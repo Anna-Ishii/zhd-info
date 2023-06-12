@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\Message\MessagePublishController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,4 +17,10 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
+Route::get('/auth', [AuthController::class, 'index']);
+Route::post('/auth', [AuthController::class, 'login']);
+
+Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage-publish');
+// Rotue::get('/admin/message/manage', )
+// Rotue::get('/admin/manual/publish', )
