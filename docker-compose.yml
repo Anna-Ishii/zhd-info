@@ -14,11 +14,13 @@ services:
     
   db:
     build: ./docker/mysql
+    platform: linux/x86_64
+    command: mysqld --innodb_use_native_aio=0 --character-set-server=utf8mb4  --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: laravel
-      MYSQL_USER: db-user
-      MYSQL_PASSWORD: db-pass
+      MYSQL_USER: zhduser
+      MYSQL_PASSWORD: zhdpass
       TZ: 'Asia/Tokyo'
     volumes:
       - type: volume
@@ -32,4 +34,4 @@ services:
 
 volumes:
   mysql-volume:
-    name: php-data
+    name: zhd-info-data
