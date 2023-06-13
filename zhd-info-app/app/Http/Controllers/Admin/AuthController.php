@@ -21,7 +21,7 @@ class AuthController extends Controller
             return view('auth.index', ['message' => 'ログインに失敗しました。']);
         }
 
-        session()->put(['user_id' => $user->id, 'user_name' => $user->name]);
+        session()->put(['user' => $user]);
 
         return redirect()->route('massage.publish');
     }
