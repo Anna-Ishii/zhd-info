@@ -21,6 +21,7 @@ Route::get('/', function () {
 Route::get('/auth', [AuthController::class, 'index']);
 Route::post('/auth', [AuthController::class, 'login']);
 
-Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage-publish');
+Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish');
 // Rotue::get('/admin/message/manage', )
 // Rotue::get('/admin/manual/publish', )
+Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
