@@ -18,10 +18,10 @@ use App\Http\Controllers\Admin\Message\MessagePublishController;
 Route::get('/', function () {
     return view('welcome');
 })->name('home');
-Route::get('/auth', [AuthController::class, 'index']);
+Route::get('/auth', [AuthController::class, 'index'])->name('auth');
 Route::post('/auth', [AuthController::class, 'login']);
 
-Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish');
+Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish')->middleware('auth');
 // Rotue::get('/admin/message/manage', )
 // Rotue::get('/admin/manual/publish', )
 Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
