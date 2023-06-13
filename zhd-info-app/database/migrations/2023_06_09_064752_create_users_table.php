@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string('employee_code')->unique();
+            $table->integer('shop_code');
+            $table->integer('roll_id');
             $table->timestamps();
         });
     }

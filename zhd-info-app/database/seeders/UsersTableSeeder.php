@@ -19,6 +19,9 @@ class UsersTableSeeder extends Seeder
             'name' => 'test',
             'email' => 'test@email.co.jp',
             'password' => 'password',
+            'employee_code' => '1234567890',
+            'shop_code' => 0,
+            'roll_id' => 0,
             ]
         ]
         );
