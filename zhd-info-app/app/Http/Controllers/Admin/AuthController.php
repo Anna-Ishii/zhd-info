@@ -23,6 +23,6 @@ class AuthController extends Controller
 
         session()->put(['user_id' => $user->id, 'user_name' => $user->name]);
 
-        return redirect()->route('massage-publish');
+        return redirect()->route('massage.publish');
     }
 }
