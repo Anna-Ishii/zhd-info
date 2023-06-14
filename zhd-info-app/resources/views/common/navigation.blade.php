@@ -48,7 +48,7 @@
                 <li>
                     <a href="#">アカウント管理 <span class="fa arrow"></span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/account/">アカウント</a></li>
+                        <li><a href="/admin/account/">アカウント</a></li>
                         <li><a href="/account/permission/">権限</a></li>
                     </ul>
                 </li>
