@@ -19,8 +19,8 @@ return new class extends Migration
             $table->integer('create_user');
             $table->integer('status');
             $table->boolean('emergency_flg');
-            $table->dateTime('start_datetime');
-            $table->dateTime('end_datetime');
+            $table->dateTime('start_datetime')->nullable();
+            $table->dateTime('end_datetime')->nullable();
             $table->timestamps();
         });
     }
