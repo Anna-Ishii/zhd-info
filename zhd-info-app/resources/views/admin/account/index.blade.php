@@ -107,10 +107,10 @@
         <div class="text-right">
             <p>
                 <button class="btn btn-info">削除</button>
-                <a href="register.html" class="btn btn-info">新規登録</a>
+                <a href="/admin/account/new" class="btn btn-info">新規登録</a>
             </p>
         </div>
-        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+        <div class="text-right flex ai-center"><span class="mr16">全 {{count($users)}} 件</span>
             <ul class="pagination">
                 <li class="active"><a href="#">1</a></li>
                 <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
@@ -141,42 +141,24 @@
                 </thead>
 
                 <tbody>
+                    @foreach ($users as $u)
                     <tr class="">
                         <td>
                             <input type="checkbox" class="form-check-input">
                         </td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>氏名氏名氏名</td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>外食店舗システム開発室</td>
-                        <td nowrap><a href="mailto:hogehoge@hoge.jp">hogehoge@hoge.jp</a></td>
+                        <td nowrap>{{$u->id}}</td>
+                        <td nowrap>{{$u->name}}</td>
+                        <td nowrap>{{$u->employee_code}}</td>
+                        <td nowrap>テスト(固定)</td>
+                        <td nowrap><a href="mailto:hogehoge@hoge.jp">{{$u->email}}</a></td>
                     </tr>
-                    <tr class="">
-                        <td>
-                            <input type="checkbox" class="form-check-input">
-                        </td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>氏名氏名氏名</td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>外食店舗システム開発室</td>
-                        <td nowrap><a href="mailto:hogehoge@hoge.jp">hogehoge@hoge.jp</a></td>
-                    </tr>
-                    <tr class="">
-                        <td>
-                            <input type="checkbox" class="form-check-input">
-                        </td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>氏名氏名氏名</td>
-                        <td nowrap>1010098590</td>
-                        <td nowrap>外食店舗システム開発室</td>
-                        <td nowrap><a href="mailto:hogehoge@hoge.jp">hogehoge@hoge.jp</a></td>
-                    </tr>
+                    @endforeach
 
                 </tbody>
             </table>
         </div>
 
-        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+        <div class="text-right flex ai-center"><span class="mr16">全 {{count($users)}} 件</span>
             <ul class="pagination">
                 <li class="active"><a href="#">1</a></li>
                 <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
