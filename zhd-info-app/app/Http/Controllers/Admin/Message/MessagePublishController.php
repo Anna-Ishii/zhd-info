@@ -11,6 +11,7 @@ use App\Models\Organization4;
 use App\Models\Roll;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\DB;
 
 class MessagePublishController extends Controller
@@ -38,30 +39,40 @@ class MessagePublishController extends Controller
 
         if ($request->isMethod('post')) {
             $title = $request->title;
-            $content_url = $request->file;
+
+            $file = $request->file('file');
+            $directory = 'uploads';
+            // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            // ファイルを指定したディレクトリに保存します
+            $path = $file->storeAs($directory, $filename, 'public');
+            
             $category = $request->category;
             $emergency_flg = $request->is_emergency == "on" ? true : false;
-            $start_datetime = $request->start_datetime;
+
+            $start_datetime = $request->start_datetime; 
+            if ($request->start_datetime == 'on') $start_datetime = null;
             $end_datetime = $request->end_datetime;
-            $target_roll = $request->target_roll;
-            $target_organization1 = $request->target_organization1;
-            $target_block = $request->target_block;
+            if ($request->end_datetime == 'on') $end_datetime = null;
+            // $target_roll = $request->target_roll;
+            // $target_organization1 = $request->target_organization1;
+            // $target_block = $request->target_block;
 
             //TODO
             // target_roll
             // target_organizationがが含まれているかチェック
-            // 
+            // ロールと対象ブロックは後で。
             $message = new Message();
             $message->title = $title;
-            $message->content_url = "https://www.adobe.com/jp/acrofamily/features/acro_nikkei/pdfs/fonts.pdf";
+            $message->content_url = $path;
             $message->category_id = $category;
             $message->create_user = $user->employee_code;
             $message->status = 0;
             $message->emergency_flg = $emergency_flg;
-            $message->start_datetime = Carbon::now()->format('Y-m-d H:i:s');
-            $message->end_datetime = Carbon::now()->format('Y-m-d H:i:s');
+            $message->start_datetime = !empty($start_datetime) ? Carbon::parse($start_datetime) : null;
+            $message->end_datetime = !empty($end_datetime) ? Carbon::parse($end_datetime) : null;
             $message->save();
-
+            redirect('message.publish');
         }
 
         $category_list = Category::all();
