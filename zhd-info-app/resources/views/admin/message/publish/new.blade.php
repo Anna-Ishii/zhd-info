@@ -9,7 +9,7 @@
         </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data"  class="form-horizontal">
+    <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
@@ -49,9 +49,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datatime" value="">
+                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="">
                 <label>
-                    <input type="checkbox" name="start_datatime" class="dateDisabled" data-target="dateFrom">
+                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
                     未定
                 </label>
             </div>
@@ -59,9 +59,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16" name="end_datatime" value="">
+                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="">
                 <label>
-                    <input type="checkbox" name="end_datatime" class="dateDisabled" data-target="dateTo">
+                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
                     未定
                 </label>
             </div>
@@ -69,9 +69,13 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">対象者</label>
             <div class="col-lg-10">
+                <label class="mr16">
+                    <input type="checkbox" name="target_roll" value="all" class="mr8">
+                    全て
+                </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll" value="{{ $target_roll->id }}" class="mr8">
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="mr8">
                     {{ $target_roll->name }}
                 </label>
                 @endforeach
@@ -82,21 +86,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="target" value="1" id="checkAll" class="mr8">
+                        <input type="checkbox" name="target_organization1[]" value="all" id="checkAll" class="mr8">
                         全業態
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="target" value="2" class="checkCommon mr8">
-                    宝島
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target" value="3" class="checkCommon mr8">
-                    熟成焼肉いちばん
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target" value="3" class="checkCommon mr8">
-                    牛庵
+                    <input type="checkbox" name="target_organization1[]" value="1" class="checkCommon mr8">
+                    JP
                 </label>
             </div>
         </div>
@@ -105,42 +101,16 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="target_block" value="1" id="checkAll" class="mr8" required="required">
+                        <input type="checkbox" name="target_block[]" value="all" id="checkAll" class="mr8">
                         全て
                     </label>
                 </div>
+                @foreach ($organization4_list as $organization4)
                 <label class="mr16">
-                    <input type="checkbox" name="target_block" value="2" class="checkCommon mr8" required="required">
-                    北海道・東北
+                    <input type="checkbox" name="target_block[]" value="{{$organization4->id}}" class="checkCommon mr8">
+                    {{$organization4->name}}
                 </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="3" class="checkCommon mr8" required="required">
-                    関東
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="4" class="checkCommon mr8" required="required">
-                    北陸
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="5" class="checkCommon mr8" required="required">
-                    東海・甲信
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="6" class="checkCommon mr8" required="required">
-                    近畿
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="7" class="checkCommon mr8" required="required">
-                    中国
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="8" class="checkCommon mr8" required="required">
-                    四国
-                </label>
-                <label class="mr16">
-                    <input type="checkbox" name="target_block" value="9" class="checkCommon mr8" required="required">
-                    九州・沖縄
-                </label>
+                @endforeach
             </div>
         </div>
 
