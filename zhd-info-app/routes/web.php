@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
@@ -25,3 +26,4 @@ Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])
 // Rotue::get('/admin/message/manage', )
 // Rotue::get('/admin/manual/publish', )
 Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
+Route::get('/admin/account', [AccountController::class, 'index'])->name('account.index');
