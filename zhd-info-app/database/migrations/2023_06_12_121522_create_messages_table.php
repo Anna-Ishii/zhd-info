@@ -15,13 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->string('content_url');
+            $table->integer('category_id');
             $table->integer('create_user');
             $table->integer('status');
-            $table->boolean('is_emergency');
-            $table->dateTime('start_datatime');
-            $table->dateTime('end_datatime');
-            $table->integer('target_roll');
-            $table->integer('target_block');
+            $table->boolean('emergency_flg');
+            $table->dateTime('start_datetime');
+            $table->dateTime('end_datetime');
             $table->timestamps();
         });
     }
