@@ -18,16 +18,16 @@ class Orgaization3Seeder extends Seeder
             [
                 [
                     'name' => '東日本営業部',
-                    'organization2_id' => '0'
+                    'organization2_id' => '1'
                 ],
                 [
                     'name' => '中日本・関西営業部',
-                    'organization2_id' => '0'
+                    'organization2_id' => '1'
                 ],
                 [
-                    'name' => '営業部',
-                    'organization2_id' => '3'
-                ]
+                    'name' => '西日本営業部',
+                    'organization2_id' => '1'
+                ],
             ]
         );
     }
