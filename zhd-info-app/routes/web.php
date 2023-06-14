@@ -26,4 +26,6 @@ Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])
 // Rotue::get('/admin/message/manage', )
 // Rotue::get('/admin/manual/publish', )
 Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
+
 Route::get('/admin/account', [AccountController::class, 'index'])->name('account.index');
+Route::match(['get', 'post'], '/admin/account/new', [AccountController::class, 'new'])->name('account.new');

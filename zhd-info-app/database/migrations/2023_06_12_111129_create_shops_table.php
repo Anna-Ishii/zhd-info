@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('name')->unique();
             $table->integer('shop_code')->nullable();
             $table->integer('organization4_id');
+            $table->integer('organization3_id');
+            $table->integer('organization2_id');
+            $table->integer('organization1_id');
             $table->timestamps();
         });
     }
