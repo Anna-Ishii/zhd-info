@@ -22,7 +22,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="{{$message->content_url}}" required="required">
+                    <input type="file" name="file" value="">
                 </label>
             </div>
         </div>
@@ -41,7 +41,7 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" required="required" {{ $message->emergency_flg ? 'checked' : '' }}>
+                    <input type="checkbox" name="emergency_flg" class="mr8" {{ $message->emergency_flg ? 'checked' : '' }}>
                     緊急配信する
                 </label>
             </div>

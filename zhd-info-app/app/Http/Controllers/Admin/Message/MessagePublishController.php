@@ -120,18 +120,19 @@ class MessagePublishController extends Controller
                 !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
 
 
-            $file = $request->file('file');
-            $directory = 'uploads';
-            // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+            if($request->file('file')){
+                $file = $request->file('file');
+                $directory = 'uploads';
+                // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
+                $filename = uniqid() . '.' . $file->getClientOriginalExtension();
 
-            $path = public_path('uploads');
-            $file->move($path, $filename);
-            $content_url = 'uploads/' . $filename;
-            // ファイルを指定したディレクトリに保存します
-            // $path = $file->storeAs($directory, $filename, 'public');
-            $msg_params['content_url'] = $content_url;
-            $msg_params['status'] = 0;
+                $path = public_path('uploads');
+                $file->move($path, $filename);
+                $content_url = 'uploads/' . $filename;
+                // ファイルを指定したディレクトリに保存します
+                // $path = $file->storeAs($directory, $filename, 'public');
+                $msg_params['content_url'] = $content_url;
+            }
             $msg_params['create_user_id'] = session('user')->id;
             // if($target_roll = "all") {
             //     $target_roll = Roll::all();
