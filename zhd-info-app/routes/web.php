@@ -38,6 +38,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
             Route::match(['get', 'post'], 'new', [MessagePublishController::class, 'new'])->name('new');
             Route::match(['get', 'post'], 'edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
         });
+        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
+            Route::get('/', [MessageManageController::class, 'index'])->name('index');
+            Route::get('detail//{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
+        });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::get('/', [AccountController::class, 'index'])->name('index');
