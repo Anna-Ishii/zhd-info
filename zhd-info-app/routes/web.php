@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
-
+use App\Http\Controllers\Admin\Message\MessageManageController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -40,7 +40,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [MessageManageController::class, 'index'])->name('index');
-            Route::get('detail//{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
+            Route::get('detail/{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
