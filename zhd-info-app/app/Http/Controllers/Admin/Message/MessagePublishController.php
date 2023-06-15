@@ -19,9 +19,6 @@ class MessagePublishController extends Controller
     public function index(Request $request)
     {
         
-        // $user = $request->session()->get('user');
-        $user = User::find(1234567890);
-        
         $category_list = Category::all();
         
         // $message_list = $user->message;
@@ -66,7 +63,7 @@ class MessagePublishController extends Controller
             $message->title = $title;
             $message->content_url = $path;
             $message->category_id = $category;
-            $message->create_user = $user->employee_code;
+            $message->create_user_id = $user->id;
             $message->status = 0;
             $message->emergency_flg = $emergency_flg;
             $message->start_datetime = !empty($start_datetime) ? Carbon::parse($start_datetime) : null;

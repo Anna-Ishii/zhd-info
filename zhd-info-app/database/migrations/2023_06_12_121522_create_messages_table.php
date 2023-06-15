@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('title');
             $table->string('content_url');
             $table->integer('category_id');
-            $table->integer('create_user');
+            $table->integer('create_user_id');
             $table->integer('status');
             $table->boolean('emergency_flg');
             $table->dateTime('start_datetime')->nullable();

@@ -16,7 +16,7 @@ class Message extends Model
         'title',
         'content_url',
         'category_id',
-        'create_user',
+        'create_user_id',
         'status',
         'emergency_flg',
         'start_datatime',
@@ -33,13 +33,13 @@ class Message extends Model
 
     public function user(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'message_user', 'employee_code', 'message_id')
+        return $this->belongsToMany(User::class, 'message_user', 'user_id', 'message_id')
             ->withPivot('read_flg', 'shop_id');
     }
 
-    public function create_user_detail(): HasOne
+    public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'create_user', 'employee_code');
+        return $this->hasOne(User::class, 'id', 'create_user_id');
     }
 
     public function category(): HasOne

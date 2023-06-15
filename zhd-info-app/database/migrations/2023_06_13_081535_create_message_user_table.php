@@ -12,13 +12,13 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('message_user', function (Blueprint $table) {
-            $table->string('employee_code');
+            $table->string('user_id');
             $table->integer('message_id');
             $table->boolean('read_flg');
             $table->integer('shop_id');
             $table->timestamps();
 
-            $table->unique(['message_id', 'employee_code']);
+            $table->unique(['message_id', 'user_id']);
         });
     }
 
