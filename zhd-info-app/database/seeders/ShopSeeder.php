@@ -1735,13 +1735,6 @@ class ShopSeeder extends Seeder
                     'organization1_id' => '1'
                 ],
                 [
-                    'name' => '柳井店',
-                    'organization4_id' => '19',
-                    'organization3_id' => '3',
-                    'organization2_id' => '1',
-                    'organization1_id' => '1'
-                ],
-                [
                     'name' => '光店',
                     'organization4_id' => '19',
                     'organization3_id' => '3',

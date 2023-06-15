@@ -13,7 +13,6 @@ class Shop extends Model
     protected $fillable = 
         [
          'name',
-         'belong_label',
          'shop_code',
          'organization4_id',
          'organization3_id',
