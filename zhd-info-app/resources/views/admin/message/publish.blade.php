@@ -49,7 +49,7 @@
 	<form method="post" action="#">
 		<div class="text-right">
 			<p>
-				<button class="btn btn-info">編集</button>
+				<a href="/admin/message/publish/edit" class="btn btn-info">編集</a>
 				<button class="btn btn-info">配信停止</button>
 				<a href="/admin/message/publish/new" class="btn btn-info">新規登録</a>
 			</p>
@@ -97,7 +97,7 @@
 						<td class="shop_id">{{$message->id}}</td>
 						<td class="bg-danger text-danger">{{ $message->emergency_flg ? '⚪︎' : '' }}</td>
 						<td>{{$message->category->name}}</td>
-						<td nowrap><a href="./edit.html">{{$message->title}}</a></td>
+						<td nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
 						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
 						<td nowrap>{{$message->start_datetime}}</td>
 						<td nowrap>{{$message->end_datetime}}</td>

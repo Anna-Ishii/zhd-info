@@ -13,6 +13,7 @@ class MessageTest extends TestCase
     {
         $message_id = 1;
         $message = Message::find($message_id);
+        $rolls = $message->roll()->pluck('rolls.id')->toArray();
         $this->assertEquals("一般", $message->roll[0]->name);
 
     }
@@ -25,7 +26,7 @@ class MessageTest extends TestCase
         $message->title = "タイトル";
         $message->content_url = "https://jp-information-sys-html.dev.nssx.work/message/detail.html";
         $message->category_id = 1;
-        $message->create_user = 1234567890;
+        $message->create_user_id = 1;
         $message->status = 0;
         $message->emergency_flg = false;
         $message->start_datetime = Carbon::now()->format('Y-m-d H:i:s');
