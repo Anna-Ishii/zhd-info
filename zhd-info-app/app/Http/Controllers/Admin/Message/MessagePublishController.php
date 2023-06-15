@@ -32,25 +32,50 @@ class MessagePublishController extends Controller
 
     public function new(Request $request)
     {
-        $user = $request->session()->get('user');
-
         if ($request->isMethod('post')) {
-            $title = $request->title;
+            $msg_params = $request
+                ->only([
+                    'title',
+                    'category_id',
+                ]);
+            $msg_params['emergency_flg'] = 
+                ($request->emergency_flg == 'on' ? true : false);
+            
+            if ($request->start_datetime == 'on') $request->start_datetime = null;
+            $msg_params['start_datetime'] =
+                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime) : null;
+            
+            if ($request->end_datetime == 'on') $request->end_datetime = null;
+            $msg_params['end_datetime'] =
+            !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
+
 
             $file = $request->file('file');
             $directory = 'uploads';
             // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
             $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            // ファイルを指定したディレクトリに保存します
-            $path = $file->storeAs($directory, $filename, 'public');
-            
-            $category = $request->category;
-            $emergency_flg = $request->is_emergency == "on" ? true : false;
 
-            $start_datetime = $request->start_datetime; 
-            if ($request->start_datetime == 'on') $start_datetime = null;
-            $end_datetime = $request->end_datetime;
-            if ($request->end_datetime == 'on') $end_datetime = null;
+            $path = public_path('uploads');
+            $file->move($path, $filename);
+            $content_url = 'uploads/' . $filename;
+            // ファイルを指定したディレクトリに保存します
+            // $path = $file->storeAs($directory, $filename, 'public');
+            $msg_params['content_url'] = $content_url;
+            $msg_params['status'] = 0;
+            $msg_params['create_user_id'] = session('user')->id;
+            // if($target_roll = "all") {
+            //     $target_roll = Roll::all();
+            // }
+            try {
+                $message = Message::create($msg_params);
+                // $message->roll->attach($request->$target_roll);
+                
+            } catch (\Throwable $th) {
+                return redirect()
+                    ->route('admin.message.publish.new')
+                    ->withInput()
+                    ->with('error', '入力エラーがあります');
+            }
             // $target_roll = $request->target_roll;
             // $target_organization1 = $request->target_organization1;
             // $target_block = $request->target_block;
@@ -59,17 +84,7 @@ class MessagePublishController extends Controller
             // target_roll
             // target_organizationがが含まれているかチェック
             // ロールと対象ブロックは後で。
-            $message = new Message();
-            $message->title = $title;
-            $message->content_url = $path;
-            $message->category_id = $category;
-            $message->create_user_id = $user->id;
-            $message->status = 0;
-            $message->emergency_flg = $emergency_flg;
-            $message->start_datetime = !empty($start_datetime) ? Carbon::parse($start_datetime) : null;
-            $message->end_datetime = !empty($end_datetime) ? Carbon::parse($end_datetime) : null;
-            $message->save();
-            redirect('message.publish');
+            return redirect()->route('admin.message.publish.index');
         }
 
         $category_list = Category::all();

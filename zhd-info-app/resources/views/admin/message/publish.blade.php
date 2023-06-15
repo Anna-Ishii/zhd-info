@@ -98,7 +98,7 @@
 						<td class="bg-danger text-danger">{{ $message->emergency_flg ? '⚪︎' : '' }}</td>
 						<td>{{$message->category->name}}</td>
 						<td nowrap><a href="./edit.html">{{$message->title}}</a></td>
-						<td>１ページ目<br><a href="{{$message->content_url}}">プレビュー表示</a></td>
+						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
 						<td nowrap>{{$message->start_datetime}}</td>
 						<td nowrap>{{$message->end_datetime}}</td>
 						<td nowrap>{{$message->status}}</td>
