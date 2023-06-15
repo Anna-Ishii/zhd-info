@@ -19,20 +19,36 @@ class AccountController extends Controller
     public function new(Request $request)
     {
         if ($request->isMethod('post')) {
-            $user = new User();
-            $user->name = $request->name;
-            $user->email = $request->email;
-            $user->password = $request->password;
-            $user->employee_code = $request->employee_code;
-            $user->shop_id = 1;//$request->shop_id;
-            $user->roll_id = $request->target_roll;
-            $user->save();
-            session()->put(['user' => $user]);
-            redirect('admin.account.index');
+            if ($request->password != $request->password2) return redirect()
+                                                                    ->route('admin.account.new')
+                                                                    ->withInput()
+                                                                    ->with('error', '入力エラーがあります');
+
+            $params = $request
+                        ->only([
+                            'name', 
+                            'belong_label', 
+                            'shop_id', 
+                            'employee_code', 
+                            'password', 
+                            'email', 
+                            'roll_id'
+                        ]);
+            try {
+                User::create($params);
+            } catch (\Throwable $th) {
+                return redirect()
+                        ->route('admin.account.new')
+                        ->withInput()
+                        ->with('error', '入力エラーがあります');
+            }
+
+            return redirect()->route('admin.account.index');
         }
         // TODO
         // 正式なものに直す
         $user_count = User::all()->count() + 1;
+
         return view('admin.account.new',[
             'user_count' => $user_count,
         ]);
