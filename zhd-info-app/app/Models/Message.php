@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Message extends Model
@@ -19,8 +20,8 @@ class Message extends Model
         'create_user_id',
         'status',
         'emergency_flg',
-        'start_datatime',
-        'end_datatime',
+        'start_datetime',
+        'end_datetime',
         'target_roll',
         'target_block',
     ];
@@ -45,5 +46,10 @@ class Message extends Model
     public function category(): HasOne
     {
         return $this->hasOne(Category::class, foreignKey: 'id', localKey: 'category_id');
+    }
+
+    public function organization4(): BelongsToMany
+    {
+        return $this->BelongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
     }
 }

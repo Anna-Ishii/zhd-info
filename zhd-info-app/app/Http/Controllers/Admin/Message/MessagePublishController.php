@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Message;
 use App\Models\Organization4;
 use App\Models\Roll;
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Queue\NullQueue;
@@ -47,7 +48,7 @@ class MessagePublishController extends Controller
             
             if ($request->end_datetime == 'on') $request->end_datetime = null;
             $msg_params['end_datetime'] =
-            !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
+                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
 
 
             $file = $request->file('file');
@@ -63,27 +64,25 @@ class MessagePublishController extends Controller
             $msg_params['content_url'] = $content_url;
             $msg_params['status'] = 0;
             $msg_params['create_user_id'] = session('user')->id;
-            // if($target_roll = "all") {
-            //     $target_roll = Roll::all();
-            // }
+
+            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+
             try {
                 $message = Message::create($msg_params);
-                // $message->roll->attach($request->$target_roll);
-                
+                $message->roll()->attach($request->target_roll);
+                $message->organization4()->attach($request->organization4);
+                foreach ($target_users as $target_user) {
+                    $message->user()->attach($target_user['id'],['read_flg'=>false, 'shop_id'=>$target_user['shop_id']]);
+                }
+
             } catch (\Throwable $th) {
                 return redirect()
                     ->route('admin.message.publish.new')
                     ->withInput()
                     ->with('error', '入力エラーがあります');
             }
-            // $target_roll = $request->target_roll;
-            // $target_organization1 = $request->target_organization1;
-            // $target_block = $request->target_block;
 
-            //TODO
-            // target_roll
-            // target_organizationがが含まれているかチェック
-            // ロールと対象ブロックは後で。
             return redirect()->route('admin.message.publish.index');
         }
 
@@ -134,11 +133,19 @@ class MessagePublishController extends Controller
                 $msg_params['content_url'] = $content_url;
             }
             $msg_params['create_user_id'] = session('user')->id;
-            // if($target_roll = "all") {
-            //     $target_roll = Roll::all();
-            // }
+
+            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+
             try {
-                Message::where('id', $message_id)->update($msg_params);
+                $message = Message::find($message_id);
+                $message->update($msg_params);
+                $message->roll()->sync($request->target_roll);
+                $message->organization4()->sync($request->organization4);
+                // target_userにいなくなったら削除する
+                foreach ($target_users as $target_user) {
+                    $message->user()->sync($target_user['id'], ['shop_id' => $target_user['shop_id']]);
+                }
                 // $message->roll->attach($request->$target_roll);
 
             } catch (\Throwable $th) {

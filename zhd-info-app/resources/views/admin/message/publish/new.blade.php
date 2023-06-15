@@ -8,6 +8,9 @@
             <h1 class="page-header">業務連絡新規登録</h1>
         </div>
     </div>
+    @if (session('error'))
+    <div class="alert alert-danger">{{(session('error'))}}</div>
+    @endif
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
@@ -41,7 +44,7 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" required="required">
+                    <input type="checkbox" name="emergency_flg" class="mr8">
                     緊急配信する
                 </label>
             </div>
