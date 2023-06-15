@@ -12,16 +12,16 @@
   <title>業連・動画配信システムログイン</title>
 
   <!-- Bootstrap Core CSS -->
-  <link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('/admin/css/bootstrap.min.css') }}" rel="stylesheet">
 
   <!-- MetisMenu CSS -->
-  <link href="{{ asset('/css/metisMenu.min.css') }}" rel="stylesheet">
+  <link href="{{ asset('/admin/css/metisMenu.min.css') }}" rel="stylesheet">
 
   <!-- Custom CSS -->
-  <link href="{{ asset('/css/sb-admin-2.css') }}" rel="stylesheet">
+  <link href="{{ asset('/admin/css/sb-admin-2.css') }}" rel="stylesheet">
 
   <!-- Custom Fonts -->
-  <link href="{{ asset('/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
+  <link href="{{ asset('/admin/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
 
   <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
   <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -66,16 +66,16 @@
   </div>
 
   <!-- jQuery -->
-  <script src="{{ asset('/js/jquery.min.js') }}"></script>
+  <script src="{{ asset('/admin/js/jquery.min.js') }}"></script>
 
   <!-- Bootstrap Core JavaScript -->
-  <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
+  <script src="{{ asset('/admin/js/bootstrap.min.js') }}"></script>
 
   <!-- Metis Menu Plugin JavaScript -->
-  <script src="{{ asset('/js/metisMenu.min.js') }}"></script>
+  <script src="{{ asset('/admin/js/metisMenu.min.js') }}"></script>
 
   <!-- Custom Theme JavaScript -->
-  <script src="{{ asset('/js/sb-admin-2.js') }}"></script>
+  <script src="{{ asset('/admin/js/sb-admin-2.js') }}"></script>
 
 </body>
 
