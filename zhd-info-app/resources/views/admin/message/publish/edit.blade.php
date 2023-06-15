@@ -8,16 +8,13 @@
             <h1 class="page-header">業務連絡新規登録</h1>
         </div>
     </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="">
+                <input class="form-control" name="title" value="{{$message->title}}">
             </div>
         </div>
         <div class="form-group">
@@ -25,7 +22,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" required="required">
+                    <input type="file" name="file" value="">
                 </label>
             </div>
         </div>
@@ -34,7 +31,7 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" required="required">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" required="required" {{ $category->id == $message->category_id ? 'checked' : '' }}>
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -44,7 +41,7 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8">
+                    <input type="checkbox" name="emergency_flg" class="mr8" {{ $message->emergency_flg ? 'checked' : '' }}>
                     緊急配信する
                 </label>
             </div>
@@ -52,9 +49,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="">
+                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="{{ $message->start_datetime }}">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
+                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom" {{ empty($message->start_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>
@@ -62,9 +59,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="">
+                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="{{ $message->end_datetime }}">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
+                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo" {{ empty($message->end_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>
@@ -78,7 +75,7 @@
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="mr8">
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="mr8" {{ in_array($target_roll->id, $message_target_roll, true) ? 'checked' : '' }}>
                     {{ $target_roll->name }}
                 </label>
                 @endforeach

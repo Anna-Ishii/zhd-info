@@ -49,12 +49,12 @@
 	<form method="post" action="#">
 		<div class="text-right">
 			<p>
-				<button class="btn btn-info">編集</button>
+				<a href="/admin/message/publish/edit" class="btn btn-info">編集</a>
 				<button class="btn btn-info">配信停止</button>
 				<a href="/admin/message/publish/new" class="btn btn-info">新規登録</a>
 			</p>
 		</div>
-		<div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+		<div class="text-right flex ai-center"><span class="mr16">全 {{$message_list->count()}} 件</span>
 			<ul class="pagination">
 				<li class="active"><a href="#">1</a></li>
 				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
@@ -89,57 +89,33 @@
 				</thead>
 
 				<tbody>
+					@foreach ($message_list as $message)
 					<tr class="">
 						<td>
 							<input type="checkbox" class="form-check-input">
 						</td>
-						<td class="shop_id">455</td>
-						<td class="bg-danger text-danger">〇</td>
-						<td>カテゴリA</td>
-						<td nowrap><a href="./edit.html">タイトルタイトルタイトル</a></td>
-						<td>１ページ目<br><a href="#">プレビュー表示</a></td>
-						<td nowrap>2023/05/12(金) 09:00</td>
-						<td nowrap>2023/05/19(金) 23:00</td>
-						<td nowrap>待機</td>
-						<td nowrap>氏名氏名</td>
-						<td nowrap>2023/05/18(木) 13:15</td>
+						<td class="shop_id">{{$message->id}}</td>
+						@if ($message->emergency_flg)
+							<td class="bg-danger text-danger">⚪︎</td>
+						@else
+							<td></td>
+						@endif
+						<td>{{$message->category->name}}</td>
+						<td nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
+						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
+						<td nowrap>{{$message->start_datetime}}</td>
+						<td nowrap>{{$message->end_datetime}}</td>
+						<td nowrap>{{$message->status}}</td>
+						<td nowrap>{{$message->create_user->name}}</td>
+						<td nowrap>{{$message->created_at}}</td>
 					</tr>
-					<tr class="active">
-						<td>
-							<input type="checkbox" class="form-check-input" id="item1">
-						</td>
-						<td class="shop_id">454</td>
-						<td></td>
-						<td>カテゴリA</td>
-						<td nowrap><a href="./edit.html">タイトルタイトルタイトル</a></td>
-						<td>１ページ目<br><a href="#">プレビュー表示</a></td>
-						<td nowrap>2023/05/12(金) 09:00</td>
-						<td nowrap>2023/05/19(金) 23:00</td>
-						<td nowrap>待機</td>
-						<td nowrap>氏名氏名氏名</td>
-						<td nowrap>2023/05/18(木) 13:15</td>
-					</tr>
-					<tr class="bg-success">
-						<td>
-							<input type="checkbox" class="form-check-input" id="item1">
-						</td>
-						<td class="shop_id">453</td>
-						<td></td>
-						<td>カテゴリA</td>
-						<td nowrap><a href="./edit.html">タイトルタイトルタイトル</a></td>
-						<td>１ページ目<br><a href="#">プレビュー表示</a></td>
-						<td nowrap>2023/05/12(金) 09:00</td>
-						<td nowrap>2023/05/19(金) 23:00</td>
-						<td nowrap>待機</td>
-						<td nowrap>氏名氏名氏名</td>
-						<td nowrap>2023/05/18(木) 13:15</td>
-					</tr>
+					@endforeach
 
 				</tbody>
 			</table>
 		</div>
 
-		<div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+		<div class="text-right flex ai-center"><span class="mr16">全 {{$message_list->count()}} 件</span>
 			<ul class="pagination">
 				<li class="active"><a href="#">1</a></li>
 				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
