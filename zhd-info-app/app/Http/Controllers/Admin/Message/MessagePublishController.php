@@ -100,4 +100,81 @@ class MessagePublishController extends Controller
         ]);
     }
 
+    public function edit(Request $request, $message_id)
+    {
+        if ($request->isMethod('post')) {
+            $msg_params = $request
+                ->only([
+                    'title',
+                    'category_id',
+                ]);
+            $msg_params['emergency_flg'] =
+                ($request->emergency_flg == 'on' ? true : false);
+
+            if ($request->start_datetime == 'on') $request->start_datetime = null;
+            $msg_params['start_datetime'] =
+                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime) : null;
+
+            if ($request->end_datetime == 'on') $request->end_datetime = null;
+            $msg_params['end_datetime'] =
+                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
+
+
+            $file = $request->file('file');
+            $directory = 'uploads';
+            // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
+            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+
+            $path = public_path('uploads');
+            $file->move($path, $filename);
+            $content_url = 'uploads/' . $filename;
+            // ファイルを指定したディレクトリに保存します
+            // $path = $file->storeAs($directory, $filename, 'public');
+            $msg_params['content_url'] = $content_url;
+            $msg_params['status'] = 0;
+            $msg_params['create_user_id'] = session('user')->id;
+            // if($target_roll = "all") {
+            //     $target_roll = Roll::all();
+            // }
+            try {
+                Message::where('id', $message_id)->update($msg_params);
+                // $message->roll->attach($request->$target_roll);
+
+            } catch (\Throwable $th) {
+                return redirect()
+                    ->route('admin.message.publish.edit', ['message_id' => $message_id])
+                    ->withInput()
+                    ->with('error', '入力エラーがあります');
+            }
+            // $target_roll = $request->target_roll;
+            // $target_organization1 = $request->target_organization1;
+            // $target_block = $request->target_block;
+
+            //TODO
+            // target_roll
+            // target_organizationがが含まれているかチェック
+            // ロールと対象ブロックは後で。
+            return redirect()->route('admin.message.publish.index');
+
+        }
+
+        $message = Message::find($message_id);
+        if(empty($message)) return redirect()->route('admin.message.publish.index');
+
+        $category_list = Category::all();
+        // 「一般」は使わない
+        $target_roll_list = Roll::where('id', '!=', '1')->get();
+        // 業態一覧を取得する
+        $organization4_list = Organization4::all();
+
+        $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
+
+        return view('admin.message.publish.edit', [
+            'message' => $message,
+            'category_list' => $category_list,
+            'target_roll_list' => $target_roll_list,
+            'organization4_list' => $organization4_list,
+            'message_target_roll' => $message_target_roll
+        ]);
+    }
 }
