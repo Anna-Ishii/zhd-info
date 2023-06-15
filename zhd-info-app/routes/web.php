@@ -5,6 +5,10 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
+use App\Http\Controllers\ManualController;
+use App\Http\Controllers\MessageController;
+use App\Http\Controllers\TopController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -16,19 +20,19 @@ use App\Http\Controllers\Admin\Message\MessageManageController;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [TopController::class, 'index'])->name('top');
+Route::group(['prefix' => 'message', 'as' => 'message.'], function (){
+    Route::get('/', [MessageController::class, 'index'])->name('index');
+    Route::get('detail', [MessageController::class, 'detail'])->name('detail');
+});
+Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
+    Route::get('/', [ManualController::class, 'index'])->name('index');
+    Route::get('detail', [ManualController::class, 'detail'])->name('detail');
+});
+
+// 管理画面へのログイン画面
 Route::get('/auth', [AuthController::class, 'index'])->name('auth');
 Route::post('/auth', [AuthController::class, 'login']);
-
-// Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish')->middleware('auth');
-// Rotue::get('/admin/message/manage', )
-// Rotue::get('/admin/manual/publish', )
-// Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
-
-// Route::get('/admin/account', [AccountController::class, 'index'])->name('account.index');
-// Route::match(['get', 'post'], '/admin/account/new', [AccountController::class, 'new'])->name('account.new');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], function() {
