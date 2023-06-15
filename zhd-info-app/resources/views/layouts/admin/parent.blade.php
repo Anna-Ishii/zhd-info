@@ -24,12 +24,12 @@
     <link href="{{ asset('/css/sb-admin-2.css') }}" rel="stylesheet">
     <link href="{{ asset('/css/style.css') }}" rel="stylesheet">
 
-    <script src="{{ asset('/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('/js/metisMenu.min.js') }}"></script>
-    <script src="{{ asset('/js/sb-admin-2.js') }}"></script>
+    <script src="{{ asset('/admin/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/metisMenu.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/sb-admin-2.js') }}"></script>
 
-    <script src="{{ asset('/js/sb-admin-form.js') }}"></script>
+    <script src="{{ asset('/admin/js/sb-admin-form.js') }}"></script>
 </head>
 
 <body>
