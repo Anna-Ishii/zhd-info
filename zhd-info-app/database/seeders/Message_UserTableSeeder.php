@@ -16,8 +16,8 @@ class Message_UserTableSeeder extends Seeder
         DB::table('message_user')->insert(
             [
                 [
-                    'employee_code' => '1234567890',
-                    'message_id' => '1',
+                    'user_id' => 1,
+                    'message_id' => 1,
                     'read_flg' => false,
                     'shop_id' => 1,
                 ]

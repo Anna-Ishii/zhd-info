@@ -102,7 +102,7 @@
 						<td nowrap>{{$message->start_datetime}}</td>
 						<td nowrap>{{$message->end_datetime}}</td>
 						<td nowrap>{{$message->status}}</td>
-						<td nowrap>{{$message->create_user}}</td>
+						<td nowrap>{{$message->create_user->name}}</td>
 						<td nowrap>{{$message->created_at}}</td>
 					</tr>
 					@endforeach

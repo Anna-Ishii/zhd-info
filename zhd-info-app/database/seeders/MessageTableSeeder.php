@@ -18,7 +18,7 @@ class MessageTableSeeder extends Seeder
                 [
                     'title' => 'test',
                     'content_url' => 'https://jp-information-sys-html.dev.nssx.work/message/detail.html',
-                    'create_user' => 1234567890,
+                    'create_user_id' => 1,
                     'category_id' => 1,
                     'status' => 0,
                     'emergency_flg' => false,
