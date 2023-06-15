@@ -86,8 +86,8 @@
 		</td> -->
                         <td class="shop_id">455</td>
                         <td>カテゴリA</td>
-                        <td nowrap><a href="detail.html">タイトルタイトルタイトル</a></td>
-                        <td>１ページ目<br><a href="#">プレビュー表示</a></td>
+                        <td nowrap><a href="{{ route('admin.message.manage.detail', ['message_id' => 1]) }}"">タイトルタイトルタイトル</a></td>
+                        <td>１ページ目<br><a href=" #">プレビュー表示</a></td>
                         <td>60%</td>
                         <td nowrap>2023/05/12(金) 09:00</td>
                         <td nowrap>2023/05/19(金) 23:00</td>

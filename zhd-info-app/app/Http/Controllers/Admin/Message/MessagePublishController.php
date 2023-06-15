@@ -23,7 +23,7 @@ class MessagePublishController extends Controller
         
         // $message_list = $user->message;
         $message_list = Message::all();
-        return view('admin.message.publish', [
+        return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list
 
