@@ -23,6 +23,6 @@ class AuthController extends Controller
 
         session()->put(['user' => $user]);
 
-        return redirect()->route('massage.publish');
+        return redirect()->route('admin.message.publish.index');
     }
 }

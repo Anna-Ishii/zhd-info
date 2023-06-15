@@ -22,10 +22,26 @@ Route::get('/', function () {
 Route::get('/auth', [AuthController::class, 'index'])->name('auth');
 Route::post('/auth', [AuthController::class, 'login']);
 
-Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish')->middleware('auth');
+// Route::get('/admin/message/publish', [MessagePublishController::class, 'index'])->name('massage.publish')->middleware('auth');
 // Rotue::get('/admin/message/manage', )
 // Rotue::get('/admin/manual/publish', )
-Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
+// Route::match(['get', 'post'], '/admin/message/publish/new', [MessagePublishController::class, 'new'])->name('message.publish.new');
 
-Route::get('/admin/account', [AccountController::class, 'index'])->name('account.index');
-Route::match(['get', 'post'], '/admin/account/new', [AccountController::class, 'new'])->name('account.new');
+// Route::get('/admin/account', [AccountController::class, 'index'])->name('account.index');
+// Route::match(['get', 'post'], '/admin/account/new', [AccountController::class, 'new'])->name('account.new');
+
+// 管理画面のルート
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], function() {
+    Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
+        Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
+            Route::get('/', [MessagePublishController::class, 'index'])->name('index');
+            Route::match(['get', 'post'], 'new', [MessagePublishController::class, 'new'])->name('new');
+
+        });
+    });
+    Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
+        Route::get('/', [AccountController::class, 'index'])->name('index');
+        Route::match(['get', 'post'], 'new', [AccountController::class, 'new'])->name('new');
+    });
+});
+
