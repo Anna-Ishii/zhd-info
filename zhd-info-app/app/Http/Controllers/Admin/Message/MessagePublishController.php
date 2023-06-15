@@ -68,13 +68,16 @@ class MessagePublishController extends Controller
             $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
 
+            $data = [];
+            foreach ($target_users as $target_user) {
+                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
+
             try {
                 $message = Message::create($msg_params);
                 $message->roll()->attach($request->target_roll);
                 $message->organization4()->attach($request->organization4);
-                foreach ($target_users as $target_user) {
-                    $message->user()->attach($target_user['id'],['read_flg'=>false, 'shop_id'=>$target_user['shop_id']]);
-                }
+                $message->user()->attach($data);
 
             } catch (\Throwable $th) {
                 return redirect()
@@ -136,19 +139,20 @@ class MessagePublishController extends Controller
 
             $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-
+            $data = [];
+            foreach ($target_users as $target_user) {
+                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
             try {
+                DB::beginTransaction();
                 $message = Message::find($message_id);
                 $message->update($msg_params);
                 $message->roll()->sync($request->target_roll);
                 $message->organization4()->sync($request->organization4);
-                // target_userにいなくなったら削除する
-                foreach ($target_users as $target_user) {
-                    $message->user()->sync($target_user['id'], ['shop_id' => $target_user['shop_id']]);
-                }
-                // $message->roll->attach($request->$target_roll);
-
+                $message->user()->sync($data);
+                DB::commit();
             } catch (\Throwable $th) {
+                DB::rollBack();
                 return redirect()
                     ->route('admin.message.publish.edit', ['message_id' => $message_id])
                     ->withInput()

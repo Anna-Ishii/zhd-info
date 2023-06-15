@@ -34,7 +34,7 @@ class Message extends Model
 
     public function user(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'message_user', 'user_id', 'message_id')
+        return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
             ->withPivot('read_flg', 'shop_id');
     }
 
