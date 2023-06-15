@@ -1,0 +1,182 @@
+@media screen and (max-width: 768px){
+$sp_per_width: 10;
+@while $sp_per_width < 110 {
+	.spw#{$sp_per_width}{
+		width: 0% + $sp_per_width;
+	}
+	$sp_per_width: $sp_per_width + 10;
+}
+
+$sp_m_right: 0;
+@while $sp_m_right <= 100 {
+	.spmr#{$sp_m_right}{
+		margin-right: $sp_m_right + px;
+	}
+	$sp_m_right: $sp_m_right + 2;
+}
+
+$sp_m_bottom: 0;
+@while $sp_m_bottom <= 100 {
+	.spmb#{$sp_m_bottom}{
+		margin-bottom: $sp_m_bottom + px;
+	}
+	$sp_m_bottom: $sp_m_bottom + 2;
+}
+
+.spBlock{
+	display: block;
+}
+
+.header--detail.header{
+	& .header{
+		&__titleBox{
+			gap: 16px;
+			max-width: 100%;
+			max-height: 100%;
+			overflow-x: scroll;
+		}
+		&__prev{
+			min-width: 65px;
+			max-width: 65px;
+			& img{
+				max-height: 16px;
+			}
+			& p{
+				font-size: 1.4rem;
+			}
+		}
+		&__title{
+			width: 100%;
+			padding-top: 14px;
+			font-size: 1.2rem;
+			white-space: nowrap;
+			& h1{
+				font-size: 1.6rem;
+			}
+		}
+		&__menu{
+			gap: 14px;
+			padding-right: 14px;
+		}
+
+	}
+}
+/* 固定しないヘッダー */
+.header--nofix{
+	position: relative;
+	& + .main,
+	& + .main.message{
+		padding-top: 0;
+		& .main__inner{
+			width: 100%;
+		}
+		& .main__fileView iframe{
+			min-height: 100vh;
+			min-height: 100svh;
+		}
+	}
+}
+
+.menu{
+	&__list{
+		&__item{
+			font-size: 1.4rem;
+		}
+	}
+}
+.search{
+	&__inner{
+		display: block;
+	}
+	&__btnList{
+		& button{
+			max-width: 120px;
+		}
+	}
+}
+
+.list{
+	&__box{
+		background-size: 24px;
+		&__title{
+
+			font-size: 2rem;
+			line-height: 2.4rem;
+		}
+		&__thumb + .list__box__txtInner{
+			& .list__box__title{
+				padding-right: 24px;
+			}
+		}	
+	}
+
+}
+
+.pager{
+	&__number{
+		font-size: 1.8rem;
+		& span{
+			font-size: 1.2rem;
+		}
+	}
+}
+
+.main{
+	&__supplement{
+		position: relative;
+		display: block;
+		&__detail{
+			display: block;
+		}
+		&__btnInner{
+			position: absolute;
+			top: 0;
+			right: 0;
+			padding: 15px;
+		}	
+	}
+	&__box{
+		padding: 10px 21px 24px;
+		& .flex{
+			display: block;
+		}
+	}
+	&__thumb{
+		margin: 0 auto 16px;
+		& + p{
+			font-size: 1.6rem;
+		}
+	}
+	&__box--single{
+		/* 全編通し動画（説目部分）のみ */
+		& .main__thumb{
+			width: 60%;
+		}
+	}
+}
+.manualAttachment{
+	width: calc(100% - 24px);
+	height: auto;
+}
+
+.sidebar{
+	right: -80%;
+	max-width: 80%;
+	&__list{
+		&__item{
+			font-size: 2rem;
+		}
+	}
+}
+
+}
+
+@media screen and (max-width: 1366px){
+	.btnFullScreen{
+		display: block;
+	}
+	
+	.btnFullScreen , .btnExitFullScreen{
+		position: fixed;
+	}
+}
