@@ -149,7 +149,7 @@
                         <td nowrap>{{$u->id}}</td>
                         <td nowrap>{{$u->name}}</td>
                         <td nowrap>{{$u->employee_code}}</td>
-                        <td nowrap>テスト(固定)</td>
+                        <td nowrap>{{$u->belong_label}}</td>
                         <td nowrap><a href="mailto:hogehoge@hoge.jp">{{$u->email}}</a></td>
                     </tr>
                     @endforeach

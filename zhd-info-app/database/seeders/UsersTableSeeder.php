@@ -17,10 +17,11 @@ class UsersTableSeeder extends Seeder
         [
             [
             'name' => 'test',
-            'email' => 'test@email.co.jp',
-            'password' => 'password',
-            'employee_code' => '1234567890',
+            'belong_label' => 'テスト所属',
             'shop_id' => 1,
+            'employee_code' => '1234567890',
+            'password' => 'password',
+            'email' => 'test@email.co.jp',
             'roll_id' => 1,
             ]
         ]
