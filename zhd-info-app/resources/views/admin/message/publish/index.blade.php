@@ -95,7 +95,11 @@
 							<input type="checkbox" class="form-check-input">
 						</td>
 						<td class="shop_id">{{$message->id}}</td>
-						<td class="bg-danger text-danger">{{ $message->emergency_flg ? '⚪︎' : '' }}</td>
+						@if ($message->emergency_flg)
+							<td class="bg-danger text-danger">⚪︎</td>
+						@else
+							<td></td>
+						@endif
 						<td>{{$message->category->name}}</td>
 						<td nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
 						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>

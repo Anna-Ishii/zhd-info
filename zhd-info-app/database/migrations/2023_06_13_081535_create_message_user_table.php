@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('message_user', function (Blueprint $table) {
             $table->string('user_id');
             $table->integer('message_id');
-            $table->boolean('read_flg');
+            $table->boolean('read_flg')->default(false);
             $table->integer('shop_id');
             $table->timestamps();
 
