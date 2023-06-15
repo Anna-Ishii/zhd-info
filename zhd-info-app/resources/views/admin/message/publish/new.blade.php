@@ -31,7 +31,7 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category" value="{{ $category->id }}" class="mr8" required="required">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" required="required">
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -41,7 +41,7 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="is_emergency" class="mr8" required="required">
+                    <input type="checkbox" name="emergency_flg" class="mr8" required="required">
                     緊急配信する
                 </label>
             </div>
@@ -70,7 +70,7 @@
             <label class="col-lg-2 control-label">対象者</label>
             <div class="col-lg-10">
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll" value="all" class="mr8">
+                    <input type="checkbox" name="target_roll" value="all" class="mr8" disabled>
                     全て
                 </label>
                 @foreach ($target_roll_list as $target_roll)
@@ -86,12 +86,12 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="target_organization1[]" value="all" id="checkAll" class="mr8">
+                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
                         全業態
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="target_organization1[]" value="1" class="checkCommon mr8">
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8">
                     JP
                 </label>
             </div>
@@ -101,13 +101,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="target_block[]" value="all" id="checkAll" class="mr8">
+                        <input type="checkbox" name="organization4[]" value="all" id="checkAll" class="mr8" disabled>
                         全て
                     </label>
                 </div>
                 @foreach ($organization4_list as $organization4)
                 <label class="mr16">
-                    <input type="checkbox" name="target_block[]" value="{{$organization4->id}}" class="checkCommon mr8">
+                    <input type="checkbox" name="organization4[]" value="{{$organization4->id}}" class="checkCommon mr8">
                     {{$organization4->name}}
                 </label>
                 @endforeach
