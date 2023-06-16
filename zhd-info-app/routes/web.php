@@ -49,7 +49,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
             Route::match(['get', 'post'], 'new', [ManualPublishController::class, 'new'])->name('new');
-            Route::match(['get', 'post'], 'edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
+            Route::match(['get', 'post'], 'detail/{manual_id}', [ManualPublishController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [ManualManageController::class, 'index'])->name('index');
