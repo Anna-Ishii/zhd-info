@@ -94,7 +94,7 @@
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8">
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
                     JP
                 </label>
             </div>
