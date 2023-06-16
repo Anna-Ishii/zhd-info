@@ -180,13 +180,17 @@ class MessagePublishController extends Controller
         $organization4_list = Organization4::all();
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
+        $target_orgs4 = $message->organization4()->pluck('organization4.id')->toArray();
+        // $target_orgs1 = Shop::select('organization1_id')->whereIn('organization4_id', $target_orgs4);
 
         return view('admin.message.publish.edit', [
             'message' => $message,
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'organization4_list' => $organization4_list,
-            'message_target_roll' => $message_target_roll
+            'message_target_roll' => $message_target_roll,
+            'message_target_org4' => $target_orgs4
+
         ]);
     }
 }
