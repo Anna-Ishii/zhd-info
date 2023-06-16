@@ -113,8 +113,8 @@
                                 </td>
                                 <td class="shop_id">{{$manual->id}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td nowrap><a href="./edit.html">{{$manual->title}}</a></td>
-                                <td>１ページ目<br><a href="#">プレビュー表示</a></td>
+                                <td nowrap><a href="{{ route('admin.manual.publish.detail', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
                                 <td nowrap>{{$manual->start_datetime}}</td>
                                 <td nowrap>{{$manual->end_datetime}}</td>
                                 <td nowrap>{{$manual->status}}</td>

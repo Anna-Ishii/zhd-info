@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Manual;
 use App\Models\Manualcategory;
+use App\Models\Manualcontent;
 use App\Models\Message;
 use App\Models\Organization1;
 use App\Models\Organization4;
@@ -40,17 +41,13 @@ class ManualPublishController extends Controller
                 ->only([
                     'title',
                     'description',
-                    'file',
                     'category_id',
-                    'start_datetime',
-                    'end_datetime',
-                    'organization4'
                 ]);
             $contents_params = $request
                 ->only([
-                    'contents_title',
-                    'contents_file',
-                    'contents_description'
+                    'manual_flow_title',
+                    'manual_file',
+                    'manual_flow_detail'
                 ]);
 
             if ($request->start_datetime == 'on') $request->start_datetime = null;
@@ -77,20 +74,50 @@ class ManualPublishController extends Controller
 
 
             $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
 
             $data = [];
             foreach ($target_users as $target_user) {
                 $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
             }
 
+            $count = 0;
+            $content_data = [];
+            foreach ($contents_params as $contents_param) {
+                $contents_param['order_no'] = $count += 1;
+                
+                $f = $contents_param['manual_file'];
+                $filename = uniqid() . '.' . $f->getClientOriginalExtension();
+                $path = public_path('uploads');
+                $file->move($path, $filename);
+                $content_url = 'uploads/' . $filename;
+                $contents_param['content_url'] = $content_url;
+                $contents_param['title'] = $contents_param['manual_flow_title'];
+                $contents_param['description'] = $contents_param['manual_flow_detail'];
+                $content_data[] = $contents_param;
+            }
+
+            foreach ($contents_params['manual_flow_title'] as $_content_tile) {
+                // $content_data[0]
+            }
+            //     $contents_param['order_no'] = $count++;
+            //     $f = $contents_param['contents_file'];
+            //     $filename = uniqid() . '.' . $f->getClientOriginalExtension();
+            //     $path = public_path('uploads');
+            //     $file->move($path, $filename);
+            //     $content_url = 'uploads/' . $filename;
+            //     $contents_param['content_url'] = $content_url;
+            // }
+            
             try {
                 $manual = Manual::create($manual_params);
                 $manual->organization1()->attach($request->organization1);
                 $manual->user()->attach($data);
+                $manual->content()->createMany($content_data);
+
             } catch (\Throwable $th) {
                 return redirect()
-                    ->route('admin.message.publish.new')
+                    ->route('admin.manual.publish.new')
                     ->withInput()
                     ->with('error', '入力エラーがあります');
             }
@@ -198,4 +225,21 @@ class ManualPublishController extends Controller
 
         ]);
     }
+
+    public function detail(Request$request, $manual_id)
+    {
+        $manual = Manual::find($manual_id);
+        $target_user = $manual->user;
+        $target_org1 = $manual->organization1()->pluck('organization1.id')->toArray();
+        $target_shop = Shop::whereIn("organization4_id", $target_org1)->get();
+        
+        return view('admin.manual.publish.detail',[
+            "manual" => $manual,
+            "content" => $manual->content,
+            "target_shop" => $target_shop
+        ]);
+
+    }
 }
+
+

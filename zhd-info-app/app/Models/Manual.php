@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery\Matcher\HasKey;
 
 class Manual extends Model
 {
@@ -32,11 +33,11 @@ class Manual extends Model
     //     return $this->belongsToMany(Roll::class, 'message_roll');
     // }
 
-    // public function user(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(User::class, 'message_user', 'message_id', 'user_id')
-    //         ->withPivot('read_flg', 'shop_id');
-    // }
+    public function user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
+            ->withPivot('read_flg', 'shop_id');
+    }
 
     public function create_user(): HasOne
     {
@@ -51,5 +52,10 @@ class Manual extends Model
     public function organization1(): BelongsToMany
     {
         return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1');
+    }
+
+    public function content(): HasMany
+    {
+        return $this->hasMany(Manualcontent::class);
     }
 }
