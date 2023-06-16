@@ -8,7 +8,8 @@
         </div>
     </div>
 
-    <form method="post" class="form-horizontal">
+    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+        @csrf
         <input type="hidden" name="mode" value="exec">
 
         <div class="form-group">
@@ -37,7 +38,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="contents_title[]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
+                        <input class="form-control" name="manual_title[0]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                 </div>
                 <div class="form-group">
@@ -105,27 +106,27 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization4[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
                         全業態
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="organization4[]" value="1" class="checkCommon mr8" checked disabled>
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked>
                     JP
                 </label>
                 <label class="mr16">
-                    <input type="checkbox" name="organization4[]" value="2" class="checkCommon mr8" disabled>
+                    <input type="checkbox" name="organization1[]" value="2" class="checkCommon mr8" disabled>
                     熟成焼肉いちばん
                 </label>
                 <label class="mr16">
-                    <input type="checkbox" name="organization4[]" value="3" class="checkCommon mr8" disabled>
+                    <input type="checkbox" name="organization1[]" value="3" class="checkCommon mr8" disabled>
                     牛庵
                 </label>
             </div>
         </div>
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="button" value="登　録" />
+            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
