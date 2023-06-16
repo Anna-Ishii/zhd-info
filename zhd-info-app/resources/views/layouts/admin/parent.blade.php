@@ -41,6 +41,8 @@
     <div id="footer" class="text-center" style="margin: 20px;">
         Powered by NSSX
     </div>
+    <script src="{{ asset('/js/index.js') }}" defer></script>
+    <script src="{{ asset('/js/edit.js') }}" defer></script>
 </body>
 
 </html>
