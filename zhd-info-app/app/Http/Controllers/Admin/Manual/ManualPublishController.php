@@ -81,34 +81,22 @@ class ManualPublishController extends Controller
                 $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
             }
 
-            $count = 0;
             $content_data = [];
-            foreach ($contents_params as $contents_param) {
-                $contents_param['order_no'] = $count += 1;
-                
-                $f = $contents_param['manual_file'];
+            for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
+
+                $f = $contents_params['manual_file'][$i];
                 $filename = uniqid() . '.' . $f->getClientOriginalExtension();
                 $path = public_path('uploads');
-                $file->move($path, $filename);
+                $f->move($path, $filename);
                 $content_url = 'uploads/' . $filename;
-                $contents_param['content_url'] = $content_url;
-                $contents_param['title'] = $contents_param['manual_flow_title'];
-                $contents_param['description'] = $contents_param['manual_flow_detail'];
-                $content_data[] = $contents_param;
+
+                $content_data[$i]['content_url'] = $content_url;
+                $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
+                $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
+                $content_data[$i]['order_no'] = $i + 1;
+
             }
 
-            foreach ($contents_params['manual_flow_title'] as $_content_tile) {
-                // $content_data[0]
-            }
-            //     $contents_param['order_no'] = $count++;
-            //     $f = $contents_param['contents_file'];
-            //     $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-            //     $path = public_path('uploads');
-            //     $file->move($path, $filename);
-            //     $content_url = 'uploads/' . $filename;
-            //     $contents_param['content_url'] = $content_url;
-            // }
-            
             try {
                 $manual = Manual::create($manual_params);
                 $manual->organization1()->attach($request->organization1);
