@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+    <div class="text-right flex ai-center"><span class="mr16">全 {{$target_shop->count()}} 件</span>
         <ul class="pagination">
             <li class="active"><a href="#">1</a></li>
             <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
@@ -43,18 +43,18 @@
             </thead>
 
             <tbody>
-                @foreach($target_shop as $shop)
+                @foreach ($target_shop as $shop)
                 <tr class="">
-                    <td>{{ $message->title }}</td>
-                    <td>{{ $shop->id }}</td>
-                    <td nowrap>{{ $shop->name }}</td>
-                    <td>{{ $shop->organization4->name }}</td>
-                    <td>{{ $shop->organization3->name }}</td>
+                    <td>{{$manual->title}}</td>
+                    <td>{{$shop->id}}</td>
+                    <td nowrap>{{$shop->name}}</td>
+                    <td>{{$shop->organization4->name}}</td>
+                    <td>{{$shop->organization3->name}}</td>
                     <td>90%(仮)</td>
                     <td>18(仮)</td>
                     <td>20(仮)</td>
-                    <td nowrap>{{ $message->start_datetime }}</td>
-                    <td nowrap>{{ $message->end_datetime }}</td>
+                    <td nowrap>{{$manual->start_datetime}}</td>
+                    <td nowrap>{{$manual->end_datetime}}</td>
                 </tr>
                 @endforeach
 
@@ -62,7 +62,7 @@
         </table>
     </div>
 
-    <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+    <div class="text-right flex ai-center"><span class="mr16">全 {{$target_shop->count()}} 件</span>
         <ul class="pagination">
             <li class="active"><a href="#">1</a></li>
             <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
