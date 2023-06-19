@@ -3,8 +3,10 @@
 use App\Http\Controllers\Admin\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
+
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -41,6 +43,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [MessageManageController::class, 'index'])->name('index');
             Route::get('detail/{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
+        });
+    });
+    Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
+        Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
+            Route::get('/', [ManualPublishController::class, 'index'])->name('index');
+            Route::match(['get', 'post'], 'new', [ManualPublishController::class, 'new'])->name('new');
+            Route::match(['get', 'post'], 'detail/{manual_id}', [ManualPublishController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
+        });
+        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
+            Route::get('/', [ManualManageController::class, 'index'])->name('index');
+            Route::get('detail/{manual_id}', [ManualManageController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
