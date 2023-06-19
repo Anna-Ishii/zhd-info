@@ -40,6 +40,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], fu
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::match(['get', 'post'], 'new', [MessagePublishController::class, 'new'])->name('new');
             Route::match(['get', 'post'], 'edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
+            Route::post('/stop', [MessagePublishController::class, 'stop'])->name('stop');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [MessageManageController::class, 'index'])->name('index');

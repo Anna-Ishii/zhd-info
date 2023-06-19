@@ -186,4 +186,14 @@ class MessagePublishController extends Controller
 
         ]);
     }
+
+    public function stop(Request $request)
+    {
+        $data = $request->json()->all();
+        $message_id = $data['message_id'];
+        
+        Message::whereIn('id', $message_id)->update(['status' => 1]);
+        
+        return response()->json(['message' => '停止しました']);
+    }
 }
