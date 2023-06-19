@@ -52,4 +52,28 @@ class Message extends Model
     {
         return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
     }
+
+    public function getStatusNameAttribute()
+    {
+        $status = $this->attributes['status']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+
+        // パラメータに応じて名称を返すロジックを記述
+        $name = '';
+        switch ($status) {
+            case 0:
+                $name = '待機';
+                break;
+            case 1:
+                $name = '掲載中';
+                break;
+            case 2:
+                $name = '掲載終了';
+                break;
+                // 他のケースを追加する必要があればここに記述します
+            default:
+                $name = 'Unknown';
+        }
+
+        return $name;
+    }
 }
