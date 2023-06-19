@@ -91,7 +91,7 @@
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8">
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
                     JP
                 </label>
             </div>
@@ -107,7 +107,7 @@
                 </div>
                 @foreach ($organization4_list as $organization4)
                 <label class="mr16">
-                    <input type="checkbox" name="organization4[]" value="{{$organization4->id}}" class="checkCommon mr8">
+                    <input type="checkbox" name="organization4[]" value="{{$organization4->id}}" class="checkCommon mr8" {{ in_array($organization4->id, $message_target_org4, true) ? 'checked' : '' }}>
                     {{$organization4->name}}
                 </label>
                 @endforeach

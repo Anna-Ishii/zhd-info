@@ -8,6 +8,9 @@
             <h1 class="page-header">業務連絡新規登録</h1>
         </div>
     </div>
+    @if (session('error'))
+    <div class="alert alert-danger">{{(session('error'))}}</div>
+    @endif
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
@@ -41,7 +44,7 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" required="required">
+                    <input type="checkbox" name="emergency_flg" class="mr8">
                     緊急配信する
                 </label>
             </div>
@@ -91,7 +94,7 @@
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8">
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
                     JP
                 </label>
             </div>
@@ -117,7 +120,7 @@
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
-            <a href="/admin/message/publish/" class="btn btn-default">一覧に戻る</a>
+            <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
     </form>

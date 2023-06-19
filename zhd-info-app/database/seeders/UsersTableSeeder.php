@@ -16,8 +16,8 @@ class UsersTableSeeder extends Seeder
         DB::table('users')->insert(
         [
             [
-            'name' => 'test',
-            'belong_label' => 'テスト所属',
+            'name' => 'JP担当者',
+            'belong_label' => 'ジョリーパスタ',
             'shop_id' => 1,
             'employee_code' => '1234567890',
             'password' => 'password',

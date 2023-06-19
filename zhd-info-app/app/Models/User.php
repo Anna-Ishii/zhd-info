@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Model
@@ -19,7 +20,13 @@ class User extends Model
 
     public function message(): BelongsToMany
     {
-        return $this->belongsToMany(Message::class, 'message_user')
+        return $this->belongsToMany(Message::class,'message_user','user_id', 'message_id')
                     ->withPivot('read_flg', 'shop_id');
+    }
+
+    public function manual(): BelongsToMany
+    {
+        return $this->belongsToMany(Manual::class, 'manual_user','user_id', 'manual_id')
+                    ->withPivot('read_flg', 'shop');
     }
 }

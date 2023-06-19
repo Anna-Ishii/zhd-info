@@ -7,34 +7,35 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Mockery\Matcher\HasKey;
 
-class Message extends Model
+class Manual extends Model
 {
-    protected $table = 'messages';
+    protected $table = 'manuals';
 
     protected $fillable =
     [
         'title',
-        'content_url',
+        'description',
         'category_id',
+        'content_url',
         'create_user_id',
+        'category_id',
         'status',
-        'emergency_flg',
         'start_datetime',
         'end_datetime',
-        'target_roll',
         'target_block',
     ];
 
     // 多対多のリレーションを定義
-    public function roll(): BelongsToMany
-    {
-        return $this->belongsToMany(Roll::class, 'message_roll');
-    }
+    // public function roll(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Roll::class, 'message_roll');
+    // }
 
     public function user(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
+        return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
             ->withPivot('read_flg', 'shop_id');
     }
 
@@ -45,12 +46,17 @@ class Message extends Model
 
     public function category(): HasOne
     {
-        return $this->hasOne(Category::class, foreignKey: 'id', localKey: 'category_id');
+        return $this->hasOne(Manualcategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
-    public function organization4(): BelongsToMany
+    public function organization1(): BelongsToMany
     {
-        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
+        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1');
+    }
+
+    public function content(): HasMany
+    {
+        return $this->hasMany(Manualcontent::class);
     }
 
     public function getStatusNameAttribute()

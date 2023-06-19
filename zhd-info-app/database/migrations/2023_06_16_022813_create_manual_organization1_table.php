@@ -11,14 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('message_user', function (Blueprint $table) {
-            $table->string('user_id');
-            $table->integer('message_id');
-            $table->boolean('read_flg')->default(false);
-            $table->integer('shop_id');
+        Schema::create('manual_organization1', function (Blueprint $table) {
+            $table->integer('manual_id');
+            $table->integer('organization1');
             $table->timestamps();
-
-            $table->unique(['message_id', 'user_id']);
         });
     }
 
@@ -27,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('message_user');
+        Schema::dropIfExists('manual_organization1');
     }
 };
