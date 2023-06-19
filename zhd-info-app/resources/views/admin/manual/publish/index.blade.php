@@ -63,8 +63,8 @@
         <form method="post" action="#">
             <div class="text-right">
                 <p>
-                    <button class="btn btn-info">編集</button>
-                    <button class="btn btn-info">配信停止</button>
+                    <button id="editBtn" class="btn btn-info">編集</button>
+                    <button id="StopBtn" class="btn btn-info">配信停止</button>
                     <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-info">新規登録</a>
                 </p>
             </div>
@@ -108,16 +108,16 @@
                             <tr class="">
                                 <td>
                                     <label>
-                                        <input type="checkbox" class="form-check-input">
+                                        <input type="checkbox" value="{{$manual->id}}" class="form-check-input">
                                     </label>
                                 </td>
                                 <td class="shop_id">{{$manual->id}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td class="message-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
                                 <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
                                 <td nowrap>{{$manual->start_datetime}}</td>
                                 <td nowrap>{{$manual->end_datetime}}</td>
-                                <td nowrap>{{$manual->status}}</td>
+                                <td nowrap>{{$manual->status_name}}</td>
                                 <td nowrap>{{$manual->create_user->name}}</td>
                                 <td nowrap>{{$manual->created_at}}</td>
                             </tr>
@@ -482,5 +482,5 @@
     </div>
 
 </div>
-
+<script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
 @endsection
