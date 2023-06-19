@@ -158,14 +158,7 @@ class MessagePublishController extends Controller
                     ->withInput()
                     ->with('error', '入力エラーがあります');
             }
-            // $target_roll = $request->target_roll;
-            // $target_organization1 = $request->target_organization1;
-            // $target_block = $request->target_block;
 
-            //TODO
-            // target_roll
-            // target_organizationがが含まれているかチェック
-            // ロールと対象ブロックは後で。
             return redirect()->route('admin.message.publish.index');
 
         }
