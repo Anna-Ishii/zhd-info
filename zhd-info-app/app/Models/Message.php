@@ -50,6 +50,6 @@ class Message extends Model
 
     public function organization4(): BelongsToMany
     {
-        return $this->BelongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
+        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
     }
 }

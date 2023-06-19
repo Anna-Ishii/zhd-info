@@ -43,42 +43,20 @@
             </thead>
 
             <tbody>
+                @foreach($target_shop as $shop)
                 <tr class="">
-                    <td>タイトルA</td>
-                    <td>1111</td>
-                    <td nowrap>JP1</td>
-                    <td>BL1</td>
-                    <td>DS1</td>
-                    <td>90%</td>
-                    <td>18</td>
-                    <td>20</td>
-                    <td nowrap>2023/05/12(金) 09:00</td>
-                    <td nowrap>2023/05/19(金) 23:00</td>
+                    <td>{{ $message->title }}</td>
+                    <td>{{ $shop->id }}</td>
+                    <td nowrap>{{ $shop->name }}</td>
+                    <td>{{ $shop->organization4->name }}</td>
+                    <td>{{ $shop->organization3->name }}</td>
+                    <td>90%(仮)</td>
+                    <td>18(仮)</td>
+                    <td>20(仮)</td>
+                    <td nowrap>{{ $message->start_datetime }}</td>
+                    <td nowrap>{{ $message->end_datetime }}</td>
                 </tr>
-                <tr class="">
-                    <td>タイトルA</td>
-                    <td>1111</td>
-                    <td nowrap>JP1</td>
-                    <td>BL1</td>
-                    <td>DS1</td>
-                    <td>90%</td>
-                    <td>18</td>
-                    <td>20</td>
-                    <td nowrap>2023/05/12(金) 09:00</td>
-                    <td nowrap>2023/05/19(金) 23:00</td>
-                </tr>
-                <tr class="">
-                    <td>タイトルA</td>
-                    <td>1111</td>
-                    <td nowrap>JP1</td>
-                    <td>BL1</td>
-                    <td>DS1</td>
-                    <td>90%</td>
-                    <td>18</td>
-                    <td>20</td>
-                    <td nowrap>2023/05/12(金) 09:00</td>
-                    <td nowrap>2023/05/19(金) 23:00</td>
-                </tr>
+                @endforeach
 
             </tbody>
         </table>

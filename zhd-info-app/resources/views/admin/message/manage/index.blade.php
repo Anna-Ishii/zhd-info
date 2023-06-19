@@ -80,42 +80,18 @@
                 </thead>
 
                 <tbody>
+                    @foreach ($message_list as $message)
                     <tr class="">
-                        <!-- <td>
-			<input type="checkbox" class="form-check-input">
-		</td> -->
-                        <td class="shop_id">455</td>
-                        <td>カテゴリA</td>
-                        <td nowrap><a href="{{ route('admin.message.manage.detail', ['message_id' => 1]) }}"">タイトルタイトルタイトル</a></td>
-                        <td>１ページ目<br><a href=" #">プレビュー表示</a></td>
-                        <td>60%</td>
-                        <td nowrap>2023/05/12(金) 09:00</td>
-                        <td nowrap>2023/05/19(金) 23:00</td>
+
+                        <td class="id">{{ $message->id }}</td>
+                        <td>{{ $message->category->name }}</td>
+                        <td nowrap><a href="{{ route('admin.message.manage.detail', ['message_id' => $message->id]) }}"">{{ $message->title }}</a></td>
+                        <td>１ページ目<br><a href=" {{ asset($message->content_url)}}">プレビュー表示</a></td>
+                        <td>60%(仮)</td>
+                        <td nowrap>{{$message->start_datetime}}</td>
+                        <td nowrap>{{$message->end_datetime}}</td>
                     </tr>
-                    <tr class="active">
-                        <!-- <td>
-			<input type="checkbox" class="form-check-input">
-		</td> -->
-                        <td class="shop_id">454</td>
-                        <td>カテゴリA</td>
-                        <td nowrap><a href="detail.html">タイトルタイトルタイトル</a></td>
-                        <td nowrap>１ページ目<br><a href="#">プレビュー表示</a></td>
-                        <td>60%</td>
-                        <td nowrap>2023/05/12(金) 09:00</td>
-                        <td nowrap>2023/05/19(金) 23:00</td>
-                    </tr>
-                    <tr class="bg-success">
-                        <!-- <td>
-			<input type="checkbox" class="form-check-input">
-		</td> -->
-                        <td class="shop_id">453</td>
-                        <td>カテゴリA</td>
-                        <td nowrap><a href="detail.html">タイトルタイトルタイトル</a></td>
-                        <td>１ページ目<br><a href="#">プレビュー表示</a></td>
-                        <td>60%</td>
-                        <td nowrap>2023/05/12(金) 09:00</td>
-                        <td nowrap>2023/05/19(金) 23:00</td>
-                    </tr>
+                    @endforeach
 
                 </tbody>
             </table>
