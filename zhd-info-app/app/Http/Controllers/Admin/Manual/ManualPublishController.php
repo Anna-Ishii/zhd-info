@@ -258,6 +258,16 @@ class ManualPublishController extends Controller
         ]);
 
     }
+
+    public function stop(Request $request)
+    {
+        $data = $request->json()->all();
+        $manual_id = $data['manual_id'];
+
+        Manual::whereIn('id', $manual_id)->update(['status' => 1]);
+
+        return response()->json(['message' => '停止しました']);
+    }
 }
 
 
