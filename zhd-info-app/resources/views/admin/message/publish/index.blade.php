@@ -49,9 +49,9 @@
 	<form method="post" action="#">
 		<div class="text-right">
 			<p>
-				<a href="/admin/message/publish/edit" class="btn btn-info">編集</a>
-				<button class="btn btn-info">配信停止</button>
-				<a href="/admin/message/publish/new" class="btn btn-info">新規登録</a>
+				<button id="editBtn" class="btn btn-info">編集</button>
+				<button id="StopBtn" class="btn btn-info">配信停止</button>
+				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-info">新規登録</a>
 			</p>
 		</div>
 		<div class="text-right flex ai-center"><span class="mr16">全 {{$message_list->count()}} 件</span>
@@ -92,16 +92,20 @@
 					@foreach ($message_list as $message)
 					<tr class="">
 						<td>
-							<input type="checkbox" class="form-check-input">
+							<input type="checkbox" value="{{$message->id}}" class="form-check-input">
 						</td>
 						<td class="shop_id">{{$message->id}}</td>
-						<td class="bg-danger text-danger">{{ $message->emergency_flg ? '⚪︎' : '' }}</td>
+						@if ($message->emergency_flg)
+						<td class="bg-danger text-danger">⚪︎</td>
+						@else
+						<td></td>
+						@endif
 						<td>{{$message->category->name}}</td>
-						<td nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
+						<td class="message-title" nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
 						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
 						<td nowrap>{{$message->start_datetime}}</td>
 						<td nowrap>{{$message->end_datetime}}</td>
-						<td nowrap>{{$message->status}}</td>
+						<td nowrap>{{$message->status_name}}</td>
 						<td nowrap>{{$message->create_user->name}}</td>
 						<td nowrap>{{$message->created_at}}</td>
 					</tr>
@@ -131,4 +135,5 @@
 	</form>
 
 </div>
+<script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
 @endsection

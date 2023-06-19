@@ -8,6 +8,8 @@
     <META HTTP-EQUIV="Pragma" CONTENT="no-cache">
     <META HTTP-EQUIV="Cache-Control" CONTENT="no-cache">
     <META HTTP-EQUIV="Expires" CONTENT="-1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
     <title>一覧 | 業務連絡配信</title>
 
@@ -41,6 +43,8 @@
     <div id="footer" class="text-center" style="margin: 20px;">
         Powered by NSSX
     </div>
+    <script src="{{ asset('/js/index.js') }}" defer></script>
+    <script src="{{ asset('/js/edit.js') }}" defer></script>
 </body>
 
 </html>

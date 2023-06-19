@@ -11,16 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('messages', function (Blueprint $table) {
+        Schema::create('manualcontents', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->integer('manual_id');
             $table->string('content_url');
-            $table->integer('category_id');
-            $table->integer('create_user_id');
-            $table->integer('status')->default(0);
-            $table->boolean('emergency_flg');
-            $table->dateTime('start_datetime')->nullable();
-            $table->dateTime('end_datetime')->nullable();
+            $table->string('title');
+            $table->text('description');
+            $table->integer('order_no');
+            $table->boolean('is_deleted')->default(false);
             $table->timestamps();
         });
     }
@@ -30,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('messages');
+        Schema::dropIfExists('manualcontents');
     }
 };
