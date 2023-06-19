@@ -38,7 +38,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="manual_title[0]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
+                        <input class="form-control" name="contents_title[]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                 </div>
                 <div class="form-group">

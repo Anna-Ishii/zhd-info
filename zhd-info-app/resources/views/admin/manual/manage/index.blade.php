@@ -4,7 +4,7 @@
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">業務連絡管理</h1>
+            <h1 class="page-header">動画マニュアル</h1>
         </div>
     </div>
 
@@ -12,18 +12,20 @@
     <form method="post" action="index" class="form-horizontal mb24">
         <div class="form-group form-inline mb16">
 
-            <div class="input-group col-lg-2">
+            <div class="input-group col-lg-2 spMb16">
                 <input name="q" value="" class="form-control" placeholder="キーワードを入力してください" />
             </div>
 
-            <div class="input-group col-lg-2">
+            <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="brand_id" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    <option value="0">メニュー・マニュアル関連</option>
-                    <option value="1">人事・総務</option>
-                    <option value="2">情報共有</option>
-                    <option value="3">イレギュラー</option>
+                    <option value="0">商品マニュアル</option>
+                    <option value="1">オペレーションマニュアル</option>
+                    <option value="2">教育動画</option>
+                    <option value="3">トピックス</option>
+                    <option value="4">Channel</option>
+
                 </select>
             </div>
 
@@ -70,29 +72,32 @@
                     <tr>
                         <!-- <th nowrap class="text-center"></th> -->
                         <th nowrap class="text-center">No</th>
-                        <th nowrap class="text-center">カテゴリ</th>
                         <th nowrap class="text-center">タイトル</th>
+                        <th nowrap class="text-center">カテゴリ</th>
                         <th nowrap class="text-center">ファイル</th>
-                        <th nowrap class="text-center">閲覧率</th>
                         <th nowrap class="text-center">提示開始日時</th>
                         <th nowrap class="text-center">提示終了日時</th>
+                        <th nowrap class="text-center">状態</th>
+                        <th nowrap class="text-center">登録者</th>
+                        <th nowrap class="text-center">登録日</th>
                     </tr>
                 </thead>
 
                 <tbody>
-                    @foreach ($message_list as $message)
+                    @foreach ($manual_list as $manual)
                     <tr class="">
 
-                        <td class="id">{{ $message->id }}</td>
-                        <td>{{ $message->category->name }}</td>
-                        <td nowrap><a href="{{ route('admin.message.manage.detail', ['message_id' => $message->id]) }}"">{{ $message->title }}</a></td>
-                        <td>１ページ目<br><a href=" {{ asset($message->content_url)}}">プレビュー表示</a></td>
-                        <td>60%(仮)</td>
-                        <td nowrap>{{$message->start_datetime}}</td>
-                        <td nowrap>{{$message->end_datetime}}</td>
+                        <td class="shop_id">{{ $manual->id }}</td>
+                        <td nowrap><a href="{{ route('admin.manual.manage.detail', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                        <td>{{$manual->category->name}}</td>
+                        <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
+                        <td nowrap>{{$manual->start_datetime}}</td>
+                        <td nowrap>{{$manual->end_datetime}}</td>
+                        <td>{{$manual->status_name}}</td>
+                        <td>{{$manual->create_user->name}}</td>
+                        <td nowrap>{{$manual->created_at}}</td>
                     </tr>
                     @endforeach
-
                 </tbody>
             </table>
         </div>
