@@ -94,7 +94,7 @@
                     </label>
                 </div>
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8">
+                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
                     JP
                 </label>
             </div>
@@ -120,7 +120,7 @@
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
-            <a href="/admin/message/publish/" class="btn btn-default">一覧に戻る</a>
+            <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
     </form>
