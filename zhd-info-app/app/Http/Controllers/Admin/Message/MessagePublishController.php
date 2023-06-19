@@ -192,7 +192,7 @@ class MessagePublishController extends Controller
         $data = $request->json()->all();
         $message_id = $data['message_id'];
         
-        Message::whereIn('id', $message_id)->update(['status' => 1]);
+        Message::whereIn('id', $message_id)->update(['status' => 2]);
         
         return response()->json(['message' => '停止しました']);
     }
