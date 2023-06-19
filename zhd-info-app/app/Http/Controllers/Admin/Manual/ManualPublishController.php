@@ -174,28 +174,42 @@ class ManualPublishController extends Controller
             }
 
             $content_data = [];
-            for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
-                if ($request->file('manual_file')) {
-                    $f = $contents_params['manual_file'][$i];
-                    $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-                    $path = public_path('uploads');
-                    $f->move($path, $filename);
-                    $content_url = 'uploads/' . $filename;
+            $contents_id = $request->input('content_id', []);
+            Manualcontent::whereNotIn('id', $contents_id)->update(['is_deleted' => true]);
 
-                    // $content_data[$i]['content_url'] = $content_url;
-                }
-                
-                $content = Manualcontent::find($request->content_id[$i]);
-                if(isEmpty($content)){
-                    $content->title = $contents_params['manual_flow_title'][$i];
-                    $content->description = $contents_params['manual_flow_detail'][$i];
-                    $content->order_no = $i + 1;
-                    if($request->file('manual_file')) $content->content_url = $content_url;
-                }else {
-                    $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
-                    $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
-                    $content_data[$i]['order_no'] = $i + 1;
-                    if ($request->file('manual_file')) $content_data[$i]['content_url'] = $content_url;
+            if(isset($contents_params['manual_flow_title'])) {
+            //手順の数分、繰り返す 
+                for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
+
+
+                    if(isset($request->content_id[$i])){
+                        $content = Manualcontent::find($request->content_id[$i]);
+                        $content->title = $contents_params['manual_flow_title'][$i];
+                        $content->description = $contents_params['manual_flow_detail'][$i];
+                        $content->order_no = $i + 1;
+
+                        if (isset($request->file('manual_file')[$i])) {
+                            $f = $contents_params['manual_file'][$i];
+                            $filename = uniqid() . '.' . $f->getClientOriginalExtension();
+                            $path = public_path('uploads');
+                            $f->move($path, $filename);
+                            $content_url = 'uploads/' . $filename;
+                            $content->content_url = $content_url;
+                        }
+                    }else {
+                        $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
+                        $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
+                        $content_data[$i]['order_no'] = $i + 1;
+
+
+                        $f = $contents_params['manual_file'][$i];
+                        $filename = uniqid() . '.' . $f->getClientOriginalExtension();
+                        $path = public_path('uploads');
+                        $f->move($path, $filename);
+                        $content_url = 'uploads/' . $filename;
+                        $content_data[$i]['content_url'] = $content_url;
+                        
+                    }
                 }
             }
 
@@ -228,6 +242,7 @@ class ManualPublishController extends Controller
         // $target_orgs1 = Shop::select('organization1_id')->whereIn('organization4_id', $target_orgs4);
         $contents = $manual->content()
             ->orderBy("order_no")
+            ->where('is_deleted','=','false')
             ->get();
 
         return view('admin.manual.publish.edit', [
