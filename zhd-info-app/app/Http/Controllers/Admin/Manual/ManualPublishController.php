@@ -279,7 +279,7 @@ class ManualPublishController extends Controller
         $data = $request->json()->all();
         $manual_id = $data['manual_id'];
 
-        Manual::whereIn('id', $manual_id)->update(['status' => 1]);
+        Manual::whereIn('id', $manual_id)->update(['status' => 2]);
 
         return response()->json(['message' => '停止しました']);
     }
