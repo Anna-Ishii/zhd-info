@@ -20,9 +20,11 @@
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="brand_id" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
-                    @endforeach
+                    <option value="0">商品マニュアル</option>
+                    <option value="1">オペレーションマニュアル</option>
+                    <option value="2">教育動画</option>
+                    <option value="3">トピックス</option>
+                    <option value="4">Channel</option>
 
                 </select>
             </div>
@@ -45,94 +47,79 @@
 
     </form>
 
+    <!-- 検索結果 -->
+    <form method="post" action="#">
+        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+            <ul class="pagination">
+                <li class="active"><a href="#">1</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+            </ul>
+        </div>
 
-        <form method="post" action="#">
-            <div class="text-right">
-                <p>
-                    <button class="btn btn-info">編集</button>
-                    <button class="btn btn-info">配信停止</button>
-                    <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-info">新規登録</a>
-                </p>
-            </div>
-            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->count()}}件</span>
-                <ul class="pagination">
-                    <li class="active"><a href="#">1</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
-                </ul>
-            </div>
+        <div class="tableInner">
+            <table id="list" class="table table-bordered table-hover table-condensed text-center">
+                <thead>
+                    <tr>
+                        <!-- <th nowrap class="text-center"></th> -->
+                        <th nowrap class="text-center">No</th>
+                        <th nowrap class="text-center">タイトル</th>
+                        <th nowrap class="text-center">カテゴリ</th>
+                        <th nowrap class="text-center">ファイル</th>
+                        <th nowrap class="text-center">提示開始日時</th>
+                        <th nowrap class="text-center">提示終了日時</th>
+                        <th nowrap class="text-center">状態</th>
+                        <th nowrap class="text-center">登録者</th>
+                        <th nowrap class="text-center">登録日</th>
+                    </tr>
+                </thead>
 
-            <div class="toggleContent isCurrent" data-tab-number="0">
-                <div class="tableInner">
-                    <table id="list" class="table table-bordered table-hover table-condensed text-center">
-                        <thead>
-                            <tr>
-                                <th nowrap class="text-center"></th>
-                                <th nowrap class="text-center">No</th>
-                                <th nowrap class="text-center">カテゴリ</th>
-                                <th nowrap class="text-center">タイトル</th>
-                                <th nowrap class="text-center">ファイル</th>
-                                <th nowrap class="text-center">提示開始日時</th>
-                                <th nowrap class="text-center">提示終了日時</th>
-                                <th nowrap class="text-center">状態</th>
-                                <th nowrap class="text-center">登録者</th>
-                                <th nowrap class="text-center">登録日</th>
-                            </tr>
-                        </thead>
+                <tbody>
+                    @foreach ($manual_list as $manual)
+                    <tr class="">
 
-                        <tbody>
-                            @foreach ($manual_list as $manual)
-                            <tr class="">
-                                <td>
-                                    <label>
-                                        <input type="checkbox" class="form-check-input">
-                                    </label>
-                                </td>
-                                <td class="shop_id">{{$manual->id}}</td>
-                                <td>{{$manual->category->name}}</td>
-                                <td nowrap><a href="{{ route('admin.manual.manage.detail', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
-                                <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
-                                <td nowrap>{{$manual->start_datetime}}</td>
-                                <td nowrap>{{$manual->end_datetime}}</td>
-                                <td nowrap>{{$manual->status_name}}</td>
-                                <td nowrap>{{$manual->create_user->name}}</td>
-                                <td nowrap>{{$manual->created_at}}</td>
-                            </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+                        <td class="shop_id">{{ $manual->id }}</td>
+                        <td nowrap><a href="{{ route('admin.manual.manage.detail', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                        <td>{{$manual->category->name}}</td>
+                        <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
+                        <td nowrap>{{$manual->start_datetime}}</td>
+                        <td nowrap>{{$manual->end_datetime}}</td>
+                        <td>{{$manual->status_name}}</td>
+                        <td>{{$manual->create_user->name}}</td>
+                        <td nowrap>{{$manual->created_at}}</td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
 
-            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->count()}}件</span>
-                <ul class="pagination">
-                    <li class="active"><a href="#">1</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-                    <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
-                </ul>
-            </div>
+        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+            <ul class="pagination">
+                <li class="active"><a href="#">1</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
+                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+            </ul>
+        </div>
 
-        </form>
-
+    </form>
 
 </div>
-
 @endsection
