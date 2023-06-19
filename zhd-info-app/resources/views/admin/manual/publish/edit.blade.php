@@ -63,7 +63,7 @@
             </div>
             @foreach ($contents as $contnet)
             <div class="manualVariableBox">
-                <input type="text" name="content_id[]" value="{{ $contnet->id }}"hidden></input>
+                <input type="text" name="content_id[]" value="{{ $contnet->id }}" hidden></input>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
