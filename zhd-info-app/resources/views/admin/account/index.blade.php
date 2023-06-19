@@ -15,7 +15,7 @@
 
             <div class="input-group col-lg-2 spMb16">
                 <input name="q" value="" class="form-control" />
-                <span class="input-group-btn"><button class="btn btn-default" type="button" onclick="submit();"><i class="fa fa-search"></i></button></span>
+                <span class="input-group-btn"><button id="deleteBtn" class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
             </div>
 
             <div class="input-group col-lg-2 spMb16">
@@ -106,7 +106,7 @@
     <form method="post" action="#">
         <div class="text-right">
             <p>
-                <button class="btn btn-info">削除</button>
+                <button id="deleteBtn" class="btn btn-info">削除</button>
                 <a href="/admin/account/new" class="btn btn-info">新規登録</a>
             </p>
         </div>
@@ -178,4 +178,5 @@
     </form>
 
 </div>
+<script src="{{ asset('/js/admin/account/index.js') }}" defer></script>
 @endsection
