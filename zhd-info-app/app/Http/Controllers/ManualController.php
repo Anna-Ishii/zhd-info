@@ -21,11 +21,10 @@ class ManualController extends Controller
             $manuals = Manual::orderBy('created_at', 'desc')
                                 ->get();
         }
-        
         $categories = Manualcategory::get();
         return view('manual.index', [
             'manuals' => $manuals,
-            'categories' => $categories
+            'categories' => $categories,
         ]);
     }
 
