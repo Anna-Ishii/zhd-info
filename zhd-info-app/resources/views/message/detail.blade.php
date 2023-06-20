@@ -52,10 +52,6 @@
         </div>
     </main>
 
-    <footer class="footer">
-        <a href="./">
-            <img src=" {{ asset('/img/logo.png') }}" alt="ゼンショーホールディングス">
-        </a>
-    </footer>
+    @include('common.footer')
 
     <script src="{{ asset('/js/common.js') }}" defer></script>
