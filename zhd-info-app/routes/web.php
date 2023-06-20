@@ -28,11 +28,11 @@ Route::get('/member/auth', [ControllersAuthController::class, 'index'])->name('a
 Route::post('/member/auth', [ControllersAuthController::class, 'login']);
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
-Route::group(['prefix' => 'message', 'as' => 'message.'], function (){
+Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
 });
-Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
+Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
     Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
 });
