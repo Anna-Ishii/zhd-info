@@ -14,30 +14,30 @@
     <title>一覧 | 業務連絡配信</title>
 
     <!-- Bootstrap Core CSS -->
-    <link href="{{ asset('/css/bootstrap.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/bootstrap.min.css') }}" rel="stylesheet">
 
     <!-- MetisMenu CSS -->
-    <link href="{{ asset('/css/metisMenu.min.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/metisMenu.min.css') }}" rel="stylesheet">
 
     <!-- Custom Fonts -->
-    <link href="{{ asset('/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
+    <link href="{{ asset('/admin/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
 
     <!-- Custom CSS -->
-    <link href="{{ asset('/css/sb-admin-2.css') }}" rel="stylesheet">
-    <link href="{{ asset('/css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/sb-admin-2.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/style.css') }}" rel="stylesheet">
 
-    <script src="{{ asset('/js/jquery.min.js') }}"></script>
-    <script src="{{ asset('/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('/js/metisMenu.min.js') }}"></script>
-    <script src="{{ asset('/js/sb-admin-2.js') }}"></script>
+    <script src="{{ asset('/admin/js/jquery.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/bootstrap.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/metisMenu.min.js') }}"></script>
+    <script src="{{ asset('/admin/js/sb-admin-2.js') }}"></script>
 
-    <script src="{{ asset('/js/sb-admin-form.js') }}"></script>
+    <script src="{{ asset('/admin/js/sb-admin-form.js') }}"></script>
 </head>
 
 <body>
 
     <div id="wrapper">
-        @include('common.navigation')
+        @include('common.admin.navigation')
         @yield('content')
     </div>
     <div id="footer" class="text-center" style="margin: 20px;">
