@@ -4,8 +4,8 @@
                 <a href="{{ route('top') }}"><img src="{{ asset('/img/logo.png') }}" alt="ゼンショーホールディングス"></a>
             </h1>
             <p class="header__name txtBold">
-                <span class="mr16">東京駅前店</span>
-                店長 野村
+                <span class="mr16">{{ $user->shop->name }}</span>
+                {{ $user->roll->name}}　 {{ $user->name }}
             </p>
         </section>
     </header>
