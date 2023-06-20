@@ -32,7 +32,7 @@
 
         <div class="search mb24">
             <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>全て</span>」56件を表示中</p>
+                <p class="search__status txtBold spmb8">「<span>全て</span>」{{ $messages->count() }}件を表示中</p>
                 <div class="search__btnList">
                     <form action="#" name="sort">
                         <button type="button" class="btnSidebar mr10 txtBold">全て</button>
@@ -50,7 +50,7 @@
                     <div class="list__box">
                         <div class="list__box__txtInner">
                             <p class="list__box__title txtBold mb2">{{ $message->title }}</p>
-                            <time datetime="2023-01-01" class="mr8 txtInline">{{ $message->start_datetime }}</time>
+                            <time datetime="2023-01-01" class="mr8 txtInline">{{ $message->created_at }}</time>
                             @if ($message->emergency_flg)
                             <p class="list__box__tag mr8 txtInline">重要</p>
                             @endif
@@ -59,26 +59,6 @@
                     </div>
                 </a>
                 @endforeach
-                <a href="detail.html" class="mb4">
-                    <div class="list__box">
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">4月メニュー展開について</p>
-                            <time datetime="2023-01-01" class="mr8 txtInline">2023.01.01(木) 09:10</time>
-                            <p class="list__box__tag mr8 txtInline">重要</p>
-                            <p class="mr8 txtInline"><img src="../assets/img/icon_clip.svg" alt=""></p>
-                        </div>
-                    </div>
-                </a>
-                <a href="detail.html" class="mb4">
-                    <div class="list__box">
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">4月メニュー展開について</p>
-                            <time datetime="2023-01-01" class="mr8 txtInline">2023.01.01(木) 09:10</time>
-                            <p class="list__box__tag mr8 txtInline">重要</p>
-                            <p class="mr8 txtInline"><img src="../assets/img/icon_clip.svg" alt=""></p>
-                        </div>
-                    </div>
-                </a>
 
             </div>
         </article>
@@ -92,7 +72,7 @@
                     <img src="{{ asset('/img/icon_prev.svg') }}" alt="前のページ">
                 </a>
                 <div class="pager__number txtBold txtCenter">
-                    <p>3<span>of</span>10</p>
+                    <p>1<span>of</span>10</p>
                 </div>
                 <a href="#" class="pager__btn txtCenter">
                     <img src=" {{ asset('/img/icon_next.svg') }}" alt="次のページ">
@@ -108,7 +88,7 @@
 
 <footer class="footer">
     <a href="../">
-        <img src="../assets/img/logo.png" alt="ゼンショーホールディングス">
+        <img src="{{ asset('/img/logo.png')}}" alt="ゼンショーホールディングス">
     </a>
 </footer>
 
@@ -116,7 +96,7 @@
 <nav class="sidebar">
     <div class="sidebar__inner">
         <div class="sidebar__close mb58">
-            <img src="../assets/img/icon_folder.svg" alt="閉じる">
+            <img src="{{ asset('/img/icon_folder.svg') }}" alt="閉じる">
         </div>
         <ul class="sidebar__list">
             <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">スタッフ用</span>(120件)</a></li>
@@ -125,7 +105,7 @@
             <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">終了した業務</span>(30件)</a></li>
         </ul>
         <div class="btnSidebarLabel">
-            <img src="../assets/img/icon_plus.svg" alt="">
+            <img src="{{ asset('/img/icon_plus.svg') }}" alt="">
             <p class="txtBold">ラベルを追加</p>
         </div>
         <div class="sidebar__inputArea">
