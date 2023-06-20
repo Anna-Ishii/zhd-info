@@ -151,7 +151,6 @@ class ManualPublishController extends Controller
 
             if ($request->file('file')) {
                 $file = $request->file('file');
-                $directory = 'uploads';
                 // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
                 $filename = uniqid() . '.' . $file->getClientOriginalExtension();
                 $path = public_path('uploads');
@@ -164,8 +163,9 @@ class ManualPublishController extends Controller
             }
             $manual_params['create_user_id'] = session('user')->id;
 
-
+            // 該当のショップID
             $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
+            // 該当のユーザー
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
 
             $data = [];
@@ -173,21 +173,24 @@ class ManualPublishController extends Controller
                 $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
             }
 
-            $content_data = [];
-            $contents_id = $request->input('content_id', []);
+            $content_data = []; // manualcontentに格納するための配列
+            $count_order_no = 0;
+            // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
+            $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
             Manualcontent::whereNotIn('id', $contents_id)->update(['is_deleted' => true]);
 
             if(isset($contents_params['manual_flow_title'])) {
-            //手順の数分、繰り返す 
+                //手順の数分、繰り返す 
                 for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
 
-
+                        // 登録されているコンテンツを変更する
                     if(isset($request->content_id[$i])){
                         $content = Manualcontent::find($request->content_id[$i]);
                         $content->title = $contents_params['manual_flow_title'][$i];
                         $content->description = $contents_params['manual_flow_detail'][$i];
-                        $content->order_no = $i + 1;
+                        $content->order_no = $count_order_no + 1;
 
+                        // manual_fileがnullの場合は変更しない
                         if (isset($request->file('manual_file')[$i])) {
                             $f = $contents_params['manual_file'][$i];
                             $filename = uniqid() . '.' . $f->getClientOriginalExtension();
@@ -196,10 +199,11 @@ class ManualPublishController extends Controller
                             $content_url = 'uploads/' . $filename;
                             $content->content_url = $content_url;
                         }
-                    }else {
+                        $content->save();
+                    }else{
                         $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
                         $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
-                        $content_data[$i]['order_no'] = $i + 1;
+                        $content_data[$i]['order_no'] = $count_order_no + 1;
 
 
                         $f = $contents_params['manual_file'][$i];
@@ -208,7 +212,6 @@ class ManualPublishController extends Controller
                         $f->move($path, $filename);
                         $content_url = 'uploads/' . $filename;
                         $content_data[$i]['content_url'] = $content_url;
-                        
                     }
                 }
             }
