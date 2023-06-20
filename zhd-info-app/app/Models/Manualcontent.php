@@ -19,8 +19,13 @@ class Manualcontent extends Model
         'is_deleted'
     ];
 
-    // public function message(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(Message::class, 'message_category', 'category_id','message_id');
-    // }
+    public function getContentTypeAttribute()
+    {
+        $content_url = $this->attributes['content_url']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+
+        // 拡張子を取得
+        $extension = pathinfo($content_url, PATHINFO_EXTENSION);
+
+        return $extension;
+    }
 }
