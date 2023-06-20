@@ -21,11 +21,10 @@
         <nav class="sliderMenu mb16">
             <div class="sliderMenu__inner">
                 <ul class="sliderMenu__list flex">
-                    <li class="sliderMenu__list__item txtBold isActive"><a href="#">全て</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">メニュー・マニュアル関連</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">人事・総務</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">情報共有</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">イレギュラー</a></li>
+                    <li class="sliderMenu__list__item txtBold {{ is_null(request()->input('category')) ? 'isActive' : ''}}"><a href="{{ route('message.index') }}">全て</a></li>
+                    @foreach($categories as $category)
+                    <li class="sliderMenu__list__item txtBold {{ request()->input('category') == $category->id ? 'isActive' : ''}}"><a href="{{ route('message.index', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
+                    @endforeach
                 </ul>
             </div>
         </nav>

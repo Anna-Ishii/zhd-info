@@ -2,17 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Category;
 use App\Models\Manual;
+use App\Models\Manualcategory;
 use Illuminate\Http\Request;
 
 class ManualController extends Controller
 {
-    function index()
+    function index(Request $request)
     {
-        $manuals = Manual::orderBy('created_at', 'desc')->get();
+        $category_id = $request->input('category');
 
+        if(isset($category_id)){
+            $manuals = Manual::where('category_id', '=', $category_id)
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+        }else {
+            $manuals = Manual::orderBy('created_at', 'desc')
+                                ->get();
+        }
+        
+        $categories = Manualcategory::get();
         return view('manual.index', [
-            'manuals' => $manuals
+            'manuals' => $manuals,
+            'categories' => $categories
         ]);
     }
 
