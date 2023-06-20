@@ -10,25 +10,24 @@
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
-        <input type="hidden" name="mode" value="exec">
 
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{$manual->title}}" id="title">
+                <input class="form-control" name="title" value="{{$manual->title}}" id="title" required>
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{$manual->description}}</textarea>
+                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required>{{$manual->description}}</textarea>
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">ファイルを選択またはドロップ</span>
+                    <span class="fileName">{{ $manual->content_url }}</span>
                     <input type="file" name="file" value="" data-variable-name="manual_file">
                 </label>
             </div>
@@ -38,7 +37,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="contents_title[]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
+                        <input class="form-control" name="manual_flow_title[]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                 </div>
                 <div class="form-group">
@@ -46,14 +45,14 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="contents_file[]" value="" data-variable-name="manual_file">
+                            <input type="file" name="manual_file[]" value="" data-variable-name="manual_file">
                         </label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
                     <div class="col-lg-10">
-                        <textarea name="contents_description[]" class="form-control" data-variable-name="manual_flow_detail"></textarea>
+                        <textarea name="manual_flow_detail[]" class="form-control" data-variable-name="manual_flow_detail"></textarea>
                     </div>
                 </div>
                 <div class="text-right">
@@ -61,28 +60,28 @@
                 </div>
 
             </div>
-            @foreach ($contents as $contnet)
+            @foreach ($contents as $content)
             <div class="manualVariableBox">
-                <input type="text" name="content_id[]" value="{{ $contnet->id }}" hidden></input>
+                <input type="text" name="content_id[]" value="{{ $content->id }}" hidden required></input>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="contents_title[]" value="{{ $contnet->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
+                        <input class="form-control" name="manual_flow_title[{{$loop->index}}]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" required>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付</label>
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
-                            <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="contents_file[]" value="" data-variable-name="manual_file">
+                            <span class="fileName">{{ $content->content_url }}</span>
+                            <input type="file" name="manual_file[{{$loop->index}}]" value="" data-variable-name="manual_file">
                         </label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
                     <div class="col-lg-10">
-                        <textarea name="contents_description[]" class="form-control" data-variable-name="manual_flow_detail">{{ $contnet->description }}</textarea>
+                        <textarea name="manual_flow_detail[{{$loop->index}}]" class="form-control" data-variable-name="manual_flow_detail" required>{{ $content->description }}</textarea>
                     </div>
                 </div>
                 <div class="text-right">
