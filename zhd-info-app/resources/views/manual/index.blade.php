@@ -20,18 +20,17 @@
         <nav class="sliderMenu mb16">
             <div class="sliderMenu__inner">
                 <ul class="sliderMenu__list flex">
-                    <li class="sliderMenu__list__item txtBold isActive"><a href="#">全て</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">メニュー・マニュアル関連</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">人事・総務</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">情報共有</a></li>
-                    <li class="sliderMenu__list__item txtBold"><a href="#">イレギュラー</a></li>
+                    <li class="sliderMenu__list__item txtBold {{ is_null(request()->input('category')) ? 'isActive' : ''}}"><a href="{{ route('manual.index') }}">全て</a></li>
+                    @foreach($categories as $category)
+                    <li class="sliderMenu__list__item txtBold {{ request()->input('category') == $category->id ? 'isActive' : ''}}"><a href="{{ route('manual.index', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
+                    @endforeach
                 </ul>
             </div>
         </nav>
 
         <div class="search mb24">
             <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>全て</span>」{{ $manuals->count() }}件を表示中</p>
+                <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->count() }}件を表示中</p>
                 <div class="search__btnList">
                     <form action="#" name="sort">
                         <!-- 昇順：isAscending 降順：isDescending -->
@@ -42,50 +41,47 @@
         </div>
 
         <article class="list mb14">
-                @foreach($manuals as $manual)
-                <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
-                    <div class="list__box flex">
-                        <div class="list__box__thumb">
-                            <img src="{{ asset('/img/img_list_dummy.jpg') }}" alt="">
-                        </div>
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">{{ $manual->title }}</p>
-                        </div>
+            @foreach($manuals as $manual)
+            <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
+                <div class="list__box flex">
+                    <div class="list__box__thumb">
+                        <img src="{{ asset('/img/img_list_dummy.jpg') }}" alt="">
                     </div>
-                </a>
-                @endforeach
-
-            </div>
-        </article>
-
-        <nav class="pager mb18">
-            <div class="pager__inner flex">
-                <a href="#" class="pager__btn txtCenter">
-                    <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
-                </a>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
-                </a>
-                <div class="pager__number txtBold txtCenter">
-                    <p>1<span>of</span>10</p>
+                    <div class="list__box__txtInner">
+                        <p class="list__box__title txtBold mb2">{{ $manual->title }}</p>
+                    </div>
                 </div>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
-                </a>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
-                </a>
+            </a>
+            @endforeach
+
+    </div>
+    </article>
+
+    <nav class="pager mb18">
+        <div class="pager__inner flex">
+            <a href="{{ $manuals->url(1) }}" class="pager__btn txtCenter">
+                <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
+            </a>
+            <a href="{{ $manuals->previousPageUrl() }}" class="pager__btn txtCenter">
+                <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
+            </a>
+            <div class="pager__number txtBold txtCenter">
+
+                <p>{{$manuals->currentPage()}}<span>of</span>{{ceil($manuals->total() / $manuals->perPage())}}</p>
             </div>
-        </nav>
+            <a href="{{ $manuals->nextPageUrl() }}" class="pager__btn txtCenter">
+                <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
+            </a>
+            <a href="{{ $manuals->url($manuals->lastPage()) }}" class="pager__btn txtCenter">
+                <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
+            </a>
+        </div>
+    </nav>
 
     </div>
 </main>
 
-<footer class="footer">
-    <a href="../">
-        <img src="{{ asset('img/logo.png')}}" alt="ゼンショーホールディングス">
-    </a>
-</footer>
+@include('common.footer')
 
 <div class="sidebarBg"></div>
 <nav class="sidebar">
