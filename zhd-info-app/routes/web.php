@@ -22,14 +22,14 @@ use App\Http\Controllers\TopController;
 |
 */
 
-Route::get('/', [TopController::class, 'index'])->name('top');
+Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
-    Route::get('detail', [MessageController::class, 'detail'])->name('detail');
+    Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
 });
 Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
-    Route::get('detail', [ManualController::class, 'detail'])->name('detail');
+    Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
 });
 
 // 管理画面へのログイン画面
