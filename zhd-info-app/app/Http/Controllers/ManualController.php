@@ -9,7 +9,7 @@ class ManualController extends Controller
 {
     function index()
     {
-        $manuals = Manual::get();
+        $manuals = Manual::orderBy('created_at', 'desc')->get();
 
         return view('manual.index', [
             'manuals' => $manuals
