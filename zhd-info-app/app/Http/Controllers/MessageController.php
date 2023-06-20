@@ -9,7 +9,7 @@ class MessageController extends Controller
 {
     function index()
     {
-        $messages = Message::get();
+        $messages = Message::orderBy('created_at', 'desc')->get();
 
         return view('message.index', [
             'messages' => $messages
