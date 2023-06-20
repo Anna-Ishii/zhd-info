@@ -59,19 +59,20 @@
 
     <nav class="pager mb18">
         <div class="pager__inner flex">
-            <a href="#" class="pager__btn txtCenter">
+            <a href="{{ $manuals->url(1) }}" class="pager__btn txtCenter">
                 <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
             </a>
-            <a href="#" class="pager__btn txtCenter">
+            <a href="{{ $manuals->previousPageUrl() }}" class="pager__btn txtCenter">
                 <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
             </a>
             <div class="pager__number txtBold txtCenter">
-                <p>1<span>of</span>10</p>
+
+                <p>{{$manuals->currentPage()}}<span>of</span>{{ceil($manuals->total() / $manuals->perPage())}}</p>
             </div>
-            <a href="#" class="pager__btn txtCenter">
+            <a href="{{ $manuals->nextPageUrl() }}" class="pager__btn txtCenter">
                 <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
             </a>
-            <a href="#" class="pager__btn txtCenter">
+            <a href="{{ $manuals->url($manuals->lastPage()) }}" class="pager__btn txtCenter">
                 <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
             </a>
         </div>
