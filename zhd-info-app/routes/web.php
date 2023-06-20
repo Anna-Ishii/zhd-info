@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Manual\ManualManageController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
+use App\Http\Controllers\AuthController as ControllersAuthController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TopController;
@@ -22,6 +23,10 @@ use App\Http\Controllers\TopController;
 |
 */
 
+// アプリ側画面へのログイン画面
+Route::get('/member/auth', [ControllersAuthController::class, 'index'])->name('auth');
+Route::post('/member/auth', [ControllersAuthController::class, 'login']);
+
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
@@ -33,11 +38,11 @@ Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
 });
 
 // 管理画面へのログイン画面
-Route::get('/auth', [AuthController::class, 'index'])->name('auth');
+Route::get('/auth', [AuthController::class, 'index'])->name('admin.auth');
 Route::post('/auth', [AuthController::class, 'login']);
 
 // 管理画面のルート
-Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth'], function() {
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
     Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');

@@ -21,18 +21,18 @@
                 </a>
                 <section class="header__title">
                     <h1 class="txtBold txtBlue">{{ $message->title }}</h1>
-                    <time datetime="2023-01-01" class="mr8 txtBold">2023.01.01(木) 09:10</time>
+                    <time datetime="2023-01-01" class="mr8 txtBold">{{ $message->created_at }}</time>
                 </section>
             </div>
             <ul class="header__menu flex">
                 <li>
-                    <a href="../assets/img/test.pdf" download="test.pdf">
-                        <img src="../assets/img/icon_folder_open.svg" alt="">
+                    <a href="{{ asset($message->content_url)}}" download="test.pdf">
+                        <img src="{{ asset('img/icon_folder_open.svg')}}" alt="">
                     </a>
                 </li>
                 <li>
                     <button type="button" class="btnPrint">
-                        <img src="../assets/img/icon_print.svg" alt="印刷する">
+                        <img src="{{ asset('img/icon_print.svg')}}" alt="印刷する">
                     </button>
                 </li>
             </ul>
