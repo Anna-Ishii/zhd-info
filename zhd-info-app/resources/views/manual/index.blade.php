@@ -42,17 +42,6 @@
         </div>
 
         <article class="list mb14">
-            <div class="list__inner">
-                <a href="detail_single.html" class="mb4">
-                    <div class="list__box flex">
-                        <div class="list__box__thumb">
-                            <img src="{{ asset('/img/img_list_dummy.jpg') }}" alt="">
-                        </div>
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">動画1つのみ確認用</p>
-                        </div>
-                    </div>
-                </a>
                 @foreach($manuals as $manual)
                 <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
                     <div class="list__box flex">
@@ -65,26 +54,6 @@
                     </div>
                 </a>
                 @endforeach
-                <a href="detail.html" class="mb4">
-                    <div class="list__box flex">
-                        <div class="list__box__thumb">
-                            <img src="{{ asset('/img/img_list_dummy.jpg') }}" alt="">
-                        </div>
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">レジ・レシートの交換（全4章）</p>
-                        </div>
-                    </div>
-                </a>
-                <a href="detail.html" class="mb4">
-                    <div class="list__box flex">
-                        <div class="list__box__thumb">
-                            <img src="{{ asset('/img/img_list_dummy.jpg') }}" alt="">
-                        </div>
-                        <div class="list__box__txtInner">
-                            <p class="list__box__title txtBold mb2">レジ・レシートの交換（全4章）</p>
-                        </div>
-                    </div>
-                </a>
 
             </div>
         </article>
@@ -92,19 +61,19 @@
         <nav class="pager mb18">
             <div class="pager__inner flex">
                 <a href="#" class="pager__btn txtCenter">
-                    <img src="../assets/img/icon_tofirst.svg" alt="最初のページへ移動">
+                    <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
                 </a>
                 <a href="#" class="pager__btn txtCenter">
-                    <img src="../assets/img/icon_prev.svg" alt="前のページ">
+                    <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
                 </a>
                 <div class="pager__number txtBold txtCenter">
                     <p>3<span>of</span>10</p>
                 </div>
                 <a href="#" class="pager__btn txtCenter">
-                    <img src="../assets/img/icon_next.svg" alt="次のページ">
+                    <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
                 </a>
                 <a href="#" class="pager__btn txtCenter">
-                    <img src="../assets/img/icon_tolast.svg" alt="最後のページへ移動">
+                    <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
                 </a>
             </div>
         </nav>
@@ -114,7 +83,7 @@
 
 <footer class="footer">
     <a href="../">
-        <img src="../assets/img/logo.png" alt="ゼンショーホールディングス">
+        <img src="{{ asset('img/logo.png')}}" alt="ゼンショーホールディングス">
     </a>
 </footer>
 
@@ -122,7 +91,7 @@
 <nav class="sidebar">
     <div class="sidebar__inner">
         <div class="sidebar__close mb58">
-            <img src="../assets/img/icon_folder.svg" alt="閉じる">
+            <img src="{{ asset('img/icon_folder.svg')}}" alt="閉じる">
         </div>
         <ul class="sidebar__list">
             <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">スタッフ用</span>(120件)</a></li>
