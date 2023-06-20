@@ -23,6 +23,15 @@ class UsersTableSeeder extends Seeder
             'password' => 'password',
             'email' => 'test@email.co.jp',
             'roll_id' => 1,
+            ],
+            [
+            'name' => 'テスト',
+            'belong_label' => 'ジョリーパスタの店長',
+            'shop_id' => 1,
+            'employee_code' => '111111111',
+            'password' => 'password',
+            'email' => 'tencho@email.co.jp',
+            'roll_id' => 4,
             ]
         ]
         );

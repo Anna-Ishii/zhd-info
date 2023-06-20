@@ -13,7 +13,7 @@ class TopController extends Controller
         $now = Carbon::now();
         $message = new Message();
         $message_now = $message->whereDate('start_datetime', $now->format('Y/m/d'))->orderBy('created_at', 'desc')->get();
-        $roll = Roll::find(2); //クルー
+        $roll = Roll::find(4); //店長
         $message_crew = $roll->message()->orderBy('created_at', 'desc')->get();; 
         $message_posting = $message->where('status', '=', '1')->orderBy('created_at', 'desc')->get();
         return view('top', [
