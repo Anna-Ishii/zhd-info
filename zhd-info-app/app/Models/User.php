@@ -29,4 +29,14 @@ class User extends Model
         return $this->belongsToMany(Manual::class, 'manual_user','user_id', 'manual_id')
                     ->withPivot('read_flg', 'shop');
     }
+
+    public function roll(): BelongsTo
+    {
+        return $this->belongsTo(Roll::class, 'roll_id', 'id');
+    }
+
+    public function shop(): BelongsTo
+    {
+        return $this->belongsTo(Shop::class, 'shop_id', 'id');
+    }
 }
