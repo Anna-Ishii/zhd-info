@@ -14,18 +14,17 @@ class MessageController extends Controller
 
         if (isset($category_id)) {
             $messages = Message::where('category_id', '=', $category_id)
-                ->orderBy('created_at', 'desc')
-                ->get();
+                                    ->orderBy('created_at', 'desc');
         } else {
-            $messages = Message::orderBy('created_at', 'desc')
-                ->get();
+            $messages = Message::orderBy('created_at', 'desc');
         }
 
         $categories = Category::get();
+
         return view('message.index', [
-            'messages' => $messages,
+            'messages' => $messages->paginate(5)
+                                    ->appends(request()->query()),
             'categories' => $categories,
-            'category_id' => $category_id
         ]);
     }
     function detail(Request $request, $message_id)

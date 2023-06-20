@@ -81,11 +81,7 @@
     </div>
 </main>
 
-<footer class="footer">
-    <a href="../">
-        <img src="{{ asset('img/logo.png')}}" alt="ゼンショーホールディングス">
-    </a>
-</footer>
+@include('common.footer')
 
 <div class="sidebarBg"></div>
 <nav class="sidebar">

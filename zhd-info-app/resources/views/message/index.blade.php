@@ -64,20 +64,21 @@
 
         <nav class="pager mb18">
             <div class="pager__inner flex">
-                <a href="#" class="pager__btn txtCenter">
-                    <img src="{{ asset('/img/icon_tofirst.svg') }}" alt="最初のページへ移動">
+                <a href="{{ $messages->url(1) }}" class="pager__btn txtCenter">
+                    <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
                 </a>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src="{{ asset('/img/icon_prev.svg') }}" alt="前のページ">
+                <a href="{{ $messages->previousPageUrl() }}" class="pager__btn txtCenter">
+                    <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
                 </a>
                 <div class="pager__number txtBold txtCenter">
-                    <p>1<span>of</span>10</p>
+
+                    <p>{{$messages->currentPage()}}<span>of</span>{{ceil($messages->total() / $messages->perPage())}}</p>
                 </div>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src=" {{ asset('/img/icon_next.svg') }}" alt="次のページ">
+                <a href="{{ $messages->nextPageUrl() }}" class="pager__btn txtCenter">
+                    <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
                 </a>
-                <a href="#" class="pager__btn txtCenter">
-                    <img src=" {{ asset('/img/icon_tolast.svg') }}" alt="最後のページへ移動">
+                <a href="{{ $messages->url($messages->lastPage()) }}" class="pager__btn txtCenter">
+                    <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
                 </a>
             </div>
         </nav>
@@ -85,11 +86,7 @@
     </div>
 </main>
 
-<footer class="footer">
-    <a href="../">
-        <img src="{{ asset('/img/logo.png')}}" alt="ゼンショーホールディングス">
-    </a>
-</footer>
+@include('common.footer')
 
 <div class="sidebarBg"></div>
 <nav class="sidebar">
