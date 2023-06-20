@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>業務連絡詳細 | 業連・動画配信システム</title>
+    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
+    <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
+
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+</head>
+
+<body>
+    <header class="header header--detail">
+        <section class="header__inner flex">
+            <div class="header__titleBox flex">
+                <a href="{{ route('manual.index') }}" class="header__prev txtCenter">
+                    <img src="{{ asset('img/icon_prev.svg') }}" alt="" class="mr10 spmr4">
+                    <p class="txtBold">戻る</p>
+                </a>
+                <section class="header__title">
+                    <h1 class="txtBold txtBlue">{{ $manual->title }}</h1>
+                    <time datetime="2023-01-01" class="mr8 txtBold">2023.01.01(木) 09:10</time>
+                </section>
+            </div>
+            <ul class="header__menu flex">
+                <li>
+                    <a href="{{ asset('img/test.pdf') }}" download="test.pdf">
+                        <img src="{{ asset('img/icon_folder_open.svg') }}" alt="">
+                    </a>
+                </li>
+                <li>
+                    <button type="button" class="btnPrint">
+                        <img src="{{ asset('img/icon_print.svg') }}" alt="印刷する">
+                    </button>
+                </li>
+            </ul>
+        </section>
+    </header>
+
+    <main class="main manual">
+        <div class="main__inner">
+            <div class="main__supplement main__box--single flex">
+                <div class="main__supplement__detail flex">
+                    <div class="main__thumb">
+                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon play"></button>
+                    </div>
+                    <p>{{ $manual->description}}</p>
+                </div>
+                <div class="main__supplement__btnInner">
+                    <p class="txtCenter">見た！<br class="spBlock">ボタン</p>
+                    <!-- フラグが1ならisActiveを付ける -->
+                    <button class="btnWatched"></button>
+                    <p class="txtBlue txtBold txtCenter">2</p>
+                </div>
+
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                        <video controls playsinline preload>
+                            <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
+                        </video>
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+
+            </div>
+            @foreach( $contents as $content )
+            <section class="main__box">
+                <h2 class="mb10">手順1：{{$content->title}}</h2>
+                <div class=" flex">
+                    <div class="main__thumb">
+                        <img src="{{ asset('img/img_manual_dummy.jpg') }}" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon play"></button>
+                    </div>
+                    <p>{{ $content->description }}</p>
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                        <video controls playsinline preload>
+                            <source src="{{ asset($content->content_url) }}#t=0.1" type="video/mp4">
+                        </video>
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+
+            </section>
+            @endforeach
+
+            <section class="main__box">
+                <h2 class="mb10">手順2：〇〇〇〇〇〇〇〇〇〇〇</h2>
+                <div class="flex">
+                    <div class="main__thumb">
+                        <img src="../assets/img/img_manual_dummy2.jpg" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon play"></button>
+                    </div>
+                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                        <video controls playsinline preload>
+                            <source src="../assets/movie/164360 (720p).mp4#t=0.1" type="video/mp4">
+                        </video>
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="main__box">
+                <h2 class="mb10">手順3：〇〇〇〇〇〇〇〇〇〇〇</h2>
+                <div class="flex">
+                    <div class="main__thumb">
+                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon"></button>
+                    </div>
+                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <img src="../assets/img/img_popup_dummy.jpg" alt="">
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="main__box">
+                <h2 class="mb10">手順4：〇〇〇〇〇〇〇〇〇〇〇</h2>
+                <div class="flex">
+                    <div class="main__thumb">
+                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon"></button>
+                    </div>
+                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <img src="../assets/img/img_popup_dummy.jpg" alt="">
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+            </section>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <a href="../">
+            <img src="../assets/img/logo.png" alt="ゼンショーホールディングス">
+        </a>
+    </footer>
+
+    <script src="{{ asset('/js/common.js') }}" defer></script>
+    <script src="{{ asset('/js/detail.js') }}" defer></script>
