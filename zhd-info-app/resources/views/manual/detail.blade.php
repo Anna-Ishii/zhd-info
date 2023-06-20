@@ -21,7 +21,7 @@
                 </a>
                 <section class="header__title">
                     <h1 class="txtBold txtBlue">{{ $manual->title }}</h1>
-                    <time datetime="2023-01-01" class="mr8 txtBold">2023.01.01(木) 09:10</time>
+                    <time datetime="{ $manual->created_at }}" class="mr8 txtBold">{{ $manual->created_at }}</time>
                 </section>
             </div>
             <ul class="header__menu flex">
@@ -44,7 +44,7 @@
             <div class="main__supplement main__box--single flex">
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
-                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
+                        <img src="{{ asset('img/img_manual_dummy.jpg')}}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
                         <button type="button" class="main__thumb__icon play"></button>
                     </div>
@@ -73,6 +73,7 @@
             @foreach( $contents as $content )
             <section class="main__box">
                 <h2 class="mb10">手順1：{{$content->title}}</h2>
+                @if($content->content_type == 'mp4')
                 <div class=" flex">
                     <div class="main__thumb">
                         <img src="{{ asset('img/img_manual_dummy.jpg') }}" alt="">
@@ -92,72 +93,27 @@
                         <button type="button" class="manualAttachment__close"></button>
                     </div>
                 </div>
-
+                @else
+                <div class="flex">
+                    <div class="main__thumb">
+                        <img src="{{ asset($content->content_url)}}" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon"></button>
+                    </div>
+                    <p>{{ $content->description }}</p>
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <img src="{{ asset($content->content_url)}}" alt="">
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+                @endif
             </section>
             @endforeach
 
-            <section class="main__box">
-                <h2 class="mb10">手順2：〇〇〇〇〇〇〇〇〇〇〇</h2>
-                <div class="flex">
-                    <div class="main__thumb">
-                        <img src="../assets/img/img_manual_dummy2.jpg" alt="">
-                        <!-- 再生ボタンにしたい場合playクラスをつける -->
-                        <button type="button" class="main__thumb__icon play"></button>
-                    </div>
-                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
-                </div>
-                <!-- 添付ファイル -->
-                <div class="manualAttachmentBg"></div>
-                <div class="manualAttachment">
-                    <div class="manualAttachment__inner">
-                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload>
-                            <source src="../assets/movie/164360 (720p).mp4#t=0.1" type="video/mp4">
-                        </video>
-                        <button type="button" class="manualAttachment__close"></button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="main__box">
-                <h2 class="mb10">手順3：〇〇〇〇〇〇〇〇〇〇〇</h2>
-                <div class="flex">
-                    <div class="main__thumb">
-                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
-                        <!-- 再生ボタンにしたい場合playクラスをつける -->
-                        <button type="button" class="main__thumb__icon"></button>
-                    </div>
-                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
-                </div>
-                <!-- 添付ファイル -->
-                <div class="manualAttachmentBg"></div>
-                <div class="manualAttachment">
-                    <div class="manualAttachment__inner">
-                        <img src="../assets/img/img_popup_dummy.jpg" alt="">
-                        <button type="button" class="manualAttachment__close"></button>
-                    </div>
-                </div>
-            </section>
-
-            <section class="main__box">
-                <h2 class="mb10">手順4：〇〇〇〇〇〇〇〇〇〇〇</h2>
-                <div class="flex">
-                    <div class="main__thumb">
-                        <img src="../assets/img/img_manual_dummy.jpg" alt="">
-                        <!-- 再生ボタンにしたい場合playクラスをつける -->
-                        <button type="button" class="main__thumb__icon"></button>
-                    </div>
-                    <p>ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。ここに詳細が入ります。</p>
-                </div>
-                <!-- 添付ファイル -->
-                <div class="manualAttachmentBg"></div>
-                <div class="manualAttachment">
-                    <div class="manualAttachment__inner">
-                        <img src="../assets/img/img_popup_dummy.jpg" alt="">
-                        <button type="button" class="manualAttachment__close"></button>
-                    </div>
-                </div>
-            </section>
 
         </div>
     </main>
