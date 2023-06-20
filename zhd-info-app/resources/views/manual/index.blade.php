@@ -31,7 +31,7 @@
 
         <div class="search mb24">
             <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>全て</span>」56件を表示中</p>
+                <p class="search__status txtBold spmb8">「<span>全て</span>」{{ $manuals->count() }}件を表示中</p>
                 <div class="search__btnList">
                     <form action="#" name="sort">
                         <!-- 昇順：isAscending 降順：isDescending -->
@@ -67,7 +67,7 @@
                     <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
                 </a>
                 <div class="pager__number txtBold txtCenter">
-                    <p>3<span>of</span>10</p>
+                    <p>1<span>of</span>10</p>
                 </div>
                 <a href="#" class="pager__btn txtCenter">
                     <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
