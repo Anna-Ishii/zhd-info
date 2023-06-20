@@ -15,15 +15,16 @@ class ManualController extends Controller
 
         if(isset($category_id)){
             $manuals = Manual::where('category_id', '=', $category_id)
-                                ->orderBy('created_at', 'desc')
-                                ->get();
+                                ->orderBy('created_at', 'desc');     
         }else {
-            $manuals = Manual::orderBy('created_at', 'desc')
-                                ->get();
+            $manuals = Manual::orderBy('created_at', 'desc');
         }
+
         $categories = Manualcategory::get();
+
         return view('manual.index', [
-            'manuals' => $manuals,
+            'manuals' => $manuals->paginate(5)
+                                ->appends(request()->query()),
             'categories' => $categories,
         ]);
     }
