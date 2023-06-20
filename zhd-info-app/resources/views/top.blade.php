@@ -39,39 +39,16 @@
             <h2 class="mb10">「<span class="txtBlue">店内掲示中</span>」のお知らせ</h2>
             <div class="indexList__inner">
                 <div class="flex">
-                    <a href="/message/detail.html">
+                    @foreach($message_posting as $ms_post)
+                    <a href="{{ route('message.detail', ['message_id' => $ms_post->id]) }}">
                         <div class="indexList__box">
                             <picture class="indexList__box__img">
                                 <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
                             </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
+                            <p class="indexList__box__title txtBold">{{$ms_post->title}}</p>
                         </div>
                     </a>
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
-
+                    @endforeach
                 </div>
             </div>
         </aricle>
@@ -89,30 +66,6 @@
                         </div>
                     </a>
                     @endforeach
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
-                    <a href="/message/detail.html">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">4月春メニュー展開について</p>
-                        </div>
-                    </a>
 
                 </div>
             </div>
