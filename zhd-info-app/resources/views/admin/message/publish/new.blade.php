@@ -120,7 +120,7 @@
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
-            <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
+            <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
     </form>
