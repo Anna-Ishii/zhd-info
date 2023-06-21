@@ -44,12 +44,24 @@ class MessagePublishController extends Controller
             
             if ($request->start_datetime == 'on') $request->start_datetime = null;
             $msg_params['start_datetime'] =
-                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime) : null;
+                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime, 'Asia/Tokyo') : null;
             
             if ($request->end_datetime == 'on') $request->end_datetime = null;
             $msg_params['end_datetime'] =
-                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
+                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
 
+            $now = Carbon::now('Asia/Tokyo');
+            $msg_params['status'] = 0;
+            if (isset($msg_params['start_datetime'])) {
+                if ($msg_params['start_datetime']->lte($now)) {
+                    $msg_params['status'] = 1;
+                }
+            }
+            if (isset($msg_params['end_datetime'])) {
+                if ($msg_params['end_datetime']->lte($now)) {
+                    $msg_params['status'] = 2;
+                }
+            }
 
             $file = $request->file('file');
             $directory = 'uploads';
@@ -62,7 +74,6 @@ class MessagePublishController extends Controller
             // ファイルを指定したディレクトリに保存します
             // $path = $file->storeAs($directory, $filename, 'public');
             $msg_params['content_url'] = $content_url;
-            $msg_params['status'] = 0;
             $msg_params['create_user_id'] = session('user')->id;
 
             $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
@@ -115,12 +126,24 @@ class MessagePublishController extends Controller
 
             if ($request->start_datetime == 'on') $request->start_datetime = null;
             $msg_params['start_datetime'] =
-                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime) : null;
+                !empty($request->start_datetime) ? Carbon::parse($request->start_datetime, 'Asia/Tokyo') : null;
 
             if ($request->end_datetime == 'on') $request->end_datetime = null;
             $msg_params['end_datetime'] =
-                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime) : null;
+                !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
 
+            $now = Carbon::now('Asia/Tokyo');
+            $msg_params['status'] = 0;
+            if(isset($msg_params['start_datetime'])) {
+                if ($msg_params['start_datetime']->lte($now)) {
+                    $msg_params['status'] = 1;
+                }
+            }
+            if(isset($msg_params['end_datetime'])) {
+                if ($msg_params['end_datetime']->lte($now)) {
+                    $msg_params['status'] = 2;
+                }
+            }
 
             if($request->file('file')){
                 $file = $request->file('file');
