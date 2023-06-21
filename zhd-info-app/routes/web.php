@@ -35,6 +35,7 @@ Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth']
 Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
     Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
+    Route::put('/watched', [ManualController::class, 'watched'])->name('watched');
 });
 
 // 管理画面へのログイン画面
