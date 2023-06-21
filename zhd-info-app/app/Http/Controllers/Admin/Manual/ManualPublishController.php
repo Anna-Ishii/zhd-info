@@ -84,19 +84,22 @@ class ManualPublishController extends Controller
             }
 
             $content_data = [];
-            for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
+            if( isset($contents_params['manual_flow_title']) &&
+                isset($contents_params['manual_file']) &&
+                isset($contents_params['manual_flow_detail'])) {
+                for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
 
-                $f = $contents_params['manual_file'][$i];
-                $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-                $path = public_path('uploads');
-                $f->move($path, $filename);
-                $content_url = 'uploads/' . $filename;
+                    $f = $contents_params['manual_file'][$i];
+                    $filename = uniqid() . '.' . $f->getClientOriginalExtension();
+                    $path = public_path('uploads');
+                    $f->move($path, $filename);
+                    $content_url = 'uploads/' . $filename;
 
-                $content_data[$i]['content_url'] = $content_url;
-                $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
-                $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
-                $content_data[$i]['order_no'] = $i + 1;
-
+                    $content_data[$i]['content_url'] = $content_url;
+                    $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
+                    $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
+                    $content_data[$i]['order_no'] = $i + 1;
+                }
             }
 
             try {
@@ -179,7 +182,10 @@ class ManualPublishController extends Controller
             $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
             Manualcontent::whereNotIn('id', $contents_id)->update(['is_deleted' => true]);
 
-            if(isset($contents_params['manual_flow_title'])) {
+            if (isset($contents_params['manual_flow_title']) &&
+                isset($contents_params['manual_file']) &&
+                isset($contents_params['manual_flow_detail'])
+            ) {
                 //手順の数分、繰り返す 
                 for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
 
