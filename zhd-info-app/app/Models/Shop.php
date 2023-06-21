@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Shop extends Model
@@ -20,9 +22,9 @@ class Shop extends Model
          'organization1_id',
         ];
 
-    public function user(): HasOne
+    public function user(): HasMany
     {
-        return $this->hasone(User::class, 'id', 'user_id');
+        return $this->hasMany(User::class, 'shop_id', 'id');
     }
 
     public function organization4(): BelongsTo
@@ -43,5 +45,16 @@ class Shop extends Model
     public function organization1(): BelongsTo
     {
         return $this->belongsTo(Organization1::class, 'organization1_id', 'id');
+    }
+
+    public function target_user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'manual_user', 'shop_id', 'user_id')
+                    ->withPivot('read_flg', 'user_id');
+    }
+
+    public function userCount()
+    {
+        return $this->user()->count();
     }
 }

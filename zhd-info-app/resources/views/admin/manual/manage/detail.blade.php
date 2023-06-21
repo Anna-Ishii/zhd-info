@@ -50,9 +50,9 @@
                     <td nowrap>{{$shop->name}}</td>
                     <td>{{$shop->organization4->name}}</td>
                     <td>{{$shop->organization3->name}}</td>
-                    <td>90%(仮)</td>
-                    <td>18(仮)</td>
-                    <td>20(仮)</td>
+                    <td>{{$shop->target_user_isread_total ? ($shop->target_user_isread_total / $shop->target_user_total) * 100 : '' }}</td>
+                    <td>{{$shop->target_user_isread_total}}</td>
+                    <td>{{$shop->target_user_total}}</td>
                     <td nowrap>{{$manual->start_datetime}}</td>
                     <td nowrap>{{$manual->end_datetime}}</td>
                 </tr>
