@@ -7,7 +7,7 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
         </button>
-        <a class="navbar-brand" href="/admin/top/index">業連・動画配信システム</a>
+        <a class="navbar-brand" href="{{ route('admin.message.publish.index') }}">業連・動画配信システム</a>
     </div>
     <!-- /.navbar-header -->
 
