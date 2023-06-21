@@ -49,8 +49,9 @@
             <label class="col-lg-2 control-label">店舗</label>
             <div class="col-lg-10">
                 <select name="shop_id" class="form-control">
-                    <option value="1">札幌発寒店</option>
-                    <option value="2">宇都宮平松本町</option>
+                    @foreach($shops as $shop)
+                    <option value="{{$shop->id}}">{{$shop->name}}</option>
+                    @endforeach
                 </select>
             </div>
         </div>

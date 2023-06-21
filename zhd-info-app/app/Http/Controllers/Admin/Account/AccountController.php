@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Account;
 
 use App\Http\Controllers\Controller;
+use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -36,6 +37,7 @@ class AccountController extends Controller
                         ]);
             try {
                 User::create($params);
+
             } catch (\Throwable $th) {
                 return redirect()
                         ->route('admin.account.new')
@@ -48,9 +50,10 @@ class AccountController extends Controller
         // TODO
         // 正式なものに直す
         $user_count = User::all()->count() + 1;
-
+        $shops = Shop::get();
         return view('admin.account.new',[
             'user_count' => $user_count,
+            'shops' => $shops,
         ]);
     }
 
