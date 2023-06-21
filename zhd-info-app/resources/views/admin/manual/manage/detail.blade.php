@@ -80,7 +80,7 @@
     </div>
 
     <div>
-        <a href="./" class="btn btn-default">戻る</a>
+        <a href="{{ route('admin.manual.manage.index') }}" class="btn btn-default">戻る</a>
     </div>
 
 </div>
