@@ -11,9 +11,10 @@ class AccountController extends Controller
 {
     public function index()
     {
-        $users = User::all();
+        $users = User::orderBy('created_at', 'desc');
         return view('admin.account.index',[
-            'users' => $users,
+            'users' => $users->paginate(5)
+                            ->appends(request()->query()),
         ]);
     }
     

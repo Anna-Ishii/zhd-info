@@ -49,15 +49,7 @@
 
     <!-- 検索結果 -->
     <form method="post" action="#">
-        <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
-            <ul class="pagination">
-                @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
-                    <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
-                        <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
-                    </li>
-                @endfor
-            </ul>
-        </div>
+        @include('common.admin.pagenation', ['objects' => $manual_list])
         <div class="tableInner">
             <table id="list" class="table table-bordered table-hover table-condensed text-center">
                 <thead>
@@ -94,15 +86,7 @@
             </table>
         </div>
 
-        <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
-            <ul class="pagination">
-                @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
-                    <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
-                        <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
-                    </li>
-                @endfor
-            </ul>
-        </div>
+        @include('common.admin.pagenation', ['objects' => $manual_list])
 
     </form>
 
