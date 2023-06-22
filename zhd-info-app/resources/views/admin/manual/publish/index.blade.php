@@ -51,9 +51,9 @@
         <div class="scrollHintR"></div>
         <div class="toggleTab__inner">
             <div class="toggleTab__btnList flex">
-                <div class="tab isCurrent" data-sort-number="0">全件</div>
+                <div class="tab {{ is_null(request()->input('category')) ? 'isCurrent' : ''}}" data-sort-number="0">全件</div>
                 @foreach ($category_list as $category)
-                <div class="tab" data-sort-number="{{ $category->id }}">{{ $category->name }}</div>
+                <div class="tab {{ request()->input('category') == $category->id ? 'isCurrent' : ''}}" data-sort-number="{{ $category->id }}">{{ $category->name }}</div>
                 @endforeach
             </div>
         </div>
