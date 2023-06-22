@@ -27,10 +27,10 @@ class ManualManageController extends Controller
         $category_list = Manualcategory::all();
 
         // $message_list = $user->message;
-        $manual_list = Manual::all();
+        $manual_list = Manual::orderBy('created_at', 'desc');
         return view('admin.manual.manage.index', [
             'category_list' => $category_list,
-            'manual_list' => $manual_list
+            'manual_list' => $manual_list->paginate(5)->appends(request()->query())
         ]);
     }
 

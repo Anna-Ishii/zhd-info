@@ -121,7 +121,7 @@
             </div>
 
 
-            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->count()}}件</span>
+            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
                 <ul class="pagination">
                     @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
                         <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
