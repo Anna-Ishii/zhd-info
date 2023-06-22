@@ -54,20 +54,13 @@
 				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-info">新規登録</a>
 			</p>
 		</div>
-		<div class="text-right flex ai-center"><span class="mr16">全 {{$message_list->count()}} 件</span>
+		<div class="text-right flex ai-center"><span class="mr16">全{{$message_list->total()}}件</span>
 			<ul class="pagination">
-				<li class="active"><a href="#">1</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+				@for ($i = 1; $i <= ceil($message_list->total() / $message_list->perPage()); $i++)
+					<li class="{{$message_list->currentPage() == $i ? 'active' : ''}}">
+						<a href="{{ $message_list->url($i) }}">{{$i}}</a>
+					</li>
+				@endfor
 			</ul>
 		</div>
 
@@ -115,20 +108,13 @@
 			</table>
 		</div>
 
-		<div class="text-right flex ai-center"><span class="mr16">全 {{$message_list->count()}} 件</span>
+		<div class="text-right flex ai-center"><span class="mr16">全{{$message_list->total()}}件</span>
 			<ul class="pagination">
-				<li class="active"><a href="#">1</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-				<li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+				@for ($i = 1; $i <= ceil($message_list->total() / $message_list->perPage()); $i++)
+					<li class="{{$message_list->currentPage() == $i ? 'active' : ''}}">
+						<a href="{{ $message_list->url($i) }}">{{$i}}</a>
+					</li>
+				@endfor
 			</ul>
 		</div>
 
