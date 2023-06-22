@@ -5,14 +5,20 @@ $(document).on('click' , '.toggleTab .tab' , function(){
 	}
 
 	let chkTabNumber = $(this).data('sort-number');
-	let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
+	if(chkTabNumber){
+		location.href = "/admin/manual/publish?category=" + chkTabNumber;
+	}else{
+		location.href = "/admin/manual/publish"
+	}
 
-	$('.toggleContent').hide();
-	target.show();
+	// let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
+
+	// $('.toggleContent').hide();
+	// target.show();
 	
-	let tabs = $(this).siblings('.tab');
-	tabs.removeClass('isCurrent');
-	$(this).addClass('isCurrent');
+	// let tabs = $(this).siblings('.tab');
+	// tabs.removeClass('isCurrent');
+	// $(this).addClass('isCurrent');
 });
 
 let scrollVal;
