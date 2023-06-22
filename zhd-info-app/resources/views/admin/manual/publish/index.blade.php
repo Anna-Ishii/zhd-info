@@ -68,15 +68,7 @@
                     <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-info">新規登録</a>
                 </p>
             </div>
-            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
-                <ul class="pagination">
-                    @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
-                        <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
-                            <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
-                        </li>
-                    @endfor
-                </ul>
-            </div>
+            @include('common.admin.pagenation', ['objects' => $manual_list])
 
             <div class="toggleContent isCurrent" data-tab-number="0">
                 <div class="tableInner">
@@ -120,16 +112,7 @@
                 </div>
             </div>
 
-
-            <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
-                <ul class="pagination">
-                    @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
-                        <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
-                            <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
-                        </li>
-                    @endfor
-                </ul>
-            </div>
+            @include('common.admin.pagenation', ['objects' => $manual_list])
 
         </form>
     </div>
