@@ -22,12 +22,12 @@ class MessageManageController extends Controller
         $category_list = Category::all();
 
         // $message_list = $user->message;
-        $message_list = Message::all();
+        $message_list = Message::orderBy('created_at', 'desc');
 
         return view('admin.message.manage.index', [
             'category_list' => $category_list,
-            'message_list' => $message_list
-
+            'message_list' => $message_list->paginate(5)
+                                            ->appends(request()->query())
         ]);
     }
 
