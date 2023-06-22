@@ -39,7 +39,7 @@ class ManualPublishController extends Controller
         
         return view('admin.manual.publish.index',[
             'category_list' => $category_list,
-            'manual_list' => $manual_list->get()
+            'manual_list' => $manual_list->paginate(5)->appends(request()->query()),
         ]);
     }
 
