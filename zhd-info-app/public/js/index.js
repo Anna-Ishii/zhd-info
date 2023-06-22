@@ -55,8 +55,16 @@ function chkScroll(){
 
 	console.log(scrollVal);
 }
+function CurrentScroll(){
+	let target = $('.isCurrent');
+	// isCurrentまでのポジションを計算
+	// isCurrentまでのx値 - toggleTab全体のwirdh + isCurrentのwidth値
+	let target_pos = target.position().left - $('.toggleTab__inner').width() + target.outerWidth(true);
+	$('.toggleTab__inner').scrollLeft(target_pos);
+}
 $(window).on('load' , function(){
 	chkScrollLoad();
+	CurrentScroll(); // .isCurrentまでスクロールする
 	$('.toggleTab__inner').on('scroll', function(){
 		chkScroll();
 	});
