@@ -5,14 +5,20 @@ $(document).on('click' , '.toggleTab .tab' , function(){
 	}
 
 	let chkTabNumber = $(this).data('sort-number');
-	let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
+	if(chkTabNumber){
+		location.href = "/admin/manual/publish?category=" + chkTabNumber;
+	}else{
+		location.href = "/admin/manual/publish"
+	}
 
-	$('.toggleContent').hide();
-	target.show();
+	// let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
+
+	// $('.toggleContent').hide();
+	// target.show();
 	
-	let tabs = $(this).siblings('.tab');
-	tabs.removeClass('isCurrent');
-	$(this).addClass('isCurrent');
+	// let tabs = $(this).siblings('.tab');
+	// tabs.removeClass('isCurrent');
+	// $(this).addClass('isCurrent');
 });
 
 let scrollVal;
@@ -49,8 +55,16 @@ function chkScroll(){
 
 	console.log(scrollVal);
 }
+function CurrentScroll(){
+	let target = $('.isCurrent');
+	// isCurrentまでのポジションを計算
+	// isCurrentまでのx値 - toggleTab全体のwirdh + isCurrentのwidth値
+	let target_pos = target.position().left - $('.toggleTab__inner').width() + target.outerWidth(true);
+	$('.toggleTab__inner').scrollLeft(target_pos);
+}
 $(window).on('load' , function(){
 	chkScrollLoad();
+	CurrentScroll(); // .isCurrentまでスクロールする
 	$('.toggleTab__inner').on('scroll', function(){
 		chkScroll();
 	});

@@ -49,23 +49,15 @@
 
     <!-- 検索結果 -->
     <form method="post" action="#">
-        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+        <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
             <ul class="pagination">
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+                @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
+                    <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
+                        <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
+                    </li>
+                @endfor
             </ul>
         </div>
-
         <div class="tableInner">
             <table id="list" class="table table-bordered table-hover table-condensed text-center">
                 <thead>
@@ -102,20 +94,13 @@
             </table>
         </div>
 
-        <div class="text-right flex ai-center"><span class="mr16">全 5651 件</span>
+        <div class="text-right flex ai-center"><span class="mr16">全{{$manual_list->total()}}件</span>
             <ul class="pagination">
-                <li class="active"><a href="#">1</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=2">2</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=3">3</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=4">4</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=5">5</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=6">6</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=7">7</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=8">8</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=9">9</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=10">10</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=11">11</a></li>
-                <li><a href="https://stag-maps.zensho.co.jp/admin/shop/index?%2Fadmin%2Fshop%2Findex=&page=283">&raquo;</a></li>
+                @for ($i = 1; $i <= ceil($manual_list->total() / $manual_list->perPage()); $i++)
+                    <li class="{{$manual_list->currentPage() == $i ? 'active' : ''}}">
+                        <a href="{{ $manual_list->url($i) }}">{{$i}}</a>
+                    </li>
+                @endfor
             </ul>
         </div>
 
