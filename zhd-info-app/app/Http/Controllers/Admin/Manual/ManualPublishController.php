@@ -25,14 +25,21 @@ class ManualPublishController extends Controller
 {
     public function index(Request $request)
     {
+        $category_id = $request->input('category');
 
+        if (isset($category_id)) {
+            $manual_list = Manual::where('category_id', '=', $category_id)
+                ->orderBy('created_at', 'desc');
+        } else {
+            $manual_list = Manual::orderBy('created_at', 'desc');
+        }
         $category_list = Manualcategory::all();
 
         // $message_list = $user->message;
-        $manual_list = Manual::all();
+        
         return view('admin.manual.publish.index',[
             'category_list' => $category_list,
-            'manual_list' => $manual_list
+            'manual_list' => $manual_list->get()
         ]);
     }
 
