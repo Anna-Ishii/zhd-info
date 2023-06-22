@@ -223,7 +223,8 @@ class ManualManageController extends Controller
         return view('admin.manual.manage.detail', [
             'manual' => $manual,
             'content' => $manual->content,
-            'target_shop' => $target_shop,
+            'target_shop' => $target_shop->paginate(10)
+                ->appends(request()->query()),
             'category_list' => $category_list
         ]);
     }
@@ -255,8 +256,7 @@ class ManualManageController extends Controller
             ->leftJoinSub($target_user, 'target_user', function ($join) {
                 $join->on('shops.id', '=', 'target_user.shop_id');
             })
-            ->select('shops.*', 'target_user_isread.total as target_user_isread_total', 'target_user.total as target_user_total')
-            ->get();
+            ->select('shops.*', 'target_user_isread.total as target_user_isread_total', 'target_user.total as target_user_total');
         return $result;
     }
 }

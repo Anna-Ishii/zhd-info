@@ -37,12 +37,13 @@ class MessageManageController extends Controller
 
         // メッセージの該当ショップを取得
         $target_org4 = $message->organization4()->select('id')->get()->makeHidden('pivot')->toArray();
-        $target_shop = Shop::whereIn('organization4_id', $target_org4)->get();
+        $target_shop = Shop::whereIn('organization4_id', $target_org4);
 
 
         return view('admin.message.manage.detail', [
             "message" => $message,
-            "target_shop" => $target_shop
+            "target_shop" => $target_shop->paginate(10)
+                ->appends(request()->query()),
         ]);
     }
 }
