@@ -18,6 +18,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Queue\NullQueue;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 
 use function PHPUnit\Framework\isEmpty;
 
@@ -46,6 +47,21 @@ class ManualPublishController extends Controller
     public function new(Request $request)
     {
         if ($request->isMethod('post')) {
+
+            $validator = Validator::make($request->all(), [
+                'title' => 'required',
+                'file' => 'required|mimes:mp4',
+                'category_id' => 'required',
+                'organization1' => 'required'
+            ]);
+
+            if ($validator->fails()) {
+                return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
+            }
+
             $manual_params = $request
                 ->only([
                     'title',
@@ -93,13 +109,15 @@ class ManualPublishController extends Controller
             $manual_params['content_url'] = $content_url;
             $manual_params['create_user_id'] = session('user')->id;
 
-
-            $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-
             $data = [];
-            foreach ($target_users as $target_user) {
-                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            if(isset($request->organization1)){
+                $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
+                $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+
+                
+                foreach ($target_users as $target_user) {
+                    $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+                }
             }
 
             $content_data = [];
@@ -129,9 +147,9 @@ class ManualPublishController extends Controller
 
             } catch (\Throwable $th) {
                 return redirect()
-                    ->route('admin.manual.publish.new')
+                    ->back()
                     ->withInput()
-                    ->with('error', '入力エラーがあります');
+                    ->with('error', '登録できませんでした。');
             }
 
             return redirect()->route('admin.manual.publish.index');
@@ -140,10 +158,11 @@ class ManualPublishController extends Controller
         $category_list = Manualcategory::all();
 
         // 業態一覧を取得する // 今回は、検証画面なので、使わない // 業態が増えたら使う
-        // $organization1_list = Organization1::all();
+        $organization1_list = Organization1::all();
 
         return view('admin.manual.publish.new', [
             'category_list' => $category_list,
+            'organization1_list' => $organization1_list,
         ]);
     }
 
