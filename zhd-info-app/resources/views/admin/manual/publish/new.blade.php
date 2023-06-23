@@ -7,7 +7,18 @@
             <h1 class="page-header">動画マニュアル新規登録</h1>
         </div>
     </div>
-
+    @if (session('error'))
+    <div class="alert alert-danger">{{(session('error'))}}</div>
+    @endif
+    @if ($errors->any())
+    <div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    </div>
+    @endif
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <input type="hidden" name="mode" value="exec">
