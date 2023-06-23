@@ -82,4 +82,14 @@ class Manual extends Model
 
         return $name;
     }
+
+    public function getContentTypeAttribute()
+    {
+        $content_url = $this->attributes['content_url']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+
+        // 拡張子を取得
+        $extension = pathinfo($content_url, PATHINFO_EXTENSION);
+
+        return $extension;
+    }
 }
