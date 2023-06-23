@@ -52,4 +52,10 @@ class AuthController extends Controller
             ->back()
             ->with('error', 'ログインに失敗しました');
     }
+
+    public function logout (Request $request)
+    {
+        $request->session()->flush();
+        return response(status:200);
+    }
 }
