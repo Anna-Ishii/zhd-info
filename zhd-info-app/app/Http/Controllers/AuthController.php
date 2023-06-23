@@ -12,6 +12,11 @@ class AuthController extends Controller
 {
     public function index()
     {
+        //ログイン中か確認
+        $user = session('member');
+        if (isset($user)) {
+            return redirect()->route('top');
+        }
         return view('auth.index');
     }
 
