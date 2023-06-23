@@ -5,7 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -16,13 +17,34 @@ class AuthController extends Controller
 
     public function login (Request $request)
     {
-        $user = User::where('email', $request->loginname)->first();
-        if (empty($user)) {
-            return view('admin.auth.index', ['message' => 'ログインに失敗しました。']);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'password' => 'required',
+        ]);
+        if ($validator->fails()) {
+            // エラー発生時の処理
+            return redirect()
+                ->back()
+                ->withErrors($validator)
+                ->withInput();
         }
 
-        session()->put(['user' => $user]);
+        $user = User::where('email', $request->email)->first();
 
-        return redirect()->route('admin.message.publish.index');
+        if (empty($user)) {
+            return redirect()
+                ->back()
+                ->with('error', 'ログインに失敗しました');
+        }
+
+        if(Hash::check($request->password, $user->password)){
+            session()->put(['member' => $user]);
+
+            return redirect()->route('admin.message.publish.index');
+        }
+
+        return redirect()
+            ->back()
+            ->with('error', 'ログインに失敗しました');
     }
 }
