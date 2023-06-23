@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class AccountController extends Controller
 {
@@ -24,8 +25,7 @@ class AccountController extends Controller
             if ($request->password != $request->password2) return redirect()
                                                                     ->route('admin.account.new')
                                                                     ->withInput()
-                                                                    ->with('error', '入力エラーがあります');
-
+                                                                    ->with('error', 'パスワードが一致しません'); 
             $params = $request
                         ->only([
                             'name', 
@@ -36,6 +36,8 @@ class AccountController extends Controller
                             'email', 
                             'roll_id'
                         ]);
+            $params['password'] = Hash::make($request->password);
+            
             try {
                 User::create($params);
 
@@ -43,14 +45,14 @@ class AccountController extends Controller
                 return redirect()
                         ->route('admin.account.new')
                         ->withInput()
-                        ->with('error', '入力エラーがあります');
+                        ->with('error', 'データベースエラーです');
             }
 
             return redirect()->route('admin.account.index');
         }
         // TODO
         // 正式なものに直す
-        $user_count = User::all()->count() + 1;
+        $user_count = User::max('id') + 1;
         $shops = Shop::get();
         return view('admin.account.new',[
             'user_count' => $user_count,

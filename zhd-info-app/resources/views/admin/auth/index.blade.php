@@ -42,17 +42,26 @@
             <h3 class="panel-title">業連・動画配信システム　本部ログイン</h3>
           </div>
           <div class="panel-body">
-            @isset($message)
-            {{ $message }}
-            @endisset
+          @if (session('error'))
+          <div class="alert alert-danger">{{(session('error'))}}</div>
+          @endif
+          @if ($errors->any())
+          <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+          </div>
+          @endif
             <form role="form" method="post">
               @csrf
               <fieldset>
                 <div class="form-group">
-                  <input class="form-control" placeholder="ログインID" name="loginname" autofocus>
+                  <input class="form-control" placeholder="メールアドレス" name="email" autofocus required>
                 </div>
                 <div class="form-group">
-                  <input class="form-control" placeholder="パスワード" name="password" type="password">
+                  <input class="form-control" placeholder="パスワード" name="password" type="password" required>
                 </div>
                 <input type="submit" class="btn btn-lg btn-success btn-block" value="ログイン">
               </fieldset>

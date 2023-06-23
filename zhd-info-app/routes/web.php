@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Manual\ManualManageController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
+use App\Http\Controllers\Admin\Setting\ChangePasswordController;
 use App\Http\Controllers\AuthController as ControllersAuthController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\MessageController;
@@ -71,6 +72,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::get('/', [AccountController::class, 'index'])->name('index');
         Route::match(['get', 'post'], 'new', [AccountController::class, 'new'])->name('new');
+    });
+    Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
+        Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {
+        Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
+        Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
+        });
     });
 });
 
