@@ -38,7 +38,7 @@ class AuthController extends Controller
         }
 
         if(Hash::check($request->password, $user->password)){
-            session()->put(['member' => $user]);
+            session()->put(['user' => $user]);
 
             return redirect()->route('admin.message.publish.index');
         }
