@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Manual\ManualManageController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
+use App\Http\Controllers\Admin\Setting\ChangePasswordController;
 use App\Http\Controllers\AuthController as ControllersAuthController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\MessageController;
@@ -41,6 +42,7 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 // 管理画面へのログイン画面
 Route::get('/auth', [AuthController::class, 'index'])->name('admin.auth');
 Route::post('/auth', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
@@ -71,6 +73,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::get('/', [AccountController::class, 'index'])->name('index');
         Route::match(['get', 'post'], 'new', [AccountController::class, 'new'])->name('new');
+    });
+    Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
+        Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {
+        Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
+        Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
+        });
     });
 });
 

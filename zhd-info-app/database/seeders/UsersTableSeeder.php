@@ -4,7 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class UsersTableSeeder extends Seeder
 {
@@ -20,7 +21,7 @@ class UsersTableSeeder extends Seeder
             'belong_label' => 'ジョリーパスタ',
             'shop_id' => 1,
             'employee_code' => '1234567890',
-            'password' => 'password',
+            'password' =>  Hash::make('password'),
             'email' => 'test@email.co.jp',
             'roll_id' => 1,
             ],
@@ -29,7 +30,7 @@ class UsersTableSeeder extends Seeder
             'belong_label' => 'ジョリーパスタの店長',
             'shop_id' => 1,
             'employee_code' => '111111111',
-            'password' => 'password',
+            'password' => Hash::make('password'),
             'email' => 'tencho@email.co.jp',
             'roll_id' => 4,
             ]
