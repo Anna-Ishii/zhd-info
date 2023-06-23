@@ -10,7 +10,15 @@
     @if (session('error'))
     <div class="alert alert-danger">{{(session('error'))}}</div>
     @endif
-
+    @if ($errors->any())
+    <div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    </div>
+    @endif
     <form method="post" class="form-horizontal">
         @csrf
         <input type="hidden" name="mode" value="exec">
@@ -117,7 +125,7 @@
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
-            <a href="/account/" class="btn btn-default">キャンセル</a>
+            <a href="{{route('admin.account.index')}}" class="btn btn-default">キャンセル</a>
         </div>
 
     </form>

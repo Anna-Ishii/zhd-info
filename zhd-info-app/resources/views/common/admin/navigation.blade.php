@@ -18,7 +18,7 @@
                 <i class="fa fa-user"><span class="mr4">{{ $user->name }}</span></i> <i class="fa fa-caret-down"></i>
             </a>
             <ul class="dropdown-menu dropdown-user">
-                <li><a href="/setting/change_password.html"><i class="fa fa-user"><span class="mr4">{{ $user->name }}</span></i> パスワード変更</a></li>
+                <li><a href="{{ route('admin.setting.change_password.index') }}"><i class="fa fa-user"><span class="mr4">{{ $user->name }}</span></i> パスワード変更</a></li>
                 <li><a href="/auth/"><i class="fa fa-sign-out fa-fw"></i> ログアウト</a></li>
             </ul>
             <!-- /.dropdown-user -->
