@@ -125,7 +125,7 @@
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
-            <a href="/account/" class="btn btn-default">キャンセル</a>
+            <a href="{{route('admin.account.index')}}" class="btn btn-default">キャンセル</a>
         </div>
 
     </form>
