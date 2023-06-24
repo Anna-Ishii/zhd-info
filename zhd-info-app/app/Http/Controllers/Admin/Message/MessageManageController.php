@@ -24,7 +24,7 @@ class MessageManageController extends Controller
         ]);
     }
 
-    public function detail(Request $request, $message_id)
+    public function detail($message_id)
     {
         $message = Message::find($message_id);
 
