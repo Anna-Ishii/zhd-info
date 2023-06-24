@@ -12,7 +12,8 @@ class MessageController extends Controller
     {
         $category_id = $request->input('category');
         // 掲示中のデータをとってくる
-        $messages = Message::query()
+        $user = session("member");
+        $messages = $user->message()
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
