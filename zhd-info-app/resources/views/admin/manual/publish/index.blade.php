@@ -98,7 +98,7 @@
                                 </td>
                                 <td class="shop_id">{{$manual->id}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td class="message-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td class="manual-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
                                 <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
                                 <td nowrap>{{$manual->start_datetime}}</td>
                                 <td nowrap>{{$manual->end_datetime}}</td>

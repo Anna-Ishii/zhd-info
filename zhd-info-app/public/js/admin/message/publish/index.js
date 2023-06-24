@@ -6,7 +6,7 @@ $("#editBtn").on('click', function (e) {
         return;
     }
     var title = checkedCheckboxes.closest('tr');
-    var link = title.find('.message-title a');
+    var link = title.find('.manual-title a');
     console.log(link);
     window.location.href = link.attr('href');
 
