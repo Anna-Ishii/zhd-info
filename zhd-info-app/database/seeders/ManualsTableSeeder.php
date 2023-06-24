@@ -21,7 +21,6 @@ class ManualsTableSeeder extends Seeder
                     'description' => 'マニュアル説明',
                     'create_user_id' => 1,
                     'category_id' => 1,
-                    'status' => 0,
                     'start_datetime' => '2023-06-12 17:00',
                     'end_datetime' => '2023-06-13 17:00'
                 ]
