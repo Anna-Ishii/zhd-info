@@ -46,6 +46,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
+    // 管理画面-業務連絡
     Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
@@ -60,11 +61,14 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('detail/{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
         });
     });
+    // 管理画面-動画マニュアル
     Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
-            Route::match(['get', 'post'], 'new', [ManualPublishController::class, 'new'])->name('new');
-            Route::match(['get', 'post'], 'edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
+            Route::get('new', [ManualPublishController::class, 'new'])->name('new');
+            Route::post('new', [ManualPublishController::class, 'store'])->name('new.store');
+            Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
+            Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
