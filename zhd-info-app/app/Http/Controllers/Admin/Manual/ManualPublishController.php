@@ -20,27 +20,25 @@ class ManualPublishController extends Controller
     {
         $category_id = $request->input('category');
 
-        if (isset($category_id)) {
-            $manual_list = Manual::where('category_id', '=', $category_id)
-                ->orderBy('created_at', 'desc');
-        } else {
-            $manual_list = Manual::orderBy('created_at', 'desc');
-        }
+        $manual_list = Manual::query()
+            ->when(isset($category_id), function ($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->appends(request()->query());
+
         $category_list = Manualcategory::all();
 
-        // $message_list = $user->message;
-        
-        return view('admin.manual.publish.index',[
+        return view('admin.manual.publish.index', [
             'category_list' => $category_list,
-            'manual_list' => $manual_list->paginate(5)->appends(request()->query()),
+            'manual_list' => $manual_list,
         ]);
     }
 
     public function new()
     {
         $category_list = Manualcategory::all();
-
-        // 業態一覧を取得する // 今回は、検証画面なので、使わない // 業態が増えたら使う
         $organization1_list = Organization1::all();
 
         return view('admin.manual.publish.new', [
@@ -146,19 +144,15 @@ class ManualPublishController extends Controller
         return redirect()->route('admin.manual.publish.index');
     }
 
-    public function edit(Request $request, $manual_id)
+    public function edit($manual_id)
     {
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index');
 
         $category_list = Manualcategory::all();
-        // 「一般」は使わない
-        $target_roll_list = Roll::where('id', '!=', '1')->get();
         // 業態一覧を取得する
         $organization1_list = Organization1::all();
-
-        $manual_target_orgs1 = $manual->organization1()->pluck('organization1.id')->toArray();
-        // $target_orgs1 = Shop::select('organization1_id')->whereIn('organization4_id', $target_orgs4);
+        $target_organization1 = $manual->organization1()->pluck('organization1.id')->toArray();
         $contents = $manual->content()
             ->orderBy("order_no")
             ->where('is_deleted','=','false')
@@ -167,9 +161,8 @@ class ManualPublishController extends Controller
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'category_list' => $category_list,
-            'target_roll_list' => $target_roll_list,
             'organization1_list' => $organization1_list,
-            'manual_target_org1' => $manual_target_orgs1,
+            'target_organization1' => $target_organization1,
             'contents' => $contents
 
         ]);
@@ -190,13 +183,8 @@ class ManualPublishController extends Controller
                 'manual_flow_detail'
             ]);
 
-        if ($request->start_datetime == 'on') $request->start_datetime = null;
-        $manual_params['start_datetime'] =
-        !empty($request->start_datetime) ? Carbon::parse($request->start_datetime, 'Asia/Tokyo') : null;
-
-        if ($request->end_datetime == 'on') $request->end_datetime = null;
-        $manual_params['end_datetime'] =
-        !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
+        $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
+        $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
 
         if ($request->file('file')) {
             $file = $request->file('file');
@@ -311,6 +299,11 @@ class ManualPublishController extends Controller
         Manual::whereIn('id', $manual_id)->update(['end_datetime' => $now]);
 
         return response()->json(['message' => '停止しました']);
+    }
+
+    private function parseDateTime($datetime)
+    {
+        return ($datetime === 'on') ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 }
 
