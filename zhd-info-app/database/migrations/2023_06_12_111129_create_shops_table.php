@@ -15,10 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name')->unique();
             $table->integer('shop_code')->nullable();
-            $table->integer('organization4_id');
-            $table->integer('organization3_id');
-            $table->integer('organization2_id');
-            $table->integer('organization1_id');
+            $table->unsignedBigInteger('organization4_id');
+            $table->unsignedBigInteger('organization3_id');
+            $table->unsignedBigInteger('organization2_id');
+            $table->unsignedBigInteger('organization1_id');
+            $table->foreign('organization4_id')->references('id')->on('organization4');
+            $table->foreign('organization3_id')->references('id')->on('organization3');
+            $table->foreign('organization2_id')->references('id')->on('organization2');
+            $table->foreign('organization1_id')->references('id')->on('organization1');
+
             $table->timestamps();
         });
     }

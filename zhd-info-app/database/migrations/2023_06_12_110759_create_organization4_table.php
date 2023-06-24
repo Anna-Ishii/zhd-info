@@ -14,7 +14,9 @@ return new class extends Migration
         Schema::create('organization4', function (Blueprint $table) {
             $table->id();
             $table->string('name')->unique();
-            $table->integer('organization3_id');
+            $table->unsignedBigInteger('organization3_id');
+            $table->foreign('organization3_id')->references('id')->on('organization3');
+
             $table->timestamps();
         });
     }

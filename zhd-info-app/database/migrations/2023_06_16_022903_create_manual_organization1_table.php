@@ -11,16 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('manualcontents', function (Blueprint $table) {
-            $table->id();
+        Schema::create('manual_organization1', function (Blueprint $table) {
             $table->unsignedBigInteger('manual_id');
-            $table->string('content_name');
-            $table->string('content_url');
-            $table->string('title');
-            $table->text('description')->nullable(true);
-            $table->integer('order_no');
-            $table->boolean('is_deleted')->default(false);
+            $table->unsignedBigInteger('organization1_id');
             $table->foreign('manual_id')->references('id')->on('manuals');
+            $table->foreign('organization1_id')->references('id')->on('organization1');
             $table->timestamps();
         });
     }
@@ -30,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('manualcontents');
+        Schema::dropIfExists('manual_organization1');
     }
 };

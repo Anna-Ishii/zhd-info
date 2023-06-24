@@ -11,9 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('manual_organization1', function (Blueprint $table) {
-            $table->integer('manual_id');
-            $table->integer('organization1');
+        Schema::create('manual_categories', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
             $table->timestamps();
         });
     }
@@ -23,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('manual_organization1');
+        Schema::dropIfExists('manualcategories');
     }
 };
