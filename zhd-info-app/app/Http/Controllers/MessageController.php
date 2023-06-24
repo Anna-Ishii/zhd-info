@@ -11,15 +11,14 @@ class MessageController extends Controller
     function index(Request $request)
     {
         $category_id = $request->input('category');
-
         // 掲示中のデータをとってくる
         $messages = Message::query()
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
-            ->where('start_datetime', '<', now())
+            ->where('start_datetime', '<', now('Asia/Tokyo'))
             ->where(function ($query) {
-                $query->where('end_datetime', '>', now())
+                $query->where('end_datetime', '>', now('Asia/Tokyo'))
                     ->orWhereNull('end_datetime');
             })
             ->orderBy('created_at', 'desc')
