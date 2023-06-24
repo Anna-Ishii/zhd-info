@@ -68,14 +68,14 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">対象者</label>
-            <div class="col-lg-10">
+            <div class="col-lg-10 checkArea">
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll" value="all" class="mr8" disabled>
+                    <input type="checkbox" id="checkAll" class="mr8">
                     全て
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="mr8" {{ in_array($target_roll->id, $message_target_roll, true) ? 'checked' : '' }}>
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8" {{ in_array($target_roll->id, $message_target_roll, true) ? 'checked' : '' }}>
                     {{ $target_roll->name }}
                 </label>
                 @endforeach
@@ -86,14 +86,16 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8">
                         全業態
                     </label>
                 </div>
+                @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
-                    JP
+                    <input type="checkbox" name="organization1[]" value="{{$organization1->id}}" class="checkCommon mr8"  {{ in_array($organization1->id, $message_target_org1, true) ? 'checked' : '' }}>
+                    {{$organization1->name}}
                 </label>
+                @endforeach
             </div>
         </div>
         <div class="form-group">
@@ -101,7 +103,7 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization4[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8">
                         全て
                     </label>
                 </div>
