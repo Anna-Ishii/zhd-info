@@ -16,6 +16,7 @@ class Message extends Model
     protected $fillable =
     [
         'title',
+        'content_name',
         'content_url',
         'category_id',
         'create_user_id',
@@ -45,12 +46,12 @@ class Message extends Model
 
     public function category(): HasOne
     {
-        return $this->hasOne(Category::class, foreignKey: 'id', localKey: 'category_id');
+        return $this->hasOne(MessageCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
     public function organization4(): BelongsToMany
     {
-        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4');
+        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4_id');
     }
 
     public function getStatusAttribute()

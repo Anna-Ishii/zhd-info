@@ -19,6 +19,7 @@ class Manual extends Model
         'title',
         'description',
         'category_id',
+        'content_name',
         'content_url',
         'create_user_id',
         'category_id',
@@ -46,12 +47,12 @@ class Manual extends Model
 
     public function category(): HasOne
     {
-        return $this->hasOne(Manualcategory::class, foreignKey: 'id', localKey: 'category_id');
+        return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
     public function organization1(): BelongsToMany
     {
-        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1');
+        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1_id');
     }
 
     public function content(): HasMany

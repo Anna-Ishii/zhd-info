@@ -15,7 +15,8 @@ class User extends Model
          'password',
          'employee_code',
          'shop_id',
-         'roll_id'
+         'roll_id',
+         'is_deleted',
         ];
 
     public function message(): BelongsToMany
