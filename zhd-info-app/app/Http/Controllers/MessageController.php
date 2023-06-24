@@ -11,23 +11,28 @@ class MessageController extends Controller
     function index(Request $request)
     {
         $category_id = $request->input('category');
-
-        if (isset($category_id)) {
-            $messages = Message::where('category_id', '=', $category_id)
-                                    ->orderBy('created_at', 'desc');
-        } else {
-            $messages = Message::orderBy('created_at', 'desc');
-        }
+        // 掲示中のデータをとってくる
+        $messages = Message::query()
+            ->when(isset($category_id), function ($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            })
+            ->where('start_datetime', '<', now('Asia/Tokyo'))
+            ->where(function ($query) {
+                $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                    ->orWhereNull('end_datetime');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->appends(request()->query());
 
         $categories = Category::get();
 
         return view('message.index', [
-            'messages' => $messages->paginate(5)
-                                    ->appends(request()->query()),
+            'messages' => $messages,
             'categories' => $categories,
         ]);
     }
-    function detail(Request $request, $message_id)
+    function detail($message_id)
     {
         $message = Message::find($message_id);
 

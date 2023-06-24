@@ -98,7 +98,7 @@
 						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
 						<td nowrap>{{$message->start_datetime}}</td>
 						<td nowrap>{{$message->end_datetime}}</td>
-						<td nowrap>{{$message->status_name}}</td>
+						<td nowrap>{{$message->status['name']}}</td>
 						<td nowrap>{{$message->create_user->name}}</td>
 						<td nowrap>{{$message->created_at}}</td>
 					</tr>

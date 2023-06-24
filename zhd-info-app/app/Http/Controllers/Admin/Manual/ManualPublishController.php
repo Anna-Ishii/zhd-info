@@ -83,19 +83,6 @@ class ManualPublishController extends Controller
             $manual_params['end_datetime'] =
                 !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
 
-            $now = Carbon::now('Asia/Tokyo');
-            $manual_params['status'] = 0;
-            if (isset($manual_params['start_datetime'])) {
-                if ($manual_params['start_datetime']->lte($now)) {
-                    $manual_params['status'] = 1;
-                }
-            }
-            if (isset($manual_params['end_datetime'])) {
-                if ($manual_params['end_datetime']->lte($now)) {
-                    $manual_params['status'] = 2;
-                }
-            }
-
             $file = $request->file('file');
             $directory = 'uploads';
             // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
@@ -189,19 +176,6 @@ class ManualPublishController extends Controller
             if ($request->end_datetime == 'on') $request->end_datetime = null;
             $manual_params['end_datetime'] =
             !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
-
-            $now = Carbon::now('Asia/Tokyo');
-            $manual_params['status'] = 0;
-            if (isset($manual_params['start_datetime'])) {
-                if ($manual_params['start_datetime']->lte($now)) {
-                    $manual_params['status'] = 1;
-                }
-            }
-            if (isset($manual_params['end_datetime'])) {
-                if ($manual_params['end_datetime']->lte($now)) {
-                    $manual_params['status'] = 2;
-                }
-            }
 
             if ($request->file('file')) {
                 $file = $request->file('file');
@@ -338,8 +312,8 @@ class ManualPublishController extends Controller
     {
         $data = $request->json()->all();
         $manual_id = $data['manual_id'];
-
-        Manual::whereIn('id', $manual_id)->update(['status' => 2]);
+        $now = Carbon::now();
+        Manual::whereIn('id', $manual_id)->update(['end_datetime' => $now]);
 
         return response()->json(['message' => '停止しました']);
     }
