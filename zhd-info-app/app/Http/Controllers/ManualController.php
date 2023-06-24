@@ -11,8 +11,10 @@ class ManualController extends Controller
     function index(Request $request)
     {
         $category_id = $request->input('category');
+
+        $user = session("member");
         // 掲示中のデータをとってくる
-        $manuals = Manual::query()
+        $manuals = $user->manual()
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
