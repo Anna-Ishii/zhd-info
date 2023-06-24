@@ -132,22 +132,17 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8" >
                         全業態
                     </label>
                 </div>
+                @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked>
-                    JP
+                    <input type="checkbox" name="organization1[]" value="{{$organization1->id}}" class="checkCommon mr8" 
+                        {{ in_array($organization1->id, $target_organization1, true) ? 'checked' : '' }}>
+                    {{$organization1->name}}
                 </label>
-                <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="2" class="checkCommon mr8" disabled>
-                    熟成焼肉いちばん
-                </label>
-                <label class="åçmr16">
-                    <input type="checkbox" name="organization1[]" value="3" class="checkCommon mr8" disabled>
-                    牛庵
-                </label>
+                @endforeach
             </div>
         </div>
 
