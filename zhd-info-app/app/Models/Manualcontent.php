@@ -12,6 +12,7 @@ class Manualcontent extends Model
 
     protected $fillable = [
         'manual_id',
+        'content_name',
         'content_url',
         'title',
         'description',
