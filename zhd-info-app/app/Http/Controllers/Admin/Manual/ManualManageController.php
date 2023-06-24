@@ -27,13 +27,13 @@ class ManualManageController extends Controller
         $manual = Manual::find($manual_id);
         // $target_user = $manual->user;
         // $target_org1 = $manual->organization1()->pluck('organization1.id')->toArray();
-        $target_shop = self::get_target_users($manual);
+        $target_shops = self::get_target_users($manual);
         $category_list = Manualcategory::all();
 
         return view('admin.manual.manage.detail', [
             'manual' => $manual,
             'content' => $manual->content,
-            'target_shop' => $target_shop->paginate(10)
+            'target_shops' => $target_shops->paginate(10)
                 ->appends(request()->query()),
             'category_list' => $category_list
         ]);

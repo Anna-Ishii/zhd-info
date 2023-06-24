@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    @include('common.admin.pagenation', ['objects' => $target_shop])
+    @include('common.admin.pagenation', ['objects' => $target_shops])
 
     <div class="tableInner">
         <table id="list" class="table table-bordered table-hover table-condensed text-center">
@@ -28,7 +28,7 @@
             </thead>
 
             <tbody>
-                @foreach ($target_shop as $shop)
+                @foreach ($target_shops as $shop)
                 <tr class="">
                     <td>{{$manual->title}}</td>
                     <td>{{$shop->id}}</td>
@@ -47,7 +47,7 @@
         </table>
     </div>
 
-    @include('common.admin.pagenation', ['objects' => $target_shop])
+    @include('common.admin.pagenation', ['objects' => $target_shops])
 
     <div>
         <a href="{{ route('admin.manual.manage.index') }}" class="btn btn-default">戻る</a>
