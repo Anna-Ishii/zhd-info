@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Models\Category;
 use App\Models\Message;
+use App\Models\Organization1;
 use App\Models\Organization4;
 use App\Models\Roll;
 use App\Models\Shop;
@@ -34,14 +35,17 @@ class MessagePublishController extends Controller
     public function new()
     {
         $category_list = Category::all();
-        // 「一般」は使わない
-        $target_roll_list = Roll::where('id','!=','1')->get();
+
+        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
         // 業態一覧を取得する
+        $organization1_list = Organization1::all();
+        
         $organization4_list = Organization4::all();
         
         return view('admin.message.publish.new', [
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
+            'organization1_list' => $organization1_list,
             'organization4_list' => $organization4_list
         ]);
     }
@@ -107,23 +111,29 @@ class MessagePublishController extends Controller
         if(empty($message)) return redirect()->route('admin.message.publish.index');
 
         $category_list = Category::all();
-        // 「一般」は使わない
-        $target_roll_list = Roll::where('id', '!=', '1')->get();
+
+        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
         // 業態一覧を取得する
+        $organization1_list = Organization1::all();
+
         $organization4_list = Organization4::all();
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
+
         $target_orgs4 = $message->organization4()->pluck('organization4.id')->toArray();
-        // $target_orgs1 = Shop::select('organization1_id')->whereIn('organization4_id', $target_orgs4);
+        $target_orgs1 = Shop::whereIn('organization4_id', $target_orgs4)
+                                ->pluck('organization1_id')
+                                ->toArray();
 
         return view('admin.message.publish.edit', [
             'message' => $message,
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
+            'organization1_list' => $organization1_list,
             'organization4_list' => $organization4_list,
             'message_target_roll' => $message_target_roll,
+            'message_target_org1' => $target_orgs1,
             'message_target_org4' => $target_orgs4
-
         ]);
     }
 
