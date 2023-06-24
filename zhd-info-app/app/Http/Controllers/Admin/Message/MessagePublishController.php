@@ -52,18 +52,6 @@ class MessagePublishController extends Controller
             $msg_params['end_datetime'] =
                 !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
 
-            $now = Carbon::now('Asia/Tokyo');
-            $msg_params['status'] = 0;
-            if (isset($msg_params['start_datetime'])) {
-                if ($msg_params['start_datetime']->lte($now)) {
-                    $msg_params['status'] = 1;
-                }
-            }
-            if (isset($msg_params['end_datetime'])) {
-                if ($msg_params['end_datetime']->lte($now)) {
-                    $msg_params['status'] = 2;
-                }
-            }
 
             $file = $request->file('file');
             $directory = 'uploads';
@@ -133,19 +121,6 @@ class MessagePublishController extends Controller
             if ($request->end_datetime == 'on') $request->end_datetime = null;
             $msg_params['end_datetime'] =
                 !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
-
-            $now = Carbon::now('Asia/Tokyo');
-            $msg_params['status'] = 0;
-            if(isset($msg_params['start_datetime'])) {
-                if ($msg_params['start_datetime']->lte($now)) {
-                    $msg_params['status'] = 1;
-                }
-            }
-            if(isset($msg_params['end_datetime'])) {
-                if ($msg_params['end_datetime']->lte($now)) {
-                    $msg_params['status'] = 2;
-                }
-            }
 
             if($request->file('file')){
                 $file = $request->file('file');
@@ -217,7 +192,8 @@ class MessagePublishController extends Controller
         $data = $request->json()->all();
         $message_id = $data['message_id'];
         
-        Message::whereIn('id', $message_id)->update(['status' => 2]);
+        $now = Carbon::now();
+        Message::whereIn('id', $message_id)->update(['end_datetime' => $now]);
         
         return response()->json(['message' => '停止しました']);
     }
