@@ -25,13 +25,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ShopSeeder::class); //店舗
         $this->call(RollTableSeeder::class);
         $this->call(UsersTableSeeder::class);
-        $this->call(CategoryTableSeeder::class);
-        $this->call(MessageTableSeeder::class);
-        $this->call(Message_RollTableSeeder::class);
-        $this->call(Message_UserTableSeeder::class);
-        $this->call(ManualsTableSeeder::class);
-        $this->call(ManualContentsTableSeeder::class);
-        $this->call(ManualCategoiesTableSeeder::class);
-        $this->call(Manual_Organization1TableSeeder::class);
+        $this->call(MessageCategoriesTableSeeder::class);
+        // $this->call(MessageTableSeeder::class);
+        // $this->call(Message_RollTableSeeder::class);
+        // $this->call(Message_UserTableSeeder::class);
+        // $this->call(ManualsTableSeeder::class);
+        // $this->call(ManualContentsTableSeeder::class);
+        $this->call(ManualCategoriesTableSeeder::class);
+        // $this->call(Manual_Organization1TableSeeder::class);
     }
 }

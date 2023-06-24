@@ -12,10 +12,12 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('message_roll', function (Blueprint $table) {
-            $table->integer('message_id');
-            $table->integer('roll_id');
+            $table->unsignedBigInteger('message_id');
+            $table->unsignedBigInteger('roll_id');
             $table->timestamps();
 
+            $table->foreign('message_id')->references('id')->on('messages');
+            $table->foreign('roll_id')->references('id')->on('rolls');
             $table->unique(['message_id', 'roll_id']);
         });
     }

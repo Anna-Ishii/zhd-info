@@ -6,29 +6,26 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ManualCategoiesTableSeeder extends Seeder
+class MessageCategoriesTableSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        DB::table('manualcategories')->insert(
+        DB::table('message_categories')->insert(
             [
                 [
-                    'name' => '商品マニュアル'
+                    'name' => 'メニュー・マニュアル関連'
                 ],
                 [
-                    'name' => 'オペレーションマニュアル'
+                    'name' => '人事・総務'
                 ],
                 [
-                    'name' => '教育動画'
+                    'name' => '情報共有'
                 ],
                 [
-                    'name' => 'トピックス'
-                ],
-                [
-                    'name' => 'Channel'
+                    'name' => 'イレギュラー'
                 ],
             ]
         );
