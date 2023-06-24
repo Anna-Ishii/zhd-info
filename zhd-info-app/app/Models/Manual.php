@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -21,7 +22,6 @@ class Manual extends Model
         'content_url',
         'create_user_id',
         'category_id',
-        'status',
         'start_datetime',
         'end_datetime',
         'target_block',
@@ -59,28 +59,39 @@ class Manual extends Model
         return $this->hasMany(Manualcontent::class);
     }
 
-    public function getStatusNameAttribute()
+    public function getStatusAttribute()
     {
-        $status = $this->attributes['status']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+        $start_datetime =
+            !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
+        $end_datetime =
+            !empty($this->attributes['end_datetime']) ? Carbon::parse($this->attributes['end_datetime'], 'Asia/Tokyo') : null;
 
-        // パラメータに応じて名称を返すロジックを記述
-        $name = '';
-        switch ($status) {
-            case 0:
-                $name = '待機';
-                break;
-            case 1:
-                $name = '掲載中';
-                break;
-            case 2:
-                $name = '掲載終了';
-                break;
-                // 他のケースを追加する必要があればここに記述します
-            default:
-                $name = 'Unknown';
+        $now = Carbon::now('Asia/Tokyo');
+
+        $status = [
+            'id'   => 0,
+            'name' => '待機' 
+        ];
+
+        if (isset($start_datetime)) {
+            if ($start_datetime->lte($now)) {
+                $status = [
+                    'id'   => 1,
+                    'name' => '掲載中'
+                ];
+            }
         }
 
-        return $name;
+        if (isset($end_datetime)) {
+            if ($end_datetime->lte($now)) {
+                $status = [
+                    'id'   => 2,
+                    'name' => '掲載終了'
+                ];
+            }
+        }
+
+        return $status;
     }
 
     public function getContentTypeAttribute()

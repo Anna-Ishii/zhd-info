@@ -102,7 +102,7 @@
                                 <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
                                 <td nowrap>{{$manual->start_datetime}}</td>
                                 <td nowrap>{{$manual->end_datetime}}</td>
-                                <td nowrap>{{$manual->status_name}}</td>
+                                <td nowrap>{{$manual->status['name']}}</td>
                                 <td nowrap>{{$manual->create_user->name}}</td>
                                 <td nowrap>{{$manual->created_at}}</td>
                             </tr>

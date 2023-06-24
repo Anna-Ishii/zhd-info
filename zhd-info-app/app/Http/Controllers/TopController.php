@@ -12,11 +12,34 @@ class TopController extends Controller
     {
         $member = session('member');
         $now = Carbon::now();
-        $message = new Message();
-        $message_now = $message->whereDate('start_datetime', $now->format('Y/m/d'))->orderBy('created_at', 'desc')->get();
+        // 今日掲載された業連
+        $message_now = Message::query()
+                                ->whereDate('start_datetime', $now->format('Y/m/d'))
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now())
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->orderBy('created_at', 'desc')
+                                ->get();
         $roll = $member->roll;
-        $message_crew = $roll->message()->orderBy('created_at', 'desc')->get();; 
-        $message_posting = $message->where('status', '=', '1')->orderBy('created_at', 'desc')->get();
+        // スタッフ用の業連
+        $message_crew = $roll->message()
+                                ->where('start_datetime', '<', now())
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now())
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+        // 掲載中の業連
+        $message_posting = Message::query()
+                                ->where('start_datetime', '<', now())
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now())
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->orderBy('created_at', 'desc')
+                                ->get();
         return view('top', [
             'message_now' => $message_now,
             'message_crew' => $message_crew,

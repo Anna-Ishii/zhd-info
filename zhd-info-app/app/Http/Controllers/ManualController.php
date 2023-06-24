@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
 use App\Models\Manual;
 use App\Models\Manualcategory;
 use Illuminate\Http\Request;
@@ -13,23 +12,29 @@ class ManualController extends Controller
     {
         $category_id = $request->input('category');
 
-        if(isset($category_id)){
-            $manuals = Manual::where('category_id', '=', $category_id)
-                                ->orderBy('created_at', 'desc');     
-        }else {
-            $manuals = Manual::orderBy('created_at', 'desc');
-        }
+        // 掲示中のデータをとってくる
+        $manuals = Manual::query()
+            ->when(isset($category_id), function ($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            })
+            ->where('start_datetime', '<', now())
+            ->where(function ($query) {
+                $query->where('end_datetime', '>', now())
+                ->orWhereNull('end_datetime');
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->appends(request()->query());
 
-        $categories = Manualcategory::get();
+        $categories = ManualCategory::get();
 
         return view('manual.index', [
-            'manuals' => $manuals->paginate(5)
-                                ->appends(request()->query()),
+            'manuals' => $manuals,
             'categories' => $categories,
         ]);
     }
 
-    function detail(Request $request, $manual_id)
+    function detail($manual_id)
     {
         $user = session('member');
         $manual = Manual::find($manual_id);
