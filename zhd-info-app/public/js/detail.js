@@ -2,11 +2,11 @@
 
 /* マニュアルモーダル */
 $(document).on('click' , '.main__thumb' , function(){
-	let thumbParents = $(this).parents('.main__box');
+	let thumbParents = $(this).parents('.thumb_parents');
 	thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
 });
 $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , function(e){
-	let thumbParents = $(this).parents('.main__box');
+	let thumbParents = $(this).parents('.thumb_parents');
 	if($(this).hasClass('manualAttachmentBg') && !e.target.closest('.manualAttachment')){
 		/* 動画を止める */
 		let chkActiveMovie = $('.manualAttachment.isActive').find('video');
