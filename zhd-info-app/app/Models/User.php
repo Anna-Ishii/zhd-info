@@ -27,7 +27,7 @@ class User extends Model
     public function manual(): BelongsToMany
     {
         return $this->belongsToMany(Manual::class, 'manual_user','user_id', 'manual_id')
-                    ->withPivot('read_flg', 'shop');
+                    ->withPivot('read_flg', 'shop_id');
     }
 
     public function roll(): BelongsTo
