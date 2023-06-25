@@ -17,7 +17,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->foreign('message_id')->references('id')->on('messages');
-            $table->foreign('organization4_id')->references('id')->on('messages');
+            $table->foreign('organization4_id')->references('id')->on('organization4');
             $table->unique(['message_id', 'organization4_id']);
         });
     }
