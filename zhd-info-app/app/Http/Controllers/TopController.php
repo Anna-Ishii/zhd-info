@@ -9,9 +9,9 @@ class TopController extends Controller
 {
     public function index()
     {
-        $member = session('member');
+        $user = session('member');
         // 今日掲載された業連
-        $message_now = Message::query()
+        $message_now = $user->message()
                                 ->whereDate('start_datetime', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
@@ -19,7 +19,7 @@ class TopController extends Controller
                                 })
                                 ->orderBy('created_at', 'desc')
                                 ->get();
-        $roll = $member->roll;
+        $roll = Roll::find(4);// 店長ロール
         // スタッフ用の業連
         $message_crew = $roll->message()
                                 ->where('start_datetime', '<=', now('Asia/Tokyo'))
@@ -30,7 +30,7 @@ class TopController extends Controller
                                 ->orderBy('created_at', 'desc')
                                 ->get();
         // 掲載中の業連
-        $message_posting = Message::query()
+        $message_posting = $user->message()
                                 ->where('start_datetime', '<=', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
