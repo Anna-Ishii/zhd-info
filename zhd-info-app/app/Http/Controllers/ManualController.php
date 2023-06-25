@@ -41,10 +41,10 @@ class ManualController extends Controller
         $manual = Manual::find($manual_id);
         $read_flg = $manual->user()->where('user_id', '=', $user->id)->pluck('manual_user.read_flg');
         $read_flg_count = $manual->user()->where('manual_user.read_flg', '=', true)->count();
-
+        $contents = $manual->content;
         return view('manual.detail', [
             'manual' => $manual,
-            'contents' => $manual->content,
+            'contents' => $contents,
             'read_flg' => $read_flg,
             'read_flg_count' => $read_flg_count
         ]);
