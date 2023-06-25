@@ -74,7 +74,7 @@
             </div>
             @foreach( $contents as $content )
             <section class="main__box thumb_parents">
-                <h2 class="mb10">手順1：{{$content->title}}</h2>
+                <h2 class="mb10">手順{{$loop->iteration}}：{{$content->title}}</h2>
                 @if( in_array($content->content_type, ['mp4', 'mov'], true ))
                 <div class=" flex">
                     <div class="main__thumb">
