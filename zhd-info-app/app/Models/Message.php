@@ -44,7 +44,7 @@ class Message extends Model
 
     public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'create_user_id');
+        return $this->hasOne(User::class, 'id', 'create_user_id')->withTrashed();
     }
 
     public function category(): HasOne
