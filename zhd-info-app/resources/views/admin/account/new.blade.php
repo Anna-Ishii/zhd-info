@@ -84,7 +84,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">パスワード（確認）</label>
             <div class="col-lg-10">
-                <input type="password" class="form-control inputPassword2" name="password2" value="" required="required">
+                <input type="password" class="form-control inputPassword2" name="password_confirmation" value="" required="required">
             </div>
         </div>
         <div class="form-group">
