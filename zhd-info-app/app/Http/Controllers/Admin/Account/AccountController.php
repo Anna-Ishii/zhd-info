@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Account\AccountStoreRequest;
 use App\Models\Manual;
 use App\Models\Message;
+use App\Models\Organization1;
+use App\Models\Organization2;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -27,10 +29,14 @@ class AccountController extends Controller
     public function new()
     {
         $user_count = User::max('id') + 1;
+        $organization1_list = Organization1::get();
+        $organization2_list = Organization2::get();
         $shops = Shop::get();
         return view('admin.account.new',[
             'user_count' => $user_count,
             'shops' => $shops,
+            'organization1_list' => $organization1_list,
+            'organization2_list' => $organization2_list,
         ]);
     }
     public function store(AccountStoreRequest $request)
