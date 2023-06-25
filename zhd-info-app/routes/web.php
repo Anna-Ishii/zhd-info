@@ -80,6 +80,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::get('/', [AccountController::class, 'index'])->name('index');
         Route::get('new', [AccountController::class, 'new'])->name('new');
         Route::post('new', [AccountController::class, 'store'])->name('new.store');
+        Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
     });
     Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
         Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {

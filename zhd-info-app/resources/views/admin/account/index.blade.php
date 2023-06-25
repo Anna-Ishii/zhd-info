@@ -15,7 +15,7 @@
 
             <div class="input-group col-lg-2 spMb16">
                 <input name="q" value="" class="form-control" />
-                <span class="input-group-btn"><button id="deleteBtn" class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
+                <span class="input-group-btn"><button class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
             </div>
 
             <div class="input-group col-lg-2 spMb16">
@@ -103,7 +103,7 @@
     </form>
 
     <!-- 検索結果 -->
-    <form method="post" action="#">
+    <form>
         <div class="text-right">
             <p>
                 <button id="deleteBtn" class="btn btn-info">削除</button>
@@ -131,7 +131,7 @@
                         <td>
                             <input type="checkbox" class="form-check-input">
                         </td>
-                        <td nowrap>{{$u->id}}</td>
+                        <td class="user_id" nowrap>{{$u->id}}</td>
                         <td nowrap>{{$u->name}}</td>
                         <td nowrap>{{$u->employee_code}}</td>
                         <td nowrap>{{$u->belong_label}}</td>
