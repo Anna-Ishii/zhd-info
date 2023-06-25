@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,6 +13,8 @@ use Mockery\Matcher\HasKey;
 
 class Manual extends Model
 {
+    use WhereLike;
+    
     protected $table = 'manuals';
 
     protected $fillable =
