@@ -28,7 +28,7 @@ class AccountController extends Controller
     
     public function new()
     {
-        $user_count = User::max('id') + 1;
+        $user_count = User::withTrashed()->max('id') + 1;
         $organization1_list = Organization1::get();
         $organization2_list = Organization2::get();
         $shops = Shop::get();
@@ -52,7 +52,7 @@ class AccountController extends Controller
         try {
             DB::beginTransaction();
             $user = User::create($params);
-            $data = [];
+            $message_data = [];
             // 該当のメッセージを登録
             $messages = Message::whereHas('roll', function ($query) use ($roll_id) {
                 $query->where('roll_id', '=', $roll_id);
@@ -60,18 +60,19 @@ class AccountController extends Controller
                 $query->where('organization4_id', '=', $organization4_id);
             })->get('id')->toArray();
             foreach ($messages as $message) {
-                $data[$message['id']] = ['shop_id' => $request->shop_id];
+                $message_data[$message['id']] = ['shop_id' => $request->shop_id];
             }
-            $user->message()->attach($data);
+            $user->message()->attach($message_data);
 
+            $manual_data = [];
             // 該当のマニュアルを登録
             $manuals = Manual::whereHas('organization1', function ($query) use ($organization1_id) {
                 $query->where('organization1_id', '=', $organization1_id);
             })->get('id')->toArray();
             foreach ($manuals as $manual) {
-                $data[$manual['id']] = ['shop_id' => $request->shop_id];
+                $manual_data[$manual['id']] = ['shop_id' => $request->shop_id];
             }
-            $user->manual()->attach($data);
+            $user->manual()->attach($manual_data);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -87,7 +88,7 @@ class AccountController extends Controller
     public function delete(Request $request)
     {
         $data = $request->json()->all();
-        $user = session('member');
+        $user = session('user');
         if(in_array((string)$user->id, $data['user_id'], true)){
             return response()->json(['message' => 'ログイン中のユーザーは削除できません'], status:500);
         }
