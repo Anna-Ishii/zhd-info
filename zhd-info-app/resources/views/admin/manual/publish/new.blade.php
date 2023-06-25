@@ -39,7 +39,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".mp4" required>
+                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".mp4,.mov,.jpeg,.jpg,.png" required>
                 </label>
             </div>
         </div>
@@ -56,7 +56,7 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="contents_file[]" value="" data-variable-name="manual_file">
+                            <input type="file" name="contents_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
                         </label>
                     </div>
                 </div>
@@ -94,7 +94,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" type="datetime-local" name="start_datetime" value="">
+                <input id="dateFrom" class="form-control mr16"  name="start_datetime" value="">
                 <label>
                     <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
                     未定
@@ -104,7 +104,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateTo">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16" type="datetime-local" name="end_datetime" value="">
+                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="">
                 <label>
                     <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
                     未定
@@ -116,7 +116,7 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization1[]" value="" id="checkAll" class="mr8">
+                        <input type="checkbox" id="checkAll" class="mr8">
                         全業態
                     </label>
                 </div>

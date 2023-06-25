@@ -34,7 +34,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" required="required">
+                    <input type="file" name="file" value="" accept=".pdf" required="required">
                 </label>
             </div>
         </div>
@@ -61,7 +61,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="">
                 <label>
                     <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
                     未定
@@ -71,7 +71,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="">
+                <input id="dateTo" class="form-control mr16" name="end_datetime" value="">
                 <label>
                     <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
                     未定
