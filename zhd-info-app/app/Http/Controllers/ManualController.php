@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Manual;
-use App\Models\Manualcategory;
+use App\Models\ManualCategory;
 use Illuminate\Http\Request;
 
 class ManualController extends Controller

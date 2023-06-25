@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Admin\Manual;
 
 use App\Http\Controllers\Controller;
 use App\Models\Manual;
-use App\Models\Manualcategory;
+use App\Models\ManualCategory;
 use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
 
@@ -12,7 +12,7 @@ class ManualManageController extends Controller
 {
     public function index()
     {
-        $category_list = Manualcategory::all();
+        $category_list = ManualCategory::all();
 
         // $message_list = $user->message;
         $manual_list = Manual::orderBy('created_at', 'desc');
@@ -28,7 +28,7 @@ class ManualManageController extends Controller
         // $target_user = $manual->user;
         // $target_org1 = $manual->organization1()->pluck('organization1.id')->toArray();
         $target_shops = self::get_target_users($manual);
-        $category_list = Manualcategory::all();
+        $category_list = ManualCategory::all();
 
         return view('admin.manual.manage.detail', [
             'manual' => $manual,

@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin\Manual;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Manual\PublishStoreRequest;
+use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
-use App\Models\Manualcategory;
+use App\Models\ManualCategory;
 use App\Models\Manualcontent;
 use App\Models\Organization1;
 use App\Models\Roll;
@@ -28,7 +30,7 @@ class ManualPublishController extends Controller
             ->paginate(5)
             ->appends(request()->query());
 
-        $category_list = Manualcategory::all();
+        $category_list = ManualCategory::all();
 
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
@@ -38,7 +40,7 @@ class ManualPublishController extends Controller
 
     public function new()
     {
-        $category_list = Manualcategory::all();
+        $category_list = ManualCategory::all();
         $organization1_list = Organization1::all();
 
         return view('admin.manual.publish.new', [
@@ -47,61 +49,22 @@ class ManualPublishController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(PublishStoreRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'title' => 'required',
-            'file' => 'required|mimes:mp4',
-            'category_id' => 'required',
-            'organization1' => 'required'
-        ]);
+        $validated = $request->validated();
 
-        if ($validator->fails()) {
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
-
-        $manual_params = $request
-            ->only([
-                'title',
-                'description',
-                'category_id',
-            ]);
-        $contents_params = $request
-            ->only([
-                'manual_flow_title',
-                'manual_file',
-                'manual_flow_detail'
-            ]);
-
-        if ($request->start_datetime == 'on') $request->start_datetime = null;
-        $manual_params['start_datetime'] =
-        !empty($request->start_datetime) ? Carbon::parse($request->start_datetime, 'Asia/Tokyo') : null;
-
-        if ($request->end_datetime == 'on') $request->end_datetime = null;
-        $manual_params['end_datetime'] =
-        !empty($request->end_datetime) ? Carbon::parse($request->end_datetime, 'Asia/Tokyo') : null;
-
-        $file = $request->file('file');
-        $directory = 'uploads';
-        // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
-        $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-        $path = public_path('uploads');
-        $file->move($path, $filename);
-        $content_url = 'uploads/' . $filename;
-
-        // ファイルを指定したディレクトリに保存します
-        // $path = $file->storeAs($directory, $filename, 'public');
-        $manual_params['content_url'] = $content_url;
+        $manual_params['title'] = $request->title;
+        $manual_params['description'] = $request->description;
+        $manual_params['category_id'] = $request->category_id;
+        $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
+        $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
+        $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
         $manual_params['create_user_id'] = session('user')->id;
 
         $data = [];
         if (isset($request->organization1)) {
             $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-
 
             foreach ($target_users as $target_user) {
                 $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
@@ -110,22 +73,16 @@ class ManualPublishController extends Controller
 
         $content_data = [];
         if (
-            isset($contents_params['manual_flow_title']) &&
-            isset($contents_params['manual_file']) &&
-            isset($contents_params['manual_flow_detail'])
+            isset($request['manual_flow_title']) &&
+            isset($request['manual_file']) &&
+            isset($request['manual_flow_detail'])
         ) {
-            for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
-
-                $f = $contents_params['manual_file'][$i];
-                $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-                $path = public_path('uploads');
-                $f->move($path, $filename);
-                $content_url = 'uploads/' . $filename;
-
-                $content_data[$i]['content_url'] = $content_url;
-                $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
-                $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
+            for ($i = 0; $i < count($validated['manual_flow_title']); $i++) {
+                $content_data[$i]['title'] = $request['manual_flow_title'][$i];
+                $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
                 $content_data[$i]['order_no'] = $i + 1;
+                $f = $request['manual_file'][$i];
+                $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
             }
         }
 
@@ -149,7 +106,7 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index');
 
-        $category_list = Manualcategory::all();
+        $category_list = ManualCategory::all();
         // 業態一覧を取得する
         $organization1_list = Organization1::all();
         $target_organization1 = $manual->organization1()->pluck('organization1.id')->toArray();
@@ -168,40 +125,20 @@ class ManualPublishController extends Controller
         ]);
     }
 
-    public function update(Request $request, $manual_id)
+    public function update(PublishUpdateRequest $request, $manual_id)
     {
-        $manual_params = $request
-            ->only([
-                'title',
-                'description',
-                'category_id',
-            ]);
-        $contents_params = $request
-            ->only([
-                'manual_flow_title',
-                'manual_file',
-                'manual_flow_detail'
-            ]);
+        $validated = $request->validated();
 
+        $manual_params['title'] = $request->title;
+        $manual_params['description'] = $request->description;
+        $manual_params['category_id'] = $request->category_id;
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-
-        if ($request->file('file')) {
-            $file = $request->file('file');
-            // ファイル名を生成します（一意の名前を使用する場合は、例えばユーザーIDやタイムスタンプを組み合わせることもできます）
-            $filename = uniqid() . '.' . $file->getClientOriginalExtension();
-            $path = public_path('uploads');
-            $file->move($path, $filename);
-            $content_url = 'uploads/' . $filename;
-
-            // ファイルを指定したディレクトリに保存します
-            // $path = $file->storeAs($directory, $filename, 'public');
-            $manual_params['content_url'] = $content_url;
-        }
+        if(isset($request->file)) $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
         $manual_params['create_user_id'] = session('user')->id;
 
         // 該当のショップID
-        $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
+        $shops_id = Shop::select('id')->whereIn('organization1_id', $request->input('organization1',[]))->get()->toArray();
         // 該当のユーザー
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
 
@@ -217,42 +154,31 @@ class ManualPublishController extends Controller
         Manualcontent::whereNotIn('id', $contents_id)->update(['is_deleted' => true]);
 
         if (
-            isset($contents_params['manual_flow_title']) &&
-            isset($contents_params['manual_file']) &&
-            isset($contents_params['manual_flow_detail'])
+            isset($request['manual_flow_title']) &&
+            isset($request['manual_file']) &&
+            isset($request['manual_flow_detail'])
         ) {
             //手順の数分、繰り返す 
-            for ($i = 0; $i < count($contents_params['manual_flow_title']); $i++) {
+            for ($i = 0; $i < count($request['manual_flow_title']); $i++) {
 
                 // 登録されているコンテンツを変更する
                 if (isset($request->content_id[$i])) {
                     $content = Manualcontent::find($request->content_id[$i]);
-                    $content->title = $contents_params['manual_flow_title'][$i];
-                    $content->description = $contents_params['manual_flow_detail'][$i];
+                    $content->title = $request['manual_flow_title'][$i];
+                    $content->description = $request['manual_flow_detail'][$i];
                     $content->order_no = $count_order_no + 1;
 
                     // manual_fileがnullの場合は変更しない
                     if (isset($request->file('manual_file')[$i])) {
-                        $f = $contents_params['manual_file'][$i];
-                        $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-                        $path = public_path('uploads');
-                        $f->move($path, $filename);
-                        $content_url = 'uploads/' . $filename;
-                        $content->content_url = $content_url;
+                        $content = array_merge($content, $this->uploadFile($request->file('manual_file')[$i]));
                     }
                     $content->save();
                 } else {
-                    $content_data[$i]['title'] = $contents_params['manual_flow_title'][$i];
-                    $content_data[$i]['description'] = $contents_params['manual_flow_detail'][$i];
+                    $content_data[$i]['title'] = $request['manual_flow_title'][$i];
+                    $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
                     $content_data[$i]['order_no'] = $count_order_no + 1;
-
-
-                    $f = $contents_params['manual_file'][$i];
-                    $filename = uniqid() . '.' . $f->getClientOriginalExtension();
-                    $path = public_path('uploads');
-                    $f->move($path, $filename);
-                    $content_url = 'uploads/' . $filename;
-                    $content_data[$i]['content_url'] = $content_url;
+                    $f = $request['manual_file'][$i];
+                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
                 }
             }
         }
@@ -273,7 +199,7 @@ class ManualPublishController extends Controller
         return redirect()->route('admin.manual.publish.index');
     }
 
-    public function detail(Request$request, $manual_id)
+    public function detail($manual_id)
     {
         $manual = Manual::find($manual_id);
         $contents = $manual->content()
@@ -288,7 +214,6 @@ class ManualPublishController extends Controller
             "contents" => $contents,
             "target_shop" => $target_shop
         ]);
-
     }
 
     public function stop(Request $request)
@@ -304,6 +229,19 @@ class ManualPublishController extends Controller
     private function parseDateTime($datetime)
     {
         return ($datetime === 'on') ? null : Carbon::parse($datetime, 'Asia/Tokyo');
+    }
+
+    private function uploadFile($file)
+    {
+        $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
+        $filename_input = $file->getClientOriginalName();
+        $path = public_path('uploads');
+        $file->move($path, $filename_upload);
+        $content_url = 'uploads/' . $filename_upload;
+        return [
+            'content_name' => $filename_input,
+            'content_url' => $content_url,
+        ];
     }
 }
 

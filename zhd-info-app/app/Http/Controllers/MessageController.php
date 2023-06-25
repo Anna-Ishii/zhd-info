@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Category;
+use App\Models\MessageCategory;
 use App\Models\Message;
 use Illuminate\Http\Request;
 
@@ -12,8 +12,7 @@ class MessageController extends Controller
     {
         $category_id = $request->input('category');
         // 掲示中のデータをとってくる
-        $user = session("member");
-        $messages = $user->message()
+        $messages = Message::query()
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
@@ -26,7 +25,7 @@ class MessageController extends Controller
             ->paginate(5)
             ->appends(request()->query());
 
-        $categories = Category::get();
+        $categories = MessageCategory::get();
 
         return view('message.index', [
             'messages' => $messages,
