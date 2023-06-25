@@ -38,18 +38,20 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">業態</label>
             <div class="col-lg-10">
-                <select name="organization4_id" class="form-control">
-                    <option value="1">JP</option>
-                    <option value="2" disabled>ON (*選択不可)</option>
+                <select name="organization1" class="form-control">
+                    @foreach ($organization1_list as $organization1)
+                        <option value="{{$organization1->id}}">{{$organization1->name}}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ブランド</label>
             <div class="col-lg-10">
-                <select name="organization3_id" class="form-control">
-                    <option value="1">ジョリーパスタ</option>
-                    <option value="2" disabled>ジョリーオックス (*選択不可)</option>
+                <select name="organization2" class="form-control">
+                    @foreach ($organization2_list as $organization2)
+                        <option value="{{$organization2->id}}">{{$organization2->name}}</option>
+                    @endforeach
                 </select>
             </div>
         </div>
@@ -84,7 +86,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">パスワード（確認）</label>
             <div class="col-lg-10">
-                <input type="password" class="form-control inputPassword2" name="password2" value="" required="required">
+                <input type="password" class="form-control inputPassword2" name="password_confirmation" value="" required="required">
             </div>
         </div>
         <div class="form-group">

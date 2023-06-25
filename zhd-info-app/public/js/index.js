@@ -3,13 +3,23 @@ $(document).on('click' , '.toggleTab .tab' , function(){
 	if($(this).hasClass('isCurrent')){
 		return false;
 	}
+	var queryParams = [];
 
 	let chkTabNumber = $(this).data('sort-number');
-	if(chkTabNumber){
-		location.href = "/admin/manual/publish?category=" + chkTabNumber;
-	}else{
-		location.href = "/admin/manual/publish"
-	}
+	let statusValue = $('select[name="status"]').val();
+	let qValue = $('input[name="q"]').val();
+
+	let url = "/admin/manual/publish"
+	if(chkTabNumber) queryParams.push("category=" + chkTabNumber);
+	if(statusValue) queryParams.push("status=" + statusValue);
+	if(qValue) queryParams.push("q=" + qValue);
+
+	if (queryParams.length > 0) {
+      url += '?' + queryParams.join('&');
+    }
+	
+	location.href = url
+
 
 	// let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
 

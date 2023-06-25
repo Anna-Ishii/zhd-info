@@ -14,13 +14,16 @@ return new class extends Migration
         Schema::create('messages', function (Blueprint $table) {
             $table->id();
             $table->string('title');
+            $table->string('content_name');
             $table->string('content_url');
-            $table->integer('category_id');
-            $table->integer('create_user_id');
+            $table->unsignedBigInteger('category_id');
+            $table->unsignedBigInteger('create_user_id');
             $table->integer('status')->default(0);
-            $table->boolean('emergency_flg');
+            $table->boolean('emergency_flg')->default(false);
             $table->dateTime('start_datetime')->nullable();
             $table->dateTime('end_datetime')->nullable();
+            $table->foreign('category_id')->references('id')->on('message_categories');
+            $table->foreign('create_user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }

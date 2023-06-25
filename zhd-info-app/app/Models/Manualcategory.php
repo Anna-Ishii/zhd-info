@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Manualcategory extends Model
+class ManualCategory extends Model
 {
-    protected $table = 'manualcategories';
+    protected $table = 'manual_categories';
 
     protected $fillable = ['name'];
 

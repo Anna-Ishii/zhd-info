@@ -9,6 +9,7 @@ services:
       - type: bind
         source: ./zhd-info-app
         target: /var/www/zhd-info-app
+    working_dir: /var/www/zhd-info-app
     depends_on:
       - db
     

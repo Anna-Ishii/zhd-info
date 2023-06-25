@@ -19,14 +19,6 @@ class Orgaization2Seeder extends Seeder
                 [
                     'name' => 'ジョリーパスタ',
                     'organization1_id' => '1'
-                ],
-                [
-                    'name' => 'ジョリーオックス',
-                    'organization1_id' => '1'
-                ],
-                [
-                    'name' => 'オリーブの丘',
-                    'organization1_id' => '2'
                 ]
             ]
         );

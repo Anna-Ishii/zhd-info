@@ -15,12 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description');
+            $table->string('content_name');
             $table->string('content_url');
-            $table->integer('create_user_id');
-            $table->integer('category_id');
+            $table->unsignedBigInteger('create_user_id');
+            $table->unsignedBigInteger('category_id');
             $table->integer('status')->default(0);
             $table->dateTime('start_datetime')->nullable();
             $table->dateTime('end_datetime')->nullable();
+            $table->foreign('category_id')->references('id')->on('manual_categories');
+            $table->foreign('create_user_id')->references('id')->on('users');
             $table->timestamps();
         });
     }

@@ -12,12 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('message_user', function (Blueprint $table) {
-            $table->string('user_id');
-            $table->integer('message_id');
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('message_id');
             $table->boolean('read_flg')->default(false);
-            $table->integer('shop_id');
+            $table->unsignedBigInteger('shop_id');
             $table->timestamps();
-
+            $table->foreign('user_id')->references('id')->on('users');
+            $table->foreign('message_id')->references('id')->on('messages');
+            $table->foreign('shop_id')->references('id')->on('shops');
             $table->unique(['message_id', 'user_id']);
         });
     }

@@ -9,19 +9,19 @@
     </div>
 
     <!-- 絞り込み部分 -->
-    <form method="post" action="index" class="form-horizontal mb24">
+    <form method="get" class="form-horizontal mb24">
         <div class="form-group form-inline mb16">
 
             <div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" placeholder="キーワードを入力してください" />
+                <input name="q" value="{{ request()->input('q') }}" class="form-control" placeholder="キーワードを入力してください" />
             </div>
 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
-                <select name="brand_id" class="form-control">
+                <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
                     @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}">{{ $category->name }}</option>
+                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
                     @endforeach
 
                 </select>
@@ -31,9 +31,9 @@
                 <label class="input-group-addon">状態</label>
                 <select name="status" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    <option value="0">待機</option>
-                    <option value="1">掲載中</option>
-                    <option value="2">掲載終了</option>
+                    @foreach ($publish_status as $status)
+                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
+                    @endforeach
                 </select>
             </div>
 
@@ -98,11 +98,11 @@
                                 </td>
                                 <td class="shop_id">{{$manual->id}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td class="message-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td class="manual-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
                                 <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
                                 <td nowrap>{{$manual->start_datetime}}</td>
                                 <td nowrap>{{$manual->end_datetime}}</td>
-                                <td nowrap>{{$manual->status_name}}</td>
+                                <td nowrap>{{$manual->status['name']}}</td>
                                 <td nowrap>{{$manual->create_user->name}}</td>
                                 <td nowrap>{{$manual->created_at}}</td>
                             </tr>
@@ -119,4 +119,5 @@
 
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
+<script src="{{ asset('/js/index.js') }}" defer></script>
 @endsection

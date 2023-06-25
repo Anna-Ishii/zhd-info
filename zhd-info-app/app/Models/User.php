@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model
 {
+    use SoftDeletes;
+    
     protected $fillable = 
         ['name',
          'belong_label',
@@ -15,7 +18,7 @@ class User extends Model
          'password',
          'employee_code',
          'shop_id',
-         'roll_id'
+         'roll_id',
         ];
 
     public function message(): BelongsToMany
@@ -27,7 +30,7 @@ class User extends Model
     public function manual(): BelongsToMany
     {
         return $this->belongsToMany(Manual::class, 'manual_user','user_id', 'manual_id')
-                    ->withPivot('read_flg', 'shop');
+                    ->withPivot('read_flg', 'shop_id');
     }
 
     public function roll(): BelongsTo
