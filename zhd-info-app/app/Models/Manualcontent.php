@@ -17,7 +17,6 @@ class Manualcontent extends Model
         'title',
         'description',
         'order_no',
-        'is_deleted'
     ];
 
     public function getContentTypeAttribute()

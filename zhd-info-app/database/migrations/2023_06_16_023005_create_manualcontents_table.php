@@ -19,9 +19,9 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable(true);
             $table->integer('order_no');
-            $table->boolean('is_deleted')->default(false);
             $table->foreign('manual_id')->references('id')->on('manuals');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

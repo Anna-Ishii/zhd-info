@@ -18,13 +18,12 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password');
             $table->string('employee_code')->unique();
-            $table->boolean('is_deleted')->default(false);
             $table->unsignedBigInteger('shop_id');
             $table->unsignedBigInteger('roll_id');
             $table->foreign('shop_id')->references('id')->on('shops');
             $table->foreign('roll_id')->references('id')->on('rolls');
-
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -142,7 +142,6 @@ class ManualPublishController extends Controller
         $target_organization1 = $manual->organization1()->pluck('organization1.id')->toArray();
         $contents = $manual->content()
             ->orderBy("order_no")
-            ->where('is_deleted','=','false')
             ->get();
 
         return view('admin.manual.publish.edit', [
@@ -181,7 +180,7 @@ class ManualPublishController extends Controller
         $count_order_no = 0;
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
         $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
-        Manualcontent::whereNotIn('id', $contents_id)->update(['is_deleted' => true]);
+        Manualcontent::whereNotIn('id', $contents_id)->delete();
 
         if (
             isset($request['manual_flow_title']) &&
