@@ -8,42 +8,42 @@
 		</div>
 	</div>
 
-	<!-- 絞り込み部分 -->
-	<form method="post" action="index" class="form-horizontal mb24">
-		<div class="form-group form-inline mb16">
+    <!-- 絞り込み部分 -->
+    <form method="get" class="form-horizontal mb24">
+        <div class="form-group form-inline mb16">
 
-			<div class="input-group col-lg-2">
-				<input name="q" value="" class="form-control" placeholder="キーワードを入力してください" />
-			</div>
+            <div class="input-group col-lg-2 spMb16">
+                <input name="q" value="{{ request()->input('q') }}" class="form-control" placeholder="キーワードを入力してください" />
+            </div>
 
-			<div class="input-group col-lg-2">
-				<label class="input-group-addon">カテゴリ</label>
-				<select name="brand_id" class="form-control">
-					<option value=""> -- 指定なし -- </option>
-					@foreach ($category_list as $category)
-					<option value="{{ $category->id }}">{{ $category->name }}</option>
-					@endforeach
+            <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">カテゴリ</label>
+                <select name="category" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($category_list as $category)
+                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @endforeach
 
-				</select>
-			</div>
+                </select>
+            </div>
 
-			<div class="input-group col-lg-2">
-				<label class="input-group-addon">状態</label>
-				<select name="status" class="form-control">
-					<option value=""> -- 指定なし -- </option>
-					<option value="0">待機</option>
-					<option value="1">掲載中</option>
-					<option value="2">掲載終了</option>
-				</select>
-			</div>
+            <div class="input-group col-lg-2">
+                <label class="input-group-addon">状態</label>
+                <select name="status" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($publish_status as $status)
+                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
+                    @endforeach
+                </select>
+            </div>
 
-		</div>
+        </div>
 
-		<div class="text-center">
-			<button class="btn btn-info">検索</button>
-		</div>
+        <div class="text-center">
+            <button class="btn btn-info">検索</button>
+        </div>
 
-	</form>
+    </form>
 
 	<!-- 検索結果 -->
 	<form method="post" action="#">

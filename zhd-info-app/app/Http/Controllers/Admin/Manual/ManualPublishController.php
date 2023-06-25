@@ -10,27 +10,57 @@ use App\Models\Manual;
 use App\Models\ManualCategory;
 use App\Models\Manualcontent;
 use App\Models\Organization1;
-use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 
 class ManualPublishController extends Controller
 {
     public function index(Request $request)
     {
+        $category_list = ManualCategory::all();
         $category_id = $request->input('category');
-
-        $manual_list = Manual::query()
+        $status = $request->input('status');
+        $q = $request->input('q');
+        $manual_list =
+            Manual::query()
+            ->when(isset($q), function ($query) use ($q) {
+                $query->whereLike('title', $q);
+            })
+            ->when(isset($status), function ($query) use ($status) {
+                switch ($status) {
+                    case 1:
+                        $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                ->where(function ($query) {
+                                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('start_datetime');
+                                })
+                                ->orWhereNull('end_datetime')
+                                ->where(function ($query) {
+                                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('start_datetime');
+                                });
+                        break;
+                    case 2:
+                        $query->where('start_datetime', '<=', now('Asia/Tokyo'))
+                                ->where(function ($query) {
+                                $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                ->orWhereNull('end_datetime');
+                        });
+                        break;
+                    case 3:
+                        $query->where('end_datetime', '<=', now('Asia/Tokyo'));
+                        break;
+                    default:
+                        break;
+                }
+            })
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(5)
             ->appends(request()->query());
-
-        $category_list = ManualCategory::all();
 
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
