@@ -11,8 +11,10 @@ class MessageController extends Controller
     function index(Request $request)
     {
         $category_id = $request->input('category');
+
+        $user = session("member");
         // 掲示中のデータをとってくる
-        $messages = Message::query()
+        $messages = $user->message()
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
