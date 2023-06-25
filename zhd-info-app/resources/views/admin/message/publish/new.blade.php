@@ -11,6 +11,15 @@
     @if (session('error'))
     <div class="alert alert-danger">{{(session('error'))}}</div>
     @endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
@@ -25,7 +34,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" required="required">
+                    <input type="file" name="file" value="" accept=".pdf" required="required">
                 </label>
             </div>
         </div>
@@ -52,7 +61,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="">
                 <label>
                     <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
                     未定
@@ -62,7 +71,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="">
+                <input id="dateTo" class="form-control mr16" name="end_datetime" value="">
                 <label>
                     <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
                     未定
@@ -71,14 +80,14 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">対象者</label>
-            <div class="col-lg-10">
+            <div class="col-lg-10 checkArea">
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll" value="all" class="mr8" disabled>
+                    <input type="checkbox" id="checkAll" class="mr8">
                     全て
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="mr8">
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8">
                     {{ $target_roll->name }}
                 </label>
                 @endforeach
@@ -89,14 +98,16 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8">
                         全業態
                     </label>
                 </div>
+                @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked disabled>
-                    JP
+                    <input type="checkbox" name="organization1[]" value="{{$organization1->id}}" class="checkCommon mr8">
+                    {{$organization1->name}}
                 </label>
+                @endforeach
             </div>
         </div>
         <div class="form-group">
@@ -104,7 +115,7 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization4[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8">
                         全て
                     </label>
                 </div>

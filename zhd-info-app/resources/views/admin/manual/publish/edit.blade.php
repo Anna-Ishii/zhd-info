@@ -7,7 +7,18 @@
             <h1 class="page-header">動画マニュアル編集</h1>
         </div>
     </div>
-
+    @if (session('error'))
+    <div class="alert alert-danger">{{(session('error'))}}</div>
+    @endif
+    @if ($errors->any())
+    <div class="alert alert-danger">
+    <ul>
+        @foreach ($errors->all() as $error)
+            <li>{{ $error }}</li>
+        @endforeach
+    </ul>
+    </div>
+    @endif
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
 
@@ -27,8 +38,8 @@
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">{{ $manual->content_url }}</span>
-                    <input type="file" name="file" value="" data-variable-name="manual_file">
+                    <span class="fileName">{{ $manual->content_name }}</span>
+                    <input type="file" name="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
                 </label>
             </div>
         </div>
@@ -45,7 +56,7 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="manual_file[]" value="" data-variable-name="manual_file">
+                            <input type="file" name="manual_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
                         </label>
                     </div>
                 </div>
@@ -73,15 +84,15 @@
                     <label class="col-lg-2 control-label">手順ファイル添付</label>
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
-                            <span class="fileName">{{ $content->content_url }}</span>
-                            <input type="file" name="manual_file[{{$loop->index}}]" value="" data-variable-name="manual_file">
+                            <span class="fileName">{{ $content->content_name }}</span>
+                            <input type="file" name="manual_file[{{$loop->index}}]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
                         </label>
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
                     <div class="col-lg-10">
-                        <textarea name="manual_flow_detail[{{$loop->index}}]" class="form-control" data-variable-name="manual_flow_detail" required>{{ $content->description }}</textarea>
+                        <textarea name="manual_flow_detail[{{$loop->index}}]" class="form-control" data-variable-name="manual_flow_detail" >{{ $content->description }}</textarea>
                     </div>
                 </div>
                 <div class="text-right">
@@ -110,7 +121,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" type="datetime-local" name="start_datetime" value="{{$manual->start_datetime}}">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{$manual->start_datetime}}">
                 <label>
                     <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom" {{ empty($manual->start_datetime) ? 'checked' : '' }}>
                     未定
@@ -120,7 +131,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateTo">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16" type="datetime-local" name="end_datetime" value="{{$manual->end_datetime}}">
+                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{$manual->end_datetime}}">
                 <label>
                     <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo" {{ empty($manual->end_datetime) ? 'checked' : '' }}>
                     未定
@@ -132,22 +143,17 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" name="organization1[]" value="all" id="checkAll" class="mr8" disabled>
+                        <input type="checkbox" id="checkAll" class="mr8" >
                         全業態
                     </label>
                 </div>
+                @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="1" class="checkCommon mr8" checked>
-                    JP
+                    <input type="checkbox" name="organization1[]" value="{{$organization1->id}}" class="checkCommon mr8" 
+                        {{ in_array($organization1->id, $target_organization1, true) ? 'checked' : '' }}>
+                    {{$organization1->name}}
                 </label>
-                <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="2" class="checkCommon mr8" disabled>
-                    熟成焼肉いちばん
-                </label>
-                <label class="åçmr16">
-                    <input type="checkbox" name="organization1[]" value="3" class="checkCommon mr8" disabled>
-                    牛庵
-                </label>
+                @endforeach
             </div>
         </div>
 

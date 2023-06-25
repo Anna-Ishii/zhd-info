@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class Category extends Model
+class MessageCategory extends Model
 {
-    protected $table = 'categories';
+    protected $table = 'message_categories';
 
     protected $fillable = ['name'];
 

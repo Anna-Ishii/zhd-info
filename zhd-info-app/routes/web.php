@@ -46,23 +46,29 @@ Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
+    // 管理画面-業務連絡
     Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
-            Route::match(['get', 'post'], 'new', [MessagePublishController::class, 'new'])->name('new');
-            Route::match(['get', 'post'], 'edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
-            Route::post('/stop', [MessagePublishController::class, 'stop'])->name('stop');
+            Route::get('new', [MessagePublishController::class, 'new'])->name('new');
+            Route::post('new', [MessagePublishController::class, 'store'])->name('new.store');
+            Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
+            Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
+            Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [MessageManageController::class, 'index'])->name('index');
             Route::get('detail/{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
         });
     });
+    // 管理画面-動画マニュアル
     Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
-            Route::match(['get', 'post'], 'new', [ManualPublishController::class, 'new'])->name('new');
-            Route::match(['get', 'post'], 'edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
+            Route::get('new', [ManualPublishController::class, 'new'])->name('new');
+            Route::post('new', [ManualPublishController::class, 'store'])->name('new.store');
+            Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
+            Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
@@ -72,7 +78,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::get('/', [AccountController::class, 'index'])->name('index');
-        Route::match(['get', 'post'], 'new', [AccountController::class, 'new'])->name('new');
+        Route::get('new', [AccountController::class, 'new'])->name('new');
+        Route::post('new', [AccountController::class, 'store'])->name('new.store');
+        Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
     });
     Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
         Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {

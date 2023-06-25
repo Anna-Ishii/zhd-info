@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Models\Traits\WhereLike;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -11,6 +13,8 @@ use Mockery\Matcher\HasKey;
 
 class Manual extends Model
 {
+    use WhereLike;
+    
     protected $table = 'manuals';
 
     protected $fillable =
@@ -18,10 +22,10 @@ class Manual extends Model
         'title',
         'description',
         'category_id',
+        'content_name',
         'content_url',
         'create_user_id',
         'category_id',
-        'status',
         'start_datetime',
         'end_datetime',
         'target_block',
@@ -41,17 +45,17 @@ class Manual extends Model
 
     public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'create_user_id');
+        return $this->hasOne(User::class, 'id', 'create_user_id')->withTrashed();
     }
 
     public function category(): HasOne
     {
-        return $this->hasOne(Manualcategory::class, foreignKey: 'id', localKey: 'category_id');
+        return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
     public function organization1(): BelongsToMany
     {
-        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1');
+        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1_id');
     }
 
     public function content(): HasMany
@@ -59,27 +63,48 @@ class Manual extends Model
         return $this->hasMany(Manualcontent::class);
     }
 
-    public function getStatusNameAttribute()
+    public function getStatusAttribute()
     {
-        $status = $this->attributes['status']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+        $start_datetime =
+            !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
+        $end_datetime =
+            !empty($this->attributes['end_datetime']) ? Carbon::parse($this->attributes['end_datetime'], 'Asia/Tokyo') : null;
 
-        // パラメータに応じて名称を返すロジックを記述
-        $name = '';
-        switch ($status) {
-            case 0:
-                $name = '待機';
-                break;
-            case 1:
-                $name = '掲載中';
-                break;
-            case 2:
-                $name = '掲載終了';
-                break;
-                // 他のケースを追加する必要があればここに記述します
-            default:
-                $name = 'Unknown';
+        $now = Carbon::now('Asia/Tokyo');
+
+        $status = [
+            'id'   => 0,
+            'name' => '待機' 
+        ];
+
+        if (isset($start_datetime)) {
+            if ($start_datetime->lte($now)) {
+                $status = [
+                    'id'   => 1,
+                    'name' => '掲載中'
+                ];
+            }
         }
 
-        return $name;
+        if (isset($end_datetime)) {
+            if ($end_datetime->lte($now)) {
+                $status = [
+                    'id'   => 2,
+                    'name' => '掲載終了'
+                ];
+            }
+        }
+
+        return $status;
+    }
+
+    public function getContentTypeAttribute()
+    {
+        $content_url = $this->attributes['content_url']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+
+        // 拡張子を取得
+        $extension = pathinfo($content_url, PATHINFO_EXTENSION);
+
+        return $extension;
     }
 }

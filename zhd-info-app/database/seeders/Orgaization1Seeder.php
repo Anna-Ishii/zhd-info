@@ -19,9 +19,6 @@ class Orgaization1Seeder extends Seeder
                 [
                     'name' => 'JP',
                 ],
-                [
-                    'name' => 'ON'
-                ],
             ]
         );
     }
