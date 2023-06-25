@@ -3,61 +3,79 @@
 namespace App\Http\Controllers\Admin\Account;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Account\AccountStoreRequest;
+use App\Models\Manual;
+use App\Models\Message;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
     public function index()
     {
         $users = User::orderBy('created_at', 'desc');
+
         return view('admin.account.index',[
             'users' => $users->paginate(5)
                             ->appends(request()->query()),
         ]);
     }
     
-    public function new(Request $request)
+    public function new()
     {
-        if ($request->isMethod('post')) {
-            if ($request->password != $request->password2) return redirect()
-                                                                    ->route('admin.account.new')
-                                                                    ->withInput()
-                                                                    ->with('error', 'パスワードが一致しません'); 
-            $params = $request
-                        ->only([
-                            'name', 
-                            'belong_label', 
-                            'shop_id', 
-                            'employee_code', 
-                            'password', 
-                            'email', 
-                            'roll_id'
-                        ]);
-            $params['password'] = Hash::make($request->password);
-            
-            try {
-                User::create($params);
-
-            } catch (\Throwable $th) {
-                return redirect()
-                        ->route('admin.account.new')
-                        ->withInput()
-                        ->with('error', 'データベースエラーです');
-            }
-
-            return redirect()->route('admin.account.index');
-        }
-        // TODO
-        // 正式なものに直す
         $user_count = User::max('id') + 1;
         $shops = Shop::get();
         return view('admin.account.new',[
             'user_count' => $user_count,
             'shops' => $shops,
         ]);
+    }
+    public function store(AccountStoreRequest $request)
+    {
+        $params = $request->safe()->all();
+        $params['password'] = Hash::make($request->password);
+        
+        $roll_id = $request->roll_id;
+        $shop = Shop::find($request->shop_id);
+        $organization4_id = $shop->organization4_id;
+        $organization1_id = $shop->organization1_id;
+
+        try {
+            DB::beginTransaction();
+            $user = User::create($params);
+            $data = [];
+            // 該当のメッセージを登録
+            $messages = Message::whereHas('roll', function ($query) use ($roll_id) {
+                $query->where('roll_id', '=', $roll_id);
+            })->whereHas('organization4', function ($query) use ($organization4_id) {
+                $query->where('organization4_id', '=', $organization4_id);
+            })->get('id')->toArray();
+            foreach ($messages as $message) {
+                $data[$message['id']] = ['shop_id' => $request->shop_id];
+            }
+            $user->message()->attach($data);
+
+            // 該当のマニュアルを登録
+            $manuals = Manual::whereHas('organization1', function ($query) use ($organization1_id) {
+                $query->where('organization1_id', '=', $organization1_id);
+            })->get('id')->toArray();
+            foreach ($manuals as $manual) {
+                $data[$manual['id']] = ['shop_id' => $request->shop_id];
+            }
+            $user->manual()->attach($data);
+            DB::commit();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', 'データベースエラーです');
+        }
+
+        return redirect()->route('admin.account.index');
     }
 
 }
