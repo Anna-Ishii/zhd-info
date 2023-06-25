@@ -8,6 +8,18 @@
             <h1 class="page-header">業務連絡新規登録</h1>
         </div>
     </div>
+    @if (session('error'))
+    <div class="alert alert-danger">{{(session('error'))}}</div>
+    @endif
+    @if ($errors->any())
+        <div class="alert alert-danger">
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
@@ -21,8 +33,8 @@
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="">
+                    <span class="fileName">{{ $message->content_name }}</span>
+                    <input type="file" name="file" accept=".pdf" value="">
                 </label>
             </div>
         </div>
@@ -49,7 +61,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" type="datetime-local" class="form-control mr16" name="start_datetime" value="{{ $message->start_datetime }}">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ $message->start_datetime }}">
                 <label>
                     <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom" {{ empty($message->start_datetime) ? 'checked' : '' }}>
                     未定
@@ -59,7 +71,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" type="datetime-local" class="form-control mr16" name="end_datetime" value="{{ $message->end_datetime }}">
+                <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ $message->end_datetime }}">
                 <label>
                     <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo" {{ empty($message->end_datetime) ? 'checked' : '' }}>
                     未定

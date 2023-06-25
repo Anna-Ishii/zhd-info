@@ -119,4 +119,5 @@
 
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
+<script src="{{ asset('/js/index.js') }}" defer></script>
 @endsection

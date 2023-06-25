@@ -126,8 +126,8 @@ function countVariableBox(){
 	let fileTarget = $('.manualVariableArea').find('.manualVariableBox').not('#cloneTarget');
 	let fileTargetNum = 0;
 	fileTarget.each(function(){
-		$(this).find('input[data-variable-name=manual_flow_title]').attr('name' , 'manual_flow_title['+fileTargetNum+']');
-		$(this).find('input[data-variable-name=manual_file]').attr('name' , 'manual_file['+fileTargetNum+']');
+		$(this).find('input[data-variable-name=manual_flow_title]').attr({'name':'manual_flow_title['+fileTargetNum+']', 'required':true});
+		$(this).find('input[data-variable-name=manual_file]').attr({'name':'manual_file['+fileTargetNum+']'});
 		$(this).find('textarea[data-variable-name=manual_flow_detail]').attr('name' , 'manual_flow_detail['+fileTargetNum+']');
 		fileTargetNum = fileTargetNum + 1;
 	});
