@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use App\Models\Shop;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
 class MessageManageController extends Controller
@@ -68,7 +69,7 @@ class MessageManageController extends Controller
 
         // メッセージの該当ショップを取得
         $target_org4 = $message->organization4()->select('id')->get()->makeHidden('pivot')->toArray();
-        $target_shop = Shop::whereIn('organization4_id', $target_org4);
+        $target_shop = self::get_target_users($message);
 
 
         return view('admin.message.manage.detail', [
@@ -76,5 +77,35 @@ class MessageManageController extends Controller
             "target_shop" => $target_shop->paginate(10)
                 ->appends(request()->query()),
         ]);
+    }
+
+    /**
+     * メッセージの該当shopと、該当userの閲覧数と在籍者数を取得する
+     *  
+     * @param Message $message マニュアルオブジェクト
+     * @return Shop 
+     */
+    private function get_target_users(Message $message)
+    {
+        $target_user_isread = DB::table('message_user')
+        ->select('shop_id')
+        ->selectRaw('COUNT(*) as total')
+        ->where('message_id', $message->id)
+            ->where('read_flg', 1)
+            ->groupBy('shop_id');
+
+        $target_user = DB::table('message_user')
+        ->select('shop_id')
+        ->selectRaw('COUNT(*) as total')
+        ->where('message_id', $message->id)
+            ->groupBy('shop_id');
+
+        $result = Shop::rightJoinSub($target_user, 'target_user', function ($join) {
+            $join->on('shops.id', '=', 'target_user.shop_id');
+        })->leftJoinSub($target_user_isread, 'target_user_isread', function ($join) {
+            $join->on('shops.id', '=', 'target_user_isread.shop_id');
+        })
+            ->select('shops.*', 'target_user_isread.total as target_user_isread_total', 'target_user.total as target_user_total');
+        return $result;
     }
 }
