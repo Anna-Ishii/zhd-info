@@ -100,11 +100,10 @@ class ManualManageController extends Controller
             ->where('manual_id', $manual->id)
             ->groupBy('shop_id');
 
-        $result = Shop::leftJoinSub($target_user_isread, 'target_user_isread', function ($join) {
-                $join->on('shops.id', '=', 'target_user_isread.shop_id');
-            })
-            ->leftJoinSub($target_user, 'target_user', function ($join) {
+        $result = Shop::rightJoinSub($target_user, 'target_user', function ($join) {
                 $join->on('shops.id', '=', 'target_user.shop_id');
+            })->leftJoinSub($target_user_isread, 'target_user_isread', function ($join) {
+            $join->on('shops.id', '=', 'target_user_isread.shop_id');
             })
             ->select('shops.*', 'target_user_isread.total as target_user_isread_total', 'target_user.total as target_user_total');
         return $result;
