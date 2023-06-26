@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Admin;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -13,8 +14,8 @@ class AuthController extends Controller
     public function index ()
     {
         //ログイン中か確認
-        $user = session('user');
-        if (isset($user)) {
+        $admin = session('admin');
+        if (isset($admin)) {
             return redirect()->route('admin.message.publish.index');
         }
         return view('admin.auth.index');
@@ -34,16 +35,16 @@ class AuthController extends Controller
                 ->withInput();
         }
 
-        $user = User::where('email', $request->email)->first();
+        $admin = Admin::where('email', $request->email)->first();
 
-        if (empty($user)) {
+        if (empty($admin)) {
             return redirect()
                 ->back()
                 ->with('error', 'ログインに失敗しました');
         }
 
-        if(Hash::check($request->password, $user->password)){
-            session()->put(['user' => $user]);
+        if(Hash::check($request->password, $admin->password)){
+            session()->put(['admin' => $admin]);
 
             return redirect()->route('admin.message.publish.index');
         }
@@ -55,7 +56,7 @@ class AuthController extends Controller
 
     public function logout (Request $request)
     {
-        $request->session()->flush();
+        $request->session()->forget('admin');
         return response(status:200);
     }
 }

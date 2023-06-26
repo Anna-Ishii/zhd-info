@@ -26,7 +26,7 @@ class MessageTest extends TestCase
         $message->title = "タイトル";
         $message->content_url = "https://jp-information-sys-html.dev.nssx.work/message/detail.html";
         $message->category_id = 1;
-        $message->create_user_id = 1;
+        $message->create_admin_id = 1;
         $message->emergency_flg = false;
         $message->start_datetime = Carbon::now()->format('Y-m-d H:i:s');
         $message->end_datetime = Carbon::now()->format('Y-m-d H:i:s');
@@ -49,7 +49,7 @@ class MessageTest extends TestCase
         $message->title = "タイトル";
         $message->content_url = "https://jp-information-sys-html.dev.nssx.work/message/detail.html";
         $message->category_id = 1;
-        $message->create_user_id = 1;
+        $message->create_admin_id = 1;
         $message->emergency_flg = false;
         $message->start_datetime = Carbon::now()->format('Y-m-d H:i:s');
         $message->end_datetime = Carbon::now()->format('Y-m-d H:i:s');

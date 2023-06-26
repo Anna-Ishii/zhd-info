@@ -19,7 +19,7 @@ class ManualsTableSeeder extends Seeder
                     'title' => 'test',
                     'content_url' => 'https://jp-information-sys-html.dev.nssx.work/message/detail.html',
                     'description' => 'マニュアル説明',
-                    'create_user_id' => 1,
+                    'create_admin_id' => 1,
                     'category_id' => 1,
                     'start_datetime' => '2023-06-12 17:00',
                     'end_datetime' => '2023-06-13 17:00'

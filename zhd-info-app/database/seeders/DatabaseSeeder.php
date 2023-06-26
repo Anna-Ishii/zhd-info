@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ShopSeeder::class); //店舗
         $this->call(RollTableSeeder::class);
         $this->call(UsersTableSeeder::class);
+        $this->call(AdminTableSeeder::class);
         $this->call(MessageCategoriesTableSeeder::class);
         // $this->call(MessageTableSeeder::class);
         // $this->call(Message_RollTableSeeder::class);

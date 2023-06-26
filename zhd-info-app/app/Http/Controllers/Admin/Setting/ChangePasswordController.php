@@ -30,10 +30,10 @@ class ChangePasswordController extends Controller
                 ->withInput();
         }
 
-        $user = session('user');
+        $admin = session('admin');
 
         // 現在のパスワードチェック
-        if (!Hash::check($request->oldpasswd, $user->password)) {
+        if (!Hash::check($request->oldpasswd, $admin->password)) {
             return redirect()
                 ->back()
                 ->with('error', 'パスワードが一致しません');
@@ -42,8 +42,8 @@ class ChangePasswordController extends Controller
         $newpassword = Hash::make($request->newpasswd);
 
         try {
-            $user->password = $newpassword;
-            $user->save();
+            $admin->password = $newpassword;
+            $admin->save();
         } catch (\Throwable $th) {
             return redirect()
                 ->back()

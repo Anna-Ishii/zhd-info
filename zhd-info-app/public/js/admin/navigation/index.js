@@ -2,7 +2,7 @@ $("#logout_btn").on('click', function() {
 
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    fetch("/logout", {
+    fetch("/admin/logout", {
         method: 'POST',
         headers: {
             "Content-Type": "application/json",

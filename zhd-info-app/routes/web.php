@@ -40,9 +40,9 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 });
 
 // 管理画面へのログイン画面
-Route::get('/auth', [AuthController::class, 'index'])->name('admin.auth');
-Route::post('/auth', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('admin.logout');
+Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
+Route::post('/admin/auth', [AuthController::class, 'login']);
+Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
