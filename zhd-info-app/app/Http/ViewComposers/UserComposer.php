@@ -8,9 +8,9 @@ class UserComposer
 {
     public function compose(View $view)
     {
-        $user = session('user');
+        $admin = session('admin');
         $view->with([
-            'user' => $user,
+            'admin' => $admin,
         ]);
     }
 }

@@ -17,13 +17,13 @@ return new class extends Migration
             $table->text('description');
             $table->string('content_name');
             $table->string('content_url');
-            $table->unsignedBigInteger('create_user_id');
+            $table->unsignedBigInteger('create_admin_id');
             $table->unsignedBigInteger('category_id');
             $table->integer('status')->default(0);
             $table->dateTime('start_datetime')->nullable();
             $table->dateTime('end_datetime')->nullable();
             $table->foreign('category_id')->references('id')->on('manual_categories');
-            $table->foreign('create_user_id')->references('id')->on('users');
+            $table->foreign('create_admin_id')->references('id')->on('admin');
             $table->timestamps();
         });
     }

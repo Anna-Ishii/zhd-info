@@ -100,7 +100,7 @@ class MessagePublishController extends Controller
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
-        $msg_params['create_user_id'] = session('user')->id;
+        $msg_params['create_admin_id'] = session('admin')->id;
 
         $data = [];
         if (isset($request->organization4)) {
@@ -173,7 +173,7 @@ class MessagePublishController extends Controller
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if (isset($request->file)) $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
-        $msg_params['create_user_id'] = session('user')->id;
+        $msg_params['create_admin_id'] = session('admin')->id;
 
         $data = [];
         if(isset($request->organization4)) {
