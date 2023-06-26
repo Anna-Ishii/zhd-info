@@ -18,7 +18,6 @@ return new class extends Migration
             $table->string('content_url');
             $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('create_admin_id');
-            $table->integer('status')->default(0);
             $table->boolean('emergency_flg')->default(false);
             $table->dateTime('start_datetime')->nullable();
             $table->dateTime('end_datetime')->nullable();
