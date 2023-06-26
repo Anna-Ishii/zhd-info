@@ -22,7 +22,7 @@ class Message extends Model
         'content_name',
         'content_url',
         'category_id',
-        'create_user_id',
+        'create_admin_id',
         'emergency_flg',
         'start_datetime',
         'end_datetime',
@@ -44,7 +44,7 @@ class Message extends Model
 
     public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'create_user_id')->withTrashed();
+        return $this->hasOne(User::class, 'id', 'create_admin_id')->withTrashed();
     }
 
     public function category(): HasOne

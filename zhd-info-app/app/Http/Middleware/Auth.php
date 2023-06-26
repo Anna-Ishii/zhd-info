@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,6 +19,11 @@ class Auth
         //リクエスト前の処理
         $user = $request->session()->get('member');
         if (!isset($user)) {
+            return redirect()->route('auth');
+        }
+        $exists = User::where('id', $user->id)->exists();
+        if (!$exists) {
+            $request->session()->forget('member');
             return redirect()->route('auth');
         }
         return $next($request);

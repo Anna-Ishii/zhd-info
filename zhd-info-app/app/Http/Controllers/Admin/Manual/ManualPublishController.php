@@ -89,7 +89,7 @@ class ManualPublishController extends Controller
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-        $manual_params['create_user_id'] = session('user')->id;
+        $manual_params['create_admin_id'] = session('admin')->id;
 
         $data = [];
         if (isset($request->organization1)) {
@@ -164,7 +164,7 @@ class ManualPublishController extends Controller
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if(isset($request->file)) $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-        $manual_params['create_user_id'] = session('user')->id;
+        $manual_params['create_admin_id'] = session('admin')->id;
 
         // 該当のショップID
         $shops_id = Shop::select('id')->whereIn('organization1_id', $request->input('organization1',[]))->get()->toArray();
