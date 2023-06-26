@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Admin;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -16,8 +17,13 @@ class Adminauth
     public function handle(Request $request, Closure $next): Response
     {
         //リクエスト前の処理
-        $user = $request->session()->get('user');
-        if (!isset($user)) {
+        $admin = $request->session()->get('admin');
+        if (!isset($admin)) {
+            return redirect()->route('admin.auth');
+        }
+        $exists = Admin::where('id', $admin->id)->exists();
+        if (!$exists) {
+            $request->session()->forget('admin');
             return redirect()->route('admin.auth');
         }
         return $next($request);

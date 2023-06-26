@@ -88,10 +88,6 @@ class AccountController extends Controller
     public function delete(Request $request)
     {
         $data = $request->json()->all();
-        $user = session('user');
-        if(in_array((string)$user->id, $data['user_id'], true)){
-            return response()->json(['message' => 'ログイン中のユーザーは削除できません'], status:500);
-        }
         User::whereIn('id', $data['user_id'])->delete();
         return response()->json(['message' => '削除しました'], status: 200);
     }
