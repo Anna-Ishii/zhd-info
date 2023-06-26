@@ -9,7 +9,7 @@ class AccountStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'name' => 'required|string',
+            'name' => 'required',
             'belong_label'  => 'required',
             'shop_id' => 'required',
             'employee_code' => 'required|unique:users',

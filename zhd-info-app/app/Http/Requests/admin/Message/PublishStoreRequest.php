@@ -9,8 +9,8 @@ class PublishStoreRequest extends FormRequest
     public function rules()
     {
         return [
-            'title' => 'required|string',
-            'file'  => 'required|mimes:pdf',
+            'title' => 'required',
+            'file'  => 'required|mimes:pdf|max:150000',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
@@ -26,6 +26,7 @@ class PublishStoreRequest extends FormRequest
             'title.required' => 'タイトルは必須項目です',
             'file.required' => 'ファイルを添付してください',
             'file.mimes' => 'PDF形式のファイルを添付してください',
+            'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
         ];
     }
