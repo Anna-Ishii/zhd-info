@@ -257,7 +257,7 @@ class ManualPublishController extends Controller
 
     private function parseDateTime($datetime)
     {
-        return ($datetime === 'on') ? null : Carbon::parse($datetime, 'Asia/Tokyo');
+        return ($datetime ==='on' || !isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 
     private function uploadFile($file)
