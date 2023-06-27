@@ -51,5 +51,6 @@ git subtree push --prefix zhd-info-app origin release
 ### サーバー側で以下コマンドでプルする
 
 ```sh
-git pull origin release
+git fetch origin release
+git reset --hard origin/release
 ```
