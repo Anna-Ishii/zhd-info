@@ -3,23 +3,7 @@
 @section('content')
 
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">業務連絡新規登録</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    @include('common.admin.page-head',['title' => '業務連絡新規登録'])
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
