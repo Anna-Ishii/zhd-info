@@ -34,6 +34,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js" integrity="sha512-AIOTidJAcHBH2G/oZv9viEGXRqDNmfdPVPYOYKGy3fti0xIplnlgMHUGfuNRzC6FkzIo0iIxgFnr9RikFxK+sw==" crossorigin="anonymous" defer></script>
 
     <script src="{{ asset('/admin/js/sb-admin-form.js') }}"></script>
+    @livewireStyles
 </head>
 
 <body>
@@ -47,6 +48,7 @@
     </div>
     
     <script src="{{ asset('/js/edit.js') }}" defer></script>
+    @livewireScripts
 </body>
 
 </html>
