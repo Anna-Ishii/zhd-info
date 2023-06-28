@@ -8,6 +8,8 @@ use App\Models\Manual;
 use App\Models\Message;
 use App\Models\Organization1;
 use App\Models\Organization2;
+use App\Models\Organization4;
+use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,13 +18,41 @@ use Illuminate\Support\Facades\DB;
 
 class AccountController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('created_at', 'desc');
+        $roll_list = Roll::all();
+
+        $organization2 = $request->input('organization2');
+        $roll = $request->input('roll');
+        $q = $request->input('q');
+
+        $shops = [];
+        if(is_null($request->input('shop'))){
+            if(isset($organization2)) {
+                $shops = Shop::select('id')->where('organization2_id', '=',$organization2)->get()->toArray();
+            }
+        }else{
+            $shops[] = $request->input('shop');
+        }
+
+        $users = 
+            User::query()
+            ->when(isset($q), function ($query) use ($q) {
+                $query->whereLike('name', $q);
+            })
+            ->when(!empty($shops), function ($query) use ($shops){
+                $query->whereIn('shop_id', $shops);
+            })
+            ->when(isset($roll), function ($query) use ($roll){
+                $query->where('roll_id', '=', $roll);
+            })
+            ->orderBy('created_at', 'desc')
+            ->paginate(5)
+            ->appends(request()->query());
 
         return view('admin.account.index',[
-            'users' => $users->paginate(5)
-                            ->appends(request()->query()),
+            'users' => $users,
+            'roll_list' => $roll_list,
         ]);
     }
     
