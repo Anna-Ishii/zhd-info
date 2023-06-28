@@ -63,7 +63,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime" value="">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom">
                     未定
                 </label>
             </div>
@@ -73,7 +73,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateTo" class="form-control mr16" name="end_datetime" value="">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo">
                     未定
                 </label>
             </div>
