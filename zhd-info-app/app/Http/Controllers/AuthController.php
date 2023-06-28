@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\AuthLoginRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -20,26 +21,16 @@ class AuthController extends Controller
         return view('auth.index');
     }
 
-    public function login(Request $request)
+    public function login(AuthLoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-        if ($validator->fails()) {
-            // エラー発生時の処理
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $validated = $request->validated();
 
         $user = User::where('email', $request->email)->first();
 
         if (empty($user)) {
             return redirect()
                 ->back()
-                ->with('error', 'ログインに失敗しました');
+                ->with('error', '存在しないメールアドレスです');
         }
 
         if(Hash::check($request->password, $user->password)){

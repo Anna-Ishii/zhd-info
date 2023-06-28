@@ -31,7 +31,7 @@ class AuthController extends Controller
         if (empty($admin)) {
             return redirect()
                 ->back()
-                ->with('error', 'ログインに失敗しました');
+                ->with('error', '存在しないメールアドレスです');
         }
 
         if(Hash::check($request->password, $admin->password)){

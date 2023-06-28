@@ -14,7 +14,7 @@ class AccountStoreRequest extends FormRequest
             'shop_id' => 'required',
             'employee_code' => 'required|unique:users',
             'password' => 'required|confirmed|min:8',
-            'email' => 'required|email:filter',
+            'email' => 'required|email:filter|unique:users',
             'roll_id' => 'required',
         ];
     }
@@ -32,6 +32,7 @@ class AccountStoreRequest extends FormRequest
             'password.min' => 'パスワードを8文字以上です',
             'email.required' => 'メールアドレスは必須です',
             'email.email' => 'メールアドレスの形式で入力してください',
+            'email.unique' => 'メールアドレスがすでに登録されています',
             'roll_id.required' => '権限を設定してください',
         ];
     }
