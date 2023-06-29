@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
 use App\Models\ManualCategory;
-use App\Models\Manualcontent;
+use App\Models\ManualContent;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
@@ -181,7 +181,7 @@ class ManualPublishController extends Controller
         $count_order_no = 0;
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
         $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
-        Manualcontent::whereNotIn('id', $contents_id)->delete();
+        ManualContent::whereNotIn('id', $contents_id)->delete();
 
 
          //手順の数分、繰り返す 
@@ -190,7 +190,7 @@ class ManualPublishController extends Controller
 
             // 登録されているコンテンツを変更する
             if (isset($request->content_id[$i])) {
-                $content = Manualcontent::find($request->content_id[$i]);
+                $content = ManualContent::find($request->content_id[$i]);
                 $content->title = $request['manual_flow_title'][$i];
                 $content->description = $request['manual_flow_detail'][$i];
                 $content->order_no = $count_order_no + 1;
