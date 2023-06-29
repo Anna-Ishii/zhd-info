@@ -3,30 +3,14 @@
 @section('content')
 
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">業務連絡新規登録</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    @include('common.admin.page-head',['title' => '業務連絡新規登録'])
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="">
+                <input class="form-control" name="title" value="{{old('title')}}" required="required">
             </div>
         </div>
         <div class="form-group">
@@ -43,7 +27,8 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" required="required">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        {{( old('category_id') == $category->id) ? "checked" : ""}}  required="required">
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -53,7 +38,8 @@
             <label class="col-lg-2 control-label">緊急配信</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8">
+                    <input type="checkbox" name="emergency_flg" class="mr8"
+                      {{( old('emergency_flg') == "on") ? "checked" : ""}}>
                     緊急配信する
                 </label>
             </div>
@@ -61,9 +47,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ old("start_datetime") }}">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" >
                     未定
                 </label>
             </div>
@@ -71,9 +57,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16" name="end_datetime" value="">
+                <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ old("end_datetime") }}">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo">
                     未定
                 </label>
             </div>
@@ -87,7 +73,7 @@
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8">
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8" required="required">
                     {{ $target_roll->name }}
                 </label>
                 @endforeach

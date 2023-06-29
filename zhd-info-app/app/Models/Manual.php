@@ -60,7 +60,7 @@ class Manual extends Model
 
     public function content(): HasMany
     {
-        return $this->hasMany(Manualcontent::class);
+        return $this->hasMany(ManualContent::class);
     }
 
     public function getStatusAttribute()
