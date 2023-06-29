@@ -15,8 +15,9 @@ class PublishUpdateRequest extends FormRequest
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
-            'organization4' => 'nullable',
-            'target_roll' => 'nullable',
+            'target_roll' => 'required',
+            'organization1' => 'required',
+            'organization4' => 'required',
         ];
     }
 
@@ -26,7 +27,11 @@ class PublishUpdateRequest extends FormRequest
             'title.required' => 'タイトルは必須項目です',
             'file.mimes' => 'PDF形式のファイルを添付してください',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
+            'file' => 'ファイルのアップロードに失敗しました',
             'category_id.required' => 'カテゴリを選択してください',
+            'target_roll' => '対象者を選択してください',
+            'organization1.required' => '対象業態を選択してください',
+            'organization4.required' => '対象フロックを選択してください',
         ];
     }
 }
