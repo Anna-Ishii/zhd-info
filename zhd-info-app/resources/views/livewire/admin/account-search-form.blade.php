@@ -4,18 +4,16 @@
         <select name="organization2" class="form-control"  wire:model="brand">
             <option value=""> -- 指定なし -- </option>
             @foreach ($organization2_list as $organization2)
-                <option value="{{$organization2->id}}">{{$organization2->name}}</option>
+                <option value="{{$organization2->id}}" {{ $organization2->id == $brand ? 'selected' : ''}}>{{$organization2->name}}</option>
             @endforeach
-            
         </select>
     </div>
-
     <div class="input-group col-lg-2">
         <label class="input-group-addon">店舗</label>
-        <select name="shop" class="form-control">
-            <option value="" selected> -- 指定なし -- </option>
+        <select name="shop" class="form-control" wire:model="shop_id">
+            <option value=""> -- 指定なし -- </option>
             @foreach ($shop_list as $shop)
-                <option value="{{$shop->id}}">{{$shop->name}}</option>
+                <option value="{{$shop->id}}" {{ $shop_id == $shop->id ? "selected" : ""}}>{{$shop->name}}</option>
             @endforeach
         </select>
     </div>

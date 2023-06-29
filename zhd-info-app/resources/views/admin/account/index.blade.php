@@ -12,7 +12,7 @@
         @csrf
         <div class="form-group form-inline mb16">
             <div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" />
+                <input name="q" value="{{request()->input('q')}}" class="form-control" />
                 <span class="input-group-btn"><button class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
             </div>
 
@@ -22,7 +22,7 @@
             <select name="roll" class="form-control">
                 <option value=""> -- 指定なし -- </option>
                 @foreach ($roll_list as $roll)
-                    <option value="{{$roll->id}}">{{$roll->name}}</option>
+                    <option value="{{$roll->id}}" {{ $roll->id == request()->input('roll') ? "selected" : "" }}>{{$roll->name}}</option>
                 @endforeach
             </select>
         </div>
