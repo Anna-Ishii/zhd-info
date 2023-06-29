@@ -2,23 +2,8 @@
 
 @section('content')
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">アカウント登録</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-    <div class="alert alert-danger">
-    <ul>
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-    </div>
-    @endif
+    @include('common.admin.page-head',['title' => 'アカウント登録'])
+
     <form method="post" class="form-horizontal">
         @csrf
         <input type="hidden" name="mode" value="exec">
@@ -26,13 +11,13 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">氏名</label>
             <div class="col-lg-10">
-                <input class="form-control" name="name" value="{{old('name')}}" required="required">
+                <input class="form-control" name="name" value="{{old('name')}}" >
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">所属</label>
             <div class="col-lg-10">
-                <input class="form-control" name="belong_label" value="{{old('belong_label')}}" required="required">
+                <input class="form-control" name="belong_label" value="{{old('belong_label')}}" >
             </div>
         </div>
         <div class="form-group">
@@ -68,7 +53,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">社員番号</label>
             <div class="col-lg-10">
-                <input type="number" class="form-control" name="employee_code" value="{{old('employee_code')}}" required="required">
+                <input type="number" class="form-control" name="employee_code" value="{{old('employee_code')}}" >
             </div>
         </div>
         <div class="form-group">
@@ -80,50 +65,37 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">パスワード</label>
             <div class="col-lg-10">
-                <input type="password" class="form-control inputPassword" name="password" value="" required="required">
+                <input type="password" class="form-control inputPassword" name="password" value="" >
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">パスワード（確認）</label>
             <div class="col-lg-10">
-                <input type="password" class="form-control inputPassword2" name="password_confirmation" value="" required="required">
+                <input type="password" class="form-control inputPassword2" name="password_confirmation" value="" >
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">メールアドレス</label>
             <div class="col-lg-10">
-                <input type="mail" class="form-control" name="email" value="{{old('email')}}" required="required">
+                <input type="mail" class="form-control" name="email" value="{{old('email')}}" >
             </div>
         </div>
-
         <div class="row">
             <div class="col-lg-12">
                 <h3 class="page-header">権限設定</h3>
             </div>
         </div>
-
         <div class="form-group">
             <div class="col-lg-12">
+                @foreach ($roll_list as $roll)
                 <label class="mr16">
-                    <input type="radio" name="roll_id" value="1" class="mr8" required="required">
-                    一般
+                    <input type="radio" name="roll_id" value="{{$roll->id}}" class="mr8" 
+                        {{($roll->id == old('roll_id')) ? "checked" : ""}}>
+                        {{$roll->name}}
                 </label>
-                <label class="mr16">
-                    <input type="radio" name="roll_id" value="2" class="mr8" required="required">
-                    クルー
-                </label>
-                <label class="mr16">
-                    <input type="radio" name="roll_id" value="3" class="mr8" required="required">
-                    時間帯責任者
-                </label>
-                <label class="mr16">
-                    <input type="radio" name="roll_id" value="4" class="mr8" required="required">
-                    店長
-                </label>
+                @endforeach
             </div>
         </div>
-
-        <input type="hidden" name="check_password" value="0">
 
         <div class="text-center">
             <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />

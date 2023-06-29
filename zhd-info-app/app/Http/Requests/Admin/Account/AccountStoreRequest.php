@@ -13,8 +13,8 @@ class AccountStoreRequest extends FormRequest
             'belong_label'  => 'required',
             'shop_id' => 'required',
             'employee_code' => 'required|unique:users',
-            'password' => 'required|confirmed|min:6',
-            'email' => 'required|email:filter',
+            'password' => 'required|confirmed|min:8',
+            'email' => 'required|email:filter|unique:users',
             'roll_id' => 'required',
         ];
     }
@@ -29,9 +29,10 @@ class AccountStoreRequest extends FormRequest
             'employee_code.unique' => '社員コードが重複しています',
             'password.required' => 'パスワードを入力してください',
             'password.confirmed' => 'パスワードが一致しません',
-            'password.min' => 'パスワードを6文字以上です',
+            'password.min' => 'パスワードを8文字以上です',
             'email.required' => 'メールアドレスは必須です',
             'email.email' => 'メールアドレスの形式で入力してください',
+            'email.unique' => 'メールアドレスがすでに登録されています',
             'roll_id.required' => '権限を設定してください',
         ];
     }

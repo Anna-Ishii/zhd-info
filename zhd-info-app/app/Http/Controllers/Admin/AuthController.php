@@ -3,11 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\AuthLoginRequest;
 use App\Models\Admin;
-use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -21,26 +20,16 @@ class AuthController extends Controller
         return view('admin.auth.index');
     }
 
-    public function login (Request $request)
+    public function login (AuthLoginRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-        if ($validator->fails()) {
-            // エラー発生時の処理
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $validated = $request->validated();
 
         $admin = Admin::where('email', $request->email)->first();
 
         if (empty($admin)) {
             return redirect()
                 ->back()
-                ->with('error', 'ログインに失敗しました');
+                ->with('error', '存在しないメールアドレスです');
         }
 
         if(Hash::check($request->password, $admin->password)){
