@@ -8,7 +8,6 @@ use App\Models\Manual;
 use App\Models\Message;
 use App\Models\Organization1;
 use App\Models\Organization2;
-use App\Models\Organization4;
 use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
@@ -62,15 +61,20 @@ class AccountController extends Controller
         $organization1_list = Organization1::get();
         $organization2_list = Organization2::get();
         $shops = Shop::get();
+        $roll_list = Roll::get();
         return view('admin.account.new',[
             'user_count' => $user_count,
             'shops' => $shops,
             'organization1_list' => $organization1_list,
             'organization2_list' => $organization2_list,
+            'roll_list' => $roll_list,
         ]);
     }
+
     public function store(AccountStoreRequest $request)
     {
+        $validated = $request->validated();
+
         $params = $request->safe()->all();
         $params['password'] = Hash::make($request->password);
         

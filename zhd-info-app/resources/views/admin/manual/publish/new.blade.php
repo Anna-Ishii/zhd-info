@@ -2,36 +2,21 @@
 
 @section('content')
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">動画マニュアル新規登録</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-    <div class="alert alert-danger">
-    <ul>
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-    </div>
-    @endif
+    @include('common.admin.page-head',['title' => '動画マニュアル新規登録'])
+
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
 
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{old('title')}}" id="title" required>
+                <input class="form-control" name="title" value="{{old('title')}}" id="title" required="required">
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="{{old('description')}}" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。"></textarea>
+                <textarea class="form-control" name="description" value="{{old('description')}}" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required="required"></textarea>
             </div>
         </div>
         <div class="form-group">
@@ -39,7 +24,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".mp4,.mov,.jpeg,.jpg,.png" required>
+                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png" required="required">
                 </label>
             </div>
         </div>
@@ -85,8 +70,9 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8" required="required">
-                    {{$category->name}}
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        {{( old('category_id') == $category->id) ? "checked" : ""}}  required="required">
+                    {{ $category->name }}
                 </label>
                 @endforeach
             </div>
@@ -94,9 +80,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16"  name="start_datetime" value="">
+                <input id="dateFrom" class="form-control mr16"  name="start_datetime" value="{{old("start_datetime")}}">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom">
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom">
                     未定
                 </label>
             </div>
@@ -104,9 +90,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateTo">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="">
+                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{old("end_datetime")}}">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo">
+                    <input type="checkbox"  class="dateDisabled" data-target="dateTo">
                     未定
                 </label>
             </div>
