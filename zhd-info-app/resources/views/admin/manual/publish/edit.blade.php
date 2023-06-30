@@ -2,36 +2,20 @@
 
 @section('content')
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">動画マニュアル編集</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-    <div class="alert alert-danger">
-    <ul>
-        @foreach ($errors->all() as $error)
-            <li>{{ $error }}</li>
-        @endforeach
-    </ul>
-    </div>
-    @endif
+    @include('common.admin.page-head',['title' => '動画マニュアル編集'])
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
 
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{$manual->title}}" id="title" required>
+                <input class="form-control" name="title" value="{{$manual->title}}" id="title" required="required">
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required>{{$manual->description}}</textarea>
+                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required="required">{{$manual->description}}</textarea>
             </div>
         </div>
         <div class="form-group">
@@ -39,7 +23,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">{{ $manual->content_name }}</span>
-                    <input type="file" name="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
+                    <input type="file" name="file" value="" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
                 </label>
             </div>
         </div>
@@ -112,7 +96,7 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8" required="required" {{ $category->id == $manual->category_id ? 'checked' : '' }}>
+                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8"  {{ $category->id == $manual->category_id ? 'checked' : '' }}>
                     {{$category->name}}
                 </label>
                 @endforeach
@@ -123,7 +107,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{$manual->start_datetime}}">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom" {{ empty($manual->start_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" {{ empty($manual->start_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>
@@ -133,7 +117,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{$manual->end_datetime}}">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo" {{ empty($manual->end_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo" {{ empty($manual->end_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>

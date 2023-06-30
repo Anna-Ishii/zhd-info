@@ -29,9 +29,9 @@
 
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
-            <ul class="nav" id="side-menu">
+            <ul class="nav" >
                 <li>
-                    <a href="#">業務連絡 <span class="fa arrow"></span></a>
+                    <a href="#">業務連絡</a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/message/publish/">配信</a></li>
                         <li><a href="/admin/message/manage/">管理</a></li>
@@ -39,17 +39,16 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#">動画マニュアル <span class="fa arrow"></span></a>
+                    <a href="#">動画マニュアル</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/manual/publish/">配信</a></li>
                         <li><a href="/admin/manual/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#">アカウント管理 <span class="fa arrow"></span></a>
+                    <a href="#">アカウント管理</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/account/">アカウント</a></li>
-                        <li><a href="/account/permission/">権限</a></li>
                     </ul>
                 </li>
 
