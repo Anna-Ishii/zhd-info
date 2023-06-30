@@ -8,7 +8,7 @@ use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
 use App\Models\ManualCategory;
-use App\Models\Manualcontent;
+use App\Models\ManualContent;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
@@ -104,15 +104,16 @@ class ManualPublishController extends Controller
         $content_data = [];
         if (
             isset($request['manual_flow_title']) &&
-            isset($request['manual_file']) &&
-            isset($request['manual_flow_detail'])
+            isset($request['manual_file']) 
         ) {
             for ($i = 0; $i < count($validated['manual_flow_title']); $i++) {
                 $content_data[$i]['title'] = $request['manual_flow_title'][$i];
                 $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
                 $content_data[$i]['order_no'] = $i + 1;
+                if (isset($request->file('manual_file')[$i])) {
                 $f = $request['manual_file'][$i];
-                $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                }
             }
         }
 
@@ -180,36 +181,35 @@ class ManualPublishController extends Controller
         $count_order_no = 0;
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
         $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
-        Manualcontent::whereNotIn('id', $contents_id)->delete();
+        ManualContent::whereNotIn('id', $contents_id)->delete();
 
-        if (
-            isset($request['manual_flow_title']) &&
-            isset($request['manual_file']) &&
-            isset($request['manual_flow_detail'])
-        ) {
-            //手順の数分、繰り返す 
-            for ($i = 0; $i < count($request['manual_flow_title']); $i++) {
 
-                // 登録されているコンテンツを変更する
-                if (isset($request->content_id[$i])) {
-                    $content = Manualcontent::find($request->content_id[$i]);
-                    $content->title = $request['manual_flow_title'][$i];
-                    $content->description = $request['manual_flow_detail'][$i];
-                    $content->order_no = $count_order_no + 1;
+         //手順の数分、繰り返す 
+         //タイトルは必須項目なので、タイトルの数はコンテンツの数
+        for ($i = 0; $i < count($request['manual_flow_title']); $i++) {
 
-                    // manual_fileがnullの場合は変更しない
-                    if (isset($request->file('manual_file')[$i])) {
-                        $content = array_merge($content, $this->uploadFile($request->file('manual_file')[$i]));
-                    }
-                    $content->save();
-                } else {
-                    $content_data[$i]['title'] = $request['manual_flow_title'][$i];
-                    $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
-                    $content_data[$i]['order_no'] = $count_order_no + 1;
+            // 登録されているコンテンツを変更する
+            if (isset($request->content_id[$i])) {
+                $content = ManualContent::find($request->content_id[$i]);
+                $content->title = $request['manual_flow_title'][$i];
+                $content->description = $request['manual_flow_detail'][$i];
+                $content->order_no = $count_order_no + 1;
+
+                // manual_fileがnullの場合は変更しない
+                if (isset($request->file('manual_file')[$i])) {
+                    $content = array_merge($content, $this->uploadFile($request->file('manual_file')[$i]));
+                }
+                $content->save();
+            } else {
+                $content_data[$i]['title'] = $request['manual_flow_title'][$i];
+                $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
+                $content_data[$i]['order_no'] = $count_order_no + 1;
+                if (isset($request->file('manual_file')[$i])) {
                     $f = $request['manual_file'][$i];
                     $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
                 }
             }
+            
         }
 
         try {
@@ -257,7 +257,7 @@ class ManualPublishController extends Controller
 
     private function parseDateTime($datetime)
     {
-        return ($datetime ==='on' || !isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
+        return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 
     private function uploadFile($file)

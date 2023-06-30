@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin\Setting;
 use Carbon\Carbon;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Requests\Admin\Setting\ChangePasswordEditRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,19 +16,9 @@ class ChangePasswordController extends Controller
         return view('admin.setting.change_password');
     }
 
-    public function edit(Request $request)
+    public function edit(ChangePasswordEditRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'oldpasswd' => 'required',
-            'newpasswd' => 'required',
-        ]);
-        if ($validator->fails()) {
-            // エラー発生時の処理
-            return redirect()
-                ->back()
-                ->withErrors($validator)
-                ->withInput();
-        }
+        $validated = $request->validated();
 
         $admin = session('admin');
 

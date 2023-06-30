@@ -3,23 +3,7 @@
 @section('content')
 
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">業務連絡新規登録</h1>
-        </div>
-    </div>
-    @if (session('error'))
-    <div class="alert alert-danger">{{(session('error'))}}</div>
-    @endif
-    @if ($errors->any())
-        <div class="alert alert-danger">
-            <ul>
-                @foreach ($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </div>
-    @endif
+    @include('common.admin.page-head',['title' => '業務連絡編集'])
 
     <form method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
@@ -43,7 +27,7 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" required="required" {{ $category->id == $message->category_id ? 'checked' : '' }}>
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8"  required="required" {{ $category->id == $message->category_id ? 'checked' : '' }}>
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -63,7 +47,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ $message->start_datetime }}">
                 <label>
-                    <input type="checkbox" name="start_datetime" class="dateDisabled" data-target="dateFrom" {{ empty($message->start_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" {{ empty($message->start_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>
@@ -73,7 +57,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ $message->end_datetime }}">
                 <label>
-                    <input type="checkbox" name="end_datetime" class="dateDisabled" data-target="dateTo" {{ empty($message->end_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo" {{ empty($message->end_datetime) ? 'checked' : '' }}>
                     未定
                 </label>
             </div>
