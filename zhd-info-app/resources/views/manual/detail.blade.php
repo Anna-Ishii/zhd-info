@@ -21,7 +21,7 @@
                 </a>
                 <section class="header__title">
                     <h1 class="txtBold txtBlue">{{ $manual->title }}</h1>
-                    <time datetime="{{ $manual->created_at }}" class="mr8 txtBold">{{ $manual->created_at }}</time>
+                    <time datetime="{{ $manual->start_datetime }}" class="mr8 txtBold">{{ $manual->start_datetime }}</time>
                 </section>
             </div>
             <ul class="header__menu flex">
