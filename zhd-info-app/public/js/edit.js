@@ -19,8 +19,7 @@ $(window).on('load' , function(){
 	/* datetimepicker */
 	$.datetimepicker.setLocale('ja');
 	$('#dateFrom').datetimepicker({
-		format:'Y/m/d H:i',
-		defaultTime: '00:00',
+		format:'Y/m/d H:00',
 		onShow:function( ct ){
 			this.setOptions({
 				maxDate:jQuery('#dateTo').val()?jQuery('#dateTo').val():false
