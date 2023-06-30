@@ -36,37 +36,19 @@
             </div>
         </aricle>
         <aricle class="indexList mb32">
-            <h2 class="mb10">「<span class="txtBlue">店内掲示中</span>」のお知らせ</h2>
+            <h2 class="mb10"><span class="txtBlue">本日到着した</span>動画マニュアル</h2>
             <div class="indexList__inner">
                 <div class="flex">
-                    @foreach($message_posting as $ms_post)
-                    <a href="{{ route('message.detail', ['message_id' => $ms_post->id]) }}">
+                    @foreach($manual_now as $ml_now)
+                    <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
                         <div class="indexList__box">
                             <picture class="indexList__box__img">
                                 <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
                             </picture>
-                            <p class="indexList__box__title txtBold">{{$ms_post->title}}</p>
+                            <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
                         </div>
                     </a>
                     @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10">「<span class="txtBlue">スタッフ用</span>」のお知らせ</h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_crew as $ms_crew)
-                    <a href="{{ route('message.detail', ['message_id' => $ms_crew->id]) }}">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">{{ $ms_crew->title }}</p>
-                        </div>
-                    </a>
-                    @endforeach
-
                 </div>
             </div>
         </aricle>
