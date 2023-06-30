@@ -201,10 +201,11 @@ class ManualPublishController extends Controller
                 }
                 $content->save();
             } else {
-                $content_data[$i]['title'] = $request['manual_flow_title'][$i];
-                $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
-                $content_data[$i]['order_no'] = $count_order_no + 1;
-                if (isset($request->file('manual_file')[$i])) {
+                if(isset($request['manual_flow_title'][$i]) &&
+                    isset($request->file('manual_file')[$i])) {
+                    $content_data[$i]['title'] = $request['manual_flow_title'][$i];
+                    $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
+                    $content_data[$i]['order_no'] = $count_order_no + 1;
                     $f = $request['manual_file'][$i];
                     $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
                 }
