@@ -8,30 +8,7 @@
             <h1 class="page-header">アカウント</h1>
         </div>
     </div>
-    <form method="get" class="form-horizontal mb24">
-        @csrf
-        <div class="form-group form-inline mb16">
-            <div class="input-group col-lg-2 spMb16">
-                <input name="q" value="{{request()->input('q')}}" class="form-control" />
-                <span class="input-group-btn"><button class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
-            </div>
-
-        @livewire('admin.account-search-form')
-        <div class="input-group col-lg-2">
-            <label class="input-group-addon">権限</label>
-            <select name="roll" class="form-control">
-                <option value=""> -- 指定なし -- </option>
-                @foreach ($roll_list as $roll)
-                    <option value="{{$roll->id}}" {{ $roll->id == request()->input('roll') ? "selected" : "" }}>{{$roll->name}}</option>
-                @endforeach
-            </select>
-        </div>
-
-</div>
-
-<div class="text-center">
-    <button class="btn btn-info">検索</button>
-</div>
+    @livewire('admin.account-search-form')
 
 </form>
 
