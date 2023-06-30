@@ -21,7 +21,7 @@
                 </a>
                 <section class="header__title">
                     <h1 class="txtBold txtBlue">{{ $message->title }}</h1>
-                    <time datetime="2023-01-01" class="mr8 txtBold">{{ $message->created_at }}</time>
+                    <time datetime="{{ $message->start_datetime }}" class="mr8 txtBold">{{ $message->start_datetime }}</time>
                 </section>
             </div>
             <ul class="header__menu flex">
