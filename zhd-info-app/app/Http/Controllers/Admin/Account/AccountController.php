@@ -60,7 +60,7 @@ class AccountController extends Controller
         $user_count = User::withTrashed()->max('id') + 1;
         $organization1_list = Organization1::get();
         $organization2_list = Organization2::get();
-        $shops = Shop::get();
+        $shops = Shop::where('organization2_id', 1)->get();
         $roll_list = Roll::get();
         return view('admin.account.new',[
             'user_count' => $user_count,
