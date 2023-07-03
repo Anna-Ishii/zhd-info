@@ -99,7 +99,7 @@
                 @if( in_array($content->content_type, ['mp4', 'mov'], true ))
                 <div class=" flex">
                     <div class="main__thumb">
-                        <img src="{{ asset('img/img_manual_dummy.jpg') }}" alt="">
+                        <img src="{{ asset($content->thumbnails_url) }}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
                         <button type="button" class="main__thumb__icon play"></button>
                     </div>
