@@ -91,7 +91,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
 
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {
-        return redirect(route('admin.message.index'));
+        return redirect(route('admin.message.publish.index'));
     });
 
 });
