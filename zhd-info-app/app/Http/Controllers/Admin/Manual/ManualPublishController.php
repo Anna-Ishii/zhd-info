@@ -89,6 +89,7 @@ class ManualPublishController extends Controller
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
+        $manual_params['thumbnails_url'] = $this->movie2image($$manual_params['content_url']);
         $manual_params['create_admin_id'] = session('admin')->id;
 
         $data = [];
@@ -164,7 +165,10 @@ class ManualPublishController extends Controller
         $manual_params['category_id'] = $request->category_id;
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        if(isset($request->file)) $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
+        if(isset($request->file)) {
+            $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
+            $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
+        }
         $manual_params['create_admin_id'] = session('admin')->id;
 
         // 該当のショップID
@@ -268,12 +272,9 @@ class ManualPublishController extends Controller
         $path = public_path('uploads');
         $file->move($path, $filename_upload);
         $content_url = 'uploads/' . $filename_upload;
-        // ImageConverter::movie2image($content_url);
-        $output_path = $this->movie2image($content_url);
         return [
             'content_name' => $filename_input,
             'content_url' => $content_url,
-            'thumbnails_url' => $output_path
         ];
     }
 
