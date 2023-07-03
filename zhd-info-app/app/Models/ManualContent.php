@@ -17,6 +17,7 @@ class Manualcontent extends Model
         'manual_id',
         'content_name',
         'content_url',
+        'thumbnails',
         'title',
         'description',
         'order_no',
@@ -24,7 +25,7 @@ class Manualcontent extends Model
 
     public function getContentTypeAttribute()
     {
-        $content_url = $this->attributes['content_url']; // 'parameter'は実際のデータベースカラム名に置き換えてください
+        $content_url = $this->attributes['content_url']; 
 
         // 拡張子を取得
         $extension = pathinfo($content_url, PATHINFO_EXTENSION);
