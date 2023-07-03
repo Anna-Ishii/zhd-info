@@ -112,8 +112,10 @@ class ManualPublishController extends Controller
                 $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
                 $content_data[$i]['order_no'] = $i + 1;
                 if (isset($request->file('manual_file')[$i])) {
-                $f = $request['manual_file'][$i];
+                    $f = $request['manual_file'][$i];
                     $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
+
                 }
             }
         }
@@ -192,7 +194,7 @@ class ManualPublishController extends Controller
          //タイトルは必須項目なので、タイトルの数はコンテンツの数
         for ($i = 0; $i < count($request['manual_flow_title']); $i++) {
 
-            // 登録されているコンテンツを変更する
+            // 登録されている手順を変更する
             if (isset($request->content_id[$i])) {
                 $content = ManualContent::find($request->content_id[$i]);
                 $content->title = $request['manual_flow_title'][$i];
@@ -202,9 +204,11 @@ class ManualPublishController extends Controller
                 // manual_fileがnullの場合は変更しない
                 if (isset($request->file('manual_file')[$i])) {
                     $content = array_merge($content, $this->uploadFile($request->file('manual_file')[$i]));
+                    $content->thumbnails_url = $this->movie2image($content->content_url);
                 }
                 $content->save();
             } else {
+                // 手順の新規登録
                 if(isset($request['manual_flow_title'][$i]) &&
                     isset($request->file('manual_file')[$i])) {
                     $content_data[$i]['title'] = $request['manual_flow_title'][$i];
@@ -212,6 +216,7 @@ class ManualPublishController extends Controller
                     $content_data[$i]['order_no'] = $count_order_no + 1;
                     $f = $request['manual_file'][$i];
                     $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
                 }
             }
             
