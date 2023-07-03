@@ -24,6 +24,7 @@ class Manual extends Model
         'category_id',
         'content_name',
         'content_url',
+        'thumbnails_url',
         'create_admin_id',
         'category_id',
         'start_datetime',
