@@ -268,10 +268,24 @@ class ManualPublishController extends Controller
         $path = public_path('uploads');
         $file->move($path, $filename_upload);
         $content_url = 'uploads/' . $filename_upload;
+        // ImageConverter::movie2image($content_url);
+        $output_path = $this->movie2image($content_url);
         return [
             'content_name' => $filename_input,
             'content_url' => $content_url,
+            'thumbnails_url' => $output_path
         ];
+    }
+
+    private function movie2image($movie_path)
+    {
+        $shot_sec = 4;
+        $dirname = dirname($movie_path);
+        $filename = pathinfo($movie_path, PATHINFO_FILENAME);
+        $output_path = $dirname . '/' . $filename . '.jpg';
+        $cmd = 'python3 /var/www/zhd-info-app/py/m.py "' . $movie_path . '" ' . $shot_sec . ' "' . $output_path . '"';
+        exec($cmd, $output);
+        return $output_path;
     }
 }
 
