@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\AuthLoginRequest;
 use App\Models\User;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
@@ -41,5 +42,10 @@ class AuthController extends Controller
             ->back()
             ->with('error', 'ログインに失敗しました');
  
+    }
+    public function logout(Request $request)
+    {
+        $request->session()->forget('member');
+        return redirect()->route('auth');
     }
 }
