@@ -46,7 +46,7 @@
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
-                        <img src="{{ asset($manual->thumbnails_url)}}" alt="">
+                        <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg')}}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
                         <button type="button" class="main__thumb__icon play"></button>
                     </div>
@@ -99,7 +99,7 @@
                 @if( in_array($content->content_type, ['mp4', 'mov'], true ))
                 <div class=" flex">
                     <div class="main__thumb">
-                        <img src="{{ asset($content->thumbnails_url) }}" alt="">
+                        <img src="{{ ($content->thumbnails_url) ? asset($content->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
                         <button type="button" class="main__thumb__icon play"></button>
                     </div>
