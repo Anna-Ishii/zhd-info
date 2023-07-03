@@ -26,7 +26,7 @@
                     <a href="{{ route('message.detail', ['message_id' => $ms_now->id]) }}">
                         <div class="indexList__box">
                             <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
+                                <img src=" {{ asset('/img/pdf_thumb_example.jpg') }}" alt="" class="mb14">
                             </picture>
                             <p class="indexList__box__title txtBold">{{ $ms_now->title }}</p>
                         </div>
