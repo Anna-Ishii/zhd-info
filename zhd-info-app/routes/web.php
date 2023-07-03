@@ -8,7 +8,7 @@ use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Message\MessageManageController;
 use App\Http\Controllers\Admin\Setting\ChangePasswordController;
-use App\Http\Controllers\AuthController as ControllersAuthController;
+use App\Http\Controllers\AuthController as MemberAuthController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TopController;
@@ -25,8 +25,9 @@ use App\Http\Controllers\TopController;
 */
 
 // アプリ側画面へのログイン画面
-Route::get('/member/auth', [ControllersAuthController::class, 'index'])->name('auth');
-Route::post('/member/auth', [ControllersAuthController::class, 'login']);
+Route::get('/member/auth', [MemberAuthController::class, 'index'])->name('auth');
+Route::post('/member/auth', [MemberAuthController::class, 'login']);
+Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
