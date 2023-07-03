@@ -43,7 +43,7 @@
                     <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
                         <div class="indexList__box">
                             <picture class="indexList__box__img">
-                                <img src=" {{ asset('/img/img_thumb_dummy.jpg') }}" alt="" class="mb14">
+                                <img src=" {{ asset($ml_now->thumbnails_url) }}" alt="" class="mb14">
                             </picture>
                             <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
                         </div>
