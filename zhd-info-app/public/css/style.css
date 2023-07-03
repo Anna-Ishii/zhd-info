@@ -1082,7 +1082,7 @@ a:visited {
   gap: 16px;
   padding: 11px 20px;
   border: 1px solid #D1D1D1;
-  background: #FFF url(../img/icon_folder_open.svg) center right 20px no-repeat;
+  background: #FFF;
   font-size: 1.4rem;
 }
 .list__box__title {
