@@ -34,7 +34,7 @@
                 <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $messages->count() }}件を表示中</p>
                 <div class="search__btnList">
                     <form action="#" name="sort">
-                        <button type="button" class="btnSidebar mr10 txtBold">全て</button>
+                        <button type="button" class="btnSidebar mr10 txtBold" hidden>全て</button>
                         <!-- 昇順：isAscending 降順：isDescending -->
                         <button class="btnSort txtBold isAscending">新着順</button>
                     </form>
