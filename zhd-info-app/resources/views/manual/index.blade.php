@@ -45,7 +45,7 @@
             <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
                 <div class="list__box flex">
                     <div class="list__box__thumb">
-                        <img src="{{ asset($manual->thumbnails_url) }}" alt="">
+                        <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
                     </div>
                     <div class="list__box__txtInner">
                         <p class="list__box__title txtBold mb2">{{ $manual->title }}</p>

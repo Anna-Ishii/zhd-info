@@ -89,7 +89,7 @@ class ManualPublishController extends Controller
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-        $manual_params['thumbnails_url'] = $this->movie2image($$manual_params['content_url']);
+        $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
         $manual_params['create_admin_id'] = session('admin')->id;
 
         $data = [];
