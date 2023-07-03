@@ -17,7 +17,6 @@ class Manualcontent extends Model
         'manual_id',
         'content_name',
         'content_url',
-        'thumbnails',
         'title',
         'description',
         'order_no',
