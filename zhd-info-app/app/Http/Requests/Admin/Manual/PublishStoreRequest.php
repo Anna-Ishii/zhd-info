@@ -21,7 +21,7 @@ class PublishStoreRequest extends FormRequest
         return [
             'title' => 'required',
             'description' => 'nullable',
-            'file'  => 'required'.$mimeTypesRule,
+            'file'  => 'required|max:150000'.$mimeTypesRule,
             'category_id' => 'required',
             'organization1' => 'required',
             'start_datetime' => 'nullable',
