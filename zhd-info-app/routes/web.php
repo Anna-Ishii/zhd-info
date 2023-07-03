@@ -88,5 +88,17 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
+
+    // パスが/admin/から始まる場合のフォールバックルート
+    Route::fallback(function () {
+        return redirect(route('admin.message.index'));
+    });
+
 });
 
+
+
+// パスが/user/から始まる場合のフォールバックルート
+Route::fallback(function () {
+    return redirect(route('top'));
+});
