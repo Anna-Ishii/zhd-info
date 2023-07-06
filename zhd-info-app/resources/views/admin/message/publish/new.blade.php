@@ -73,7 +73,7 @@
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8" required="required">
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8">
                     {{ $target_roll->name }}
                 </label>
                 @endforeach

@@ -75,7 +75,9 @@
 
 				<tbody>
 					@foreach ($message_list as $message)
-					<tr class="">
+					<tr class="@if($message->status['id'] == 1) publishing
+								@elseif($message->status['id'] == 2) published
+								@endif">
 						<td>
 							<input type="checkbox" value="{{$message->id}}" class="form-check-input">
 						</td>
