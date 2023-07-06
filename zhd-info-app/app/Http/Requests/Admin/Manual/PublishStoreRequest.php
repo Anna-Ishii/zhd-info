@@ -13,6 +13,8 @@ class PublishStoreRequest extends FormRequest
         'm4v' => 'video/x-m4v',
         'webm' => 'video/webm',
         'wmv' => 'video/x-ms-wmv',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
     ];
 
     public function rules()
@@ -44,7 +46,7 @@ class PublishStoreRequest extends FormRequest
             'organization1.required' => '対象業態を選択してください',
             'manual_flow_title.*.required' => '手順のタイトルを入力してください',
             'manual_file.*.mimes' => 'mp4・mov・jpeg・png・jpg形式のファイルを添付してください',
-            'manual_file' => '手順ファイルのアップロードに失敗しました',
+            'manual_file.*' => '手順ファイルのアップロードに失敗しました',
         ];
     }
 }

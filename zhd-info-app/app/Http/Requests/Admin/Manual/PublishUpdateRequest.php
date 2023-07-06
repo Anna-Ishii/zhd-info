@@ -13,6 +13,8 @@ class PublishUpdateRequest extends FormRequest
         'm4v' => 'video/x-m4v',
         'webm' => 'video/webm',
         'wmv' => 'video/x-ms-wmv',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
     ];
 
     public function rules()
@@ -44,7 +46,7 @@ class PublishUpdateRequest extends FormRequest
             'organization1.required' => '対象業態を選択してください',
             'manual_flow_title.*.required_with' => 'タイトルを入力してください',
             'manual_file.*.mimetypes' => 'mp4・mov・jpeg・png・jpg・wmv形式のファイルを添付してください',
-            'manual_file' => 'ファイルのアップデートに失敗しました'
+            'manual_file.*' => 'ファイルのアップデートに失敗しました'
         ];
     }
 }
