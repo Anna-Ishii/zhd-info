@@ -18,7 +18,7 @@ $("#StopBtn").on('click', function (e) {
 
     var checkedCheckboxes = $(".form-check-input:checked");
     if(checkedCheckboxes.length < 1) {
-        alert("1つの業務連絡を選択してください") ;
+        alert("1つの動画マニュアルを選択してください") ;
         return;
     }
 
@@ -38,10 +38,21 @@ $("#StopBtn").on('click', function (e) {
         })
     })
     .then(response => {
-        alert("停止しました");
-        window.location.reload();
-    })
-    .catch(error => {
-        alert("エラーです");
-    });
+        if (response.ok) {
+            return response.json();
+        } else {
+            return response.json().then(data => {
+                throw new Error(data.message); // エラーメッセージをスロー
+            });
+        }})
+        .then(data => {
+            const message = data.message;
+            // メッセージの表示や処理を行う
+            alert(message);
+            window.location.reload();
+        })
+        .catch(error => {
+            const message = error.message;
+            alert(message);
+        })    
 });
