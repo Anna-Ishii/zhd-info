@@ -44,7 +44,7 @@ class PublishStoreRequest extends FormRequest
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
             'organization1.required' => '対象業態を選択してください',
-            'manual_flow_title.*.required' => '手順のタイトルを入力してください',
+            'manual_flow_title.*.required' => '手順名は必須項目です',
             'manual_file.*.mimetypes' => 'mp4,mov,jpeg,png,jpg形式のファイルを添付してください',
             'manual_file.*' => '手順ファイルのアップロードに失敗しました',
         ];
