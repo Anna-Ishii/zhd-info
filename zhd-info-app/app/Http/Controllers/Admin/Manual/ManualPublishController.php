@@ -259,6 +259,11 @@ class ManualPublishController extends Controller
     {
         $data = $request->json()->all();
         $manual_id = $data['manual_id'];
+        $manual = Manual::find($manual_id)->first();
+        $status = $manual->status;
+        //掲載終了だと、エラーを返す
+        if($status['id'] == 2) return response()->json(['message' => '掲載中の動画マニュアルしか配信停止できません'], status: 500);
+
         $now = Carbon::now();
         Manual::whereIn('id', $manual_id)->update(['end_datetime' => $now]);
 

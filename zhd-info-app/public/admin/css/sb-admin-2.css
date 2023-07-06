@@ -402,6 +402,15 @@ table.dataTable thead .sorting:after {
 .timeline-body > p + p {
   margin-top: 5px;
 }
+
+.publishing {
+  background-color: #fff2cc;
+}
+
+.published {
+  background-color: #d9d9d9;
+}
+
 @media (max-width: 767px) {
   ul.timeline:before {
     left: 40px;

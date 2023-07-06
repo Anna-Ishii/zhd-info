@@ -90,7 +90,9 @@
 
                         <tbody>
                             @foreach ($manual_list as $manual)
-                            <tr class="">
+                            <tr class="@if($manual->status['id'] == 1) publishing
+                                        @elseif($manual->status['id'] == 2) published
+                                        @endif">
                                 <td>
                                     <label>
                                         <input type="checkbox" value="{{$manual->id}}" class="form-check-input">
