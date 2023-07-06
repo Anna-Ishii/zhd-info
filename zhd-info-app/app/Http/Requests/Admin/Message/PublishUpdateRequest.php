@@ -31,7 +31,7 @@ class PublishUpdateRequest extends FormRequest
             'category_id.required' => 'カテゴリを選択してください',
             'target_roll' => '対象者を選択してください',
             'organization1.required' => '対象業態を選択してください',
-            'organization4.required' => '対象フロックを選択してください',
+            'organization4.required' => '対象ブロックを選択してください',
         ];
     }
 }
