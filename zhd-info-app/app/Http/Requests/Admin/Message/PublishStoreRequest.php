@@ -34,7 +34,7 @@ class PublishStoreRequest extends FormRequest
             'end_datetime.date_format' => '日時の形式で入力してください',
             'target_roll' => '対象者を選択してください',
             'organization1.required' => '対象業態を選択してください',
-            'organization4.required' => '対象フロックを選択してください',
+            'organization4.required' => '対象ブロックを選択してください',
         ];
     }
 }
