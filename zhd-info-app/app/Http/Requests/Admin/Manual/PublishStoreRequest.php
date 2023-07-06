@@ -13,6 +13,8 @@ class PublishStoreRequest extends FormRequest
         'm4v' => 'video/x-m4v',
         'webm' => 'video/webm',
         'wmv' => 'video/x-ms-wmv',
+        'jpeg' => 'image/jpeg',
+        'png' => 'image/png',
     ];
 
     public function rules()
