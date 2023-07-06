@@ -39,13 +39,13 @@ class PublishUpdateRequest extends FormRequest
     {
         return [
             'title.required' => 'タイトルは必須項目です',
-            'file.mimetypes' => 'mp4・mov・jpeg・png・jpg・wmv形式のファイルを添付してください',
+            'file.mimetypes' => 'mp4,mov,jpeg,png,jpg形式のファイルを添付してください',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'file' => 'ファイルのアップデートに失敗しました',
             'category_id.required' => 'カテゴリを選択してください',
             'organization1.required' => '対象業態を選択してください',
             'manual_flow_title.*.required_with' => 'タイトルを入力してください',
-            'manual_file.*.mimetypes' => 'mp4・mov・jpeg・png・jpg・wmv形式のファイルを添付してください',
+            'manual_file.*.mimetypes' => 'mp4,mov,jpeg,png,jpg形式のファイルを添付してください',
             'manual_file.*' => '手順ファイルのアップロードに失敗しました'
         ];
     }
