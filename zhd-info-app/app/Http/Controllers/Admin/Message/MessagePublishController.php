@@ -208,7 +208,10 @@ class MessagePublishController extends Controller
     {
         $data = $request->json()->all();
         $message_id = $data['message_id'];
-        
+        $message = Message::find($message_id)->first();
+        $status = $message->status;
+        //掲載終了だと、エラーを返す
+        if ($status['id'] == 2) return response()->json(['message' => '掲載中の業務連絡しか配信停止できません'], status: 500);
         $now = Carbon::now();
         Message::whereIn('id', $message_id)->update(['end_datetime' => $now]);
         
