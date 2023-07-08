@@ -16,6 +16,7 @@ class Admin extends Model
         'email',
         'password',
         'employee_code',
+        'organization1_id',
     ];
 
 }

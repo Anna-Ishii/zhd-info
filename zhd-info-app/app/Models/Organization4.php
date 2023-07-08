@@ -12,14 +12,9 @@ class Organization4 extends Model
 
     protected $fillable =
     [
+        'id',
         'name',
-        'organization3_id'
     ];
-
-    public function organization3(): BelongsTo
-    {
-        return $this->belongsTo(Organization3::class, 'organization3_id', 'id');
-    }
 
     public function shop(): HasMany
     {

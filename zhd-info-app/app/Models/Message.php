@@ -54,7 +54,7 @@ class Message extends Model
 
     public function organization4(): BelongsToMany
     {
-        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4_id');
+        return $this->belongsToMany(Organization5::class, 'message_organization5', 'message_id', 'organization5_id');
     }
 
     public function getStatusAttribute()

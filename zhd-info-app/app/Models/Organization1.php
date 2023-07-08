@@ -10,11 +10,7 @@ class Organization1 extends Model {
 
     protected $fillable = 
     [
-        'name'
+        'id',
+        'name',
     ];
-
-    public function organization2(): HasMany
-    {
-        return $this->hasMany(Organization2::class,'organization1_id', 'id');
-    }
 }
