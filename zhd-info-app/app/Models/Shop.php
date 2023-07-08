@@ -16,6 +16,8 @@ class Shop extends Model
         [
          'name',
          'shop_code',
+         'brand',
+         'organization5_id',
          'organization4_id',
          'organization3_id',
          'organization2_id',

@@ -12,17 +12,7 @@ class Organization2 extends Model
 
     protected $fillable = 
     [
-         'name',
-         'organization1_id'
+        'id',
+        'name',
     ];
-
-    public function organization1(): BelongsTo
-    {
-        return $this->belongsTo(Organization1::class, 'organization1_id', 'id');
-    }
-    
-    public function organization3(): HasMany
-    {
-        return $this->hasMany(Organization3::class, 'organization2_id', 'id');
-    }
 }
