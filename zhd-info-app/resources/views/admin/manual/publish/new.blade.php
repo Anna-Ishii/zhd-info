@@ -106,10 +106,10 @@
                         全業態
                     </label>
                 </div>
-                @foreach ($organization1_list as $organization1)
+                @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="{{$organization1->id}}" class="checkCommon mr8">
-                    {{$organization1->name}}
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8">
+                    {{$brand->name}}
                 </label>
                 @endforeach
             </div>

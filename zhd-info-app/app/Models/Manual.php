@@ -27,16 +27,12 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'category_id',
+        'organization1_id',
+        'number',
+        'updated_admin_id',
         'start_datetime',
         'end_datetime',
-        'target_block',
     ];
-
-    // 多対多のリレーションを定義
-    // public function roll(): BelongsToMany
-    // {
-    //     return $this->belongsToMany(Roll::class, 'message_roll');
-    // }
 
     public function user(): BelongsToMany
     {
@@ -46,7 +42,12 @@ class Manual extends Model
 
     public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'create_admin_id')->withTrashed();
+        return $this->hasOne(Admin::class, 'id', 'create_admin_id')->withTrashed();
+    }
+
+    public function updated_user(): HasOne
+    {
+        return $this->hasOne(Admin::class, 'id', 'updated_admin_id')->withTrashed();
     }
 
     public function category(): HasOne
@@ -54,10 +55,15 @@ class Manual extends Model
         return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
-    public function organization1(): BelongsToMany
+    public function brand(): BelongsToMany
     {
-        return $this->BelongsToMany(Organization1::class, 'manual_organization1', 'manual_id', 'organization1_id');
+        return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');
     }
+
+    // public function organization2(): BelongsToMany
+    // {
+    //     return $this->belongsToMany(Organization2::class, 'manual_organization2', 'manual_id', 'organization2_id');
+    // }
 
     public function content(): HasMany
     {
