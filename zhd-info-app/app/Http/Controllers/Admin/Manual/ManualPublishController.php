@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Manual;
 
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
+use App\Http\Repository\AdminRepository;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
@@ -13,20 +14,24 @@ use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ManualPublishController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = session('admin');
         $category_list = ManualCategory::all();
         $category_id = $request->input('category');
         $status = $request->input('status');
         $q = $request->input('q');
         $manual_list =
             Manual::query()
+            // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('title', $q);
             })
+            // 検索機能 状態
             ->when(isset($status), function ($query) use ($status) {
                 switch ($status) {
                     case 1:
@@ -55,9 +60,11 @@ class ManualPublishController extends Controller
                         break;
                 }
             })
+            // 検索機能 カテゴリ
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
+            ->where('organization1_id', $admin->organization1_id)
             ->orderBy('created_at', 'desc')
             ->paginate(5)
             ->appends(request()->query());
@@ -70,12 +77,14 @@ class ManualPublishController extends Controller
 
     public function new()
     {
+        $admin = session("admin");
+
         $category_list = ManualCategory::all();
-        $organization1_list = Organization1::all();
+        $brand_list = AdminRepository::getBrands($admin);
 
         return view('admin.manual.publish.new', [
             'category_list' => $category_list,
-            'organization1_list' => $organization1_list,
+            'brand_list' => $brand_list,
         ]);
     }
 
@@ -83,6 +92,7 @@ class ManualPublishController extends Controller
     {
         $validated = $request->validated();
 
+        $admin = session('admin');
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
         $manual_params['category_id'] = $request->category_id;
@@ -90,46 +100,47 @@ class ManualPublishController extends Controller
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
         $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
-        $manual_params['create_admin_id'] = session('admin')->id;
-
-        $data = [];
-        if (isset($request->organization1)) {
-            $shops_id = Shop::select('id')->whereIn('organization1_id', $request->organization1)->get()->toArray();
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-
-            foreach ($target_users as $target_user) {
-                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
+        $manual_params['create_admin_id'] = $admin->id;
+        $manual_params['organization1_id'] = $admin->organization1_id;
+        $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
+        $manual_params['number'] = (is_null($number)) ? 1 : $number;
+        // message_userに該当のユーザーを登録する
+        $target_users_data = [];
+        $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+        foreach ($target_users as $target_user) {
+            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
 
+        // 手順を登録する
         $content_data = [];
-        if (
-            isset($request['manual_flow_title']) &&
-            isset($request['manual_file']) 
-        ) {
+        if(isset($request['manual_flow_title'])){
             for ($i = 0; $i < count($validated['manual_flow_title']); $i++) {
                 $content_data[$i]['title'] = $request['manual_flow_title'][$i];
                 $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
                 $content_data[$i]['order_no'] = $i + 1;
-                if (isset($request->file('manual_file')[$i])) {
-                    $f = $request['manual_file'][$i];
-                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                    $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
+                $f = $request['manual_file'][$i];
+                $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
 
-                }
             }
         }
 
         try {
+            DB::beginTransaction();
             $manual = Manual::create($manual_params);
-            $manual->organization1()->attach($request->organization1);
-            $manual->user()->attach($data);
+            $manual->updated_at = null;
+            $manual->save();
+            $manual->brand()->attach($request->brand);
+            $manual->user()->attach($target_users_data);
             $manual->content()->createMany($content_data);
+            DB::commit();
         } catch (\Throwable $th) {
+            DB::rollBack();
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', '登録できませんでした。');
+                ->with('error', 'データベースエラーです');
         }
 
         return redirect()->route('admin.manual.publish.index');
@@ -140,10 +151,14 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index');
 
+        $admin = session('admin');
+        // ログインユーザーとは違う業態のものは編集画面を出さない
+        if($manual->organization1_id != $admin->organization1_id) return redirect()->route('admin.manual.publish.index');
+
         $category_list = ManualCategory::all();
         // 業態一覧を取得する
-        $organization1_list = Organization1::all();
-        $target_organization1 = $manual->organization1()->pluck('organization1.id')->toArray();
+        $brand_list = AdminRepository::getBrands($admin);
+        $target_brand = $manual->brand()->pluck('brands.id')->toArray();
         $contents = $manual->content()
             ->orderBy("order_no")
             ->get();
@@ -151,8 +166,8 @@ class ManualPublishController extends Controller
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'category_list' => $category_list,
-            'organization1_list' => $organization1_list,
-            'target_organization1' => $target_organization1,
+            'brand_list' => $brand_list,
+            'target_brand' => $target_brand,
             'contents' => $contents
 
         ]);
@@ -161,6 +176,7 @@ class ManualPublishController extends Controller
     public function update(PublishUpdateRequest $request, $manual_id)
     {
         $validated = $request->validated();
+        $admin = session('admin');
 
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
@@ -171,16 +187,17 @@ class ManualPublishController extends Controller
             $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
             $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
         }
-        $manual_params['create_admin_id'] = session('admin')->id;
+        $manual_params['updated_admin_id'] = $admin->id;
 
         // 該当のショップID
-        $shops_id = Shop::select('id')->whereIn('organization1_id', $request->input('organization1',[]))->get()->toArray();
+        $shops_id = Shop::select('id')->whereIn('brand_id', $request->input('brand',[]))->get()->toArray();
         // 該当のユーザー
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
 
-        $data = [];
+        // 該当ユーザーを追加する
+        $target_user_data = [];
         foreach ($target_users as $target_user) {
-            $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
 
         $content_data = []; // manualcontentに格納するための配列
@@ -203,7 +220,9 @@ class ManualPublishController extends Controller
 
                 // manual_fileがnullの場合は変更しない
                 if (isset($request->file('manual_file')[$i])) {
-                    $content = array_merge($content, $this->uploadFile($request->file('manual_file')[$i]));
+                    $file = $this->uploadFile($request->file('manual_file')[$i]);
+                    $content->content_url = $file['content_url'];
+                    $content->content_name = $file['content_name'];
                     $content->thumbnails_url = $this->movie2image($content->content_url);
                 }
                 $content->save();
@@ -223,14 +242,17 @@ class ManualPublishController extends Controller
         }
 
         try {
+            DB::beginTransaction();
             $manual = Manual::find($manual_id);
             $manual->update($manual_params);
-            $manual->organization1()->sync($request->organization1);
-            $manual->user()->sync($data);
+            $manual->brand()->sync($request->brand);
+            $manual->user()->sync($target_user_data);
             $manual->content()->createMany($content_data);
+            DB::commit();
         } catch (\Throwable $th) {
+            DB::rollBack();
             return redirect()
-                ->route('admin.manual.publish.new')
+                ->back()
                 ->withInput()
                 ->with('error', '入力エラーがあります');
         }
@@ -264,8 +286,12 @@ class ManualPublishController extends Controller
         //掲載終了だと、エラーを返す
         if($status['id'] == 2) return response()->json(['message' => '掲載中の動画マニュアルしか配信停止できません'], status: 500);
 
+        $admin = session('admin');
         $now = Carbon::now();
-        Manual::whereIn('id', $manual_id)->update(['end_datetime' => $now]);
+        Manual::whereIn('id', $manual_id)->update([
+            'end_datetime' => $now,
+            'updated_admin_id' => $admin->id,
+        ]);
 
         return response()->json(['message' => '停止しました']);
     }

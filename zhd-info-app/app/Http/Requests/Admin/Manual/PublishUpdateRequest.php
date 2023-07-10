@@ -25,7 +25,7 @@ class PublishUpdateRequest extends FormRequest
             'description' => 'nullable',
             'file'  => 'max:150000'.$mimeTypesRule,
             'category_id' => 'required',
-            'organization1' => 'nullable',
+            'brand' => 'nullable',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
             'manual_flow_title.*' => 'required_with:manual_file',
@@ -43,7 +43,7 @@ class PublishUpdateRequest extends FormRequest
             'file' => 'ファイルのアップデートに失敗しました',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
-            'organization1.required' => '対象業態を選択してください',
+            'brand.required' => '対象業態を選択してください',
             'manual_flow_title.*.required_with' => '手順名は必須項目です',
             'manual_file.*.mimetypes' => '手順ファイルはmp4,mov,jpeg,png,jpg形式のファイルを添付してください',
             'manual_file.*' => '手順ファイルのアップロードに失敗しました'
