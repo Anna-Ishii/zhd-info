@@ -14,11 +14,16 @@ return new class extends Migration
         Schema::create('admin', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('password');
-            $table->string('employee_code')->unique();
+            $table->string('employee_code');
+            $table->unsignedBigInteger('organization1_id');
             $table->timestamps();
             $table->softDeletes();
+            $table->unique(['email', 'organization1_id']);
+            $table->unique(['employee_code', 'organization1_id']);
+
+            $table->foreign('organization1_id')->references('id')->on('organization1');
         });
     }
 
