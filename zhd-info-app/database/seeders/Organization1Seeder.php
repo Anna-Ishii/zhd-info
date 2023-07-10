@@ -6,14 +6,15 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class ShopSeeder extends Seeder
+class Organization1Seeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $path = 'database/sql/shops.sql';
+        // 業態
+        $path = 'database/sql/organization1.sql';
         DB::unprepared(file_get_contents($path));
     }
 }

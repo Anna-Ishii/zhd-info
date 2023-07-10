@@ -24,10 +24,11 @@ class Message extends Model
         'category_id',
         'create_admin_id',
         'emergency_flg',
+        'organization1_id',
+        'number',
+        'updated_admin_id',
         'start_datetime',
         'end_datetime',
-        'target_roll',
-        'target_block',
     ];
 
     // 多対多のリレーションを定義
@@ -44,7 +45,12 @@ class Message extends Model
 
     public function create_user(): HasOne
     {
-        return $this->hasOne(User::class, 'id', 'create_admin_id')->withTrashed();
+        return $this->hasOne(Admin::class, 'id', 'create_admin_id')->withTrashed();
+    }
+
+    public function updated_user(): HasOne
+    {
+        return $this->hasOne(Admin::class, 'id', 'updated_admin_id')->withTrashed();
     }
 
     public function category(): HasOne
@@ -52,9 +58,14 @@ class Message extends Model
         return $this->hasOne(MessageCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
-    public function organization4(): BelongsToMany
+    public function organization5(): BelongsToMany
     {
         return $this->belongsToMany(Organization5::class, 'message_organization5', 'message_id', 'organization5_id');
+    }
+
+    public function brand(): BelongsToMany
+    {
+        return $this->belongsToMany(Brand::class, 'message_brand', 'message_id', 'brand_id');
     }
 
     public function getStatusAttribute()

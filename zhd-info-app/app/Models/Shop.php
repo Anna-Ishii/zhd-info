@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Shop extends Model
 {
@@ -16,7 +15,7 @@ class Shop extends Model
         [
          'name',
          'shop_code',
-         'brand',
+         'brand_id',
          'organization5_id',
          'organization4_id',
          'organization3_id',
@@ -27,6 +26,16 @@ class Shop extends Model
     public function user(): HasMany
     {
         return $this->hasMany(User::class, 'shop_id', 'id');
+    }
+
+    public function brand(): BelongsTo
+    {
+        return $this->belongsTo(Brand::class, 'brand_id', 'id');
+    }
+
+    public function organization5(): BelongsTo
+    {
+        return $this->belongsTo(Organization5::class, 'organization5_id', 'id');
     }
 
     public function organization4(): BelongsTo
