@@ -44,7 +44,7 @@ class AdminCreateCommand extends Command
 
         $organization_id = $this->ask('業態番号を入力してください');
 
-        $organization = Organization1::find($organization_id)->first();
+        $organization = Organization1::where('id',$organization_id)->first();
 
         $this->info("名前 : $name");
         $this->info("年齢 : $email");
