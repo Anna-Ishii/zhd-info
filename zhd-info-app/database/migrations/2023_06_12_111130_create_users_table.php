@@ -15,13 +15,15 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('belong_label');
-            $table->string('email')->unique();
+            $table->string('email');
             $table->string('password');
-            $table->string('employee_code')->unique();
+            $table->string('employee_code');
             $table->unsignedBigInteger('shop_id');
             $table->unsignedBigInteger('roll_id');
             $table->foreign('shop_id')->references('id')->on('shops');
             $table->foreign('roll_id')->references('id')->on('rolls');
+            $table->unique(['email', 'shop_id']);
+            $table->unique(['employee_code', 'shop_id']);
             $table->timestamps();
             $table->softDeletes();
         });
