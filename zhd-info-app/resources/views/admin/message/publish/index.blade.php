@@ -69,7 +69,10 @@
 						<th nowrap class="text-center">提示開始日時</th>
 						<th nowrap class="text-center">提示終了日時</th>
 						<th nowrap class="text-center">状態</th>
-						<th nowrap colspan="2" class="text-center">登録</th>
+						<th nowrap class="text-center">登録者</th>
+						<th nowrap class="text-center">登録日</th>
+						<th nowrap class="text-center">更新者</th>
+						<th nowrap class="text-center">更新日</th>
 					</tr>
 				</thead>
 
@@ -95,6 +98,8 @@
 						<td nowrap>{{$message->status['name']}}</td>
 						<td nowrap>{{$message->create_user->name}}</td>
 						<td nowrap>{{$message->created_at}}</td>
+                        <td nowrap>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
+						<td nowrap>{{$message->updated_at}}</td>
 					</tr>
 					@endforeach
 

@@ -6,13 +6,17 @@ use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
 use App\Http\Requests\Admin\Message\PublishUpdateRequest;
+use App\Models\Brand;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use App\Models\Organization1;
 use App\Models\Organization4;
+use App\Models\Organization5;
 use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
+use App\Http\Repository\AdminRepository;
+use App\Http\Repository\Organization5Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -73,25 +77,27 @@ class MessagePublishController extends Controller
 
     public function new()
     {
+        $admin = session("admin");
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
         // 業態一覧を取得する
-        $organization1_list = Organization1::all();
+        $brand_list = AdminRepository::getBrands($admin);
         
-        $organization4_list = Organization4::all();
+        $organization5_list = Organization5Repository::getOrg5($admin->organization1_id);
         
         return view('admin.message.publish.new', [
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
-            'organization1_list' => $organization1_list,
-            'organization4_list' => $organization4_list
+            'brand_list' => $brand_list,
+            'organization5_list' => $organization5_list
         ]);
     }
 
     public function store(PublishStoreRequest $request)
     {
         $validated = $request->validated();
+        $admin = session('admin');
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
@@ -100,24 +106,30 @@ class MessagePublishController extends Controller
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
-        $msg_params['create_admin_id'] = session('admin')->id;
+        $msg_params['create_admin_id'] = $admin->id;
+        $msg_params['organization1_id'] = $admin->organization1_id;
+        $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
+        $msg_params['number'] = (is_null($number)) ? 1 : $number;
 
-        $data = [];
-        if (isset($request->organization4)) {
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-        
-            foreach ($target_users as $target_user) {
-                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
+
+        $target_user_data = [];
+        $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization5)->whereIn('brand_id', $request->brand)->get()->toArray();
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+    
+        foreach ($target_users as $target_user) {
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
+        
 
         try {
             DB::beginTransaction();
             $message = Message::create($msg_params);
+            $message->updated_at = null;
+            $message->save();
             $message->roll()->attach($request->target_roll);
-            $message->organization4()->attach($request->organization4);
-            $message->user()->attach($data);
+            $message->organization5()->attach($request->organization5);
+            $message->brand()->attach($request->brand);
+            $message->user()->attach($target_user_data);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -135,36 +147,39 @@ class MessagePublishController extends Controller
         $message = Message::find($message_id);
         if(empty($message)) return redirect()->route('admin.message.publish.index');
 
+        $admin = session('admin');
+        // ログインユーザーとは違う業態のものは編集画面を出さない
+        if ($message->organization1_id != $admin->organization1_id) return redirect()->route('admin.message.publish.index');
+
         $category_list = MessageCategory::all();
 
-        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
+        $target_roll_list = Roll::get();
         // 業態一覧を取得する
-        $organization1_list = Organization1::all();
+        $brand_list = AdminRepository::getBrands($admin);
 
-        $organization4_list = Organization4::all();
+        $organization5_list = Organization5Repository::getOrg5($admin->organization1_id)->toArray();
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
 
-        $target_orgs4 = $message->organization4()->pluck('organization4.id')->toArray();
-        $target_orgs1 = Shop::whereIn('organization4_id', $target_orgs4)
-                                ->pluck('organization1_id')
-                                ->toArray();
+        $target_org5 = $message->organization5()->pluck('organization5.id')->toArray();
+        $target_brand = $message->brand()->pluck('brands.id')->toArray();
 
         return view('admin.message.publish.edit', [
             'message' => $message,
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
-            'organization1_list' => $organization1_list,
-            'organization4_list' => $organization4_list,
+            'brand_list' => $brand_list,
+            'organization5_list' => $organization5_list,
             'message_target_roll' => $message_target_roll,
-            'message_target_org1' => $target_orgs1,
-            'message_target_org4' => $target_orgs4
+            'target_brand' => $target_brand,
+            'target_org5' => $target_org5,
         ]);
     }
 
     public function update(PublishUpdateRequest $request, $message_id)
     {
         $validated = $request->validated();
+        $admin = session('admin');
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
@@ -173,24 +188,23 @@ class MessagePublishController extends Controller
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if (isset($request->file)) $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
-        $msg_params['create_admin_id'] = session('admin')->id;
+        $msg_params['updated_admin_id'] = $admin->id;
 
         $data = [];
-        if(isset($request->organization4)) {
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization4)->get()->toArray();
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+        $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization5)->whereIn('brand_id', $request->brand)->get()->toArray();
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
             
-            foreach ($target_users as $target_user) {
-                $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
+        foreach ($target_users as $target_user) {
+            $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
-
+        
         try {
             DB::beginTransaction();
             $message = Message::find($message_id);
             $message->update($msg_params);
             $message->roll()->sync($request->target_roll);
-            $message->organization4()->sync($request->organization4);
+            $message->brand()->sync($request->brand);
+            $message->organization5()->sync($request->organization5);
             $message->user()->sync($data);
             DB::commit();
         } catch (\Throwable $th) {
