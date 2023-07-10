@@ -20,7 +20,8 @@ class AdminTableSeeder extends Seeder
                     'name' => 'JP担当者',
                     'email' => 'test@email.co.jp',
                     'password' => Hash::make('password'),
-                    'employee_code' => 1234567890
+                    'employee_code' => 1234567890,
+                    'organization1_id' => 1,
                 ]
             ]
         );

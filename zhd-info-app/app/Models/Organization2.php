@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Organization2 extends Model
 {
@@ -12,17 +10,7 @@ class Organization2 extends Model
 
     protected $fillable = 
     [
-         'name',
-         'organization1_id'
+        'id',
+        'name',
     ];
-
-    public function organization1(): BelongsTo
-    {
-        return $this->belongsTo(Organization1::class, 'organization1_id', 'id');
-    }
-    
-    public function organization3(): HasMany
-    {
-        return $this->hasMany(Organization3::class, 'organization2_id', 'id');
-    }
 }

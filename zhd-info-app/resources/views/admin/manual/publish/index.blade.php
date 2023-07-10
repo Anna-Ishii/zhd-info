@@ -85,6 +85,8 @@
                                 <th nowrap class="text-center">状態</th>
                                 <th nowrap class="text-center">登録者</th>
                                 <th nowrap class="text-center">登録日</th>
+                                <th nowrap class="text-center">更新者</th>
+                                <th nowrap class="text-center">更新日</th>
                             </tr>
                         </thead>
 
@@ -98,7 +100,7 @@
                                         <input type="checkbox" value="{{$manual->id}}" class="form-check-input">
                                     </label>
                                 </td>
-                                <td class="shop_id">{{$manual->id}}</td>
+                                <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->category->name}}</td>
                                 <td class="manual-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
                                 <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
@@ -107,6 +109,8 @@
                                 <td nowrap>{{$manual->status['name']}}</td>
                                 <td nowrap>{{$manual->create_user->name}}</td>
                                 <td nowrap>{{$manual->created_at}}</td>
+                                <td nowrap>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
+                                <td nowrap>{{$manual->updated_at}}</td>
                             </tr>
                             @endforeach
                         </tbody>

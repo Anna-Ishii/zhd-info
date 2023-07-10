@@ -17,7 +17,7 @@ $("#StopBtn").on('click', function (e) {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     var checkedCheckboxes = $(".form-check-input:checked");
-    if(checkedCheckboxes.length < 1) {
+    if(checkedCheckboxes.length != 1) {
         alert("1つの業務連絡を選択してください") ;
         return;
     }
