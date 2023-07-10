@@ -18,7 +18,6 @@ return new class extends Migration
 
             $table->foreign('message_id')->references('id')->on('messages');
             $table->foreign('organization5_id')->references('id')->on('organization5');
-            $table->unique(['message_id', 'organization5_id']);
         });
     }
 

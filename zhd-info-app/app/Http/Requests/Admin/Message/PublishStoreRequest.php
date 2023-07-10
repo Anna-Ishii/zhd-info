@@ -16,8 +16,8 @@ class PublishStoreRequest extends FormRequest
             'start_datetime' => 'nullable|date_format:Y/m/d H:i',
             'end_datetime' => 'nullable|date_format:Y/m/d H:i',
             'target_roll' => 'required',
-            'organization1' => 'required',
-            'organization4' => 'required',
+            'brand' => 'required',
+            'organization5' => 'required',
         ];
     }
 
@@ -33,8 +33,8 @@ class PublishStoreRequest extends FormRequest
             'start_datetime.date_format' => '日時の形式で入力してください',
             'end_datetime.date_format' => '日時の形式で入力してください',
             'target_roll' => '対象者を選択してください',
-            'organization1.required' => '対象業態を選択してください',
-            'organization4.required' => '対象ブロックを選択してください',
+            'brand.required' => '対象ブランドを選択してください',
+            'organization5.required' => '対象ブロックを選択してください',
         ];
     }
 }
