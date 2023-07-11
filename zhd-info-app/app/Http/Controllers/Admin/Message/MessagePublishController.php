@@ -6,17 +6,13 @@ use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
 use App\Http\Requests\Admin\Message\PublishUpdateRequest;
-use App\Models\Brand;
 use App\Models\MessageCategory;
 use App\Models\Message;
-use App\Models\Organization1;
-use App\Models\Organization4;
-use App\Models\Organization5;
 use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
 use App\Http\Repository\AdminRepository;
-use App\Http\Repository\Organization5Repository;
+use App\Http\Repository\Organization1Repository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -24,6 +20,7 @@ class MessagePublishController extends Controller
 {
     public function index(Request $request)
     {
+        $admin = session('admin');
         $category_list = MessageCategory::all();
         $category_id = $request->input('category');
         $status = $request->input('status');
@@ -64,6 +61,7 @@ class MessagePublishController extends Controller
                 ->when(isset($category_id), function ($query) use ($category_id) {
                     $query->where('category_id', $category_id);
                 })
+                ->where('organization1_id', $admin->organization1_id)
                 ->orderBy('created_at', 'desc')
                 ->paginate(5)
                 ->appends(request()->query());
@@ -81,16 +79,23 @@ class MessagePublishController extends Controller
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
-        // 業態一覧を取得する
+        // ブランド一覧を取得する
         $brand_list = AdminRepository::getBrands($admin);
         
-        $organization5_list = Organization5Repository::getOrg5($admin->organization1_id);
-        
+        $this->organization_list = [];
+        $this->organization_list = Organization1Repository::getOrg5($admin->organization1_id);
+        $this->organization_type = 5;  // ブロックを表示する
+        if($this->organization_list->isEmpty()) {
+            $this->organization_list = Organization1Repository::getOrg4($admin->organization1_id);  
+            $this->organization_type = 4; // エリアを表示する
+        }
+
         return view('admin.message.publish.new', [
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
-            'organization5_list' => $organization5_list
+            'organization_type' => $this->organization_type,
+            'organization_list' => $this->organization_list
         ]);
     }
 
@@ -111,23 +116,37 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number;
 
+        // ブロックかエリアかを判断するタイプ
+        $organization_type = $request->organization_type;
 
+        $shops_id = [];
         $target_user_data = [];
-        $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization5)->whereIn('brand_id', $request->brand)->get()->toArray();
+
+        if($organization_type == 4){
+            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        }elseif($organization_type == 5){
+            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        }
+
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
     
         foreach ($target_users as $target_user) {
             $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
         
-
         try {
             DB::beginTransaction();
             $message = Message::create($msg_params);
             $message->updated_at = null;
             $message->save();
             $message->roll()->attach($request->target_roll);
-            $message->organization5()->attach($request->organization5);
+
+            if ($organization_type == 4) {
+                $message->organization4()->attach($request->organization);
+            }elseif($organization_type == 5) {
+                $message->organization5()->attach($request->organization);
+            }
+
             $message->brand()->attach($request->brand);
             $message->user()->attach($target_user_data);
             DB::commit();
@@ -157,11 +176,19 @@ class MessagePublishController extends Controller
         // 業態一覧を取得する
         $brand_list = AdminRepository::getBrands($admin);
 
-        $organization5_list = Organization5Repository::getOrg5($admin->organization1_id)->toArray();
+        $this->organization_list = [];
+        $this->organization_list = Organization1Repository::getOrg5($admin->organization1_id);
+        $this->organization_type = 5;
+        $this->target_org = [];
+        $this->target_org = $message->organization5()->pluck('organization5.id')->toArray();
+        if ($this->organization_list->isEmpty()) {
+            $this->organization_list = Organization1Repository::getOrg4($admin->organization1_id);
+            $this->organization_type = 4;
+            $this->target_org = $message->organization4()->pluck('organization4.id')->toArray();
+        }
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
-
-        $target_org5 = $message->organization5()->pluck('organization5.id')->toArray();
+        
         $target_brand = $message->brand()->pluck('brands.id')->toArray();
 
         return view('admin.message.publish.edit', [
@@ -169,10 +196,11 @@ class MessagePublishController extends Controller
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
-            'organization5_list' => $organization5_list,
+            'organization_list' => $this->organization_list,
             'message_target_roll' => $message_target_roll,
             'target_brand' => $target_brand,
-            'target_org5' => $target_org5,
+            'target_org' => $this->target_org,
+            'organization_type' => $this->organization_type
         ]);
     }
 
@@ -190,12 +218,22 @@ class MessagePublishController extends Controller
         if (isset($request->file)) $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
         $msg_params['updated_admin_id'] = $admin->id;
 
-        $data = [];
-        $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization5)->whereIn('brand_id', $request->brand)->get()->toArray();
+        // ブロックかエリアかを判断するタイプ
+        $organization_type = $request->organization_type;
+
+        $shops_id = [];
+        $target_user_data = [];
+
+        if ($organization_type == 4) {
+            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        } elseif ($organization_type == 5) {
+            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        }
+
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
             
         foreach ($target_users as $target_user) {
-            $data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
         
         try {
@@ -203,9 +241,15 @@ class MessagePublishController extends Controller
             $message = Message::find($message_id);
             $message->update($msg_params);
             $message->roll()->sync($request->target_roll);
+
+            if ($organization_type == 4) {
+                $message->organization4()->sync($request->organization);
+            } elseif ($organization_type == 5) {
+                $message->organization5()->sync($request->organization);
+            }
+
             $message->brand()->sync($request->brand);
-            $message->organization5()->sync($request->organization5);
-            $message->user()->sync($data);
+            $message->user()->sync($target_user_data);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();

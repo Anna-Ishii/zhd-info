@@ -17,7 +17,8 @@ class PublishUpdateRequest extends FormRequest
             'end_datetime' => 'nullable',
             'target_roll' => 'required',
             'brand' => 'required',
-            'organization5' => 'required',
+            'organization_type' => 'required',
+            'organization' => 'required',
         ];
     }
 
@@ -31,7 +32,17 @@ class PublishUpdateRequest extends FormRequest
             'category_id.required' => 'カテゴリを選択してください',
             'target_roll' => '対象者を選択してください',
             'brand.required' => '対象ブランドを選択してください',
-            'organization5.required' => '対象ブロックを選択してください',
         ];
+
+        if ($this->organization_type == '5') {
+            $messages = array_merge($messages, [
+                'organization.required' => '対象ブロックを選択してください',
+            ]);
+        }
+        if ($this->organization_type == '4') {
+            $messages = array_merge($messages, [
+                'organization.required' => '対象エリアを選択してください',
+            ]);
+        }
     }
 }

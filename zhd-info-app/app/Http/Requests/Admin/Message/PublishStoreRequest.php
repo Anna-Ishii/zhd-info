@@ -17,13 +17,14 @@ class PublishStoreRequest extends FormRequest
             'end_datetime' => 'nullable|date_format:Y/m/d H:i',
             'target_roll' => 'required',
             'brand' => 'required',
-            'organization5' => 'required',
+            'organization_type' => 'required',
+            'organization' => 'required',
         ];
     }
 
     public function messages()
     {
-        return [
+        $messages = [
             'title.required' => 'タイトルは必須項目です',
             'file.required' => 'ファイルを添付してください',
             'file.mimes' => 'PDF形式のファイルを添付してください',
@@ -34,7 +35,19 @@ class PublishStoreRequest extends FormRequest
             'end_datetime.date_format' => '日時の形式で入力してください',
             'target_roll' => '対象者を選択してください',
             'brand.required' => '対象ブランドを選択してください',
-            'organization5.required' => '対象ブロックを選択してください',
         ];
+
+        if ($this->organization_type == '5') {
+            $messages = array_merge($messages, [
+                'organization.required' => '対象ブロックを選択してください',
+            ]);
+        }
+        if ($this->organization_type == '4') {
+            $messages = array_merge($messages, [
+                'organization.required' => '対象エリアを選択してください',
+            ]);
+        }
+
+        return $messages;
     }
 }
