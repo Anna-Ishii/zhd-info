@@ -24,7 +24,7 @@ DROP TABLE IF EXISTS `brands`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `brands` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `organization1_id` bigint unsigned NOT NULL,
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
@@ -32,7 +32,7 @@ CREATE TABLE `brands` (
   UNIQUE KEY `brands_name_unique` (`name`),
   KEY `brands_organization1_id_foreign` (`organization1_id`),
   CONSTRAINT `brands_organization1_id_foreign` FOREIGN KEY (`organization1_id`) REFERENCES `organization1` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=11 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -41,7 +41,7 @@ CREATE TABLE `brands` (
 
 LOCK TABLES `brands` WRITE;
 /*!40000 ALTER TABLE `brands` DISABLE KEYS */;
-INSERT INTO `brands` VALUES (1,'JP',1,NULL,NULL),(2,'JO',1,NULL,NULL),(3,'VS',4,NULL,NULL),(4,'BB',4,NULL,NULL),(5,'NIB',5,NULL,NULL),(6,'TJ',5,NULL,NULL),(7,'YCP',5,NULL,NULL),(8,'HY',3,NULL,NULL),(9,'ON',2,NULL,NULL);
+INSERT INTO `brands` VALUES (1,'JP',1,NULL,NULL),(2,'JO',1,NULL,NULL),(3,'VS',4,NULL,NULL),(4,'BB',4,NULL,NULL),(5,'NIB',5,NULL,NULL),(6,'TJ',5,NULL,NULL),(7,'YCP',5,NULL,NULL),(8,'HY',3,NULL,NULL),(9,'ON',2,NULL,NULL),(10,'G',5,NULL,NULL);
 /*!40000 ALTER TABLE `brands` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -54,4 +54,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-07-08 16:51:25
+-- Dump completed on 2023-07-11 16:49:33
