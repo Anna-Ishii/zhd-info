@@ -95,7 +95,10 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">対象ブロック</label>
+            <label class="col-lg-2 control-label">
+                {{($organization_type == 5) ? '対象ブロック' : '対象エリア'}}
+            </label>
+            <input type="text" name="organization_type" value='{{$organization_type}}' hidden>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -103,10 +106,12 @@
                         全て
                     </label>
                 </div>
-                @foreach ($organization5_list as $organization5)
+                @foreach ($organization_list as $organization)
                 <label class="mr16">
-                    <input type="checkbox" name="organization5[]" value="{{$organization5['organization5_id']}}" class="checkCommon mr8" {{ in_array($organization5['organization5_id'], $target_org5, true) ? 'checked' : '' }}>
-                    {{$organization5['name']}}
+                    <input type="checkbox" name="organization[]" value="{{$organization->organization_id}}" class="checkCommon mr8" 
+                    {{ in_array($organization->organization_id, $target_org, true) ? 'checked' : '' }}
+                    >
+                    {{$organization->organization_name}}
                 </label>
                 @endforeach
             </div>
