@@ -63,6 +63,11 @@ class Message extends Model
         return $this->belongsToMany(Organization5::class, 'message_organization5', 'message_id', 'organization5_id');
     }
 
+    public function organization4(): BelongsToMany
+    {
+        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4_id');
+    }
+
     public function brand(): BelongsToMany
     {
         return $this->belongsToMany(Brand::class, 'message_brand', 'message_id', 'brand_id');
