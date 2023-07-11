@@ -51,7 +51,7 @@
                             @csrf
                             <fieldset>
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="メールアドレス" name="email" autofocus>
+                                    <input class="form-control" placeholder="社員ID" name="employee_code" autofocus>
                                 </div>
                                 <div class="form-group">
                                     <input class="form-control" placeholder="パスワード" name="password" type="password">

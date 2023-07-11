@@ -24,12 +24,12 @@ class AuthController extends Controller
     {
         $validated = $request->validated();
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('employee_code', $request->employee_code)->first();
 
         if (empty($user)) {
             return redirect()
                 ->back()
-                ->with('error', '存在しないメールアドレスです');
+                ->with('error', '存在しない社員IDです');
         }
 
         if(Hash::check($request->password, $user->password)){
