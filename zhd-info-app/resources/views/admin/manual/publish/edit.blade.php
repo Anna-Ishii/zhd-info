@@ -105,7 +105,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{$manual->start_datetime}}">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{$manual->start_datetime}}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateFrom" {{ empty($manual->start_datetime) ? 'checked' : '' }}>
                     未定
@@ -115,7 +115,7 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateTo">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{$manual->end_datetime}}">
+                <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{$manual->end_datetime}}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateTo" {{ empty($manual->end_datetime) ? 'checked' : '' }}>
                     未定
