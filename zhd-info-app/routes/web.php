@@ -41,8 +41,8 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 });
 
 // 管理画面へのログイン画面
-Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
-Route::post('/admin/auth', [AuthController::class, 'login']);
+Route::get('/admin/{organization1}/auth', [AuthController::class, 'index'])->name('admin.auth');
+Route::post('/admin/{organization1}/auth', [AuthController::class, 'login']);
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート

@@ -58,14 +58,6 @@
               @csrf
               <fieldset>
                 <div class="form-group">
-                  <select name="organization1" class="form-control" required>
-                  <option value="" hidden> -- 業態を選択してください -- </option>
-                  @foreach ($organization1_list as $organization1)
-                      <option value="{{$organization1->id}}" {{ $organization1->id == old('organization1') ? 'selected' : ''}}>{{$organization1->name}}</option>
-                  @endforeach
-                  </select>
-                </div>
-                <div class="form-group">
                   <input class="form-control" placeholder="社員番号" name="employee_code" value="{{ old('employee_code') }}" autofocus required>
                 </div>
                 <div class="form-group">

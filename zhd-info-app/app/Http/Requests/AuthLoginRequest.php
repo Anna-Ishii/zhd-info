@@ -9,7 +9,7 @@ class AuthLoginRequest extends FormRequest
     public function rules()
     {
         return [
-            'email' => 'required|email:filter',
+            'employee_code' => 'required',
             'password'  => 'required',
         ];
     }
@@ -17,8 +17,7 @@ class AuthLoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => 'メールアドレスを入力してください',
-            'email.email' => 'メールアドレス形式で入力してください',
+            'email.required' => '社員IDを入力してください',
             'password' => 'パスワードを入力してください',
         ];
     }

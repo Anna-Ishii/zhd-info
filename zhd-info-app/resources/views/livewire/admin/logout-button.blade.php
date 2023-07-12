@@ -1,0 +1,1 @@
+<li><a wire:click="logout"><i class="fa fa-sign-out fa-fw"></i> ログアウト</a></li>

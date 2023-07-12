@@ -11,24 +11,27 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function index ()
+    public function index ($organization1)
     {
         //ログイン中か確認
         $admin = session('admin');
-        $organization1_list = Organization1::get();
+
         if (isset($admin)) {
             return redirect()->route('admin.message.publish.index');
         }
-        return view('admin.auth.index',[
-            'organization1_list' => $organization1_list,
-        ]);
+        // 業態がなければ404を返す
+        if(!Organization1::where('name', $organization1)->exists()) abort(404);
+        return view('admin.auth.index');
     }
 
-    public function login (AuthLoginRequest $request)
+    public function login (AuthLoginRequest $request, $organization1)
     {
         $validated = $request->validated();
+        
+        $org1 = Organization1::where('name', $organization1)
+                                ->firstOrFail();
 
-        $admin = Admin::where('organization1_id', $request->organization1)
+        $admin = Admin::where('organization1_id', $org1->id)
                         ->where('employee_code', $request->employee_code)->first();
 
         if (empty($admin)) {
