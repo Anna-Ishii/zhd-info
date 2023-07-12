@@ -15,7 +15,7 @@
     <header class="header header--detail">
         <section class="header__inner flex">
             <div class="header__titleBox flex">
-                <a href="{{ route('message.index') }}" class="header__prev txtCenter">
+                <a href="{{ url()->previous() }}" class="header__prev txtCenter">
                     <img src=" asset('/img/icon_prev.svg') " alt="" class="mr10 spmr4">
                     <p class="txtBold">戻る</p>
                 </a>

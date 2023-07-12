@@ -30,7 +30,7 @@
 
         <div class="search mb24">
             <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->count() }}件を表示中</p>
+                <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->total() }}件を表示中</p>
                 <div class="search__btnList">
                     <form action="#" name="sort">
                         <!-- 昇順：isAscending 降順：isDescending -->
