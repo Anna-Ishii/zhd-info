@@ -103,10 +103,7 @@ class ShopUserCreateCommnad extends Command
                 DB::commit();
             } catch (\Throwable $th) {
                 DB::rollBack();
-                return redirect()
-                    ->back()
-                    ->withInput()
-                    ->with('error', 'データベースエラーです');
+                $this->info('データベースエラーです。');
             }
         }else{
             $this->info('cancel');
