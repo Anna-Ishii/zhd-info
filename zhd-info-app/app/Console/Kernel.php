@@ -4,6 +4,7 @@ namespace App\Console;
 
 use App\Console\Commands\admin\setting\HashPasswordCommand;
 use App\Console\Commands\AdminCreateCommand;
+use App\Console\Commands\ShopUserCreateCommnad;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -11,7 +12,8 @@ class Kernel extends ConsoleKernel
 {
     protected $commands = [
         HashPasswordCommand::class,
-        AdminCreateCommand::class
+        AdminCreateCommand::class,
+        ShopUserCreateCommnad::class
     ];
     /**
      * Define the application's command schedule.
