@@ -84,7 +84,7 @@
 						<td>
 							<input type="checkbox" value="{{$message->id}}" class="form-check-input">
 						</td>
-						<td class="shop_id">{{$message->id}}</td>
+						<td class="shop_id">{{$message->number}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">⚪︎</td>
 						@else
