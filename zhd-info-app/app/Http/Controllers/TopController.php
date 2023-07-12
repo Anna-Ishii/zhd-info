@@ -16,7 +16,7 @@ class TopController extends Controller
                                 })
                                 ->orderBy('created_at', 'desc')
                                 ->get();
-        // 今日掲載された業連
+        // 今日掲載されたマニュアル
         $manual_now = $user->manual()
             ->whereDate('start_datetime', now('Asia/Tokyo'))
             ->where(function ($query) {
