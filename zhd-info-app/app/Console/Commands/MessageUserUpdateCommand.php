@@ -76,7 +76,9 @@ class MessageUserUpdateCommand extends Command
                         $query->where('brand_id', '=', $brand_id);
                     })->get('id')->toArray();
                     foreach ($manuals as $manual) {
-                        $manual_data[$manual['id']] = ['shop_id' => $shop->id];
+                        $manul_id = $manual['id'];
+                        $this->info($manul_id);
+                        $manual_data[$manual['id']] = ['shop_id' => $user->shop_id];
                     }
                     $user->manual()->sync($manual_data);
                 }
@@ -84,6 +86,8 @@ class MessageUserUpdateCommand extends Command
             } catch (\Throwable $th) {
                 DB::rollBack();
                 $this->info('データベースエラーです。');
+                $th_msg  = $th->getMessage();
+                $this->info("$th_msg");
             }
         } else {
             $this->info('cancel');
