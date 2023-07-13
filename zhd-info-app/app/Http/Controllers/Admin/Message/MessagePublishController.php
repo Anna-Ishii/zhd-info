@@ -13,6 +13,7 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
+use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -115,6 +116,7 @@ class MessagePublishController extends Controller
         $msg_params['organization1_id'] = $admin->organization1_id;
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number;
+        $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
 
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
