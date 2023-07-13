@@ -16,6 +16,7 @@ use App\Http\Repository\Organization1Repository;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class MessagePublishController extends Controller
 {
@@ -154,6 +155,7 @@ class MessagePublishController extends Controller
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error($th->getMessage());
             return redirect()
                 ->back()
                 ->withInput()
@@ -217,9 +219,11 @@ class MessagePublishController extends Controller
             ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        if (isset($request->file)) $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
+        if (isset($request->file)) {
+            $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
+            $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
+        }
         $msg_params['updated_admin_id'] = $admin->id;
-
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
 
@@ -255,6 +259,7 @@ class MessagePublishController extends Controller
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            Log::error($th->getMessage());
             return redirect()
                 ->back()
                 ->withInput()
