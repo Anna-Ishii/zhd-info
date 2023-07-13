@@ -21,6 +21,7 @@ class Message extends Model
         'title',
         'content_name',
         'content_url',
+        'thumbnails_url',
         'category_id',
         'create_admin_id',
         'emergency_flg',
