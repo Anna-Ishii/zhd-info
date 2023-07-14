@@ -42,7 +42,7 @@
     <main class="main manual">
         <input id="manual_id" value="{{$manual->id}}" hidden>
         <div class="main__inner">
-            <div class="main__supplement main__box--single thumb_parents flex">
+            <div class="main__supplement main__box--single flex">
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">

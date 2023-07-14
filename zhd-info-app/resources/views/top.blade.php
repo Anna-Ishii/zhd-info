@@ -25,10 +25,11 @@
                     @foreach($message_now as $ms_now)
                     <a href="{{ route('message.detail', ['message_id' => $ms_now->id]) }}">
                         <div class="indexList__box">
+                            <p class="indexList__box__title txtBold">{{ $ms_now->title }}</p>
                             <picture class="indexList__box__img">
                                 <img src=" {{ ($ms_now->thumbnails_url) ? asset($ms_now->thumbnails_url) : asset('/img/pdf_thumb_example.jpg') }}" alt="" class="mb14">
                             </picture>
-                            <p class="indexList__box__title txtBold">{{ $ms_now->title }}</p>
+                            <p class="indexList__box__title txtBold">{{ $ms_now->start_datetime }}</p>
                         </div>
                     </a>
                     @endforeach
@@ -40,14 +41,18 @@
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($manual_now as $ml_now)
-                    <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
-                        <div class="indexList__box">
-                            <picture class="indexList__box__img">
-                                <img src=" {{ ($ml_now->thumbnails_url) ? asset($ml_now->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
-                        </div>
-                    </a>
+                    <div>
+                        <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
+                            <div class="indexList__box">
+                                <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
+                                <picture class="indexList__box__img">
+                                    <img src=" {{ ($ml_now->thumbnails_url) ? asset($ml_now->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
+                                </picture>
+                                <p class="indexList__box__title txtBold">{{ $ml_now->start_datetime }}</p>
+                            </div>
+                        </a>
+                        <button class="indexList_box_button list__box__tag">詳細を確認する</button>
+                    </div>
                     @endforeach
                 </div>
             </div>
