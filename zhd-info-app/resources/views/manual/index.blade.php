@@ -28,7 +28,7 @@
             </div>
         </nav>
 
-        <div class="search mb24">
+        <div class="search mb24" style="display: none">
             <div class="search__inner flex">
                 <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->total() }}件を表示中</p>
                 <div class="search__btnList">
