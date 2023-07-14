@@ -23,7 +23,7 @@
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_now as $ms_now)
-                    <a href="{{ route('message.detail', ['message_id' => $ms_now->id]) }}">
+                    <a href="{{ asset($ms_now->content_url) }}">
                         <div class="indexList__box">
                             <p class="indexList__box__title txtBold">{{ $ms_now->title }}</p>
                             <picture class="indexList__box__img">
