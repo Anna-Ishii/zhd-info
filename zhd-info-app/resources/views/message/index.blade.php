@@ -32,20 +32,20 @@
         <div class="search mb24">
             <div class="search__inner flex">
                 <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $messages->total() }}件を表示中</p>
-                <div class="search__btnList">
+                {{-- <div class="search__btnList">
                     <form action="#" name="sort">
                         <button type="button" class="btnSidebar mr10 txtBold" hidden>全て</button>
                         <!-- 昇順：isAscending 降順：isDescending -->
                         <button class="btnSort txtBold isAscending">新着順</button>
                     </form>
-                </div>
+                </div> --}}
             </div>
         </div>
 
         <article class="list mb14">
             <div class="list__inner">
                 @foreach($messages as $message)
-                <a href="{{ route('message.detail', ['message_id' => $message->id ]) }}" class="mb4">
+                <a href="{{ asset($message->content_url) }}" class="mb4">
                     <div class="list__box">
                         <div class="list__box__txtInner">
                             <p class="list__box__title txtBold mb2">{{ $message->title }}</p>
