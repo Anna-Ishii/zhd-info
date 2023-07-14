@@ -45,7 +45,7 @@
         <article class="list mb14">
             <div class="list__inner">
                 @foreach($messages as $message)
-                <a href="{{ route('message.detail', ['message_id' => $message->id ]) }}" class="mb4">
+                <a href="{{ asset($message->content_url) }}" class="mb4">
                     <div class="list__box">
                         <div class="list__box__txtInner">
                             <p class="list__box__title txtBold mb2">{{ $message->title }}</p>
