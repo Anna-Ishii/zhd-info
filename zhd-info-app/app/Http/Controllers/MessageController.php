@@ -24,7 +24,7 @@ class MessageController extends Controller
                     ->orWhereNull('end_datetime');
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(5)
+            ->paginate(20)
             ->appends(request()->query());
 
         $categories = MessageCategory::get();
