@@ -36,7 +36,13 @@ class MessageController extends Controller
     }
     function detail($message_id)
     {
+        $member = session('member');
         $message = Message::find($message_id);
+
+        // 既読をつける
+        $member->message()->updateExistingPivot($message_id, [
+            'read_flg' => true, 
+        ]);
 
         return view('message.detail', [
             'message' => $message
