@@ -41,18 +41,16 @@
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($manual_now as $ml_now)
-                    <div>
-                        <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
-                            <div class="indexList__box">
-                                <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
-                                <picture class="indexList__box__img">
-                                    <img src=" {{ ($ml_now->thumbnails_url) ? asset($ml_now->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
-                                </picture>
-                                <p class="indexList__box__title txtBold">{{ $ml_now->start_datetime }}</p>
-                            </div>
-                        </a>
+                    <a href="{{ route('manual.detail', ['manual_id' => $ml_now->id]) }}">
+                        <div class="indexList__box">
+                            <picture class="indexList__box__img">
+                                <img src=" {{ ($ml_now->thumbnails_url) ? asset($ml_now->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
+                            </picture>
+                            <p class="indexList__box__title txtBold">{{ $ml_now->title }}</p>
+                        </div>
                         <button class="indexList_box_button list__box__tag">詳細を確認する</button>
-                    </div>
+                    </a>
+
                     @endforeach
                 </div>
             </div>
