@@ -1077,6 +1077,8 @@ a:visited {
 .indexList_box_button {
   min-width: 185px;
   max-width: 185px;
+  background: #0051A4;
+  color: #fff;
 }
 
 .list__inner {
