@@ -1093,9 +1093,14 @@ a:visited {
   font-size: 1.4rem;
 }
 .list__box__title {
-  color: #0051A4;
+  color: #000000;
   font-size: 2.4rem;
   line-height: 3.9rem;
+}
+.unread {
+  color: #0070c0;
+  font-size: 2.6rem;
+  line-height: 4.1rem;
 }
 .list__box__tag {
   padding-inline: 4px;
