@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
 
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
+    @livewireStyles
 </head>
 
 <body>
     @include('common.header')
 
     @yield('content')
+    @livewireScripts
 </body>
 
 </html>
