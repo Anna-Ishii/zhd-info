@@ -23,15 +23,7 @@
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_now as $ms)
-                    <a href="{{ asset($ms->content_url) }}">
-                        <div class="indexList__box">
-                            <p class="indexList__box__title txtBold">{{ $ms->title }}</p>
-                            <picture class="indexList__box__img">
-                                <img src=" {{ ($ms->thumbnails_url) ? asset($ms->thumbnails_url) : asset('/img/pdf_thumb_example.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">{{ $ms->start_datetime }}</p>
-                        </div>
-                    </a>
+                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
                     @endforeach
                 </div>
             </div>
@@ -61,17 +53,7 @@
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_unread as $ms)
-                    <a href="{{ asset($ms->content_url) }}">
-                        <div class="indexList__box">
-                            <p class="indexList__box__title txtBold">{{ $ms->title }}</p>
-                            <picture class="indexList__box__img">
-                                <img src=" {{ ($ms->thumbnails_url) ? asset($ms->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
-                            </picture>
-                            <p class="indexList__box__title txtBold">{{ $ms->start_datetime }}</p>
-                        </div>
-                        
-                    </a>
-
+                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
                     @endforeach
                 </div>
             </div>
