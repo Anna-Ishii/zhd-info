@@ -32,34 +32,34 @@ $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , funct
 	}
 });
 
-/* 「見た！」ボタンの色切り替え */
-$(document).on('click' , '.btnWatched' , function(){
-	if(!$(this).hasClass('isActive')){
+// /* 「見た！」ボタンの色切り替え */
+// $(document).on('click' , '.btnWatched' , function(){
+// 	if(!$(this).hasClass('isActive')){
 		
-		var csrfToken = $('meta[name="csrf-token"]').attr('content');
+// 		var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-		let manual_id = $('#manual_id').val();
-		fetch("/manual/watched", {
-			method: 'PUT',
-			headers: {
-				"Content-Type": "application/json",
-				"X-CSRF-TOKEN": csrfToken
-			},
-			body: JSON.stringify({
-				'manual_id': manual_id
-			})
-		})
-		.then(response => {
-			alert("閲覧ました");
-			$(this).addClass('isActive');
-			window.location.reload();
-		})
-		.catch(error => {
-			alert("エラーです");
-		});
+// 		let manual_id = $('#manual_id').val();
+// 		fetch("/manual/watched", {
+// 			method: 'PUT',
+// 			headers: {
+// 				"Content-Type": "application/json",
+// 				"X-CSRF-TOKEN": csrfToken
+// 			},
+// 			body: JSON.stringify({
+// 				'manual_id': manual_id
+// 			})
+// 		})
+// 		.then(response => {
+// 			alert("閲覧ました");
+// 			$(this).addClass('isActive');
+// 			window.location.reload();
+// 		})
+// 		.catch(error => {
+// 			alert("エラーです");
+// 		});
 
-	}
-});
+// 	}
+// });
 
 $(document).on('click' , '.btnPrint' , function(){
 	window.print();
