@@ -14,16 +14,7 @@ class AdminTableSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('admin')->insert(
-            [
-                [
-                    'name' => 'JP担当者',
-                    'email' => 'test@email.co.jp',
-                    'password' => Hash::make('password'),
-                    'employee_code' => 1234567890,
-                    'organization1_id' => 1,
-                ]
-            ]
-        );
+        $path = 'database/sql/admin.sql';
+        DB::unprepared(file_get_contents($path));
     }
 }
