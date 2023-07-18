@@ -1278,6 +1278,31 @@ a:visited {
   max-width: 21px;
 }
 
+summary {
+  list-style: none;
+  position: relative;
+}
+summary::-webkit-details-marker {
+  display: none;
+}
+summary {
+  cursor: pointer;
+}
+
+summary::after {
+	content: '+';
+	position: absolute;
+  top: -15px;
+	left: -10px;
+	font-size: 30px;
+  vertical-align: middle;
+  display: inline-block;
+}
+/* アコーディオンが開いた時のスタイル */
+details[open] summary::after{
+  content: '-';
+}
+
 /* 業連詳細 拡大ボタン */
 .btnFullScreen, .btnExitFullScreen {
   display: none;
