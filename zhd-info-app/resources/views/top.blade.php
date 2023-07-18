@@ -19,7 +19,9 @@
 <main class="main">
     <div class="main__inner">
         <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">今週の</span>お知らせ</h2>
+            <h2 class="mb10"><span class="txtBlue">
+                今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})の</span>お知らせ
+            </h2>
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_thisweek as $ms)
@@ -29,7 +31,9 @@
             </div>
         </aricle>
         <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">今週の</span>動画マニュアル</h2>
+            <h2 class="mb10">
+                <span class="txtBlue">今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})</span>の動画マニュアル
+            </h2>
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($manual_thisweek as $ml)
@@ -39,7 +43,7 @@
                             <picture class="indexList__box__img">
                                 <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
                             </picture>
-                            <p class="indexList__box__title txtBold">{{ $ml->start_datetime }}</p>
+                            <p class="indexList__box__title txtBold">{{ $ml->formatted_startdate }}</p>
                         </div>
                         <div class="manualAttachmentBg"></div>
                         <!-- 添付ファイル -->
@@ -65,7 +69,11 @@
         </aricle>
         <aricle class="indexList mb32">
             <details>
-            <summary><h2 class="mb10"><span class="txtBlue">先週の</span>お知らせ</h2></summary>
+            <summary>
+                <h2 class="mb10"><span class="txtBlue">
+                    先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>お知らせ
+                </h2>
+            </summary>
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_lastweek as $ms)
@@ -77,7 +85,11 @@
         </aricle>
         <aricle class="indexList mb32">
             <details>
-            <summary><h2 class="mb10"><span class="txtBlue">先週の</span>動画マニュアル</h2></summary>
+            <summary>
+                <h2 class="mb10">
+                    <span class="txtBlue">先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>動画マニュアル
+                </h2>
+            </summary>
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($manual_lastweek as $ml)

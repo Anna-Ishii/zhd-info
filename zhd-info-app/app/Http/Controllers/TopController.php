@@ -65,7 +65,7 @@ class TopController extends Controller
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
-                                })
+                                }) 
                                 ->orderBy('start_datetime', 'desc')
                                 ->limit(5)
                                 ->get();
@@ -76,7 +76,11 @@ class TopController extends Controller
             'message_lastweek' => $message_lastweek,
             'manual_lastweek' => $manual_lastweek,
             'message_unread' => $message_unread,
-            'manual_unread' => $manual_unread
+            'manual_unread' => $manual_unread,
+            'thisweek_start' => $thisweek_start,
+            'thisweek_end' => $thisweek_end,
+            'lastweek_start' => $lastweek_start,
+            'lastweek_end' => $lastweek_end,
         ]);
     }
     
