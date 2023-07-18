@@ -11,11 +11,13 @@ class TopController extends Controller
         $user = session('member');
 
         $today = Carbon::now();
-        $d_s = $today->copy()->startOfWeek(Carbon::MONDAY); //週初め
-        $d_e = $today->copy()->endOfWeek(Carbon::SUNDAY); // 週終わり
+        $thisweek_start = $today->copy()->startOfWeek(Carbon::MONDAY); //週初め
+        $thisweek_end = $today->copy()->endOfWeek(Carbon::SUNDAY); // 週終わり
+        $lastweek_start = $thisweek_start->copy()->subWeek();
+        $lastweek_end = $thisweek_end->copy()->subWeek();
         // 今日掲載された業連
-        $message_now = $user->message()
-                                ->whereBetween('start_datetime', [$d_s, $d_e])
+        $message_thisweek = $user->message()
+                                ->whereBetween('start_datetime', [$thisweek_start, $thisweek_end])
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
@@ -23,36 +25,62 @@ class TopController extends Controller
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
         // 今日掲載されたマニュアル
-        $manual_now = $user->manual()
-            ->whereBetween('start_datetime', [$d_s, $d_e])
-            ->where(function ($query) {
-                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('end_datetime');
-            })
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $manual_thisweek = $user->manual()
+                                ->whereBetween('start_datetime', [$thisweek_start, $thisweek_end])
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->orderBy('created_at', 'desc')
+                                ->get();
+
+        $message_lastweek = $user->message()
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                        ->orWhereNull('end_datetime');
+                                })
+                                ->whereBetween('start_datetime', [$lastweek_start, $lastweek_end])
+                                ->orderBy('start_datetime', 'desc')
+                                ->get();
+                                
+        $manual_lastweek = $user->manual()
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->whereBetween('start_datetime', [$lastweek_start, $lastweek_end])
+                                ->orderBy('start_datetime', 'desc')
+                                ->get();
 
         $message_unread = $user->unreadMessages()
-                            ->where(function ($query) {
-                                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                ->orWhereNull('end_datetime');
-                            })
-                            ->orderBy('start_datetime', 'desc')
-                            ->get();
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('end_datetime');
+                                })
+                                ->orderBy('start_datetime', 'desc')
+                                ->limit(5)
+                                ->get();
 
         $manual_unread = $user->unreadManuals()
-            ->where(function ($query) {
-                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('end_datetime');
-            })
-            ->orderBy('start_datetime', 'desc')
-            ->get();
+                                ->where(function ($query) {
+                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
+                                    ->orWhereNull('end_datetime');
+                                }) 
+                                ->orderBy('start_datetime', 'desc')
+                                ->limit(5)
+                                ->get();
 
         return view('top', [
-            'message_now' => $message_now,
-            'manual_now' => $manual_now,
+            'message_thisweek' => $message_thisweek,
+            'manual_thisweek' => $manual_thisweek,
+            'message_lastweek' => $message_lastweek,
+            'manual_lastweek' => $manual_lastweek,
             'message_unread' => $message_unread,
-            'manual_unread' => $manual_unread
+            'manual_unread' => $manual_unread,
+            'thisweek_start' => $thisweek_start,
+            'thisweek_end' => $thisweek_end,
+            'lastweek_start' => $lastweek_start,
+            'lastweek_end' => $lastweek_end,
         ]);
     }
     

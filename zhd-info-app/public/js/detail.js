@@ -8,7 +8,10 @@ $(document).on('click' , '.main__thumb' , function(){
 	/* 動画を自動再生する */
 	let targetMovie = $('.manualAttachment.isActive').find('video');
 	if(targetMovie.length){
-		targetMovie.get(0).play();
+		setTimeout(function(){
+			targetMovie.get(0).play();
+		},1000);
+		
 	}
 });
 $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , function(e){
@@ -32,34 +35,18 @@ $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , funct
 	}
 });
 
-// /* 「見た！」ボタンの色切り替え */
-// $(document).on('click' , '.btnWatched' , function(){
-// 	if(!$(this).hasClass('isActive')){
-		
-// 		var csrfToken = $('meta[name="csrf-token"]').attr('content');
+/* 要素全体を押したときに停止/再生する */
+$(document).on('click', '.manualAttachment.isActive video' , function(){
+	let chkTarget = $(this);
 
-// 		let manual_id = $('#manual_id').val();
-// 		fetch("/manual/watched", {
-// 			method: 'PUT',
-// 			headers: {
-// 				"Content-Type": "application/json",
-// 				"X-CSRF-TOKEN": csrfToken
-// 			},
-// 			body: JSON.stringify({
-// 				'manual_id': manual_id
-// 			})
-// 		})
-// 		.then(response => {
-// 			alert("閲覧ました");
-// 			$(this).addClass('isActive');
-// 			window.location.reload();
-// 		})
-// 		.catch(error => {
-// 			alert("エラーです");
-// 		});
-
-// 	}
-// });
+	if(!chkTarget.get(0).paused){
+		chkTarget.get(0).pause();
+		return false;
+	}else{
+		chkTarget.get(0).play();
+		return false;
+	}
+});
 
 $(document).on('click' , '.btnPrint' , function(){
 	window.print();
