@@ -42,7 +42,7 @@
     <main class="main manual">
         <input id="manual_id" value="{{$manual->id}}" hidden>
         <div class="main__inner">
-            <div class="main__supplement main__box--single flex">
+            <div class="main__supplement main__box--single thumb_parents flex">
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
@@ -70,17 +70,31 @@
                     <p class="txtBlue txtBold txtCenter">{{ $read_flg_count }}</p>
                 </div>
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
-                <!-- 添付ファイル -->
-                <div class="manualAttachmentBg"></div>
-                <div class="manualAttachment">
-                    <div class="manualAttachment__inner">
-                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload>
-                            <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
-                        </video>
-                        <button type="button" class="manualAttachment__close"></button>
+                    @if($manual->content->isEmpty())
+                    <!-- 添付ファイル -->
+                    <div class="manualAttachmentBg isActive"></div>
+                    <div class="manualAttachment isActive">
+                        <div class="manualAttachment__inner">
+                            <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                            <video controls playsinline preload autoplay muted>
+                                <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
+                            </video>
+                            <button type="button" class="manualAttachment__close"></button>
+                        </div>
                     </div>
-                </div>
+                    @else
+                    <!-- 添付ファイル -->
+                    <div class="manualAttachmentBg"></div>
+                    <div class="manualAttachment">
+                        <div class="manualAttachment__inner">
+                            <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                            <video controls playsinline preload autoplay>
+                                <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
+                            </video>
+                            <button type="button" class="manualAttachment__close"></button>
+                        </div>
+                    </div>
+                    @endif
                 @else
                 <!-- 添付ファイル -->
                 <div class="manualAttachmentBg"></div>
@@ -110,7 +124,7 @@
                 <div class="manualAttachment">
                     <div class="manualAttachment__inner">
                         <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload>
+                        <video controls playsinline preload >
                             <source src="{{ asset($content->content_url) }}#t=0.1" type="video/mp4">
                         </video>
                         <button type="button" class="manualAttachment__close"></button>

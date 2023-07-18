@@ -1,4 +1,4 @@
-　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　　@extends('layouts.parent')
+@extends('layouts.parent')
 
 @section('content')
 <nav class="menu">
@@ -42,34 +42,13 @@
 
         <article class="list mb14">
             @foreach($manuals as $manual)
-           
-                @if($manual->content->isEmpty())
-                    <a class="mb4 main__box--single">
-                    @else
-                    <a href="{{route('manual.detail', ['manual_id' => $manual->id ])}}" class="mb4">
-                @endif
-                <div class="list__box flex ">
+            <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
+                <div class="list__box flex">
                     <div class="list__box__thumb">
                         <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
                     </div>
                     <div class="list__box__txtInner">
-                        <p class="list__box__title txtBold mb2 {{($manual->pivot->read_flg) ? "" : "unread"}}">{{ $manual->title }}</p>
-                    </div>
-                </div>
-                <div class="manualAttachmentBg"></div>
-                <!-- 添付ファイル -->
-                <div class="manualAttachment">
-                    <div class="manualAttachment__inner">
-                        @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
-                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload>
-                            <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
-                        </video>
-                        <button type="button" class="manualAttachment__close"></button>
-                        @else
-                        <img src="{{ asset($manual->content_url)}}" alt="">
-                        <button type="button" class="manualAttachment__close"></button>
-                        @endif
+                        <p class="list__box__title txtBold mb2">{{ $manual->title }}</p>
                     </div>
                 </div>
             </a>
