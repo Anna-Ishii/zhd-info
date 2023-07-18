@@ -111,38 +111,4 @@
 </nav>
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
-<script>
-    /* マニュアルモーダル */
-$(document).on('click' , '.list__box' , function(){
-	let thumbParents = $(this).parents('.main__box , .main__box--single');
-	thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
-
-	/* 動画を自動再生する */
-	let targetMovie = $('.manualAttachment.isActive').find('video');
-	if(targetMovie.length){
-		targetMovie.get(0).play();
-	}
-});
-$(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , function(e){
-	let thumbParents = $(this).parents('.main__box , .main__box--single');
-	if($(this).hasClass('manualAttachmentBg') && !e.target.closest('.manualAttachment')){
-		/* 動画を止める */
-		let targetActiveMovie = $('.manualAttachment.isActive').find('video');
-		if(targetActiveMovie.length){
-			targetActiveMovie.get(0).pause();
-		}
-
-		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
-	}else if($(this).hasClass('manualAttachment__close')){
-		/* 動画を止める */
-		let targetActiveMovie = $('.manualAttachment.isActive').find('video');
-		if(targetActiveMovie.length){
-			targetActiveMovie.get(0).pause();
-		}
-
-		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
-	}
-});
-
-</script>
 @endsection
