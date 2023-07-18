@@ -1,17 +1,6 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.parent')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>業務連絡詳細 | 業連・動画配信システム</title>
-    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
-</head>
-
-<body>
+@section('content')
     <header class="header header--detail">
         <section class="header__inner flex">
             <div class="header__titleBox flex">
@@ -62,13 +51,9 @@
                     <p>{{ $manual->description }}</p>
                 </div>
                 @endif
-                <div class="main__supplement__btnInner">
-                    <p class="txtCenter">見た！<br class="spBlock">ボタン</p>
-                    <!-- フラグが1ならisActiveを付ける -->
 
-                    <button class="btnWatched {{ $read_flg != true ? 'isActive' : '' }}"></button>
-                    <p class="txtBlue txtBold txtCenter">{{ $read_flg_count }}</p>
-                </div>
+                @livewire('manual.reading-button', ['manual' => $manual])
+
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
                     @if($manual->content->isEmpty())
                     <!-- 添付ファイル -->
@@ -159,3 +144,4 @@
 
     <script src="{{ asset('/js/common.js') }}" defer></script>
     <script src="{{ asset('/js/detail.js') }}" defer></script>
+    @endsection
