@@ -64,7 +64,7 @@
             </div>
         </aricle>
         <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">未読の</span>業務連絡</h2>
+            <h2 class="mb10"><span class="txtBlue">未読の</span>お知らせ</h2>
             <div class="indexList__inner">
                 <div class="flex">
                     @foreach($message_unread as $ms)
