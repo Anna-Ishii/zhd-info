@@ -114,4 +114,16 @@ class Manual extends Model
 
         return $extension;
     }
+
+    public function getStartDatetimeAttribute($value)
+    {
+        Carbon::setLocale('ja'); 
+         return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+    }
+
+    public function getEndDatetimeAttribute($value)
+    {
+        Carbon::setLocale('ja');
+        return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+    }
 }

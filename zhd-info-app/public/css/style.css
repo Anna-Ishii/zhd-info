@@ -941,6 +941,17 @@ a:visited {
 .manualAttachment__inner {
   position: relative;
 }
+.manualAttachment__btnPlay {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: none;
+  background: none;
+}
 .manualAttachment__close {
   position: absolute;
   top: -20px;
@@ -955,6 +966,10 @@ a:visited {
 }
 .manualAttachment video {
   max-width: 100%;
+}
+
+.is-paused + .manualAttachment__btnPlay {
+  display: block;
 }
 
 .manualAttachmentSingle img, .manualAttachmentSingle video {
@@ -1105,7 +1120,7 @@ a:visited {
 .list__box__tag {
   padding-inline: 4px;
   line-height: 2rem;
-  background: #0051A4;
+  background: #a40000;
   color: #FFF;
 }
 .list__box__thumb {
@@ -1877,7 +1892,7 @@ details[open] summary::after{
     font-size: 1.6rem;
   }
   .main__box--single {
-    /* 全編通し動画（説目部分）のみ */
+    /* 全編通し動画（説明部分）のみ */
   }
   .main__box--single .main__thumb {
     width: 60%;
@@ -1885,6 +1900,9 @@ details[open] summary::after{
   .manualAttachment {
     width: calc(100% - 24px);
     height: auto;
+  }
+  .manualAttachment__btnPlay {
+    top: 45%;
   }
   .sidebar {
     right: -80%;
