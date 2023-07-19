@@ -46,7 +46,7 @@ class AccountController extends Controller
                 $query->where('roll_id', '=', $roll);
             })
             ->orderBy('created_at', 'desc')
-            ->paginate(5)
+            ->paginate(50)
             ->appends(request()->query());
 
         return view('admin.account.index',[
