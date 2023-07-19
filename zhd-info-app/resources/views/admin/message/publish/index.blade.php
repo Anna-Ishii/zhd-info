@@ -4,7 +4,7 @@
 <div id="page-wrapper">
 	<div class="row">
 		<div class="col-lg-12">
-			<h1 class="page-header">業務連絡配信</h1>
+			<h1 class="page-header admin-header">業務連絡配信</h1>
 		</div>
 	</div>
 
@@ -64,8 +64,8 @@
 						<th nowrap class="text-center">カテゴリ</th>
 						<th nowrap class="text-center">タイトル</th>
 						<th nowrap class="text-center">ファイル</th>
-						<th nowrap class="text-center">提示開始日時</th>
-						<th nowrap class="text-center">提示終了日時</th>
+						<th nowrap class="text-center">掲示開始日時</th>
+						<th nowrap class="text-center">掲示終了日時</th>
 						<th nowrap class="text-center">状態</th>
 						<th nowrap class="text-center">登録者</th>
 						<th nowrap class="text-center">登録日</th>
