@@ -56,11 +56,17 @@ class ShopUserCreateCommnad extends Command
                 DB::beginTransaction();
 
                 foreach($shops as $shop) {
-                    $model = $user->create([
+                    $employee_code = $this->shopid2employeecode($shop->shop_code);
+                    $shop_code = $shop->shop_code;
+                    $this->info("店舗コード：$shop_code");
+                    $this->info("従業員コード：$employee_code");
+                    $model = User::firstOrCreate([
+                        'employee_code' => $employee_code
+                    ],[
                         'name' => $shop->name,
                         'belong_label' => $shop->name,
                         'shop_id' => $shop->id,
-                        'employee_code' => $shop->shop_code,
+                        'employee_code' => $employee_code,
                         'password' => Hash::make($password),
                         'email' => '',
                         'roll_id' => $roll_id,
@@ -87,7 +93,7 @@ class ShopUserCreateCommnad extends Command
                     foreach ($messages as $message) {
                         $message_data[$message['id']] = ['shop_id' => $shop->id];
                     }
-                    $model->message()->attach($message_data);
+                    $model->message()->sync($message_data);
 
                     $brand_id = $shop->brand_id;
                     $manual_data = [];
@@ -98,11 +104,13 @@ class ShopUserCreateCommnad extends Command
                     foreach ($manuals as $manual) {
                         $manual_data[$manual['id']] = ['shop_id' => $shop->id];
                     }
-                    $model->manual()->attach($manual_data);
+                    $model->manual()->sync($manual_data);
                 } 
                 DB::commit();
             } catch (\Throwable $th) {
                 DB::rollBack();
+                $th_msg = $th->getMessage();
+                $this->info("$th_msg");
                 $this->info('データベースエラーです。');
             }
         }else{
@@ -110,5 +118,20 @@ class ShopUserCreateCommnad extends Command
         }
         $this->info('end');
 
+    }
+    private function shopid2employeecode($shop_code)
+    {
+        $employee_code = $shop_code;
+        
+        preg_match_all('/[a-zA-Z]/', $shop_code, $matches);
+        $brand_code = implode('', $matches[0]);
+        $shop_number = substr($shop_code, -4);
+        if($brand_code=='tj' || $brand_code=='ycp' || $brand_code=='nib'){
+            $employee_code = 'tag'.$shop_number;
+        }
+
+        
+        
+        return $employee_code;
     }
 }
