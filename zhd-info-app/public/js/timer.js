@@ -1,6 +1,6 @@
 // 一定時間経過後にトップページにリダイレクトする関数
 function redirectIfInactive() {
-  window.location.href = location.host; // トップページのURLを指定してください
+  window.location.href = location.host;
 }
 
 // 操作があった場合にタイマーをリセットする関数
@@ -16,7 +16,7 @@ document.addEventListener("scroll", resetTimer);
 
 // タイマーを開始する関数
 function startTimer() {
-  timer = setTimeout(redirectIfInactive, 40 * 60000); // 40分がなかった場合にリダイレクトする（適宜変更可能）
+  timer = setTimeout(redirectIfInactive, 40 * 60000); // 40分操作がなかった場合にリダイレクトする
 }
 
 // 初回のタイマーを開始する
