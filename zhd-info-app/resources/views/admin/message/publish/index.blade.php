@@ -27,7 +27,7 @@
                 </select>
             </div>
 
-            <div class="input-group col-lg-2">
+            <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">状態</label>
                 <select name="status" class="form-control">
                     <option value=""> -- 指定なし -- </option>
@@ -36,13 +36,11 @@
                     @endforeach
                 </select>
             </div>
+			<div class="input-group col-lg-2">
+				<button class="btn btn-info">検索</button>
+			</div>
 
         </div>
-
-        <div class="text-center">
-            <button class="btn btn-info">検索</button>
-        </div>
-
     </form>
 
 	<!-- 検索結果 -->

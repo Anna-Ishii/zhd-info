@@ -66,7 +66,7 @@ class ManualPublishController extends Controller
             })
             ->where('organization1_id', $admin->organization1_id)
             ->orderBy('created_at', 'desc')
-            ->paginate(5)
+            ->paginate(50)
             ->appends(request()->query());
 
         return view('admin.manual.publish.index', [
