@@ -15,7 +15,7 @@ class MessageComponent extends Component
         $member->message()->updateExistingPivot($this->message->id, [
             'read_flg' => true, 
         ]);
-        return redirect($this->message->content_url);
+        return redirect()->to(url()->full());
     }
 
     public function render()
