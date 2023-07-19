@@ -1,5 +1,30 @@
 "use strict";
 
+/* 動画再生・停止時に再生ボタンの表示の切り替えをする */
+$(window).on('load' , function(){
+	let targetMovie = $('.manualAttachment').find('video');
+	console.log(targetMovie.length);
+	targetMovie.each(function(){
+		$(this).get(0).addEventListener('play', function(){
+			$(this).removeClass('is-paused');
+		}, true);
+		$(this).get(0).addEventListener('pause', function(){
+			$(this).addClass('is-paused');
+		}, true);
+		$(this).get(0).addEventListener('seeked , timeupdate', function(){
+			return false;
+		}, true);
+	});
+});
+$(document).on('play', 'video', function(){
+	console.log('ugoitayo');
+	$(this).removeClass('is-paused');
+});
+$(document).on('pause', 'video', function(){
+	console.log('tomattayo');
+	$(this).addClass('is-paused');
+});
+
 /* マニュアルモーダル */
 $(document).on('click' , '.main__thumb' , function(){
 	let thumbParents = $(this).parents('.main__box , .main__box--single');
@@ -8,10 +33,7 @@ $(document).on('click' , '.main__thumb' , function(){
 	/* 動画を自動再生する */
 	let targetMovie = $('.manualAttachment.isActive').find('video');
 	if(targetMovie.length){
-		setTimeout(function(){
-			targetMovie.get(0).play();
-		},1000);
-		
+		targetMovie.get(0).play();
 	}
 });
 $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , function(e){
@@ -34,10 +56,14 @@ $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , funct
 		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
 	}
 });
-
 /* 要素全体を押したときに停止/再生する */
-$(document).on('click', '.manualAttachment.isActive video' , function(){
-	let chkTarget = $(this);
+$(document).on('click', '.manualAttachment.isActive video, .manualAttachment__btnPlay' , function(){
+	let chkTarget;
+	if($(this).hasClass('manualAttachment__btnPlay')){
+		chkTarget = $(this).siblings('video');
+	}else{
+		chkTarget = $(this);	
+	}	
 
 	if(!chkTarget.get(0).paused){
 		chkTarget.get(0).pause();
