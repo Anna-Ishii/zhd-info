@@ -58,7 +58,6 @@ class TopController extends Controller
                                     ->orWhereNull('end_datetime');
                                 })
                                 ->orderBy('start_datetime', 'desc')
-                                ->limit(5)
                                 ->get();
 
         $manual_unread = $user->unreadManuals()
@@ -67,7 +66,6 @@ class TopController extends Controller
                                     ->orWhereNull('end_datetime');
                                 }) 
                                 ->orderBy('start_datetime', 'desc')
-                                ->limit(5)
                                 ->get();
 
         return view('top', [
