@@ -16,6 +16,7 @@
     @include('common.header')
 
     @yield('content')
+    <script src="{{ asset('/js/timer.js') }}" defer></script>
     @livewireScripts
 </body>
 
