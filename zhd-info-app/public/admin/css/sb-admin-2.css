@@ -411,6 +411,10 @@ table.dataTable thead .sorting:after {
   background-color: #d9d9d9;
 }
 
+.admin-header {
+  font-size: 13px;
+}
+
 @media (max-width: 767px) {
   ul.timeline:before {
     left: 40px;
