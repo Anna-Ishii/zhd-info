@@ -1,4 +1,4 @@
-<a href="javascript:void(0);" wire:click='reading'>
+<a href="{{$ms->content_url}}" target="_blank" wire:click='reading'>
     <div class="indexList__box">
         <p class="indexList__box__title txtBold">{{ $ms->title }}</p>
         <picture class="indexList__box__img">
