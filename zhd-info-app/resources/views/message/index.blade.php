@@ -21,17 +21,19 @@
         <nav class="sliderMenu mb16">
             <div class="sliderMenu__inner">
                 <ul class="sliderMenu__list flex">
-                    <li class="sliderMenu__list__item txtBold {{ is_null(request()->input('category')) ? 'isActive' : ''}}"><a href="{{ route('message.index') }}">全て</a></li>
+                    <li class="sliderMenu__list__item txtBold {{ is_null(request()->input('category')) && is_null(request()->input('emergency')) ? 'isActive' : ''}}"><a href="{{ route('message.index') }}">全て</a></li>
                     @foreach($categories as $category)
                     <li class="sliderMenu__list__item txtBold {{ request()->input('category') == $category->id ? 'isActive' : ''}}"><a href="{{ route('message.index', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
                     @endforeach
+                    <li class="sliderMenu__list__item txtBold {{ request()->input('emergency') == 1  ? 'isActive' : ''}}"><a href="{{ route('message.index', ['emergency' => 1])}}">重要</a></li>
                 </ul>
             </div>
         </nav>
 
         <div class="search mb24">
             <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $messages->total() }}件を表示中</p>
+                <p class="search__status txtBold spmb8">
+                    「<span>{{ $search_status_name }}</span>」{{ $messages->total() }}件を表示中</p>
                 {{-- <div class="search__btnList">
                     <form action="#" name="sort">
                         <button type="button" class="btnSidebar mr10 txtBold" hidden>全て</button>

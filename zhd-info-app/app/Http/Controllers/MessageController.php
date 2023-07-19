@@ -11,10 +11,16 @@ class MessageController extends Controller
     function index(Request $request)
     {
         $category_id = $request->input('category');
+        $emergency = $request->input('emergency');
+
+        $search_status_name = '全て';
 
         $user = session("member");
         // 掲示中のデータをとってくる
         $messages = $user->message()
+            ->when(isset($emergency), function ($query) {
+                $query->where('emergency_flg', true);
+            })
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
@@ -29,11 +35,19 @@ class MessageController extends Controller
 
         $categories = MessageCategory::get();
 
+        if (isset($emergency)){
+            $search_status_name = '重要';
+        }elseif(isset($category_id)) {
+            $search_status_name = $categories[$category_id - 1]->name;
+        }
+
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
+            'search_status_name' => $search_status_name,
         ]);
     }
+
     function detail($message_id)
     {
         $member = session('member');
