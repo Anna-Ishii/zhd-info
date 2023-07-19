@@ -61,9 +61,10 @@
                     <div class="manualAttachment isActive">
                         <div class="manualAttachment__inner">
                             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload autoplay muted>
+                            <video controls playsinline preload autoplay class="is-paused" id="aaa">
                                 <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
                             </video>
+                            <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
                             <button type="button" class="manualAttachment__close"></button>
                         </div>
                     </div>
@@ -109,9 +110,10 @@
                 <div class="manualAttachment">
                     <div class="manualAttachment__inner">
                         <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload >
+                        <video controls playsinline preload class="is-paused" id="aaa">
                             <source src="{{ asset($content->content_url) }}#t=0.1" type="video/mp4">
                         </video>
+                        <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
                         <button type="button" class="manualAttachment__close"></button>
                     </div>
                 </div>
