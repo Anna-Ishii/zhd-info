@@ -126,7 +126,7 @@ class ShopUserCreateCommnad extends Command
         preg_match_all('/[a-zA-Z]/', $shop_code, $matches);
         $brand_code = implode('', $matches[0]);
         $shop_number = substr($shop_code, -4);
-        if($brand_code=='tj' || $brand_code=='ycp' || $brand_code=='nib'){
+        if($brand_code=='tj' || $brand_code=='ycp' || $brand_code=='nib' || $brand_code=="g"){
             $employee_code = 'tag'.$shop_number;
         }
 
