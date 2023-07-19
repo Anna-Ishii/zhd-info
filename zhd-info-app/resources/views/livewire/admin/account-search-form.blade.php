@@ -15,7 +15,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="input-group col-lg-2">
+        <div class="input-group col-lg-2 spMb16">
             <label class="input-group-addon">店舗</label>
             <select name="shop" class="form-control" wire:model="current_shop">
                 <option value=""> -- 指定なし -- </option>
@@ -24,7 +24,7 @@
                 @endforeach
             </select>
         </div>
-        <div class="input-group col-lg-2">
+        <div class="input-group col-lg-2 spMb16">
             <label class="input-group-addon">権限</label>
             <select name="roll" class="form-control">
                 <option value=""> -- 指定なし -- </option>
@@ -33,11 +33,10 @@
                 @endforeach
             </select>
         </div>
+        <div class="input-group col-lg-2">
+            <button class="btn btn-info">検索</button>
+        </div>
 
-    </div>
-
-    <div class="text-center">
-        <button class="btn btn-info">検索</button>
     </div>
 
 </form>
