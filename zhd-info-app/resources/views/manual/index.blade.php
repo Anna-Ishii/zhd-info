@@ -28,7 +28,7 @@
             </div>
         </nav>
 
-        <div class="search mb24" style="display: none">
+        {{-- <div class="search mb24" style="display: none">
             <div class="search__inner flex">
                 <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->total() }}件を表示中</p>
                 <div class="search__btnList">
@@ -38,11 +38,16 @@
                     </form>
                 </div>
             </div>
-        </div>
+        </div> --}}
 
         <article class="list mb14">
             @foreach($manuals as $manual)
-            <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
+                {{-- 手順が一つもないものは遷移後自動再生する --}}
+                @if($manual->content->isEmpty())
+                    <a href="{{ route('manual.detail', ['manual_id' => $manual->id, "autoplay" => true]) }}" class="mb4">
+                @else
+                    <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
+                @endif
                 <div class="list__box flex">
                     <div class="list__box__thumb">
                         <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
