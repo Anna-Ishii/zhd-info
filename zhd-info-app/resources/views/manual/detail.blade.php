@@ -55,32 +55,20 @@
                 @livewire('manual.reading-button', ['manual' => $manual])
 
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
-                    @if($manual->content->isEmpty())
                     <!-- 添付ファイル -->
-                    <div class="manualAttachmentBg isActive"></div>
-                    <div class="manualAttachment isActive">
+                    {{-- クエリパラメータにautoplayがあれば自動再生 --}}
+                    <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
+                    <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
                         <div class="manualAttachment__inner">
                             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload autoplay class="is-paused" id="aaa">
+                            <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : ''}} class="is-paused" id="aaa">
                                 <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
                             </video>
                             <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
                             <button type="button" class="manualAttachment__close"></button>
                         </div>
                     </div>
-                    @else
-                    <!-- 添付ファイル -->
-                    <div class="manualAttachmentBg"></div>
-                    <div class="manualAttachment">
-                        <div class="manualAttachment__inner">
-                            <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload autoplay>
-                                <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
-                            </video>
-                            <button type="button" class="manualAttachment__close"></button>
-                        </div>
-                    </div>
-                    @endif
+                    
                 @else
                 <!-- 添付ファイル -->
                 <div class="manualAttachmentBg"></div>
