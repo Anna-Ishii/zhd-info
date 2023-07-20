@@ -53,6 +53,7 @@ class TopController extends Controller
                                 ->get();
 
         $message_unread = $user->unreadMessages()
+                                ->where('start_datetime', '<', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
@@ -61,6 +62,7 @@ class TopController extends Controller
                                 ->get();
 
         $manual_unread = $user->unreadManuals()
+                                ->where('start_datetime', '<', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
