@@ -60,7 +60,7 @@
 					<tr>
 						<th nowrap class="text-center"></th>
 						<th nowrap class="text-center">No</th>
-						<th nowrap class="text-center">緊急</th>
+						<th nowrap class="text-center">ラベル</th>
 						<th nowrap class="text-center">カテゴリ</th>
 						<th nowrap class="text-center">タイトル</th>
 						<th nowrap class="text-center">ファイル</th>
@@ -84,7 +84,7 @@
 						</td>
 						<td class="shop_id">{{$message->number}}</td>
 						@if ($message->emergency_flg)
-						<td class="bg-danger text-danger">⚪︎</td>
+						<td class="bg-danger text-danger">重要</td>
 						@else
 						<td></td>
 						@endif
