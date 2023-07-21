@@ -34,11 +34,11 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">緊急配信</label>
+            <label class="col-lg-2 control-label">ラベル</label>
             <div class="col-lg-10">
                 <label>
                     <input type="checkbox" name="emergency_flg" class="mr8" {{ $message->emergency_flg ? 'checked' : '' }}>
-                    緊急配信する
+                    重要
                 </label>
             </div>
         </div>
