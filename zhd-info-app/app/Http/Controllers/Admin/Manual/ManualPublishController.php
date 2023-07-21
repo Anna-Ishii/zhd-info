@@ -103,7 +103,7 @@ class ManualPublishController extends Controller
         $manual_params['create_admin_id'] = $admin->id;
         $manual_params['organization1_id'] = $admin->organization1_id;
         $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
-        $manual_params['number'] = (is_null($number)) ? 1 : $number;
+        $manual_params['number'] = (is_null($number)) ? 1 : $number + 1;
         // message_userに該当のユーザーを登録する
         $target_users_data = [];
         $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
