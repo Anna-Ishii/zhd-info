@@ -116,7 +116,7 @@ class MessagePublishController extends Controller
         $msg_params['create_admin_id'] = $admin->id;
         $msg_params['organization1_id'] = $admin->organization1_id;
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
-        $msg_params['number'] = (is_null($number)) ? 1 : $number;
+        $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
         $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
 
         // ブロックかエリアかを判断するタイプ
