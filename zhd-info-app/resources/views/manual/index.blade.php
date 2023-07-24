@@ -53,7 +53,7 @@
                         <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
                     </div>
                     <div class="list__box__txtInner">
-                        <p class="list__box__title txtBold mb2 {{($manual->pivot->read_flg) ? "" : "unread"}}">{{ $manual->title }}</p>
+                        <p class="list__box__title mb2 {{($manual->pivot->read_flg) ? "" : "list__box__title_large txtBold unread"}}">{{ $manual->title }}</p>
                     </div>
                 </div>
             </a>
