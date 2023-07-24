@@ -14,7 +14,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">ファイル添付</label>
+            <label class="col-lg-2 control-label">PDF添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
