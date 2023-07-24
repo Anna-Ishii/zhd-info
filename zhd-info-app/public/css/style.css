@@ -1086,7 +1086,7 @@ a:visited {
   background: #FFF;
 }
 .indexList__box__title {
-  color: #0051A4;
+  color: #000000;
   font-size: 1.6rem;
 }
 .indexList_box_button {
@@ -1109,13 +1109,16 @@ a:visited {
 }
 .list__box__title {
   color: #000000;
+  font-size: 2.2rem;
+  line-height: 3.7rem;
+}
+.list__box__title_large {
+  color: #000000;
   font-size: 2.4rem;
   line-height: 3.9rem;
 }
 .unread {
-  color: #0070c0;
-  font-size: 2.6rem;
-  line-height: 4.1rem;
+  color: #ff0000;
 }
 .list__box__tag {
   padding-inline: 4px;
