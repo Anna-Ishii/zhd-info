@@ -38,6 +38,12 @@ class ManualController extends Controller
     function detail($manual_id)
     {
         $manual = Manual::find($manual_id);
+
+        //既読処理
+        $user = session('member');
+        $manual->user()->updateExistingPivot($user->id, ['read_flg' => true]);
+        //
+        
         $contents = $manual->content;
         return view('manual.detail', [
             'manual' => $manual,

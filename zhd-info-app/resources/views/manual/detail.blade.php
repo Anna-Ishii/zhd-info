@@ -52,8 +52,6 @@
                 </div>
                 @endif
 
-                @livewire('manual.reading-button', ['manual' => $manual])
-
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
                     <!-- 添付ファイル -->
                     {{-- クエリパラメータにautoplayがあれば自動再生 --}}
