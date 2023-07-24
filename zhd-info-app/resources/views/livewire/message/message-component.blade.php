@@ -6,7 +6,6 @@
             @if ($message->emergency_flg)
             <p class="list__box__tag mr8 txtInline">重要</p>
             @endif
-            <p class="mr8 txtInline"><img src="{{ asset('/img/icon_clip.svg') }}" alt=""></p>
         </div>
     </div>
 </a>
