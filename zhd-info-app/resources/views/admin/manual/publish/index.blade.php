@@ -97,9 +97,9 @@
                                 <td>{{$manual->end_datetime}}</td>
                                 <td>{{$manual->status['name']}}</td>
                                 <td>{{$manual->create_user->name}}</td>
-                                <td>{{$manual->created_at}}</td>
+                                <td>{{$manual->created_at?->format('Y/m/d H:i')}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
-                                <td>{{$manual->updated_at}}</td>
+                                <td>{{$manual->updated_at?->format('Y/m/d H:i')}}</td>
                                 <td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
                                 <td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
                             </tr>
