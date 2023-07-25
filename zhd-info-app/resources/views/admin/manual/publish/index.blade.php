@@ -62,8 +62,6 @@
         <form method="post" action="#">
             <div class="text-right">
                 <p>
-                    <button id="editBtn" class="btn btn-info">編集</button>
-                    <button id="StopBtn" class="btn btn-info">配信停止</button>
                     <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-info">新規登録</a>
                 </p>
             </div>
@@ -82,12 +80,14 @@
                                 <th class="text-center">状態</th>
                                 <th class="text-center" colspan="2">登録者</th>
                                 <th class="text-center" colspan="2">更新</th>
+                                
                             </tr>
                         </thead>
 
                         <tbody>
                             @foreach ($manual_list as $manual)
-                            <tr class="@if($manual->status['id'] == 1) publishing
+                            <tr data-manual_id={{$manual->id}} 
+                                class="@if($manual->status['id'] == 1) publishing
                                         @elseif($manual->status['id'] == 2) published
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
@@ -100,6 +100,8 @@
                                 <td>{{$manual->created_at}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
                                 <td>{{$manual->updated_at}}</td>
+                                <td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
+                                <td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
                             </tr>
                             @endforeach
                         </tbody>

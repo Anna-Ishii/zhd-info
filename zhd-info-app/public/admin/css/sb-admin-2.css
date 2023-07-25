@@ -372,6 +372,11 @@ table.dataTable thead .sorting:after {
   padding-right: 8px;
 }
 
+.border-none {
+  border-style:none !important;
+  background-color: transparent;
+}
+
 .btn-circle {
   width: 30px;
   height: 30px;
