@@ -1,31 +1,25 @@
-$("#editBtn").on('click', function (e) {
+$(".editBtn").on('click', function (e) {
     e.preventDefault();
-    var checkedCheckboxes = $(".form-check-input:checked");
-    if(checkedCheckboxes.length != 1) {
-        alert("1つの業務連絡を選択してください") ;
-        return;
-    }
-    var title = checkedCheckboxes.closest('tr');
-    var link = title.find('.manual-title a');
-    console.log(link);
-    window.location.href = link.attr('href');
+    var targetElement = $(this).parents("tr");
+    var manual_id= targetElement.attr("data-manual_id");
+
+    let uri = new URL(window.location.href);
+    let targetUrl = uri.origin + "/admin/manual/publish/edit/" + manual_id;
+
+    console.log(targetUrl);
+    window.location.href = targetUrl;
 
 });
 
-$("#StopBtn").on('click', function (e) {
+$(".StopBtn").on('click', function (e) {
     e.preventDefault();
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    var checkedCheckboxes = $(".form-check-input:checked");
-    if(checkedCheckboxes.length != 1) {
-        alert("1つの動画マニュアルを選択してください") ;
-        return;
-    }
-
-    let checkedValues = [];
-    checkedCheckboxes.each(function() {
-      checkedValues.push($(this).val());
-    });
+    var targetElement = $(this).parents("tr");
+    var manual_id= targetElement.attr("data-manual_id");
+    
+    let manuals = [];
+    manuals.push(manual_id);
 
     fetch("/admin/manual/publish/stop", {
         method: 'POST',
@@ -34,7 +28,7 @@ $("#StopBtn").on('click', function (e) {
             "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify({
-            'manual_id': checkedValues
+            'manual_id': manuals
         })
     })
     .then(response => {
