@@ -1,31 +1,24 @@
-$("#editBtn").on('click', function (e) {
+$(".editBtn").on('click', function (e) {
     e.preventDefault();
-    var checkedCheckboxes = $(".form-check-input:checked");
-    if(checkedCheckboxes.length != 1) {
-        alert("1つの業務連絡を選択してください") ;
-        return;
-    }
-    var title = checkedCheckboxes.closest('tr');
-    var link = title.find('.message-title a');
-    console.log(link);
-    window.location.href = link.attr('href');
+    var targetElement = $(this).parents("tr");
+    var message_id= targetElement.attr("data-message_id");
 
+    let uri = new URL(window.location.href);
+    let targetUrl = uri.origin + "/admin/message/publish/edit/" +  message_id;
+
+    console.log(targetUrl);
+    window.location.href = targetUrl;
 });
 
-$("#StopBtn").on('click', function (e) {
+$(".StopBtn").on('click', function (e) {
     e.preventDefault();
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-    var checkedCheckboxes = $(".form-check-input:checked");
-    if(checkedCheckboxes.length != 1) {
-        alert("1つの業務連絡を選択してください") ;
-        return;
-    }
-
-    let checkedValues = [];
-    checkedCheckboxes.each(function() {
-      checkedValues.push($(this).val());
-    });
+    var targetElement = $(this).parents("tr");
+    var message_id= targetElement.attr("data-message_id");
+    
+    let messages = [];
+    messages.push(message_id);
 
     fetch("/admin/message/publish/stop", {
         method: 'POST',
@@ -34,7 +27,7 @@ $("#StopBtn").on('click', function (e) {
             "X-CSRF-TOKEN": csrfToken
         },
         body: JSON.stringify({
-            'message_id': checkedValues
+            'message_id': messages
         })
     })
     .then(response => {

@@ -47,8 +47,6 @@
 	<form method="post" action="#">
 		<div class="text-right">
 			<p>
-				<button id="editBtn" class="btn btn-info">編集</button>
-				<button id="StopBtn" class="btn btn-info">配信停止</button>
 				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-info">新規登録</a>
 			</p>
 		</div>
@@ -72,7 +70,8 @@
 
 				<tbody>
 					@foreach ($message_list as $message)
-					<tr class="@if($message->status['id'] == 1) publishing
+					<tr data-message_id={{$message->id}}
+						class="@if($message->status['id'] == 1) publishing
 								@elseif($message->status['id'] == 2) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
@@ -90,6 +89,8 @@
 						<td >{{$message->created_at?->format('Y/m/d H:i')}}</td>
                         <td >{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td >{{$message->updated_at?->format('Y/m/d H:i')}}</td>
+						<td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
+						<td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
 					</tr>
 					@endforeach
 
