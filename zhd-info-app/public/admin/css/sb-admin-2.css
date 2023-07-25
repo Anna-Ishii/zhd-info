@@ -17,7 +17,7 @@ body {
 @media (min-width: 768px) {
   #page-wrapper {
     position: inherit;
-    margin: 0 0 0 250px;
+    margin: 0 0 0 160px;
     padding: 0 30px;
     border-left: 1px solid #e7e7e7;
   }
@@ -103,7 +103,7 @@ body {
   .sidebar {
     z-index: 1;
     position: absolute;
-    width: 250px;
+    width: 160px;
     margin-top: 51px;
   }
   .navbar-top-links .dropdown-messages,
@@ -200,6 +200,178 @@ table.dataTable thead .sorting:after {
   font-family: fontawesome;
   color: rgba(50, 50, 50, 0.5);
 }
+
+.message-tableInner{
+  overflow-x: auto;
+  width: 1606px;
+}
+.message-table tr td{
+  padding-left: 8px;
+  padding-right: 8px;
+  word-wrap: break-word;
+}
+
+/* No */
+.message-table tr td:nth-of-type(1){
+  width: 56px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* ラベル */
+.message-table tr td:nth-of-type(2){
+  width: 88px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* カテゴリ */
+.message-table tr td:nth-of-type(3){
+  width: 196px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* タイトル */
+.message-table tr td:nth-of-type(4){
+  width: 466px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 掲載開始日 */
+.message-table tr td:nth-of-type(5){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 掲載終了日 */
+.message-table tr td:nth-of-type(6){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 状態 */
+.message-table tr td:nth-of-type(7){
+  width: 88px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 登録者 */
+.message-table tr td:nth-of-type(8){
+  width: 124px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 登録日 */
+.message-table tr td:nth-of-type(9){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 更新者 */
+.message-table tr td:nth-of-type(10){
+  width: 124px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 更新日 */
+.message-table tr td:nth-of-type(11){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+
+
+.manual-tableInner{
+  overflow-x: auto;
+  width: 1554px;
+}
+.manual-table tr td{
+  padding-left: 8px;
+  padding-right: 8px;
+  word-wrap: break-word;
+}
+
+/* No */
+.manual-table tr td:nth-of-type(1){
+  width: 56px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* カテゴリ */
+.manual-table tr td:nth-of-type(2){
+  width: 232px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* タイトル */
+.manual-table tr td:nth-of-type(3){
+  width: 466px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 掲載開始日 */
+.manual-table tr td:nth-of-type(4){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 掲載終了日 */
+.manual-table tr td:nth-of-type(5){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 状態 */
+.manual-table tr td:nth-of-type(6){
+  width: 88px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 登録者 */
+.manual-table tr td:nth-of-type(7){
+  width: 124px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 登録日 */
+.manual-table tr td:nth-of-type(8){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 更新者 */
+.manual-table tr td:nth-of-type(9){
+  width: 124px;
+  font-size: 18px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+/* 更新日 */
+.manual-table tr td:nth-of-type(10){
+  width: 116px;
+  font-size: 10px;
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
 .btn-circle {
   width: 30px;
   height: 30px;
