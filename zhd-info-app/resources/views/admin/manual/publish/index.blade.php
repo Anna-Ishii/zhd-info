@@ -70,22 +70,18 @@
             @include('common.admin.pagenation', ['objects' => $manual_list])
 
             <div class="toggleContent isCurrent" data-tab-number="0">
-                <div class="tableInner">
-                    <table id="list" class="table table-bordered table-hover table-condensed text-center">
+                <div class="manual-tableInner">
+                    <table id="list" class="manual-table table table-bordered table-hover table-condensed text-center">
                         <thead>
                             <tr>
-                                <th nowrap class="text-center"></th>
-                                <th nowrap class="text-center">No</th>
-                                <th nowrap class="text-center">カテゴリ</th>
-                                <th nowrap class="text-center">タイトル</th>
-                                <th nowrap class="text-center">ファイル</th>
-                                <th nowrap class="text-center">掲示開始日時</th>
-                                <th nowrap class="text-center">掲示終了日時</th>
-                                <th nowrap class="text-center">状態</th>
-                                <th nowrap class="text-center">登録者</th>
-                                <th nowrap class="text-center">登録日</th>
-                                <th nowrap class="text-center">更新者</th>
-                                <th nowrap class="text-center">更新日</th>
+                                <th class="text-center">No</th>
+                                <th class="text-center">カテゴリ</th>
+                                <th class="text-center">タイトル</th>
+                                <th class="text-center">掲載開始日時</th>
+                                <th class="text-center">掲載終了日時</th>
+                                <th class="text-center">状態</th>
+                                <th class="text-center" colspan="2">登録者</th>
+                                <th class="text-center" colspan="2">更新</th>
                             </tr>
                         </thead>
 
@@ -94,22 +90,16 @@
                             <tr class="@if($manual->status['id'] == 1) publishing
                                         @elseif($manual->status['id'] == 2) published
                                         @endif">
-                                <td>
-                                    <label>
-                                        <input type="checkbox" value="{{$manual->id}}" class="form-check-input">
-                                    </label>
-                                </td>
                                 <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td class="manual-title" nowrap><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
-                                <td>１ページ目<br><a href="{{ asset($manual->content_url)}}">プレビュー表示</a></td>
-                                <td nowrap>{{$manual->start_datetime}}</td>
-                                <td nowrap>{{$manual->end_datetime}}</td>
-                                <td nowrap>{{$manual->status['name']}}</td>
-                                <td nowrap>{{$manual->create_user->name}}</td>
-                                <td nowrap>{{$manual->created_at}}</td>
-                                <td nowrap>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
-                                <td nowrap>{{$manual->updated_at}}</td>
+                                <td class="manual-title"><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td>{{$manual->start_datetime}}</td>
+                                <td>{{$manual->end_datetime}}</td>
+                                <td>{{$manual->status['name']}}</td>
+                                <td>{{$manual->create_user->name}}</td>
+                                <td>{{$manual->created_at}}</td>
+                                <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
+                                <td>{{$manual->updated_at}}</td>
                             </tr>
                             @endforeach
                         </tbody>
