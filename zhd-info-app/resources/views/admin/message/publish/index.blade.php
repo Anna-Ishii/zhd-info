@@ -47,57 +47,50 @@
 	<form method="post" action="#">
 		<div class="text-right">
 			<p>
-				<button id="editBtn" class="btn btn-info">編集</button>
-				<button id="StopBtn" class="btn btn-info">配信停止</button>
 				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-info">新規登録</a>
 			</p>
 		</div>
 		@include('common.admin.pagenation', ['objects' => $message_list])
 
-		<div class="tableInner">
-			<table id="list" class="table table-bordered table-hover table-condensed text-center">
+		<div class="message-tableInner">
+			<table id="list" class="message-table table table-bordered table-hover table-condensed text-center">
 				<thead>
 					<tr>
-						<th nowrap class="text-center"></th>
-						<th nowrap class="text-center">No</th>
-						<th nowrap class="text-center">ラベル</th>
-						<th nowrap class="text-center">カテゴリ</th>
-						<th nowrap class="text-center">タイトル</th>
-						<th nowrap class="text-center">ファイル</th>
-						<th nowrap class="text-center">掲示開始日時</th>
-						<th nowrap class="text-center">掲示終了日時</th>
-						<th nowrap class="text-center">状態</th>
-						<th nowrap class="text-center">登録者</th>
-						<th nowrap class="text-center">登録日</th>
-						<th nowrap class="text-center">更新者</th>
-						<th nowrap class="text-center">更新日</th>
+						<th class="text-center">No</th>
+						<th class="text-center">ラベル</th>
+						<th class="text-center">カテゴリ</th>
+						<th class="text-center">タイトル</th>
+						<th class="text-center">掲載開始日時</th>
+						<th class="text-center">掲載終了日時</th>
+						<th class="text-center">状態</th>
+						<th class="text-center" colspan="2">登録</th>
+						<th class="text-center" colspan="2">更新</th>
 					</tr>
 				</thead>
 
 				<tbody>
 					@foreach ($message_list as $message)
-					<tr class="@if($message->status['id'] == 1) publishing
+					<tr data-message_id={{$message->id}}
+						class="@if($message->status['id'] == 1) publishing
 								@elseif($message->status['id'] == 2) published
 								@endif">
-						<td>
-							<input type="checkbox" value="{{$message->id}}" class="form-check-input">
-						</td>
 						<td class="shop_id">{{$message->number}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">重要</td>
 						@else
 						<td></td>
 						@endif
-						<td>{{$message->category->name}}</td>
-						<td class="message-title" nowrap><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
-						<td>１ページ目<br><a href="{{ asset($message->content_url)}}">プレビュー表示</a></td>
-						<td nowrap>{{$message->start_datetime}}</td>
-						<td nowrap>{{$message->end_datetime}}</td>
-						<td nowrap>{{$message->status['name']}}</td>
-						<td nowrap>{{$message->create_user->name}}</td>
-						<td nowrap>{{$message->created_at}}</td>
-                        <td nowrap>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
-						<td nowrap>{{$message->updated_at}}</td>
+						<td >{{$message->category->name}}</td>
+						<td class="message-title" ><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
+						<td >{{$message->start_datetime}}</td>
+						<td >{{$message->end_datetime}}</td>
+						<td >{{$message->status['name']}}</td>
+						<td >{{$message->create_user->name}}</td>
+						<td >{{$message->created_at?->format('Y/m/d H:i')}}</td>
+                        <td >{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
+						<td >{{$message->updated_at?->format('Y/m/d H:i')}}</td>
+						<td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
+						<td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
 					</tr>
 					@endforeach
 
