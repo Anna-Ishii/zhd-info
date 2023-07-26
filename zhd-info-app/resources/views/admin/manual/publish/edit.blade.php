@@ -23,8 +23,9 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">{{ $manual->content_name }}</span>
-                    <input type="file" name="file" value="" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
+                    <input type="file" name="file" value="" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                 </label>
+                <div>「mp4, mov, png, jpeg, jpg, pdfが添付可能です。」</div>
             </div>
         </div>
         <div class="manualVariableArea">
@@ -40,8 +41,9 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="manual_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
+                            <input type="file" name="manual_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
+                        <div>「mp4, mov, png, jpeg, jpg, pdfが添付可能です。」</div>
                     </div>
                 </div>
                 <div class="form-group">
@@ -69,8 +71,9 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">{{ $content->content_name }}</span>
-                            <input type="file" name="manual_file[{{$loop->index}}]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
+                            <input type="file" name="manual_file[{{$loop->index}}]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
+                        <div>「mp4, mov, png, jpeg, jpg, pdfが添付可能です。」</div>
                     </div>
                 </div>
                 <div class="form-group">
