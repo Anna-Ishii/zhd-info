@@ -24,8 +24,9 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png" required="required">
+                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf" required="required">
                 </label>
+                <div>「mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。」</div>
             </div>
         </div>
         <div class="manualVariableArea">
@@ -41,8 +42,9 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="contents_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png" data-variable-name="manual_file">
+                            <input type="file" name="contents_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
+                        <div>「mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。」</div>
                     </div>
                 </div>
                 <div class="form-group">
