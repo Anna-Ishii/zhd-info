@@ -81,7 +81,7 @@
 						<td></td>
 						@endif
 						<td >{{$message->category->name}}</td>
-						<td class="message-title" ><a href="{{ route('admin.message.publish.edit', ['message_id' => $message->id]) }}">{{$message->title}}</a></td>
+						<td class="message-title" ><a href="{{ asset($message->content_url)}}">{{$message->title}}</a></td>
 						<td >{{$message->start_datetime}}</td>
 						<td >{{$message->end_datetime}}</td>
 						<td >{{$message->status['name']}}</td>
