@@ -203,7 +203,7 @@ table.dataTable thead .sorting:after {
 
 .message-tableInner{
   overflow-x: auto;
-  width: 1606px;
+  /* width: 1664px; */
 }
 .message-table tr td{
   padding-left: 8px;
@@ -213,163 +213,163 @@ table.dataTable thead .sorting:after {
 
 /* No */
 .message-table tr td:nth-of-type(1){
-  width: 56px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 64px;
+  font-size: 12px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* ラベル */
 .message-table tr td:nth-of-type(2){
-  width: 88px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 80px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* カテゴリ */
 .message-table tr td:nth-of-type(3){
-  width: 196px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 176px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* タイトル */
 .message-table tr td:nth-of-type(4){
-  width: 466px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 416px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 掲載開始日 */
 .message-table tr td:nth-of-type(5){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 掲載終了日 */
 .message-table tr td:nth-of-type(6){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 状態 */
 .message-table tr td:nth-of-type(7){
-  width: 88px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 80px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 登録者 */
 .message-table tr td:nth-of-type(8){
-  width: 124px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 112px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 登録日 */
 .message-table tr td:nth-of-type(9){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 更新者 */
 .message-table tr td:nth-of-type(10){
-  width: 124px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 112px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 更新日 */
 .message-table tr td:nth-of-type(11){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 
 
 
 .manual-tableInner{
   overflow-x: auto;
-  width: 1554px;
+  /* width: 1554px; */
 }
 .manual-table tr td{
-  padding-left: 8px;
-  padding-right: 8px;
+  padding-left: 7px;
+  padding-right: 7px;
   word-wrap: break-word;
 }
 
 /* No */
 .manual-table tr td:nth-of-type(1){
-  width: 56px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 64px;
+  font-size: 12px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* カテゴリ */
 .manual-table tr td:nth-of-type(2){
-  width: 232px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 208px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* タイトル */
 .manual-table tr td:nth-of-type(3){
-  width: 466px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 416px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 掲載開始日 */
 .manual-table tr td:nth-of-type(4){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 掲載終了日 */
 .manual-table tr td:nth-of-type(5){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 状態 */
 .manual-table tr td:nth-of-type(6){
-  width: 88px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 80px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 登録者 */
 .manual-table tr td:nth-of-type(7){
-  width: 124px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 112px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 登録日 */
 .manual-table tr td:nth-of-type(8){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 更新者 */
 .manual-table tr td:nth-of-type(9){
-  width: 124px;
-  font-size: 18px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 112px;
+  font-size: 16px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 /* 更新日 */
 .manual-table tr td:nth-of-type(10){
-  width: 116px;
-  font-size: 10px;
-  padding-left: 8px;
-  padding-right: 8px;
+  width: 156px;
+  font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px;
 }
 
 .border-none {
