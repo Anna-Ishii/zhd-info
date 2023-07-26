@@ -13,6 +13,7 @@ use App\Models\ManualContent;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
+use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -99,7 +100,7 @@ class ManualPublishController extends Controller
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-        $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
+        $manual_params['thumbnails_url'] = ImageConverter::convert2image($manual_params['content_url']);
         $manual_params['create_admin_id'] = $admin->id;
         $manual_params['organization1_id'] = $admin->organization1_id;
         $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
@@ -121,7 +122,8 @@ class ManualPublishController extends Controller
                 $content_data[$i]['order_no'] = $i + 1;
                 $f = $request['manual_file'][$i];
                 $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
+                $content_data[$i]['thumbnails_url'] =
+                    ImageConverter::convert2image($content_data[$i]['content_url']);
 
             }
         }
@@ -185,7 +187,7 @@ class ManualPublishController extends Controller
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if(isset($request->file)) {
             $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-            $manual_params['thumbnails_url'] = $this->movie2image($manual_params['content_url']);
+            $manual_params['thumbnails_url'] = ImageConverter::convert2image($manual_params['content_url']);
         }
         $manual_params['updated_admin_id'] = $admin->id;
 
@@ -223,7 +225,7 @@ class ManualPublishController extends Controller
                     $file = $this->uploadFile($request->file('manual_file')[$i]);
                     $content->content_url = $file['content_url'];
                     $content->content_name = $file['content_name'];
-                    $content->thumbnails_url = $this->movie2image($content->content_url);
+                    $content->thumbnails_url = ImageConverter::convert2image($content->content_url);
                 }
                 $content->save();
             } else {
@@ -235,7 +237,7 @@ class ManualPublishController extends Controller
                     $content_data[$i]['order_no'] = $count_order_no + 1;
                     $f = $request['manual_file'][$i];
                     $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                    $content_data[$i]['thumbnails_url'] = $this->movie2image($content_data[$i]['content_url']);
+                    $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
                 }
             }
             

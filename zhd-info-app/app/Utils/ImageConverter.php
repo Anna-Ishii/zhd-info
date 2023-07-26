@@ -4,6 +4,27 @@ namespace App\Utils;
 
 class ImageConverter
 {
+    public static function convert2image($url)
+    {
+        // 拡張子を取得
+        $extension = pathinfo($url, PATHINFO_EXTENSION);
+
+
+        switch ($extension) {
+            case 'pdf':
+                return self::pdf2image($url);
+            case 'mp4':
+            case 'mov':
+            case 'm4a':
+                return self::movie2image($url);
+            case 'png':
+            case 'jpeg':
+            case 'jpg':
+                return $url;
+            default:
+                return null;
+        }
+    }
     public static function movie2image($movie_path)
     {
         $shot_sec = 4;
