@@ -37,14 +37,14 @@ class PublishStoreRequest extends FormRequest
         return [
             'title.required' => 'タイトルは必須項目です',
             'file.required' => 'ファイルを添付してください',
-            'file.mimetypes' => 'mp4,mov,png,jpeg,jpg,pdf形式のファイルを添付してください',
+            'file.mimetypes' => 'mp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
             'file' => 'ファイルのアップロードに失敗しました',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
             'brand.required' => '対象ブランドを選択してください',
             'manual_flow_title.*.required' => '手順名は必須項目です',
             'manual_file.*.required' => '手順ファイルは必須項目です',
-            'manual_file.*.mimetypes' => '手順ファイルはmp4,mov,png,jpeg,jpg,pdf形式のファイルを添付してください',
+            'manual_file.*.mimetypes' => '手順ファイルはmp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
             'manual_file.*' => '手順ファイルのアップロードに失敗しました',
         ];
     }
