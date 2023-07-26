@@ -92,7 +92,7 @@
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->category->name}}</td>
-                                <td class="manual-title"><a href="{{ route('admin.manual.publish.edit', ['manual_id' => $manual->id]) }}">{{$manual->title}}</a></td>
+                                <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
                                 <td>{{$manual->start_datetime}}</td>
                                 <td>{{$manual->end_datetime}}</td>
                                 <td>{{$manual->status['name']}}</td>
