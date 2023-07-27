@@ -1,5 +1,4 @@
 "use strict";
-​
 /* 動画再生・停止時に再生ボタンの表示の切り替えをする */
 $(window).on('load' , function(){
 	let targetMovie = $('.manualAttachment').find('video');
@@ -22,12 +21,10 @@ $(document).on('play', 'video', function(){
 $(document).on('pause', 'video', function(){
 	$(this).addClass('is-paused');
 });
-​
 /* マニュアルモーダル */
 $(document).on('click' , '.main__thumb' , function(){
 	let thumbParents = $(this).parents('.main__box , .main__box--single');
 	thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
-​
 	/* 動画を自動再生する */
 	let targetMovie = $('.manualAttachment.isActive').find('video');
 	if(targetMovie.length){
@@ -43,7 +40,6 @@ $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , funct
 		if(targetActiveMovie.length){
 			targetActiveMovie.get(0).pause();
 		}
-​
 		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
 	}else if($(this).hasClass('manualAttachment__close')){
 		/* 動画を止める */
@@ -51,7 +47,6 @@ $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , funct
 		if(targetActiveMovie.length){
 			targetActiveMovie.get(0).pause();
 		}
-​
 		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
 	}
 });
@@ -63,7 +58,6 @@ $(document).on('click', '.manualAttachment.isActive video, .manualAttachment__bt
 	}else{
 		chkTarget = $(this);	
 	}	
-​
 	if(!chkTarget.get(0).paused){
 		chkTarget.get(0).pause();
 		return false;
@@ -76,7 +70,6 @@ $(document).on('click', '.manualAttachment.isActive video, .manualAttachment__bt
 $(document).on('click' , '.btnPrint' , function(){
 	window.print();
 });
-​
 /* モーダル */
 $(document).on('click' , '.btnMoveFolder' , function(){
 	let chkTargetName = $(this).data('target-name');
@@ -87,13 +80,11 @@ $(document).on('click' , '.btnMoveFolder' , function(){
 		modalTarget.show();
 	}
 });
-​
 $(document).on('click', '.modalBg' , function(e){
 	if(!e.target.closest('.modal')){
 		$('.modalBg , .modal').hide();	
 	};
 });
-​
 /* 移動先フォルダ選択時 */
 $(document).on('change' , '.moveFolder' , function(){
 	$('.modal__list__item').find('label').removeClass('isSelected');
