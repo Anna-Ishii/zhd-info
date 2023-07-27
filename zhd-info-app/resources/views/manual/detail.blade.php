@@ -59,7 +59,7 @@
                     <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
                         <div class="manualAttachment__inner">
                             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : ''}} class="is-paused" id="aaa">
+                            <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : 'class="is-paused"'}}  id="aaa">
                                 <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
                             </video>
                             <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
