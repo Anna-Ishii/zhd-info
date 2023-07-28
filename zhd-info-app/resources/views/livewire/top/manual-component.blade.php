@@ -12,7 +12,7 @@
         <div class="manualAttachment__inner">
             @if( in_array($ml->content_type, ['mp4', 'mov'], true ))
             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-            <video controls playsinline preload class="is-paused">
+            <video controls playsinline preload >
                 <source src="{{ asset($ml->content_url) }}#t=0.1" type="video/mp4">
             </video>
             <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
