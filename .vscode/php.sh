@@ -1,3 +1,3 @@
 #!/bin/sh
-docker-compose exec PHPコンテナ名 php "$@"
+docker-compose exec app php "$@"
 return $?

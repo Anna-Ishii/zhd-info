@@ -47,7 +47,7 @@ class AdminCreateCommand extends Command
         $organization = Organization1::where('id',$organization_id)->first();
 
         $this->info("名前 : $name");
-        $this->info("年齢 : $email");
+        $this->info("メールアドレス : $email");
         $this->info("従業員コード : $employee_code");
         $this->info("パスワード : $password");
         $this->info("業態 : $organization->name");
