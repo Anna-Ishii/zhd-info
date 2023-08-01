@@ -33,6 +33,7 @@
         <div class="main__inner">
             <div class="main__supplement main__box--single thumb_parents flex">
                 @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
+                {{-- 動画 --}}
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
                         <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg')}}" alt="">
@@ -41,7 +42,34 @@
                     </div>
                     <p>{{ $manual->description}}</p>
                 </div>
+                <!-- 添付ファイル -->
+                {{-- クエリパラメータにautoplayがあれば自動再生 --}}
+                <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
+                <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
+                    <div class="manualAttachment__inner">
+                        <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
+                        <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : 'class="is-paused"'}}  id="aaa">
+                            <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
+                        </video>
+                        <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
+                        <button type="button" class="manualAttachment__close"></button>
+                    </div>
+                </div>
+                @elseif( in_array($manual->content_type, ['pdf'], true ))
+                {{-- PDF --}}
+                <div class="main__supplement__detail flex">
+                    <a href="{{ asset($manual->content_url)}}">
+                        <!-- jsのクリックイベントを無効化、pdfはポップアップで表示しないため -->
+                        <div class="main__thumb" style="pointer-events: none;">
+                            <img src="{{ asset($manual->thumbnails_url)}}" alt="">
+                            <!-- 再生ボタンにしたい場合playクラスをつける -->
+                            <button type="button" class="main__thumb__icon"></button>
+                        </div>
+                    </a>
+                    <p>{{ $manual->description }}</p>
+                </div>
                 @else
+                {{-- 画像 --}}
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
                         <img src="{{ asset($manual->content_url)}}" alt="">
@@ -50,25 +78,7 @@
                     </div>
                     <p>{{ $manual->description }}</p>
                 </div>
-                @endif
-
-                @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
-                    <!-- 添付ファイル -->
-                    {{-- クエリパラメータにautoplayがあれば自動再生 --}}
-                    <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
-                    <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
-                        <div class="manualAttachment__inner">
-                            <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : 'class="is-paused"'}}  id="aaa">
-                                <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
-                            </video>
-                            <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
-                            <button type="button" class="manualAttachment__close"></button>
-                        </div>
-                    </div>
-                    
-                @else
-                <!-- 添付ファイル -->
+                                <!-- 添付ファイル -->
                 <div class="manualAttachmentBg"></div>
                 <div class="manualAttachment">
                     <div class="manualAttachment__inner">
@@ -103,6 +113,15 @@
                         <button type="button" class="manualAttachment__close"></button>
                     </div>
                 </div>
+                @elseif( in_array($content->content_type, ['pdf'], true ))
+                <div class="flex" >
+                    <div class="main__thumb" onclick="location.href='{{ asset($content->content_url)}}'">
+                        <img src="{{ asset($content->thumbnails_url)}}" alt="">
+                        <!-- 再生ボタンにしたい場合playクラスをつける -->
+                        <button type="button" class="main__thumb__icon"></button>
+                    </div>
+                    <p>{{ $content->description }}</p>
+                </div>
                 @else
                 <div class="flex">
                     <div class="main__thumb">
@@ -123,8 +142,6 @@
                 @endif
             </section>
             @endforeach
-
-
         </div>
     </main>
 
