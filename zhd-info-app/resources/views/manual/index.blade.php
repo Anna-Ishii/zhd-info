@@ -54,6 +54,7 @@
                     </div>
                     <div class="list__box__txtInner">
                         <p class="list__box__title mb2 {{($manual->pivot->read_flg) ? "" : "list__box__title_large txtBold unread"}}">{{ $manual->title }}</p>
+                        <time datetime="{{$manual->start_datetime}}" class="mr8 txtInline">{{ $manual->formatted_start_datetime }}</time>
                     </div>
                 </div>
             </a>
