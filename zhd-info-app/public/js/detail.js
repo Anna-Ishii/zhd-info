@@ -111,6 +111,7 @@ $(window).on('load' , function(){
 	});
 	/* プリロード画面の削除 */
 	$('.manualAttachment').find('.manualAttachment__preload').fadeOut();
+	$('.manualAttachment__ui__progressDot').sortable();
 });
 
 /* 動画UIの操作関係 */

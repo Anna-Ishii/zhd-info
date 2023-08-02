@@ -101,7 +101,7 @@
                                 <div class="manualAttachment__ui__seekbarInner">
                                     <div class="manualAttachment__ui__seekbar">
                                         <div class="manualAttachment__ui__progress">
-                                            <div class="manualAttachment__ui__progressDot draggable ui-widget-content"></div>
+                                            <a onclick="return false;" href="#" class="manualAttachment__ui__progressDot draggable ui-widget-content" draggable="true"></a>
                                         </div>
                                     </div>
                                 </div>
