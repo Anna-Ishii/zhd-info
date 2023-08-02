@@ -82,8 +82,8 @@
 						@endif
 						<td >{{$message->category->name}}</td>
 						<td class="message-title" ><a href="{{ asset($message->content_url)}}">{{$message->title}}</a></td>
-						<td >{{$message->start_datetime}}</td>
-						<td >{{$message->end_datetime}}</td>
+						<td >{{$message->formatted_start_datetime}}</td>
+						<td >{{$message->formatted_end_datetime}}</td>
 						<td >{{$message->status['name']}}</td>
 						<td >{{$message->create_user->name}}</td>
 						<td >{{$message->created_at?->format('Y/m/d H:i')}}</td>

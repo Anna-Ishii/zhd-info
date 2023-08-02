@@ -3,6 +3,6 @@
         <p class="indexList__box__title {{($ms->pivot->read_flg) ? "" : "txtBold unread"}}">{{ $ms->title }}</p>
         {{-- スペース確保のため --}}
         <p class="mb14"></p>
-        <p class="indexList__box__title txtBold">{{ $ms->start_datetime }}</p>
+        <p class="indexList__box__title txtBold">{{ $ms->formatted_start_datetime }}</p>
     </div>
 </a>
