@@ -1140,9 +1140,9 @@ a:visited {
   width: 100%;
 }
 .list__box__thumb + .list__box__txtInner .list__box__title {
-  position: absolute;
+  /* position: absolute; */
   top: 50%;
-  transform: translateY(-50%);
+  /* transform: translateY(-50%); */
 }
 .list a {
   display: block;
