@@ -1,4 +1,9 @@
 @charset "UTF-8";
+/* google fonts */
+.material-symbols-outlined {
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 48;
+}
+
 html {
   font-size: 62.5%;
 }
@@ -20,6 +25,10 @@ a {
 }
 a:visited {
   text-decoration: none;
+}
+
+li {
+  list-style-type: none;
 }
 
 *.w10 {
@@ -701,8 +710,10 @@ a:visited {
   font-size: 1.8rem;
 }
 .header--detail.header .header__menu {
-  gap: 28px;
   padding-right: 27px;
+}
+.header--detail.header .header__menu li:first-of-type {
+  margin-right: 27px;
 }
 .header--detail.header .header__menu button {
   appearance: none;
@@ -711,10 +722,9 @@ a:visited {
 }
 .header--detail.header .header__titleBox {
   width: 100%;
-  gap: 35px;
 }
 .header--detail.header .header__title {
-  padding-top: 10px;
+  padding: 10px 0 0 35px;
 }
 .header--detail.header .header__title h1 {
   font-size: 2.4rem;
@@ -850,9 +860,6 @@ a:visited {
   padding: 10px 21px;
   background: #FFF;
 }
-.main__box .flex {
-  gap: 17px;
-}
 .main__box h2 {
   padding-left: 0;
 }
@@ -863,6 +870,7 @@ a:visited {
   position: relative;
   width: 100%;
   max-width: 160px;
+  margin-right: 17px;
   cursor: pointer;
 }
 .main__thumb img {
@@ -916,6 +924,7 @@ a:visited {
   display: block;
 }
 
+/* マニュアルモーダル */
 .manualAttachmentBg {
   z-index: 1001;
   position: fixed;
@@ -937,9 +946,38 @@ a:visited {
   width: 100%;
   max-width: 768px;
   max-height: calc(80vh - 50px);
+  /* 動画UI関係 */
 }
 .manualAttachment__inner {
   position: relative;
+}
+.manualAttachment__videoCover {
+  z-index: 1002;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: pointer;
+}
+.manualAttachment__preload {
+  z-index: 1003;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: #CCC;
+}
+.manualAttachment__preload div {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+.manualAttachment__preload__txt {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 2rem;
 }
 .manualAttachment__btnPlay {
   display: none;
@@ -953,6 +991,7 @@ a:visited {
   background: none;
 }
 .manualAttachment__close {
+  z-index: 1005;
   position: absolute;
   top: -20px;
   right: -10px;
@@ -964,18 +1003,154 @@ a:visited {
   background: #FFF url(../img/icon_close.svg) center no-repeat;
   background-size: 20px;
 }
+.manualAttachment__ui {
+  z-index: 1004;
+  position: absolute;
+  bottom: 16px;
+  left: 0;
+  width: 100%;
+  /* 個々のボタン */
+  /* シークバー */
+}
+.manualAttachment__ui__inner {
+  position: relative;
+}
+.manualAttachment__ui__main, .manualAttachment__ui__other {
+  position: absolute;
+  bottom: 16px;
+  width: 50%;
+}
+.manualAttachment__ui__main {
+  left: 10px;
+  text-align: left;
+}
+.manualAttachment__ui__other {
+  right: 10px;
+  text-align: right;
+}
+.manualAttachment__ui__other {
+  justify-content: right;
+  align-items: center;
+}
+.manualAttachment__ui button, .manualAttachment__ui__btnPlaySpeed {
+  display: inline-block;
+  width: 100%;
+  max-width: 40px;
+  border: none;
+  background: none;
+  color: #FFF;
+  text-align: center;
+  cursor: pointer;
+}
+.manualAttachment__ui button span, .manualAttachment__ui__btnPlaySpeed span {
+  width: 40px;
+  font-size: 3.2rem;
+  line-height: 4rem;
+  vertical-align: middle;
+}
+.manualAttachment__ui__btnPlaySpeed {
+  position: relative;
+}
+.manualAttachment__ui__seekbarInner {
+  width: 100%;
+  padding: 0 10px;
+}
+.manualAttachment__ui__seekbar {
+  width: 100%;
+  height: 8px;
+  border-radius: 4px;
+  background: #CCC;
+  cursor: pointer;
+}
+.manualAttachment__ui__progress {
+  position: relative;
+  width: 0;
+  height: 100%;
+  border-radius: 4px;
+  background: #FFF;
+}
+.manualAttachment__ui__progressDot {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  width: 16px;
+  height: 16px;
+  background: #FFF;
+  border-radius: 50%;
+}
+.manualAttachment .txtPlay, .manualAttachment .txtPause {
+  line-height: 4rem;
+}
+.manualAttachment .txtPlay {
+  display: none;
+}
+.manualAttachment .txtExitFullScreen {
+  display: none;
+}
+.manualAttachment .listPlaySpeed {
+  z-index: 1005;
+  display: none;
+  position: absolute;
+  bottom: 40px;
+  right: 10px;
+  background: #FFF;
+}
+.manualAttachment .listPlaySpeed li {
+  list-style-type: none;
+  padding: 0 5px;
+  border-bottom: 1px solid #CCC;
+  color: #5E5E5E;
+  font-size: 1.8rem;
+  cursor: pointer;
+}
+.manualAttachment .listPlaySpeed li:hover {
+  background-color: #EEE;
+}
+.manualAttachment .listPlaySpeed li:last-of-type {
+  border-bottom: none;
+}
 .manualAttachment video {
   max-width: 100%;
 }
 
-.is-paused + .manualAttachment__btnPlay {
+.manualAttachment:fullscreen, .manualAttachment:-webkit-full-screen {
+  /* フルスクリーンモードの時用 */
   display: block;
+  width: 100vw;
+  height: 100vh;
+  height: 100svh;
+}
+.manualAttachment:fullscreen .manualAttachment__close, .manualAttachment:-webkit-full-screen .manualAttachment__close {
+  display: none;
+}
+.manualAttachment:fullscreen video, .manualAttachment:-webkit-full-screen video {
+  height: 100vh;
+  height: 100svh;
+  margin: 0 auto;
+}
+.manualAttachment:fullscreen .txtFullScreen, .manualAttachment:-webkit-full-screen .txtFullScreen {
+  display: none;
+}
+.manualAttachment:fullscreen .txtExitFullScreen, .manualAttachment:-webkit-full-screen .txtExitFullScreen {
+  display: block;
+}
+.manualAttachment:fullscreen .listPlaySpeed, .manualAttachment:-webkit-full-screen .listPlaySpeed {
+  top: auto;
+  bottom: 40px;
+  right: 16px;
 }
 
 .manualAttachmentSingle img, .manualAttachmentSingle video {
   display: block;
   max-width: 100%;
   margin: 0 auto;
+}
+
+.isPaused {
+  /* 動画停止中のcss */
+}
+.isPaused + .manualAttachment__btnPlay {
+  display: block;
 }
 
 .sliderMenu__inner {

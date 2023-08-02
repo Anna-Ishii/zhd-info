@@ -15,7 +15,7 @@
             </div>
             <ul class="header__menu flex">
                 <li>
-                    <a href="{{ asset('img/test.pdf') }}" download="test.pdf">
+                    <a href="#" class="btnMoveFolder" data-target-name="moveFolder">
                         <img src="{{ asset('img/icon_folder_open.svg') }}" alt="">
                     </a>
                 </li>
@@ -58,12 +58,65 @@
                     <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
                     <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
                         <div class="manualAttachment__inner">
+                            <!-- ロード画面（動画再生の場合のみ） -->
+                            <div class="manualAttachment__preload">
+                                <div>
+                                    <p class="manualAttachment__preload__txt txtBold">読み込み中です</p>
+                                </div>
+                            </div>
                             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                            <video controls playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : 'class="is-paused"'}}  id="aaa">
+                            <div class="manualAttachment__videoCover"></div>
+                            <video playsinline preload {{(request()->input('autoplay')) ? 'autoplay' : 'class="is-paused"'}}  id="aaa">
                                 <source src="{{ asset($manual->content_url) }}#t=0.1" type="video/mp4">
                             </video>
                             <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
                             <button type="button" class="manualAttachment__close"></button>
+                            <!-- 操作UI（動画再生の場合のみ） -->
+                            <!-- material-symbols-outlinedはgoogle fontsでアイコン読み込み -->
+                            <div class="manualAttachment__ui">
+                                <div class="manualAttachment__ui__inner">
+                                    <div class="manualAttachment__ui__main">
+                                    <button class="manualAttachment__ui__btnPlay">
+                                        <span class="material-symbols-outlined txtPlay">play_circle</span>
+                                        <span class="material-symbols-outlined txtPause">stop_circle</span>
+                                    </button><!-- /btnPlay -->
+                                    <button class="manualAttachment__ui__btnReplay">
+                                        <span class="material-symbols-outlined">replay_10</span>
+                                    </button>
+                                    <button class="manualAttachment__ui__btnForward">
+                                        <span class="material-symbols-outlined">forward_10</span>
+                                    </button>
+                                    </div>
+
+                                    <div class="manualAttachment__ui__other">
+                                        <button class="manualAttachment__ui__btnFull" title="フルスクリーンモードで表示する">
+                                            <span class="material-symbols-outlined txtFullScreen">fullscreen</span>
+                                            <span class="material-symbols-outlined txtExitFullScreen">fullscreen_exit</span>
+                                        </button>
+                                        <button class="manualAttachment__ui__btnPiP" title="ピクチャインピクチャで表示する">
+                                            <span class="material-symbols-outlined">picture_in_picture_alt</span>
+                                        </button>
+                                        <div class="manualAttachment__ui__btnPlaySpeed" title="再生速度を変更する">
+                                            <span class="material-symbols-outlined">settings_slow_motion</span>
+                                            <ul class="listPlaySpeed">
+                                            <li data-play-speed="0.5">0.5x</li>
+                                            <li data-play-speed="1.0" class="is-selected">1x</li>
+                                            <li data-play-speed="1.25">1.25x</li>
+                                            <li data-play-speed="1.5">1.5x</li>
+                                            <li data-play-speed="2">2x</li>
+                                            </ul>
+                                        </div>
+                                    </div><!-- /other -->
+
+                                </div>
+                                <div class="manualAttachment__ui__seekbarInner">
+                                    <div class="manualAttachment__ui__seekbar">
+                                        <div class="manualAttachment__ui__progress">
+                                            <div class="manualAttachment__ui__progressDot draggable ui-widget-content"></div>
+                                        </div>
+                                    </div>
+                                </div>
+						    </div>
                         </div>
                     </div>
                     
@@ -95,12 +148,64 @@
                 <div class="manualAttachmentBg"></div>
                 <div class="manualAttachment">
                     <div class="manualAttachment__inner">
+                        <!-- ロード画面（動画再生の場合のみ） -->
+                        <div class="manualAttachment__preload">
+                            <div>
+                                <p class="manualAttachment__preload__txt txtBold">読み込み中です</p>
+                            </div>
+                        </div>
                         <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
-                        <video controls playsinline preload class="is-paused" id="aaa">
+                        <div class="manualAttachment__videoCover"></div>
+                        <video playsinline preload class="is-paused">
                             <source src="{{ asset($content->content_url) }}#t=0.1" type="video/mp4">
                         </video>
                         <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
                         <button type="button" class="manualAttachment__close"></button>
+                        <!-- 操作UI（動画再生の場合のみ） -->
+                        <!-- material-symbols-outlinedはgoogle fontsでアイコン読み込み -->
+                        <div class="manualAttachment__ui">
+                            <div class="manualAttachment__ui__inner">
+                                <div class="manualAttachment__ui__main">
+                                <button class="manualAttachment__ui__btnPlay">
+                                    <span class="material-symbols-outlined txtPlay">play_circle</span>
+                                    <span class="material-symbols-outlined txtPause">stop_circle</span>
+                                </button><!-- /btnPlay -->
+                                <button class="manualAttachment__ui__btnReplay">
+                                    <span class="material-symbols-outlined">replay_10</span>
+                                </button>
+                                <button class="manualAttachment__ui__btnForward">
+                                    <span class="material-symbols-outlined">forward_10</span>
+                                </button>
+                                </div>
+
+                                <div class="manualAttachment__ui__other flex">
+                                    <button class="manualAttachment__ui__btnFull" title="フルスクリーンモードで表示する">
+                                        <span class="material-symbols-outlined txtFullScreen">fullscreen</span>
+                                        <span class="material-symbols-outlined txtExitFullScreen">fullscreen_exit</span>
+                                    </button>
+                                    <button class="manualAttachment__ui__btnPiP" title="ピクチャインピクチャで表示する">
+                                        <span class="material-symbols-outlined">picture_in_picture_alt</span>
+                                    </button>
+                                    <div class="manualAttachment__ui__btnPlaySpeed" title="再生速度を変更する">
+                                        <span class="material-symbols-outlined">settings_slow_motion</span>
+                                        <ul class="listPlaySpeed">
+                                        <li data-play-speed="0.5">0.5x</li>
+                                        <li data-play-speed="1.0" class="is-selected">1x</li>
+                                        <li data-play-speed="1.25">1.25x</li>
+                                        <li data-play-speed="1.5">1.5x</li>
+                                        <li data-play-speed="2">2x</li>
+                                        </ul>
+                                    </div>
+                                </div><!-- /other -->
+                            </div>
+                            <div class="manualAttachment__ui__seekbarInner">
+                                <div class="manualAttachment__ui__seekbar">
+                                    <div class="manualAttachment__ui__progress">
+                                        <div class="manualAttachment__ui__progressDot draggable ui-widget-content"></div>
+                                    </div>
+                                </div>
+                            </div>
+						</div>
                     </div>
                 </div>
                 @else
