@@ -93,8 +93,8 @@
                                 <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->category->name}}</td>
                                 <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
-                                <td>{{$manual->start_datetime}}</td>
-                                <td>{{$manual->end_datetime}}</td>
+                                <td>{{$manual->formatted_start_datetime}}</td>
+                                <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status['name']}}</td>
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->created_at?->format('Y/m/d H:i')}}</td>
