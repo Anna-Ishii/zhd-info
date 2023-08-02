@@ -1270,6 +1270,9 @@ li {
   background: #0051A4;
   color: #fff;
 }
+.indexList__box__img img {
+  max-width: 100%;
+}
 
 .list__inner {
   max-width: 1280px;
@@ -2112,3 +2115,8 @@ details[open] summary::after{
     padding: 15px 0;
   }
 }/*# sourceMappingURL=style.css.map */
+
+.indexList__box.main__thumb {
+width: 100%;
+margin-bottom: 0px;
+}
