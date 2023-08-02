@@ -115,15 +115,17 @@ class Manual extends Model
         return $extension;
     }
 
-    public function getStartDatetimeAttribute($value)
+    public function getFormattedStartDatetimeAttribute()
     {
-        Carbon::setLocale('ja'); 
-         return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
-    public function getEndDatetimeAttribute($value)
+    public function getFormattedEndDatetimeAttribute()
     {
+        $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
-        return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 }

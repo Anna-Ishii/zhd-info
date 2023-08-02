@@ -6,7 +6,7 @@
             <picture class="indexList__box__img">
                 <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
             </picture>
-            <p class="indexList__box__title txtBold">{{ $ml->start_datetime }}</p>
+            <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
         </div>
         <div class="manualAttachmentBg"></div>
         <!-- 添付ファイル -->
@@ -28,7 +28,7 @@
             <picture class="indexList__box__img">
                 <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
             </picture>
-            <p class="indexList__box__title txtBold">{{ $ml->start_datetime }}</p>
+            <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
         </div>
         <button class="indexList_box_button" onclick='location.href=&quot;{{route("manual.detail",["manual_id" => $ml->id])}}&quot;'>詳細を確認する</button>
     @else
@@ -38,7 +38,7 @@
             <picture class="indexList__box__img">
                 <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
             </picture>
-            <p class="indexList__box__title txtBold">{{ $ml->start_datetime }}</p>
+            <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
         </div>
         <div class="manualAttachmentBg"></div>
         <!-- 添付ファイル -->
