@@ -109,15 +109,17 @@ class Message extends Model
         return $status;
     }
 
-    public function getStartDatetimeAttribute($value)
+    public function getFormattedStartDatetimeAttribute()
     {
+        $before_datetime = $this->attributes['start_datetime'];
         Carbon::setLocale('ja');
-        return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
-    public function getEndDatetimeAttribute($value)
+    public function getFormattedEndDatetimeAttribute()
     {
+        $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
-        return $value ? Carbon::parse($value)->format('Y/m/d H:i') : null;
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 }
