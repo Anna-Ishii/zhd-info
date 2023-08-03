@@ -927,3 +927,14 @@ textarea {
     width: 100%;
   }
 }/*# sourceMappingURL=style.css.map */
+
+/* バージョンテキスト */
+.version-number {
+  /* position: fixed; */
+  bottom: 10px; /* 下からの距離を調整 */
+  left: 10px; /* 左からの距離を調整 */
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+  color:#5E5E5E;
+}

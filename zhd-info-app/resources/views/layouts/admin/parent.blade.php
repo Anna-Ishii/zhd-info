@@ -43,10 +43,11 @@
         @include('common.admin.navigation')
         @yield('content')
     </div>
-    <div id="footer" class="text-center" style="margin: 20px;">
-        
+
+    <div class="version-number">
+        Ver. {{config('version.admin_version')}}
     </div>
-    
+
     <script src="{{ asset('/js/edit.js') }}" defer></script>
     @livewireScripts
 </body>
