@@ -73,6 +73,7 @@
                         <thead>
                             <tr>
                                 <th class="text-center">No</th>
+                                <th class="text-center">対象業態</th>
                                 <th class="text-center">カテゴリ</th>
                                 <th class="text-center">タイトル</th>
                                 <th class="text-center">掲載開始日時</th>
@@ -91,6 +92,7 @@
                                         @elseif($manual->status['id'] == 2) published
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
+                                <td>{{$manual->brands_string}}</td>
                                 <td>{{$manual->category->name}}</td>
                                 <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
                                 <td>{{$manual->formatted_start_datetime}}</td>
