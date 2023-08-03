@@ -2121,3 +2121,13 @@ details[open] summary::after{
 width: 100%;
 margin-bottom: 0px;
 }
+
+/* バージョンテキスト */
+.version-number {
+  /* position: fixed; */
+  bottom: 10px; /* 下からの距離を調整 */
+  left: 10px; /* 左からの距離を調整 */
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 14px;
+}
