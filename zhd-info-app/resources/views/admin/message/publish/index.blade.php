@@ -86,9 +86,9 @@
 						<td >{{$message->formatted_end_datetime}}</td>
 						<td >{{$message->status['name']}}</td>
 						<td >{{$message->create_user->name}}</td>
-						<td >{{$message->created_at?->format('Y/m/d H:i')}}</td>
+						<td >{{$message->formatted_created_at}}</td>
                         <td >{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
-						<td >{{$message->updated_at?->format('Y/m/d H:i')}}</td>
+						<td >{{$message->formatted_updated_at}}</td>
 						<td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
 						<td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
 					</tr>
