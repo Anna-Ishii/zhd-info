@@ -74,6 +74,15 @@ class Message extends Model
         return $this->belongsToMany(Brand::class, 'message_brand', 'message_id', 'brand_id');
     }
 
+    public function getBrandsStringAttribute()
+    {
+        $brands = $this->brand;
+        // リレーションからnameプロパティを取得して配列に変換
+        $brandNames = $brands->pluck('name')->toArray();
+        // カンマ区切りの文字列として返す
+        return implode(',', $brandNames);
+    }
+
     public function getStatusAttribute()
     {
         $start_datetime =
