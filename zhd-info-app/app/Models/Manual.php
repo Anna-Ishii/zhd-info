@@ -115,6 +115,20 @@ class Manual extends Model
         return $extension;
     }
 
+    public function getFormattedCreatedAtAttribute()
+    {
+        $before_datetime = $this->attributes['created_at'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
+    }
+
+    public function getFormattedUpdatedAtAttribute()
+    {
+        $before_datetime = $this->attributes['updated_at'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
+    }
+
     public function getFormattedStartDatetimeAttribute()
     {
         $before_datetime = $this->attributes['start_datetime'];
