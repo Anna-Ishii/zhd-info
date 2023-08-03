@@ -23,6 +23,11 @@
     @include('common.header')
 
     @yield('content')
+
+    <div class="version-number">
+        Ver. {{config('version.version')}}
+    </div>
+
     <script src="{{ asset('/js/timer.js') }}" defer></script>
     @livewireScripts
 </body>
