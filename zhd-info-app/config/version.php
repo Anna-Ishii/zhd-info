@@ -1,6 +1,6 @@
 <?php
 
 return [
-    'version' => '1.0.0',
-    'admin_version' => '1.0.0',
+    'version' => '1.0.1', // 店舗画面
+    'admin_version' => '1.0.1', // 管理画面
 ];
