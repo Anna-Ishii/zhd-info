@@ -60,6 +60,15 @@ class Manual extends Model
         return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');
     }
 
+    public function getBrandsStringAttribute()
+    {
+        $brands = $this->brand;
+        // リレーションからnameプロパティを取得して配列に変換
+        $brandNames = $brands->pluck('name')->toArray();
+        // カンマ区切りの文字列として返す
+        return implode(',', $brandNames);
+    }
+
     // public function organization2(): BelongsToMany
     // {
     //     return $this->belongsToMany(Organization2::class, 'manual_organization2', 'manual_id', 'organization2_id');
