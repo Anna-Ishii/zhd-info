@@ -57,6 +57,7 @@
 				<thead>
 					<tr>
 						<th class="text-center">No</th>
+						<th class="text-center">対象業態</th>
 						<th class="text-center">ラベル</th>
 						<th class="text-center">カテゴリ</th>
 						<th class="text-center">タイトル</th>
@@ -75,6 +76,7 @@
 								@elseif($message->status['id'] == 2) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
+						<td>{{$message->brands_string}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">重要</td>
 						@else
