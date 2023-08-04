@@ -23,6 +23,7 @@ class ManualPublishController extends Controller
     {
         $admin = session('admin');
         $category_list = ManualCategory::all();
+        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $category_id = $request->input('category');
         $status = $request->input('status');
         $q = $request->input('q');
@@ -73,6 +74,7 @@ class ManualPublishController extends Controller
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
             'manual_list' => $manual_list,
+            'brand_list' => $brand_list,
         ]);
     }
 

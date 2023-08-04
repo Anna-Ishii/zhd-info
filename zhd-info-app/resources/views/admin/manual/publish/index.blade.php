@@ -92,7 +92,7 @@
                                         @elseif($manual->status['id'] == 2) published
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
-                                <td>{{$manual->brands_string}}</td>
+                                <td>{{$manual->brands_string($brand_list)}}</td>
                                 <td>{{$manual->category->name}}</td>
                                 <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
                                 <td>{{$manual->formatted_start_datetime}}</td>
