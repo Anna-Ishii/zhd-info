@@ -24,6 +24,7 @@ class MessagePublishController extends Controller
     {
         $admin = session('admin');
         $category_list = MessageCategory::all();
+        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $category_id = $request->input('category');
         $status = $request->input('status');
         $q = $request->input('q');
@@ -70,8 +71,8 @@ class MessagePublishController extends Controller
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
-            'message_list' => $message_list
-
+            'message_list' => $message_list,
+            'brand_list' => $brand_list,
         ]);
     }
 

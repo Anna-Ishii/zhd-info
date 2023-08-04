@@ -76,7 +76,7 @@
 								@elseif($message->status['id'] == 2) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
-						<td>{{$message->brands_string}}</td>
+						<td>{{$message->brands_string($brand_list)}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">重要</td>
 						@else
