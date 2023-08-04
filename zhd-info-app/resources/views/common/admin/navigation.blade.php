@@ -31,7 +31,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav" >
                 <li>
-                    <a href="#">業務連絡</a>
+                    <a href="#" style="pointer-events: none;">業務連絡</a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/message/publish/">配信</a></li>
                         <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
@@ -39,19 +39,22 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#">動画マニュアル</span></a>
+                    <a href="#" style="pointer-events: none;">動画マニュアル</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/manual/publish/">配信</a></li>
                         <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#">アカウント管理</span></a>
+                    <a href="#" style="pointer-events: none;">アカウント管理</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/account/">アカウント</a></li>
                     </ul>
                 </li>
-
+                <li>
+                    <a href="#" style="pointer-events: none;">Ver. {{config('version.admin_version')}}</span></a>
+                    
+                </li>
             </ul>
         </div>
         <!-- /.sidebar-collapse -->
