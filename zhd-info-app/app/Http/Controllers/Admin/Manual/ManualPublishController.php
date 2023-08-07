@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Manual;
 
+use App\Enums\PublishStatus;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\AdminRepository;
@@ -36,7 +37,7 @@ class ManualPublishController extends Controller
             // 検索機能 状態
             ->when(isset($status), function ($query) use ($status) {
                 switch ($status) {
-                    case 1:
+                    case PublishStatus::Wait:
                         $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('start_datetime', '>', now('Asia/Tokyo'))
@@ -48,16 +49,17 @@ class ManualPublishController extends Controller
                                     ->orWhereNull('start_datetime');
                                 });
                         break;
-                    case 2:
+                    case PublishStatus::Publishing:
                         $query->where('start_datetime', '<=', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                 $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                 ->orWhereNull('end_datetime');
                         });
                         break;
-                    case 3:
+                    case PublishStatus::Published:
                         $query->where('end_datetime', '<=', now('Asia/Tokyo'));
                         break;
+                    case 4: break;
                     default:
                         break;
                 }
