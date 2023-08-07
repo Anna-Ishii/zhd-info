@@ -213,16 +213,16 @@ table.dataTable thead .sorting:after {
 
 /* No */
 .message-table tr td:nth-of-type(1){
-  width: 38px;
-  min-width: 38px;
+  width: 48px;
+  min-width: 48px;
   font-size: 10px;
   padding-left: 4px;
   padding-right: 4px;
 }
 /* 対象業態 */
 .message-table tr td:nth-of-type(2){
-  width: 90px;
-  min-width: 90px;
+  width: 102px;
+  min-width: 102px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
@@ -311,14 +311,10 @@ table.dataTable thead .sorting:after {
 .message-table tr td:nth-of-type(13){
   width: 120px;
   min-width: 120px;
-
-  /* font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px; */
+  vertical-align:middle;
 }
 .message-table tr td:nth-of-type(13) button{
   width: auto;
-  font-size: auto;
   padding: 2px;
   display: inline;
 }
@@ -336,79 +332,105 @@ table.dataTable thead .sorting:after {
 
 /* No */
 .manual-table tr td:nth-of-type(1){
-  width: 64px;
-  font-size: 12px;
-  padding-left: 7px;
-  padding-right: 7px;
+  width: 48px;
+  min-width: 48px;
+  font-size: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+/* 対象業態 */
+.manual-table tr td:nth-of-type(2){
+  width: 102px;
+  min-width: 102px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* カテゴリ */
-.manual-table tr td:nth-of-type(2){
-  width: 208px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(3){
+  width: 132px;
+  min-width: 132px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* タイトル */
-.manual-table tr td:nth-of-type(3){
-  width: 416px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(4){
+  width: 391px;
+  min-width: 391px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 掲載開始日 */
-.manual-table tr td:nth-of-type(4){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(5){
+  width: 136px;
+  min-width: 136px;
+  font-size: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 掲載終了日 */
-.manual-table tr td:nth-of-type(5){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(6){
+  width: 136px;
+  min-width: 136px;
+  font-size: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 状態 */
-.manual-table tr td:nth-of-type(6){
-  width: 80px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(7){
+  width: 76px;
+  min-width: 76px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 登録者 */
-.manual-table tr td:nth-of-type(7){
-  width: 112px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(8){
+  width: 106px;
+  min-width: 106px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 登録日 */
-.manual-table tr td:nth-of-type(8){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(9){
+  width: 136px;
+  min-width: 136px;
+  font-size: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 更新者 */
-.manual-table tr td:nth-of-type(9){
-  width: 112px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(10){
+  width: 106px;
+  min-width: 106px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
 }
 /* 更新日 */
-.manual-table tr td:nth-of-type(10){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.manual-table tr td:nth-of-type(11){
+  width: 136px;
+  min-width: 136px;
+  font-size: 12px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+/* 編集・配信停止btn */
+.manual-table tr td:nth-of-type(12){
+  width: 120px;
+  min-width: 120px;
+  min-width: 120px;
+  vertical-align:middle;
+}
+.manual-table tr td:nth-of-type(12) button{
+  width: auto;
+  padding: 2px;
+  display: inline;
 }
 
-.border-none {
-  border-style:none !important;
-  background-color: transparent;
-}
 
 .btn-circle {
   width: 30px;

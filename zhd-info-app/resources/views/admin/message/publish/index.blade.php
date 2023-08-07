@@ -91,7 +91,7 @@
 						<td>{{$message->formatted_created_at}}</td>
                         <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td>{{$message->formatted_updated_at}}</td>
-						<td class="border-none">
+						<td>
 							<button class="editBtn btn btn-info">編集</button>
 							<button class="StopBtn btn btn-info">配信停止</button>
 						</td>
