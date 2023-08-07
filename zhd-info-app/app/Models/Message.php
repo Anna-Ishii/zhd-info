@@ -26,6 +26,7 @@ class Message extends Model
         'category_id',
         'create_admin_id',
         'emergency_flg',
+        'editing_flg',
         'organization1_id',
         'number',
         'updated_admin_id',
@@ -93,7 +94,9 @@ class Message extends Model
 
     public function getStatusAttribute()
     {
-        if($this->attributes['editing_flg'] == true) return PublishStatus::Editing;
+        if($this->attributes['editing_flg'] == true) 
+            return PublishStatus::Editing;
+
         $start_datetime =
             !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
         $end_datetime =

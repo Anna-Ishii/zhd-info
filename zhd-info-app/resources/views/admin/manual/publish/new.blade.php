@@ -118,7 +118,8 @@
         </div>
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-light" type="submit" value="保　存" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
