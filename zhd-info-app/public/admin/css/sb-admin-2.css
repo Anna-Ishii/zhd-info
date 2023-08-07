@@ -213,82 +213,115 @@ table.dataTable thead .sorting:after {
 
 /* No */
 .message-table tr td:nth-of-type(1){
-  width: 64px;
-  font-size: 12px;
-  padding-left: 7px;
-  padding-right: 7px;
+  width: 38px;
+  min-width: 38px;
+  font-size: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+/* 対象業態 */
+.message-table tr td:nth-of-type(2){
+  width: 90px;
+  min-width: 90px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* ラベル */
-.message-table tr td:nth-of-type(2){
-  width: 80px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(3){
+  width: 72px;
+  min-width: 72px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* カテゴリ */
-.message-table tr td:nth-of-type(3){
-  width: 176px;
+.message-table tr td:nth-of-type(4){
+  width: 132px;
+  min-width: 132px;
   font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* タイトル */
-.message-table tr td:nth-of-type(4){
-  width: 416px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(5){
+  width: 387px;
+  min-width: 387px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 掲載開始日 */
-.message-table tr td:nth-of-type(5){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(6){
+  width: 132px;
+  min-width: 132px;
+  font-size: 12px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 掲載終了日 */
-.message-table tr td:nth-of-type(6){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(7){
+  width: 132px;
+  min-width: 132px;
+  font-size: 12px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 状態 */
-.message-table tr td:nth-of-type(7){
-  width: 80px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(8){
+  width: 72px;
+  min-width: 72px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 登録者 */
-.message-table tr td:nth-of-type(8){
-  width: 112px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(9){
+  width: 102px;
+  min-width: 102px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 登録日 */
-.message-table tr td:nth-of-type(9){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(10){
+  width: 132px;
+  min-width: 132px;
+  font-size: 12px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
 /* 更新者 */
-.message-table tr td:nth-of-type(10){
-  width: 112px;
-  font-size: 16px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(11){
+  width: 102px;
+  min-width: 102px;
+  font-size: 15px;
+  padding-left: 5px;
+  padding-right: 5px;
 }
 /* 更新日 */
-.message-table tr td:nth-of-type(11){
-  width: 156px;
-  font-size: 14px;
-  padding-left: 7px;
-  padding-right: 7px;
+.message-table tr td:nth-of-type(12){
+  width: 132px;
+  min-width: 132px;
+  font-size: 12px;
+  padding-left: 2px;
+  padding-right: 2px;
 }
+/* 編集・配信停止btn */
+.message-table tr td:nth-of-type(13){
+  width: 120px;
+  min-width: 120px;
 
+  /* font-size: 14px;
+  padding-left: 7px;
+  padding-right: 7px; */
+}
+.message-table tr td:nth-of-type(13) button{
+  width: auto;
+  font-size: auto;
+  padding: 2px;
+  display: inline;
+}
 
 
 .manual-tableInner{
