@@ -113,8 +113,7 @@ class MessagePublishController extends Controller
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] = 
-        ($request->emergency_flg == 'on' ? true : false);
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
@@ -123,6 +122,7 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
         $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
+        $msg_params['editing_flg'] = $request->save ? true : false;
 
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
@@ -229,6 +229,8 @@ class MessagePublishController extends Controller
             $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
         }
         $msg_params['updated_admin_id'] = $admin->id;
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
+
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
 

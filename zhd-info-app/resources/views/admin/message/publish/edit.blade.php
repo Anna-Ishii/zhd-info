@@ -119,7 +119,8 @@
 
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-danger" type="submit" name="register" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
