@@ -72,8 +72,8 @@
 				<tbody>
 					@foreach ($message_list as $message)
 					<tr data-message_id={{$message->id}}
-						class="@if($message->status['id'] == 1) publishing
-								@elseif($message->status['id'] == 2) published
+						class="@if($message->status == App\Enums\PublishStatus::Publishing) publishing
+								@elseif($message->status == App\Enums\PublishStatus::Published) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
 						<td>{{$message->brands_string($brand_list)}}</td>
@@ -86,7 +86,7 @@
 						<td class="message-title" ><a href="{{ asset($message->content_url)}}">{{$message->title}}</a></td>
 						<td >{{$message->formatted_start_datetime}}</td>
 						<td >{{$message->formatted_end_datetime}}</td>
-						<td >{{$message->status['name']}}</td>
+						<td >{{$message->status->text()}}</td>
 						<td >{{$message->create_user->name}}</td>
 						<td >{{$message->formatted_created_at}}</td>
                         <td >{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
