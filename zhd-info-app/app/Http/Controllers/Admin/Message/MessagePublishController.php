@@ -122,7 +122,7 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
         $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
-        $msg_params['editing_flg'] = $request->save ? true : false;
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
@@ -130,18 +130,19 @@ class MessagePublishController extends Controller
         $shops_id = [];
         $target_user_data = [];
 
-        if($organization_type == 4){
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        }elseif($organization_type == 5){
-            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            if ($organization_type == 4) {
+                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            } elseif ($organization_type == 5) {
+                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            }
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+            foreach ($target_users as $target_user) {
+                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
 
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-    
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-        }
-        
         try {
             DB::beginTransaction();
             $message = Message::create($msg_params);
@@ -151,7 +152,7 @@ class MessagePublishController extends Controller
 
             if ($organization_type == 4) {
                 $message->organization4()->attach($request->organization);
-            }elseif($organization_type == 5) {
+            } elseif ($organization_type == 5) {
                 $message->organization5()->attach($request->organization);
             }
 
@@ -237,16 +238,18 @@ class MessagePublishController extends Controller
         $shops_id = [];
         $target_user_data = [];
 
-        if ($organization_type == 4) {
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        } elseif ($organization_type == 5) {
-            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        }
+        if(!isset($request->save)) {
+            if ($organization_type == 4) {
+                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            } elseif ($organization_type == 5) {
+                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            }
 
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-            
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+                
+            foreach ($target_users as $target_user) {
+                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
         
         try {
@@ -301,6 +304,8 @@ class MessagePublishController extends Controller
 
     private function uploadFile($file)
     {
+        if(!isset($ifle)) return ['content_name' => null, 'content_url' => null];
+
         $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
         $filename_input = $file->getClientOriginalName();
         $path = public_path('uploads');

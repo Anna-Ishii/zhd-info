@@ -8,6 +8,7 @@ class PublishUpdateRequest extends FormRequest
 {
     public function rules()
     {
+        if ($this->input('save')) return []; 
         return [
             'title' => 'required',
             'file'  => 'mimes:pdf|max:150000',
