@@ -946,16 +946,22 @@ li {
   width: 100%;
   max-width: 768px;
   max-height: calc(80vh - 50px);
+  max-height: calc(80svh - 50px);
+  background: none;
   /* 動画UI関係 */
 }
 .manualAttachment__inner {
   position: relative;
+  width: 100%;
+  height: 100%;
+  background: none;
 }
 .manualAttachment__videoCover {
   z-index: 1002;
   position: absolute;
   top: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   height: 100%;
   cursor: pointer;
@@ -979,17 +985,6 @@ li {
   transform: translate(-50%, -50%);
   font-size: 2rem;
 }
-.manualAttachment__btnPlay {
-  display: none;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80px;
-  height: 80px;
-  border: none;
-  background: none;
-}
 .manualAttachment__close {
   z-index: 1005;
   position: absolute;
@@ -1003,11 +998,23 @@ li {
   background: #FFF url(../img/icon_close.svg) center no-repeat;
   background-size: 20px;
 }
+.manualAttachment__btnPlay {
+  display: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80px;
+  height: 80px;
+  border: none;
+  background: none;
+}
 .manualAttachment__ui {
   z-index: 1004;
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 100%;
   height: 24px;
   /* 個々のボタン */
@@ -1048,6 +1055,7 @@ li {
   font-size: 3.2rem;
   line-height: 4rem;
   vertical-align: middle;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
 }
 .manualAttachment__ui__btnPlaySpeed {
   position: relative;
@@ -1113,32 +1121,11 @@ li {
 .manualAttachment video, .manualAttachment img {
   max-width: 100%;
 }
-
-.manualAttachment:fullscreen, .manualAttachment:-webkit-full-screen {
-  /* フルスクリーンモードの時用 */
-  display: block;
-  width: 100vw;
-  height: 100vh;
-  height: 100svh;
-}
-.manualAttachment:fullscreen .manualAttachment__close, .manualAttachment:-webkit-full-screen .manualAttachment__close {
-  display: none;
-}
-.manualAttachment:fullscreen video, .manualAttachment:-webkit-full-screen video {
-  height: 100vh;
-  height: 100svh;
+.manualAttachment video {
+  max-height: calc(80svh - 50px);
   margin: 0 auto;
-}
-.manualAttachment:fullscreen .txtFullScreen, .manualAttachment:-webkit-full-screen .txtFullScreen {
-  display: none;
-}
-.manualAttachment:fullscreen .txtExitFullScreen, .manualAttachment:-webkit-full-screen .txtExitFullScreen {
-  display: block;
-}
-.manualAttachment:fullscreen .listPlaySpeed, .manualAttachment:-webkit-full-screen .listPlaySpeed {
-  top: auto;
-  bottom: 40px;
-  right: 16px;
+  background: none;
+  filter: drop-shadow(0px 0px rgba(0, 0, 0, 0));
 }
 
 .manualAttachmentSingle img, .manualAttachmentSingle video {
@@ -1147,9 +1134,40 @@ li {
   margin: 0 auto;
 }
 
-.isPaused {
-  /* 動画停止中のcss */
+/* フルスクリーンモードの時用 */
+.isFullScreen {
+  width: 100%;
+  height: 100%;
 }
+.isFullScreen .manualAttachment__close {
+  display: none !important;
+}
+.isFullScreen .manualAttachment__ui {
+  max-width: 100% !important;
+}
+.isFullScreen video {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  max-height: 100%;
+  margin: 0 auto;
+}
+.isFullScreen .txtFullScreen {
+  display: none;
+}
+.isFullScreen .txtExitFullScreen {
+  display: inline-block; /* 縦にずれるのでインライン */
+}
+.isFullScreen .listPlaySpeed {
+  top: auto;
+  bottom: 40px;
+  right: 16px;
+  font-size: 2rem;
+}
+
+/* 動画停止中 */
 .isPaused + .manualAttachment__btnPlay {
   display: block;
 }
@@ -1264,15 +1282,6 @@ li {
 .indexList__box__title {
   color: #000000;
   font-size: 1.6rem;
-}
-.indexList_box_button {
-  min-width: 185px;
-  max-width: 185px;
-  background: #0051A4;
-  color: #fff;
-}
-.indexList__box__img img {
-  max-width: 100%;
 }
 
 .list__inner {
