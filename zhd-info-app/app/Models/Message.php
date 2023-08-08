@@ -148,4 +148,16 @@ class Message extends Model
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
+
+    // 掲載中
+    public function scopePublishingMessage($query)
+    {
+        return $query
+                ->where('editing_flg', false)
+                ->where('start_datetime', '<', now('Asia/Tokyo'))
+                ->where(function ($q) {
+                    $q->where('end_datetime', '>', now('Asia/Tokyo'))
+                        ->orWhereNull('end_datetime');
+                });
+    }
 }

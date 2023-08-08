@@ -53,11 +53,7 @@ class TopController extends Controller
                                 ->get();
 
         $message_unread = $user->unreadMessages()
-                                ->where('start_datetime', '<', now('Asia/Tokyo'))
-                                ->where(function ($query) {
-                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                    ->orWhereNull('end_datetime');
-                                })
+                                ->publishingMessage()
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
 
