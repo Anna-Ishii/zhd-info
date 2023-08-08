@@ -82,7 +82,7 @@
 						@else
 						<td></td>
 						@endif
-						<td>{{$message->category->name}}</td>
+						<td>{{$message->category?->name}}</td>
 						<td class="message-title" ><a href="{{ asset($message->content_url)}}">{{$message->title}}</a></td>
 						<td>{{$message->formatted_start_datetime}}</td>
 						<td>{{$message->formatted_end_datetime}}</td>
