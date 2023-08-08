@@ -102,8 +102,10 @@
                                 <td>{{$manual->formatted_created_at}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
                                 <td>{{$manual->formatted_updated_at}}</td>
-                                <td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
-                                <td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
+                                <td>
+                                    <button class="editBtn btn btn-info">編集</button>
+                                    <button class="StopBtn btn btn-info">配信停止</button>
+                                </td>
                             </tr>
                             @endforeach
                         </tbody>
