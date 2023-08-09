@@ -218,7 +218,7 @@ class MessagePublishController extends Controller
     {
         $validated = $request->validated();
         $admin = session('admin');
-
+ 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] =
@@ -265,7 +265,10 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->sync($request->brand);
-            $message->user()->sync($target_user_data);
+
+            if (!isset($request->save)) {
+                $message->user()->sync($target_user_data);
+            }
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -304,7 +307,7 @@ class MessagePublishController extends Controller
 
     private function uploadFile($file)
     {
-        if(!isset($ifle)) return ['content_name' => null, 'content_url' => null];
+        if(!isset($file)) return ['content_name' => null, 'content_url' => null];
 
         $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
         $filename_input = $file->getClientOriginalName();
