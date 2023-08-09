@@ -32,6 +32,7 @@ class TopController extends Controller
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
                                 })
+                                ->where('editing_flg', false)
                                 ->orderBy('created_at', 'desc')
                                 ->get();
 
@@ -41,6 +42,7 @@ class TopController extends Controller
                                         ->orWhereNull('end_datetime');
                                 })
                                 ->whereBetween('start_datetime', [$lastweek_start, $lastweek_end])
+                                ->where('editing_flg', false)
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
                                 
@@ -50,6 +52,7 @@ class TopController extends Controller
                                     ->orWhereNull('end_datetime');
                                 })
                                 ->whereBetween('start_datetime', [$lastweek_start, $lastweek_end])
+                                ->where('editing_flg', false)
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
 
@@ -59,11 +62,7 @@ class TopController extends Controller
                                 ->get();
 
         $manual_unread = $user->unreadManuals()
-                                ->where('start_datetime', '<', now('Asia/Tokyo'))
-                                ->where(function ($query) {
-                                    $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                    ->orWhereNull('end_datetime');
-                                }) 
+                                ->publishingManual()
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
 
