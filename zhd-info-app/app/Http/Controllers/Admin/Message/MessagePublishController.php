@@ -218,7 +218,6 @@ class MessagePublishController extends Controller
     {
         $validated = $request->validated();
         $admin = session('admin');
- 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] =
@@ -289,7 +288,7 @@ class MessagePublishController extends Controller
         $message = Message::find($message_id)->first();
         $status = $message->status;
         //掲載終了だと、エラーを返す
-        if ($status['id'] == 2) return response()->json(['message' => '掲載中の業務連絡しか配信停止できません'], status: 500);
+        if ($status == PublishStatus::Published) return response()->json(['message' => '掲載中の業務連絡しか配信停止できません'], status: 500);
         $admin = session('admin');
         $now = Carbon::now();
         Message::whereIn('id', $message_id)->update([
