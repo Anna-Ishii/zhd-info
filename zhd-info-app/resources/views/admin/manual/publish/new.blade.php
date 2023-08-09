@@ -10,13 +10,13 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{old('title')}}" id="title" required="required">
+                <input class="form-control" name="title" value="{{old('title')}}" id="title">
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="{{old('description')}}" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required="required"></textarea>
+                <textarea class="form-control" name="description" value="{{old('description')}}" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。"></textarea>
             </div>
         </div>
         <div class="form-group">
@@ -24,7 +24,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf" required="required">
+                    <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf">
                 </label>
                 <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
             </div>
@@ -73,7 +73,7 @@
                 @foreach ($category_list as $category)
                 <label class="mr16">
                     <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        {{( old('category_id') == $category->id) ? "checked" : ""}}  required="required">
+                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -119,7 +119,7 @@
 
         <div class="text-center">
             <input class="btn btn-danger" type="submit" value="登　録" />
-            <input class="btn btn-light" type="submit" value="保　存" />
+            <input class="btn btn-default" type="submit" value="保　存" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
