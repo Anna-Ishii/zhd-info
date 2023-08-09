@@ -109,26 +109,32 @@ class ManualPublishController extends Controller
         $manual_params['organization1_id'] = $admin->organization1_id;
         $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
         $manual_params['number'] = (is_null($number)) ? 1 : $number + 1;
+        $manual_params['editing_flg'] = isset($request->save) ? true : false;
+
         // message_userに該当のユーザーを登録する
         $target_users_data = [];
-        $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-        foreach ($target_users as $target_user) {
-            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+            foreach ($target_users as $target_user) {
+                $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
 
         // 手順を登録する
         $content_data = [];
-        if(isset($request['manual_flow_title'])){
-            for ($i = 0; $i < count($validated['manual_flow_title']); $i++) {
-                $content_data[$i]['title'] = $request['manual_flow_title'][$i];
-                $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
+        if(isset($request['manual_flow'])){
+            foreach ($request['manual_flow'] as $i => $r) {
+                $content_data[$i]['title'] = $r['title'];
+                $content_data[$i]['description'] = $r['detail'];
                 $content_data[$i]['order_no'] = $i + 1;
-                $f = $request['manual_file'][$i];
-                $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                $content_data[$i]['thumbnails_url'] =
-                    ImageConverter::convert2image($content_data[$i]['content_url']);
-
+                if ($request->hasFile('manual_flow.' . $i . '.file')) {
+                    $f = $request->file('manual_flow.' . $i . '.file');
+                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    $content_data[$i]['thumbnails_url'] =
+                        ImageConverter::convert2image($content_data[$i]['content_url']);
+                }
             }
         }
 
@@ -309,6 +315,8 @@ class ManualPublishController extends Controller
 
     private function uploadFile($file)
     {
+        if (!isset($file)) return ['content_name' => null, 'content_url' => null];
+
         $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
         $filename_input = $file->getClientOriginalName();
         $path = public_path('uploads');

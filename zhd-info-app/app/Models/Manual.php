@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -77,6 +78,9 @@ class Manual extends Model
 
     public function getStatusAttribute()
     {
+        if ($this->attributes['editing_flg'] == true)
+            return PublishStatus::Editing;
+
         $start_datetime =
             !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
         $end_datetime =
@@ -84,26 +88,17 @@ class Manual extends Model
 
         $now = Carbon::now('Asia/Tokyo');
 
-        $status = [
-            'id'   => 0,
-            'name' => '待機' 
-        ];
+        $status = PublishStatus::Wait;
 
         if (isset($start_datetime)) {
             if ($start_datetime->lte($now)) {
-                $status = [
-                    'id'   => 1,
-                    'name' => '掲載中'
-                ];
+                $status = PublishStatus::Publishing;
             }
         }
 
         if (isset($end_datetime)) {
             if ($end_datetime->lte($now)) {
-                $status = [
-                    'id'   => 2,
-                    'name' => '掲載終了'
-                ];
+                $status = PublishStatus::Published;
             }
         }
 

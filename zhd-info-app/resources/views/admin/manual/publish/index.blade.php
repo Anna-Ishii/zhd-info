@@ -88,16 +88,16 @@
                         <tbody>
                             @foreach ($manual_list as $manual)
                             <tr data-manual_id={{$manual->id}} 
-                                class="@if($manual->status['id'] == 1) publishing
-                                        @elseif($manual->status['id'] == 2) published
+                                class="@if($manual->status == App\Enums\PublishStatus::Publishing) publishing
+                                        @elseif($manual->status == App\Enums\PublishStatus::Published) published
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brand_list)}}</td>
-                                <td>{{$manual->category->name}}</td>
+                                <td>{{$manual->category?->name}}</td>
                                 <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
-                                <td>{{$manual->status['name']}}</td>
+                                <td>{{$manual->status->text()}}</td>
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>

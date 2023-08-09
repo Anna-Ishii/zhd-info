@@ -118,8 +118,8 @@
         </div>
 
         <div class="text-center">
-            <input class="btn btn-danger" type="submit" value="登　録" />
-            <input class="btn btn-default" type="submit" value="保　存" />
+            <input class="btn btn-danger" type="submit" name="rigister" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
