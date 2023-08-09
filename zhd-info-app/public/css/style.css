@@ -2126,6 +2126,16 @@ details[open] summary::after{
   }
 }/*# sourceMappingURL=style.css.map */
 
+.indexList_box_button {
+  min-width: 185px;
+  max-width: 185px;
+  background: #0051A4;
+  color: #fff;
+}
+.indexList__box__img img {
+  max-width: 100%;
+}
+
 .indexList__box.main__thumb {
 width: 100%;
 margin-bottom: 0px;
