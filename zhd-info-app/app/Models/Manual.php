@@ -28,11 +28,16 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'category_id',
+        'editing_flg',
         'organization1_id',
         'number',
         'updated_admin_id',
         'start_datetime',
         'end_datetime',
+    ];
+
+    protected $casts = [
+        'editing_flg' => 'boolean',
     ];
 
     public function user(): BelongsToMany
@@ -78,8 +83,7 @@ class Manual extends Model
 
     public function getStatusAttribute()
     {
-        if ($this->attributes['editing_flg'] == true)
-            return PublishStatus::Editing;
+
 
         $start_datetime =
             !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
@@ -95,6 +99,9 @@ class Manual extends Model
                 $status = PublishStatus::Publishing;
             }
         }
+
+        if ($this->attributes['editing_flg'] == true)
+            $status = PublishStatus::Editing;
 
         if (isset($end_datetime)) {
             if ($end_datetime->lte($now)) {
