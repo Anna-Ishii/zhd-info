@@ -82,17 +82,20 @@
 						@else
 						<td></td>
 						@endif
-						<td >{{$message->category?->name}}</td>
+						<td>{{$message->category?->name}}</td>
 						<td class="message-title" ><a href="{{ asset($message->content_url)}}">{{$message->title}}</a></td>
-						<td >{{$message->formatted_start_datetime}}</td>
-						<td >{{$message->formatted_end_datetime}}</td>
-						<td >{{$message->status->text()}}</td>
-						<td >{{$message->create_user->name}}</td>
-						<td >{{$message->formatted_created_at}}</td>
-                        <td >{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
-						<td >{{$message->formatted_updated_at}}</td>
-						<td class="border-none"><button class="editBtn btn btn-info">編集</button></td>
-						<td class="border-none"><button class="StopBtn btn btn-info">配信停止</button></td>
+						<td>{{$message->formatted_start_datetime}}</td>
+						<td>{{$message->formatted_end_datetime}}</td>
+						<td>{{$message->status->text()}}</td>
+						<td>{{$message->create_user->name}}</td>
+						<td>{{$message->formatted_created_at}}</td>
+                        <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
+						<td>{{$message->formatted_updated_at}}</td>
+						<td>
+							<button class="editBtn btn btn-info">編集</button>
+							<button class="StopBtn btn btn-info">配信停止</button>
+						</td>
+
 					</tr>
 					@endforeach
 
