@@ -9,7 +9,7 @@ class PublishStoreRequest extends FormRequest
     public function rules()
     {
         // 一時保存の時は、バリデーショnしない
-        if ($this->input('save')) return []; 
+        if ($this->input('save')) return [];
         return [
             'title' => 'required',
             'file'  => 'required|mimes:pdf|max:150000',

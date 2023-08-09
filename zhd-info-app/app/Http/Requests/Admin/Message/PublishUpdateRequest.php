@@ -2,16 +2,22 @@
 
 namespace App\Http\Requests\Admin\Message;
 
+use App\Models\Message;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PublishUpdateRequest extends FormRequest
 {
     public function rules()
     {
-        if ($this->input('save')) return []; 
+        if ($this->input('save')) 
+        return [
+            'file'  => 'mimes:pdf|max:150000'
+        ];
+        $message_id = $this->route('message_id');
+        $message = Message::findOrFail($message_id);
         return [
             'title' => 'required',
-            'file'  => 'mimes:pdf|max:150000',
+            'file'  => 'mimes:pdf|max:150000'.(isset($message->content_url) ? '' : '|required'),
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
@@ -25,8 +31,9 @@ class PublishUpdateRequest extends FormRequest
 
     public function messages()
     {
-        return [
+        $messages = [
             'title.required' => 'タイトルは必須項目です',
+            'file.required' => 'ファイルを添付してください',
             'file.mimes' => 'PDF形式のファイルを添付してください',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'file' => 'ファイルのアップロードに失敗しました',
@@ -45,5 +52,7 @@ class PublishUpdateRequest extends FormRequest
                 'organization.required' => '対象エリアを選択してください',
             ]);
         }
+
+        return $messages;
     }
 }

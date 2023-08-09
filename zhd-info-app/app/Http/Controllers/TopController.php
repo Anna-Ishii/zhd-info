@@ -22,6 +22,7 @@ class TopController extends Controller
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
                                 })
+                                ->where('editing_flg', false)
                                 ->orderBy('start_datetime', 'desc')
                                 ->get();
         // 今日掲載されたマニュアル
