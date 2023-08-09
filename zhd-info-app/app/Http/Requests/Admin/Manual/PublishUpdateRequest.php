@@ -37,7 +37,7 @@ class PublishUpdateRequest extends FormRequest
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
             'manual_flow.*.title' => 'required',
-            'manual_flow.*.file' => 'max:150000'.$mimeTypesRule,
+            'manual_flow.*.file' => 'required_without:manual_flow.*.file_name|max:150000'.$mimeTypesRule,
             'manual_flow.*.detail' => 'nullable',
             'content_id.*' => 'nullable',
         ];
@@ -53,7 +53,7 @@ class PublishUpdateRequest extends FormRequest
             'category_id.required' => 'カテゴリを選択してください',
             'brand.required' => '対象業態を選択してください',
             'manual_flow.*.title.required' => '手順名は必須項目です',
-            'manual_flow.*.file.required' => '手順ファイルは必須項目です',
+            'manual_flow.*.file.required_without' => '手順ファイルは必須項目です',
             'manual_flow.*.file.mimetypes' => '手順ファイルはmp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
             'manual_flow.*.file' => '手順ファイルのアップロードに失敗しました',
         ];
