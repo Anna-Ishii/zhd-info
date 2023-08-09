@@ -17,9 +17,14 @@ class PublishStoreRequest extends FormRequest
 
     public function rules()
     {
-        // 一時保存の時は、バリデーショnしない
-        if ($this->input('save')) return [];
-        $mimeTypesRule = '|mimetypes:'. implode(',', array_values($this->uploadableFileTypes));
+        $mimeTypesRule = '|mimetypes:' . implode(',', array_values($this->uploadableFileTypes));
+        // 一時保存
+        if ($this->input('save')) 
+        return [
+            'file'  => 'max:150000' . $mimeTypesRule,
+            'manual_flow.*.file' => 'max:150000' . $mimeTypesRule,
+        ];
+
         return [
             'title' => 'required',
             'description' => 'nullable',
@@ -29,7 +34,7 @@ class PublishStoreRequest extends FormRequest
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
             'manual_flow.*.title' => 'required',
-            'manual_flow.*.file' => 'required'.$mimeTypesRule,
+            'manual_flow.*.file' => 'required|max:150000'.$mimeTypesRule,
             'manual_flow.*.detail' => 'nullable',
         ];
     }

@@ -9,20 +9,20 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{$manual->title}}" id="title" required="required">
+                <input class="form-control" name="title" value="{{$manual->title}}" id="title">
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。" required="required">{{$manual->description}}</textarea>
+                <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{$manual->description}}</textarea>
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">{{ $manual->content_name }}</span>
+                    <span class="fileName">{{ ($manual->content_name) ? $manual->content_name : 'ファイルを選択またはドロップ'}}</span>
                     <input type="file" name="file" value="" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                 </label>
                 <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
@@ -63,15 +63,15 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="manual_flow_title[{{$loop->index}}]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" required>
+                        <input class="form-control" name="manual_flow[{{$loop->index}}][title]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" >
                     </div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付</label>
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
-                            <span class="fileName">{{ $content->content_name }}</span>
-                            <input type="file" name="manual_file[{{$loop->index}}]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
+                            <span class="fileName">{{ ($content->content_name) ? $content->content_name : 'ファイルを選択またはドロップ' }}</span>
+                            <input type="file" name="manual_flow[{{$loop->index}}][file]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
                         <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
                     </div>
@@ -79,7 +79,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
                     <div class="col-lg-10">
-                        <textarea name="manual_flow_detail[{{$loop->index}}]" class="form-control" data-variable-name="manual_flow_detail" >{{ $content->description }}</textarea>
+                        <textarea name="manual_flow[{{$loop->index}}][detail]" class="form-control" data-variable-name="manual_flow_detail" >{{ $content->description }}</textarea>
                     </div>
                 </div>
                 <div class="text-right">
@@ -145,7 +145,8 @@
         </div>
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-danger" type="submit" name="rigister" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
