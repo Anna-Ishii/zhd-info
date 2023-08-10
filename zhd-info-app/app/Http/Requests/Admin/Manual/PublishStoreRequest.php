@@ -17,7 +17,14 @@ class PublishStoreRequest extends FormRequest
 
     public function rules()
     {
-        $mimeTypesRule = '|mimetypes:'. implode(',', array_values($this->uploadableFileTypes));
+        $mimeTypesRule = '|mimetypes:' . implode(',', array_values($this->uploadableFileTypes));
+        // 一時保存
+        if ($this->input('save')) 
+        return [
+            'file'  => 'max:150000' . $mimeTypesRule,
+            'manual_flow.*.file' => 'max:150000' . $mimeTypesRule,
+        ];
+
         return [
             'title' => 'required',
             'description' => 'nullable',
@@ -26,9 +33,9 @@ class PublishStoreRequest extends FormRequest
             'brand' => 'required',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
-            'manual_flow_title.*' => 'required',
-            'manual_file.*' => 'required'.$mimeTypesRule,
-            'manual_flow_detail.*' => 'nullable',
+            'manual_flow.*.title' => 'required',
+            'manual_flow.*.file' => 'required|max:150000'.$mimeTypesRule,
+            'manual_flow.*.detail' => 'nullable',
         ];
     }
 
@@ -42,10 +49,10 @@ class PublishStoreRequest extends FormRequest
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
             'brand.required' => '対象ブランドを選択してください',
-            'manual_flow_title.*.required' => '手順名は必須項目です',
-            'manual_file.*.required' => '手順ファイルは必須項目です',
-            'manual_file.*.mimetypes' => '手順ファイルはmp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
-            'manual_file.*' => '手順ファイルのアップロードに失敗しました',
+            'manual_flow.*.title.required' => '手順名は必須項目です',
+            'manual_flow.*.file.required' => '手順ファイルは必須項目です',
+            'manual_flow.*.file.mimetypes' => '手順ファイルはmp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
+            'manual_flow.*.file' => '手順ファイルのアップロードに失敗しました',
         ];
     }
 }

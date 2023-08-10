@@ -24,11 +24,7 @@ class MessageController extends Controller
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
-            ->where('start_datetime', '<', now('Asia/Tokyo'))
-            ->where(function ($query) {
-                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                    ->orWhereNull('end_datetime');
-            })
+            ->publishingMessage()
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->appends(request()->query());

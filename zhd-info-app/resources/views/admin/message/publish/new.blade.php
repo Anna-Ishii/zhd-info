@@ -5,12 +5,12 @@
 <div id="page-wrapper">
     @include('common.admin.page-head',['title' => '業務連絡新規登録'])
 
-    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{old('title')}}" required="required">
+                <input class="form-control" name="title" value="{{old('title')}}">
             </div>
         </div>
         <div class="form-group">
@@ -18,7 +18,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" accept=".pdf" required="required">
+                    <input type="file" name="file" value="" accept=".pdf">
                 </label>
             </div>
         </div>
@@ -28,7 +28,7 @@
                 @foreach ($category_list as $category)
                 <label class="mr16">
                     <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        {{( old('category_id') == $category->id) ? "checked" : ""}}  required="required">
+                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -119,7 +119,8 @@
 
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-danger" type="submit" name="register" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 

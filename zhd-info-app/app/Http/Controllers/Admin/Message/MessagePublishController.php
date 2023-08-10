@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Message;
 
 use Carbon\Carbon;
+use App\Enums\PublishStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
 use App\Http\Requests\Admin\Message\PublishUpdateRequest;
@@ -26,7 +27,7 @@ class MessagePublishController extends Controller
         $category_list = MessageCategory::all();
         $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $category_id = $request->input('category');
-        $status = $request->input('status');
+        $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $message_list =
             Message::query()
@@ -35,7 +36,7 @@ class MessagePublishController extends Controller
                 })
                 ->when(isset($status), function ($query) use ($status) {
                     switch ($status) {
-                        case 1:
+                        case PublishStatus::Wait:
                             $query->where('end_datetime', '>', now('Asia/Tokyo'))
                             ->where(function ($query) {
                                 $query->where('start_datetime', '>', now('Asia/Tokyo'))
@@ -47,15 +48,18 @@ class MessagePublishController extends Controller
                                     ->orWhereNull('start_datetime');
                                 });
                             break;
-                        case 2:
+                        case PublishStatus::Publishing:
                             $query->where('start_datetime', '<=', now('Asia/Tokyo'))
                             ->where(function ($query) {
                                 $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                 ->orWhereNull('end_datetime');
                             });
                             break;
-                        case 3:
+                        case PublishStatus::Published:
                             $query->where('end_datetime', '<=', now('Asia/Tokyo'));
+                            break;
+                        case PublishStatus::Editing:
+                            $query->where('editing_flg', '=', true);
                             break;
                         default:
                             break;
@@ -109,8 +113,7 @@ class MessagePublishController extends Controller
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] = 
-        ($request->emergency_flg == 'on' ? true : false);
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
@@ -119,6 +122,7 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
         $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
@@ -126,18 +130,19 @@ class MessagePublishController extends Controller
         $shops_id = [];
         $target_user_data = [];
 
-        if($organization_type == 4){
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        }elseif($organization_type == 5){
-            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            if ($organization_type == 4) {
+                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            } elseif ($organization_type == 5) {
+                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            }
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+            foreach ($target_users as $target_user) {
+                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
 
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-    
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-        }
-        
         try {
             DB::beginTransaction();
             $message = Message::create($msg_params);
@@ -147,7 +152,7 @@ class MessagePublishController extends Controller
 
             if ($organization_type == 4) {
                 $message->organization4()->attach($request->organization);
-            }elseif($organization_type == 5) {
+            } elseif ($organization_type == 5) {
                 $message->organization5()->attach($request->organization);
             }
 
@@ -213,7 +218,6 @@ class MessagePublishController extends Controller
     {
         $validated = $request->validated();
         $admin = session('admin');
-
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] =
@@ -225,22 +229,26 @@ class MessagePublishController extends Controller
             $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
         }
         $msg_params['updated_admin_id'] = $admin->id;
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
+
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
 
         $shops_id = [];
         $target_user_data = [];
 
-        if ($organization_type == 4) {
-            $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        } elseif ($organization_type == 5) {
-            $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-        }
+        if(!isset($request->save)) {
+            if ($organization_type == 4) {
+                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            } elseif ($organization_type == 5) {
+                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+            }
 
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-            
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+                
+            foreach ($target_users as $target_user) {
+                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
         
         try {
@@ -256,7 +264,10 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->sync($request->brand);
-            $message->user()->sync($target_user_data);
+
+            if (!isset($request->save)) {
+                $message->user()->sync($target_user_data);
+            }
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -277,7 +288,7 @@ class MessagePublishController extends Controller
         $message = Message::find($message_id)->first();
         $status = $message->status;
         //掲載終了だと、エラーを返す
-        if ($status['id'] == 2) return response()->json(['message' => '掲載中の業務連絡しか配信停止できません'], status: 500);
+        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています'], status: 500);
         $admin = session('admin');
         $now = Carbon::now();
         Message::whereIn('id', $message_id)->update([
@@ -295,6 +306,8 @@ class MessagePublishController extends Controller
 
     private function uploadFile($file)
     {
+        if(!isset($file)) return ['content_name' => null, 'content_url' => null];
+
         $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
         $filename_input = $file->getClientOriginalName();
         $path = public_path('uploads');

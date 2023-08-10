@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Message;
 
+use App\Enums\PublishStatus;
 use App\Http\Controllers\Controller;
 use App\Models\MessageCategory;
 use App\Models\Message;
@@ -24,7 +25,7 @@ class MessageManageController extends Controller
             })
             ->when(isset($status), function ($query) use ($status) {
                 switch ($status) {
-                    case 1:
+                    case PublishStatus::Wait:
                         $query->where('end_datetime', '>', now('Asia/Tokyo'))
                         ->where(function ($query) {
                             $query->where('start_datetime', '>', now('Asia/Tokyo'))
@@ -36,15 +37,18 @@ class MessageManageController extends Controller
                                 ->orWhereNull('start_datetime');
                             });
                         break;
-                    case 2:
+                    case PublishStatus::Publishing:
                         $query->where('start_datetime', '<=', now('Asia/Tokyo'))
                         ->where(function ($query) {
                             $query->where('end_datetime', '>', now('Asia/Tokyo'))
                             ->orWhereNull('end_datetime');
                         });
                         break;
-                    case 3:
+                    case PublishStatus::Published:
                         $query->where('end_datetime', '<=', now('Asia/Tokyo'));
+                        break;
+                    case PublishStatus::Editing:
+                        $query->where('editing_flg', '=', true);
                         break;
                     default:
                         break;
