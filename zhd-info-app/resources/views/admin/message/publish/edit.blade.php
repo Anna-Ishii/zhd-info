@@ -10,14 +10,14 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
             <div class="col-lg-10">
-                <input class="form-control" name="title" value="{{$message->title}}">
+                <input class="form-control" name="title" value="{{old('title', $message->title)}}">
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">PDF添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">{{ $message->content_name }}</span>
+                    <span class="fileName">{{ ($message->content_name) ? $message->content_name : 'ファイルを選択またはドロップ'}}</span>
                     <input type="file" name="file" accept=".pdf" value="">
                 </label>
             </div>
@@ -27,7 +27,7 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8"  required="required" {{ $category->id == $message->category_id ? 'checked' : '' }}>
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" {{ $category->id == $message->category_id ? 'checked' : '' }}>
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -119,7 +119,8 @@
 
 
         <div class="text-center">
-            <input id="submitbutton" class="btn btn-danger" type="submit" value="登　録" />
+            <input class="btn btn-danger" type="submit" name="register" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 

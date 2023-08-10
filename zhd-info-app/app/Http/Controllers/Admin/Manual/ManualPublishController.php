@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin\Manual;
 
+use App\Enums\PublishStatus;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\AdminRepository;
@@ -36,7 +37,7 @@ class ManualPublishController extends Controller
             // 検索機能 状態
             ->when(isset($status), function ($query) use ($status) {
                 switch ($status) {
-                    case 1:
+                    case PublishStatus::Wait:
                         $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                     $query->where('start_datetime', '>', now('Asia/Tokyo'))
@@ -48,16 +49,17 @@ class ManualPublishController extends Controller
                                     ->orWhereNull('start_datetime');
                                 });
                         break;
-                    case 2:
+                    case PublishStatus::Publishing:
                         $query->where('start_datetime', '<=', now('Asia/Tokyo'))
                                 ->where(function ($query) {
                                 $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                 ->orWhereNull('end_datetime');
                         });
                         break;
-                    case 3:
+                    case PublishStatus::Published:
                         $query->where('end_datetime', '<=', now('Asia/Tokyo'));
                         break;
+                    case 4: break;
                     default:
                         break;
                 }
@@ -107,26 +109,34 @@ class ManualPublishController extends Controller
         $manual_params['organization1_id'] = $admin->organization1_id;
         $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
         $manual_params['number'] = (is_null($number)) ? 1 : $number + 1;
-        // message_userに該当のユーザーを登録する
+        $manual_params['editing_flg'] = isset($request->save) ? true : false;
+
+        // manual_userに該当のユーザーを登録する
         $target_users_data = [];
-        $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-        foreach ($target_users as $target_user) {
-            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            // 該当のショップID
+            $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
+            // 該当のユーザー
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+            foreach ($target_users as $target_user) {
+                $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
 
         // 手順を登録する
         $content_data = [];
-        if(isset($request['manual_flow_title'])){
-            for ($i = 0; $i < count($validated['manual_flow_title']); $i++) {
-                $content_data[$i]['title'] = $request['manual_flow_title'][$i];
-                $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
+        if(isset($request['manual_flow'])){
+            foreach ($request['manual_flow'] as $i => $r) {
+                $content_data[$i]['title'] = $r['title'];
+                $content_data[$i]['description'] = $r['detail'];
                 $content_data[$i]['order_no'] = $i + 1;
-                $f = $request['manual_file'][$i];
-                $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                $content_data[$i]['thumbnails_url'] =
-                    ImageConverter::convert2image($content_data[$i]['content_url']);
-
+                if ($request->hasFile('manual_flow.' . $i . '.file')) {
+                    $f = $request->file('manual_flow.' . $i . '.file');
+                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    $content_data[$i]['thumbnails_url'] =
+                        ImageConverter::convert2image($content_data[$i]['content_url']);
+                }
             }
         }
 
@@ -192,57 +202,62 @@ class ManualPublishController extends Controller
             $manual_params['thumbnails_url'] = ImageConverter::convert2image($manual_params['content_url']);
         }
         $manual_params['updated_admin_id'] = $admin->id;
+        $manual_params['editing_flg'] = isset($request->save) ? true : false;
 
-        // 該当のショップID
-        $shops_id = Shop::select('id')->whereIn('brand_id', $request->input('brand',[]))->get()->toArray();
-        // 該当のユーザー
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-
-        // 該当ユーザーを追加する
+        // manual_userに該当のユーザーを登録する
         $target_user_data = [];
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            // 該当のショップID
+            $shops_id = Shop::select('id')->whereIn('brand_id', $request->input('brand',[]))->get()->toArray();
+            // 該当のユーザー
+            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+            foreach ($target_users as $target_user) {
+                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            }
         }
 
-        $content_data = []; // manualcontentに格納するための配列
+        // 手順を登録する
+        $content_data = []; 
         $count_order_no = 0;
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
         $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
         ManualContent::whereNotIn('id', $contents_id)->delete();
 
 
-         //手順の数分、繰り返す 
-         //タイトルは必須項目なので、タイトルの数はコンテンツの数
-        for ($i = 0; $i < count($request['manual_flow_title']); $i++) {
+        //手順を登録する
+        if (isset($request['manual_flow'])) {
+            foreach ($request['manual_flow'] as $i => $r) {
+                // 登録されている手順を変更する
+                if (isset($request->content_id[$i])) {
+                    $content = ManualContent::find($request->content_id[$i]);
+                    $content->title = $r['title'];
+                    $content->description = $r['detail'];
+                    $content->order_no = $i + 1;
 
-            // 登録されている手順を変更する
-            if (isset($request->content_id[$i])) {
-                $content = ManualContent::find($request->content_id[$i]);
-                $content->title = $request['manual_flow_title'][$i];
-                $content->description = $request['manual_flow_detail'][$i];
-                $content->order_no = $count_order_no + 1;
-
-                // manual_fileがnullの場合は変更しない
-                if (isset($request->file('manual_file')[$i])) {
-                    $file = $this->uploadFile($request->file('manual_file')[$i]);
-                    $content->content_url = $file['content_url'];
-                    $content->content_name = $file['content_name'];
-                    $content->thumbnails_url = ImageConverter::convert2image($content->content_url);
+                    // manual_fileがnullの場合は変更しない
+                    if ($request->hasFile('manual_flow.' . $i . '.file')) {
+                        $f = $request->file('manual_flow.' . $i . '.file');
+                        $file = $this->uploadFile($f);
+                        $content->content_url = $file['content_url'];
+                        $content->content_name = $file['content_name'];
+                        $content->thumbnails_url = ImageConverter::convert2image($content->content_url);
+                    }
+                    $content->save();
+                } else {
+                    // 手順の新規登録
+                    $content_data[$i]['title'] = $r['title'];
+                    $content_data[$i]['description'] = $r['detail'];
+                    $content_data[$i]['order_no'] = $i + 1;
+                    if ($request->hasFile('manual_flow.' . $i . '.file')) {
+                        $f = $request->file('manual_flow.' . $i . '.file');
+                        $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                        $content_data[$i]['thumbnails_url'] =
+                            ImageConverter::convert2image($content_data[$i]['content_url']);
+                    }
                 }
-                $content->save();
-            } else {
-                // 手順の新規登録
-                if(isset($request['manual_flow_title'][$i]) &&
-                    isset($request->file('manual_file')[$i])) {
-                    $content_data[$i]['title'] = $request['manual_flow_title'][$i];
-                    $content_data[$i]['description'] = $request['manual_flow_detail'][$i];
-                    $content_data[$i]['order_no'] = $count_order_no + 1;
-                    $f = $request['manual_file'][$i];
-                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                    $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                }
+                
             }
-            
         }
 
         try {
@@ -250,7 +265,9 @@ class ManualPublishController extends Controller
             $manual = Manual::find($manual_id);
             $manual->update($manual_params);
             $manual->brand()->sync($request->brand);
-            $manual->user()->sync($target_user_data);
+            if(!isset($request->save)){ 
+                $manual->user()->sync($target_user_data);
+            }
             $manual->content()->createMany($content_data);
             DB::commit();
         } catch (\Throwable $th) {
@@ -288,7 +305,7 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id)->first();
         $status = $manual->status;
         //掲載終了だと、エラーを返す
-        if($status['id'] == 2) return response()->json(['message' => '掲載中の動画マニュアルしか配信停止できません'], status: 500);
+        if($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています'], status: 500);
 
         $admin = session('admin');
         $now = Carbon::now();
@@ -307,6 +324,8 @@ class ManualPublishController extends Controller
 
     private function uploadFile($file)
     {
+        if (!isset($file)) return ['content_name' => null, 'content_url' => null];
+
         $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
         $filename_input = $file->getClientOriginalName();
         $path = public_path('uploads');
