@@ -17,7 +17,7 @@ class TopController extends Controller
         $lastweek_end = $thisweek_end->copy()->subWeek();
         // 今日掲載された業連
         $message_thisweek = $user->message()
-                                ->whereBetween('start_datetime', [$thisweek_start, $thisweek_end])
+                                ->whereBetween('start_datetime', [$thisweek_start, now('Asia/Tokyo')])
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
@@ -27,7 +27,7 @@ class TopController extends Controller
                                 ->get();
         // 今日掲載されたマニュアル
         $manual_thisweek = $user->manual()
-                                ->whereBetween('start_datetime', [$thisweek_start, $thisweek_end])
+                                ->whereBetween('start_datetime', [$thisweek_start, now('Asia/Tokyo')])
                                 ->where(function ($query) {
                                     $query->where('end_datetime', '>', now('Asia/Tokyo'))
                                     ->orWhereNull('end_datetime');
