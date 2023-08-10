@@ -5,7 +5,7 @@
     <div class="indexList__box main__thumb">
         <p class="indexList__box__title {{($ml->pivot->read_flg) ? "" : "txtBold unread"}}">{{ $ml->title }}</p>
         <picture class="indexList__box__img">
-            <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
+            <img loading="lazy" src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
         </picture>
         <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
     </div>
@@ -19,10 +19,10 @@
             </div>
             <!-- 動画の場合、スマートフォンで再生前に動画を表示できるように#t=0.1を指定 -->
             <div class="manualAttachment__videoCover"></div>
-            <video playsinline preload class="isPaused">
+            <video playsinline preload="none" class="isPaused">
                 <source src="{{ asset($ml->content_url) }}#t=0.1" type="video/mp4">
             </video>
-            <button type="button" class="manualAttachment__btnPlay"><img src="{{asset('/img/btn_play.svg')}}" alt=""></button>
+            <button type="button" class="manualAttachment__btnPlay"><img loading="lazy" src="{{asset('/img/btn_play.svg')}}" alt=""></button>
             <button type="button" class="manualAttachment__close"></button>
             <!-- 操作UI（動画再生の場合のみ） -->
             <!-- material-symbols-outlinedはgoogle fontsでアイコン読み込み -->
@@ -79,7 +79,7 @@
         <div class="indexList__box" onclick="location.href='{{asset($ml->content_url)}}'">
             <p class="indexList__box__title {{($ml->pivot->read_flg) ? "" : "txtBold unread"}}">{{ $ml->title }}</p>
             <picture class="indexList__box__img">
-                <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
+                <img loading="lazy" src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
             </picture>
             <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
         </div>
@@ -89,7 +89,7 @@
         <div class="indexList__box main__thumb">
             <p class="indexList__box__title {{($ml->pivot->read_flg) ? "" : "txtBold unread"}}">{{ $ml->title }}</p>
             <picture class="indexList__box__img">
-                <img src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
+                <img loading="lazy" src=" {{ ($ml->thumbnails_url) ? asset($ml->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="" class="mb14">
             </picture>
             <p class="indexList__box__title txtBold">{{ $ml->formatted_start_datetime }}</p>
         </div>
@@ -97,7 +97,7 @@
         <!-- 添付ファイル -->
         <div class="manualAttachment">
             <div class="manualAttachment__inner">
-                <img src="{{ asset($ml->content_url)}}" alt="">
+                <img loading="lazy" src="{{ asset($ml->content_url)}}" alt="">
                 <button type="button" class="manualAttachment__close"></button>
             </div>
         </div>
