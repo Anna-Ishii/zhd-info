@@ -11,19 +11,7 @@ function changeMovieUIsize(){
 	modalVideoH = $('.manualAttachment.isActive').find('video').innerHeight();
 	$('.manualAttachment.isActive').css('height' , modalVideoH);
 }
-$(document).on('click' , '.main__thumb' , function(){
-	let thumbParents = $(this).parents('.main__box , .main__box--single');
-	thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
 
-	/* 動画を自動再生する */
-	let targetMovie = $('.manualAttachment.isActive').find('video');
-	if(targetMovie.length){
-		targetMovie.get(0).play().then(function(){
-			targetMovie.removeClass('isPaused');
-			changeMovieUIsize();	
-		});
-	}
-});
 $(document).on('click', '.manualAttachmentBg , .manualAttachment__close' , function(e){
 	let thumbParents = $(this).parents('.main__box , .main__box--single');
 	if($(this).hasClass('manualAttachmentBg') && !e.target.closest('.manualAttachment')){
@@ -170,6 +158,20 @@ $(window).on('load' , function(){
 	$('.manualAttachment').find('.manualAttachment__preload').fadeOut();
 	/* jquery UI Touch Punch */
 	$('.manualAttachment__ui__progressDot').sortable();
+
+	$(document).on('click' , '.main__thumb' , function(){
+		let thumbParents = $(this).parents('.main__box , .main__box--single');
+		thumbParents.find('.manualAttachmentBg , .manualAttachment').toggleClass('isActive');
+
+		/* 動画を自動再生する */
+		let targetMovie = $('.manualAttachment.isActive').find('video');
+		if(targetMovie.length){
+			targetMovie.get(0).play().then(function(){
+				targetMovie.removeClass('isPaused');
+				changeMovieUIsize();	
+			});
+		}
+	});
 });
 /* ウィンドウ幅変更時、videoの表示調整を行うようにする */
 $(window).on('resize' , function(){
