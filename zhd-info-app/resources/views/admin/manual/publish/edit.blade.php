@@ -23,6 +23,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">{{ ($manual->content_name) ? $manual->content_name : 'ファイルを選択またはドロップ'}}</span>
+                    <input type="text" name="file_name" value="{{ $manual->content_name }}" hidden>
                     <input type="file" name="file" value="" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                 </label>
                 <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
@@ -71,7 +72,7 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">{{ ($content->content_name) ? $content->content_name : 'ファイルを選択またはドロップ' }}</span>
-                            <input type="text" name="manual_flow[{{$loop->index}}][file_name]" value="{{ $content->content_name }}" hidden></input>
+                            <input type="text" name="manual_flow[{{$loop->index}}][file_name]" value="{{ $content->content_name }}" hidden>
                             <input type="file" name="manual_flow[{{$loop->index}}][file]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
                         <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
