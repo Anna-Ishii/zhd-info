@@ -18,6 +18,7 @@
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">{{ ($message->content_name) ? $message->content_name : 'ファイルを選択またはドロップ'}}</span>
+                    <input type="text" name="file_name" value="{{ $message->content_name }}" hidden>
                     <input type="file" name="file" accept=".pdf" value="">
                 </label>
             </div>
