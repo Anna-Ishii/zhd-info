@@ -26,12 +26,10 @@ class PublishUpdateRequest extends FormRequest
             'manual_flow.*.file' => 'max:150000' . $mimeTypesRule,
         ];
 
-        $manual_id = $this->route('manual_id');
-        $manual = Manual::findOrFail($manual_id);
         return [
             'title' => 'required',
             'description' => 'nullable',
-            'file'  => 'max:150000'.$mimeTypesRule.(isset($manual->content_url) ? '' : '|required'),
+            'file'  => 'required_without:file_name|max:150000'.$mimeTypesRule,
             'category_id' => 'required',
             'brand' => 'required',
             'start_datetime' => 'nullable',
@@ -49,6 +47,7 @@ class PublishUpdateRequest extends FormRequest
             'title.required' => 'タイトルは必須項目です',
             'file.mimetypes' => 'mp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
             'file' => 'ファイルのアップデートに失敗しました',
+            'file.required_without' => 'ファイルを添付してください',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
             'category_id.required' => 'カテゴリを選択してください',
             'brand.required' => '対象業態を選択してください',
