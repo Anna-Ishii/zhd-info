@@ -33,7 +33,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名</label>
                     <div class="col-lg-10">
-                        <input class="form-control" name="manual_flow_title[]" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
+                        <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                 </div>
                 <div class="form-group">
@@ -41,7 +41,7 @@
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
-                            <input type="file" name="manual_file[]" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
+                            <input type="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
                         </label>
                         <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。」</div>
                     </div>
@@ -49,7 +49,7 @@
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
                     <div class="col-lg-10">
-                        <textarea name="manual_flow_detail[]" class="form-control" data-variable-name="manual_flow_detail"></textarea>
+                        <textarea class="form-control" data-variable-name="manual_flow_detail"></textarea>
                     </div>
                 </div>
                 <div class="text-right">
