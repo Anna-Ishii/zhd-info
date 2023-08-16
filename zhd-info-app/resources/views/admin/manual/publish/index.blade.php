@@ -94,7 +94,13 @@
                                 <td class="shop_id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brand_list)}}</td>
                                 <td>{{$manual->category?->name}}</td>
-                                <td class="manual-title"><a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a></td>
+                                <td class="manual-title">
+                                    @if(isset($manual->content_url))
+                                        <a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a>
+                                    @else
+                                        {{$manual->title}}
+                                    @endif
+                                </td>
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status->text()}}</td>
