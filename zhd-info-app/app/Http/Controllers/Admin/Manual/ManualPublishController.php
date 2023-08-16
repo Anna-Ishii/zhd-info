@@ -305,7 +305,7 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id)->first();
         $status = $manual->status;
         //掲載終了だと、エラーを返す
-        if($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています'], status: 500);
+        if($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています']);
 
         $admin = session('admin');
         $now = Carbon::now();
@@ -335,17 +335,6 @@ class ManualPublishController extends Controller
             'content_name' => $filename_input,
             'content_url' => $content_url,
         ];
-    }
-
-    private function movie2image($movie_path)
-    {
-        $shot_sec = 4;
-        $dirname = dirname($movie_path);
-        $filename = pathinfo($movie_path, PATHINFO_FILENAME);
-        $output_path = $dirname . '/' . $filename . '.jpg';
-        $cmd = 'python3 /var/www/zhd-info-app/py/m.py "' . $movie_path . '" ' . $shot_sec . ' "' . $output_path . '"';
-        exec($cmd, $output);
-        return $output_path;
     }
 }
 

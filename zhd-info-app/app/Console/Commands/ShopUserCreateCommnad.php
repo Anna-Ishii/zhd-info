@@ -27,7 +27,7 @@ class ShopUserCreateCommnad extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = '選択した業態のユーザーを作成するコマンドです。ユーザーの作成と同時に対象の業務連絡と動画マニュアルを登録します。';
 
     /**
      * Execute the console command.
@@ -45,8 +45,6 @@ class ShopUserCreateCommnad extends Command
         $shops_query = Shop::where('organization1_id', $organization_id);
         $count = $shops_query->count();
 
-        $user = new User();
-        $password = 'password';
         $roll_id = 4; //店長
         $this->info("$count 個のアカウントを作成します");
 
@@ -67,7 +65,7 @@ class ShopUserCreateCommnad extends Command
                         'belong_label' => $shop->name,
                         'shop_id' => $shop->id,
                         'employee_code' => $employee_code,
-                        'password' => Hash::make($password),
+                        'password' => Hash::make($employee_code),
                         'email' => '',
                         'roll_id' => $roll_id,
                     ]);
