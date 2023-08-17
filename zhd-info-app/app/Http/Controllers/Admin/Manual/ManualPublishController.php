@@ -26,7 +26,7 @@ class ManualPublishController extends Controller
         $category_list = ManualCategory::all();
         $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $category_id = $request->input('category');
-        $status = $request->input('status');
+        $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $manual_list =
             Manual::query()
@@ -38,28 +38,17 @@ class ManualPublishController extends Controller
             ->when(isset($status), function ($query) use ($status) {
                 switch ($status) {
                     case PublishStatus::Wait:
-                        $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                ->where(function ($query) {
-                                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                                    ->orWhereNull('start_datetime');
-                                })
-                                ->orWhereNull('end_datetime')
-                                ->where(function ($query) {
-                                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                                    ->orWhereNull('start_datetime');
-                                });
+                        $query->waitManual();
                         break;
                     case PublishStatus::Publishing:
-                        $query->where('start_datetime', '<=', now('Asia/Tokyo'))
-                                ->where(function ($query) {
-                                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                ->orWhereNull('end_datetime');
-                        });
+                        $query->publishingManual();
                         break;
                     case PublishStatus::Published:
-                        $query->where('end_datetime', '<=', now('Asia/Tokyo'));
+                        $query->publishedManual();
                         break;
-                    case 4: break;
+                    case PublishStatus::Editing:
+                        $query->where('editing_flg', '=', true);
+                        break;
                     default:
                         break;
                 }
@@ -312,6 +301,7 @@ class ManualPublishController extends Controller
         Manual::whereIn('id', $manual_id)->update([
             'end_datetime' => $now,
             'updated_admin_id' => $admin->id,
+            'editing_flg' => false
         ]);
 
         return response()->json(['message' => '停止しました']);

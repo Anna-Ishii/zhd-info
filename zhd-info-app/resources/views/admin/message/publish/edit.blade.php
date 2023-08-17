@@ -121,7 +121,9 @@
 
         <div class="text-center">
             <input class="btn btn-danger" type="submit" name="register" value="登　録" />
+            @if($message->editing_flg)
             <input class="btn btn-default" type="submit" name="save" value="保　存" />
+            @endif
             <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
