@@ -148,7 +148,9 @@
 
         <div class="text-center">
             <input class="btn btn-danger" type="submit" name="rigister" value="登　録" />
+            @if($manual->editing_flg)
             <input class="btn btn-default" type="submit" name="save" value="保　存" />
+            @endif
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
