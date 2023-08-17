@@ -37,26 +37,13 @@ class MessagePublishController extends Controller
                 ->when(isset($status), function ($query) use ($status) {
                     switch ($status) {
                         case PublishStatus::Wait:
-                            $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                            ->where(function ($query) {
-                                $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                                ->orWhereNull('start_datetime');
-                            })
-                                ->orWhereNull('end_datetime')
-                                ->where(function ($query) {
-                                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                                    ->orWhereNull('start_datetime');
-                                });
+                            $query->waitMessage();
                             break;
                         case PublishStatus::Publishing:
-                            $query->where('start_datetime', '<=', now('Asia/Tokyo'))
-                            ->where(function ($query) {
-                                $query->where('end_datetime', '>', now('Asia/Tokyo'))
-                                ->orWhereNull('end_datetime');
-                            });
+                            $query->publishingMessage();
                             break;
                         case PublishStatus::Published:
-                            $query->where('end_datetime', '<=', now('Asia/Tokyo'));
+                            $query->publishedMessage();
                             break;
                         case PublishStatus::Editing:
                             $query->where('editing_flg', '=', true);
@@ -294,6 +281,7 @@ class MessagePublishController extends Controller
         Message::whereIn('id', $message_id)->update([
             'end_datetime' => $now,
             'updated_admin_id' => $admin->id,
+            'editing_flg' => false
         ]);
         
         return response()->json(['message' => '停止しました']);

@@ -148,15 +148,40 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    // 待機
+    public function scopeWaitManual($query)
+    {
+        return $query
+            ->where('end_datetime', '>', now('Asia/Tokyo'))
+            ->where(function ($query) {
+                $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                ->orWhereNull('start_datetime');
+            })
+            ->orWhereNull('end_datetime')
+            ->where(function ($query) {
+                $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                ->orWhereNull('start_datetime');
+            })
+            ->where('editing_flg', false);
+    }
+
     // 掲載中
     public function scopePublishingManual($query)
     {
         return $query
-            ->where('editing_flg', false)
-            ->where('start_datetime', '<', now('Asia/Tokyo'))
+            ->where('start_datetime', '<=', now('Asia/Tokyo'))
             ->where(function ($q) {
                 $q->where('end_datetime', '>', now('Asia/Tokyo'))
                 ->orWhereNull('end_datetime');
-            });
+            })
+            ->where('editing_flg', false);
+    }
+
+    // 掲載終了
+    public function scopePublishedManual($query)
+    {
+        return $query
+            ->where('end_datetime', '<=', now('Asia/Tokyo'))
+            ->where('editing_flg', false);
     }
 }
