@@ -94,7 +94,8 @@ class Message extends Model
 
     public function getStatusAttribute()
     {
-
+        if ($this->attributes['editing_flg'] == true)
+            return $status =  PublishStatus::Editing;
 
         $start_datetime =
             !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
@@ -110,9 +111,6 @@ class Message extends Model
                 $status = PublishStatus::Publishing;
             }
         }
-
-        if ($this->attributes['editing_flg'] == true)
-            $status =  PublishStatus::Editing;
 
         if (isset($end_datetime)) {
             if ($end_datetime->lte($now)) {
@@ -151,15 +149,40 @@ class Message extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    // 待機
+    public function scopeWaitMessage($query)
+    {
+        return $query
+                ->where('end_datetime', '>', now('Asia/Tokyo'))
+                ->where(function ($query) {
+                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                    ->orWhereNull('start_datetime');
+                })
+                ->orWhereNull('end_datetime')
+                ->where(function ($query) {
+                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+                    ->orWhereNull('start_datetime');
+                })
+                ->where('editing_flg', false);
+    }
+
     // 掲載中
     public function scopePublishingMessage($query)
     {
         return $query
-                ->where('editing_flg', false)
-                ->where('start_datetime', '<', now('Asia/Tokyo'))
+                ->where('start_datetime', '<=', now('Asia/Tokyo'))
                 ->where(function ($q) {
                     $q->where('end_datetime', '>', now('Asia/Tokyo'))
                         ->orWhereNull('end_datetime');
-                });
+                })
+                ->where('editing_flg', false);
+    }
+
+    // 掲載終了
+    public function scopePublishedMessage($query)
+    {
+        return $query
+                ->where('end_datetime', '<=', now('Asia/Tokyo'))
+                ->where('editing_flg', false);
     }
 }
