@@ -153,7 +153,6 @@ class Message extends Model
     public function scopeWaitMessage($query)
     {
         return $query
-                ->where('editing_flg', false)
                 ->where('end_datetime', '>', now('Asia/Tokyo'))
                 ->where(function ($query) {
                     $query->where('start_datetime', '>', now('Asia/Tokyo'))
@@ -163,26 +162,27 @@ class Message extends Model
                 ->where(function ($query) {
                     $query->where('start_datetime', '>', now('Asia/Tokyo'))
                     ->orWhereNull('start_datetime');
-                });
+                })
+                ->where('editing_flg', false);
     }
 
     // 掲載中
     public function scopePublishingMessage($query)
     {
         return $query
-                ->where('editing_flg', false)
                 ->where('start_datetime', '<=', now('Asia/Tokyo'))
                 ->where(function ($q) {
                     $q->where('end_datetime', '>', now('Asia/Tokyo'))
                         ->orWhereNull('end_datetime');
-                });
+                })
+                ->where('editing_flg', false);
     }
 
     // 掲載終了
     public function scopePublishedMessage($query)
     {
         return $query
-                ->where('editing_flg', false)
-                ->where('end_datetime', '<=', now('Asia/Tokyo'));
+                ->where('end_datetime', '<=', now('Asia/Tokyo'))
+                ->where('editing_flg', false);
     }
 }
