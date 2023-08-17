@@ -83,7 +83,8 @@ class Manual extends Model
 
     public function getStatusAttribute()
     {
-
+        if ($this->attributes['editing_flg'] == true)
+            return $status = PublishStatus::Editing;
 
         $start_datetime =
             !empty($this->attributes['start_datetime']) ? Carbon::parse($this->attributes['start_datetime'], 'Asia/Tokyo') : null;
@@ -99,9 +100,6 @@ class Manual extends Model
                 $status = PublishStatus::Publishing;
             }
         }
-
-        if ($this->attributes['editing_flg'] == true)
-            $status = PublishStatus::Editing;
 
         if (isset($end_datetime)) {
             if ($end_datetime->lte($now)) {
