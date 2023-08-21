@@ -4,7 +4,7 @@
 <div id="page-wrapper">
     @include('common.admin.page-head',['title' => '動画マニュアル新規登録'])
 
-    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
 
         <div class="form-group">

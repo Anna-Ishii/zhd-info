@@ -5,7 +5,7 @@
 <div id="page-wrapper">
     @include('common.admin.page-head',['title' => '業務連絡編集'])
 
-    <form method="post" enctype="multipart/form-data" class="form-horizontal">
+    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
             <label class="col-lg-2 control-label">タイトル</label>
