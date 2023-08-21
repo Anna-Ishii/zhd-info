@@ -1090,7 +1090,7 @@ li {
 .manualAttachment .txtPlay, .manualAttachment .txtPause {
   line-height: 4rem;
 }
-.manualAttachment .txtPlay {
+.manualAttachment .txtPause {
   display: none;
 }
 .manualAttachment .txtExitFullScreen {
@@ -1170,6 +1170,10 @@ li {
 /* 動画停止中 */
 .isPaused + .manualAttachment__btnPlay {
   display: block;
+}
+
+.isPaused + .txtPause {
+  display: none;
 }
 
 .sliderMenu__inner {
