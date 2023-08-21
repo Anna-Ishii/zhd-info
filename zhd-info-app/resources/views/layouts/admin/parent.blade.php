@@ -44,10 +44,6 @@
         @yield('content')
     </div>
 
-    <div class="version-number">
-        Ver. {{config('version.admin_version')}}
-    </div>
-
     <div id="overlay">
         <div class="cv-spinner">
             <span class="spinner"></span>
