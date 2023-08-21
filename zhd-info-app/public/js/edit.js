@@ -170,3 +170,28 @@ $(document).on('click' , '.btnRemoveBox' , function(){
 	let removeTarget = $(this);
 	removeVariableBox(removeTarget , countVariableBox);
 });
+
+$(document).on('submit' , '#form' , function(event){
+	// イベントを停止する
+	event.preventDefault();
+	// ローディングアニメーション
+	var overlay = document.getElementById('overlay');
+	overlay.style.display = 'block';
+
+	// form.submit()ではサブミットのボタンをpostしないので、パラメータを追加する
+	var submitterButtonName = event.originalEvent.submitter.attributes['name'].value;
+	if(submitterButtonName == 'save'){
+		let fm = $('#form');
+		fm.append($('<input />', {
+            type: 'hidden',
+            name: 'save',
+            value: 1,
+        }));
+	}
+	// 改めてsubmitする
+	form.submit();
+});
+
+$(document).on('invalid' , '#form' , function(event){
+	overlay.style.display = 'none';
+}, true);

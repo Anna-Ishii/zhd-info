@@ -43,6 +43,17 @@
         @include('common.admin.navigation')
         @yield('content')
     </div>
+
+    <div class="version-number">
+        Ver. {{config('version.admin_version')}}
+    </div>
+
+    <div id="overlay">
+        <div class="cv-spinner">
+            <span class="spinner"></span>
+        </div>
+    </div>
+
     <script src="{{ asset('/js/edit.js') }}" defer></script>
     @livewireScripts
 </body>
