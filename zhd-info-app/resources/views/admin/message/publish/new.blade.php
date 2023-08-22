@@ -119,12 +119,12 @@
 
 
         <div class="text-center">
-            <input class="btn btn-danger" type="submit" name="register" value="登　録" />
-            <input class="btn btn-default" type="submit" name="save" value="保　存" />
+            <input class="btn btn-danger" type="submit" name="register" value="登　録" onclick="window.onbeforeunload=null" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
             <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
     </form>
 </div>
-
+<script src="{{ asset('/js/admin/message/publish/new.js') }}" defer></script>
 @endsection
