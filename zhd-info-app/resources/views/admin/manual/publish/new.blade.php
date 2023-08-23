@@ -4,7 +4,7 @@
 <div id="page-wrapper">
     @include('common.admin.page-head',['title' => '動画マニュアル新規登録'])
 
-    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal" name="form">
+    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
 
         <div class="form-group">
@@ -118,12 +118,12 @@
         </div>
 
         <div class="text-center">
-            <input class="btn btn-danger" type="submit" name="rigister" value="登　録" onclick="window.onbeforeunload=null" />
-            <input class="btn btn-default" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
+            <input class="btn btn-danger" type="submit" name="rigister" value="登　録" />
+            <input class="btn btn-default" type="submit" name="save" value="保　存" />
             <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
         </div>
 
     </form>
 </div>
-<script src="{{ asset('/js/admin/manual/publish/new.js') }}" defer></script>
+
 @endsection
