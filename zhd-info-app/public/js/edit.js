@@ -191,7 +191,3 @@ $(document).on('submit' , '#form' , function(event){
 	// 改めてsubmitする
 	form.submit();
 });
-
-$(document).on('invalid' , '#form' , function(event){
-	overlay.style.display = 'none';
-}, true);
