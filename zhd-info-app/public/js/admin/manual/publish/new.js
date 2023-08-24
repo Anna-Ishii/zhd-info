@@ -2,6 +2,7 @@ window.onbeforeunload = function(e) {
     if(inputCheck()) return;
     e.preventDefault();
     e.returnValue = "";
+    overlay.style.display = 'none';
 }
 
 // 入力チェック
