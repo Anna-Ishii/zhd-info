@@ -53,9 +53,11 @@ class AuthController extends Controller
             ->withInput();
     }
 
-    public function logout (Request $request)
+    public function logout ()
     {
-        $request->session()->forget('admin');
-        return response(status:200);
+        $admin = session('admin');
+        $organization1 = Organization1::find($admin->organization1_id);
+        session()->forget('admin');
+        return redirect()->route('admin.auth', ['organization1' => $organization1->name]);
     }
 }
