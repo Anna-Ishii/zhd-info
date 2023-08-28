@@ -37,7 +37,22 @@ class MessageUserUpdateCommand extends Command
         //
         $this->info('start');
 
-        $users = User::get();
+        $organization1_list = Organization1::get();
+        foreach ($organization1_list as $key => $value) {
+            $this->info("業態番号: $value->id , 業態名: $value->name");
+        }
+        $organization1_id = $this->ask('業態番号を入力してください');
+        
+        $users = User::query()
+                        ->whereHas('shop', function($query) use ($organization1_id) {
+                            $query->where('organization1_id', $organization1_id);
+                        })
+                        ->get();
+        $this->info('対象ユーザー');
+        foreach ($users as $key => $value) {
+            $this->info("id: $value->id, name: $value->name");
+        }
+        $this->info("合計:".$users->count());
         if ($this->confirm('更新してよろしいですか?')) {
             try {
                 DB::beginTransaction();
@@ -50,9 +65,16 @@ class MessageUserUpdateCommand extends Command
 
                     $message_data = [];
                     // 該当のメッセージを登録
-                    $messages = Message::whereHas('roll', function ($query) use ($roll_id) {
-                        $query->where('roll_id', '=', $roll_id);
-                    });
+                    $messages = Message::query()
+                                    ->whereHas('roll', function ($query) use ($roll_id) {
+                                        $query->where('roll_id', '=', $roll_id);
+                                    })
+                                    ->where(function ($query) {
+                                        $query->waitMessage()
+                                            ->orWhere(function ($q) {
+                                            $q->publishingMessage();
+                                        });
+                                    });
                     if (isset($organization5_id)) {
                         $messages = $messages->whereHas('organization5', function ($query) use ($organization5_id) {
                             $query->where('organization5_id', '=', $organization5_id);
@@ -67,19 +89,29 @@ class MessageUserUpdateCommand extends Command
                     foreach ($messages as $message) {
                         $message_data[$message['id']] = ['shop_id' => $user->shop_id];
                     }
+                    $this->info("message_data");
+                    $this->info(var_dump($message_data));
                     $user->message()->sync($message_data);
 
                     $brand_id = $user->shop->brand_id;
                     $manual_data = [];
                     // 該当のマニュアルを登録
-                    $manuals = Manual::whereHas('brand', function ($query) use ($brand_id) {
-                        $query->where('brand_id', '=', $brand_id);
-                    })->get('id')->toArray();
+                    $manuals = Manual::query()
+                                ->whereHas('brand', function ($query) use ($brand_id) {
+                                    $query->where('brand_id', '=', $brand_id);
+                                })
+                                ->where(function ($query) {
+                                    $query->waitManual()
+                                        ->orWhere(function ($q) {
+                                            $q->publishingManual();
+                                    });
+                                })->get('id')->toArray();
                     foreach ($manuals as $manual) {
                         $manul_id = $manual['id'];
-                        $this->info($manul_id);
                         $manual_data[$manual['id']] = ['shop_id' => $user->shop_id];
                     }
+                    $this->info("manual_data");
+                    $this->info(var_dump($manual_data));
                     $user->manual()->sync($manual_data);
                 }
                 DB::commit();
