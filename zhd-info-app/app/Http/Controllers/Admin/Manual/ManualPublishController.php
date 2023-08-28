@@ -211,8 +211,9 @@ class ManualPublishController extends Controller
         $count_order_no = 0;
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
         $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
-        ManualContent::whereNotIn('id', $contents_id)->delete();
-
+        $manual = Manual::find($manual_id);
+        $content = $manual->content()->whereNotIn('id', $contents_id);
+        $manual->content()->whereNotIn('id', $contents_id)->delete();
 
         //手順を登録する
         if (isset($request['manual_flow'])) {
@@ -251,7 +252,6 @@ class ManualPublishController extends Controller
 
         try {
             DB::beginTransaction();
-            $manual = Manual::find($manual_id);
             $manual->update($manual_params);
             $manual->brand()->sync($request->brand);
             if(!isset($request->save)){ 
