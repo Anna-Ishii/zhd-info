@@ -938,3 +938,7 @@ textarea {
   font-size: 14px;
   color:#5E5E5E;
 }
+
+.duration-form-text {
+  width: auto;
+}
