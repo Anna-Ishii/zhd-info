@@ -67,6 +67,13 @@ class MessagePublishController extends Controller
         ]);
     }
 
+    public function show($message_id)
+    {
+        $admin = session('admin');
+        
+        return view('admin.message.publish.show');
+    }
+
     public function new()
     {
         $admin = session("admin");

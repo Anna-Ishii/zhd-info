@@ -69,6 +69,11 @@ class ManualPublishController extends Controller
         ]);
     }
 
+    public function show($manual_id)
+    {
+        return view('admin.manual.publish.show');
+    }
+
     public function new()
     {
         $admin = session("admin");

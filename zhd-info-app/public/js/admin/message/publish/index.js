@@ -4,9 +4,9 @@ $(".detailBtn").on('click', function (e) {
     var message_id= targetElement.attr("data-message_id");
 
     let uri = new URL(window.location.href);
-    // let targetUrl = uri.origin + "/admin/message/publish/edit/" +  message_id;
+    let targetUrl = uri.origin + "/admin/message/publish/" +  message_id;
 
-    // window.location.href = targetUrl;
+    window.location.href = targetUrl;
 });
 
 $(".editBtn").on('click', function (e) {
