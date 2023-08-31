@@ -17,6 +17,29 @@
             </div>
 
             <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">対象業態</label>
+                <select name="category" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($category_list as $category)
+                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @endforeach
+
+                </select>
+            </div>    
+
+			<div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">ラベル</label>
+                <select name="category" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($category_list as $category)
+                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @endforeach
+
+                </select>
+            </div>
+		</div>
+		<div class="form-group form-inline mb16">
+            <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
@@ -36,6 +59,36 @@
                     @endforeach
                 </select>
             </div>
+		</div>
+		<div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				掲載期間
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+                <input name="q" value="" class="form-control" placeholder="" />
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input name="q" value="" class="form-control" placeholder="" />
+            </div>
+		</div>
+		<div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				閲覧率
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+                <input name="q" value="" class="form-control" placeholder="" />
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input name="q" value="" class="form-control" placeholder="" />
+            </div>
+		</div>
+		<div class="form-group form-inline mb16">
 			<div class="input-group col-lg-2">
 				<button class="btn btn-info">検索</button>
 			</div>
@@ -64,6 +117,7 @@
 						<th class="text-center">掲載開始日時</th>
 						<th class="text-center">掲載終了日時</th>
 						<th class="text-center">状態</th>
+						<th class="text-center">閲覧率</th>
 						<th class="text-center" colspan="2">登録</th>
 						<th class="text-center" colspan="2">更新</th>
 					</tr>
@@ -93,11 +147,13 @@
 						<td>{{$message->formatted_start_datetime}}</td>
 						<td>{{$message->formatted_end_datetime}}</td>
 						<td>{{$message->status->text()}}</td>
+						<td>30 %</td>
 						<td>{{$message->create_user->name}}</td>
 						<td>{{$message->formatted_created_at}}</td>
                         <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td>{{$message->formatted_updated_at}}</td>
 						<td>
+							<button class="detailBtn btn btn-info">詳細</button>
 							<button class="editBtn btn btn-info">編集</button>
 							<button class="StopBtn btn btn-info">配信停止</button>
 						</td>
