@@ -942,3 +942,7 @@ textarea {
 .duration-form-text {
   width: auto;
 }
+
+form.form-horizontal .form-group:last-child {
+  text-align: center;
+}

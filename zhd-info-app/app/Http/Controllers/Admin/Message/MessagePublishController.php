@@ -70,8 +70,12 @@ class MessagePublishController extends Controller
     public function show($message_id)
     {
         $admin = session('admin');
-        
-        return view('admin.message.publish.show');
+        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
+        $message = Message::find($message_id);
+        return view('admin.message.publish.show', [
+            'message' => $message,
+            'brand_list' => $brand_list,
+        ]);
     }
 
     public function new()

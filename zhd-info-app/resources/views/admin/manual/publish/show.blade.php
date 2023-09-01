@@ -8,7 +8,7 @@
         </div>
     </div>
 
-    {{-- <!-- 絞り込み部分 -->
+    <!-- 絞り込み部分 -->
     <form method="get" class="form-horizontal mb24">
         <div class="form-group form-inline mb16">
 
@@ -20,9 +20,9 @@
                 <label class="input-group-addon">対象業態</label>
                 <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($category_list as $category)
+                    {{-- @foreach ($category_list as $category)
                     <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach
+                    @endforeach --}}
 
                 </select>
             </div>
@@ -31,9 +31,9 @@
                 <label class="input-group-addon">ラベル</label>
                 <select name="status" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($publish_status as $status)
+                    {{-- @foreach ($publish_status as $status)
                     <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach
+                    @endforeach --}}
                 </select>
             </div>
         </div>
@@ -42,9 +42,9 @@
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($category_list as $category)
+                    {{-- @foreach ($category_list as $category)
                     <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach
+                    @endforeach --}}
 
                 </select>
             </div>
@@ -53,9 +53,9 @@
                 <label class="input-group-addon">状態</label>
                 <select name="status" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($publish_status as $status)
+                    {{-- @foreach ($publish_status as $status)
                     <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach
+                    @endforeach --}}
                 </select>
             </div>
         </div>
@@ -102,10 +102,10 @@
         <div class="toggleTab__inner">
             <div class="toggleTab__btnList flex">
                 <div class="tab {{ is_null(request()->input('category')) ? 'isCurrent' : ''}}" data-sort-number="0">全件</div>
-                @foreach ($category_list as $category)
+                {{-- @foreach ($category_list as $category)
                 <div class="tab {{ request()->input('category') == $category->id ? 'isCurrent' : ''}}" data-sort-number="{{ $category->id }}">{{ $category->name }}</div>
                 @endforeach
-            </div>
+            </div> --}}
         </div>
     </div>
 
@@ -176,7 +176,7 @@
             @include('common.admin.pagenation', ['objects' => $manual_list])
 
         </form>
-    </div> --}}
+    </div>
 
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
