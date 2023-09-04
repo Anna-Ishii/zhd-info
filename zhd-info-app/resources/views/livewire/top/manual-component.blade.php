@@ -1,6 +1,6 @@
 <a class="main__box--single">
 
-    @if( in_array($ml->content_type, ['mp4', 'mov'], true ))
+    @if( in_array($ml->content_type, ['mp4', 'mov', 'MP4'], true ))
         {{-- 動画 --}}
     <div class="indexList__box main__thumb">
         <p class="indexList__box__title {{($ml->pivot->read_flg) ? "" : "txtBold unread"}}">{{ $ml->title }}</p>

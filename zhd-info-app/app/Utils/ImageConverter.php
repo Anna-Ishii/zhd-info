@@ -16,6 +16,7 @@ class ImageConverter
             case 'mp4':
             case 'mov':
             case 'm4a':
+            case 'MP4':
                 return self::movie2image($url);
             case 'png':
             case 'jpeg':
