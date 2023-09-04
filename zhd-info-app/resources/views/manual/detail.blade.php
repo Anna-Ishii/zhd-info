@@ -32,7 +32,7 @@
         <input id="manual_id" value="{{$manual->id}}" hidden>
         <div class="main__inner">
             <div class="main__supplement main__box--single thumb_parents flex">
-                @if( in_array($manual->content_type, ['mp4', 'mov'], true ))
+                @if( in_array($manual->content_type, ['mp4', 'mov', 'MP4'], true ))
                 {{-- 動画 --}}
                 <div class="main__supplement__detail flex">
                     <div class="main__thumb">
@@ -137,7 +137,7 @@
             @foreach( $contents as $content )
             <section class="main__box thumb_parents">
                 <h2 class="mb10">手順{{$loop->iteration}}：{{$content->title}}</h2>
-                @if( in_array($content->content_type, ['mp4', 'mov'], true ))
+                @if( in_array($content->content_type, ['mp4', 'mov', 'MP4'], true ))
                 <div class=" flex">
                     <div class="main__thumb">
                         <img src="{{ ($content->thumbnails_url) ? asset($content->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
