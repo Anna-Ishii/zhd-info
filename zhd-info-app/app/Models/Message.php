@@ -51,6 +51,12 @@ class Message extends Model
         return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
             ->withPivot('read_flg', 'shop_id');
     }
+    public function readed_user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'message_user', 'message_id', 'user_id')
+            ->wherePivot('read_flg', true)
+            ->withPivot('read_flg', 'shop_id');
+    }
 
     public function create_user(): HasOne
     {
@@ -147,6 +153,15 @@ class Message extends Model
         $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
+    }
+    
+    public function getViewRateAttribute() : ?float
+    {
+        $user_count = $this->user->count();
+        $readed_user_count = $this->readed_user->count();
+        if($user_count == 0) return null;
+
+        return round((($readed_user_count / $user_count) * 100), 1);
     }
 
     // 待機

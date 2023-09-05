@@ -137,8 +137,10 @@
                         <td>{{$message->formatted_start_datetime}}</td>
                         <td>{{$message->formatted_end_datetime}}</td>
                         <td>{{$message->status->text()}}</td>
-                        <td>閲覧率</td>
+                        <td>{{ $message->view_rate ?  $message->view_rate : 0}}% 
+							({{$message->readed_user->count() }}/{{$message->user->count()}})</td>
                     </tr>
+                    
                 </tbody>
             </table>
     </div>
@@ -170,43 +172,6 @@
                         <td>2023/05/12(金) 09:00</td>
                     </tr>
                     @endforeach
-					{{-- @foreach ($message_list as $message)
-					<tr data-message_id={{$message->id}}
-						class="@if($message->status == App\Enums\PublishStatus::Publishing) publishing
-								@elseif($message->status == App\Enums\PublishStatus::Published) published
-								@endif">
-						<td class="shop_id">{{$message->number}}</td>
-						<td>{{$message->brands_string($brand_list)}}</td>
-						@if ($message->emergency_flg)
-						<td class="bg-danger text-danger">重要</td>
-						@else
-						<td></td>
-						@endif
-						<td>{{$message->category?->name}}</td>
-						<td class="message-title">
-							@if(isset($message->content_url))
-								<a href="{{ asset($message->content_url)}}">{{$message->title}}</a>								
-							@else
-								{{$message->title}}
-							@endif
-						</td>
-						<td>{{$message->formatted_start_datetime}}</td>
-						<td>{{$message->formatted_end_datetime}}</td>
-						<td>{{$message->status->text()}}</td>
-						<td>30 %</td>
-						<td>{{$message->create_user->name}}</td>
-						<td>{{$message->formatted_created_at}}</td>
-                        <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
-						<td>{{$message->formatted_updated_at}}</td>
-						<td>
-							<button class="detailBtn btn btn-info">詳細</button>
-							<button class="editBtn btn btn-info">編集</button>
-							<button class="StopBtn btn btn-info">配信停止</button>
-						</td>
-
-					</tr>
-					@endforeach --}}
-
 				</tbody>
 			</table>
 		</div>
@@ -214,8 +179,10 @@
 		{{-- @include('common.admin.pagenation', ['objects' => $message_list]) --}}
 
 	</form>
-            
-    <button class="btn btn-light">戻る</button>
+    
+    <a href="{{url()->previous()}}">
+        <button class="btn btn-light">戻る</button>
+    </a>
 
 </div>
 <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
