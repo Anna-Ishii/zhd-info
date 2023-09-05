@@ -200,4 +200,15 @@ class Message extends Model
                 ->where('end_datetime', '<=', now('Asia/Tokyo'))
                 ->where('editing_flg', false);
     }
+    
+    public function scopeViewRateBetween($query, $min = 0, $max = 100)
+    {
+        
+        $query->withCount('user as total_users')
+            ->withCount(['user as read_users' => function ($query) {
+                $query->where('read_flg', true);
+            }])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) >= ?', [isset($min) ? $min : 0])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) <= ?', [isset($max) ? $max : 100]);
+    }
 }
