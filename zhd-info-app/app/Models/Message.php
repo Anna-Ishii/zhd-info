@@ -49,13 +49,13 @@ class Message extends Model
     public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
-            ->withPivot('read_flg', 'shop_id');
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
     public function readed_user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'message_user', 'message_id', 'user_id')
             ->wherePivot('read_flg', true)
-            ->withPivot('read_flg', 'shop_id');
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
 
     public function create_user(): HasOne

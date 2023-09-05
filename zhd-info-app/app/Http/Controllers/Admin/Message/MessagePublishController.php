@@ -72,9 +72,13 @@ class MessagePublishController extends Controller
         $admin = session('admin');
         $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $message = Message::find($message_id);
+        $user_list = 
+            $message->user()
+                    ->paginate(50);
         return view('admin.message.publish.show', [
             'message' => $message,
             'brand_list' => $brand_list,
+            'user_list' => $user_list
         ]);
     }
 
