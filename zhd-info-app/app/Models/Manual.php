@@ -46,6 +46,13 @@ class Manual extends Model
             ->withPivot('read_flg', 'shop_id');
     }
 
+    public function readed_user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
+            ->wherePivot('read_flg', true)
+            ->withPivot('read_flg', 'shop_id');
+    }
+
     public function create_user(): HasOne
     {
         return $this->hasOne(Admin::class, 'id', 'create_admin_id')->withTrashed();
@@ -146,6 +153,15 @@ class Manual extends Model
         $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
+    }
+
+    public function getViewRateAttribute(): ?float
+    {
+        $user_count = $this->user->count();
+        $readed_user_count = $this->readed_user->count();
+        if ($user_count == 0) return null;
+
+        return round((($readed_user_count / $user_count) * 100), 2);
     }
 
     // 待機
