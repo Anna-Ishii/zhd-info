@@ -71,6 +71,7 @@ class MessagePublishController extends Controller
                 ->when(isset($label), function ($query) use ($label) {
                     $query->where('emergency_flg', true);
                 })
+                ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
                     $query->viewRateBetween($rate[0], $rate[1]);
                 })
                 ->where('organization1_id', $admin->organization1_id)
