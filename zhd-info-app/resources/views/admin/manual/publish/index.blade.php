@@ -164,7 +164,7 @@
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status->text()}}</td>
-                                <td>{{ $manual->view_rate ?  $manual->view_rate : 0}}% 
+                                <td>{{isset($message->view_rate) ?  $message->view_rate : 0}}% 
 							        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})</td>
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
