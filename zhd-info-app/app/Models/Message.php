@@ -58,6 +58,11 @@ class Message extends Model
             ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
 
+    public function shop(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'message_user', 'message_id', 'shop_id');
+    }
+
     public function create_user(): HasOne
     {
         return $this->hasOne(Admin::class, 'id', 'create_admin_id')->withTrashed();

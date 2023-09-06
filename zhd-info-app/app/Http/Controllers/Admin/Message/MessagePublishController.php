@@ -14,6 +14,9 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
+use App\Models\Organization3;
+use App\Models\Organization4;
+use App\Models\Organization5;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -99,18 +102,68 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    public function show($message_id)
+    public function show(Request $request, $message_id)
     {
         $admin = session('admin');
-        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $message = Message::find($message_id);
-        $user_list = 
-            $message->user()
-                    ->paginate(50);
+
+        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $brands = $_brand->pluck('name')->toArray();
+        $brand_list = $_brand->get();
+        $org3_list = Organization3::get();
+        $org4_list = Organization4::get();
+        $org5_list = Organization5::get();
+        
+        // request
+        $brand_id = $request->input('brand');
+        $shop_code = $request->input('shop-code');
+        $shop_name = $request->input('shop-name');
+        $org3 = $request->input('org3');
+        $org4 = $request->input('org4');
+        $org5 = $request->input('org5');
+        $read_flg = $request->input('read_flg');
+
+        $shop_list = $message
+                        ->shop()
+                        ->when(isset($brand_id), function ($query) use ($brand_id) {
+                            $query->where('brand_id', $brand_id);
+                        })
+                        ->when(isset($shop_code), function ($query) use ($shop_code) {
+                            $query->where('shop_code', $shop_code);
+                        })
+                        ->when(isset($shop_name), function ($query) use ($shop_name) {
+                            $query->whereLike('name', $shop_name);
+                        })
+                        ->when(isset($org3), function ($query) use ($org3) {
+                            $query->where('organization3_id', $org3);
+                        })
+                        ->when(isset($org4), function ($query) use ($org4) {
+                            $query->where('organization4_id', $org4);
+                        })
+                        ->when(isset($org5), function ($query) use ($org5) {
+                            $query->where('organization5_id', $org5);
+                        })
+                        ->pluck('id')
+                        ->unique()
+                        ->toArray();
+
+        $user_list = $message
+                        ->user()
+                        ->when(isset($read_flg), function ($query) use ($read_flg) {
+                            if($read_flg == 'true') $query->where('read_flg', true);
+                            if($read_flg == 'false') $query->where('read_flg', false);
+                        })
+                        ->wherePivotIn('shop_id', $shop_list)
+                        ->paginate(50);
+
         return view('admin.message.publish.show', [
             'message' => $message,
+            'user_list' => $user_list,
             'brand_list' => $brand_list,
-            'user_list' => $user_list
+            'org3_list' => $org3_list,
+            'org4_list' => $org4_list,
+            'org5_list' => $org5_list,
+            'brands' => $brands,
         ]);
     }
 
