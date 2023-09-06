@@ -35,6 +35,8 @@ class MessagePublishController extends Controller
         $q = $request->input('q');
         $rate = $request->input('rate');
         $brand_id = $request->input('brand');
+        $label = $request->input('label');
+
         $message_list =
             Message::query()
                 ->when(isset($q), function ($query) use ($q) {
@@ -65,6 +67,9 @@ class MessagePublishController extends Controller
                         $query->whereHas('brand', function($q) use($brand_id)  {
                         $q->where('brand_id', $brand_id);
                     });
+                })
+                ->when(isset($label), function ($query) use ($label) {
+                    $query->where('emergency_flg', true);
                 })
                     $query->viewRateBetween($rate[0], $rate[1]);
                 })

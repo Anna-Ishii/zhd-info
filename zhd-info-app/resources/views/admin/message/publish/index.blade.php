@@ -29,12 +29,9 @@
 
 			<div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">ラベル</label>
-                <select name="category" class="form-control">
+                <select name="label" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach
-
+					<option value="1" {{ request()->input('label') == 1 ? 'selected' : ''}}>重要</option>
                 </select>
             </div>
 		</div>
