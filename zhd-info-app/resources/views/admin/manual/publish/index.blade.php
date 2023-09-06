@@ -54,13 +54,13 @@
 				掲載期間
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" placeholder="" />
+                <input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
 			</div>
 			<div class="input-group col-lg-2 spMb16 duration-form-text">
 				　〜　
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input name="q" value="" class="form-control" placeholder="" />
+				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
             </div>
 		</div>
 		<div class="form-group form-inline mb16 duration-form">
@@ -164,7 +164,7 @@
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status->text()}}</td>
-                                <td>{{isset($message->view_rate) ?  $message->view_rate : 0}}% 
+                                <td>{{isset($manual->view_rate) ?  $manual->view_rate : 0}}% 
 							        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})</td>
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
