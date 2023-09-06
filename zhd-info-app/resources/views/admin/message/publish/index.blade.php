@@ -162,7 +162,7 @@
 						<td>{{$message->formatted_start_datetime}}</td>
 						<td>{{$message->formatted_end_datetime}}</td>
 						<td>{{$message->status->text()}}</td>
-						<td>{{ $message->view_rate ?  $message->view_rate : 0}}% 
+						<td>{{isset($message->view_rate) ?  $message->view_rate : 0}}% 
 							({{$message->readed_user->count() }}/{{$message->user->count()}})</td>
 						<td>{{$message->create_user->name}}</td>
 						<td>{{$message->formatted_created_at}}</td>
