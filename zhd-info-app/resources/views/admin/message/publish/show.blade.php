@@ -78,13 +78,13 @@
 				閲覧日時
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" placeholder="" />
+				<input id="viewrateDateFrom" class="form-control mr16"  name="viewrate-date[0]" value="{{ request()->input('viewrate-date.0')}}" autocomplete="off">
 			</div>
 			<div class="input-group col-lg-2 spMb16 duration-form-text">
 				　〜　
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input name="q" value="" class="form-control" placeholder="" />
+				<input id="viewrateDateTo" class="form-control mr16"  name="viewrate-date[1]" value="{{ request()->input('viewrate-date.1')}}" autocomplete="off">
             </div>
 		</div>
         <div class="form-group form-inline mb16">
