@@ -6,9 +6,7 @@ use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Message extends Model
@@ -49,7 +47,18 @@ class Message extends Model
     public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
-            ->withPivot('read_flg', 'shop_id');
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
+    }
+    public function readed_user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'message_user', 'message_id', 'user_id')
+            ->wherePivot('read_flg', true)
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
+    }
+
+    public function shop(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'message_user', 'message_id', 'shop_id');
     }
 
     public function create_user(): HasOne
@@ -148,6 +157,15 @@ class Message extends Model
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
+    
+    public function getViewRateAttribute() : ?float
+    {
+        $user_count = $this->user->count();
+        $readed_user_count = $this->readed_user->count();
+        if($user_count == 0) return null;
+
+        return round((($readed_user_count / $user_count) * 100), 1);
+    }
 
     // 待機
     public function scopeWaitMessage($query)
@@ -184,5 +202,16 @@ class Message extends Model
         return $query
                 ->where('end_datetime', '<=', now('Asia/Tokyo'))
                 ->where('editing_flg', false);
+    }
+    
+    public function scopeViewRateBetween($query, $min = 0, $max = 100)
+    {
+        
+        $query->withCount('user as total_users')
+            ->withCount(['user as read_users' => function ($query) {
+                $query->where('read_flg', true);
+            }])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) >= ?', [isset($min) ? $min : 0])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) <= ?', [isset($max) ? $max : 100]);
     }
 }

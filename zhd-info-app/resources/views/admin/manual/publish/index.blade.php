@@ -17,6 +17,18 @@
             </div>
 
             <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">対象業態</label>
+                <select name="brand" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($brand_list as $brand)
+                    <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
+                    @endforeach
+
+                </select>
+            </div> 
+        </div>
+        <div class="form-group form-inline mb16">
+            <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
@@ -36,7 +48,54 @@
                     @endforeach
                 </select>
             </div>
-            
+        </div>
+        <div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				掲載期間
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+                <input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
+            </div>
+		</div>
+		<div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				閲覧率
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+                <input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[0]" 
+				 value="{{request()->input('rate.0')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[1]" 
+				 value="{{request()->input('rate.1')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
+            </div>
+		</div>
+        <div class="form-group form-inline mb16">
             <div class="input-group col-lg-2">
                 <button class="btn btn-info">検索</button>
             </div>
@@ -79,6 +138,7 @@
                                 <th class="text-center">掲載開始日時</th>
                                 <th class="text-center">掲載終了日時</th>
                                 <th class="text-center">状態</th>
+                                <th class="text-center">閲覧率</th>
                                 <th class="text-center" colspan="2">登録者</th>
                                 <th class="text-center" colspan="2">更新</th>
                                 
@@ -92,7 +152,7 @@
                                         @elseif($manual->status == App\Enums\PublishStatus::Published) published
                                         @endif">
                                 <td class="shop_id">{{$manual->number}}</td>
-                                <td>{{$manual->brands_string($brand_list)}}</td>
+                                <td>{{$manual->brands_string($brands)}}</td>
                                 <td>{{$manual->category?->name}}</td>
                                 <td class="manual-title">
                                     @if(isset($manual->content_url))
@@ -104,11 +164,14 @@
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status->text()}}</td>
+                                <td>{{isset($manual->view_rate) ?  $manual->view_rate : 0}}% 
+							        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})</td>
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
                                 <td>{{$manual->formatted_updated_at}}</td>
                                 <td>
+                                    <button class="detailBtn btn btn-info">詳細</button>
                                     <button class="editBtn btn btn-info">編集</button>
                                     <button class="StopBtn btn btn-info">配信停止</button>
                                 </td>

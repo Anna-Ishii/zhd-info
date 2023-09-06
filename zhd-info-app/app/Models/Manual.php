@@ -43,7 +43,19 @@ class Manual extends Model
     public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
-            ->withPivot('read_flg', 'shop_id');
+            ->withPivot('read_flg','shop_id', 'readed_datetime');
+    }
+
+    public function readed_user(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
+            ->wherePivot('read_flg', true)
+            ->withPivot('read_flg','shop_id', 'readed_datetime');
+    }
+
+    public function shop(): BelongsToMany
+    {
+        return $this->belongsToMany(Shop::class, 'manual_user', 'manual_id', 'shop_id');
     }
 
     public function create_user(): HasOne
@@ -148,6 +160,15 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getViewRateAttribute(): ?float
+    {
+        $user_count = $this->user->count();
+        $readed_user_count = $this->readed_user->count();
+        if ($user_count == 0) return null;
+
+        return round((($readed_user_count / $user_count) * 100), 1);
+    }
+
     // 待機
     public function scopeWaitManual($query)
     {
@@ -183,5 +204,16 @@ class Manual extends Model
         return $query
             ->where('end_datetime', '<=', now('Asia/Tokyo'))
             ->where('editing_flg', false);
+    }
+
+    public function scopeViewRateBetween($query, $min = 0, $max = 100)
+    {
+
+        $query->withCount('user as total_users')
+        ->withCount(['user as read_users' => function ($query) {
+            $query->where('read_flg', true);
+        }])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) >= ?', [isset($min) ? $min : 0])
+            ->havingRaw('ROUND((read_users / total_users) * 100, 2) <= ?', [isset($max) ? $max : 100]);
     }
 }

@@ -51,6 +51,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
+            Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('new', [MessagePublishController::class, 'new'])->name('new');
             Route::post('new', [MessagePublishController::class, 'store'])->name('new.store');
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
@@ -66,6 +67,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
+            Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
             Route::get('new', [ManualPublishController::class, 'new'])->name('new');
             Route::post('new', [ManualPublishController::class, 'store'])->name('new.store');
             Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');

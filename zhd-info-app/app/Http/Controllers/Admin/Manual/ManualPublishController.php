@@ -11,7 +11,9 @@ use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
 use App\Models\ManualCategory;
 use App\Models\ManualContent;
-use App\Models\Organization1;
+use App\Models\Organization3;
+use App\Models\Organization4;
+use App\Models\Organization5;
 use App\Models\Shop;
 use App\Models\User;
 use App\Utils\ImageConverter;
@@ -24,10 +26,18 @@ class ManualPublishController extends Controller
     {
         $admin = session('admin');
         $category_list = ManualCategory::all();
-        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
+        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $brands = $_brand->pluck('name')->toArray();
+        $brand_list = $_brand->get();
+
+        // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
+        $rate = $request->input('rate');
+        $brand_id = $request->input('brand');
+        $publish_date = $request->input('publish-date');
+
         $manual_list =
             Manual::query()
             // 検索機能 キーワード
@@ -57,6 +67,26 @@ class ManualPublishController extends Controller
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
+            ->when(isset($brand_id), function ($query) use ($brand_id) {
+                $query->whereHas('brand', function ($q) use ($brand_id) {
+                    $q->where('brand_id', $brand_id);
+                });
+            })
+            ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
+                $query->viewRateBetween($rate[0], $rate[1]);
+            })
+            ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
+                $query
+                    ->where('start_datetime', '>=', $publish_date[0]);
+            })
+            ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
+                $query
+                    ->where(function ($query) use ($publish_date) {
+                        $query->where('end_datetime', '>=', $publish_date[1])
+                            ->orWhereNull('end_datetime');
+                    });
+            })
+
             ->where('organization1_id', $admin->organization1_id)
             ->orderBy('created_at', 'desc')
             ->paginate(50)
@@ -66,6 +96,72 @@ class ManualPublishController extends Controller
             'category_list' => $category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
+            'brands' => $brands,
+        ]);
+    }
+
+    public function show(Request $request, $manual_id)
+    {
+        $admin = session('admin');
+        $manual = Manual::find($manual_id);
+
+        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $brands = $_brand->pluck('name')->toArray();
+        $brand_list = $_brand->get();
+        $org3_list = Organization3::get();
+        $org4_list = Organization4::get();
+        $org5_list = Organization5::get();
+
+        // request
+        $brand_id = $request->input('brand');
+        $shop_code = $request->input('shop-code');
+        $shop_name = $request->input('shop-name');
+        $org3 = $request->input('org3');
+        $org4 = $request->input('org4');
+        $org5 = $request->input('org5');
+        $read_flg = $request->input('read_flg');
+
+        $shop_list = $manual
+            ->shop()
+            ->when(isset($brand_id), function ($query) use ($brand_id) {
+                $query->where('brand_id', $brand_id);
+            })
+            ->when(isset($shop_code), function ($query) use ($shop_code) {
+                $query->where('shop_code', $shop_code);
+            })
+            ->when(isset($shop_name), function ($query) use ($shop_name) {
+                $query->whereLike('name', $shop_name);
+            })
+            ->when(isset($org3), function ($query) use ($org3) {
+                $query->where('organization3_id', $org3);
+            })
+            ->when(isset($org4), function ($query) use ($org4) {
+                $query->where('organization4_id', $org4);
+            })
+            ->when(isset($org5), function ($query) use ($org5) {
+                $query->where('organization5_id', $org5);
+            })
+            ->pluck('id')
+            ->unique()
+            ->toArray();
+
+        $user_list = $manual
+            ->user()
+            ->when(isset($read_flg), function ($query) use ($read_flg) {
+                if ($read_flg == 'true') $query->where('read_flg', true);
+                if ($read_flg == 'false') $query->where('read_flg', false);
+            })
+            ->wherePivotIn('shop_id', $shop_list)
+            ->paginate(50);
+
+        return view('admin.manual.publish.show', [
+            'manual' => $manual,
+            'user_list' => $user_list,
+            'brand_list' => $brand_list,
+            'org3_list' => $org3_list,
+            'org4_list' => $org4_list,
+            'org5_list' => $org5_list,
+            'brands' => $brands,
         ]);
     }
 
