@@ -74,10 +74,13 @@ class ManualPublishController extends Controller
         $admin = session('admin');
         $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         $manual = Manual::find($manual_id);
+        $user_list =
+            $manual->user()
+                    ->paginate(50);
         return view('admin.manual.publish.show', [
             'manual' => $manual,
             'brand_list' => $brand_list,
-            'user_list' => $manual
+            'user_list' => $user_list
             
         ]);
     }
