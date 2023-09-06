@@ -70,7 +70,7 @@ class ManualPublishController extends Controller
                     $q->where('brand_id', $brand_id);
                 });
             })
-            ->when(isset($rate), function ($query) use ($rate) {
+            ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
                 $query->viewRateBetween($rate[0], $rate[1]);
             })
 
