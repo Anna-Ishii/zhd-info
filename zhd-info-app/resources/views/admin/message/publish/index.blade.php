@@ -62,13 +62,13 @@
 				掲載期間
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" placeholder="" />
+				<input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
 			</div>
 			<div class="input-group col-lg-2 spMb16 duration-form-text">
 				　〜　
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input name="q" value="" class="form-control" placeholder="" />
+				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
             </div>
 		</div>
 		<div class="form-group form-inline mb16 duration-form">
