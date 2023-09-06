@@ -110,6 +110,7 @@
         </div>
     </form>
 
+    @include('common.admin.pagenation', ['objects' => $user_list])
 	<div class="manual-tableInner">
         <table id="list" class="table table-bordered table-hover table-condensed text-center">
             <thead>
@@ -161,19 +162,21 @@
 				</thead>
 
 				<tbody>
-                    @foreach ($manual->user as $user)
+                    @foreach ($user_list as $user)
                     <tr>
                         <td>{{$user->shop->organization3?->name}}</td>
                         <td>{{$user->shop->organization5?->name}}</td>
                         <td>{{$user->shop->organization4?->name}}</td>
                         <td>{{$user->shop->name}}</td>
                         <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
-                        <td>2023/05/12(金) 09:00</td>
+                        <td>{{$user->readed_datetime}}</td>
                     </tr>
                     @endforeach
 				</tbody>
 			</table>
 		</div>
+
+        @include('common.admin.pagenation', ['objects' => $user_list])
 
 	</form>
 
