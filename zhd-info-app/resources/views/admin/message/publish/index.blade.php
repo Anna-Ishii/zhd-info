@@ -18,10 +18,10 @@
 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">対象業態</label>
-                <select name="category" class="form-control">
+                <select name="brand" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @foreach ($brand_list as $brand)
+                    <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
 
                 </select>
@@ -148,7 +148,7 @@
 								@elseif($message->status == App\Enums\PublishStatus::Published) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
-						<td>{{$message->brands_string($brand_list)}}</td>
+						<td>{{$message->brands_string($brands)}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">重要</td>
 						@else

@@ -25,11 +25,16 @@ class MessagePublishController extends Controller
     {
         $admin = session('admin');
         $category_list = MessageCategory::all();
-        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
+        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $brands = $_brand->pluck('name')->toArray();
+        $brand_list = $_brand->get();
+
+        // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
+        $brand_id = $request->input('brand');
         $message_list =
             Message::query()
                 ->when(isset($q), function ($query) use ($q) {
@@ -56,7 +61,11 @@ class MessagePublishController extends Controller
                 ->when(isset($category_id), function ($query) use ($category_id) {
                     $query->where('category_id', $category_id);
                 })
-                ->when(isset($rate), function ($query) use ($rate) {
+                ->when(isset($brand_id), function ($query) use ($brand_id) {
+                        $query->whereHas('brand', function($q) use($brand_id)  {
+                        $q->where('brand_id', $brand_id);
+                    });
+                })
                     $query->viewRateBetween($rate[0], $rate[1]);
                 })
                 ->where('organization1_id', $admin->organization1_id)
@@ -68,6 +77,7 @@ class MessagePublishController extends Controller
             'category_list' => $category_list,
             'message_list' => $message_list,
             'brand_list' => $brand_list,
+            'brands' => $brands,
         ]);
     }
 
