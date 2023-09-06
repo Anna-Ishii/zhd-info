@@ -26,16 +26,6 @@
 
                 </select>
             </div> 
-
-            <div class="input-group col-lg-2 spMb16">
-                <label class="input-group-addon">ラベル</label>
-                <select name="status" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
-                    @foreach ($publish_status as $status)
-                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach
-                </select>
-            </div>
         </div>
         <div class="form-group form-inline mb16">
             <div class="input-group col-lg-2 spMb16">
