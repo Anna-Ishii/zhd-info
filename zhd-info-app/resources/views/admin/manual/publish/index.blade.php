@@ -78,13 +78,31 @@
 				閲覧率
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-                <input name="q" value="" class="form-control" placeholder="" />
+                <input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[0]" 
+				 value="{{request()->input('rate.0')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
 			</div>
 			<div class="input-group col-lg-2 spMb16 duration-form-text">
 				　〜　
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input name="q" value="" class="form-control" placeholder="" />
+				<input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[1]" 
+				 value="{{request()->input('rate.1')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
             </div>
 		</div>
         <div class="form-group form-inline mb16">

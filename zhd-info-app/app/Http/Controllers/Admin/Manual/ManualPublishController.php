@@ -28,6 +28,8 @@ class ManualPublishController extends Controller
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
+        $rate = $request->input('rate');
+
         $manual_list =
             Manual::query()
             // 検索機能 キーワード
@@ -56,6 +58,9 @@ class ManualPublishController extends Controller
             // 検索機能 カテゴリ
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
+            })
+            ->when(isset($rate), function ($query) use ($rate) {
+                $query->viewRateBetween($rate[0], $rate[1]);
             })
             ->where('organization1_id', $admin->organization1_id)
             ->orderBy('created_at', 'desc')
