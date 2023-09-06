@@ -34,6 +34,7 @@ class ManualPublishController extends Controller
         $q = $request->input('q');
         $rate = $request->input('rate');
         $brand_id = $request->input('brand');
+        $label = $request->input('label');
 
         $manual_list =
             Manual::query()
