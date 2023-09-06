@@ -13,76 +13,63 @@
         <div class="form-group form-inline mb16">
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">対象業態</label>
-                <select name="category" class="form-control">
+                <select name="brand" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach --}}
+                    @foreach ($brand_list as $brand)
+                    <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
+                    @endforeach
 
                 </select>
             </div>    
 
 			<div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">店舗コード</label>
-                <select name="category" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach --}}
-
-                </select>
+                <input type="text" name="shop-code" class="form-control" value="{{ request()->input('shop-code')}}">
             </div>
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">店舗名</label>
-                <select name="category" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach --}}
-
-                </select>
+                <input type="text" name="shop-name" class="form-control" value="{{ request()->input('shop-name')}}">
             </div>
 		{{-- </div>
 		<div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">DS</label>
-                <select name="category" class="form-control">
+                <select name="org3" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach --}}
+                    @foreach ($org3_list as $org3)
+                    <option value="{{ $org3->id }}" {{ request()->input('org3') == $org3->id ? 'selected' : ''}}>{{ $org3->name }}</option>
+                    @endforeach
 
                 </select>
             </div>
 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">BL</label>
-                <select name="status" class="form-control">
+                <select name="org5" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($publish_status as $status)
-                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach --}}
+                    @foreach ($org5_list as $org5)
+                    <option value="{{ $org5->id }}" {{ request()->input('org5') == $org5->id ? 'selected' : ''}}>{{ $org5->name }}</option>
+                    @endforeach
                 </select>
             </div>
 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">AR</label>
-                <select name="status" class="form-control">
+                <select name="org4" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($publish_status as $status)
-                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach --}}
+                    @foreach ($org4_list as $org4)
+                    <option value="{{ $org4->id }}" {{ request()->input('org4') == $org4->id ? 'selected' : ''}}>{{ $org4->name }}</option>
+                    @endforeach
                 </select>
             </div>
 		{{-- </div>
         <div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">既読状況</label>
-                <select name="status" class="form-control">
+                <select name="read_flg" class="form-control">
                     <option value=""> -- 指定なし -- </option>
-                    {{-- @foreach ($publish_status as $status)
-                    <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
-                    @endforeach --}}
+                    <option value="true" {{ request()->input('read_flg') == "true" ? 'selected' : ''}}>既読</option>
+                    <option value="false" {{ request()->input('read_flg') == "false" ? 'selected' : ''}}>未読</option>
                 </select>
             </div>
         </div>
@@ -134,7 +121,7 @@
                     @else
                     <td></td>
                     @endif
-                    <td>{{$manual->brands_string($brand_list)}}</td>
+                    <td>{{$manual->brands_string($brands)}}</td>
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
                     <td>{{$manual->status->text()}}</td>
@@ -155,7 +142,7 @@
 						<th class="text-center">DS</th>
 						<th class="text-center">BL</th>
 						<th class="text-center">AR</th>
-						<th class="text-center">店舗名</th>
+						<th class="text-center" colspan="2">店舗名</th>
 						<th class="text-center">既読状況</th>
 						<th class="text-center">閲覧日時</th>
 					</tr>
@@ -167,9 +154,10 @@
                         <td>{{$user->shop->organization3?->name}}</td>
                         <td>{{$user->shop->organization5?->name}}</td>
                         <td>{{$user->shop->organization4?->name}}</td>
+                        <td>{{$user->shop->shop_code}}</td>
                         <td>{{$user->shop->name}}</td>
                         <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
-                        <td>{{$user->readed_datetime}}</td>
+                        <td>{{$user->pivot->readed_datetime}}</td>
                     </tr>
                     @endforeach
 				</tbody>
