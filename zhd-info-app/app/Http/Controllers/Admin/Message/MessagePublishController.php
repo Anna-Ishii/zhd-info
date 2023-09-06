@@ -36,6 +36,7 @@ class MessagePublishController extends Controller
         $rate = $request->input('rate');
         $brand_id = $request->input('brand');
         $label = $request->input('label');
+        $publish_date = $request->input('publish-date');
 
         $message_list =
             Message::query()
@@ -73,6 +74,17 @@ class MessagePublishController extends Controller
                 })
                 ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
                     $query->viewRateBetween($rate[0], $rate[1]);
+                })
+                ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
+                    $query
+                        ->where('start_datetime', '>=', $publish_date[0]);
+                })
+                ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
+                    $query
+                        ->where(function ($query) use ($publish_date) {
+                            $query->where('end_datetime', '>=',$publish_date[1])
+                                ->orWhereNull('end_datetime');
+                        });
                 })
                 ->where('organization1_id', $admin->organization1_id)
                 ->orderBy('created_at', 'desc')
