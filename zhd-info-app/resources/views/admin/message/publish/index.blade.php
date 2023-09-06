@@ -17,6 +17,26 @@
             </div>
 
             <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">対象業態</label>
+                <select name="brand" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+                    @foreach ($brand_list as $brand)
+                    <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
+                    @endforeach
+
+                </select>
+            </div>    
+
+			<div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">ラベル</label>
+                <select name="label" class="form-control">
+                    <option value=""> -- 指定なし -- </option>
+					<option value="1" {{ request()->input('label') == 1 ? 'selected' : ''}}>重要</option>
+                </select>
+            </div>
+		</div>
+		<div class="form-group form-inline mb16">
+            <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value=""> -- 指定なし -- </option>
@@ -36,6 +56,54 @@
                     @endforeach
                 </select>
             </div>
+		</div>
+		<div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				掲載期間
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
+            </div>
+		</div>
+		<div class="form-group form-inline mb16 duration-form">
+            <div class="input-group col-lg-2 spMb16 duration-form-text">
+				閲覧率
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+                <input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[0]" 
+				 value="{{request()->input('rate.0')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
+			</div>
+			<div class="input-group col-lg-2 spMb16 duration-form-text">
+				　〜　
+			</div>
+			<div class="input-group col-lg-2 spMb16">
+				<input
+				 type="number"
+				 max="100"
+				 min="0"
+				 step="0.1"
+				 name="rate[1]" 
+				 value="{{request()->input('rate.1')}}" 
+				 class="form-control" 
+				 placeholder="" 
+				/>
+            </div>
+		</div>
+		<div class="form-group form-inline mb16">
 			<div class="input-group col-lg-2">
 				<button class="btn btn-info">検索</button>
 			</div>
@@ -64,6 +132,7 @@
 						<th class="text-center">掲載開始日時</th>
 						<th class="text-center">掲載終了日時</th>
 						<th class="text-center">状態</th>
+						<th class="text-center">閲覧率</th>
 						<th class="text-center" colspan="2">登録</th>
 						<th class="text-center" colspan="2">更新</th>
 					</tr>
@@ -76,7 +145,7 @@
 								@elseif($message->status == App\Enums\PublishStatus::Published) published
 								@endif">
 						<td class="shop_id">{{$message->number}}</td>
-						<td>{{$message->brands_string($brand_list)}}</td>
+						<td>{{$message->brands_string($brands)}}</td>
 						@if ($message->emergency_flg)
 						<td class="bg-danger text-danger">重要</td>
 						@else
@@ -93,11 +162,14 @@
 						<td>{{$message->formatted_start_datetime}}</td>
 						<td>{{$message->formatted_end_datetime}}</td>
 						<td>{{$message->status->text()}}</td>
+						<td>{{isset($message->view_rate) ?  $message->view_rate : 0}}% 
+							({{$message->readed_user->count() }}/{{$message->user->count()}})</td>
 						<td>{{$message->create_user->name}}</td>
 						<td>{{$message->formatted_created_at}}</td>
                         <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td>{{$message->formatted_updated_at}}</td>
 						<td>
+							<button class="detailBtn btn btn-info">詳細</button>
 							<button class="editBtn btn btn-info">編集</button>
 							<button class="StopBtn btn btn-info">配信停止</button>
 						</td>

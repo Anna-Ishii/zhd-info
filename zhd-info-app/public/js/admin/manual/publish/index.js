@@ -1,3 +1,14 @@
+$(".detailBtn").on('click', function (e) {
+    e.preventDefault();
+    var targetElement = $(this).parents("tr");
+    var manual_id= targetElement.attr("data-manual_id");
+
+    let uri = new URL(window.location.href);
+    let targetUrl = uri.origin + "/admin/manual/publish/" + manual_id;
+
+    window.location.href = targetUrl;
+});
+
 $(".editBtn").on('click', function (e) {
     e.preventDefault();
     var targetElement = $(this).parents("tr");
@@ -6,7 +17,6 @@ $(".editBtn").on('click', function (e) {
     let uri = new URL(window.location.href);
     let targetUrl = uri.origin + "/admin/manual/publish/edit/" + manual_id;
 
-    console.log(targetUrl);
     window.location.href = targetUrl;
 
 });
@@ -49,4 +59,31 @@ $(".StopBtn").on('click', function (e) {
             const message = error.message;
             alert(message);
         })    
+});
+
+$(window).on('load' , function(){
+	let d = new Date();
+	/* datetimepicker */
+	$.datetimepicker.setLocale('ja');
+
+	$('#publishDateFrom').datetimepicker({
+		format:'Y/m/d',
+		timepicker:false,
+		onShow:function( ct ){
+			this.setOptions({
+				maxDate:jQuery('#publishDateTo').val()?jQuery('#publishDateTo').val():false
+			})
+		 },
+		 defaultDate: d,
+	});	
+	$('#publishDateTo').datetimepicker({
+		format:'Y/m/d',
+		timepicker:false,
+		onShow:function( ct ){
+			this.setOptions({
+				minDate:jQuery('#publishDateFrom').val()?jQuery('#publishDateFrom').val():false
+			})
+		 },
+		 defaultDate: d,
+	});	
 });
