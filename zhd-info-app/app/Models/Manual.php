@@ -161,7 +161,7 @@ class Manual extends Model
         $readed_user_count = $this->readed_user->count();
         if ($user_count == 0) return null;
 
-        return round((($readed_user_count / $user_count) * 100), 2);
+        return round((($readed_user_count / $user_count) * 100), 1);
     }
 
     // 待機

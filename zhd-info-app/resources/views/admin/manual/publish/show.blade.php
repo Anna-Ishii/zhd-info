@@ -137,8 +137,8 @@
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
                     <td>{{$manual->status->text()}}</td>
-                    <td>{{ ($manual->user->count() != 0) ? round((($manual->readed_user->count() / $manual->user->count()) * 100),2) : '0'}}% 
-                        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})
+                    <td>{{$manual->view_rate ?  $manual->view_rate : 0}}% 
+							({{$manual->readed_user->count() }}/{{$manual->user->count()}})
                     </td>
                 </tr>
             </tbody>
@@ -146,7 +146,6 @@
     </div>
 	<!-- 検索結果 -->
 	<form method="post" action="#">
-		{{-- @include('common.admin.pagenation', ['objects' => $manual_list]) --}}
 
 		<div class="manual-tableInner">
 			<table id="list" class="table table-bordered table-hover table-condensed text-center">
@@ -176,9 +175,11 @@
 			</table>
 		</div>
 
-		{{-- @include('common.admin.pagenation', ['objects' => $manual_list]) --}}
-
 	</form>
+
+    <a href="{{url()->previous()}}">
+        <button class="btn btn-light">戻る</button>
+    </a>
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
 @endsection
