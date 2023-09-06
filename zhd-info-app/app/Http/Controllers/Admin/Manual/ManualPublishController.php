@@ -24,11 +24,16 @@ class ManualPublishController extends Controller
     {
         $admin = session('admin');
         $category_list = ManualCategory::all();
-        $brand_list = $admin->organization1->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
+        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $brands = $_brand->pluck('name')->toArray();
+        $brand_list = $_brand->get();
+
+        // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
+        $brand_id = $request->input('brand');
 
         $manual_list =
             Manual::query()
@@ -59,9 +64,15 @@ class ManualPublishController extends Controller
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
+            ->when(isset($brand_id), function ($query) use ($brand_id) {
+                $query->whereHas('brand', function ($q) use ($brand_id) {
+                    $q->where('brand_id', $brand_id);
+                });
+            })
             ->when(isset($rate), function ($query) use ($rate) {
                 $query->viewRateBetween($rate[0], $rate[1]);
             })
+
             ->where('organization1_id', $admin->organization1_id)
             ->orderBy('created_at', 'desc')
             ->paginate(50)
@@ -71,6 +82,7 @@ class ManualPublishController extends Controller
             'category_list' => $category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
+            'brands' => $brands,
         ]);
     }
 
