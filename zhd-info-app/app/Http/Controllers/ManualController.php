@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Manual;
 use App\Models\ManualCategory;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class ManualController extends Controller
@@ -33,11 +34,14 @@ class ManualController extends Controller
 
     function detail($manual_id)
     {
+        $member = session('member');
         $manual = Manual::find($manual_id);
 
-        //既読処理
-        $user = session('member');
-        $manual->user()->updateExistingPivot($user->id, ['read_flg' => true]);
+        // 既読をつける
+        $member->manual()->updateExistingPivot($manual->id, [
+            'read_flg' => true,
+            'readed_datetime' => Carbon::now(),
+        ]);
         //
         
         $contents = $manual->content;
