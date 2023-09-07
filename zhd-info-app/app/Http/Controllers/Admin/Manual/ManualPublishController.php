@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Manual;
 
 use App\Enums\PublishStatus;
+use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\AdminRepository;
@@ -19,6 +20,7 @@ use App\Models\User;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ManualPublishController extends Controller
 {
@@ -413,6 +415,16 @@ class ManualPublishController extends Controller
         ]);
 
         return response()->json(['message' => '停止しました']);
+    }
+
+    public function export(Request $request, $manual_id)
+    {
+        $now = new Carbon('now');
+        $now->format('Y_m_d-H_i_s');
+        return Excel::download(
+            new ManualViewRateExport($manual_id, $request),
+            $now->format('Y_m_d-H_i') . '-動画マニュアルエクスポート.csv'
+        );
     }
 
     private function parseDateTime($datetime)
