@@ -164,14 +164,25 @@
                                 <td>{{$manual->formatted_start_datetime}}</td>
                                 <td>{{$manual->formatted_end_datetime}}</td>
                                 <td>{{$manual->status->text()}}</td>
-                                <td>{{isset($manual->view_rate) ?  $manual->view_rate : 0}}% 
-							        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})</td>
+                                @if($manual->status == App\Enums\PublishStatus::Wait || 
+                                    $manual->status == App\Enums\PublishStatus::Editing)
+                                    <td></td>
+                                @else
+                                    <td {{($manual->view_rate <= 30) ? 'class=under-quota' : ''}}>
+                                        {{$manual->view_rate}}% 
+                                        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})
+                                    </td>
+                                @endif
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
                                 <td>{{$manual->formatted_updated_at}}</td>
                                 <td>
-                                    <button class="detailBtn btn btn-info">詳細</button>
+                                    <button class="detailBtn btn btn-info" 
+                                        @if($manual->status == App\Enums\PublishStatus::Wait || 
+                                            $manual->status == App\Enums\PublishStatus::Editing)
+                                            disabled
+                                        @endif>詳細</button>
                                     <button class="editBtn btn btn-info">編集</button>
                                     <button class="StopBtn btn btn-info">配信停止</button>
                                 </td>
