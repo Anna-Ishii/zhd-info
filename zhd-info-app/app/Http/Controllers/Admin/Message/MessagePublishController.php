@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Message;
 
 use Carbon\Carbon;
 use App\Enums\PublishStatus;
+use App\Exports\MessageViewRateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
 use App\Http\Requests\Admin\Message\PublishUpdateRequest;
@@ -21,6 +22,7 @@ use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Maatwebsite\Excel\Facades\Excel;
 
 class MessagePublishController extends Controller
 {
@@ -397,6 +399,16 @@ class MessagePublishController extends Controller
         ]);
         
         return response()->json(['message' => '停止しました']);
+    }
+
+    public function export(Request $request, $message_id)
+    {
+        $now = new Carbon('now');
+        $now->format('Y_m_d-H_i_s');
+        return Excel::download(
+            new MessageViewRateExport($message_id, $request),
+            $now->format('Y_m_d-H_i').'-業務連絡エクスポート.csv'
+        );
     }
 
     private function parseDateTime($datetime)
