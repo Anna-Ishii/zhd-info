@@ -57,6 +57,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
+            Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
+
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [MessageManageController::class, 'index'])->name('index');
@@ -73,6 +75,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
             Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
+            Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
             Route::get('/', [ManualManageController::class, 'index'])->name('index');

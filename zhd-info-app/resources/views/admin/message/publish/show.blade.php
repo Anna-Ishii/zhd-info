@@ -92,7 +92,9 @@
                 <button class="btn btn-info">検索</button>
             </div>
             <div class="input-group col-lg-2">
-                <button class="btn btn-info">エクスポート</button>
+                <a href="{{ route('admin.message.publish.export', $message->id) }}?{{ http_build_query(request()->query())  }}">
+                    <button type='button' class="btn btn-info">エクスポート</button>
+                </a>
             </div>
         </div>
     </form>
