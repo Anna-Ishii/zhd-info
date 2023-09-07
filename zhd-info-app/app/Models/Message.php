@@ -158,11 +158,11 @@ class Message extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
     
-    public function getViewRateAttribute() : ?float
+    public function getViewRateAttribute() : float
     {
         $user_count = $this->user->count();
         $readed_user_count = $this->readed_user->count();
-        if($user_count == 0) return null;
+        if($user_count == 0) return 0;
 
         return round((($readed_user_count / $user_count) * 100), 1);
     }

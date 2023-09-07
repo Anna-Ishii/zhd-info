@@ -162,14 +162,25 @@
 						<td>{{$message->formatted_start_datetime}}</td>
 						<td>{{$message->formatted_end_datetime}}</td>
 						<td>{{$message->status->text()}}</td>
-						<td>{{isset($message->view_rate) ?  $message->view_rate : 0}}% 
-							({{$message->readed_user->count() }}/{{$message->user->count()}})</td>
+						@if($message->status == App\Enums\PublishStatus::Wait || 
+							$message->status == App\Enums\PublishStatus::Editing)
+							<td></td>
+						@else
+							<td {{($message->view_rate <= 30) ? 'class=under-quota' : ''}}>
+								{{$message->view_rate}}% 
+								({{$message->readed_user->count() }}/{{$message->user->count()}})
+							</td>
+						@endif
 						<td>{{$message->create_user->name}}</td>
 						<td>{{$message->formatted_created_at}}</td>
                         <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td>{{$message->formatted_updated_at}}</td>
 						<td>
-							<button class="detailBtn btn btn-info">詳細</button>
+							<button class="detailBtn btn btn-info" 
+								@if($message->status == App\Enums\PublishStatus::Wait || 
+									$message->status == App\Enums\PublishStatus::Editing)
+									disabled
+								@endif>詳細</button>
 							<button class="editBtn btn btn-info">編集</button>
 							<button class="StopBtn btn btn-info">配信停止</button>
 						</td>
