@@ -120,7 +120,7 @@ class ManualPublishController extends Controller
         $org4 = $request->input('org4');
         $org5 = $request->input('org5');
         $read_flg = $request->input('read_flg');
-        $viewrate_date = $request->input('viewrate-date');
+        $readed_date = $request->input('readed-date');
 
         $shop_list = $manual
             ->shop()
@@ -152,14 +152,14 @@ class ManualPublishController extends Controller
                 if ($read_flg == 'true') $query->where('read_flg', true);
                 if ($read_flg == 'false') $query->where('read_flg', false);
             })
-            ->when((isset($viewrate_date[0])), function ($query) use ($viewrate_date) {
+            ->when((isset($readed_date[0])), function ($query) use ($readed_date) {
                 $query
-                    ->where('readed_datetime', '>=', $viewrate_date[0]);
+                    ->where('readed_datetime', '>=', $readed_date[0]);
             })
-            ->when((isset($viewrate_date[1])), function ($query) use ($viewrate_date) {
+            ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
                 $query
-                    ->where(function ($query) use ($viewrate_date) {
-                        $query->where('readed_datetime', '<=', $viewrate_date[1])
+                    ->where(function ($query) use ($readed_date) {
+                        $query->where('readed_datetime', '<=', $readed_date[1])
                             ->orWhereNull('readed_datetime');
                     });
             })
