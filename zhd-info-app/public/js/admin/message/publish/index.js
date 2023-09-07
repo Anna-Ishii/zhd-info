@@ -85,20 +85,20 @@ $(window).on('load' , function(){
 		 },
 		 defaultDate: d,
 	});	
-    $('#viewrateDateFrom').datetimepicker({
+    $('#readedDateFrom').datetimepicker({
 		format:'Y/m/d H:i',
 		onShow:function( ct ){
 			this.setOptions({
-				maxDate:jQuery('#viewrateDateTo').val()?jQuery('#viewrateDateTo').val():false
+				maxDate:jQuery('#readedDateTo').val()?jQuery('#readedDateTo').val():false
 			})
 		 },
 		 defaultDate: d,
 	});	
-	$('#viewrateDateTo').datetimepicker({
+	$('#readedDateTo').datetimepicker({
 		format:'Y/m/d H:i',
 		onShow:function( ct ){
 			this.setOptions({
-				minDate:jQuery('#viewrateDateFrom').val()?jQuery('#viewrateDateFrom').val():false
+				minDate:jQuery('#readedDateFrom').val()?jQuery('#readedDateFrom').val():false
 			})
 		 },
 		 defaultDate: d,
