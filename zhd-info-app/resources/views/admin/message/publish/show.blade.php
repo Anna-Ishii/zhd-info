@@ -150,9 +150,9 @@
 				<tbody>
                     @foreach ($user_list as $user)
                     <tr>
-                        <td>{{$user->shop->organization3?->name}}</td>
-                        <td>{{$user->shop->organization5?->name}}</td>
-                        <td>{{$user->shop->organization4?->name}}</td>
+                        <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
+                        <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
+                        <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
                         <td>{{$user->shop->shop_code}}</td>
                         <td>{{$user->shop->name}}</td>
                         <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>

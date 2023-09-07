@@ -946,3 +946,8 @@ textarea {
 form.form-horizontal .form-group:last-child {
   text-align: center;
 }
+
+.under-quota {
+  color: #a94442;
+  font-weight: bold;
+}
