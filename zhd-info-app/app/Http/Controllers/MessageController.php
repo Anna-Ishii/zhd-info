@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\MessageCategory;
 use App\Models\Message;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class MessageController extends Controller
@@ -44,18 +45,19 @@ class MessageController extends Controller
         ]);
     }
 
-    function detail($message_id)
-    {
-        $member = session('member');
-        $message = Message::find($message_id);
+    // function detail($message_id)
+    // {
+    //     $member = session('member');
+    //     $message = Message::find($message_id);
 
-        // 既読をつける
-        $member->message()->updateExistingPivot($message_id, [
-            'read_flg' => true, 
-        ]);
+    //     // 既読をつける
+    //     $member->message()->updateExistingPivot($message_id, [
+    //         'read_flg' => true,
+    //         'readed_datetime' => Carbon::now(), 
+    //     ]);
 
-        return view('message.detail', [
-            'message' => $message
-        ]);
-    }
+    //     return view('message.detail', [
+    //         'message' => $message
+    //     ]);
+    // }
 }
