@@ -170,7 +170,7 @@
 
 	</form>
 
-    <a href="{{url()->previous()}}">
+    <a href="{{route('admin.manual.publish.index')}}">
         <button class="btn btn-light">戻る</button>
     </a>
 </div>
