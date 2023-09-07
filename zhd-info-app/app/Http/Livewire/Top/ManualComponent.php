@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Top;
 
+use Carbon\Carbon;
 use Livewire\Component;
 
 class ManualComponent extends Component
@@ -14,6 +15,7 @@ class ManualComponent extends Component
         // 既読をつける
         $member->manual()->updateExistingPivot($this->ml->id, [
             'read_flg' => true,
+            'readed_datetime' => Carbon::now(),
         ]);
         return redirect()->to(route('top'));
     }

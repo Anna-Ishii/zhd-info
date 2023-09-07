@@ -2,6 +2,7 @@
 
 namespace App\Http\Livewire\Message;
 
+use Carbon\Carbon;
 use Livewire\Component;
 
 class MessageComponent extends Component
@@ -13,7 +14,8 @@ class MessageComponent extends Component
         $member = session("member");
         // 既読をつける
         $member->message()->updateExistingPivot($this->message->id, [
-            'read_flg' => true, 
+            'read_flg' => true,
+            'readed_datetime' => Carbon::now(),
         ]);
         return redirect()->to(route('message.index'));
     }
