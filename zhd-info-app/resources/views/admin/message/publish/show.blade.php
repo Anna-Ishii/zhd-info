@@ -168,7 +168,7 @@
 		{{-- @include('common.admin.pagenation', ['objects' => $message_list]) --}}
 
 	</form>
-    <a href="{{url()->previous()}}">
+    <a href="{{route('admin.message.publish.index')}}">
         <button class="btn btn-light">戻る</button>
     </a>
 
