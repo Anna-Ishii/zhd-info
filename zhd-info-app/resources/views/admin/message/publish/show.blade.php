@@ -24,11 +24,11 @@
 
 			<div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">店舗コード</label>
-                <input type="text" name="shop-code" class="form-control" value="{{ request()->input('shop-code')}}">
+                <input type="text" name="shop_code" class="form-control" value="{{ request()->input('shop_code')}}">
             </div>
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">店舗名</label>
-                <input type="text" name="shop-name" class="form-control" value="{{ request()->input('shop-name')}}">
+                <input type="text" name="shop_name" class="form-control" value="{{ request()->input('shop_name')}}">
             </div>
 		{{-- </div>
 		<div class="form-group form-inline mb16"> --}}
@@ -78,13 +78,13 @@
 				閲覧日時
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input id="readedDateFrom" class="form-control mr16"  name="readed-date[0]" value="{{ request()->input('readed-date.0')}}" autocomplete="off">
+				<input id="readedDateFrom" class="form-control mr16"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
 			</div>
 			<div class="input-group col-lg-2 spMb16 duration-form-text">
 				　〜　
 			</div>
 			<div class="input-group col-lg-2 spMb16">
-				<input id="readedDateTo" class="form-control mr16"  name="readed-date[1]" value="{{ request()->input('readed-date.1')}}" autocomplete="off">
+				<input id="readedDateTo" class="form-control mr16"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
             </div>
 		</div>
         <div class="form-group form-inline mb16">
