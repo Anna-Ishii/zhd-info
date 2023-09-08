@@ -30,8 +30,6 @@
                 <label class="input-group-addon">店舗名</label>
                 <input type="text" name="shop_name" class="form-control" value="{{ request()->input('shop_name')}}">
             </div>
-		{{-- </div>
-		<div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">DS</label>
                 <select name="org3" class="form-control">
@@ -62,8 +60,6 @@
                     @endforeach
                 </select>
             </div>
-		{{-- </div>
-        <div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">既読状況</label>
                 <select name="read_flg" class="form-control">
