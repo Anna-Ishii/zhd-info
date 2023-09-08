@@ -118,13 +118,13 @@ class MessagePublishController extends Controller
         
         // request
         $brand_id = $request->input('brand');
-        $shop_code = $request->input('shop-code');
-        $shop_name = $request->input('shop-name');
+        $shop_code = $request->input('shop_code');
+        $shop_name = $request->input('shop_name');
         $org3 = $request->input('org3');
         $org4 = $request->input('org4');
         $org5 = $request->input('org5');
         $read_flg = $request->input('read_flg');
-        $readed_date = $request->input('readed-date');
+        $readed_date = $request->input('readed_date');
 
         $shop_list = $message
                         ->shop()
@@ -163,8 +163,7 @@ class MessagePublishController extends Controller
                         ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
                             $query
                                 ->where(function ($query) use ($readed_date) {
-                                    $query->where('readed_datetime', '<=', $readed_date[1])
-                                        ->orWhereNull('readed_datetime');
+                                    $query->where('readed_datetime', '<=', $readed_date[1]);
                                 });
                         })
                         ->wherePivotIn('shop_id', $shop_list)
