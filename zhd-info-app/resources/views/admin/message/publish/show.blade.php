@@ -158,7 +158,7 @@
                         <td>{{$user->shop->shop_code}}</td>
                         <td>{{$user->shop->name}}</td>
                         <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
-                        <td>{{$user->pivot->readed_datetime}}</td>
+                        <td>{{$user->pivot->formatted_readed_datetime}}</td>
                     </tr>
                     @endforeach
 				</tbody>
