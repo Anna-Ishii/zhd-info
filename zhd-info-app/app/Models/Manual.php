@@ -43,12 +43,14 @@ class Manual extends Model
     public function user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
+            ->using(ManualUser::class)
             ->withPivot('read_flg','shop_id', 'readed_datetime');
     }
 
     public function readed_user(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
+            ->using(ManualUser::class)
             ->wherePivot('read_flg', true)
             ->withPivot('read_flg','shop_id', 'readed_datetime');
     }
