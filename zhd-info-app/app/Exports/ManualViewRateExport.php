@@ -26,7 +26,7 @@ class ManualViewRateExport implements FromView, ShouldAutoSize
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
 
-        $brand_id = $this->request->brand_id;
+        $brand_id = $this->request->brand;
         $shop_code = $this->request->shop_code;
         $shop_name = $this->request->shop_name;
         $org3 = $this->request->org3;
@@ -72,8 +72,7 @@ class ManualViewRateExport implements FromView, ShouldAutoSize
             ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
                 $query
                     ->where(function ($query) use ($readed_date) {
-                        $query->where('readed_datetime', '<=', $readed_date[1])
-                            ->orWhereNull('readed_datetime');
+                        $query->where('readed_datetime', '<=', $readed_date[1]);
                     });
             })
             ->wherePivotIn('shop_id', $shop_list)
