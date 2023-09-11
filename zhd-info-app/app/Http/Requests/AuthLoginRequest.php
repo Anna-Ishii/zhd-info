@@ -17,7 +17,7 @@ class AuthLoginRequest extends FormRequest
     public function messages()
     {
         return [
-            'email.required' => '社員IDを入力してください',
+            'employee_code.required' => 'ログインIDを入力してください',
             'password' => 'パスワードを入力してください',
         ];
     }

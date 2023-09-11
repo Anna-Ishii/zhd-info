@@ -34,8 +34,6 @@
 					<option value="1" {{ request()->input('label') == 1 ? 'selected' : ''}}>重要</option>
                 </select>
             </div>
-		</div>
-		<div class="form-group form-inline mb16">
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
@@ -70,8 +68,7 @@
 			<div class="input-group col-lg-2 spMb16">
 				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
             </div>
-		</div>
-		<div class="form-group form-inline mb16 duration-form">
+			　
             <div class="input-group col-lg-2 spMb16 duration-form-text">
 				閲覧率
 			</div>

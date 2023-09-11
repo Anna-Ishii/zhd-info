@@ -87,7 +87,7 @@ class MessagePublishController extends Controller
                 ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
                     $query
                         ->where(function ($query) use ($publish_date) {
-                            $query->where('end_datetime', '>=',$publish_date[1])
+                            $query->where('end_datetime', '<=',$publish_date[1])
                                 ->orWhereNull('end_datetime');
                         });
                 })
