@@ -45,6 +45,9 @@ class MessagePublishController extends Controller
 
         $message_list =
             Message::query()
+                ->with('user', 'category', 'create_user', 'updated_user', 'brand')
+                ->withCount(['user as total_users'])
+                ->withCount(['readed_user as read_users'])
                 ->when(isset($q), function ($query) use ($q) {
                     $query->whereLike('title', $q);
                 })
@@ -92,7 +95,7 @@ class MessagePublishController extends Controller
                         });
                 })
                 ->where('organization1_id', $admin->organization1_id)
-                ->orderBy('created_at', 'desc')
+                ->orderBy('created_at', 'desc')                
                 ->paginate(50)
                 ->appends(request()->query());
 
