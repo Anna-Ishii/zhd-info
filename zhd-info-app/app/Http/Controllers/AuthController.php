@@ -29,7 +29,7 @@ class AuthController extends Controller
         if (empty($user)) {
             return redirect()
                 ->back()
-                ->with('error', '存在しない社員IDです');
+                ->with('error', '存在しないログインIDです');
         }
 
         if(Hash::check($request->password, $user->password)){
