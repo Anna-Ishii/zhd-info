@@ -7,14 +7,12 @@ use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\AdminRepository;
+use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
 use App\Models\ManualCategory;
 use App\Models\ManualContent;
-use App\Models\Organization3;
-use App\Models\Organization4;
-use App\Models\Organization5;
 use App\Models\Shop;
 use App\Models\User;
 use App\Utils\ImageConverter;
@@ -110,9 +108,9 @@ class ManualPublishController extends Controller
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
-        $org3_list = Organization3::get();
-        $org4_list = Organization4::get();
-        $org5_list = Organization5::get();
+        $org3_list = Organization1Repository::getOrg3($admin->organization1_id);
+        $org4_list = Organization1Repository::getOrg4($admin->organization1_id);
+        $org5_list = Organization1Repository::getOrg5($admin->organization1_id);
 
         // request
         $brand_id = $request->input('brand');

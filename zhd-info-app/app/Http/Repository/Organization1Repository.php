@@ -39,4 +39,20 @@ class Organization1Repository
                 ->select('shops.organization4_id as organization_id', 'organization4.name as organization_name')
                 ->where('shops.organization1_id', '=', $organization1_id)->get();
     }
+
+    public static function getOrg3($organization1_id)
+    {
+        return Shop::Join('organization3', 'shops.organization3_id', '=', 'organization3.id')
+            ->distinct()
+            ->select('shops.organization3_id as organization_id', 'organization3.name as organization_name')
+            ->where('shops.organization1_id', '=', $organization1_id)->get();
+    }
+
+    public static function getOrg2($organization1_id)
+    {
+        return Shop::Join('organization2', 'shops.organization2_id', '=', 'organization2.id')
+            ->distinct()
+            ->select('shops.organization2_id as organization_id', 'organization2.name as organization_name')
+            ->where('shops.organization1_id', '=', $organization1_id)->get();
+    }
 }
