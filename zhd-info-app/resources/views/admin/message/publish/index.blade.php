@@ -163,9 +163,10 @@
 							$message->status == App\Enums\PublishStatus::Editing)
 							<td></td>
 						@else
-							<td {{($message->view_rate <= 30) ? 'class=under-quota' : ''}}>
-								{{$message->view_rate}}% 
-								({{$message->readed_user->count() }}/{{$message->user->count()}})
+							
+							<td {{( (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0) <= 30) ? 'class=under-quota' : ''}}>
+								{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}% 
+								({{$message->read_users }}/{{$message->total_users}})
 							</td>
 						@endif
 						<td>{{$message->create_user->name}}</td>
