@@ -34,10 +34,7 @@ class Handler extends ExceptionHandler
     {
         if ($e instanceof TokenMismatchException) {
             return redirect()
-                ->back()
-                ->with('error',
-                'セッションの有効期限が切れました。
-                再度ログインしてください。');
+                ->back();
         }
         return parent::render($request, $e);
     }
