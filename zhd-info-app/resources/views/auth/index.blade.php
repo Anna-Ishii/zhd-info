@@ -36,7 +36,7 @@
                     </div>
                     <div class="panel-body">
                     @if (session('error'))
-                    <div class="alert alert-danger">{{(session('error'))}}</div>
+                    <div class="alert alert-danger">{!! nl2br(htmlspecialchars(session('error'))) !!}</div>
                     @endif
                     @if ($errors->any())
                     <div class="alert alert-danger">
