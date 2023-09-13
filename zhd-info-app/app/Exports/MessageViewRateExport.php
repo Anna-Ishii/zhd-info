@@ -21,7 +21,10 @@ class MessageViewRateExport implements FromView, ShouldAutoSize
     public function view(): View
     {
         $admin = session('admin');
-        $message = Message::find($this->message_id);
+        $message = Message::where('id', $this->message_id)
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
+            ->first();
 
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
