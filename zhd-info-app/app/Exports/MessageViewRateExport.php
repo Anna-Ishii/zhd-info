@@ -64,6 +64,7 @@ class MessageViewRateExport implements FromView, ShouldAutoSize
 
         $user_list = $message
                         ->user()
+                        ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5'])
                         ->when(isset($read_flg), function ($query) use ($read_flg) {
                             if($read_flg == 'true') $query->where('read_flg', true);
                             if($read_flg == 'false') $query->where('read_flg', false);
