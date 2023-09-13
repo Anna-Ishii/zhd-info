@@ -1,4 +1,4 @@
-<a href="{{$message->content_url}}" class="mb4" wire:click='reading'>
+<a href="javascript:void(0)" class="mb4" wire:click='reading'>
     <div class="list__box">
         <div class="list__box__txtInner">
             <p class="mb2 {{($message->pivot->read_flg) ? "list__box__title" : "list__box__title_large txtBold unread"}}">{{ $message->title }}</p>
