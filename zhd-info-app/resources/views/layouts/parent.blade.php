@@ -29,6 +29,15 @@
     </div>
 
     <script src="{{ asset('/js/timer.js') }}" defer></script>
+    <script>
+        // ブラウザバックの時、リロードする
+        // 既読処理のレイアウトを再描画させるため
+        window.onpageshow = function(event) {
+            if (event.persisted) {
+                    window.location.reload();
+            }
+        };
+    </script>
     @livewireScripts
 </body>
 
