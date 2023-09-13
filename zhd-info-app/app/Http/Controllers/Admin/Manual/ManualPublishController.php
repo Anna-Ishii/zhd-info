@@ -40,6 +40,9 @@ class ManualPublishController extends Controller
 
         $manual_list =
             Manual::query()
+            ->with('user', 'category', 'create_user', 'updated_user', 'brand')
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('title', $q);
@@ -103,7 +106,10 @@ class ManualPublishController extends Controller
     public function show(Request $request, $manual_id)
     {
         $admin = session('admin');
-        $manual = Manual::find($manual_id);
+        $manual = Manual::where('id', $manual_id)
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
+            ->first();
 
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
@@ -148,6 +154,7 @@ class ManualPublishController extends Controller
 
         $user_list = $manual
             ->user()
+            ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5'])
             ->when(isset($read_flg), function ($query) use ($read_flg) {
                 if ($read_flg == 'true') $query->where('read_flg', true);
                 if ($read_flg == 'false') $query->where('read_flg', false);

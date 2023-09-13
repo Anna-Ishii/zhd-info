@@ -127,9 +127,8 @@
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
                     <td>{{$manual->status->text()}}</td>
-                    <td>{{$manual->view_rate ?  $manual->view_rate : 0}}% 
-							({{$manual->readed_user->count() }}/{{$manual->user->count()}})
-                    </td>
+                    <td>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}%
+							({{$manual->read_users }}/{{$manual->total_users}})</td>
                 </tr>
             </tbody>
         </table>
