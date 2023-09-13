@@ -13,11 +13,11 @@ class MessageComponent extends Component
     {
         $member = session("member");
         // 既読をつける
-        $member->message()->updateExistingPivot($this->ms->id, [
+        $member->message()->wherePivot('read_flg', false)->updateExistingPivot($this->ms->id, [
             'read_flg' => true,
             'readed_datetime' => Carbon::now(),
         ]);
-        return redirect()->to(route('top'));
+        return redirect()->to($this->ms->content_url);
     }
 
     public function render()
