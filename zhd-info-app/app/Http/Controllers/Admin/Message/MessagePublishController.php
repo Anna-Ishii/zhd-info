@@ -107,7 +107,10 @@ class MessagePublishController extends Controller
     public function show(Request $request, $message_id)
     {
         $admin = session('admin');
-        $message = Message::find($message_id);
+        $message = Message::where('id', $message_id)
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
+            ->first();
 
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
