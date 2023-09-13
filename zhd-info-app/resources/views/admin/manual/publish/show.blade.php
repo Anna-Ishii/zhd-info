@@ -37,7 +37,7 @@
                 <select name="org3" class="form-control">
                     <option value=""> -- 指定なし -- </option>
                     @foreach ($org3_list as $org3)
-                    <option value="{{ $org3->id }}" {{ request()->input('org3') == $org3->id ? 'selected' : ''}}>{{ $org3->name }}</option>
+                    <option value="{{ $org3->organization_id }}" {{ request()->input('org3') == $org3->organization_id ? 'selected' : ''}}>{{ $org3->organization_name }}</option>
                     @endforeach
 
                 </select>
@@ -48,7 +48,7 @@
                 <select name="org5" class="form-control">
                     <option value=""> -- 指定なし -- </option>
                     @foreach ($org5_list as $org5)
-                    <option value="{{ $org5->id }}" {{ request()->input('org5') == $org5->id ? 'selected' : ''}}>{{ $org5->name }}</option>
+                    <option value="{{ $org5->organization_id }}" {{ request()->input('org5') == $org5->organization_id ? 'selected' : ''}}>{{ $org5->organization_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -58,7 +58,7 @@
                 <select name="org4" class="form-control">
                     <option value=""> -- 指定なし -- </option>
                     @foreach ($org4_list as $org4)
-                    <option value="{{ $org4->id }}" {{ request()->input('org4') == $org4->id ? 'selected' : ''}}>{{ $org4->name }}</option>
+                    <option value="{{ $org4->organization_id }}" {{ request()->input('org4') == $org4->organization_id ? 'selected' : ''}}>{{ $org4->organization_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -127,9 +127,8 @@
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
                     <td>{{$manual->status->text()}}</td>
-                    <td>{{$manual->view_rate ?  $manual->view_rate : 0}}% 
-							({{$manual->readed_user->count() }}/{{$manual->user->count()}})
-                    </td>
+                    <td>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}%
+							({{$manual->read_users }}/{{$manual->total_users}})</td>
                 </tr>
             </tbody>
         </table>

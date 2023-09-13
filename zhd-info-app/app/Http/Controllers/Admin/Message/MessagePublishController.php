@@ -15,9 +15,6 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
-use App\Models\Organization3;
-use App\Models\Organization4;
-use App\Models\Organization5;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -45,6 +42,9 @@ class MessagePublishController extends Controller
 
         $message_list =
             Message::query()
+                ->with('user', 'category', 'create_user', 'updated_user', 'brand')
+                ->withCount(['user as total_users'])
+                ->withCount(['readed_user as read_users'])
                 ->when(isset($q), function ($query) use ($q) {
                     $query->whereLike('title', $q);
                 })
@@ -92,7 +92,7 @@ class MessagePublishController extends Controller
                         });
                 })
                 ->where('organization1_id', $admin->organization1_id)
-                ->orderBy('created_at', 'desc')
+                ->orderBy('created_at', 'desc')                
                 ->paginate(50)
                 ->appends(request()->query());
 
@@ -107,14 +107,17 @@ class MessagePublishController extends Controller
     public function show(Request $request, $message_id)
     {
         $admin = session('admin');
-        $message = Message::find($message_id);
+        $message = Message::where('id', $message_id)
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
+            ->first();
 
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
-        $org3_list = Organization3::get();
-        $org4_list = Organization4::get();
-        $org5_list = Organization5::get();
+        $org3_list = Organization1Repository::getOrg3($admin->organization1_id);
+        $org4_list = Organization1Repository::getOrg4($admin->organization1_id);
+        $org5_list = Organization1Repository::getOrg5($admin->organization1_id);
         
         // request
         $brand_id = $request->input('brand');
@@ -152,6 +155,7 @@ class MessagePublishController extends Controller
 
         $user_list = $message
                         ->user()
+                        ->with(['shop', 'shop.organization3','shop.organization4', 'shop.organization5'])
                         ->when(isset($read_flg), function ($query) use ($read_flg) {
                             if($read_flg == 'true') $query->where('read_flg', true);
                             if($read_flg == 'false') $query->where('read_flg', false);
