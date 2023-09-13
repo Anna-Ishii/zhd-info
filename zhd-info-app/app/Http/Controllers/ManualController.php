@@ -16,6 +16,7 @@ class ManualController extends Controller
         $user = session("member");
         // 掲示中のデータをとってくる
         $manuals = $user->manual()
+            ->with('content')
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
@@ -38,7 +39,7 @@ class ManualController extends Controller
         $manual = Manual::find($manual_id);
 
         // 既読をつける
-        $member->manual()->updateExistingPivot($manual->id, [
+        $member->manual()->wherePivot('read_flg', false)->updateExistingPivot($manual->id, [
             'read_flg' => true,
             'readed_datetime' => Carbon::now(),
         ]);
