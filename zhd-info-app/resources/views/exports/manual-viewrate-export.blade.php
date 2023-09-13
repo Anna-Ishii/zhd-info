@@ -30,7 +30,7 @@
         <td>{{$manual->status->text()}}</td>
         <td>{{$manual->readed_user->count()}}</td>
         <td>{{$manual->user->count()}}</td>
-        <td>{{ $manual->view_rate ? $manual->view_rate : 0}}% </td>
+        <td>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}%</td>
         <td>{{$user->shop->shop_code}}</td>
         <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
         <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>

@@ -82,9 +82,8 @@ class Manual extends Model
 
     public function brands_string($brandList = [])
     {
-        $brands = $this->brand();
         // リレーションからnameプロパティを取得して配列に変換
-        $brandNames = $brands->orderBy('id', 'asc')->pluck('name')->toArray();
+        $brandNames = $this->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         if($brandList === $brandNames) return "全業態";
         // カンマ区切りの文字列として返す
         return implode(',', $brandNames);
@@ -164,8 +163,8 @@ class Manual extends Model
 
     public function getViewRateAttribute(): float
     {
-        $user_count = $this->user->count();
-        $readed_user_count = $this->readed_user->count();
+        $user_count = $this->withCount('user')->get();
+        $readed_user_count = $this->withCount('readed_user')->get();
         if ($user_count == 0) return 0;
 
         return round((($readed_user_count / $user_count) * 100), 1);
@@ -210,12 +209,8 @@ class Manual extends Model
 
     public function scopeViewRateBetween($query, $min = 0, $max = 100)
     {
-
-        $query->withCount('user as total_users')
-        ->withCount(['user as read_users' => function ($query) {
-            $query->where('read_flg', true);
-        }])
-            ->havingRaw('ROUND((read_users / total_users) * 100, 2) >= ?', [isset($min) ? $min : 0])
-            ->havingRaw('ROUND((read_users / total_users) * 100, 2) <= ?', [isset($max) ? $max : 100]);
+        $min = isset($min) ? $min : 0;
+        $max = isset($max) ? $max : 100;
+        $query->havingRaw('ROUND((read_users / total_users) * 100, 2) BETWEEN ? AND ?', [$min, $max]);
     }
 }

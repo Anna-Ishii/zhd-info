@@ -166,10 +166,10 @@
                                     $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                 @else
-                                    <td {{($manual->view_rate <= 30) ? 'class=under-quota' : ''}}>
-                                        {{$manual->view_rate}}% 
-                                        ({{$manual->readed_user->count() }}/{{$manual->user->count()}})
-                                    </td>
+                                <td {{( (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0) <= 30) ? 'class=under-quota' : ''}}>
+                                    {{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}% 
+                                    ({{$manual->read_users }}/{{$manual->total_users}})
+                                </td>
                                 @endif
                                 <td>{{$manual->create_user->name}}</td>
                                 <td>{{$manual->formatted_created_at}}</td>
