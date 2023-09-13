@@ -21,7 +21,10 @@ class ManualViewRateExport implements FromView, ShouldAutoSize
     public function view(): View
     {
         $admin = session('admin');
-        $manual = Manual::find($this->manual_id);
+        $manual = Manual::where('id', $this->manual_id)
+            ->withCount(['user as total_users'])
+            ->withCount(['readed_user as read_users'])
+            ->first();
 
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
