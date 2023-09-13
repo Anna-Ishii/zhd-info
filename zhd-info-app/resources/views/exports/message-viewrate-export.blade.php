@@ -32,7 +32,7 @@
         <td>{{$message->status->text()}}</td>
         <td>{{$message->readed_user->count()}}</td>
         <td>{{$message->user->count()}}</td>
-        <td>{{ $message->view_rate ? $message->view_rate : 0}}% </td>
+        <td>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}%</td>
         <td>{{$user->shop->shop_code}}</td>
         <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
         <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
