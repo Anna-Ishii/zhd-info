@@ -7,7 +7,39 @@
             <h1 class="page-header admin-header">動画マニュアル</h1>
         </div>
     </div>
-
+	<div class="manual-tableInner">
+        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+            <thead>
+                <tr>
+                    <th class="text-center">タイトル</th>
+                    <th class="text-center">カテゴリ</th>
+                    <th class="text-center">ラベル</th>
+                    <th class="text-center">対象業態</th>
+                    <th class="text-center">掲載開始日時</th>
+                    <th class="text-center">掲載終了日時</th>
+                    <th class="text-center">状態</th>
+                    <th class="text-center">閲覧率</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>{{$manual->title}}</td>
+                    <td>{{$manual->category?->name}}</td>
+                    @if ($manual->emergency_flg)
+                    <td class="bg-danger text-danger">重要</td>
+                    @else
+                    <td></td>
+                    @endif
+                    <td>{{$manual->brands_string($brands)}}</td>
+                    <td>{{$manual->formatted_start_datetime}}</td>
+                    <td>{{$manual->formatted_end_datetime}}</td>
+                    <td>{{$manual->status->text()}}</td>
+                    <td>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}%
+							({{$manual->read_users }}/{{$manual->total_users}})</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
     <!-- 絞り込み部分 -->
     <form method="get" class="form-horizontal mb24">
         <div class="form-group form-inline mb16">
@@ -18,7 +50,6 @@
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
-
                 </select>
             </div>    
 
@@ -30,8 +61,6 @@
                 <label class="input-group-addon">店舗名</label>
                 <input type="text" name="shop_name" class="form-control" value="{{ request()->input('shop_name')}}">
             </div>
-		{{-- </div>
-		<div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">DS</label>
                 <select name="org3" class="form-control">
@@ -39,7 +68,6 @@
                     @foreach ($org3_list as $org3)
                     <option value="{{ $org3->organization_id }}" {{ request()->input('org3') == $org3->organization_id ? 'selected' : ''}}>{{ $org3->organization_name }}</option>
                     @endforeach
-
                 </select>
             </div>
 
@@ -62,8 +90,6 @@
                     @endforeach
                 </select>
             </div>
-		{{-- </div>
-        <div class="form-group form-inline mb16"> --}}
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">既読状況</label>
                 <select name="read_flg" class="form-control">
@@ -98,77 +124,36 @@
             </div>
         </div>
     </form>
-
+	<!-- 検索結果 -->
     @include('common.admin.pagenation', ['objects' => $user_list])
-	<div class="manual-tableInner">
+    <div class="manual-tableInner">
         <table id="list" class="table table-bordered table-hover table-condensed text-center">
             <thead>
                 <tr>
-                    <th class="text-center">タイトル</th>
-                    <th class="text-center">カテゴリ</th>
-                    <th class="text-center">ラベル</th>
-                    <th class="text-center">対象業態</th>
-                    <th class="text-center">掲載開始日時</th>
-                    <th class="text-center">掲載終了日時</th>
-                    <th class="text-center">状態</th>
-                    <th class="text-center">閲覧率</th>
+                    <th class="text-center">DS</th>
+                    <th class="text-center">BL</th>
+                    <th class="text-center">AR</th>
+                    <th class="text-center" colspan="2">店舗名</th>
+                    <th class="text-center">既読状況</th>
+                    <th class="text-center">閲覧日時</th>
                 </tr>
             </thead>
             <tbody>
+                @foreach ($user_list as $user)
                 <tr>
-                    <td>{{$manual->title}}</td>
-                    <td>{{$manual->category?->name}}</td>
-                    @if ($manual->emergency_flg)
-                    <td class="bg-danger text-danger">重要</td>
-                    @else
-                    <td></td>
-                    @endif
-                    <td>{{$manual->brands_string($brands)}}</td>
-                    <td>{{$manual->formatted_start_datetime}}</td>
-                    <td>{{$manual->formatted_end_datetime}}</td>
-                    <td>{{$manual->status->text()}}</td>
-                    <td>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}%
-							({{$manual->read_users }}/{{$manual->total_users}})</td>
+                    <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
+                    <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
+                    <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
+                    <td>{{$user->shop->shop_code}}</td>
+                    <td>{{$user->shop->name}}</td>
+                    <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
+                    <td>{{$user->pivot->formatted_readed_datetime}}</td>
                 </tr>
+                @endforeach
             </tbody>
         </table>
     </div>
-	<!-- 検索結果 -->
-	<form method="post" action="#">
-
-		<div class="manual-tableInner">
-			<table id="list" class="table table-bordered table-hover table-condensed text-center">
-				<thead>
-					<tr>
-						<th class="text-center">DS</th>
-						<th class="text-center">BL</th>
-						<th class="text-center">AR</th>
-						<th class="text-center" colspan="2">店舗名</th>
-						<th class="text-center">既読状況</th>
-						<th class="text-center">閲覧日時</th>
-					</tr>
-				</thead>
-
-				<tbody>
-                    @foreach ($user_list as $user)
-                    <tr>
-                        <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
-                        <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
-                        <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
-                        <td>{{$user->shop->shop_code}}</td>
-                        <td>{{$user->shop->name}}</td>
-                        <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
-                        <td>{{$user->pivot->formatted_readed_datetime}}</td>
-                    </tr>
-                    @endforeach
-				</tbody>
-			</table>
-		</div>
-
-        @include('common.admin.pagenation', ['objects' => $user_list])
-
-	</form>
-
+    @include('common.admin.pagenation', ['objects' => $user_list])
     <a href="{{route('admin.manual.publish.index')}}">
         <button class="btn btn-light">戻る</button>
     </a>
