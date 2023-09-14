@@ -37,7 +37,6 @@
                         <td>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}%
 							({{$message->read_users }}/{{$message->total_users}})</td>
                     </tr>
-                    
                 </tbody>
             </table>
     </div>
@@ -52,7 +51,6 @@
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
-
                 </select>
             </div>    
 
@@ -71,7 +69,6 @@
                     @foreach ($org3_list as $org3)
                     <option value="{{ $org3->organization_id }}" {{ request()->input('org3') == $org3->organization_id ? 'selected' : ''}}>{{ $org3->organization_name }}</option>
                     @endforeach
-
                 </select>
             </div>
 
@@ -128,7 +125,6 @@
             </div>
         </div>
     </form>
-
 	<!-- 検索結果 -->
     @include('common.admin.pagenation', ['objects' => $user_list])
     <div class="message-tableInner">
@@ -143,7 +139,6 @@
                     <th class="text-center">閲覧日時</th>
                 </tr>
             </thead>
-
             <tbody>
                 @foreach ($user_list as $user)
                 <tr>
