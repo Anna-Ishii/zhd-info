@@ -203,6 +203,7 @@ table.dataTable thead .sorting:after {
 
 .message-tableInner{
   overflow-x: auto;
+  margin-bottom: 20px;
   /* width: 1664px; */
 }
 .message-table tr td{
@@ -330,6 +331,7 @@ table.dataTable thead .sorting:after {
 
 .manual-tableInner{
   overflow-x: auto;
+  margin-bottom: 20px;
   /* width: 1554px; */
 }
 .manual-table tr td{
