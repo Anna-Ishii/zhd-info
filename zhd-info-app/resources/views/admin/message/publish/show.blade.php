@@ -7,6 +7,40 @@
 			<h1 class="page-header admin-header">業務連絡配信</h1>
 		</div>
 	</div>
+	<div class="message-tableInner">
+			<table id="list" class="table table-bordered table-hover table-condensed text-center">
+				<thead>
+					<tr>
+						<th class="text-center">タイトル</th>
+						<th class="text-center">カテゴリ</th>
+						<th class="text-center">ラベル</th>
+						<th class="text-center">対象業態</th>
+						<th class="text-center">掲載開始日時</th>
+						<th class="text-center">掲載終了日時</th>
+						<th class="text-center">状態</th>
+						<th class="text-center">閲覧率</th>
+					</tr>
+				</thead>
+                <tbody>
+                    <tr>
+                        <td>{{$message->title}}</td>
+                        <td>{{$message->category?->name}}</td>
+                        @if ($message->emergency_flg)
+						<td class="bg-danger text-danger">重要</td>
+						@else
+						<td></td>
+						@endif
+                        <td>{{$message->brands_string($brands)}}</td>
+                        <td>{{$message->formatted_start_datetime}}</td>
+                        <td>{{$message->formatted_end_datetime}}</td>
+                        <td>{{$message->status->text()}}</td>
+                        <td>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}%
+							({{$message->read_users }}/{{$message->total_users}})</td>
+                    </tr>
+                    
+                </tbody>
+            </table>
+    </div>
 
     <!-- 絞り込み部分 -->
     <form method="get" class="form-horizontal mb24">
@@ -95,75 +129,37 @@
         </div>
     </form>
 
-	<div class="message-tableInner">
-			<table id="list" class="table table-bordered table-hover table-condensed text-center">
-				<thead>
-					<tr>
-						<th class="text-center">タイトル</th>
-						<th class="text-center">カテゴリ</th>
-						<th class="text-center">ラベル</th>
-						<th class="text-center">対象業態</th>
-						<th class="text-center">掲載開始日時</th>
-						<th class="text-center">掲載終了日時</th>
-						<th class="text-center">状態</th>
-						<th class="text-center">閲覧率</th>
-					</tr>
-				</thead>
-                <tbody>
-                    <tr>
-                        <td>{{$message->title}}</td>
-                        <td>{{$message->category?->name}}</td>
-                        @if ($message->emergency_flg)
-						<td class="bg-danger text-danger">重要</td>
-						@else
-						<td></td>
-						@endif
-                        <td>{{$message->brands_string($brands)}}</td>
-                        <td>{{$message->formatted_start_datetime}}</td>
-                        <td>{{$message->formatted_end_datetime}}</td>
-                        <td>{{$message->status->text()}}</td>
-                        <td>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}%
-							({{$message->read_users }}/{{$message->total_users}})</td>
-                    </tr>
-                    
-                </tbody>
-            </table>
-    </div>
 	<!-- 検索結果 -->
-	<form method="post" action="#">
-		@include('common.admin.pagenation', ['objects' => $user_list])
-		<div class="message-tableInner">
-			<table id="list" class="table table-bordered table-hover table-condensed text-center">
-				<thead>
-					<tr>
-						<th class="text-center">DS</th>
-						<th class="text-center">BL</th>
-						<th class="text-center">AR</th>
-						<th class="text-center" colspan="2">店舗名</th>
-						<th class="text-center">既読状況</th>
-						<th class="text-center">閲覧日時</th>
-					</tr>
-				</thead>
+    @include('common.admin.pagenation', ['objects' => $user_list])
+    <div class="message-tableInner">
+        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+            <thead>
+                <tr>
+                    <th class="text-center">DS</th>
+                    <th class="text-center">BL</th>
+                    <th class="text-center">AR</th>
+                    <th class="text-center" colspan="2">店舗名</th>
+                    <th class="text-center">既読状況</th>
+                    <th class="text-center">閲覧日時</th>
+                </tr>
+            </thead>
 
-				<tbody>
-                    @foreach ($user_list as $user)
-                    <tr>
-                        <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
-                        <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
-                        <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
-                        <td>{{$user->shop->shop_code}}</td>
-                        <td>{{$user->shop->name}}</td>
-                        <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
-                        <td>{{$user->pivot->formatted_readed_datetime}}</td>
-                    </tr>
-                    @endforeach
-				</tbody>
-			</table>
-		</div>
-        @include('common.admin.pagenation', ['objects' => $user_list])
-		{{-- @include('common.admin.pagenation', ['objects' => $message_list]) --}}
-
-	</form>
+            <tbody>
+                @foreach ($user_list as $user)
+                <tr>
+                    <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
+                    <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
+                    <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
+                    <td>{{$user->shop->shop_code}}</td>
+                    <td>{{$user->shop->name}}</td>
+                    <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
+                    <td>{{$user->pivot->formatted_readed_datetime}}</td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @include('common.admin.pagenation', ['objects' => $user_list])
     <a href="{{route('admin.message.publish.index')}}">
         <button class="btn btn-light">戻る</button>
     </a>
