@@ -8,8 +8,6 @@ RUN mkdir /run/php-fpm
 RUN dnf update -y && \
     dnf install -y httpd wget php-fpm php-mysqli php-json php php-devel php-pear git python3-pip mesa-libGL mesa-libGL-devel 
 
-RUN yum install poppler-utils
-
 RUN git clone https://github.com/xdebug/xdebug.git
 RUN cd /xdebug && \
     ./rebuild.sh && \
