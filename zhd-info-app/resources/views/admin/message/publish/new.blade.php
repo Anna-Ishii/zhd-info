@@ -64,20 +64,16 @@
                 </label>
             </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" hidden>
             <label class="col-lg-2 control-label">対象者</label>
             <div class="col-lg-10 checkArea">
                 <label class="mr16">
-                    <input type="checkbox" id="checkAll" class="mr8" 
-                        {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                    >
+                    <input type="checkbox" id="checkAll" class="mr8" checked>
                     全て
                 </label>
                 @foreach ($target_roll_list as $target_roll)
                 <label class="mr16">
-                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8" 
-                    {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                    >
+                    <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}" class="checkCommon mr8" checked>
                     {{ $target_roll->name }}
                 </label>
                 @endforeach
@@ -88,17 +84,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" 
-                        {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                        >
+                        <input type="checkbox" id="checkAll" class="mr8" checked>
                         全業態
                     </label>
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
-                    {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                    >
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" checked>
                     {{$brand->name}}
                 </label>
                 @endforeach
@@ -112,17 +104,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" 
-                        {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                        >
+                        <input type="checkbox" id="checkAll" class="mr8" checked>
                         全て
                     </label>
                 </div>
                 @foreach ($organization_list as $organization)
                 <label class="mr16">
-                    <input type="checkbox" name="organization[]" value="{{$organization->organization_id}}" class="checkCommon mr8" 
-                    {{ $admin->organization1_id == 3 ? '' : 'checked'}}
-                    >
+                    <input type="checkbox" name="organization[]" value="{{$organization->organization_id}}" class="checkCommon mr8" checked>
                     {{$organization->organization_name}}
                 </label>
                 @endforeach
