@@ -109,10 +109,27 @@
                     </label>
                 </div>
                 @foreach ($organization_list as $organization)
-                <label class="mr16">
-                    <input type="checkbox" name="organization[]" value="{{$organization->organization_id}}" class="checkCommon mr8" checked>
-                    {{$organization->organization_name}}
-                </label>
+                    @if (isset($organization['organization5_name']))
+                        <label class="mr16">
+                            <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8" checked>
+                            {{$organization['organization5_name']}}
+                        </label>
+                    @elseif (isset($organization['organization4_name']))
+                        <label class="mr16">
+                            <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8" checked>
+                            {{$organization['organization4_name']}}
+                        </label>
+                    @elseif (isset($organization['organization3_name']))
+                        <label class="mr16">
+                            <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8" checked>
+                            {{$organization['organization3_name']}}直轄
+                        </label>
+                    @elseif (isset($organization['organization2_name']))
+                        <label class="mr16">
+                            <input type="checkbox" name="organization[org2][]" value="{{$organization['organization2_id']}}" class="checkCommon mr8" checked>
+                            {{$organization['organization2_name']}}直轄
+                        </label>
+                    @endif
                 @endforeach
             </div>
         </div>

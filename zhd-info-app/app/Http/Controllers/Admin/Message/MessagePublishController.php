@@ -15,6 +15,7 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
+use App\Models\MessageOrganization;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -193,20 +194,41 @@ class MessagePublishController extends Controller
         // ブランド一覧を取得する
         $brand_list = AdminRepository::getBrands($admin);
         
-        $this->organization_list = [];
-        $this->organization_list = Organization1Repository::getOrg5($admin->organization1_id);
-        $this->organization_type = 5;  // ブロックを表示する
-        if($this->organization_list->isEmpty()) {
-            $this->organization_list = Organization1Repository::getOrg4($admin->organization1_id);  
-            $this->organization_type = 4; // エリアを表示する
+        $organization_list = [];
+        $organization_list = Shop::query()
+                                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+                                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+                                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+                                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+                                ->distinct('organization4_id')
+                                ->distinct('organization5_id')
+                                ->select('organization2_id', 'organization2.name as organization2_name', 
+                                         'organization3_id', 'organization3.name as organization3_name',
+                                         'organization4_id', 'organization4.name as organization4_name',
+                                         'organization5_id', 'organization5.name as organization5_name')
+                                ->where('organization1_id', $admin->organization1_id)
+                                ->orderByRaw('organization2_id is null asc')
+                                ->orderByRaw('organization3_id is null asc')
+                                ->orderByRaw('organization4_id is null asc')
+                                ->orderByRaw('organization5_id is null asc')
+                                ->orderBy("organization2_id", "asc")
+                                ->orderBy("organization3_id", "asc")
+                                ->orderBy("organization4_id", "asc")
+                                ->orderBy("organization5_id", "asc")
+                                ->get()
+                                ->toArray();
+
+        $organization_type = 5;  // ブロックを表示する
+        if (!Organization1Repository::isExistOrg5($admin->organization1_id)) {
+            $organization_type = 4; // エリアを表示する
         }
 
         return view('admin.message.publish.new', [
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
-            'organization_type' => $this->organization_type,
-            'organization_list' => $this->organization_list
+            'organization_type' => $organization_type,
+            'organization_list' => $organization_list,
         ]);
     }
 
@@ -236,12 +258,47 @@ class MessagePublishController extends Controller
 
         // 一時保存の時は、ユーザー登録しない
         if (!isset($request->save)) {
-            if ($organization_type == 4) {
-                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-            } elseif ($organization_type == 5) {
-                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-            }
+            // organizationごとにshopを取得する
+                if(isset($request->organization['org5'])){
+                    $_shops_id = Shop::select('id')
+                                        ->whereIn('organization5_id', $request->organization['org5'])
+                                        ->whereIn('brand_id', $request->brand)
+                                        ->get()
+                                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+                if(isset($request->organization['org4'])){
+                    $_shops_id = Shop::select('id')
+                                        ->whereIn('organization4_id', $request->organization['org4'])
+                                        ->whereIn('brand_id', $request->brand)
+                                        ->get()
+                                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+                if(isset($request->organization['org3'])){
+                    $_shops_id = Shop::select('id')
+                                        ->whereIn('organization3_id', $request->organization['org3'])
+                                        ->whereIn('brand_id', $request->brand)
+                                        ->whereNull('organization4_id')
+                                        ->whereNull('organization5_id')
+                                        ->get()
+                                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+                if (isset($request->organization['org2'])) {
+                    $_shops_id = Shop::select('id')
+                                        ->whereIn('organization2_id', $request->organization['org2'])
+                                        ->whereIn('brand_id', $request->brand)
+                                        ->whereNull('organization4_id')
+                                        ->whereNull('organization5_id')
+                                        ->get()
+                                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id); 
+                }
+
+            // 取得したshopのリストからユーザーを取得する
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+            // ユーザーに業務連絡の閲覧権限を与える
             foreach ($target_users as $target_user) {
                 $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
             }
@@ -254,10 +311,41 @@ class MessagePublishController extends Controller
             $message->save();
             $message->roll()->attach($request->target_roll);
 
-            if ($organization_type == 4) {
-                $message->organization4()->attach($request->organization);
-            } elseif ($organization_type == 5) {
-                $message->organization5()->attach($request->organization);
+            if (isset($request->organization['org5'])) {
+                foreach ($request->organization['org5'] as $org5_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization5_id' => $org5_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org4'])) {
+                foreach ($request->organization['org4'] as $org4_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization4_id' => $org4_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org3'])) {
+                foreach ($request->organization['org3'] as $org3_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization3_id' => $org3_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org2'])) {
+                foreach ($request->organization['org2'] as $org2_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization2_id' => $org2_id
+                    ]);
+                }
             }
 
             $message->brand()->attach($request->brand);
@@ -290,16 +378,42 @@ class MessagePublishController extends Controller
         // 業態一覧を取得する
         $brand_list = AdminRepository::getBrands($admin);
 
-        $this->organization_list = [];
-        $this->organization_list = Organization1Repository::getOrg5($admin->organization1_id);
-        $this->organization_type = 5;
-        $this->target_org = [];
-        $this->target_org = $message->organization5()->pluck('organization5.id')->toArray();
-        if ($this->organization_list->isEmpty()) {
-            $this->organization_list = Organization1Repository::getOrg4($admin->organization1_id);
-            $this->organization_type = 4;
-            $this->target_org = $message->organization4()->pluck('organization4.id')->toArray();
+        $organization_list = [];
+        $organization_list = Shop::query()
+                                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+                                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+                                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+                                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+                                ->distinct('organization4_id')
+                                ->distinct('organization5_id')
+                                ->select('organization2_id', 'organization2.name as organization2_name',
+                                         'organization3_id', 'organization3.name as organization3_name',
+                                         'organization4_id', 'organization4.name as organization4_name',
+                                         'organization5_id', 'organization5.name as organization5_name')
+                                ->where('organization1_id', $admin->organization1_id)
+                                ->orderByRaw('organization2_id is null asc')
+                                ->orderByRaw('organization3_id is null asc')
+                                ->orderByRaw('organization4_id is null asc')
+                                ->orderByRaw('organization5_id is null asc')
+                                ->orderBy("organization2_id", "asc")
+                                ->orderBy("organization3_id", "asc")
+                                ->orderBy("organization4_id", "asc")
+                                ->orderBy("organization5_id", "asc")
+                                ->get()
+                                ->toArray();
+
+                    
+        $organization_type = 5;  // ブロックを表示する
+        if (!Organization1Repository::isExistOrg5($admin->organization1_id)) {
+            $organization_type = 4; // エリアを表示する
         }
+
+        $target_org = [];
+        $target_org['org5'] = MessageOrganization::where('message_id', $message_id)->pluck('organization5_id')->toArray();
+        $target_org['org4'] = MessageOrganization::where('message_id', $message_id)->pluck('organization4_id')->toArray();
+        $target_org['org3'] = MessageOrganization::where('message_id', $message_id)->pluck('organization3_id')->toArray();
+        $target_org['org2'] = MessageOrganization::where('message_id', $message_id)->pluck('organization2_id')->toArray();
+
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
         
@@ -310,11 +424,11 @@ class MessagePublishController extends Controller
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
-            'organization_list' => $this->organization_list,
+            'organization_list' => $organization_list,
             'message_target_roll' => $message_target_roll,
             'target_brand' => $target_brand,
-            'target_org' => $this->target_org,
-            'organization_type' => $this->organization_type
+            'target_org' => $target_org,
+            'organization_type' => $organization_type,
         ]);
     }
 
@@ -341,15 +455,50 @@ class MessagePublishController extends Controller
         $shops_id = [];
         $target_user_data = [];
 
-        if(!isset($request->save)) {
-            if ($organization_type == 4) {
-                $shops_id = Shop::select('id')->whereIn('organization4_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
-            } elseif ($organization_type == 5) {
-                $shops_id = Shop::select('id')->whereIn('organization5_id', $request->organization)->whereIn('brand_id', $request->brand)->get()->toArray();
+
+        // 一時保存の時は、ユーザー登録しない
+        if (!isset($request->save)) {
+            // organizationごとにshopを取得する
+            if (isset($request->organization['org5'])) {
+                $_shops_id = Shop::select('id')
+                    ->whereIn('organization5_id', $request->organization['org5'])
+                    ->whereIn('brand_id', $request->brand)
+                    ->get()
+                    ->toArray();
+                $shops_id = array_merge($shops_id, $_shops_id);
+            }
+            if (isset($request->organization['org4'])) {
+                $_shops_id = Shop::select('id')
+                    ->whereIn('organization4_id', $request->organization['org4'])
+                    ->whereIn('brand_id', $request->brand)
+                    ->get()
+                    ->toArray();
+                $shops_id = array_merge($shops_id, $_shops_id);
+            }
+            if (isset($request->organization['org3'])) {
+                $_shops_id = Shop::select('id')
+                    ->whereIn('organization3_id', $request->organization['org3'])
+                    ->whereIn('brand_id', $request->brand)
+                    ->whereNull('organization4_id')
+                    ->whereNull('organization5_id')
+                    ->get()
+                    ->toArray();
+                $shops_id = array_merge($shops_id, $_shops_id);
+            }
+            if (isset($request->organization['org2'])) {
+                $_shops_id = Shop::select('id')
+                    ->whereIn('organization2_id', $request->organization['org2'])
+                    ->whereIn('brand_id', $request->brand)
+                    ->whereNull('organization4_id')
+                    ->whereNull('organization5_id')
+                    ->get()
+                    ->toArray();
+                $shops_id = array_merge($shops_id, $_shops_id);
             }
 
+            // 取得したshopのリストからユーザーを取得する
             $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-                
+            // ユーザーに業務連絡の閲覧権限を与える
             foreach ($target_users as $target_user) {
                 $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
             }
@@ -361,10 +510,42 @@ class MessagePublishController extends Controller
             $message->update($msg_params);
             $message->roll()->sync($request->target_roll);
 
-            if ($organization_type == 4) {
-                $message->organization4()->sync($request->organization);
-            } elseif ($organization_type == 5) {
-                $message->organization5()->sync($request->organization);
+            MessageOrganization::where('message_id', $message_id)->delete();
+            if (isset($request->organization['org5'])) {
+                foreach ($request->organization['org5'] as $org5_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization5_id' => $org5_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org4'])) {
+                foreach ($request->organization['org4'] as $org4_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization4_id' => $org4_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org3'])) {
+                foreach ($request->organization['org3'] as $org3_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization3_id' => $org3_id
+                    ]);
+                }
+            }
+            if (isset($request->organization['org2'])) {
+                foreach ($request->organization['org2'] as $org2_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $admin->organization1_id,
+                        'organization2_id' => $org2_id
+                    ]);
+                }
             }
 
             $message->brand()->sync($request->brand);
