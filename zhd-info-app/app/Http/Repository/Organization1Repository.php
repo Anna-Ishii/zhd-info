@@ -10,18 +10,19 @@ class Organization1Repository
     // ブロックがあるか
     public static function isExistOrg5($organization1_id)
     {
-        return Shop::select('organization5_id')
-                ->whereNotNull('organization1_id', $organization1_id)
+        return Shop::query()
+                ->where('organization1_id', $organization1_id)
+                ->whereNotNull('organization5_id')
                 ->exists();
-
     }
 
     // ブロックがあるか
     public static function isExistOrg4($organization1_id)
     {
-        return Shop::select('organization4_id')
-            ->whereNotNull('organization1_id', $organization1_id)
-            ->exists();
+        return Shop::query()
+                ->where('organization1_id', $organization1_id)
+                ->whereNotNull('organization4_id')
+                ->exists();
     }
 
     public static function getOrg5($organization1_id)

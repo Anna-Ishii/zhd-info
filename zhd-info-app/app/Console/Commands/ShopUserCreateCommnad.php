@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Admin;
 use App\Models\Manual;
 use App\Models\Message;
+use App\Models\MessageOrganization;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
@@ -37,74 +38,83 @@ class ShopUserCreateCommnad extends Command
         //
         $this->info('start');
         $this->info('店舗ユーザーを作成します');
-        $organization1_list = Organization1::get();
-        foreach ($organization1_list as $key => $value) {
-            $this->info("業態番号: $value->id , 業態名: $value->name");
-        }
-        $organization_id = $this->ask('業態番号を入力してください');
-        $shops_query = Shop::where('organization1_id', $organization_id);
-        $count = $shops_query->count();
+        $shop_code = $this->ask('店舗コードを入力してください');
 
-        $roll_id = 4; //店長
-        $this->info("$count 個のアカウントを作成します");
+        $shop = Shop::where('shop_code', $shop_code)->first();
+        $ROLL_ID = 4;
 
-        $shops = $shops_query->get();
-        if ($this->confirm('作成してよろしいですか?')) {
+        if ($this->confirm($shop->name.'の店舗アカウント作成してよろしいですか?')) {
             try {
-                DB::beginTransaction();
+            DB::beginTransaction();
 
-                foreach($shops as $shop) {
-                    $employee_code = $this->shopid2employeecode($shop->shop_code);
-                    $shop_code = $shop->shop_code;
-                    $this->info("店舗コード：$shop_code");
-                    $this->info("従業員コード：$employee_code");
-                    $model = User::firstOrCreate([
-                        'employee_code' => $employee_code
-                    ],[
-                        'name' => $shop->name,
-                        'belong_label' => $shop->name,
-                        'shop_id' => $shop->id,
-                        'employee_code' => $employee_code,
-                        'password' => Hash::make($employee_code),
-                        'email' => '',
-                        'roll_id' => $roll_id,
-                    ]);
-                    $organization5_id = $shop->organization5_id;
-                    $organization4_id = $shop->organization4_id;
+            $employee_code = $this->shopid2employeecode($shop->shop_code);
+            $user = User::create([
+                'name' => $shop->name,
+                'belong_label' => $shop->name,
+                'shop_id' => $shop->id,
+                'employee_code' => $employee_code,
+                'password' => Hash::make($employee_code),
+                'email' => '',
+                'roll_id' => $ROLL_ID,
+            ]);
 
-                    $message_data = [];
-                    // 該当のメッセージを登録
-                    $messages = Message::whereHas('roll', function ($query) use ($roll_id) {
-                                        $query->where('roll_id', '=', $roll_id);
-                                    });
-                    if(isset($organization5_id)){
-                        $messages = $messages->whereHas('organization5', function ($query) use ($organization5_id) {
-                            $query->where('organization5_id', '=', $organization5_id);
-                        });
-                    }elseif(isset($organization4_id)){
-                        $messages = $messages->whereHas('organization4', function ($query) use ($organization4_id) {
-                            $query->where('organization4_id', '=', $organization4_id);
-                        });
-                    }
-                    $messages = $messages->get('id')->toArray();
-                                    
-                    foreach ($messages as $message) {
-                        $message_data[$message['id']] = ['shop_id' => $shop->id];
-                    }
-                    $model->message()->sync($message_data);
+            // TODO 掲載終了したものを配布するかどうか。
+            $messages = [];
+            if(isset($shop->organization5_id)) {
+                $messages = MessageOrganization::query()
+                                    ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                                    ->select('message_organization.message_id as id')
+                                    ->where('message_organization.organization5_id', $shop->organization5_id)
+                                    ->where('message_brand.brand_id', $shop->brand_id)
+                                    ->get()
+                                    ->toArray();
+            }elseif(isset($shop->organization4_id)) {
+                $messages = MessageOrganization::query()
+                                    ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                                    ->select('message_organization.message_id as id')
+                                    ->where('message_organization.organization4_id', $shop->organization4_id)
+                                    ->where('message_brand.brand_id', $shop->brand_id)
+                                    ->get()
+                                    ->toArray();
 
-                    $brand_id = $shop->brand_id;
-                    $manual_data = [];
-                    // 該当のマニュアルを登録
-                    $manuals = Manual::whereHas('brand', function ($query) use ($brand_id) {
-                            $query->where('brand_id', '=', $brand_id);
-                        })->get('id')->toArray();
-                    foreach ($manuals as $manual) {
-                        $manual_data[$manual['id']] = ['shop_id' => $shop->id];
-                    }
-                    $model->manual()->sync($manual_data);
-                } 
-                DB::commit();
+            }elseif(isset($shop->organization3_id)) {
+                $messages = MessageOrganization::query()
+                                    ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                                    ->select('message_organization.message_id as id')
+                                    ->where('message_organization.organization3_id', $shop->organization3_id)
+                                    ->where('message_brand.brand_id', $shop->brand_id)
+                                    ->get()
+                                    ->toArray();
+
+            }elseif(isset($shop->organization2_id)) {
+                $messages = MessageOrganization::query()
+                                    ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                                    ->select('message_organization.message_id as id')
+                                    ->where('message_organization.organization2_id', $shop->organization2_id)
+                                    ->where('message_brand.brand_id', $shop->brand_id)
+                                    ->get()
+                                    ->toArray();
+            }
+
+            $message_data = [];
+            foreach ($messages as $message) {
+                $message_data[$message['id']] = ['shop_id' => $shop->id];
+            }
+
+            $user->message()->sync($message_data);
+
+            $manual_data = [];
+            $_brand_id = $shop->brand_id;
+            // 該当のマニュアルを登録
+            $manuals = Manual::whereHas('brand', function ($query) use ($_brand_id) {
+                    $query->where('brand_id', '=', $_brand_id);
+                })->get('id')->toArray();
+            foreach ($manuals as $manual) {
+                $manual_data[$manual['id']] = ['shop_id' => $shop->id];
+            }
+            $user->manual()->sync($manual_data);
+
+            DB::commit();
             } catch (\Throwable $th) {
                 DB::rollBack();
                 $th_msg = $th->getMessage();

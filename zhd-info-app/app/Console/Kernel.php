@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Console\Commands\admin\setting\HashPasswordCommand;
 use App\Console\Commands\AdminCreateCommand;
 use App\Console\Commands\MessageUserUpdateCommand;
+use App\Console\Commands\ShopCreateCommnad;
 use App\Console\Commands\ShopUserCreateCommnad;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -15,7 +16,8 @@ class Kernel extends ConsoleKernel
         HashPasswordCommand::class,
         AdminCreateCommand::class,
         ShopUserCreateCommnad::class,
-        MessageUserUpdateCommand::class
+        MessageUserUpdateCommand::class,
+        ShopCreateCommnad::class,
     ];
     /**
      * Define the application's command schedule.

@@ -6,6 +6,7 @@ use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
@@ -86,6 +87,11 @@ class Message extends Model
     public function organization4(): BelongsToMany
     {
         return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4_id');
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(MessageOrganization::class, foreignKey: 'id', ownerKey: 'message_id');
     }
 
     public function brand(): BelongsToMany
