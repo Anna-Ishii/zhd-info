@@ -1,26 +1,56 @@
 @extends('layouts.admin.parent')
 
+@section('sideber')
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav">
+                <li>
+                    <a href="#" class="nav-label">業務連絡</a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/message/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">動画マニュアル</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li class="nav-current-page">
+                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+@endsection
+
 @section('content')
 
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header admin-header">アカウント</h1>
-        </div>
-    </div>
     @livewire('admin.account-search-form')
 
 </form>
 
     <!-- 検索結果 -->
     <form>
-        <div class="text-right">
-            <p>
-                <button id="deleteBtn" class="btn btn-info">削除</button>
-                <a href="/admin/account/new" class="btn btn-info">新規登録</a>
-            </p>
+        <div class="pagenation-top">
+            @include('common.admin.pagenation', ['objects' => $users])
+            <div>
+                <button id="deleteBtn" class="btn btn-admin">削除</button>
+                <a href="/admin/account/new" class="btn btn-admin" style="margin-left: 5px">新規登録</a>
+            </div>
         </div>
-        @include('common.admin.pagenation', ['objects' => $users])
+        
 
         <div class="tableInner">
             <table id="list" class="table table-bordered table-hover table-condensed text-center">
