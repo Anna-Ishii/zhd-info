@@ -55,7 +55,7 @@ $(window).on('load' , function(){
 	$.datetimepicker.setLocale('ja');
 
 	$('#publishDateFrom').datetimepicker({
-		format:'Y/m/d',
+		format:'Y/m/d(D)',
 		timepicker:false,
 		onShow:function( ct ){
 			this.setOptions({
@@ -65,7 +65,7 @@ $(window).on('load' , function(){
 		 defaultDate: d,
 	});	
 	$('#publishDateTo').datetimepicker({
-		format:'Y/m/d',
+		format:'Y/m/d(D)',
 		timepicker:false,
 		onShow:function( ct ){
 			this.setOptions({
