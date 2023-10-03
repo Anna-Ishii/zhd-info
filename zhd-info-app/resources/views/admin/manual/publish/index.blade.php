@@ -1,71 +1,81 @@
 @extends('layouts.admin.parent')
 
+@section('sideber')
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav">
+                <li>
+                    <a href="#" class="nav-label">業務連絡</a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/message/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li class="nav-current-page">
+                    <a href="#" class="nav-label">動画マニュアル</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+@endsection
+
 @section('content')
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header admin-header">動画マニュアル</h1>
-        </div>
-    </div>
 
     <!-- 絞り込み部分 -->
-    <form method="get" class="form-horizontal mb24">
+    <form method="get" class="mb24">
         <div class="form-group form-inline mb16">
-
-            <div class="input-group col-lg-2 spMb16">
-                <input name="q" value="{{ request()->input('q') }}" class="form-control" placeholder="キーワードを入力してください" />
-            </div>
-
-            <div class="input-group col-lg-2 spMb16">
-                <label class="input-group-addon">対象業態</label>
+            <div class="input-group col-lg-1 spMb16">
+                <label class="input-group-addon">業態</label>
                 <select name="brand" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
-
                 </select>
             </div> 
-
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="category" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($category_list as $category)
                     <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
                     @endforeach
-
                 </select>
             </div>
 
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">状態</label>
-                <select name="status" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                <select name="status" class="form-control duration-form-text">
+                    <option value="">指定なし</option>
                     @foreach ($publish_status as $status)
                     <option value="{{$status->value}}" {{ request()->input('status') == $status->value ? 'selected' : ''}}>{{$status->text()}}</option>
                     @endforeach
                 </select>
             </div>
-        </div>
-        <div class="form-group form-inline mb16 duration-form">
-            <div class="input-group col-lg-2 spMb16 duration-form-text">
-				掲載期間
-			</div>
-			<div class="input-group col-lg-2 spMb16">
+            <div class="input-group col-lg-3 spMb16">
+				<label class="input-group-addon">掲載期間</label>
                 <input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
-			</div>
-			<div class="input-group col-lg-2 spMb16 duration-form-text">
-				　〜　
-			</div>
-			<div class="input-group col-lg-2 spMb16">
+				<label class="input-group-addon">〜</label>
 				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
             </div>
-            　
-            <div class="input-group col-lg-2 spMb16 duration-form-text">
-				閲覧率
-			</div>
-			<div class="input-group col-lg-2 spMb16">
+            <div class="input-group col-lg-2 spMb16">
+				<label class="input-group-addon">閲覧率</label>
                 <input
 				 type="number"
 				 max="100"
@@ -76,11 +86,7 @@
 				 class="form-control" 
 				 placeholder="" 
 				/>
-			</div>
-			<div class="input-group col-lg-2 spMb16 duration-form-text">
-				　〜　
-			</div>
-			<div class="input-group col-lg-2 spMb16">
+				<label class="input-group-addon">〜</label>
 				<input
 				 type="number"
 				 max="100"
@@ -92,53 +98,39 @@
 				 placeholder="" 
 				/>
             </div>
-		</div>
-        <div class="form-group form-inline mb16">
-            <div class="input-group col-lg-2">
-                <button class="btn btn-info">検索</button>
+            <div class="input-group col-lg-1 spMb16">
+                <input name="q" value="{{ request()->input('q') }}" class="form-control" placeholder="キーワードを入力してください" />
+            </div>
+            <div class="input-group col-lg-1">
+                <button class="btn btn-admin">検索</button>
             </div>
         </div>
 
     </form>
 
-    <!-- 検索結果 -->
-    <div class="toggleTab">
-        <div class="scrollHintL"></div>
-        <div class="scrollHintR"></div>
-        <div class="toggleTab__inner">
-            <div class="toggleTab__btnList flex">
-                <div class="tab {{ is_null(request()->input('category')) ? 'isCurrent' : ''}}" data-sort-number="0">全件</div>
-                @foreach ($category_list as $category)
-                <div class="tab {{ request()->input('category') == $category->id ? 'isCurrent' : ''}}" data-sort-number="{{ $category->id }}">{{ $category->name }}</div>
-                @endforeach
-            </div>
-        </div>
-    </div>
-
-    <div class="toggleTab__contents mb48">
         <form method="post" action="#">
-            <div class="text-right">
-                <p>
-                    <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-info">新規登録</a>
-                </p>
-            </div>
+            <div class="pagenation-top">
             @include('common.admin.pagenation', ['objects' => $manual_list])
+                <div>
+                    <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                </div>
+            </div>
 
             <div class="toggleContent isCurrent" data-tab-number="0">
                 <div class="manual-tableInner">
                     <table id="list" class="manual-table table table-bordered table-hover table-condensed text-center">
                         <thead>
                             <tr>
-                                <th class="text-center">No</th>
-                                <th class="text-center">対象業態</th>
-                                <th class="text-center">カテゴリ</th>
-                                <th class="text-center">タイトル</th>
-                                <th class="text-center">掲載開始日時</th>
-                                <th class="text-center">掲載終了日時</th>
-                                <th class="text-center">状態</th>
-                                <th class="text-center">閲覧率</th>
-                                <th class="text-center" colspan="2">登録者</th>
-                                <th class="text-center" colspan="2">更新</th>
+                                <th class="text-center" nowrap>No</th>
+                                <th class="text-center" nowrap>対象業態</th>
+                                <th class="text-center" nowrap>カテゴリ</th>
+                                <th class="text-center" nowrap>タイトル</th>
+                                <th class="text-center" colspan="2" nowrap>掲載期間</th>
+                                <th class="text-center" nowrap>状態</th>
+                                <th class="text-center" colspan="3" nowrap>閲覧率</th>
+                                <th class="text-center" colspan="2" nowrap>登録者</th>
+                                <th class="text-center" colspan="2" nowrap>更新</th>
+                                <th class="text-center" nowrap>操作</th>
                                 
                             </tr>
                         </thead>
@@ -148,41 +140,47 @@
                             <tr data-manual_id={{$manual->id}} 
                                 class="@if($manual->status == App\Enums\PublishStatus::Publishing) publishing
                                         @elseif($manual->status == App\Enums\PublishStatus::Published) published
+                                        @elseif($manual->status == App\Enums\PublishStatus::Wait) wait
+                                        @elseif($manual->status == App\Enums\PublishStatus::Editing) editing
                                         @endif">
-                                <td class="shop_id">{{$manual->number}}</td>
+                                <td class="shop-id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brands)}}</td>
                                 <td>{{$manual->category?->name}}</td>
-                                <td class="manual-title">
+                                <td class="label-title">
                                     @if(isset($manual->content_url))
                                         <a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a>
                                     @else
                                         {{$manual->title}}
                                     @endif
                                 </td>
-                                <td>{{$manual->formatted_start_datetime}}</td>
-                                <td>{{$manual->formatted_end_datetime}}</td>
+                                <td class="date-time"><div>{{$manual->formatted_start_datetime}}</div></td>
+                                <td class="date-time"><div>{{$manual->formatted_end_datetime}}</div></td>
                                 <td>{{$manual->status->text()}}</td>
                                 @if($manual->status == App\Enums\PublishStatus::Wait || 
                                     $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
+                                    <td></td>
+                                    <td nowrap>詳細</td>
                                 @else
-                                <td {{( (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0) <= 30) ? 'class=under-quota' : ''}}>
-                                    {{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}% 
-                                    ({{$manual->read_users }}/{{$manual->total_users}})
-                                </td>
+                                    <td class="view-rate {{( (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0) <= 30) ? 'under-quota' : ''}}">
+                                        <div>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}% </div>
+                                    </td>
+                                    <td>
+                                        {{$manual->read_users }}/{{$manual->total_users}}
+                                    </td>
+                                    <td class="detailBtn">
+                                        <a href="/admin/manual/publish/{{$manual->id}}">詳細</a>
+                                    </td>
                                 @endif
                                 <td>{{$manual->create_user->name}}</td>
-                                <td>{{$manual->formatted_created_at}}</td>
+                                <td class="date-time"><div>{{$manual->formatted_created_at}}</div></td>
                                 <td>{{isset($manual->updated_user->name) ? $manual->updated_user->name : ""}}</td>
-                                <td>{{$manual->formatted_updated_at}}</td>
+                                <td class="date-time"><div>{{$manual->formatted_updated_at}}</div></td>
                                 <td>
-                                    <button class="detailBtn btn btn-info" 
-                                        @if($manual->status == App\Enums\PublishStatus::Wait || 
-                                            $manual->status == App\Enums\PublishStatus::Editing)
-                                            disabled
-                                        @endif>詳細</button>
-                                    <button class="editBtn btn btn-info">編集</button>
-                                    <button class="StopBtn btn btn-info">配信停止</button>
+                                    <div class="button-group">
+                                        <button class="editBtn btn btn-admin">編集</button>
+                                        <button class="StopBtn btn btn-admin">配信停止</button>
+                                    </div>
                                 </td>
                             </tr>
                             @endforeach
@@ -194,7 +192,7 @@
             @include('common.admin.pagenation', ['objects' => $manual_list])
 
         </form>
-    </div>
+
 
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>

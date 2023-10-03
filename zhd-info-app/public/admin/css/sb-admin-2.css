@@ -5,6 +5,7 @@
  */
 body {
   background-color: #f8f8f8;
+  font-size: 12px;
 }
 #wrapper {
   width: 100%;
@@ -21,6 +22,33 @@ body {
     padding: 0 30px;
     border-left: 1px solid #e7e7e7;
   }
+}
+#page-wrapper form .input-group:first-child{
+  margin-left: 0px;
+}
+#page-wrapper form .input-group{
+  margin-left: 5px;
+  padding-bottom: 10px;
+}
+#page-wrapper form .input-group-addon {
+  background-color: transparent;
+  border: none;
+  font-size: 12px;
+  padding: 0;
+  width: 0;
+}
+#page-wrapper form .input-group select.form-control {
+  border-radius: 0px;
+  padding: 0;
+  font-size: 12px;
+}
+#page-wrapper form .input-group input.form-control {
+  border-radius: 0px;
+  padding: 3px;
+  font-size: 12px;
+}
+#page-wrapper form:first-child {
+  padding-top: 20px;
 }
 .navbar-top-links {
   margin-right: 0;
@@ -98,6 +126,20 @@ body {
 }
 .sidebar .nav-third-level li a {
   padding-left: 52px;
+}
+.sidebar ul.nav a.nav-label{
+  pointer-events: none;
+  color: black;
+}
+.sidebar ul.nav .nav-current-page .nav-second-level li:first-child{
+ background-color: #337ab7;
+ pointer-events: none;
+}
+.sidebar ul.nav .nav-current-page .nav-second-level li:first-child:hover{
+ background-color: white;
+}
+.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a{
+ color: white;
 }
 @media (min-width: 768px) {
   .sidebar {
@@ -207,12 +249,11 @@ table.dataTable thead .sorting:after {
   /* width: 1664px; */
 }
 .message-table tr td{
-  padding-left: 8px;
-  padding-right: 8px;
+  font-size: 12px;
   word-wrap: break-word;
 }
 
-/* No */
+/* No
 .message-table tr td:nth-of-type(1){
   width: 48px;
   min-width: 48px;
@@ -221,112 +262,112 @@ table.dataTable thead .sorting:after {
   padding-right: 3px;
 }
 /* 対象業態 */
-.message-table tr td:nth-of-type(2){
+/* .message-table tr td:nth-of-type(2){
   width: 102px;
   min-width: 102px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* ラベル */
-.message-table tr td:nth-of-type(3){
+/* .message-table tr td:nth-of-type(3){
   width: 72px;
   min-width: 72px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* カテゴリ */
-.message-table tr td:nth-of-type(4){
+/* .message-table tr td:nth-of-type(4){
   width: 132px;
   min-width: 132px;
   font-size: 16px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* タイトル */
-.message-table tr td:nth-of-type(5){
+/* .message-table tr td:nth-of-type(5){
   width: 387px;
   min-width: 387px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 掲載開始日 */
-.message-table tr td:nth-of-type(6){
+/* .message-table tr td:nth-of-type(6){
   width: 132px;
   min-width: 132px;
   font-size: 12px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 掲載終了日 */
-.message-table tr td:nth-of-type(7){
+/* .message-table tr td:nth-of-type(7){
   width: 132px;
   min-width: 132px;
   font-size: 12px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 状態 */
-.message-table tr td:nth-of-type(8){
+/* .message-table tr td:nth-of-type(8){
   width: 72px;
   min-width: 72px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 閲覧率 */
-.message-table tr td:nth-of-type(9){
+/* .message-table tr td:nth-of-type(9){
   width: 72px;
   min-width: 72px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 登録者 */
-.message-table tr td:nth-of-type(10){
+/* .message-table tr td:nth-of-type(10){
   width: 102px;
   min-width: 102px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 登録日 */
-.message-table tr td:nth-of-type(11){
+/* .message-table tr td:nth-of-type(11){
   width: 132px;
   min-width: 132px;
   font-size: 12px;
   padding-left: 2px;
   padding-right: 2px;
-}
+} */
 /* 更新者 */
-.message-table tr td:nth-of-type(12){
+/* .message-table tr td:nth-of-type(12){
   width: 102px;
   min-width: 102px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* 更新日 */
-.message-table tr td:nth-of-type(13){
+/* .message-table tr td:nth-of-type(13){
   width: 132px;
   min-width: 132px;
   font-size: 12px;
   padding-left: 2px;
   padding-right: 2px;
-}
+} */
 /* 編集・配信停止btn */
-.message-table tr td:nth-of-type(14){
+/* .message-table tr td:nth-of-type(14){
   width: 150px;
   min-width: 150px;
   vertical-align:middle;
-}
-.message-table tr td:nth-of-type(14) button{
+} */
+/* .message-table tr td:nth-of-type(14) button{
   width: auto;
   padding: 2px;
   display: inline;
-}
+}  */
 
 
 .manual-tableInner{
@@ -341,103 +382,103 @@ table.dataTable thead .sorting:after {
 }
 
 /* No */
-.manual-table tr td:nth-of-type(1){
+/* .manual-table tr td:nth-of-type(1){
   width: 48px;
   min-width: 48px;
   font-size: 10px;
   padding-left: 3px;
   padding-right: 3px;
-}
+} */
 /* 対象業態 */
-.manual-table tr td:nth-of-type(2){
+/* .manual-table tr td:nth-of-type(2){
   width: 102px;
   min-width: 102px;
   font-size: 15px;
   padding-left: 5px;
   padding-right: 5px;
-}
+} */
 /* カテゴリ */
-.manual-table tr td:nth-of-type(3){
+/* .manual-table tr td:nth-of-type(3){
   width: 136px;
   min-width: 136px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* タイトル */
-.manual-table tr td:nth-of-type(4){
+/* .manual-table tr td:nth-of-type(4){
   width: 391px;
   min-width: 391px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 掲載開始日 */
-.manual-table tr td:nth-of-type(5){
+/* .manual-table tr td:nth-of-type(5){
   width: 136px;
   min-width: 136px;
   font-size: 12px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 掲載終了日 */
-.manual-table tr td:nth-of-type(6){
+/* .manual-table tr td:nth-of-type(6){
   width: 136px;
   min-width: 136px;
   font-size: 12px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 状態 */
-.manual-table tr td:nth-of-type(7){
+/* .manual-table tr td:nth-of-type(7){
   width: 76px;
   min-width: 76px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 閲覧率 */
-.manual-table tr td:nth-of-type(8){
+/* .manual-table tr td:nth-of-type(8){
   width: 76px;
   min-width: 76px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 登録者 */
-.manual-table tr td:nth-of-type(9){
+/* .manual-table tr td:nth-of-type(9){
   width: 106px;
   min-width: 106px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 登録日 */
-.manual-table tr td:nth-of-type(10){
+/* .manual-table tr td:nth-of-type(10){
   width: 126px;
   min-width: 126px;
   font-size: 12px;
   padding-left: 2px;
   padding-right: 2px;
-}
+} */
 /* 更新者 */
-.manual-table tr td:nth-of-type(11){
+/* .manual-table tr td:nth-of-type(11){
   width: 106px;
   min-width: 106px;
   font-size: 15px;
   padding-left: 7px;
   padding-right: 7px;
-}
+} */
 /* 更新日 */
-.manual-table tr td:nth-of-type(12){
+/* .manual-table tr td:nth-of-type(12){
   width: 126px;
   min-width: 126px;
   font-size: 12px;
   padding-left: 2px;
   padding-right: 2px;
-}
+} */
 /* 編集・配信停止btn */
-.manual-table tr td:nth-of-type(13){
+/* .manual-table tr td:nth-of-type(13){
   width: 150px;
   min-width: 150px;
   vertical-align:middle;
@@ -446,7 +487,7 @@ table.dataTable thead .sorting:after {
   width: auto;
   padding: 2px;
   display: inline;
-}
+} */
 
 
 .btn-circle {
@@ -653,11 +694,19 @@ table.dataTable thead .sorting:after {
 }
 
 .publishing {
-  background-color: #fff2cc;
+  background-color: #fff;
 }
 
 .published {
   background-color: #d9d9d9;
+}
+
+.wait {
+  background-color: #fff;
+}
+
+.editing {
+  background-color: #f4a300;
 }
 
 .admin-header {
@@ -726,4 +775,55 @@ table.dataTable thead .sorting:after {
 }
 .is-hide{
   display:none;
+}
+.btn-admin {
+  background-color: #eee;
+  color: #333;
+  font-size: 12px;
+}
+table .btn-admin {
+  border-color: #999;
+}
+table#list, table#list td, table#list th{
+  border-color: #999;
+  border-collapse: collapse;
+}
+table#list thead {
+  background-color: #D9E1F2;
+}
+table#list tbody td {
+  white-space: nowrap;
+  vertical-align: middle;
+}
+table#list tbody .shop-id {
+  text-align: right;
+}
+table#list tbody .label-title {
+  white-space: normal;
+  text-align: left;
+  min-width: 387px;
+}
+table#list tbody .view-rate {
+  text-align: right;
+}
+table#list tbody td.label-colum-danger div{
+  background-color: #ff0000;
+  color: #fff;
+  border-radius: 9999px;
+  padding-right: 10px;
+  padding-left: 10px;
+  padding-top: 1px;
+}
+table#list tbody td div.button-group {
+  margin-left: 5px;
+  margin-right: 5px;
+}
+table#list tbody td.date-time{
+  text-align: center;
+}
+table#list tbody td.date-time div{
+  white-space: normal;
+  width: 110px;
+  margin-left: auto;
+  margin-right: auto;
 }
