@@ -46,7 +46,15 @@ body {
   border-radius: 0px;
   padding: 3px;
   font-size: 12px;
+
 }
+#page-wrapper form .input-group input[name*="publish-date"] {
+  width: 90px;
+}
+#page-wrapper form .input-group input[name*="rate"] {
+  width: 50px;
+}
+
 #page-wrapper form:first-child {
   padding-top: 20px;
 }

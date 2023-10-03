@@ -74,13 +74,13 @@
                     @endforeach
                 </select>
             </div>
-            <div class="input-group col-lg-3 spMb16">
+            <div class="input-group spMb16 ">
 				<label class="input-group-addon">掲載期間</label>
-				<input id="publishDateFrom" class="form-control mr16"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
+				<input id="publishDateFrom" class="form-control"  name="publish-date[0]" value="{{ request()->input('publish-date.0')}}" autocomplete="off">
 				<label class="input-group-addon">〜</label>
-				<input id="publishDateTo" class="form-control mr16"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
+				<input id="publishDateTo" class="form-control"  name="publish-date[1]" value="{{ request()->input('publish-date.1')}}" autocomplete="off">
             </div>
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
 				<label class="input-group-addon">閲覧率</label>
                 <input
 				 type="number"
