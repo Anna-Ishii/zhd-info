@@ -124,7 +124,7 @@
 		</div>
 
 		<div class="message-tableInner table-responsive-xxl">
-			<table id="list" class="message-table table table-bordered table-hover table-condensed text-center">
+			<table id="list" class="message-table table-list table-hover table-condensed text-center">
 				<thead>
 					<tr>
 						<th class="text-center" nowrap>No</th>
@@ -200,9 +200,9 @@
 				</tbody>
 			</table>
 		</div>
-
-		@include('common.admin.pagenation', ['objects' => $message_list])
-
+		<div class="pagenation-bottom">
+			@include('common.admin.pagenation', ['objects' => $message_list])
+		</div>
 	</form>
 
 </div>
