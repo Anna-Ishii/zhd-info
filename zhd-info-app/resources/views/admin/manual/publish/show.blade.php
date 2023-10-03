@@ -1,19 +1,47 @@
 @extends('layouts.admin.parent')
 
+@section('sideber')
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav">
+                <li>
+                    <a href="#" class="nav-label">業務連絡</a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/message/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li class="nav-current-page">
+                    <a href="#" class="nav-label">動画マニュアル</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+@endsection
+
 @section('content')
 <div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header admin-header">動画マニュアル</h1>
-        </div>
-    </div>
-	<div class="manual-tableInner">
+	<div class="manual-tableInner"  style="padding-top: 10px">
         <table id="list" class="table table-bordered table-hover table-condensed text-center">
             <thead>
                 <tr>
                     <th class="text-center">タイトル</th>
                     <th class="text-center">カテゴリ</th>
-                    <th class="text-center">ラベル</th>
                     <th class="text-center">対象業態</th>
                     <th class="text-center">掲載開始日時</th>
                     <th class="text-center">掲載終了日時</th>
@@ -25,11 +53,6 @@
                 <tr>
                     <td>{{$manual->title}}</td>
                     <td>{{$manual->category?->name}}</td>
-                    @if ($manual->emergency_flg)
-                    <td class="bg-danger text-danger">重要</td>
-                    @else
-                    <td></td>
-                    @endif
                     <td>{{$manual->brands_string($brands)}}</td>
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
@@ -41,91 +64,84 @@
         </table>
     </div>
     <!-- 絞り込み部分 -->
-    <form method="get" class="form-horizontal mb24">
+    <form method="get" class="mb24">
         <div class="form-group form-inline mb16">
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">対象業態</label>
                 <select name="brand" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
                 </select>
             </div>    
 
-			<div class="input-group col-lg-2 spMb16">
+			<div class="input-group spMb16">
                 <label class="input-group-addon">店舗コード</label>
                 <input type="text" name="shop_code" class="form-control" value="{{ request()->input('shop_code')}}">
             </div>
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">店舗名</label>
                 <input type="text" name="shop_name" class="form-control" value="{{ request()->input('shop_name')}}">
             </div>
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">DS</label>
                 <select name="org3" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($org3_list as $org3)
                     <option value="{{ $org3->organization_id }}" {{ request()->input('org3') == $org3->organization_id ? 'selected' : ''}}>{{ $org3->organization_name }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">BL</label>
                 <select name="org5" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($org5_list as $org5)
                     <option value="{{ $org5->organization_id }}" {{ request()->input('org5') == $org5->organization_id ? 'selected' : ''}}>{{ $org5->organization_name }}</option>
                     @endforeach
                 </select>
             </div>
 
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">AR</label>
                 <select name="org4" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     @foreach ($org4_list as $org4)
                     <option value="{{ $org4->organization_id }}" {{ request()->input('org4') == $org4->organization_id ? 'selected' : ''}}>{{ $org4->organization_name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="input-group col-lg-2 spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">既読状況</label>
                 <select name="read_flg" class="form-control">
-                    <option value=""> -- 指定なし -- </option>
+                    <option value="">指定なし</option>
                     <option value="true" {{ request()->input('read_flg') == "true" ? 'selected' : ''}}>既読</option>
                     <option value="false" {{ request()->input('read_flg') == "false" ? 'selected' : ''}}>未読</option>
                 </select>
             </div>
-        </div>
-		<div class="form-group form-inline mb16 duration-form">
-            <div class="input-group col-lg-2 spMb16 duration-form-text">
-				閲覧日時
-			</div>
-			<div class="input-group col-lg-2 spMb16">
-				<input id="readedDateFrom" class="form-control mr16"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
-			</div>
-			<div class="input-group col-lg-2 spMb16 duration-form-text">
-				　〜　
-			</div>
-			<div class="input-group col-lg-2 spMb16">
-				<input id="readedDateTo" class="form-control mr16"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
-            </div>
-		</div>
-        <div class="form-group form-inline mb16">
-            <div class="input-group col-lg-2">
-                <button class="btn btn-info">検索</button>
+        
+
+            <div class="input-group spMb16 duration-form-text">
+                <label class="input-group-addon">閲覧日時</label>
+                <input id="readedDateFrom" class="form-control mr16"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
+                <label class="input-group-addon">〜</label>
+                <input id="readedDateTo" class="form-control mr16"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
             </div>
             <div class="input-group col-lg-2">
-                <a href="{{ route('admin.manual.publish.export', $manual->id) }}?{{ http_build_query(request()->query())  }}">
-                    <button type='button' class="btn btn-info">エクスポート</button>
-                </a>
+                <button class="btn btn-admin">検索</button>
             </div>
         </div>
+
     </form>
 	<!-- 検索結果 -->
-    @include('common.admin.pagenation', ['objects' => $user_list])
+    <div class="pagenation-top">
+        @include('common.admin.pagenation', ['objects' => $user_list])
+        <a href="{{ route('admin.manual.publish.export', $manual->id) }}?{{ http_build_query(request()->query())  }}">
+            <button type='button' class="btn btn-admin">エクスポート</button>
+        </a>
+    </div>
     <div class="manual-tableInner">
         <table id="list" class="table table-bordered table-hover table-condensed text-center">
             <thead>
@@ -155,7 +171,7 @@
     </div>
     @include('common.admin.pagenation', ['objects' => $user_list])
     <a href="{{route('admin.manual.publish.index')}}">
-        <button class="btn btn-light">戻る</button>
+        <button class="btn btn-admin">戻る</button>
     </a>
 </div>
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
