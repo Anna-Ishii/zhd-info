@@ -947,7 +947,24 @@ form.form-horizontal .form-group:last-child {
   text-align: center;
 }
 
-.under-quota {
-  color: #a94442;
+.under-quota div{
+  color: #333;
   font-weight: bold;
+  border-radius: 9999px;
+  background-color: #ff9999;
+  padding-right: 10px;
+  padding-left: 10px;
+  text-align: center;
+}
+
+.pagenation-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.pagenation-top div {
+  display: flex; 
+  justify-content: center;
+  align-items: center;
+  height: 100%;
 }

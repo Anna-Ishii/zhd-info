@@ -2,11 +2,6 @@
     @csrf
     <div class="form-group form-inline mb16">
         <div class="input-group col-lg-2 spMb16">
-            <input name="q" value="{{$current_q}}" class="form-control" />
-            <span class="input-group-btn"><button class="btn btn-default" type="button" ><i class="fa fa-search"></i></button></span>
-        </div>
-
-        <div class="input-group col-lg-2 spMb16">
             <label class="input-group-addon">ブランド</label>
             <select name="organization2" class="form-control"  wire:model="current_organization2">
                 <option value=""> -- 指定なし -- </option>
@@ -33,10 +28,13 @@
                 @endforeach
             </select>
         </div>
-        <div class="input-group col-lg-2">
-            <button class="btn btn-info">検索</button>
+        <div class="input-group col-lg-2 spMb16">
+            <input name="q" value="{{$current_q}}" class="form-control" placeholder="キーワードを入力してください" />
+            <span class="input-group-btn"></span>
         </div>
-
+        <div class="input-group col-lg-2">
+            <button class="btn btn-admin">検索</button>
+        </div>
     </div>
 
 </form>

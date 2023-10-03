@@ -20,3 +20,5 @@ yarn-error.log
 /.vscode
 
 .well-known
+/public/thumbnail
+/public/movies
