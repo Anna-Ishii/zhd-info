@@ -170,6 +170,27 @@ class Manual extends Model
         return round((($readed_user_count / $user_count) * 100), 1);
     }
 
+    public function getContentFileSizeAttribute()
+    {
+        if(!isset($this->content_url)) return "ファイルがありません";
+        $path = public_path($this->content_url);
+
+        if (!file_exists($path)) return "ファイルがありません";
+
+        $filesize = filesize($path);
+
+        $K = 1000;
+        $M = 1000 * $K;
+
+        if ($M <= $filesize) {
+            return round($filesize / $M, 2)."MB";
+        } else if ($K <= $filesize) {
+            return round($filesize / $K, 2)."KB";
+        }
+
+        return $filesize."B";
+    }
+
     // 待機
     public function scopeWaitManual($query)
     {
