@@ -93,4 +93,15 @@ $(window).on('load' , function(){
 		 },
 		 defaultDate: d,
 	});	
+
+    $(".label-title").each((i, dt) => {
+        let video = $(dt).find("video");
+        if(video.length) {
+            let duration = video[0]?.duration;
+            console.log(duration);
+            let min = Math.floor(duration / 60);
+            let sec = Math.floor(duration % 60);
+            $(dt).find("a").append(`【再生時間：${min} 分 ${sec} 秒】`);
+        }
+    })
 });
