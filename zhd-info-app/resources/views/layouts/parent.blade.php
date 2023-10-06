@@ -7,6 +7,8 @@
     <title>業務連絡一覧 | 業連・動画配信システム</title>
     <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
     <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
+    <!-- google fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
