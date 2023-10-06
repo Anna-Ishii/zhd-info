@@ -36,8 +36,8 @@
 
 @section('content')
 <div id="page-wrapper">
-    <div class="message-tableInner" style="padding-top: 10px">
-        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+    <div class="message-tableInner" style="padding-top: 10px; height: auto; margin-bottom: 0px;">
+        <table class="table-list table table-hover table-condensed text-center">
             <thead>
                 <tr>
                     <th class="text-center">タイトル</th>
@@ -83,7 +83,7 @@
                 </select>
             </div>    
 
-			<div class="input-group spMb16">
+            <div class="input-group spMb16">
                 <label class="input-group-addon">店舗コード</label>
                 <input type="text" name="shop_code" class="form-control" value="{{ request()->input('shop_code')}}">
             </div>
@@ -131,10 +131,10 @@
         
 
             <div class="input-group spMb16 duration-form-text">
-				<label class="input-group-addon">閲覧日時</label>
-				<input id="readedDateFrom" class="form-control mr16"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
-				<label class="input-group-addon">〜</label>
-				<input id="readedDateTo" class="form-control mr16"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
+                <label class="input-group-addon">閲覧日時</label>
+                <input id="readedDateFrom" class="form-control"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
+                <label class="input-group-addon">〜</label>
+                <input id="readedDateTo" class="form-control"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
             </div>
             <div class="input-group">
                 <button class="btn btn-admin">検索</button>
@@ -142,15 +142,15 @@
 
         </div>
     </form>
-	<!-- 検索結果 -->
+    <!-- 検索結果 -->
     <div class="pagenation-top">
     @include('common.admin.pagenation', ['objects' => $user_list])
-        <a href="{{ route('admin.message.publish.export', $message->id) }}?{{ http_build_query(request()->query())  }}">
-            <button type='button' class="btn btn-admin">エクスポート</button>
-        </a>
+        <div>
+            <a href="{{ route('admin.message.publish.export', $message->id) }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
+        </div>
     </div>
-    <div class="message-tableInner">
-        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+    <div class="message-tableInner" style="height: 70vh;">
+        <table id="list" class="table-list table table-hover table-condensed text-center">
             <thead>
                 <tr>
                     <th class="text-center">DS</th>
@@ -176,7 +176,9 @@
             </tbody>
         </table>
     </div>
-    @include('common.admin.pagenation', ['objects' => $user_list])
+    <div class="pagenation-bottom">
+        @include('common.admin.pagenation', ['objects' => $user_list])
+    </div>
     <a href="{{route('admin.message.publish.index')}}">
         <button class="btn btn-admin">戻る</button>
     </a>
