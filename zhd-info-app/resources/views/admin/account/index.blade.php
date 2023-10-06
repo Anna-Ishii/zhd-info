@@ -51,9 +51,8 @@
             </div>
         </div>
         
-
-        <div class="tableInner">
-            <table id="list" class="table table-bordered table-hover table-condensed text-center">
+        <div class="tableInner" style="height: 70vh;">
+            <table id="list" class="table-list table table-bordered table-hover table-condensed text-center">
                 <thead>
                     <tr>
                         <th nowrap class="text-center"></th>
