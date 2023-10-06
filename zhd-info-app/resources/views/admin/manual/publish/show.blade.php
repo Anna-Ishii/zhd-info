@@ -36,8 +36,8 @@
 
 @section('content')
 <div id="page-wrapper">
-	<div class="manual-tableInner"  style="padding-top: 10px">
-        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+    <div class="message-tableInner" style="padding-top: 10px; height: auto; margin-bottom: 0px;">
+        <table class="table-list table table-hover table-condensed text-center">
             <thead>
                 <tr>
                     <th class="text-center">タイトル</th>
@@ -125,9 +125,9 @@
 
             <div class="input-group spMb16 duration-form-text">
                 <label class="input-group-addon">閲覧日時</label>
-                <input id="readedDateFrom" class="form-control mr16"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
+                <input id="readedDateFrom" class="form-control"  name="readed_date[0]" value="{{ request()->input('readed_date.0')}}" autocomplete="off">
                 <label class="input-group-addon">〜</label>
-                <input id="readedDateTo" class="form-control mr16"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
+                <input id="readedDateTo" class="form-control"  name="readed_date[1]" value="{{ request()->input('readed_date.1')}}" autocomplete="off">
             </div>
             <div class="input-group col-lg-2">
                 <button class="btn btn-admin">検索</button>
@@ -138,12 +138,12 @@
 	<!-- 検索結果 -->
     <div class="pagenation-top">
         @include('common.admin.pagenation', ['objects' => $user_list])
-        <a href="{{ route('admin.manual.publish.export', $manual->id) }}?{{ http_build_query(request()->query())  }}">
-            <button type='button' class="btn btn-admin">エクスポート</button>
-        </a>
+        <div>
+            <a href="{{ route('admin.manual.publish.export', $manual->id) }}?{{ http_build_query(request()->query())  }}" class="btn btn-admin">エクスポート</a>
+        </div>
     </div>
-    <div class="manual-tableInner">
-        <table id="list" class="table table-bordered table-hover table-condensed text-center">
+    <div class="message-tableInner" style="height: 70vh;">
+        <table id="list" class="table-list table table-bordered table-hover table-condensed text-center">
             <thead>
                 <tr>
                     <th class="text-center">DS</th>
@@ -169,7 +169,9 @@
             </tbody>
         </table>
     </div>
-    @include('common.admin.pagenation', ['objects' => $user_list])
+    <div class="pagenation-bottom">
+        @include('common.admin.pagenation', ['objects' => $user_list])
+    </div>
     <a href="{{route('admin.manual.publish.index')}}">
         <button class="btn btn-admin">戻る</button>
     </a>

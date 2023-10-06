@@ -962,9 +962,15 @@ form.form-horizontal .form-group:last-child {
   align-items: center;
   justify-content: space-between;
 }
+.pagenation-bottom div{
+  height: 0px;
+  padding-bottom: 25px;
+  padding-top: 25px;
+}
 .pagenation-top div {
   display: flex; 
   justify-content: center;
   align-items: center;
-  height: 100%;
+  height: 0px;
+  padding-bottom: 25px;
 }
