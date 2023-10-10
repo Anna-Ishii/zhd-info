@@ -50,6 +50,21 @@ $(".StopBtn").on('click', function (e) {
         })    
 });
 
+$(".label-title").each((i, dt) => {
+    let video = $(dt).find("video");
+    
+    if(video.length) {
+        video.on('loadedmetadata', function() {
+            let duration = video[0]?.duration;
+            console.log(duration);
+            let min = Math.floor(duration / 60);
+            let sec = Math.floor(duration % 60);
+            $(dt).find("a").append(`【再生時間：${min} 分 ${sec} 秒】`);
+            console.log("完了");
+        })
+        console.log("イベント追加");
+    }
+})
 $(window).on('load' , function(){
 	let d = new Date();
 	/* datetimepicker */

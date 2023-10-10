@@ -124,6 +124,7 @@
                                 <th class="text-center" nowrap>対象業態</th>
                                 <th class="text-center" nowrap>カテゴリ</th>
                                 <th class="text-center" nowrap>タイトル</th>
+                                <th class="text-center" colspan="2" nowrap>添付ファイル</th>
                                 <th class="text-center" colspan="2" nowrap>掲載期間</th>
                                 <th class="text-center" nowrap>状態</th>
                                 <th class="text-center" colspan="3" nowrap>閲覧率</th>
@@ -148,9 +149,20 @@
                                 <td class="label-title">
                                     @if(isset($manual->content_url))
                                         <a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a>
+                                        @if(in_array($manual->content_type, ['mp4', 'mov', 'MP4'], true ))
+                                            <video preload="metadata" src="{{asset($manual->content_url)}}" hidden></video>
+                                        @endif
                                     @else
                                         {{$manual->title}}
                                     @endif
+                                </td>
+                                <td>
+                                    @if(isset($manual->content_url))
+                                        <div>{{$manual->content_type}}</div>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div>{{$manual->content_file_size}}</div>
                                 </td>
                                 <td class="date-time"><div>{{$manual->formatted_start_datetime}}</div></td>
                                 <td class="date-time"><div>{{$manual->formatted_end_datetime}}</div></td>
