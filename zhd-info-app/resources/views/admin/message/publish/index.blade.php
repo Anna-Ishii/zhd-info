@@ -132,6 +132,7 @@
 						<th class="text-center" nowrap>ラベル</th>
 						<th class="text-center" nowrap>カテゴリ</th>
 						<th class="text-center" nowrap>タイトル</th>
+						<th class="text-center" nowrap>添付ファイル</th>
 						<th class="text-center" colspan="2">掲載期間</th>
 						<th class="text-center" nowrap>状態</th>
 						<th class="text-center" colspan="3" nowrap>閲覧率</th>
@@ -163,6 +164,9 @@
 							@else
 								{{$message->title}}
 							@endif
+						</td>
+						<td>
+							<div>{{$message->content_file_size}}</div>
 						</td>
 						<td class="date-time"><div>{{$message->formatted_start_datetime}}</div></td>
 						<td class="date-time"><div>{{$message->formatted_end_datetime}}</div></td>
