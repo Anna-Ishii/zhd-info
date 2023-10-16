@@ -177,8 +177,8 @@
 							<td></td>
 							<td nowrap>詳細</td>
 						@else
-							<td class="view-rate {{( (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0) <= 30) ? 'under-quota' : ''}}">
-								<div>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}% </div>
+							<td class="view-rate {{( (($message->total_users != 0) ? $message->view_rate : 0) <= 30) ? 'under-quota' : ''}}">
+								<div>{{ (($message->total_users != 0) ? $message->view_rate : 0)}}% </div>
 							</td>
 							<td>
 								{{$message->read_users }}/{{$message->total_users}}
