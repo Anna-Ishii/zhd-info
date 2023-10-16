@@ -41,8 +41,16 @@ class ManualPublishController extends Controller
         $manual_list =
             Manual::query()
             ->with('user', 'category', 'create_user', 'updated_user', 'brand')
-            ->withCount(['user as total_users'])
-            ->withCount(['readed_user as read_users'])
+            ->join('manual_user', 'manuals.id', '=', 'manual_id')
+            ->join('admin', 'create_admin_id', '=', 'admin.id')
+            ->selectRaw('
+                        manuals.*,
+                        sum(manual_user.read_flg) as read_users, 
+                        count(manual_user.user_id) as total_users,
+                        round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate
+                        ')
+            ->where('manuals.organization1_id', $admin->organization1_id)
+            ->groupBy(DB::raw('manuals.id'))
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('title', $q);
@@ -76,7 +84,7 @@ class ManualPublishController extends Controller
                 });
             })
             ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                $query->viewRateBetween($rate[0], $rate[1]);
+                $query->havingRaw('view_rate between ? and ?', [$rate[0], $rate[1]]);
             })
             ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                 $query
@@ -90,8 +98,7 @@ class ManualPublishController extends Controller
                     });
             })
 
-            ->where('organization1_id', $admin->organization1_id)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('manuals.created_at', 'desc')
             ->paginate(50)
             ->appends(request()->query());
 
