@@ -43,9 +43,17 @@ class MessagePublishController extends Controller
 
         $message_list =
             Message::query()
-                ->with('user', 'category', 'create_user', 'updated_user', 'brand')
-                ->withCount(['user as total_users'])
-                ->withCount(['readed_user as read_users'])
+                ->with('category', 'create_user', 'updated_user', 'brand')
+                ->join('message_user', 'messages.id', '=', 'message_id')
+                ->join('admin', 'create_admin_id', '=', 'admin.id')
+                ->selectRaw('
+                            messages.*,
+                            sum(message_user.read_flg) as read_users, 
+                            count(message_user.user_id) as total_users,
+                            round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate
+                        ')
+                ->where('messages.organization1_id', $admin->organization1_id)
+                ->groupBy(DB::raw('messages.id'))
                 ->when(isset($q), function ($query) use ($q) {
                     $query->whereLike('title', $q);
                 })
@@ -79,7 +87,7 @@ class MessagePublishController extends Controller
                     $query->where('emergency_flg', true);
                 })
                 ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                    $query->viewRateBetween($rate[0], $rate[1]);
+                    $query->havingRaw('view_rate between ? and ?', [$rate[0], $rate[1]]);
                 })
                 ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                     $query
@@ -92,8 +100,7 @@ class MessagePublishController extends Controller
                                 ->orWhereNull('end_datetime');
                         });
                 })
-                ->where('organization1_id', $admin->organization1_id)
-                ->orderBy('created_at', 'desc')                
+                ->orderBy('messages.created_at', 'desc')               
                 ->paginate(50)
                 ->appends(request()->query());
 
