@@ -27,7 +27,6 @@ class Manual extends Model
         'content_url',
         'thumbnails_url',
         'create_admin_id',
-        'category_id',
         'editing_flg',
         'organization1_id',
         'number',
@@ -161,14 +160,14 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
-    public function getViewRateAttribute(): float
-    {
-        $user_count = $this->withCount('user')->get();
-        $readed_user_count = $this->withCount('readed_user')->get();
-        if ($user_count == 0) return 0;
+    // public function getViewRateAttribute(): float
+    // {
+    //     $user_count = $this->withCount('user')->get();
+    //     $readed_user_count = $this->withCount('readed_user')->get();
+    //     if ($user_count == 0) return 0;
 
-        return round((($readed_user_count / $user_count) * 100), 1);
-    }
+    //     return round((($readed_user_count / $user_count) * 100), 1);
+    // }
 
     public function getContentFileSizeAttribute()
     {
