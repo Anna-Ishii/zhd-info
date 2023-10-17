@@ -44,13 +44,15 @@ class MessagePublishController extends Controller
         $message_list =
             Message::query()
                 ->with('category', 'create_user', 'updated_user', 'brand')
-                ->join('message_user', 'messages.id', '=', 'message_id')
+                ->leftjoin('message_user', 'messages.id', '=', 'message_id')
                 ->join('admin', 'create_admin_id', '=', 'admin.id')
+                ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+                ->leftjoin('brands', 'message_brand.brand_id', '=', 'brands.id')
                 ->selectRaw('
                             messages.*,
-                            sum(message_user.read_flg) as read_users, 
-                            count(message_user.user_id) as total_users,
-                            round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate
+                            floor(sum(message_user.read_flg) / count(distinct brand_id)) as read_users, 
+                            count(distinct message_user.user_id) as total_users,
+                            round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate
                         ')
                 ->where('messages.organization1_id', $admin->organization1_id)
                 ->groupBy(DB::raw('messages.id'))
@@ -79,9 +81,8 @@ class MessagePublishController extends Controller
                     $query->where('category_id', $category_id);
                 })
                 ->when(isset($brand_id), function ($query) use ($brand_id) {
-                        $query->whereHas('brand', function($q) use($brand_id)  {
-                        $q->where('brand_id', $brand_id);
-                    });
+                    $query->where('message_brand.brand_id', $brand_id);
+                    
                 })
                 ->when(isset($label), function ($query) use ($label) {
                     $query->where('emergency_flg', true);
@@ -100,7 +101,7 @@ class MessagePublishController extends Controller
                                 ->orWhereNull('end_datetime');
                         });
                 })
-                ->orderBy('messages.created_at', 'desc')               
+                ->orderBy('messages.number', 'desc')               
                 ->paginate(50)
                 ->appends(request()->query());
 
