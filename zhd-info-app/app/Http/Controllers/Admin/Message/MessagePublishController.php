@@ -44,7 +44,6 @@ class MessagePublishController extends Controller
             Message::query()
                 ->with('category', 'create_user', 'updated_user', 'brand')
                 ->leftjoin('message_user','messages.id', '=', 'message_id')
-                ->join('admin', 'create_admin_id', '=', 'admin.id')
                 ->selectRaw('
                             messages.*,
                             ifnull(sum(message_user.read_flg),0) as read_users, 
@@ -78,7 +77,7 @@ class MessagePublishController extends Controller
                     $query->where('category_id', $category_id);
                 })
                 ->when(isset($brand_id), function ($query) use ($brand_id) {
-                    $query->join('message_brand', 'messages.id', '=', 'message_brand.message_id')
+                    $query->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
                     ->where('message_brand.brand_id', '=', $brand_id);
                 })
                 ->when(isset($label), function ($query) use ($label) {
@@ -100,6 +99,7 @@ class MessagePublishController extends Controller
                                 ->orWhereNull('end_datetime');
                         });
                 })
+                ->join('admin', 'create_admin_id', '=', 'admin.id')
                 ->orderBy('messages.number', 'desc')               
                 ->paginate(50)
                 ->appends(request()->query());

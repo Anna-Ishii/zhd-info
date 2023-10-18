@@ -40,12 +40,11 @@ class ManualPublishController extends Controller
 
         $manual_list =
             Manual::query()
-            ->with('user', 'category', 'create_user', 'updated_user', 'brand')
-            ->join('manual_user', 'manuals.id', '=', 'manual_id')
-            ->join('admin', 'create_admin_id', '=', 'admin.id')
+            ->with('category', 'create_user', 'updated_user', 'brand')
+            ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->selectRaw('
                         manuals.*,
-                        sum(manual_user.read_flg) as read_users, 
+                        ifnull(sum(manual_user.read_flg),0) as read_users, 
                         count(manual_user.user_id) as total_users,
                         round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate
                         ')
@@ -79,12 +78,13 @@ class ManualPublishController extends Controller
                 $query->where('category_id', $category_id);
             })
             ->when(isset($brand_id), function ($query) use ($brand_id) {
-                $query->whereHas('brand', function ($q) use ($brand_id) {
-                    $q->where('brand_id', $brand_id);
-                });
+                $query->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
+                    ->where('manual_brand.brand_id', '=', $brand_id);
             })
             ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                $query->havingRaw('view_rate between ? and ?', [$rate[0], $rate[1]]);
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
             })
             ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                 $query
@@ -97,8 +97,8 @@ class ManualPublishController extends Controller
                             ->orWhereNull('end_datetime');
                     });
             })
-
-            ->orderBy('manuals.created_at', 'desc')
+            ->join('admin', 'create_admin_id', '=', 'admin.id')
+            ->orderBy('manuals.number', 'desc')
             ->paginate(50)
             ->appends(request()->query());
 
