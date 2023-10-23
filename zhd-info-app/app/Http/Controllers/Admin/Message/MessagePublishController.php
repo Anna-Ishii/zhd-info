@@ -40,12 +40,18 @@ class MessagePublishController extends Controller
         $brand_id = $request->input('brand');
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
-
         $message_list =
             Message::query()
-                ->with('user', 'category', 'create_user', 'updated_user', 'brand')
-                ->withCount(['user as total_users'])
-                ->withCount(['readed_user as read_users'])
+                ->with('category', 'create_user', 'updated_user', 'brand')
+                ->leftjoin('message_user','messages.id', '=', 'message_id')
+                ->selectRaw('
+                            messages.*,
+                            ifnull(sum(message_user.read_flg),0) as read_users, 
+                            count(message_user.user_id) as total_users,
+                            round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate
+                        ')
+                ->where('messages.organization1_id', $admin->organization1_id)
+                ->groupBy(DB::raw('messages.id'))
                 ->when(isset($q), function ($query) use ($q) {
                     $query->whereLike('title', $q);
                 })
@@ -71,15 +77,16 @@ class MessagePublishController extends Controller
                     $query->where('category_id', $category_id);
                 })
                 ->when(isset($brand_id), function ($query) use ($brand_id) {
-                        $query->whereHas('brand', function($q) use($brand_id)  {
-                        $q->where('brand_id', $brand_id);
-                    });
+                    $query->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+                    ->where('message_brand.brand_id', '=', $brand_id);
                 })
                 ->when(isset($label), function ($query) use ($label) {
                     $query->where('emergency_flg', true);
                 })
                 ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                    $query->viewRateBetween($rate[0], $rate[1]);
+                    $min = isset($rate[0]) ? $rate[0] : 0;
+                    $max = isset($rate[1]) ? $rate[1] : 100;
+                    $query->havingRaw('view_rate between ? and ?', [$min, $max]);
                 })
                 ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                     $query
@@ -92,8 +99,8 @@ class MessagePublishController extends Controller
                                 ->orWhereNull('end_datetime');
                         });
                 })
-                ->where('organization1_id', $admin->organization1_id)
-                ->orderBy('created_at', 'desc')                
+                ->join('admin', 'create_admin_id', '=', 'admin.id')
+                ->orderBy('messages.number', 'desc')               
                 ->paginate(50)
                 ->appends(request()->query());
 

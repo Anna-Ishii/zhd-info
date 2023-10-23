@@ -165,13 +165,34 @@ class Message extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
     
-    public function getViewRateAttribute() : float
-    {
-        $user_count = $this->withCount('user')->get();
-        $readed_user_count = $this->withCount('readed_user')->get();
-        if($user_count == 0) return 0;
+    // public function getViewRateAttribute() : float
+    // {
+    //     $user_count = $this->withCount('user')->get();
+    //     $readed_user_count = $this->withCount('readed_user')->get();
+    //     if($user_count == 0) return 0;
 
-        return round((($readed_user_count / $user_count) * 100), 1);
+    //     return round((($readed_user_count / $user_count) * 100), 1);
+    // }
+    
+    public function getContentFileSizeAttribute()
+    {
+        if (!isset($this->content_url)) return "ファイルがありません";
+        $path = public_path($this->content_url);
+
+        if (!file_exists($path)) return "ファイルがありません";
+
+        $filesize = filesize($path);
+
+        $K = 1000;
+        $M = 1000 * $K;
+
+        if ($M <= $filesize) {
+            return round($filesize / $M, 2) . "MB";
+        } else if ($K <= $filesize) {
+            return round($filesize / $K, 2) . "KB";
+        }
+
+        return $filesize . "B";
     }
     
     public function getContentFileSizeAttribute()
