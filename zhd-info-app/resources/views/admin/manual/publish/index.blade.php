@@ -173,8 +173,8 @@
                                     <td></td>
                                     <td nowrap>詳細</td>
                                 @else
-                                    <td class="view-rate {{( (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0) <= 30) ? 'under-quota' : ''}}">
-                                        <div>{{ (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)}}% </div>
+                                    <td class="view-rate {{( (($manual->total_users != 0) ? $manual->view_rate : 0) <= 30) ? 'under-quota' : ''}}">
+                                        <div>{{ (($manual->total_users != 0) ? $manual->view_rate : 0)}}% </div>
                                     </td>
                                     <td>
                                         {{$manual->read_users }}/{{$manual->total_users}}
