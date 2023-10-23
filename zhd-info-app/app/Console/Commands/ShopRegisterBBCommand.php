@@ -76,25 +76,28 @@ class ShopRegisterBBCommand extends Command
                 $organization2_id = Organization2::where('name', $data[2])->value('id');
                 if (is_null($organization2_id)) {
                     $null_org2[] = $data[2];
-                    Organization2::create([
+                    $organization2 = Organization2::create([
                         "name" => $data[2]
                     ]);
+                    $organization2_id = $organization2->id;
                 }
                 // DS
                 $organization3_id = Organization3::where('name', $data[3])->value('id');
                 if (is_null($organization3_id)) {
                     $null_org3[] = $data[3];
-                    Organization3::create([
+                    $organization3 = Organization3::create([
                         "name" => $data[3]
                     ]);
+                    $organization3_id = $organization3->id;
                 }
                 // AR
                 $organization4_id = Organization4::where('name', $data[5])->value('id');
                 if (is_null($organization4_id)) {
                     $null_org2[] = $data[5];
-                    Organization4::create([
+                    $organization4 = Organization4::create([
                         "name" => $data[5]
                     ]);
+                    $organization4_id = $organization4->id;
                 }
 
                 // 店舗を更新
