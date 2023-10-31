@@ -33,7 +33,21 @@ services:
         target: /docker-entrypoint-initdb.d
     ports:
       - 3306:3306
-
+  minio : 
+    image: minio/minio:RELEASE.2023-10-25T06-33-25Z
+    container_name: minio
+    ports:
+      - "9090:9000"
+      - "9091:9001"
+    environment:
+      - MINIO_ROOT_USER=minio
+      - MINIO_ROOT_PASSWORD=minio123
+    entrypoint: sh
+    command: -c "/opt/bin/minio server /export --address :9000 --console-address :9001"
+    volumes:
+      - type: bind
+        source: ./docker/minio/data
+        target: /export
 volumes:
   mysql-volume:
     name: zhd-info-data
