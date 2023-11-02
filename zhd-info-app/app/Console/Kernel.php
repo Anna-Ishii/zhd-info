@@ -4,6 +4,8 @@ namespace App\Console;
 
 use App\Console\Commands\admin\setting\HashPasswordCommand;
 use App\Console\Commands\AdminCreateCommand;
+use App\Console\Commands\ExportCrewFakerCsvCommand;
+use App\Console\Commands\ExportShopCsvCommand;
 use App\Console\Commands\MessageUserUpdateCommand;
 use App\Console\Commands\ShopCreateCommnad;
 use App\Console\Commands\ShopUserCreateCommnad;
@@ -18,6 +20,8 @@ class Kernel extends ConsoleKernel
         ShopUserCreateCommnad::class,
         MessageUserUpdateCommand::class,
         ShopCreateCommnad::class,
+        ExportShopCsvCommand::class,
+        ExportCrewFakerCsvCommand::class,
     ];
     /**
      * Define the application's command schedule.
