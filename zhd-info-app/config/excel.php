@@ -48,7 +48,7 @@ return [
             'use_bom'                => false,
             'include_separator_line' => false,
             'excel_compatibility'    => false,
-            'output_encoding'        => 'SJIS',
+            'output_encoding'        => 'UTF-8',
             'test_auto_detect'       => true,
         ],
 
