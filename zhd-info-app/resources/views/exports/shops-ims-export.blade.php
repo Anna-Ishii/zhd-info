@@ -32,7 +32,8 @@
     <tr>
         <td>{{$shop->brand_id}}</td>
         <td>{{$shop->brand->name}}</td>
-        <td>="{{substr($shop->shop_code, -4)}}"</td>
+        {{-- <td>="{{substr($shop->shop_code, -4)}}"</td> --}}
+        <td>="{{$shop->shop_code}}"</td>
         <td>{{$shop->name}}</td>
         @if (isset( $shop->organization2_id ))
           <td>営業部</td>
