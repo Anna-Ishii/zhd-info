@@ -288,6 +288,8 @@ class ImportImsCsvCommand extends Command
     {
         $ROLL_ID = 4;
 
+        $undefind_shop = [];
+        $undefind_user = [];
         $register_crews = [];
         $change_crew = [];
         $new_crew = [];
@@ -298,9 +300,14 @@ class ImportImsCsvCommand extends Command
                             ->where('brand_id', $crew[0])
                             ->where('shop_code', $crew[14])
                             ->first();
+            if (empty($shop)) {
+                $undefind_shop[] = $crew;
+                continue;
+            }
             $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
 
             if(empty($user)) {
+                $undefind_user[] = $crew;
                 continue;
             }
 
@@ -342,13 +349,13 @@ class ImportImsCsvCommand extends Command
         Crew::whereIn('part_code', $diff_crew_id)->delete();
 
         // ログ出力
-        $this->info("---新しい店舗---");
+        $this->info("---新しいクルー---");
         if (!empty($new_crew)) {
             foreach ($new_crew as $c) {
                 $this->info("crewID" . $c->id . " クルー名" . $c->name);
             }
         }
-        $this->info("---変更する店舗---");
+        $this->info("---変更するクルー---");
         if (!empty($change_crew)) {
             foreach ($change_crew as $c) {
                 $this->info("crewID" . $c->id . " クルー名" . $c->name);
@@ -358,6 +365,18 @@ class ImportImsCsvCommand extends Command
         if (!$diff_crew->isEmpty()) {
             foreach ($diff_crew as $c) {
                 $this->info("crewID" . $c->id . " クルー名" . $c->name);
+            }
+        }
+        $this->info("---店舗が見つからないエラー---");
+        if (!empty($undefind_shop)) {
+            foreach ($undefind_shop as $c) {
+                $this->info("店舗コード" . $c[14] . " 店舗名" . $c[15]);
+            }
+        }
+        $this->info("---店舗ユーザーが見つからないエラー---");
+        if (!empty($undefind_user)) {
+            foreach ($undefind_user as $c) {
+                $this->info("店舗コード" . $c[14] . " 店舗名" . $c[15]);
             }
         }
     }
