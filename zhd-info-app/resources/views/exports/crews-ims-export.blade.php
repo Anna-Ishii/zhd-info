@@ -25,7 +25,7 @@
     @foreach ($export as $data)
     <tr>
         {{-- 業態コード --}}
-        <td>{{$data['brand_id']}}</td>
+        <td>="{{$data['brand_code']}}"</td>
         <td>{{$data['brand_name']}}</td>
         {{-- 組織 --}}
         @for ($i = 0; $i < 5; $i++)

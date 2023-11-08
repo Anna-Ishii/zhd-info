@@ -45,7 +45,7 @@ class ExportCrewFakerCsvCommand extends Command
             $shop_id = Arr::random($shops);
             $shop = Shop::find($shop_id);
 
-            $export[$i]['brand_id'] = $shop->brand->id;
+            $export[$i]['brand_code'] = $shop->brand->brand_code;
             $export[$i]['brand_name'] = $shop->brand->name;
             if(isset($shop->organization2)) {
                 $export[$i]['organization'][] = [
