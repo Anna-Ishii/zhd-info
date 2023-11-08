@@ -122,8 +122,9 @@ class ImportImsCsvCommand extends Command
                 }
             }
 
-            $brand_id = $shop[0];
-            $brand = Brand::find($shop[0]);
+            $brand_code = $shop[0];
+            $brand = Brand::where('brand_code', $brand_code);
+            $brand_id = $brand->id;
             $organization1_id = $brand->organization1->id;
             $shop_code = $shop[2];
             $shop_name = $shop[3];
@@ -295,9 +296,11 @@ class ImportImsCsvCommand extends Command
         $new_crew = [];
         
         foreach ($crews_data as $index => $crew) {
+            $brand = Brand::where('brand_code', $crew[0])->first();
+            $brand_id = $brand->id;
             // クルーの情報を更新
             $shop = Shop::query()
-                            ->where('brand_id', $crew[0])
+                            ->where('brand_id', $brand_id)
                             ->where('shop_code', $crew[14])
                             ->first();
             if (empty($shop)) {
