@@ -2,32 +2,42 @@
 
 namespace Tests\Unit\Models;
 
+use App\Models\Brand;
+use App\Models\Organization1;
 use App\Models\Shop;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Symfony\Component\VarDumper\Caster\RdKafkaCaster;
 use Tests\TestCase;
 
 class ShopTest extends TestCase
 {
-    public function test_Shopモデルからorganizationを取得できるか()
-    {
-        $shop_id = 1;
-        $shop = Shop::find($shop_id);
+    use RefreshDatabase;
 
-        $this->assertEquals("北海道", $shop->organization4->name);
+    protected function setUp():void
+    {
+        parent::setUp();
+
+        Organization1::create([
+            'name' => "test業態"
+        ]);
+        Brand::create([
+            'name' => "testブランド",
+            'organization1_id' => 1,
+            'brand_code' => "testコード"
+        ]);
+        Shop::create([
+            'name' => "shop",
+            'shop_code' => "test0001",
+            'organization1_id' => 1,
+            'brand_id' => 1,
+        ]);
     }
 
-    public function test_Shopモデルからユーザーの数を取得できるか()
+    public function test_入力shopcodeの下四桁とブランドIDが一致する店舗は新しいshopcodeに更新()
     {
-        $shop = Shop::withCount('user')->get();
-
-        $this->assertEquals(2, $shop[0]->user_count);
-    }
-
-    public function test_Shopモデルから条件指定でユーザーの数を取得できるか()
-    {
-        $shop_id = 1;
-        $shop = Shop::withCount('user')->whereIn('id', [1,2,3])->get();
-
-        $this->assertEquals(2, $shop[0]->user_count);
+        // 入力の店舗コードは1110001とする
+        Shop::update_shopcode('1110001', 1);
+        $after_shop = Shop::find(1);
+        $this->assertEquals('1110001', $after_shop->shop_code);
     }
 }

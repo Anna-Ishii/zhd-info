@@ -123,11 +123,15 @@ class ImportImsCsvCommand extends Command
             }
 
             $brand_code = $shop[0];
-            $brand = Brand::where('brand_code', $brand_code);
+            $brand = Brand::where('brand_code', $brand_code)->first();
             $brand_id = $brand->id;
             $organization1_id = $brand->organization1->id;
             $shop_code = $shop[2];
             $shop_name = $shop[3];
+
+            //店舗コードを更新(IMS連携の初回のみ)
+            Shop::update_shopcode($shop_code, $brand_id);
+            // 店舗が存在するか
             $shop_id = Shop::query()
                             ->where('shop_code', $shop_code)
                             ->where('brand_id', $brand_id)    
