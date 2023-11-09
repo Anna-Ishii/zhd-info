@@ -129,7 +129,7 @@ class MessagePublishController extends Controller
         
         // request
         $brand_id = $request->input('brand');
-        $shop_code = $request->input('shop_code');
+        $shop_freeword = $request->input('shop_freeword');
         $shop_name = $request->input('shop_name');
         $org3 = $request->input('org3');
         $org4 = $request->input('org4');
@@ -142,8 +142,9 @@ class MessagePublishController extends Controller
                         ->when(isset($brand_id), function ($query) use ($brand_id) {
                             $query->where('brand_id', $brand_id);
                         })
-                        ->when(isset($shop_code), function ($query) use ($shop_code) {
-                            $query->where('shop_code', $shop_code);
+                        ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
+                            $query->whereLike('name', $shop_freeword)
+                                    ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
                         })
                         ->when(isset($shop_name), function ($query) use ($shop_name) {
                             $query->whereLike('name', $shop_name);
@@ -179,7 +180,8 @@ class MessagePublishController extends Controller
                                 });
                         })
                         ->wherePivotIn('shop_id', $shop_list)
-                        ->paginate(50);
+                        ->paginate(50)
+                        ->appends(request()->query());
 
         return view('admin.message.publish.show', [
             'message' => $message,
