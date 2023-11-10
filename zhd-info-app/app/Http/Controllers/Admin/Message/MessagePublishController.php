@@ -17,6 +17,7 @@ use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
 use App\Models\MessageOrganization;
 use App\Utils\ImageConverter;
+use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -130,7 +131,6 @@ class MessagePublishController extends Controller
         // request
         $brand_id = $request->input('brand');
         $shop_freeword = $request->input('shop_freeword');
-        $shop_name = $request->input('shop_name');
         $org3 = $request->input('org3');
         $org4 = $request->input('org4');
         $org5 = $request->input('org5');
@@ -145,9 +145,6 @@ class MessagePublishController extends Controller
                         ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                             $query->whereLike('name', $shop_freeword)
                                     ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
-                        })
-                        ->when(isset($shop_name), function ($query) use ($shop_name) {
-                            $query->whereLike('name', $shop_name);
                         })
                         ->when(isset($org3), function ($query) use ($org3) {
                             $query->where('organization3_id', $org3);
@@ -170,13 +167,13 @@ class MessagePublishController extends Controller
                             if($read_flg == 'false') $query->where('read_flg', false);
                         })
                         ->when((isset($readed_date[0])), function ($query) use ($readed_date) {
-                            $query
-                                ->where('readed_datetime', '>=', $readed_date[0]);
+                            $from = Util::delweek_string($readed_date[0]);
+                            $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') >= ?", $from);
                         })
                         ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
-                            $query
-                                ->where(function ($query) use ($readed_date) {
-                                    $query->where('readed_datetime', '<=', $readed_date[1]);
+                            $to = Util::delweek_string($readed_date[1]);
+                            $query->where(function ($query) use ($to) {
+                                    $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') <= ?", $to);
                                 });
                         })
                         ->wherePivotIn('shop_id', $shop_list)
