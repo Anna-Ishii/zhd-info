@@ -233,4 +233,8 @@ class Manual extends Model
         $max = isset($max) ? $max : 100;
         $query->havingRaw('ROUND((read_users / total_users) * 100, 2) BETWEEN ? AND ?', [$min, $max]);
     }
+
+    public static function getCurrentNumber($organization1_id): Int{
+        return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
+    }
 }

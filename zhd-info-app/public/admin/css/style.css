@@ -974,3 +974,9 @@ form.form-horizontal .form-group:last-child {
   height: 0px;
   padding-bottom: 25px;
 }
+
+.progress {
+  height: 3px;
+  margin-bottom: 0px;
+  display: none;
+}

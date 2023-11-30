@@ -7,13 +7,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Manualcontent extends Model
+class ManualContent extends Model
 {
     use SoftDeletes;
     
     protected $table = 'manualcontents';
 
     protected $fillable = [
+        'id',
         'manual_id',
         'content_name',
         'content_url',
