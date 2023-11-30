@@ -50,16 +50,21 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-10">
-                <textarea class="form-control" name="description" value="{{old('description')}}" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。"></textarea>
+                <textarea class="form-control" name="description" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description')}}</textarea>
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">ファイルを選択またはドロップ</span>
+                    <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
                     <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf">
+                    <input type="hidden" name="file_name" data-variable-name="manual_file_name" value="{{old('file_name')}}">
+                    <input type="hidden" name="file_path" data-variable-name="manual_file_path" value="{{old('file_path')}}">
                 </label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
                 <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
             </div>
         </div>
@@ -77,7 +82,12 @@
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
                             <input type="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
+                            <input type="hidden" data-variable-name="manual_file_name" value="">
+                            <input type="hidden" data-variable-name="manual_file_path" value="">
                         </label>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
                         <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
                     </div>
                 </div>
@@ -92,7 +102,43 @@
                 </div>
 
             </div>
+            @if (old('manual_flow'))
+                @foreach (old('manual_flow') as $old_manual)
+                    <div class="manualVariableBox">
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">手順名</label>
+                            <div class="col-lg-10">
+                                <input class="form-control" value="{{$old_manual['title']}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$loop->index}}][title]">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">手順ファイル添付</label>
+                            <div class="col-lg-10">
+                                <label class="inputFile form-control">
+                                    <span class="fileName">{{$old_manual['file_name'] ? $old_manual['file_name'] : "ファイルを選択またはドロップ"}}</span>
+                                    <input type="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
+                                    <input type="hidden" data-variable-name="manual_file_name" value="{{$old_manual['file_name']}}" name="manual_flow[{{$loop->index}}][file_name]">
+                                    <input type="hidden" data-variable-name="manual_file_path" value="{{$old_manual['file_path']}}" name="manual_flow[{{$loop->index}}][file_path]">
+                                </label>
+                                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar" style="width: 0%"></div>
+                                </div>
+                                <div>mp4, mov, m4v, jpeg, jpg, png, pdfが添付可能です。</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-lg-2 control-label">手順内容</label>
+                            <div class="col-lg-10">
+                                <textarea class="form-control" data-variable-name="manual_flow_detail" name="manual_flow[{{$loop->index}}][detail]">{{$old_manual['detail']}}</textarea>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <button type="button" class="btn btn-default btnRemoveBox">この手順を削除する</button>
+                        </div>
 
+                    </div>
+                @endforeach                
+            @endif
 
         </div>
         <div class="form-group">
@@ -144,7 +190,8 @@
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8">
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8"
+                        {{ in_array((string)$brand->id, old('brand',[]), true) ? 'checked' : '' }}>
                     {{$brand->name}}
                 </label>
                 @endforeach
