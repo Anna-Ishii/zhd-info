@@ -51,9 +51,14 @@
             <label class="col-lg-2 control-label">PDF添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">ファイルを選択またはドロップ</span>
-                    <input type="file" name="file" value="" accept=".pdf">
+                    <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
+                    <input type="file" name="file" accept=".pdf">
+                    <input type="hidden" name="file_name" value="{{old('file_name')}}">
+                    <input type="hidden" name="file_path" value="{{old('file_path')}}">
                 </label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
             </div>
         </div>
         <div class="form-group">
@@ -118,13 +123,26 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" checked>
+                        <input type="checkbox" id="checkAll" name="brandAll" class="mr8" 
+                            @if(request()->old())
+                                {{ old('brandAll') ? 'checked' : '' }}
+                            @else
+                                {{'checked'}}
+                            @endif
+                        >
                         全業態
                     </label>
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" checked>
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
+                        @if(old('brand'))
+                            {{ in_array((string)$brand->id, old('brand',[]), true) ? 'checked' : '' }}
+                        @elseif(!request()->old())
+                            {{'checked'}}
+                        @else
+                        @endif
+                        >
                     {{$brand->name}}
                 </label>
                 @endforeach
@@ -138,29 +156,60 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" checked>
+                        <input type="checkbox" id="checkAll" name="organizationAll" class="mr8" 
+                            @if(request()->old())
+                                {{ old('organizationAll') ? 'checked' : '' }}
+                            @else
+                                {{'checked'}}
+                            @endif
+                        >
                         全て
                     </label>
                 </div>
-                @foreach ($organization_list as $organization)
+                @foreach ($organization_list as $index => $organization)
                     @if (isset($organization['organization5_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8" checked>
+                            <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8" 
+                                @if(old('organization.org5'))
+                                    {{ in_array((string)$organization['organization5_id'], old('organization.org5',[]), true) ? 'checked' : '' }}
+                                @elseif(!request()->old())
+                                    {{'checked'}}
+                                @else
+                                @endif
+                            >
                             {{$organization['organization5_name']}}
                         </label>
                     @elseif (isset($organization['organization4_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8" checked>
+                            <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8" 
+                                @if(old('organization.org4'))
+                                    {{ in_array((string)$organization['organization4_id'], old('organization.org4',[]), true) ? 'checked' : '' }}
+                                @else
+                                    {{'checked'}}
+                                @endif
+                            >
                             {{$organization['organization4_name']}}
                         </label>
                     @elseif (isset($organization['organization3_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8" checked>
+                            <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8" 
+                                @if(old('organization.org3'))
+                                    {{ in_array((string)$organization['organization3_id'], old('organization.org3',[]), true) ? 'checked' : '' }}
+                                @else
+                                    {{'checked'}}
+                                @endif
+                            >
                             {{$organization['organization3_name']}}直轄
                         </label>
                     @elseif (isset($organization['organization2_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org2][]" value="{{$organization['organization2_id']}}" class="checkCommon mr8" checked>
+                            <input type="checkbox" name="organization[org2][]" value="{{$organization['organization2_id']}}" class="checkCommon mr8"
+                                @if(old('organization.org2'))
+                                    {{ in_array((string)$organization['organization2_id'], old('organization.org2',[]), true) ? 'checked' : '' }}
+                                @else
+                                    {{'checked'}}
+                                @endif
+                            >
                             {{$organization['organization2_name']}}直轄
                         </label>
                     @endif

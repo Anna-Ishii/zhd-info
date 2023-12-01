@@ -1,27 +1,17 @@
 <?php
 
-namespace App\Http\Requests\Admin\Manual;
+namespace App\Http\Requests\Admin\Message;
 
 use App\Http\Requests\ApiRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
 class FileUpdateApiRequest extends ApiRequest
 {
-    private $uploadableFileTypes = [
-        'mov' => 'video/quicktime',
-        'mp4' => 'video/mp4',
-        'm4v' => 'video/x-m4v',
-        'jpeg' => 'image/jpeg',
-        'png' => 'image/png',
-        'pdf_file' => 'application/pdf',
-    ];
 
     public function rules()
-    {
-        $mimeTypesRule = '|mimetypes:' . implode(',', array_values($this->uploadableFileTypes));
-       
+    {       
         return [
-            'file'  => 'required|max:150000' . $mimeTypesRule,
+            'file'  => 'required|mimes:pdf|max:150000',
         ];
     }
 

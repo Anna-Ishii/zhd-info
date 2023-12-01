@@ -58,6 +58,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
+            Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
 
         });
         Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
