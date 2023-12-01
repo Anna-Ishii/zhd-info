@@ -41,7 +41,7 @@
         @csrf
 
         <div class="form-group">
-            <label class="col-lg-2 control-label" for="title">タイトル</label>
+            <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 <input class="form-control" name="title" value="{{ old('title', $manual->title) }}" id="title">
             </div>
@@ -53,7 +53,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">ファイル添付</label>
+            <label class="col-lg-2 control-label">ファイル添付<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">
@@ -76,13 +76,13 @@
         <div class="manualVariableArea">
             <div class="manualVariableBox" id="cloneTarget">
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順名</label>
+                    <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
                     <div class="col-lg-10">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順ファイル添付</label>
+                    <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
@@ -114,13 +114,13 @@
                             <input type="hidden" data-variable-name="manual_flow_content_id" name="manual_flow[{{$index}}][content_id]" value="{{ $old_manual["content_id"] }}">
                         @endif
                         <div class="form-group">
-                            <label class="col-lg-2 control-label">手順名</label>
+                            <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
                             <div class="col-lg-10">
                                 <input class="form-control" value="{{$old_manual['title'] ?? ''}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$index}}][title]">
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-lg-2 control-label">手順ファイル添付</label>
+                            <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
                             <div class="col-lg-10">
                                 <label class="inputFile form-control">
                                     <span class="fileName">{{$old_manual['file_name'] ? $old_manual['file_name'] : "ファイルを選択またはドロップ"}}</span>
@@ -151,13 +151,13 @@
             <div class="manualVariableBox">
                 <input type="hidden" data-variable-name="manual_flow_content_id" name="manual_flow[{{$index}}][content_id]" value="{{ $content->id }}"  required>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順名</label>
+                    <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
                     <div class="col-lg-10">
                         <input class="form-control" name="manual_flow[{{$index}}][title]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" >
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順ファイル添付</label>
+                    <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
                     <div class="col-lg-10">
                         <label class="inputFile form-control">
                             <span class="fileName">{{ ($content->content_name) ? $content->content_name : 'ファイルを選択またはドロップ' }}</span>
@@ -191,7 +191,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ</label>
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
@@ -237,7 +237,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">対象業態</label>
+            <label class="col-lg-2 control-label">対象業態<span class="text-danger">*<span></label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
