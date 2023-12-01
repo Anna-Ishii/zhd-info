@@ -9,13 +9,9 @@ class PublishStoreRequest extends FormRequest
     public function rules()
     {
         // 一時保存の時は、バリデーショnしない
-        if ($this->input('save'))
-        return [
-            'file'  => 'mimes:pdf|max:150000'
-        ];
+        if ($this->input('save')) return [];
         return [
             'title' => 'required',
-            'file'  => 'required|mimes:pdf|max:150000',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable|date_format:Y/m/d H:i',
@@ -31,10 +27,6 @@ class PublishStoreRequest extends FormRequest
     {
         $messages = [
             'title.required' => 'タイトルは必須項目です',
-            'file.required' => 'ファイルを添付してください',
-            'file.mimes' => 'PDF形式のファイルを添付してください',
-            'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
-            'file' => 'ファイルのアップロードに失敗しました',
             'category_id.required' => 'カテゴリを選択してください',
             'start_datetime.date_format' => '日時の形式で入力してください',
             'end_datetime.date_format' => '日時の形式で入力してください',
