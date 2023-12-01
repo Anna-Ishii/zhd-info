@@ -42,13 +42,13 @@
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
-            <label class="col-lg-2 control-label">タイトル</label>
+            <label class="col-lg-2 control-label">タイトル<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 <input class="form-control" name="title" value="{{old('title')}}">
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">PDF添付</label>
+            <label class="col-lg-2 control-label">PDF添付<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
                     <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
@@ -62,7 +62,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ</label>
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
@@ -119,7 +119,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">対象業態</label>
+            <label class="col-lg-2 control-label">対象業態<span class="text-danger">*<span></label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -150,7 +150,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">
-                {{($organization_type == 5) ? '対象ブロック' : '対象エリア'}}
+                {{($organization_type == 5) ? '対象ブロック' : '対象エリア'}}<span class="text-danger">*<span>
             </label>
             <input type="text" name="organization_type" value='{{$organization_type}}' hidden>
             <div class="col-lg-10 checkArea">
