@@ -20,11 +20,11 @@ $(document).on('change', 'input[type="file"]', function() {
     progressBar.css('width', 0 + '%');
     progress.show();
     
-    let fileName = $(this).siblings('input[data-variable-name="manual_file_name"]');
-    let filePath = $(this).siblings('input[data-variable-name="manual_file_path"]');
+    let fileName = $(this).siblings('input[name="file_name"]');
+    let filePath = $(this).siblings('input[name="file_path"]');
 
     $.ajax({
-        url: '/admin/manual/publish/upload',
+        url: '/admin/message/publish/upload',
         type: 'post',
         data: formData,
         processData: false,

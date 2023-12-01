@@ -65,7 +65,7 @@ $(document).on('change', 'input[type="file"]', function() {
         })
         if(errorThrown) {
             labelForm.parent().append(`
-                <div class="text-danger">${errorThrown}</div>
+                <div class="text-danger">アップロードできませんでした</div>
             `);
         }
         fileName.val("");

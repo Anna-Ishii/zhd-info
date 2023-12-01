@@ -56,7 +56,13 @@
             <label class="col-lg-2 control-label">ファイル添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">{{old('file_name') ? old('file_name') : ( ($manual->content_name) ? $manual->content_name : 'ファイルを選択またはドロップ')}}</span>
+                    <span class="fileName">
+                        @if(request()->old())
+                            {{(old('file_name')) ? old('file_name') : 'ファイルを選択またはドロップ'}}
+                        @else
+                            {{$manual->content_name ?? 'ファイルを選択またはドロップ'}}
+                        @endif
+                    </span>
                     <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf">
                     <input type="hidden" name="file_name" data-variable-name="manual_file_name" value="{{ old('file_name', $manual->content_name) }}" >
                     <input type="hidden" name="file_path" data-variable-name="manual_file_path" value="{{old('file_path', $manual->content_url) }}">
@@ -199,7 +205,9 @@
         <div class="form-group">
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ old("start_datetime") ? old("start_datetime") : $manual->start_datetime}}" autocomplete="off">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime"
+                    value="{{ old("start_datetime") ? old("start_datetime") : $manual->start_datetime}}" 
+                    autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateFrom" 
                         @if(old("start_datetime"))

@@ -44,7 +44,6 @@ $(document).on('change', 'input[type="file"]', function() {
                     if (progVal == 100)
                     {
                         // アップロードが完了したら、サーバー側で保存処理が始まる
-                        console.log("完了");
                         setTimeout(() => {
                             progress.hide();
                         }, 1000);
@@ -67,7 +66,7 @@ $(document).on('change', 'input[type="file"]', function() {
         })
         if(errorThrown) {
             labelForm.parent().append(`
-                <div class="text-danger">${errorThrown}</div>
+                <div class="text-danger">アップロードできませんでした</div>
             `);
         }
         fileName.val("");
