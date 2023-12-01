@@ -19,8 +19,7 @@ class FileUpdateApiRequest extends ApiRequest
     {
         return [
             'file.required' => 'ファイルを添付してください',
-            'file.mimetypes' => 'mp4,mov,m4v,jpeg,jpg,png,pdf形式のファイルを添付してください',
-            'file' => 'ファイルのアップロードに失敗しました',
+            'file.mimes' => 'pdf形式のファイルを添付してください',
             'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
         ];
     }

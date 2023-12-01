@@ -51,10 +51,20 @@
             <label class="col-lg-2 control-label">PDF添付</label>
             <div class="col-lg-10">
                 <label class="inputFile form-control">
-                    <span class="fileName">{{ ($message->content_name) ? $message->content_name : 'ファイルを選択またはドロップ'}}</span>
-                    <input type="text" name="file_name" value="{{ $message->content_name }}" hidden>
-                    <input type="file" name="file" accept=".pdf" value="">
+                    <span class="fileName">
+                        @if(request()->old())
+                            {{(old('file_name')) ? old('file_name') : 'ファイルを選択またはドロップ'}}
+                        @else
+                            {{$message->content_name ?? 'ファイルを選択またはドロップ'}}
+                        @endif
+                    </span>
+                    <input type="file" name="file" accept=".pdf">
+                    <input type="hidden" name="file_name" value="{{old('file_name', $message->content_name)}}">
+                    <input type="hidden" name="file_path" value="{{old('file_path', $message->content_url)}}">
                 </label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
             </div>
         </div>
         <div class="form-group">
@@ -62,7 +72,13 @@
             <div class="col-lg-10">
                 @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" {{ $category->id == $message->category_id ? 'checked' : '' }}>
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        @if(request()->old())
+                            {{ ($category->id == old('category_id')) ? 'checked' : '' }}
+                        @else
+                            {{ ($category->id == $message->category_id) ? 'checked' : '' }}
+                        @endif
+                    >
                     {{ $category->name }}
                 </label>
                 @endforeach
@@ -72,7 +88,13 @@
             <label class="col-lg-2 control-label">ラベル</label>
             <div class="col-lg-10">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" {{ $message->emergency_flg ? 'checked' : '' }}>
+                    <input type="checkbox" name="emergency_flg" class="mr8" 
+                        @if(request()->old())
+                            {{(old('emergency_flg') == "on") ? "checked" : ""}}
+                        @else
+                            {{$message->emergency_flg ? 'checked' : ''}}
+                        @endif
+                    >
                     重要
                 </label>
             </div>
@@ -80,9 +102,17 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ $message->start_datetime }}" autocomplete="off">
+                <input id="dateFrom" class="form-control mr16" name="start_datetime" 
+                    value="{{request()->old() ? old("start_datetime") : $message->start_datetime}}" 
+                    autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" {{ empty($message->start_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" 
+                        @if(request()->old())
+                            {{ empty(old("start_datetime")) ? 'checked' : ''  }}
+                        @else
+                            {{ empty($message->start_datetime) ? 'checked' : '' }}
+                        @endif
+                    >
                     未定
                 </label>
             </div>
@@ -90,9 +120,16 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-10 flex ai-center">
-                <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ $message->end_datetime }}" autocomplete="off">
+                <input id="dateTo" class="form-control mr16" name="end_datetime" 
+                    value="{{ request()->old() ? old("end_datetime") : $message->end_datetime }}" autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateTo" {{ empty($message->end_datetime) ? 'checked' : '' }}>
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo" 
+                        @if(request()->old())
+                            {{ empty(old("end_datetime")) ? 'checked' : ''  }}
+                        @else
+                            {{ empty($message->end_datetime) ? 'checked' : '' }}
+                        @endif
+                    >
                     未定
                 </label>
             </div>
@@ -123,7 +160,13 @@
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8"  {{ in_array($brand->id, $target_brand, true) ? 'checked' : '' }}>
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
+                        @if(request()->old())
+                            {{ in_array((string)$brand->id, old("brand", []), true) ? 'checked' : '' }}
+                        @else
+                            {{ in_array($brand->id, $target_brand, true) ? 'checked' : '' }}
+                        @endif
+                        >
                     {{$brand->name}}
                 </label>
                 @endforeach
@@ -146,28 +189,44 @@
                     @if (isset($organization['organization5_name']))
                         <label class="mr16">
                             <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8"
-                            {{ in_array($organization['organization5_id'], $target_org['org5'], true) ? 'checked' : '' }}
+                                @if(request()->old())
+                                    {{ in_array((string)$organization['organization5_id'], old("organization.org5", []), true) ? 'checked' : '' }}
+                                @else
+                                    {{ in_array($organization['organization5_id'], $target_org['org5'], true) ? 'checked' : '' }}
+                                @endif
                             >
                             {{$organization['organization5_name']}}
                         </label>
                     @elseif (isset($organization['organization4_name']))
                         <label class="mr16">
                             <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8"
-                            {{ in_array($organization['organization4_id'], $target_org['org4'], true) ? 'checked' : '' }}
+                                @if(request()->old())
+                                    {{ in_array((string)$organization['organization4_id'], old("organization.org4", []), true) ? 'checked' : '' }}
+                                @else
+                                    {{ in_array($organization['organization4_id'], $target_org['org4'], true) ? 'checked' : '' }}
+                                @endif
                             >
                             {{$organization['organization4_name']}}
                         </label>
                     @elseif (isset($organization['organization3_name']))
                         <label class="mr16">
                             <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8"
-                            {{ in_array($organization['organization3_id'], $target_org['org3'], true) ? 'checked' : '' }}
+                                @if(request()->old())
+                                    {{ in_array((string)$organization['organization3_id'], old("organization.org3", []), true) ? 'checked' : '' }}
+                                @else
+                                    {{ in_array($organization['organization3_id'], $target_org['org3'], true) ? 'checked' : '' }}
+                                @endif                           
                             >
                             {{$organization['organization3_name']}}直轄
                         </label>
                     @elseif (isset($organization['organization2_name']))
                         <label class="mr16">
                             <input type="checkbox" name="organization[org2][]" value="{{$organization['organization2_id']}}" class="checkCommon mr8"
-                            {{ in_array($organization['organization2_id'], $target_org['org2'], true) ? 'checked' : '' }}
+                                @if(request()->old())
+                                    {{ in_array((string)$organization['organization2_id'], old("organization.org2", []), true) ? 'checked' : '' }}
+                                @else
+                                    {{ in_array($organization['organization2_id'], $target_org['org2'], true) ? 'checked' : '' }}
+                                @endif 
                             >
                             {{$organization['organization2_name']}}直轄
                         </label>
@@ -186,5 +245,5 @@
 
     </form>
 </div>
-
+<script src="{{ asset('/js/admin/message/publish/edit.js') }}" defer></script>
 @endsection

@@ -251,6 +251,9 @@ class MessagePublishController extends Controller
             }
         }
 
+        // ファイルを移動したかフラグ
+        $message_changed_flg = false;
+
         $admin = session('admin');
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
@@ -322,6 +325,7 @@ class MessagePublishController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error($th->getMessage());
+            if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
             return redirect()
                 ->back()
                 ->withInput()
@@ -403,74 +407,38 @@ class MessagePublishController extends Controller
     public function update(PublishUpdateRequest $request, $message_id)
     {
         $validated = $request->validated();
+
+        if (!isset($request->save)) {
+            if (!$this->hasRequestFile($request)) {
+                return redirect()->back()->withInput()->withError('ファイルを添付してください');
+            }
+        }
+
+        // ファイルを移動したかフラグ
+        $message_changed_flg = false;
+
         $admin = session('admin');
+        $message = Message::find($message_id);
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] =
-            ($request->emergency_flg == 'on' ? true : false);
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        if (isset($request->file)) {
-            $msg_params = array_merge($msg_params, $this->uploadFile($request->file));
-            $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
+        if ($this->isChangedFile($message->content_url, $request->file_path)) {
+            $msg_params['content_name'] = $request->file_name;
+            $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+            $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
+            $message_changed_flg = true;
+        } else {
+            $message_params['content_name'] = $message->content_name;
+            $message_params['content_url'] = $message->content_url;
+            $message_params['thumbnails_url'] = $message->thumbnails_url;
         }
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         // ブロックかエリアかを判断するタイプ
         $organization_type = $request->organization_type;
-
-        $shops_id = [];
-        $target_user_data = [];
-
-
-        // 一時保存の時は、ユーザー登録しない
-        if (!isset($request->save)) {
-            // organizationごとにshopを取得する
-            if (isset($request->organization['org5'])) {
-                $_shops_id = Shop::select('id')
-                    ->whereIn('organization5_id', $request->organization['org5'])
-                    ->whereIn('brand_id', $request->brand)
-                    ->get()
-                    ->toArray();
-                $shops_id = array_merge($shops_id, $_shops_id);
-            }
-            if (isset($request->organization['org4'])) {
-                $_shops_id = Shop::select('id')
-                    ->whereIn('organization4_id', $request->organization['org4'])
-                    ->whereIn('brand_id', $request->brand)
-                    ->get()
-                    ->toArray();
-                $shops_id = array_merge($shops_id, $_shops_id);
-            }
-            if (isset($request->organization['org3'])) {
-                $_shops_id = Shop::select('id')
-                    ->whereIn('organization3_id', $request->organization['org3'])
-                    ->whereIn('brand_id', $request->brand)
-                    ->whereNull('organization4_id')
-                    ->whereNull('organization5_id')
-                    ->get()
-                    ->toArray();
-                $shops_id = array_merge($shops_id, $_shops_id);
-            }
-            if (isset($request->organization['org2'])) {
-                $_shops_id = Shop::select('id')
-                    ->whereIn('organization2_id', $request->organization['org2'])
-                    ->whereIn('brand_id', $request->brand)
-                    ->whereNull('organization4_id')
-                    ->whereNull('organization5_id')
-                    ->get()
-                    ->toArray();
-                $shops_id = array_merge($shops_id, $_shops_id);
-            }
-
-            // 取得したshopのリストからユーザーを取得する
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
-            // ユーザーに業務連絡の閲覧権限を与える
-            foreach ($target_users as $target_user) {
-                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
-        }
         
         try {
             DB::beginTransaction();
@@ -517,13 +485,14 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->sync($request->brand);
+            $message->user()->sync(
+                !isset($request->save) ? $this->targetUserParam($request) : [])
+            ;
 
-            if (!isset($request->save)) {
-                $message->user()->sync($target_user_data);
-            }
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
             Log::error($th->getMessage());
             return redirect()
                 ->back()
@@ -607,6 +576,15 @@ class MessagePublishController extends Controller
         return $content_url;
     }
 
+    private function rollbackRegisterFile($request_file_path): Void
+    {
+        $content_url = 'uploads/' . basename($request_file_path);
+        $current_path = storage_path('app/' . $request_file_path);
+        $next_path = public_path($content_url);
+        rename($next_path, $current_path);
+        return;
+    }
+
     private function targetUserParam($request): Array {
         $shops_id = [];
         $target_user_data = [];
@@ -662,5 +640,13 @@ class MessagePublishController extends Controller
     private function hasRequestFile($request) {
         if(!isset($request->file_name) || !isset($request->file_path)) return false;
         return true;
+    }
+
+    private function isChangedFile($current_file_path, $next_file_path): Bool
+    {
+        $currnt_path = $current_file_path ? basename($current_file_path) : null;
+        $next_path = $next_file_path ? basename($next_file_path) : null;
+
+        return !($currnt_path == $next_path);
     }
 }

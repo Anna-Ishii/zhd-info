@@ -10,13 +10,10 @@ class PublishUpdateRequest extends FormRequest
     public function rules()
     {
         if ($this->input('save')) 
-        return [
-            'file'  => 'mimes:pdf|max:150000'
-        ];
+        return [];
 
         return [
             'title' => 'required',
-            'file'  => 'required_without:file_name|max:150000|mimes:pdf',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
@@ -32,10 +29,6 @@ class PublishUpdateRequest extends FormRequest
     {
         $messages = [
             'title.required' => 'タイトルは必須項目です',
-            'file.required_without' => 'ファイルを添付してください',
-            'file.mimes' => 'PDF形式のファイルを添付してください',
-            'file.max' => 'ファイルの容量が大きすぎます。150MB以下にしてください',
-            'file' => 'ファイルのアップロードに失敗しました',
             'category_id.required' => 'カテゴリを選択してください',
             'target_roll' => '対象者を選択してください',
             'brand.required' => '対象ブランドを選択してください',
