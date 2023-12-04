@@ -12,6 +12,7 @@ class PublishStoreRequest extends FormRequest
         if ($this->input('save')) return [];
         return [
             'title' => 'required',
+            'file_path' => 'required',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable|date_format:Y/m/d H:i',
@@ -27,11 +28,12 @@ class PublishStoreRequest extends FormRequest
     {
         $messages = [
             'title.required' => 'タイトルは必須項目です',
+            'file_path.required' => 'ファイルを添付してください',
             'category_id.required' => 'カテゴリを選択してください',
             'start_datetime.date_format' => '日時の形式で入力してください',
             'end_datetime.date_format' => '日時の形式で入力してください',
             'target_roll' => '対象者を選択してください',
-            'brand.required' => '対象ブランドを選択してください',
+            'brand.required' => '対象業態を選択してください',
         ];
 
         if ($this->organization_type == '5') {
