@@ -3,10 +3,8 @@
 use App\Http\Controllers\Admin\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
-use App\Http\Controllers\Admin\Manual\ManualManageController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
-use App\Http\Controllers\Admin\Message\MessageManageController;
 use App\Http\Controllers\Admin\Setting\ChangePasswordController;
 use App\Http\Controllers\AuthController as MemberAuthController;
 use App\Http\Controllers\ManualController;
@@ -61,10 +59,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
 
         });
-        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
-            Route::get('/', [MessageManageController::class, 'index'])->name('index');
-            Route::get('detail/{message_id}', [MessageManageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
-        });
     });
     // 管理画面-動画マニュアル
     Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
@@ -78,10 +72,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
             Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
-        });
-        Route::group(['prefix' => 'manage', 'as' => 'manage.'], function () {
-            Route::get('/', [ManualManageController::class, 'index'])->name('index');
-            Route::match(['get', 'post'], 'detail/{manual_id}', [ManualManageController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
