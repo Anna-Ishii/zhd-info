@@ -14,6 +14,7 @@ class PublishStoreRequest extends FormRequest
 
         return [
             'title' => 'required',
+            'file_path' => 'required',
             'description' => 'nullable',
             'category_id' => 'required',
             'brand' => 'required',
@@ -21,6 +22,7 @@ class PublishStoreRequest extends FormRequest
             'end_datetime' => 'nullable',
             'manual_flow.*.title' => 'required',
             'manual_flow.*.detail' => 'nullable',
+            'manual_flow.*.file_path' => 'required',
         ];
     }
 
@@ -28,9 +30,11 @@ class PublishStoreRequest extends FormRequest
     {
         return [
             'title.required' => 'タイトルは必須項目です',
+            'file_path.required' => 'ファイルを添付してください',
             'category_id.required' => 'カテゴリを選択してください',
-            'brand.required' => '対象ブランドを選択してください',
+            'brand.required' => '対象業態を選択してください',
             'manual_flow.*.title.required' => '手順名は必須項目です',
+            'manual_flow.*.file_path.required' => '手順ファイルを添付してください'
         ];
     }
 }

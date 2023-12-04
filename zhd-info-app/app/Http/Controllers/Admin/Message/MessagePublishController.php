@@ -245,12 +245,6 @@ class MessagePublishController extends Controller
     {
         $validated = $request->validated();
 
-        if (!isset($request->save)) {
-            if(!$this->hasRequestFile($request)) {
-                return redirect()->back()->withInput()->withError('ファイルを添付してください');
-            }
-        }
-
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
 
@@ -407,12 +401,6 @@ class MessagePublishController extends Controller
     public function update(PublishUpdateRequest $request, $message_id)
     {
         $validated = $request->validated();
-
-        if (!isset($request->save)) {
-            if (!$this->hasRequestFile($request)) {
-                return redirect()->back()->withInput()->withError('ファイルを添付してください');
-            }
-        }
 
         // ファイルを移動したかフラグ
         $message_changed_flg = false;

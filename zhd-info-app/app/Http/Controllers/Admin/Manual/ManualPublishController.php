@@ -210,15 +210,6 @@ class ManualPublishController extends Controller
     {
         $validated = $request->validated();
 
-        if (!isset($request->save)) {
-            if(!$this->hasManualFile($request)) {
-                return redirect()->back()->withInput()->withError('ファイルを添付してください');
-            }
-            if (!$this->hasManualContentFile($request)) {
-                return redirect()->back()->withInput()->withError('手順ファイルを添付してください');
-            }
-        }
-
         $admin = session('admin');
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
@@ -287,15 +278,7 @@ class ManualPublishController extends Controller
     public function update(PublishUpdateRequest $request, $manual_id)
     {
         $validated = $request->validated();
-
-        if (!isset($request->save)) {
-            if (!$this->hasManualFile($request)) {
-                return redirect()->back()->withInput()->withError('ファイルを添付してください');
-            }
-            if (!$this->hasManualContentFile($request)) {
-                return redirect()->back()->withInput()->withError('手順ファイルを添付してください');
-            }
-        }
+        
         // ファイルを移動したかフラグ
         $manual_changed_flg = false;
         $manualcontent_changed_flg = false;
