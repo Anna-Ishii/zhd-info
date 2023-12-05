@@ -99,6 +99,11 @@ class Message extends Model
         return $this->belongsToMany(Brand::class, 'message_brand', 'message_id', 'brand_id');
     }
 
+    public function tag(): BelongsToMany
+    {
+        return $this->belongsToMany(MessageTagMaster::class, 'message_tags', 'message_id', 'tag_id');
+    }
+
     public function brands_string($brandList = [])
     {
         // リレーションからnameプロパティを取得して配列に変換
