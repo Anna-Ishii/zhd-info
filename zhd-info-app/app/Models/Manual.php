@@ -79,6 +79,11 @@ class Manual extends Model
         return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');
     }
 
+    public function tag(): BelongsToMany
+    {
+        return $this->belongsToMany(ManualTagMaster::class, 'manual_tags', 'manual_id', 'tag_id');
+    }
+
     public function brands_string($brandList = [])
     {
         // リレーションからnameプロパティを取得して配列に変換
