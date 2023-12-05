@@ -439,21 +439,6 @@ class ManualPublishController extends Controller
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 
-    private function uploadFile($file)
-    {
-        if (!isset($file)) return ['content_name' => null, 'content_url' => null];
-
-        $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
-        $filename_input = $file->getClientOriginalName();
-        $path = public_path('uploads');
-        $file->move($path, $filename_upload);
-        $content_url = 'uploads/' . $filename_upload;
-        return [
-            'content_name' => $filename_input,
-            'content_url' => $content_url,
-        ];
-    }
-
     private function hasManualFile($request): Bool {
         if(!isset($request->file_name) || !isset($request->file_path)) return false;
         return true;
