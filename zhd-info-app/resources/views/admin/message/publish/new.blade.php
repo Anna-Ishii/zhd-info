@@ -40,8 +40,30 @@
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
+            <div class="col-lg-6">
+                @foreach ($category_list as $category)
+                <label class="mr16">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
+                    {{ $category->name }}
+                </label>
+                @endforeach
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">ラベル</label>
+            <div class="col-lg-4">
+                <label>
+                    <input type="checkbox" name="emergency_flg" class="mr8"
+                      {{( old('emergency_flg') == "on") ? "checked" : ""}}>
+                    重要
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-lg-2 control-label">タイトル<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{old('title')}}">
             </div>
             <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div>
@@ -65,7 +87,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">PDF添付<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <label class="inputFile form-control">
                     <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
                     <input type="file" name="file" accept=".pdf">
@@ -78,30 +100,8 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
-                    {{ $category->name }}
-                </label>
-                @endforeach
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-2 control-label">ラベル</label>
-            <div class="col-lg-10">
-                <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8"
-                      {{( old('emergency_flg') == "on") ? "checked" : ""}}>
-                    重要
-                </label>
-            </div>
-        </div>
-        <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
-            <div class="col-lg-10 flex ai-center">
+            <div class="col-lg-4 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ old("start_datetime") }}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateFrom" >
@@ -111,7 +111,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
-            <div class="col-lg-10 flex ai-center">
+            <div class="col-lg-4 flex ai-center">
                 <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ old("end_datetime") }}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateTo">
@@ -233,11 +233,16 @@
             </div>
         </div>
 
-
-        <div class="text-center">
-            <input class="btn btn-danger" type="submit" name="register" value="登　録" onclick="window.onbeforeunload=null" />
-            <input class="btn btn-default" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
-            <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
+        <div class="form-group text-center">
+                <div class="col-lg-2 col-lg-offset-2">
+                    <input class="btn btn-admin" type="submit" name="register" value="登　録" onclick="window.onbeforeunload=null" />
+                </div>
+                <div class="col-lg-2">
+                    <input class="btn btn-admin" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
+                </div>
+                <div class="col-lg-2">
+                    <a href="{{ route('admin.message.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+                </div>
         </div>
 
     </form>

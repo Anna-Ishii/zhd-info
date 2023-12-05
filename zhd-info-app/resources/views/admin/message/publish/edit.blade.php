@@ -40,8 +40,40 @@
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
+            <div class="col-lg-6">
+                @foreach ($category_list as $category)
+                <label class="mr16">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        @if(request()->old())
+                            {{ ($category->id == old('category_id')) ? 'checked' : '' }}
+                        @else
+                            {{ ($category->id == $message->category_id) ? 'checked' : '' }}
+                        @endif
+                    >
+                    {{ $category->name }}
+                </label>
+                @endforeach
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">ラベル</label>
+            <div class="col-lg-4">
+                <label>
+                    <input type="checkbox" name="emergency_flg" class="mr8" 
+                        @if(request()->old())
+                            {{(old('emergency_flg') == "on") ? "checked" : ""}}
+                        @else
+                            {{$message->emergency_flg ? 'checked' : ''}}
+                        @endif
+                    >
+                    重要
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-lg-2 control-label">タイトル<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{old('title', $message->title)}}">
             </div>
             <div class="counter">入力数 {{mb_strlen(old('title', $message->title))}}/20文字</div>
@@ -75,7 +107,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">PDF添付<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <label class="inputFile form-control">
                     <span class="fileName">
                         @if(request()->old())
@@ -94,40 +126,8 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        @if(request()->old())
-                            {{ ($category->id == old('category_id')) ? 'checked' : '' }}
-                        @else
-                            {{ ($category->id == $message->category_id) ? 'checked' : '' }}
-                        @endif
-                    >
-                    {{ $category->name }}
-                </label>
-                @endforeach
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-2 control-label">ラベル</label>
-            <div class="col-lg-10">
-                <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" 
-                        @if(request()->old())
-                            {{(old('emergency_flg') == "on") ? "checked" : ""}}
-                        @else
-                            {{$message->emergency_flg ? 'checked' : ''}}
-                        @endif
-                    >
-                    重要
-                </label>
-            </div>
-        </div>
-        <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
-            <div class="col-lg-10 flex ai-center">
+            <div class="col-lg-4 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime" 
                     value="{{request()->old() ? old("start_datetime") : $message->start_datetime}}" 
                     autocomplete="off">
@@ -145,7 +145,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
-            <div class="col-lg-10 flex ai-center">
+            <div class="col-lg-4 flex ai-center">
                 <input id="dateTo" class="form-control mr16" name="end_datetime" 
                     value="{{ request()->old() ? old("end_datetime") : $message->end_datetime }}" autocomplete="off">
                 <label>
@@ -261,12 +261,18 @@
             </div>
         </div>
 
-        <div class="text-center">
-            <input class="btn btn-danger" type="submit" name="register" value="登　録" />
+        <div class="form-group text-center">
+            <div class="col-lg-2 col-lg-offset-2">
+                <input class="btn btn-admin" type="submit" name="register" value="登　録" />
+            </div>
             @if($message->editing_flg)
-            <input class="btn btn-default" type="submit" name="save" value="保　存" />
+            <div class="col-lg-2">
+                <input class="btn btn-admin" type="submit" name="save" value="保　存" />
+            </div>
             @endif
-            <a href="{{ route('admin.message.publish.index') }}" class="btn btn-default">一覧に戻る</a>
+            <div class="col-lg-2">
+                <a href="{{ route('admin.message.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+            </div>
         </div>
 
     </form>
