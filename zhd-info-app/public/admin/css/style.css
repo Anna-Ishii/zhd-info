@@ -957,7 +957,7 @@ form .form-group.tag-form .form-control {
 form .form-group.tag-form .form-control span.tag-form-label {
   outline: none;
   margin-right: 5px;
-  border: solid;
+  border: solid 1px;
   padding: 3px 8px;
   margin-right: 5px;
   border-radius: 5px;
@@ -1006,4 +1006,11 @@ form .form-group.tag-form .form-control span.tag-form-input {
   height: 3px;
   margin-bottom: 0px;
   display: none;
+}
+
+
+.btn-admin {
+  background-color: #eee;
+  color: #333;
+  font-size: 12px;
 }
