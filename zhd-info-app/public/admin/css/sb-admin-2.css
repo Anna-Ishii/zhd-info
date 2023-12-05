@@ -621,7 +621,7 @@ table.table-list tbody .label-tags > div {
   display: flex;
 }
 table.table-list tbody .label-tags-mark {
-  border: solid;
+  border: solid 1px;
   padding: 3px 8px;
   margin-right: 5px;
   border-radius: 5px;
