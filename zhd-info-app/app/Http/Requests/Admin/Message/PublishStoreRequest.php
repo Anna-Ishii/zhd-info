@@ -10,9 +10,12 @@ class PublishStoreRequest extends FormRequest
     public function rules()
     {
         // 一時保存の時は、バリデーショnしない
-        if ($this->input('save')) return [];
+        if ($this->input('save')) return [
+            'title' => 'max:20',
+        ];
+        
         return [
-            'title' => 'required',
+            'title' => 'required|max:20',
             'tag_id' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
@@ -30,6 +33,7 @@ class PublishStoreRequest extends FormRequest
     {
         $messages = [
             'title.required' => 'タイトルは必須項目です',
+            'title.max' => 'タイトルは20文字までです',
             'file_path.required' => 'ファイルを添付してください',
             'category_id.required' => 'カテゴリを選択してください',
             'start_datetime.date_format' => '日時の形式で入力してください',

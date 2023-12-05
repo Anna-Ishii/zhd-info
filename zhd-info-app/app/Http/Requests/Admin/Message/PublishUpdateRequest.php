@@ -10,10 +10,12 @@ class PublishUpdateRequest extends FormRequest
 {
     public function rules()
     {
-        if ($this->input('save')) return [];
+        if ($this->input('save')) return [
+            'title' => 'max:20',
+        ];
 
         return [
-            'title' => 'required',
+            'title' => 'required|max:20',
             'tag_id' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
@@ -31,6 +33,7 @@ class PublishUpdateRequest extends FormRequest
     {
         $messages = [
             'title.required' => 'タイトルは必須項目です',
+            'title.max' => 'タイトルは20文字までです',
             'file_path.required' => 'ファイルを添付してください', 
             'category_id.required' => 'カテゴリを選択してください',
             'target_roll' => '対象者を選択してください',

@@ -43,6 +43,7 @@
             <div class="col-lg-10">
                 <input class="form-control" name="title" value="{{ old('title', $manual->title) }}" id="title">
             </div>
+            <div class="counter">入力数 {{mb_strlen(old('title', $manual->title))}}/20文字</div>
         </div>
         <div class="form-group tag-form">
             <label class="col-lg-2 control-label">検索タグ</label>
@@ -105,6 +106,7 @@
                     <div class="col-lg-10">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
+                    <div class="counter">入力数 0/20文字</div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
@@ -143,6 +145,7 @@
                             <div class="col-lg-10">
                                 <input class="form-control" value="{{$old_manual['title'] ?? ''}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$index}}][title]">
                             </div>
+                            <div class="counter">入力数 {{mb_strlen($old_manual['title'])}}/20文字</div>
                         </div>
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
@@ -180,6 +183,7 @@
                     <div class="col-lg-10">
                         <input class="form-control" name="manual_flow[{{$index}}][title]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" >
                     </div>
+                    <div class="counter">入力数 {{mb_strlen($content->title)}}/20文字</div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>

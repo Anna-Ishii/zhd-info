@@ -44,6 +44,7 @@
             <div class="col-lg-10">
                 <input class="form-control" name="title" value="{{old('title')}}" id="title">
             </div>
+            <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
@@ -90,6 +91,7 @@
                     <div class="col-lg-10">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
+                    <div class="counter">入力数 0/20文字</div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
@@ -125,6 +127,7 @@
                             <div class="col-lg-10">
                                 <input class="form-control" value="{{$old_manual['title']}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$loop->index}}][title]">
                             </div>
+                            <div class="counter">入力数 {{mb_strlen($old_manual['title'])}}/20文字</div>
                         </div>
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
