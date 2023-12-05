@@ -194,3 +194,13 @@ $(document).on('submit' , '#form' , function(event){
 	// 改めてsubmitする
 	form.submit();
 });
+
+$(document).on('input', 'input[name="title"], input[data-variable-name="manual_flow_title"]', function(e){
+	var inputText = $(this).val();
+    var textLength = inputText.length;
+	var maxLength = 20; // 最大文字数
+
+    // 文字数を表示
+    var counterText = '入力数 ' + textLength + '/' + maxLength + '文字';
+    $(this).parent().siblings('div.counter').text(counterText);
+})

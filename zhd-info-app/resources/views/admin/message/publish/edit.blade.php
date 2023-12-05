@@ -44,6 +44,7 @@
             <div class="col-lg-10">
                 <input class="form-control" name="title" value="{{old('title', $message->title)}}">
             </div>
+            <div class="counter">入力数 {{mb_strlen(old('title', $message->title))}}/20文字</div>
         </div>
         <div class="form-group tag-form">
             <label class="col-lg-2 control-label">検索タグ</label>
