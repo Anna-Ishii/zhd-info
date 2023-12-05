@@ -72,6 +72,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
             Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
+            Route::post('/tag', [ManualPublishController::class, 'Tag'])->name('tag');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {

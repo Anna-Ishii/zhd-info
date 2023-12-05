@@ -14,6 +14,7 @@ use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Models\Manual;
 use App\Models\ManualCategory;
 use App\Models\ManualContent;
+use App\Models\ManualTagMaster;
 use App\Models\Shop;
 use App\Models\User;
 use App\Utils\ImageConverter;
@@ -234,6 +235,7 @@ class ManualPublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : [] 
             );
             $manual->content()->createMany($this->manualContentsParam($request));
+            $manual->tag()->attach($request->tag_id);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -358,6 +360,8 @@ class ManualPublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : [] 
             );
             $manual->content()->createMany($content_data);
+            $manual->tag()->sync($request->tag_id);
+            
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -432,6 +436,17 @@ class ManualPublishController extends Controller
                     'content_name' => $file_name,
                     'content_url' => $file_path
                 ]);
+    }
+
+    public function Tag(Request $request)
+    {
+        $name = $request->tag_label_text;
+        // バリデート
+        $message_tag = ManualTagMaster::firstOrCreate(['name' => $name]);
+
+        return response()->json([
+            'message_tag_id' => $message_tag->id
+        ]);
     }
 
     private function parseDateTime($datetime)
