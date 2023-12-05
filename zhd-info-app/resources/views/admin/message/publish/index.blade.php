@@ -130,6 +130,7 @@
 						<th class="text-center" nowrap>ラベル</th>
 						<th class="text-center" nowrap>カテゴリ</th>
 						<th class="text-center" nowrap>タイトル</th>
+						<th class="text-center" nowrap>検索タグ</th>
 						<th class="text-center" nowrap>添付ファイル</th>
 						<th class="text-center" colspan="2">掲載期間</th>
 						<th class="text-center" nowrap>状態</th>
@@ -162,6 +163,16 @@
 							@else
 								{{$message->title}}
 							@endif
+						</td>
+						<td class="label-tags">
+							<div>
+								@foreach ($message->tag as $tag)
+									<div class="label-tags-mark">
+									{{$tag->name}}
+									</div>
+								@endforeach
+							</div>
+
 						</td>
 						<td>
 							<div>{{$message->content_file_size}}</div>
