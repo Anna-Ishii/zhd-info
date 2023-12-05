@@ -122,6 +122,7 @@
                                 <th class="text-center" nowrap>対象業態</th>
                                 <th class="text-center" nowrap>カテゴリ</th>
                                 <th class="text-center" nowrap>タイトル</th>
+                                <th class="text-center" nowrap>検索タグ</th>
                                 <th class="text-center" colspan="2" nowrap>添付ファイル</th>
                                 <th class="text-center" colspan="2" nowrap>掲載期間</th>
                                 <th class="text-center" nowrap>状態</th>
@@ -154,6 +155,15 @@
                                         {{$manual->title}}
                                     @endif
                                 </td>
+                                <td class="label-tags">
+                                    <div>
+                                        @foreach ($manual->tag as $tag)
+                                            <div class="label-tags-mark">
+                                            {{$tag->name}}
+                                            </div>
+                                        @endforeach
+                                    </div>
+						        </td>
                                 <td>
                                     @if(isset($manual->content_url))
                                         <div>{{$manual->content_type}}</div>
