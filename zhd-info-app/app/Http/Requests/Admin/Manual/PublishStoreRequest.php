@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Manual;
 
+use App\Rules\TagRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PublishStoreRequest extends FormRequest
@@ -14,6 +15,7 @@ class PublishStoreRequest extends FormRequest
 
         return [
             'title' => 'required',
+            'tag_id' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'description' => 'nullable',
             'category_id' => 'required',

@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Admin\Message;
 
 use App\Models\Message;
+use App\Rules\TagRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PublishUpdateRequest extends FormRequest
@@ -13,7 +14,7 @@ class PublishUpdateRequest extends FormRequest
 
         return [
             'title' => 'required',
-            'tag_id' => 'nullable',
+            'tag_id' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',

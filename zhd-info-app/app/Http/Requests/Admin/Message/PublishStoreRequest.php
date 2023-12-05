@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Admin\Message;
 
+use App\Rules\TagRule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class PublishStoreRequest extends FormRequest
@@ -12,7 +13,7 @@ class PublishStoreRequest extends FormRequest
         if ($this->input('save')) return [];
         return [
             'title' => 'required',
-            'tag_id' => 'nullable',
+            'tag_id' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
