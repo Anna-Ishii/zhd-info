@@ -133,6 +133,7 @@
                     <div class="col-lg-4">
                         <textarea class="form-control" data-variable-name="manual_flow_detail"></textarea>
                     </div>
+                    <div class="counter">入力数 0/30文字</div>
                 </div>
                 <div class="form-group">
                     <div class="col-lg-7 text-right">
@@ -174,6 +175,7 @@
                             <div class="col-lg-4">
                                 <textarea class="form-control" data-variable-name="manual_flow_detail" name="manual_flow[{{$index}}][detail]">{{$old_manual['detail']}}</textarea>
                             </div>
+                            <div class="counter">入力数 {{mb_strlen($old_manual['detail'])}}/20文字</div>
                         </div>
                         <div class="form-group">
                             <div class="col-lg-7 text-right">
@@ -214,6 +216,7 @@
                     <div class="col-lg-4">
                         <textarea name="manual_flow[{{$index}}][detail]" class="form-control" data-variable-name="manual_flow_detail" >{{ $content->description }}</textarea>
                     </div>
+                    <div class="counter">入力数 {{mb_strlen($content->description)}}/20文字</div>
                 </div>
                 <div class="form-group">
                     <div class="col-lg-7 text-right">
@@ -292,6 +295,7 @@
             <div class="col-lg-4">
                 <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description', $manual->description)}}</textarea>
             </div>
+            <div class="counter">入力数 {{mb_strlen(old('description', $manual->description))}}/30文字</div>
         </div>
         <div class="form-group text-center">
             <div class="col-lg-2 col-lg-offset-2">
