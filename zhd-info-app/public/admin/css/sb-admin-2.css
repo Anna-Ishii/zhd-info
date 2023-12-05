@@ -617,6 +617,17 @@ table.table-list tbody .label-title {
   text-align: left;
   min-width: 387px;
 }
+table.table-list tbody .label-tags > div {
+  display: flex;
+}
+table.table-list tbody .label-tags-mark {
+  border: solid;
+  padding: 3px 8px;
+  margin-right: 5px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
 table.table-list tbody .view-rate {
   text-align: right;
 }
