@@ -954,6 +954,13 @@ form .form-group.tag-form .form-control {
   height: 100%;
 }
 
+form .form-group.tag-form > div {
+  width: auto;
+  /* col-lg-4のmin-widthを数値で指定 */
+  /* widthでautoを使いたいため */
+  min-width: 33.3333%; 
+}
+
 form .form-group.tag-form .form-control span.tag-form-label {
   outline: none;
   margin-right: 5px;
@@ -962,6 +969,7 @@ form .form-group.tag-form .form-control span.tag-form-label {
   margin-right: 5px;
   border-radius: 5px;
   background-color: #fff;
+  white-space: nowrap;
 }
 
 form .form-group.tag-form .form-control span.tag-form-delete {

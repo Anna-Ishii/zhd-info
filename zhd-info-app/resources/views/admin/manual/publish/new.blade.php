@@ -38,19 +38,24 @@
 
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal" name="form">
         @csrf
-
+        <div class="form-group">
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
+            <div class="col-lg-6">
+                @foreach ($category_list as $category)
+                <label class="mr16">
+                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
+                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
+                    {{ $category->name }}
+                </label>
+                @endforeach
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{old('title')}}" id="title">
             </div>
             <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-2 control-label" for="description">説明文</label>
-            <div class="col-lg-10">
-                <textarea class="form-control" name="description" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description')}}</textarea>
-            </div>
         </div>
         <div class="form-group tag-form">
             <label class="col-lg-2 control-label">検索タグ</label>
@@ -71,7 +76,7 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ファイル添付<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
+            <div class="col-lg-4">
                 <label class="inputFile form-control">
                     <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
                     <input type="file" name="file" value="" data-variable-name="manual_file" accept=".m4v,.mp4,.mov,.jpeg,.jpg,.png,.pdf">
@@ -88,14 +93,14 @@
             <div class="manualVariableBox" id="cloneTarget">
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
-                    <div class="col-lg-10">
+                    <div class="col-lg-4">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                     <div class="counter">入力数 0/20文字</div>
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
-                    <div class="col-lg-10">
+                    <div class="col-lg-4">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
                             <input type="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
@@ -110,12 +115,14 @@
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順内容</label>
-                    <div class="col-lg-10">
+                    <div class="col-lg-4">
                         <textarea class="form-control" data-variable-name="manual_flow_detail"></textarea>
                     </div>
                 </div>
-                <div class="text-right">
-                    <button type="button" class="btn btn-default btnRemoveBox">この手順を削除する</button>
+                <div class="form-group">
+                    <div class="col-lg-7 text-right">
+                        <button type="button" class="btn btn-default btnRemoveBox">この手順を削除する</button>
+                    </div>
                 </div>
 
             </div>
@@ -124,14 +131,14 @@
                     <div class="manualVariableBox">
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
-                            <div class="col-lg-10">
+                            <div class="col-lg-4">
                                 <input class="form-control" value="{{$old_manual['title']}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$loop->index}}][title]">
                             </div>
                             <div class="counter">入力数 {{mb_strlen($old_manual['title'])}}/20文字</div>
                         </div>
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
-                            <div class="col-lg-10">
+                            <div class="col-lg-4">
                                 <label class="inputFile form-control">
                                     <span class="fileName">{{$old_manual['file_name'] ? $old_manual['file_name'] : "ファイルを選択またはドロップ"}}</span>
                                     <input type="file" value="" accept=".mp4,.mov,.jpeg,.jpg,.png,.pdf" data-variable-name="manual_file">
@@ -146,12 +153,14 @@
                         </div>
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順内容</label>
-                            <div class="col-lg-10">
+                            <div class="col-lg-4">
                                 <textarea class="form-control" data-variable-name="manual_flow_detail" name="manual_flow[{{$loop->index}}][detail]">{{$old_manual['detail']}}</textarea>
                             </div>
                         </div>
-                        <div class="text-right">
-                            <button type="button" class="btn btn-default btnRemoveBox">この手順を削除する</button>
+                        <div class="form-group">
+                            <div class="col-lg-7 text-right">
+                                <button type="button" class="btn btn-default btnRemoveBox">この手順を削除する</button>
+                            </div>
                         </div>
 
                     </div>
@@ -163,18 +172,6 @@
             <label class="col-lg-2 control-label"></label>
             <div class="col-lg-10 flex ai-center">
                 <button type="button" class="btn btn-default btnAddBox">手順の入力欄を増やす</button>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
-            <div class="col-lg-10">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
-                    {{ $category->name }}
-                </label>
-                @endforeach
             </div>
         </div>
         <div class="form-group">
@@ -215,11 +212,22 @@
                 @endforeach
             </div>
         </div>
-
-        <div class="text-center">
-            <input class="btn btn-danger" type="submit" name="rigister" value="登　録" onclick="window.onbeforeunload=null" />
-            <input class="btn btn-default" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
-            <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-default">一覧に戻る</a>
+        <div class="form-group">
+            <label class="col-lg-2 control-label" for="description">説明文</label>
+            <div class="col-lg-4">
+                <textarea class="form-control" name="description" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description')}}</textarea>
+            </div>
+        </div>
+        <div class="form-group text-center">
+                <div class="col-lg-2 col-lg-offset-2">
+                    <input class="btn btn-admin" type="submit" name="register" value="登　録" onclick="window.onbeforeunload=null" />
+                </div>
+                <div class="col-lg-2">
+                    <input class="btn btn-admin" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
+                </div>
+                <div class="col-lg-2">
+                    <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+                </div>
         </div>
 
     </form>
