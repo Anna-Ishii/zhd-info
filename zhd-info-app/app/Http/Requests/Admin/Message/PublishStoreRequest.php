@@ -12,6 +12,7 @@ class PublishStoreRequest extends FormRequest
         if ($this->input('save')) return [];
         return [
             'title' => 'required',
+            'tag_id' => 'nullable',
             'file_path' => 'required',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',

@@ -947,6 +947,33 @@ form.form-horizontal .form-group:last-child {
   text-align: center;
 }
 
+form .form-group.tag-form .form-control {
+  padding-left: 5px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+form .form-group.tag-form .form-control span.tag-form-label {
+  outline: none;
+  margin-right: 5px;
+  border: solid;
+  padding: 3px 8px;
+  margin-right: 5px;
+  border-radius: 5px;
+  background-color: #fff;
+}
+
+form .form-group.tag-form .form-control span.tag-form-delete {
+  margin-left: 5px;
+  color: #a7a2a2;
+  cursor: pointer;
+}
+
+form .form-group.tag-form .form-control span.tag-form-input {
+  outline: none;
+}
+
 .under-quota div{
   color: #333;
   font-weight: bold;

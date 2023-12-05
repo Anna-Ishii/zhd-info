@@ -57,7 +57,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
-
+            Route::post('/tag', [MessagePublishController::class, 'Tag'])->name('tag');
         });
     });
     // 管理画面-動画マニュアル

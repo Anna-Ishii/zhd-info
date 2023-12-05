@@ -17,6 +17,7 @@ use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Models\MessageOrganization;
+use App\Models\MessageTagMaster;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -315,6 +316,7 @@ class MessagePublishController extends Controller
             $message->user()->attach(
                 !isset($request->save) ? $this->targetUserParam($request) : []
             );
+            $message->tag()->attach($request->tag_id);
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -474,8 +476,8 @@ class MessagePublishController extends Controller
 
             $message->brand()->sync($request->brand);
             $message->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request) : [])
-            ;
+                !isset($request->save) ? $this->targetUserParam($request) : []);
+            $message->tag()->sync($request->tag_id);
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -520,6 +522,7 @@ class MessagePublishController extends Controller
         );
     }
 
+    // API
     public function fileUpload(FileUpdateApiRequest $request)
     {
         $validated = $request->validated();
@@ -532,6 +535,17 @@ class MessagePublishController extends Controller
         return  response()->json([
             'content_name' => $file_name,
             'content_url' => $file_path
+        ]);
+    }
+
+    public function Tag(Request $request)
+    {
+        $name = $request->tag_label_text;
+        // バリデート
+        $message_tag = MessageTagMaster::firstOrCreate(['name' => $name]);
+
+        return response()->json([
+            'message_tag_id' => $message_tag->id
         ]);
     }
 
