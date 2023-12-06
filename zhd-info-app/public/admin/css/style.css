@@ -1041,7 +1041,3 @@ form .form-group.tag-form .form-control span.tag-form-input {
   margin-left: 30px;
   margin-right: 30px;
 }
-
-.modal-body div:last-child {
-  text-align: right;
-}
