@@ -124,6 +124,7 @@
                                 <th class="text-center" nowrap>タイトル</th>
                                 <th class="text-center" nowrap>検索タグ</th>
                                 <th class="text-center" colspan="2" nowrap>添付ファイル</th>
+                                <th class="text-center" nowrap>再生時間</th>
                                 <th class="text-center" colspan="2" nowrap>掲載期間</th>
                                 <th class="text-center" nowrap>状態</th>
                                 <th class="text-center" colspan="3" nowrap>閲覧率</th>
@@ -172,6 +173,7 @@
                                 <td>
                                     <div>{{$manual->content_file_size}}</div>
                                 </td>
+                                <td class="label-movie-time"> - </td>
                                 <td class="date-time"><div>{{$manual->formatted_start_datetime}}</div></td>
                                 <td class="date-time"><div>{{$manual->formatted_end_datetime}}</div></td>
                                 <td>{{$manual->status->text()}}</td>
