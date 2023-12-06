@@ -117,7 +117,12 @@
 		<div class="pagenation-top">
 		@include('common.admin.pagenation', ['objects' => $message_list])
 			<div>
-				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+				<div>
+					<input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageImportModal" value="インポート">
+				</div>
+				<div>
+					<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+				</div>
 			</div>
 		</div>
 

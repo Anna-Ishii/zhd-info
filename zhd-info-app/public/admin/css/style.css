@@ -1002,12 +1002,16 @@ form .form-group.tag-form .form-control span.tag-form-input {
   padding-bottom: 25px;
   padding-top: 25px;
 }
-.pagenation-top div {
+.pagenation-top > div {
   display: flex; 
   justify-content: center;
   align-items: center;
   height: 0px;
   padding-bottom: 25px;
+}
+
+.pagenation-top > div > *:not(:last-child) {
+  margin-right: 10px;
 }
 
 .progress {
@@ -1021,4 +1025,23 @@ form .form-group.tag-form .form-control span.tag-form-input {
   background-color: #eee;
   color: #333;
   font-size: 12px;
+}
+
+.modal {
+  top: 25%;
+}
+.modal-body {
+  padding: 10px;
+}
+.modal-body > div:first-child {
+  margin-top: 20px;
+}
+.modal-body > div {
+  margin-bottom: 30px;
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+.modal-body div:last-child {
+  text-align: right;
 }
