@@ -45,7 +45,7 @@ class MessagePublishController extends Controller
         $publish_date = $request->input('publish-date');
         $message_list =
             Message::query()
-                ->with('category', 'create_user', 'updated_user', 'brand')
+                ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
                 ->leftjoin('message_user','messages.id', '=', 'message_id')
                 ->selectRaw('
                             messages.*,
@@ -56,7 +56,12 @@ class MessagePublishController extends Controller
                 ->where('messages.organization1_id', $admin->organization1_id)
                 ->groupBy(DB::raw('messages.id'))
                 ->when(isset($q), function ($query) use ($q) {
-                    $query->whereLike('title', $q);
+                    $query->where(function ($query) use ($q) {
+                        $query->whereLike('title', $q)
+                            ->orWhereHas('tag', function ($query) use ($q) {
+                                $query->where('name', $q);
+                            });
+                    });
                 })
                 ->when(isset($status), function ($query) use ($status) {
                     switch ($status) {

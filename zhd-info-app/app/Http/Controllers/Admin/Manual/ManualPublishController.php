@@ -44,7 +44,7 @@ class ManualPublishController extends Controller
 
         $manual_list =
             Manual::query()
-            ->with('category', 'create_user', 'updated_user', 'brand')
+            ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->selectRaw('
                         manuals.*,
@@ -56,7 +56,12 @@ class ManualPublishController extends Controller
             ->groupBy(DB::raw('manuals.id'))
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
-                $query->whereLike('title', $q);
+                $query->where(function ($query) use ($q) {
+                    $query->whereLike('title', $q)
+                        ->orWhereHas('tag', function ($query) use ($q) {
+                            $query->where('name', $q);
+                        });
+                });
             })
             // 検索機能 状態
             ->when(isset($status), function ($query) use ($status) {
