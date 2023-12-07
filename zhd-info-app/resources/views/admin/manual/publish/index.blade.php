@@ -110,7 +110,15 @@
             <div class="pagenation-top">
             @include('common.admin.pagenation', ['objects' => $manual_list])
                 <div>
-                    <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                    <div>
+                        <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#manualImportModal" value="インポート">
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                    </div>
                 </div>
             </div>
 

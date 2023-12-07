@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Message;
 
 use Carbon\Carbon;
 use App\Enums\PublishStatus;
+use App\Exports\MessageListExport;
 use App\Exports\MessageViewRateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
@@ -524,6 +525,18 @@ class MessagePublishController extends Controller
         return Excel::download(
             new MessageViewRateExport($message_id, $request),
             $now->format('Y_m_d-H_i').'-業務連絡エクスポート.csv'
+        );
+    }
+
+    public function exportList(Request $request)
+    {
+        $admin = session('admin');
+        $organization1 = $admin->organization1->name;
+        $now = new Carbon('now');
+        $file_name = '業務連絡_' . $organization1 . $now->format('_Y_m_d') . '.csv';
+        return Excel::download(
+            new MessageListExport($request),
+            $file_name
         );
     }
 

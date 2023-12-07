@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin\Manual;
 
 use App\Enums\PublishStatus;
+use App\Exports\ManualListExport;
 use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
@@ -366,7 +367,7 @@ class ManualPublishController extends Controller
             );
             $manual->content()->createMany($content_data);
             $manual->tag()->sync($request->tag_id);
-            
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -425,6 +426,18 @@ class ManualPublishController extends Controller
         return Excel::download(
             new ManualViewRateExport($manual_id, $request),
             $now->format('Y_m_d-H_i') . '-動画マニュアルエクスポート.csv'
+        );
+    }
+
+    public function exportList(Request $request)
+    {
+        $admin = session('admin');
+        $organization1 = $admin->organization1->name;
+        $now = new Carbon('now');
+        $file_name = '動画マニュアル_' . $organization1 . $now->format('_Y_m_d') . '.csv';
+        return Excel::download(
+            new ManualListExport($request),
+            $file_name
         );
     }
 
