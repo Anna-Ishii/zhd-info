@@ -50,7 +50,6 @@ $(".StopBtn").on('click', function (e) {
 });
 
 $(window).on('load' , function(){
-    $("#messageImportModal").modal('show');
 	let d = new Date();
 	/* datetimepicker */
 	$.datetimepicker.setLocale('ja');
