@@ -58,6 +58,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
             Route::post('/tag', [MessagePublishController::class, 'Tag'])->name('tag');
+            Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');
         });
     });
     // 管理画面-動画マニュアル
@@ -73,6 +74,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
             Route::post('/tag', [ManualPublishController::class, 'Tag'])->name('tag');
+            Route::get('export-list', [ManualPublishController::class, 'exportList'])->name('export-list');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
