@@ -31,8 +31,8 @@
                 <td>{{$message->tag->get(2)?->name}}</td>
                 <td>{{$message->tag->get(3)?->name}}</td>
                 <td>{{$message->tag->get(4)?->name}}</td>
-                <td>{{$message->formatted_start_datetime}}</td>
-                <td>{{$message->formatted_end_datetime}}</td>
+                <td>{{$message->formatted_start_datetime_for_export}}</td>
+                <td>{{$message->formatted_end_datetime_for_export}}</td>
                 <td>{{$message->status->text()}}</td>
                 <td>{{$message->brand_name}}</td>
                 <td>{{$message->o5_name}}</td>
