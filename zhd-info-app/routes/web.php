@@ -59,6 +59,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
             Route::post('/tag', [MessagePublishController::class, 'Tag'])->name('tag');
             Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');
+            Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
         });
     });
     // 管理画面-動画マニュアル

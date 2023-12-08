@@ -31,8 +31,8 @@
                 <td>{{$manual->tag->get(2)?->name}}</td>
                 <td>{{$manual->tag->get(3)?->name}}</td>
                 <td>{{$manual->tag->get(4)?->name}}</td>
-                <td>{{$manual->formatted_start_datetime}}</td>
-                <td>{{$manual->formatted_end_datetime}}</td>
+                <td>{{$manual->formatted_start_datetime_for_export}}</td>
+                <td>{{$manual->formatted_end_datetime_for_export}}</td>
                 <td>{{$manual->status->text()}}</td>
                 <td>{{$manual->brands_string($brand_list)}}</td>
                 <td>{{$manual->description}}</td>

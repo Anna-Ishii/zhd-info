@@ -17,14 +17,22 @@ use App\Models\User;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
+use App\Imports\MessageCsvImport;
+use App\Models\Brand;
+use App\Models\ManualCategory;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
+use App\Models\Organization1;
+use App\Models\Organization3;
+use App\Models\Organization4;
+use App\Models\Organization5;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+use Maatwebsite\Excel\Validators\ValidationException;
 
 class MessagePublishController extends Controller
 {
@@ -556,6 +564,85 @@ class MessagePublishController extends Controller
         ]);
     }
 
+    public function csvUpload($request)
+    {
+        $validated = $request->validated();
+        $file = $request->file;
+
+        $messages = (new MessageCsvImport)
+            ->toCollection($csv, \Maatwebsite\Excel\Excel::CSV);
+
+        $organization_list = Shop::query()
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization5_id',
+                'organization5.name as organization5_name'
+            )
+            ->where('organization1_id', $admin->organization1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_id", "asc")
+            ->orderBy("organization3_id", "asc")
+            ->orderBy("organization4_id", "asc")
+            ->orderBy("organization5_id", "asc")
+            ->get()
+            ->toArray();
+        
+    }
+
+    public function import(Request $request)
+    {
+        $csv = $request->file;
+
+        $admin = session('admin');
+
+        DB::beginTransaction();
+        try {
+            $messages = Excel::import(new MessageCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            // $this->importMessage($messages[0], $admin->organization1);
+
+            DB::commit();
+            return response()->json([
+                'message' => "インポート完了しました"
+            ], 200);
+
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+
+            $errorMessage = [];
+            foreach ($failures as $index => $failure) {
+                $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
+                $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+            }
+
+            return response()->json([
+                'error' => 'Validation failed', 
+                'error_message' => $errorMessage
+            ], 422);
+
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
     public function Tag(Request $request)
     {
         $name = $request->tag_label_text;
@@ -590,41 +677,41 @@ class MessagePublishController extends Controller
         return;
     }
 
-    private function targetUserParam($request): Array {
+    private function targetUserParam($organizarions): Array {
         $shops_id = [];
         $target_user_data = [];
 
         // organizationごとにshopを取得する
-        if (isset($request->organization['org5'])) {
+        if (isset($organizarions->organization['org5'])) {
             $_shops_id = Shop::select('id')
-                ->whereIn('organization5_id', $request->organization['org5'])
-                ->whereIn('brand_id', $request->brand)
+                ->whereIn('organization5_id', $organizarions->organization['org5'])
+                ->whereIn('brand_id', $organizarions->brand)
                 ->get()
                 ->toArray();
             $shops_id = array_merge($shops_id, $_shops_id);
         }
-        if (isset($request->organization['org4'])) {
+        if (isset($organizarions->organization['org4'])) {
             $_shops_id = Shop::select('id')
-                ->whereIn('organization4_id', $request->organization['org4'])
-                ->whereIn('brand_id', $request->brand)
+                ->whereIn('organization4_id', $organizarions->organization['org4'])
+                ->whereIn('brand_id', $organizarions->brand)
                 ->get()
                 ->toArray();
             $shops_id = array_merge($shops_id, $_shops_id);
         }
-        if (isset($request->organization['org3'])) {
+        if (isset($organizarions->organization['org3'])) {
             $_shops_id = Shop::select('id')
-                ->whereIn('organization3_id', $request->organization['org3'])
-                ->whereIn('brand_id', $request->brand)
+                ->whereIn('organization3_id', $organizarions->organization['org3'])
+                ->whereIn('brand_id', $organizarions->brand)
                 ->whereNull('organization4_id')
                 ->whereNull('organization5_id')
                 ->get()
                 ->toArray();
             $shops_id = array_merge($shops_id, $_shops_id);
         }
-        if (isset($request->organization['org2'])) {
+        if (isset($organizarions->organization['org2'])) {
             $_shops_id = Shop::select('id')
-                ->whereIn('organization2_id', $request->organization['org2'])
-                ->whereIn('brand_id', $request->brand)
+                ->whereIn('organization2_id', $organizarions->organization['org2'])
+                ->whereIn('brand_id', $organizarions->brand)
                 ->whereNull('organization4_id')
                 ->whereNull('organization5_id')
                 ->get()
@@ -633,7 +720,7 @@ class MessagePublishController extends Controller
         }
 
         // 取得したshopのリストからユーザーを取得する
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $request->target_roll)->get()->toArray();
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizarions->target_roll)->get()->toArray();
         // ユーザーに業務連絡の閲覧権限を与える
         foreach ($target_users as $target_user) {
             $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
@@ -654,4 +741,73 @@ class MessagePublishController extends Controller
 
         return !($currnt_path == $next_path);
     }
+
+    
+
+    private function tagImportParam(?Array $tags): Array
+    {
+        if(!isset($tags)) return [];
+
+        $tags_pram = [];
+        foreach ($tags as $key => $tag_name) {
+            if(!isset($tag_name)) continue;
+            $tag = MessageTagMaster::firstOrCreate(['name' => trim($tag_name, "\"")]);
+            $tags_pram[] = $tag->id;
+        }
+        return $tags_pram;
+    }
+
+    private  function strToArray(?String $str): Array
+    {
+        if(!isset($str)) return [];
+        
+        $array = explode(',', $str);
+
+        $returnArray = []; 
+        foreach ($array as $key => $value) {
+            $returnArray[] = trim($value, "\"");
+        }
+
+        return $returnArray;
+    }
+
+    private function getBrandAll(Int $org1_id): array
+    {
+        return Brand::query()
+            ->where('organization1_id', '=', $org1_id)
+            ->pluck('id')
+            ->toArray();
+    }
+    
+    private function getOrg3All(Int $org1_id): Array
+    {
+        return Shop::query()
+            ->distinct('organization3.id')
+            ->where('organization1_id', '=', $org1_id)
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->pluck('organization3.id')
+            ->toArray();
+    }
+
+    private function getOrg4All(Int $org1_id): array
+    {
+        return Shop::query()
+            ->distinct('organization4.id')
+            ->where('organization1_id', '=', $org1_id)
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->pluck('organization4.id')
+            ->toArray();
+    }
+
+    private function getOrg5All(Int $org1_id): array
+    {
+        return Shop::query()
+            ->distinct('organization5.id')
+            ->where('organization1_id', '=', $org1_id)
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->pluck('organization5.id')
+            ->toArray();
+            
+    }
+    
 }
