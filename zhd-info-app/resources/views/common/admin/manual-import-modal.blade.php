@@ -13,7 +13,7 @@
                     <input type="file" name="csv" accept=".csv">
                 </div>
                 <div>
-                    最終取り込み日時
+                    最終取り込み日時 {{isset($manual_csv_log) ? $manual_csv_log : ""}}
                 </div>
                 <div class="text-right">
                     <input type="button" class="btn btn-admin" value="インポート">
