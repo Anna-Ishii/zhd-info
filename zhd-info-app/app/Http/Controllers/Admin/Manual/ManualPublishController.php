@@ -113,6 +113,13 @@ class ManualPublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
+        $csv_log = DB::table('manual_csv_logs')
+        ->select('imported_datetime')
+        ->orderBy('id', 'desc')
+            ->limit(1)
+            ->pluck('imported_datetime');
+        view()->share('manual_csv_log', isset($csv_log) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') : NULL);
+
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
             'manual_list' => $manual_list,
