@@ -74,7 +74,7 @@ class ManualListExport implements FromView, ShouldAutoSize
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
                 $query->where(function ($query) use ($q) {
-                    $query->whereLike('title', $q)
+                    $query->whereLike('manuals.title', $q)
                         ->orWhereHas('tag', function ($query) use ($q) {
                             $query->where('name', $q);
                         });
