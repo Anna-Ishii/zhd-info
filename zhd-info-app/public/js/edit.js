@@ -214,3 +214,120 @@ $(document).on('input', 'textarea[name="description"], textarea[data-variable-na
     var counterText = '入力数 ' + textLength + '/' + maxLength + '文字';
     $(this).parent().siblings('div.counter').text(counterText);
 })
+
+
+$('#messageImportModal input[type="button"]').click(function(e){
+	e.preventDefault();
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let formData = new FormData();
+	formData.append("file", $('#messageImportModal input[name="csv"]')[0].files[0]);
+	
+	var overlay = document.getElementById('overlay');
+	overlay.style.display = 'block';
+
+	$('#messageImportModal .modal-body .alert-danger').remove();
+	$.ajax({
+	url: '/admin/message/publish/import',
+	type: 'post',
+	data: formData,
+	processData: false,
+	contentType: false,
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+	}).done(function(response){
+		overlay.style.display = 'none';
+		$('#messageImportModal .modal-body').replaceWith(successTamplate('/admin/message/publish'));
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		overlay.style.display = 'none';
+
+		$('#messageImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		// labelForm.parent().find('.text-danger').remove();
+		
+		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
+			let error_li;
+			
+			errorMessage['errors'].forEach((error) => {
+				$('#messageImportModal .modal-body .alert ul').append(
+					`<li>${errorMessage['row']}行目：${error}</li>`
+				);
+			})
+		})
+		if(errorThrown) {
+			$('#messageImportModal .modal-body .alert ul').append(
+				`<li>エラーが発生しました</li>`
+			);
+		}
+	});
+})
+
+
+$('#manualImportModal input[type="button"]').click(function(e){
+	e.preventDefault();
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let formData = new FormData();
+	formData.append("file", $('#manualImportModal input[name="csv"]')[0].files[0]);
+	
+	var overlay = document.getElementById('overlay');
+	overlay.style.display = 'block';
+
+	$('#manualImportModal .modal-body .alert-danger').remove();
+	$.ajax({
+	url: '/admin/manual/publish/import',
+	type: 'post',
+	data: formData,
+	processData: false,
+	contentType: false,
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+	}).done(function(response){
+		overlay.style.display = 'none';
+		$('#manualImportModal .modal-body').replaceWith(successTamplate('/admin/manual/publish'));
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		overlay.style.display = 'none';
+
+		$('#manualImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		// labelForm.parent().find('.text-danger').remove();
+		
+		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
+			let error_li;
+			
+			errorMessage['errors'].forEach((error) => {
+				$('#manualImportModal .modal-body .alert ul').append(
+					`<li>${errorMessage['row']}行目：${error}</li>`
+				);
+			})
+		})
+		if(errorThrown) {
+			$('#manualImportModal .modal-body .alert ul').append(
+				`<li>エラーが発生しました</li>`
+			);
+		}
+	});
+})
+
+
+
+const successTamplate = (path) => `
+	<div class="modal-body">
+		<div class="text-center">
+			<div>
+				csv取り込み完了しました
+			</div>
+			<div>
+				<a href="${path}" class=" btn btn-admin">一覧に戻る</a>
+			</div>
+		</div>
+	</div>
+`

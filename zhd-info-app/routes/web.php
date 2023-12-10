@@ -76,6 +76,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
             Route::post('/tag', [ManualPublishController::class, 'Tag'])->name('tag');
             Route::get('export-list', [ManualPublishController::class, 'exportList'])->name('export-list');
+            Route::post('import', [ManualPublishController::class, 'Import'])->name('import');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
