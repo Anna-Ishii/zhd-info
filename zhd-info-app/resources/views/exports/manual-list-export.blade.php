@@ -34,7 +34,7 @@
                 <td>{{$manual->formatted_start_datetime_for_export}}</td>
                 <td>{{$manual->formatted_end_datetime_for_export}}</td>
                 <td>{{$manual->status->text()}}</td>
-                <td>{{$manual->brands_string($brand_list)}}</td>
+                <td>{{$manual->brand_name}}</td>
                 <td>{{$manual->description}}</td>
                 @foreach ($manual->content as $content)
                     <td>{{$content->title}}</td>
