@@ -35,25 +35,42 @@ class ManualListExport implements FromView, ShouldAutoSize
         $rate = $this->request->input('rate');
         $brand_id = $this->request->input('brand');
         $publish_date = $this->request->input('publish-date');
+        $cte = DB::table('manuals')
+                    ->select([
+                        'manuals.id as manual_id',
+                        DB::raw('
+                            CASE
+                                WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
+                                WHEN (
+                                    SELECT COUNT(DISTINCT _b.name) 
+                                    FROM brands as _b
+                                    WHERE _b.organization1_id = manuals.organization1_id
+                                ) = COUNT(DISTINCT b.name) THEN "全て"
+                                ELSE group_concat(distinct b.name)
+                            END as brand_name')
+                        ])
+                        ->leftjoin('manual_brand as m_b', 'manuals.id', '=', 'm_b.manual_id')
+                        ->leftjoin('brands as b', 'm_b.brand_id', '=', 'b.id')
+                        ->groupBy('manuals.id');
 
         $manual_list =
             Manual::query()
+            ->select([
+                'manuals.*',
+                DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
+                DB::raw('count(distinct manualcontents.id) as content_counts'),
+                'org.*'
+            ])
             ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->leftJoin('manualcontents', function ($join) {
                 $join->on('manuals.id', '=', 'manualcontents.manual_id');
-                // ここで適切な条件を追加して重複を避ける
             })
-            ->selectRaw(
-            '
-                        manuals.*,
-                        ifnull(sum(manual_user.read_flg),0) as read_users, 
-                        count(manual_user.user_id) as total_users,
-                        round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate,
-                        count(distinct manualcontents.id) as content_counts
-                        ')
+            ->leftJoinSub($cte, 'org', function ($join) {
+                $join->on('manuals.id', '=', 'org.manual_id');
+            })
             ->where('manuals.organization1_id', $admin->organization1_id)
-            ->groupBy(DB::raw('manuals.id'))
+            ->groupBy('manuals.id')
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
                 $query->where(function ($query) use ($q) {

@@ -32,12 +32,11 @@ class MessageListExport implements FromView, ShouldAutoSize
         $brand_id = $this->request->input('brand');
         $label = $this->request->input('label');
         $publish_date = $this->request->input('publish-date');
-        $message_list =
-            Message::query()
-                ->select([
-                    'messages.*',
-                    DB::raw('round((sum(message_user . read_flg) / count(message_user . user_id)) * 100, 1) as view_rate'),
-                    DB::raw('CASE
+        $cte = DB::table('messages')
+                    ->select([
+                        'messages.id as message_id',
+                        DB::raw('
+                            CASE
                                 WHEN (COUNT(DISTINCT o5.name)) = 0 THEN ""
                                 WHEN (
                                     SELECT COUNT(DISTINCT organization5_id) 
@@ -46,7 +45,8 @@ class MessageListExport implements FromView, ShouldAutoSize
                                 ) = COUNT(DISTINCT o5.name) THEN "全て"
                                 ELSE group_concat(distinct o5.name)
                             END as o5_name'),
-                    DB::raw('CASE
+                        DB::raw('
+                            CASE
                                 WHEN (COUNT(DISTINCT o4.name)) = 0 THEN ""
                                 WHEN (
                                     SELECT COUNT(DISTINCT organization4_id) 
@@ -55,7 +55,8 @@ class MessageListExport implements FromView, ShouldAutoSize
                                 ) = COUNT(DISTINCT o4.name) THEN "全て"
                                 ELSE group_concat(distinct o4.name)
                             END as o4_name'),
-                    DB::raw('CASE
+                        DB::raw('
+                            CASE
                                 WHEN (COUNT(DISTINCT o3.name)) = 0 THEN ""
                                 WHEN (
                                     SELECT COUNT(DISTINCT organization3_id) 
@@ -64,7 +65,8 @@ class MessageListExport implements FromView, ShouldAutoSize
                                 ) = COUNT(DISTINCT o3.name) THEN "全て"
                                 ELSE group_concat(distinct o3.name)
                             END as o3_name'),
-                    DB::raw('CASE
+                        DB::raw('
+                            CASE
                                 WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
                                 WHEN (
                                     SELECT COUNT(DISTINCT _b.name) 
@@ -73,15 +75,27 @@ class MessageListExport implements FromView, ShouldAutoSize
                                 ) = COUNT(DISTINCT b.name) THEN "全て"
                                 ELSE group_concat(distinct b.name)
                             END as brand_name')
+                    ])
+                    ->leftjoin('message_organization as m_o', 'messages.id', '=', 'm_o.message_id')
+                    ->leftjoin('organization5 as o5', 'm_o.organization5_id', '=', 'o5.id')
+                    ->leftjoin('organization4 as o4', 'm_o.organization4_id', '=', 'o4.id')
+                    ->leftjoin('organization3 as o3', 'm_o.organization3_id', '=', 'o3.id')
+                    ->leftjoin('message_brand as m_b', 'messages.id', '=', 'm_b.message_id')
+                    ->leftjoin('brands as b', 'm_b.brand_id', '=', 'b.id')
+                    ->groupBy('messages.id');
+        
+        $message_list =
+            Message::query()
+                ->select([
+                    'messages.*',
+                    DB::raw('round((sum(message_user . read_flg) / count(message_user . user_id)) * 100, 1) as view_rate'),
+                    'org.*'
                 ])
                 ->with('category', 'brand', 'tag')
                 ->leftjoin('message_user', 'messages.id', '=', 'message_id')
-                ->leftjoin('message_organization as m_o', 'messages.id', '=', 'm_o.message_id')
-                ->leftjoin('organization5 as o5', 'm_o.organization5_id', '=', 'o5.id')
-                ->leftjoin('organization4 as o4', 'm_o.organization4_id', '=', 'o4.id')
-                ->leftjoin('organization3 as o3', 'm_o.organization3_id', '=', 'o3.id')
-                ->leftjoin('message_brand as m_b', 'messages.id', '=', 'm_b.message_id')
-                ->leftjoin('brands as b', 'm_b.brand_id', '=', 'b.id')
+                ->leftJoinSub($cte, 'org', function($join) {
+                    $join->on('messages.id', '=', 'org.message_id');
+                })
                 ->where('messages.organization1_id', $admin->organization1_id)
                 ->groupBy('messages.id')
                 ->when(isset($q), function ($query) use ($q) {
