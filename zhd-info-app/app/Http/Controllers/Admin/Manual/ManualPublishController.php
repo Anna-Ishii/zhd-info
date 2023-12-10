@@ -12,6 +12,7 @@ use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Manual\FileUpdateApiRequest;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
+use App\Imports\ManualCsvImport;
 use App\Models\Manual;
 use App\Models\ManualCategory;
 use App\Models\ManualContent;
@@ -454,6 +455,47 @@ class ManualPublishController extends Controller
                     'content_name' => $file_name,
                     'content_url' => $file_path
                 ]);
+    }
+
+    public function import(Request $request)
+    {
+        $csv = $request->file;
+
+        $admin = session('admin');
+
+        DB::beginTransaction();
+        try {
+            $messages = Excel::import(new ManualCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            // $this->importMessage($messages[0], $admin->organization1);
+            DB::table('manual_csv_logs')->insert([
+                'imported_datetime' => new Carbon('now'),
+                'is_success' => true
+            ]);
+            DB::commit();
+            return response()->json([
+                'message' => "インポート完了しました"
+            ], 200);
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+
+            $errorMessage = [];
+            foreach ($failures as $index => $failure) {
+                $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
+                $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+            }
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'error_message' => $errorMessage
+            ], 422);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
     }
 
     public function Tag(Request $request)

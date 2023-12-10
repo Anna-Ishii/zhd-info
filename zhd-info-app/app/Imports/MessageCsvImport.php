@@ -87,11 +87,11 @@ class MessageCsvImport implements
             $target_roll = $message->roll()->pluck('id')->toArray();
 
             $message->emergency_flg = isset($emergency_flg);
-            $message->category = ManualCategory::where('name', $category)->select('id')->first();
+            $message->category_id = $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL;
             $message->title = $title;
             $message->start_datetime = $this->parseDateTime($start_datetime);
             $message->end_datetime = $this->parseDateTime($end_datetime);
-
+            $message->save();
             MessageOrganization::where('message_id', $message->id)->delete();
 
             if (isset($org5_param)) {
@@ -135,6 +135,7 @@ class MessageCsvImport implements
                 ]) : []
             );
             $message->tag()->sync($this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]));
+            
         }
 
     }

@@ -613,7 +613,10 @@ class MessagePublishController extends Controller
         try {
             $messages = Excel::import(new MessageCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
             // $this->importMessage($messages[0], $admin->organization1);
-
+            DB::table('message_csv_logs')->insert([
+                'imported_datetime' => new Carbon('now'),
+                'is_success' => true
+            ]);
             DB::commit();
             return response()->json([
                 'message' => "インポート完了しました"
