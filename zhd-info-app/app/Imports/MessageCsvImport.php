@@ -3,7 +3,6 @@
 namespace App\Imports;
 
 use App\Models\Brand;
-use App\Models\ManualCategory;
 use App\Models\Message;
 use App\Models\MessageCategory;
 use App\Models\MessageOrganization;
@@ -15,10 +14,8 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Rules\Import\OrganizationRule;
 use Carbon\Carbon;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
@@ -152,14 +149,6 @@ class MessageCsvImport implements
     {
         return 2;
     }
-
-    // public function prepareForValidation($data, $index)
-    // {
-    //     // $data['13'] = $this->strToArray($data['13']);
-    //     // $data['14'] = $this->strToArray($data['14']);
-    //     // $data['15'] = $this->strToArray($data['15']);
-    //     // return $data;
-    // }
 
     public function rules(): array
     {
