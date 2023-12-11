@@ -127,7 +127,7 @@ class MessagePublishController extends Controller
                                 ->orderBy('id', 'desc')
                                  ->limit(1)
                                  ->pluck('imported_datetime');
-        view()->share('message_csv_log', isset($csv_log) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') :NULL);
+        view()->share('message_csv_log', isset($csv_log[0]) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') :NULL);
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
