@@ -952,6 +952,7 @@ form .form-group.tag-form .form-control {
   display: flex;
   align-items: center;
   height: 100%;
+  cursor: text;
 }
 
 form .form-group.tag-form > div {
