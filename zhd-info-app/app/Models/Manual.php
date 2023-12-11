@@ -158,6 +158,14 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getFormattedStartDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
+    }
+
+
     public function getFormattedEndDatetimeAttribute()
     {
         $before_datetime = $this->attributes['end_datetime'];
@@ -165,6 +173,12 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getFormattedEndDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
+    }
     // public function getViewRateAttribute(): float
     // {
     //     $user_count = $this->withCount('user')->get();
