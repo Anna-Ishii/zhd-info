@@ -983,6 +983,10 @@ form .form-group.tag-form .form-control span.tag-form-input {
   outline: none;
 }
 
+.required {
+  font-size: 17px;
+}
+
 .under-quota div{
   color: #333;
   font-weight: bold;
