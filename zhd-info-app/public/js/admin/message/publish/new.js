@@ -3,7 +3,7 @@ $(document).ready(function(){
         event.preventDefault();
         // ファイルは送信しない
         $('input[type="file"]').prop('disabled', true);
-        $('#form').submit();
+        $('#form').off('submit').submit();
     });
 });
 $(document).on('change', 'input[type="file"]', function() {
