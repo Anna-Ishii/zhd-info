@@ -237,7 +237,7 @@ $('#messageImportModal input[type="button"]').click(function(e){
 	},
 	}).done(function(response){
 		overlay.style.display = 'none';
-		$('#messageImportModal .modal-body').replaceWith(successTamplate('/admin/message/publish'));
+		$('#messageImportModal .modal-body').replaceWith(successTamplate);
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
 		overlay.style.display = 'none';
@@ -288,7 +288,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 	},
 	}).done(function(response){
 		overlay.style.display = 'none';
-		$('#manualImportModal .modal-body').replaceWith(successTamplate('/admin/manual/publish'));
+		$('#manualImportModal .modal-body').replaceWith(successTamplate);
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
 		overlay.style.display = 'none';
@@ -319,14 +319,14 @@ $('#manualImportModal input[type="button"]').click(function(e){
 
 
 
-const successTamplate = (path) => `
+const successTamplate = `
 	<div class="modal-body">
 		<div class="text-center">
 			<div>
 				csv取り込み完了しました
 			</div>
 			<div>
-				<a href="${path}" class=" btn btn-admin">一覧に戻る</a>
+				<a href="" class="btn btn-admin" onClick="location.reload()">一覧に戻る</a>
 			</div>
 		</div>
 	</div>
