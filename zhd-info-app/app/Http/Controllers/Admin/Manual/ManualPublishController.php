@@ -249,7 +249,16 @@ class ManualPublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : [] 
             );
             $manual->content()->createMany($this->manualContentsParam($request));
-            $manual->tag()->attach($request->tag_id);
+
+            if (isset($request->tag_name)) {
+                $tag_ids = [];
+                foreach ($request->tag_name as $tag_name) {
+                    $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
+                    $tag_ids[] = $tag->id;
+                }
+                $manual->tag()->attach($tag_ids);
+            }
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -374,7 +383,15 @@ class ManualPublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : [] 
             );
             $manual->content()->createMany($content_data);
-            $manual->tag()->sync($request->tag_id);
+
+            if (isset($request->tag_name)) {
+                $tag_ids = [];
+                foreach ($request->tag_name as $tag_name) {
+                    $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
+                    $tag_ids[] = $tag->id;
+                }
+                $manual->tag()->sync($tag_ids);
+            }
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -504,18 +521,7 @@ class ManualPublishController extends Controller
             ], 500);
         }
     }
-
-    public function Tag(Request $request)
-    {
-        $name = $request->tag_label_text;
-        // バリデート
-        $message_tag = ManualTagMaster::firstOrCreate(['name' => $name]);
-
-        return response()->json([
-            'message_tag_id' => $message_tag->id
-        ]);
-    }
-
+    
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
@@ -596,7 +602,9 @@ class ManualPublishController extends Controller
         return $content_url;
 
     }
-    private function rollbackRegisterFile($request_file_path): Void {
+    private function rollbackRegisterFile($request_file_path): Void 
+    {
+        if(!(isset($request_file_path))) return;
         $content_url = 'uploads/' . basename($request_file_path);
         $current_path = storage_path('app/' . $request_file_path);
         $next_path = public_path($content_url);
