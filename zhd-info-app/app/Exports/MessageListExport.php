@@ -4,14 +4,13 @@ namespace App\Exports;
 
 use App\Enums\PublishStatus;
 use App\Models\Message;
-use App\Models\Organization5;
-use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class MessageListExport implements FromView, ShouldAutoSize
+class MessageListExport implements FromView, ShouldAutoSize, WithCustomCsvSettings
 {
     protected $manual_id;
     protected $request;
@@ -19,6 +18,13 @@ class MessageListExport implements FromView, ShouldAutoSize
     public function __construct($request)
     {
         $this->request = $request;
+    }
+
+    public function getCsvSettings(): array
+    {
+        return [
+            'use_bom' => true
+        ];
     }
 
     public function view(): View

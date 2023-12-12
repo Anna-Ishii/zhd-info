@@ -39,7 +39,7 @@
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal" name="form">
         @csrf
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger">*<span></label>
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
                 @foreach ($category_list as $category)
                 <label class="mr16">
@@ -51,7 +51,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger">*<span></label>
+            <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger required">*<span></label>
             <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{old('title')}}" id="title">
             </div>
@@ -61,21 +61,22 @@
             <label class="col-lg-2 control-label">検索タグ</label>
             <div class="col-lg-4">
                 <div class="form-control">
-                    @if (old('tag_id'))
-                         @foreach (old('tag_id') as $index => $tag_id)
+                    @if (old('tag_name'))
+                         @foreach (old('tag_name') as $index => $tag_name)
                             <span class="focus:outline-none tag-form-label" nowrap>
-                                {{old("tag_name.$index")}}<span class="tag-form-delete">×</span>
-                                <input type="hidden" name="tag_name[]" value='{{old("tag_name.$index")}}'>
-                                <input type="hidden" name="tag_id[]" value="{{$tag_id}}">
+                                {{$tag_name}}<span class="tag-form-delete">×</span>
+                                <input type="hidden" name="tag_name[]" value='{{$tag_name}}'>
                             </span>
                         @endforeach
                     @endif
                     <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
                 </div>
+                <div>複数入力する場合は「,」で区切る</div> 
             </div>
+            
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">ファイル添付<span class="text-danger">*<span></label>
+            <label class="col-lg-2 control-label">ファイル添付<span class="text-danger required">*<span></label>
             <div class="col-lg-4">
                 <label class="inputFile form-control">
                     <span class="fileName">{{old('file_name') ? old('file_name') : "ファイルを選択またはドロップ"}}</span>
@@ -92,14 +93,14 @@
         <div class="manualVariableArea">
             <div class="manualVariableBox" id="cloneTarget">
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
+                    <label class="col-lg-2 control-label">手順名<span class="text-danger required">*<span></label>
                     <div class="col-lg-4">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
                     <div class="counter">入力数 0/20文字</div>
                 </div>
                 <div class="form-group">
-                    <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger">*<span></label>
+                    <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger required">*<span></label>
                     <div class="col-lg-4">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
@@ -131,7 +132,7 @@
                 @foreach (old('manual_flow') as $old_manual)
                     <div class="manualVariableBox">
                         <div class="form-group">
-                            <label class="col-lg-2 control-label">手順名<span class="text-danger">*<span></label>
+                            <label class="col-lg-2 control-label">手順名<span class="text-danger required">*<span></label>
                             <div class="col-lg-4">
                                 <input class="form-control" value="{{$old_manual['title']}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$loop->index}}][title]">
                             </div>
@@ -197,7 +198,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">対象業態<span class="text-danger">*<span></label>
+            <label class="col-lg-2 control-label">対象業態<span class="text-danger required">*<span></label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -220,6 +221,11 @@
                 <textarea class="form-control" name="description" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description')}}</textarea>
             </div>
             <div class="counter">入力数 {{mb_strlen(old('description', ''))}}/30文字</div>
+        </div>
+        <div class="form-group text-left">
+            <div class="col-lg-2 control-label">
+                <span class="text-danger required">*</span>：必須項目
+            </div>
         </div>
         <div class="form-group text-center">
                 <div class="col-lg-2 col-lg-offset-2">

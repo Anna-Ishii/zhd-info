@@ -9,8 +9,9 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class ManualListExport implements FromView, ShouldAutoSize
+class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSettings
 {
     protected $manual_id;
     protected $request;
@@ -20,6 +21,13 @@ class ManualListExport implements FromView, ShouldAutoSize
         $this->request = $request;
     }
 
+    public function getCsvSettings(): array
+    {
+        return [
+            'use_bom' => true
+        ];
+    }
+    
     public function view(): View
     {
         $admin = session('admin');

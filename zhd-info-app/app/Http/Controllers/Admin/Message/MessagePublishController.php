@@ -20,6 +20,7 @@ use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
 use App\Models\Brand;
 use App\Models\ManualCategory;
+use App\Models\ManualTagMaster;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\Organization1;
@@ -127,7 +128,7 @@ class MessagePublishController extends Controller
                                 ->orderBy('id', 'desc')
                                  ->limit(1)
                                  ->pluck('imported_datetime');
-        view()->share('message_csv_log', isset($csv_log) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') :NULL);
+        view()->share('message_csv_log', isset($csv_log[0]) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') :NULL);
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
@@ -338,7 +339,16 @@ class MessagePublishController extends Controller
             $message->user()->attach(
                 !isset($request->save) ? $this->targetUserParam($request) : []
             );
-            $message->tag()->attach($request->tag_id);
+
+            if(isset($request->tag_name)) {
+                $tag_ids = [];
+                foreach ($request->tag_name as $tag_name) {
+                    $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
+                    $tag_ids[] = $tag->id;
+                }
+                $message->tag()->attach($tag_ids);
+            }
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -498,8 +508,17 @@ class MessagePublishController extends Controller
 
             $message->brand()->sync($request->brand);
             $message->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request) : []);
-            $message->tag()->sync($request->tag_id);
+                !isset($request->save) ? $this->targetUserParam($request) : []
+            );
+
+            if (isset($request->tag_name)) {
+                $tag_ids = [];
+                foreach ($request->tag_name as $tag_name) {
+                    $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
+                    $tag_ids[] = $tag->id;
+                }
+                $message->tag()->sync($tag_ids);
+            }
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -654,17 +673,6 @@ class MessagePublishController extends Controller
         }
     }
 
-    public function Tag(Request $request)
-    {
-        $name = $request->tag_label_text;
-        // バリデート
-        $message_tag = MessageTagMaster::firstOrCreate(['name' => $name]);
-
-        return response()->json([
-            'message_tag_id' => $message_tag->id
-        ]);
-    }
-
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
@@ -681,6 +689,7 @@ class MessagePublishController extends Controller
 
     private function rollbackRegisterFile($request_file_path): Void
     {
+        if (!(isset($request_file_path))) return;
         $content_url = 'uploads/' . basename($request_file_path);
         $current_path = storage_path('app/' . $request_file_path);
         $next_path = public_path($content_url);

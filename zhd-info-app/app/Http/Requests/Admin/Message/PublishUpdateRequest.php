@@ -16,7 +16,7 @@ class PublishUpdateRequest extends FormRequest
 
         return [
             'title' => 'required|max:20',
-            'tag_id' => ['nullable', new TagRule()],
+            'tag_name' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
             'emergency_flg' => 'nullable',

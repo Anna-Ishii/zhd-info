@@ -57,7 +57,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
-            Route::post('/tag', [MessagePublishController::class, 'Tag'])->name('tag');
             Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
         });
@@ -74,7 +73,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
             Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
-            Route::post('/tag', [ManualPublishController::class, 'Tag'])->name('tag');
             Route::get('export-list', [ManualPublishController::class, 'exportList'])->name('export-list');
             Route::post('import', [ManualPublishController::class, 'Import'])->name('import');
         });
