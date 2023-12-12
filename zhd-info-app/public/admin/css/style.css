@@ -948,11 +948,17 @@ form.form-horizontal .form-group:last-child {
 }
 
 form .form-group.tag-form .form-control {
-  padding-left: 5px;
+  padding-left: 10px;
   display: flex;
   align-items: center;
   height: 100%;
   cursor: text;
+}
+
+form .form-group.tag-form .form-control:focus-within {
+  border-color: #66afe9;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+  outline: 0;
 }
 
 form .form-group.tag-form > div {
@@ -981,6 +987,11 @@ form .form-group.tag-form .form-control span.tag-form-delete {
 
 form .form-group.tag-form .form-control span.tag-form-input {
   outline: none;
+}
+
+form .form-group.tag-form .form-control span.tag-form-input:focus {
+  caret-color: #000;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0);
 }
 
 .required {
