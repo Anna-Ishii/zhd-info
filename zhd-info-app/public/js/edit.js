@@ -330,4 +330,56 @@ const successTamplate = `
 			</div>
 		</div>
 	</div>
-`
+`;
+
+//
+// 登録編集画面のタグ機能
+//
+// タグを削除
+$(document).on('click', '.tag-form-delete', function() {
+    $(this).parent().remove();
+})
+
+// カーソルをフォーカスする
+$('.tag-form .form-control').click(function() {
+    $('.tag-form-input').focus();
+})
+
+// 入力を監視する
+$(document).on('keydown', '.tag-form-input', function(e) {
+
+    let tagLabelText = $(this)[0].innerText;
+    // エンターの入力
+    if(e.keyCode == 13) {
+        if(tagLabelText == "") return false;
+
+        $(this).before(createTag(tagLabelText));
+        $(this)[0].innerText = "";
+        return false;
+    }
+    
+    // 「,」の入力 
+    if(e.keyCode == 188) {
+        $(this).before(createTag(tagLabelText));
+        $(this)[0].innerText = "";
+        return false;
+    }
+
+    // Backspace
+    if(e.keyCode == 8) {
+        if($(this)[0].innerText == "") {
+            $(this).prev().remove();
+        }
+    }
+})
+
+function createTag(tagLabelText) {
+    return (
+        `
+        <span class="focus:outline-none tag-form-label">
+            ${tagLabelText}<span class="tag-form-delete">×</span>
+            <input type="hidden" name="tag_name[]" value="${tagLabelText}">
+        </span>
+        `
+    )
+}

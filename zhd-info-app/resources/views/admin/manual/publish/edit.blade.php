@@ -61,12 +61,11 @@
             <div class="col-lg-4">
                 <div class="form-control">
                     @if(request()->old())
-                        @if (old('tag_id'))
-                            @foreach (old('tag_id') as $index => $tag_id)
+                        @if (old('tag_name'))
+                            @foreach (old('tag_name') as $index => $tag_name)
                                 <span class="focus:outline-none tag-form-label">
-                                    {{old("tag_name.$index")}}<span class="tag-form-delete">×</span>
-                                    <input type="hidden" name="tag_name[]" value='{{old("tag_name.$index")}}'>
-                                    <input type="hidden" name="tag_id[]" value="{{$tag_id}}">
+                                    {{$tag_name}}<span class="tag-form-delete">×</span>
+                                    <input type="hidden" name="tag_name[]" value='{{$tag_name}}'>
                                 </span>
                             @endforeach
                         @endif
@@ -75,7 +74,6 @@
                             <span class="focus:outline-none tag-form-label">
                                 {{$tag->name}}<span class="tag-form-delete">×</span>
                                 <input type="hidden" name="tag_name[]" value='{{$tag->name}}'>
-                                <input type="hidden" name="tag_id[]" value="{{$tag->id}}">
                             </span>
                         @endforeach
                     @endif

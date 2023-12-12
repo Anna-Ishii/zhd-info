@@ -19,7 +19,7 @@ class PublishUpdateRequest extends FormRequest
 
         return [
             'title' => 'required|max:20',
-            'tag_id' => ['nullable', new TagRule()],
+            'tag_name' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'description' => 'nullable|max:30',
             'category_id' => 'required',
