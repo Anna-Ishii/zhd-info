@@ -153,13 +153,18 @@ body {
 }
 .sidebar ul.nav .nav-current-page .nav-second-level li:first-child{
  background-color: #337ab7;
- pointer-events: none;
 }
 .sidebar ul.nav .nav-current-page .nav-second-level li:first-child:hover{
  background-color: white;
 }
 .sidebar ul.nav .nav-current-page .nav-second-level li:first-child a{
  color: white;
+}
+.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a:hover{
+ background-color: #337ab7;
+}
+.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a:focus{
+ background-color: #337ab7;
 }
 @media (min-width: 768px) {
   .sidebar {
