@@ -15,6 +15,8 @@ use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Imports\ManualCsvImport;
 use App\Models\Manual;
 use App\Models\ManualCategory;
+use App\Models\ManualCategoryLevel1;
+use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
 use App\Models\ManualTagMaster;
 use App\Models\Shop;
@@ -24,7 +26,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
-use PhpOffice\PhpSpreadsheet\Calculation\Logical\Boolean;
 
 class ManualPublishController extends Controller
 {
@@ -112,13 +113,6 @@ class ManualPublishController extends Controller
             ->orderBy('manuals.number', 'desc')
             ->paginate(50)
             ->appends(request()->query());
-
-        $csv_log = DB::table('manual_csv_logs')
-        ->select('imported_datetime')
-        ->orderBy('id', 'desc')
-            ->limit(1)
-            ->pluck('imported_datetime');
-        view()->share('manual_csv_log', isset($csv_log[0]) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') : NULL);
 
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
@@ -290,12 +284,22 @@ class ManualPublishController extends Controller
             ->orderBy("order_no")
             ->get();
 
+        $new_category_list = ManualCategoryLevel2::query()
+                                ->select([
+                                    'manual_category_level2s.id as id',
+                                    DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+                                ])
+                                ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+                                ->get();
+
+
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'category_list' => $category_list,
             'brand_list' => $brand_list,
             'target_brand' => $target_brand,
-            'contents' => $contents
+            'contents' => $contents,
+            'new_category_list' => $new_category_list,
 
         ]);
     }
@@ -313,6 +317,8 @@ class ManualPublishController extends Controller
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
         $manual_params['category_id'] = $request->category_id;
+        $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
+        $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if($this->isChangedFile($manual->content_url, $request->file_path)) {
@@ -624,6 +630,16 @@ class ManualPublishController extends Controller
         }
         return $content_ids;
 
+    }
+
+    private function level1CategoryParam($level2_category_id): ?Int {
+        if(!isset($level2_category_id) || $level2_category_id == "null") return null;
+        return ManualCategoryLevel2::find($level2_category_id)->level1;
+    }
+
+    private function level2CategoryParam($level2_category_id): ?Int {
+        if($level2_category_id == "null") return null;
+        return $level2_category_id;
     }
 }
 
