@@ -334,11 +334,11 @@ $('#manualImportModal input[type="button"]').click(function(e){
 const successTamplate = `
 	<div class="modal-body">
 		<div class="text-center">
-			<div>
+			<div class="form-group">
 				csv取り込み完了しました
 			</div>
-			<div>
-				<a href="" class="btn btn-admin" onClick="location.reload()">一覧に戻る</a>
+			<div class="text-right">
+				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
 			</div>
 		</div>
 	</div>
