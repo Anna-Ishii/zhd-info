@@ -49,6 +49,27 @@
                 @endforeach
             </div>
         </div>
+        <div class="form-group form-group-sm">
+            <label class="col-lg-2 control-label">新カテゴリ<span class="text-danger required">*<span></label>
+            <div class="col-lg-6">      
+                <label class="mr16">
+                    <select class="form-control" name="new_category_id">
+                        <option value="null">カテゴリを選択</option>
+                        @if(request()->old())
+                            @foreach ($new_category_list as $category)
+                                <option class="mr8" value="{{$category->id}}" 
+                                    @if(old('new_category_id') == $category->id) selected @endif>{{ $category->name }}</option>
+                            @endforeach
+                        @else
+                            @foreach ($new_category_list as $category)
+                                <option class="mr8" value="{{$category->id}}" 
+                                    @if($manual->category_level2_id == $category->id) selected @endif>{{ $category->name }}</option>
+                            @endforeach
+                        @endif
+                    </select>
+                </label>
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger required">*<span></label>
             <div class="col-lg-4">
