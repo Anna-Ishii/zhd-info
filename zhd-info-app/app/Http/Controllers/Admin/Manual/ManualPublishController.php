@@ -384,14 +384,14 @@ class ManualPublishController extends Controller
             );
             $manual->content()->createMany($content_data);
 
-            if (isset($request->tag_name)) {
-                $tag_ids = [];
-                foreach ($request->tag_name as $tag_name) {
-                    $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
-                    $tag_ids[] = $tag->id;
-                }
-                $manual->tag()->sync($tag_ids);
+            
+            $tag_ids = [];
+            foreach ($request->input('tag_name', []) as $tag_name) {
+                $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
+                $tag_ids[] = $tag->id;
             }
+            $manual->tag()->sync($tag_ids);
+            
 
             DB::commit();
         } catch (\Throwable $th) {

@@ -511,14 +511,13 @@ class MessagePublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : []
             );
 
-            if (isset($request->tag_name)) {
-                $tag_ids = [];
-                foreach ($request->tag_name as $tag_name) {
-                    $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
-                    $tag_ids[] = $tag->id;
-                }
-                $message->tag()->sync($tag_ids);
+            $tag_ids = [];
+            foreach ($request->input('tag_name', []) as $tag_name) {
+                $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
+                $tag_ids[] = $tag->id;
             }
+            $message->tag()->sync($tag_ids);
+            
 
             DB::commit();
         } catch (\Throwable $th) {
