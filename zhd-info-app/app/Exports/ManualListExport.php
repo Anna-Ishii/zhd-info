@@ -38,6 +38,7 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
 
         // request
         $category_id = $this->request->input('category');
+        $new_category_id = $this->request->input('new_category');
         $status = PublishStatus::tryFrom($this->request->input('status'));
         $q = $this->request->input('q');
         $rate = $this->request->input('rate');
@@ -69,7 +70,7 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
                 DB::raw('count(distinct manualcontents.id) as content_counts'),
                 'org.*'
             ])
-            ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
+            ->with('category', 'create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->leftJoin('manualcontents', function ($join) {
                 $join->on('manuals.id', '=', 'manualcontents.manual_id');
@@ -108,6 +109,9 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
                 }
             })
             // 検索機能 カテゴリ
+            ->when(isset($new_category_id), function ($query) use ($new_category_id) {
+                $query->where('category_level2_id', $new_category_id);
+            })
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
