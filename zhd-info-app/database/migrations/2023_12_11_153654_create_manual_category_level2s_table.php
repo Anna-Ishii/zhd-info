@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('manual_category_level2s', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->unique();
+            $table->string('name');
             $table->unsignedBigInteger('level1');
             $table->foreign('level1')->references('id')->on('manual_category_level1s');
             $table->timestamps();

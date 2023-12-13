@@ -23,6 +23,8 @@ class Manual extends Model
         'title',
         'description',
         'category_id',
+        'category_level1_id',
+        'category_level2_id',
         'content_name',
         'content_url',
         'thumbnails_url',
