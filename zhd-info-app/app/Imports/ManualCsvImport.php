@@ -5,6 +5,8 @@ namespace App\Imports;
 use App\Models\Brand;
 use App\Models\Manual;
 use App\Models\ManualCategory;
+use App\Models\ManualCategoryLevel1;
+use App\Models\ManualCategoryLevel2;
 use App\Models\ManualTagMaster;
 use App\Models\Shop;
 use App\Models\User;
@@ -37,6 +39,7 @@ class ManualCsvImport implements
 
         foreach ($rows as $index => [
             $no,
+            $new_cateory,
             $category,
             $title,
             $tag1,
@@ -65,7 +68,13 @@ class ManualCsvImport implements
                 }
             }
             $brand_param = ($brand == "全て") ? $this->getBrandAll($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+            $new_category_array = $new_cateory ? explode('|', $new_cateory) : null;
+            $new_category_level1_name = str_replace(' ', '', trim($new_category_array[0], "\""));
+            $new_category_level2_name = str_replace(' ', '', trim($new_category_array[1], "\""));
+
             $manual->category_id = $category ? ManualCategory::where('name', $category)->pluck('id')->first() : NULL;
+            $manual->category_level1_id = $new_category_array[0] ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
+            $manual->category_level2_id = $new_category_array[1] ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
             $manual->title = $title;
             $manual->start_datetime = $this->parseDateTime($start_datetime);
             $manual->end_datetime = $this->parseDateTime($end_datetime);
