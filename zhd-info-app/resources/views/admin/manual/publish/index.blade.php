@@ -162,7 +162,8 @@
                                         @endif">
                                 <td class="shop-id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brands)}}</td>
-                                <td>@if($manual->category_level1)
+                                <td>
+                                    @if($manual->category_level1)
                                         {{"{$manual->category_level1?->name} |"}}
                                     @endif
                                     {{$manual->category_level2?->name}}
