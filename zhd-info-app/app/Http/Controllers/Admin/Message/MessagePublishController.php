@@ -49,7 +49,7 @@ class MessagePublishController extends Controller
         $publish_date = $request->input('publish-date');
         $message_list =
             Message::query()
-                ->with('category', 'create_user', 'updated_user', 'brand', 'tag', 'categoy_level1', 'category_level2')
+                ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
                 ->leftjoin('message_user','messages.id', '=', 'message_id')
                 ->selectRaw('
                             messages.*,
