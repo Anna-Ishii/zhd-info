@@ -10,10 +10,10 @@
                     csvデータを業務連絡に上書きします
                 </div>
                 <div>
-                    <input type="file" name="csv" accept=".csv">
-                </div>
-                <div>
-                    最終取り込み日時 {{isset($message_csv_log) ? $message_csv_log : ""}}
+                    <label class="inputFile form-control">
+                        <span class="fileName">ファイルを選択またはドロップ</span>
+                        <input type="file" name="csv" accept=".csv">
+                    </label>
                 </div>
                 <div class="text-right">
                     <input type="button" class="btn btn-admin" value="インポート">
