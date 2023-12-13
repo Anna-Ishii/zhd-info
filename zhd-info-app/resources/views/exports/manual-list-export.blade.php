@@ -3,6 +3,7 @@
         <tr>
             <th>No</th>
             <th>カテゴリ</th>
+            <th>旧カテゴリ</th>
             <th>タイトル</th>
             <th>タグ(1)</th>
             <th>タグ(2)</th>
@@ -24,6 +25,12 @@
         @foreach ($manual_list as $manual)
             <tr>
                 <td>{{$manual->number}}</td>
+                <td>
+                @if($manual->category_level1)
+                    {{"{$manual->category_level1?->name} |"}}
+                @endif
+                {{$manual->category_level2?->name}}
+                </td>
                 <td>{{$manual->category?->name}}</td>
                 <td>{{$manual->title}}</td>
                 <td>{{$manual->tag->get(0)?->name}}</td>
