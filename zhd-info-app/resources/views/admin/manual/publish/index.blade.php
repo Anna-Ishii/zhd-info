@@ -49,6 +49,15 @@
             </div> 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
+                <select name="new_category" class="form-control">
+                    <option value="">指定なし</option>
+                    @foreach ($new_category_list as $category)
+                    <option value="{{ $category->id }}" {{ request()->input('new_category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">旧カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value="">指定なし</option>
                     @foreach ($category_list as $category)
@@ -56,7 +65,6 @@
                     @endforeach
                 </select>
             </div>
-
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">状態</label>
                 <select name="status" class="form-control duration-form-text">

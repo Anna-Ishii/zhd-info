@@ -36,9 +36,17 @@ class ManualPublishController extends Controller
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
+        $new_category_list = ManualCategoryLevel2::query()
+            ->select([
+                'manual_category_level2s.id as id',
+                DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+            ])
+            ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+            ->get();
 
         // request
         $category_id = $request->input('category');
+        $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
@@ -86,6 +94,9 @@ class ManualPublishController extends Controller
                 }
             })
             // 検索機能 カテゴリ
+            ->when(isset($new_category_id), function ($query) use ($new_category_id) {
+                $query->where('category_level2_id', $new_category_id);
+            })
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
@@ -116,6 +127,7 @@ class ManualPublishController extends Controller
 
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
+            'new_category_list' => $new_category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
             'brands' => $brands,
