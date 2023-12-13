@@ -19,20 +19,13 @@ use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
 use App\Models\Brand;
-use App\Models\ManualCategory;
-use App\Models\ManualTagMaster;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
-use App\Models\Organization1;
-use App\Models\Organization3;
-use App\Models\Organization4;
-use App\Models\Organization5;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\View;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 
@@ -56,7 +49,7 @@ class MessagePublishController extends Controller
         $publish_date = $request->input('publish-date');
         $message_list =
             Message::query()
-                ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
+                ->with('category', 'create_user', 'updated_user', 'brand', 'tag', 'categoy_level1', 'category_level2')
                 ->leftjoin('message_user','messages.id', '=', 'message_id')
                 ->selectRaw('
                             messages.*,
@@ -122,13 +115,6 @@ class MessagePublishController extends Controller
                 ->orderBy('messages.number', 'desc')               
                 ->paginate(50)
                 ->appends(request()->query());
-
-        $csv_log = DB::table('message_csv_logs')
-                                ->select('imported_datetime')
-                                ->orderBy('id', 'desc')
-                                 ->limit(1)
-                                 ->pluck('imported_datetime');
-        view()->share('message_csv_log', isset($csv_log[0]) ? Carbon::parse($csv_log[0])->isoFormat('YYYY/MM/DD(ddd) HH:mm') :NULL);
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
