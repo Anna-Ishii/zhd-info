@@ -38,7 +38,7 @@
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
         <div class="form-group">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
+            <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
                 @foreach ($category_list as $category)
                 <label class="mr16">
@@ -50,7 +50,7 @@
             </div>
         </div>
         <div class="form-group form-group-sm">
-            <label class="col-lg-2 control-label">新カテゴリ<span class="text-danger required">*<span></label>
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">      
                 <label class="mr16">
                     <select class="form-control" name="new_category_id">
