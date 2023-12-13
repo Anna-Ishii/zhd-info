@@ -7,17 +7,24 @@
             </div>
             <div class="modal-body">           
                 <div>
-                    csvデータを業務連絡に上書きします
+                    csvデータを動画マニュアルに上書きします
                 </div>
-                <div>
-                    <input type="file" name="csv" accept=".csv">
-                </div>
-                <div>
-                    最終取り込み日時 {{isset($manual_csv_log) ? $manual_csv_log : ""}}
-                </div>
-                <div class="text-right">
-                    <input type="button" class="btn btn-admin" value="インポート">
-                </div>
+                <form>
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label">CSV添付<span class="text-danger required">*<span></label>
+                        <div class="col-lg-9">
+                            <label class="inputFile form-control">
+                                <span class="fileName">ファイルを選択またはドロップ</span>
+                                <input type="file" name="csv" accept=".csv">
+                            </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="text-right">
+                            <input type="button" class="btn btn-admin" value="インポート">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
         </div>

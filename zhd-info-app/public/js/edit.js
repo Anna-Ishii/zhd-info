@@ -269,6 +269,18 @@ $('#messageImportModal input[type="button"]').click(function(e){
 
 $('#manualImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
+
+	if(isEmptyImportFile($("#manualImportModal"))) {
+		$('#manualImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul>
+					<li>ファイルを添付してください</l>
+				</ul>
+			</div>
+		`);
+		return;
+	}
+
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let formData = new FormData();
 	formData.append("file", $('#manualImportModal input[name="csv"]')[0].files[0]);
@@ -322,11 +334,11 @@ $('#manualImportModal input[type="button"]').click(function(e){
 const successTamplate = `
 	<div class="modal-body">
 		<div class="text-center">
-			<div>
+			<div class="form-group">
 				csv取り込み完了しました
 			</div>
-			<div>
-				<a href="" class="btn btn-admin" onClick="location.reload()">一覧に戻る</a>
+			<div class="text-right">
+				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
 			</div>
 		</div>
 	</div>
@@ -382,4 +394,15 @@ function createTag(tagLabelText) {
         </span>
         `
     )
+}
+
+$('.modal').on('hidden.bs.modal', function (e) {
+	// modalを初期化する
+	$(this).find('input[type="file"]')[0].value = "";
+	$(this).find('.fileName')[0].textContent = "ファイルを選択またはドロップ";
+	$('.modal-body .alert-danger').remove();
+})
+
+function isEmptyImportFile(modal) {
+	return !$(modal).find('input[type="file"]')[0].value
 }
