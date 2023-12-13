@@ -129,6 +129,7 @@
                                 <th class="text-center" nowrap>No</th>
                                 <th class="text-center" nowrap>対象業態</th>
                                 <th class="text-center" nowrap>カテゴリ</th>
+                                <th class="text-center" nowrap>旧カテゴリ</th>
                                 <th class="text-center" nowrap>タイトル</th>
                                 <th class="text-center" nowrap>検索タグ</th>
                                 <th class="text-center" colspan="2" nowrap>添付ファイル</th>
@@ -153,6 +154,11 @@
                                         @endif">
                                 <td class="shop-id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brands)}}</td>
+                                <td>@if($manual->category_level1)
+                                        {{"{$manual->category_level1?->name} |"}}
+                                    @endif
+                                    {{$manual->category_level2?->name}}
+                                </td>
                                 <td>{{$manual->category?->name}}</td>
                                 <td class="label-title">
                                     @if(isset($manual->content_url))

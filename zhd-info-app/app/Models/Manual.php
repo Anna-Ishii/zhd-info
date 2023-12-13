@@ -76,6 +76,16 @@ class Manual extends Model
         return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
+    public function category_level1(): HasOne
+    {
+        return $this->hasOne(ManualCategoryLevel1::class, foreignKey: 'id', localKey: 'category_level1_id');
+    }
+
+    public function category_level2(): HasOne
+    {
+        return $this->hasOne(ManualCategoryLevel2::class, foreignKey: 'id', localKey: 'category_level2_id');
+    }
+
     public function brand(): BelongsToMany
     {
         return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');
