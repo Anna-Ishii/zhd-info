@@ -20,15 +20,6 @@ $(document).on('click' , '.toggleTab .tab' , function(){
 	
 	location.href = url
 
-
-	// let target = $('.toggleContent[data-tab-number="'+chkTabNumber+'"]');
-
-	// $('.toggleContent').hide();
-	// target.show();
-	
-	// let tabs = $(this).siblings('.tab');
-	// tabs.removeClass('isCurrent');
-	// $(this).addClass('isCurrent');
 });
 
 let scrollVal;

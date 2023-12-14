@@ -947,6 +947,57 @@ form.form-horizontal .form-group:last-child {
   text-align: center;
 }
 
+form .form-group.tag-form .form-control {
+  padding-left: 10px;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  cursor: text;
+}
+
+form .form-group.tag-form .form-control:focus-within {
+  border-color: #66afe9;
+  box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102,175,233,.6);
+  outline: 0;
+}
+
+form .form-group.tag-form > div {
+  width: auto;
+  /* col-lg-4のmin-widthを数値で指定 */
+  /* widthでautoを使いたいため */
+  min-width: 33.3333%; 
+}
+
+form .form-group.tag-form .form-control span.tag-form-label {
+  outline: none;
+  margin-right: 5px;
+  border: solid 1px;
+  padding: 3px 8px;
+  margin-right: 5px;
+  border-radius: 5px;
+  background-color: #fff;
+  white-space: nowrap;
+}
+
+form .form-group.tag-form .form-control span.tag-form-delete {
+  margin-left: 5px;
+  color: #a7a2a2;
+  cursor: pointer;
+}
+
+form .form-group.tag-form .form-control span.tag-form-input {
+  outline: none;
+}
+
+form .form-group.tag-form .form-control span.tag-form-input:focus {
+  caret-color: #000;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0);
+}
+
+.required {
+  font-size: 17px;
+}
+
 .under-quota div{
   color: #333;
   font-weight: bold;
@@ -967,10 +1018,42 @@ form.form-horizontal .form-group:last-child {
   padding-bottom: 25px;
   padding-top: 25px;
 }
-.pagenation-top div {
+.pagenation-top > div {
   display: flex; 
   justify-content: center;
   align-items: center;
   height: 0px;
   padding-bottom: 25px;
+}
+
+.pagenation-top > div > *:not(:last-child) {
+  margin-right: 10px;
+}
+
+.progress {
+  height: 3px;
+  margin-bottom: 0px;
+  display: none;
+}
+
+
+.btn-admin {
+  background-color: #eee;
+  color: #333;
+  font-size: 12px;
+}
+
+.modal {
+  top: 25%;
+}
+.modal-body {
+  padding: 10px;
+}
+.modal-body > div:first-child {
+  margin-top: 20px;
+}
+.modal-body > div {
+  margin-bottom: 30px;
+  margin-left: 30px;
+  margin-right: 30px;
 }
