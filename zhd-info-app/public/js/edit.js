@@ -218,6 +218,17 @@ $(document).on('input', 'textarea[name="description"], textarea[data-variable-na
 
 $('#messageImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
+
+	if(isEmptyImportFile($("#messageImportModal"))) {
+		$('#messageImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul>
+					<li>ファイルを添付してください</l>
+				</ul>
+			</div>
+		`);
+		return;
+	}
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let formData = new FormData();
 	formData.append("file", $('#messageImportModal input[name="csv"]')[0].files[0]);
