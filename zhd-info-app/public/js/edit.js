@@ -397,10 +397,7 @@ function createTag(tagLabelText) {
 }
 
 $('.modal').on('hidden.bs.modal', function (e) {
-	// modalを初期化する
-	$(this).find('input[type="file"]')[0].value = "";
-	$(this).find('.fileName')[0].textContent = "ファイルを選択またはドロップ";
-	$('.modal-body .alert-danger').remove();
+	window.location.reload();
 })
 
 function isEmptyImportFile(modal) {
