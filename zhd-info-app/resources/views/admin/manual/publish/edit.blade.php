@@ -37,24 +37,12 @@
     @include('common.admin.page-head',['title' => '動画マニュアル編集'])
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
-        <div class="form-group">
-            <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8"
-                      {{ ( old('category_id') ?  old('category_id') : $manual->category_id) == $category->id ? 'checked' : '' }}>
-                    {{ $category->name }}
-                </label>
-                @endforeach
-            </div>
-        </div>
         <div class="form-group form-group-sm">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">      
                 <label class="mr16">
                     <select class="form-control" name="new_category_id">
-                        <option value="null">カテゴリを選択</option>
+                        <option value="null" hidden>カテゴリを選択</option>
                         @if(request()->old())
                             @foreach ($new_category_list as $category)
                                 <option class="mr8" value="{{$category->id}}" 
@@ -68,6 +56,18 @@
                         @endif
                     </select>
                 </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
+            <div class="col-lg-6">
+                @foreach ($category_list as $category)
+                <label class="mr16">
+                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8"
+                      {{ ( old('category_id') ?  old('category_id') : $manual->category_id) == $category->id ? 'checked' : '' }}>
+                    {{ $category->name }}
+                </label>
+                @endforeach
             </div>
         </div>
         <div class="form-group">
