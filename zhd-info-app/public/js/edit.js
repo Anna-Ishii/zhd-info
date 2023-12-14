@@ -132,9 +132,11 @@ function countVariableBox(){
 	let fileTarget = $('.manualVariableArea').find('.manualVariableBox').not('#cloneTarget');
 	let fileTargetNum = 0;
 	fileTarget.each(function(){
+		$(this).find('input[data-variable-name=manual_flow_content_id]').attr({'name':'manual_flow['+fileTargetNum+'][content_id]'});
 		$(this).find('input[data-variable-name=manual_flow_title]').attr({'name':'manual_flow['+fileTargetNum+'][title]'});
 		$(this).find('input[data-variable-name=manual_file_name]').attr({'name':'manual_flow['+fileTargetNum+'][file_name]'});
 		$(this).find('input[data-variable-name=manual_file]').attr({'name':'manual_flow['+fileTargetNum+'][file]'});
+		$(this).find('input[data-variable-name=manual_file_path]').attr({'name':'manual_flow['+fileTargetNum+'][file_path]'});
 		$(this).find('textarea[data-variable-name=manual_flow_detail]').attr('name' , 'manual_flow['+fileTargetNum+'][detail]');
 		fileTargetNum = fileTargetNum + 1;
 	});
@@ -192,3 +194,215 @@ $(document).on('submit' , '#form' , function(event){
 	// 改めてsubmitする
 	form.submit();
 });
+
+$(document).on('input', 'input[name="title"], input[data-variable-name="manual_flow_title"]', function(e){
+	var inputText = $(this).val();
+    var textLength = inputText.length;
+	var maxLength = 20; // 最大文字数
+
+    // 文字数を表示
+    var counterText = '入力数 ' + textLength + '/' + maxLength + '文字';
+    $(this).parent().siblings('div.counter').text(counterText);
+})
+
+$(document).on('input', 'textarea[name="description"], textarea[data-variable-name="manual_flow_detail"]', function(e){
+	var inputText = $(this).val();
+    var textLength = inputText.length;
+	var maxLength = 30; // 最大文字数
+
+    // 文字数を表示
+    var counterText = '入力数 ' + textLength + '/' + maxLength + '文字';
+    $(this).parent().siblings('div.counter').text(counterText);
+})
+
+
+$('#messageImportModal input[type="button"]').click(function(e){
+	e.preventDefault();
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let formData = new FormData();
+	formData.append("file", $('#messageImportModal input[name="csv"]')[0].files[0]);
+	
+	var overlay = document.getElementById('overlay');
+	overlay.style.display = 'block';
+
+	$('#messageImportModal .modal-body .alert-danger').remove();
+	$.ajax({
+	url: '/admin/message/publish/import',
+	type: 'post',
+	data: formData,
+	processData: false,
+	contentType: false,
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+	}).done(function(response){
+		overlay.style.display = 'none';
+		$('#messageImportModal .modal-body').replaceWith(successTamplate);
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		overlay.style.display = 'none';
+
+		$('#messageImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		// labelForm.parent().find('.text-danger').remove();
+		
+		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
+			let error_li;
+			
+			errorMessage['errors'].forEach((error) => {
+				$('#messageImportModal .modal-body .alert ul').append(
+					`<li>${errorMessage['row']}行目：${error}</li>`
+				);
+			})
+		})
+		if(errorThrown) {
+			$('#messageImportModal .modal-body .alert ul').append(
+				`<li>エラーが発生しました</li>`
+			);
+		}
+	});
+})
+
+
+$('#manualImportModal input[type="button"]').click(function(e){
+	e.preventDefault();
+
+	if(isEmptyImportFile($("#manualImportModal"))) {
+		$('#manualImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul>
+					<li>ファイルを添付してください</l>
+				</ul>
+			</div>
+		`);
+		return;
+	}
+
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let formData = new FormData();
+	formData.append("file", $('#manualImportModal input[name="csv"]')[0].files[0]);
+	
+	var overlay = document.getElementById('overlay');
+	overlay.style.display = 'block';
+
+	$('#manualImportModal .modal-body .alert-danger').remove();
+	$.ajax({
+	url: '/admin/manual/publish/import',
+	type: 'post',
+	data: formData,
+	processData: false,
+	contentType: false,
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+	}).done(function(response){
+		overlay.style.display = 'none';
+		$('#manualImportModal .modal-body').replaceWith(successTamplate);
+
+	}).fail(function(jqXHR, textStatus, errorThrown){
+		overlay.style.display = 'none';
+
+		$('#manualImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		// labelForm.parent().find('.text-danger').remove();
+		
+		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
+			let error_li;
+			
+			errorMessage['errors'].forEach((error) => {
+				$('#manualImportModal .modal-body .alert ul').append(
+					`<li>${errorMessage['row']}行目：${error}</li>`
+				);
+			})
+		})
+		if(errorThrown) {
+			$('#manualImportModal .modal-body .alert ul').append(
+				`<li>エラーが発生しました</li>`
+			);
+		}
+	});
+})
+
+
+
+const successTamplate = `
+	<div class="modal-body">
+		<div class="text-center">
+			<div class="form-group">
+				csv取り込み完了しました
+			</div>
+			<div class="text-right">
+				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
+			</div>
+		</div>
+	</div>
+`;
+
+//
+// 登録編集画面のタグ機能
+//
+// タグを削除
+$(document).on('click', '.tag-form-delete', function() {
+    $(this).parent().remove();
+})
+
+// カーソルをフォーカスする
+$('.tag-form .form-control').click(function() {
+    $('.tag-form-input').focus();
+})
+
+// 入力を監視する
+$(document).on('keydown', '.tag-form-input', function(e) {
+
+    let tagLabelText = $(this)[0].innerText;
+    // エンターの入力
+    if(e.keyCode == 13) {
+        if(tagLabelText == "") return false;
+
+        $(this).before(createTag(tagLabelText));
+        $(this)[0].innerText = "";
+        return false;
+    }
+    
+    // 「,」の入力 
+    if(e.keyCode == 188) {
+        $(this).before(createTag(tagLabelText));
+        $(this)[0].innerText = "";
+        return false;
+    }
+
+    // Backspace
+    if(e.keyCode == 8) {
+        if($(this)[0].innerText == "") {
+            $(this).prev().remove();
+        }
+    }
+})
+
+function createTag(tagLabelText) {
+    return (
+        `
+        <span class="focus:outline-none tag-form-label">
+            ${tagLabelText}<span class="tag-form-delete">×</span>
+            <input type="hidden" name="tag_name[]" value="${tagLabelText}">
+        </span>
+        `
+    )
+}
+
+$('.modal').on('hidden.bs.modal', function (e) {
+	// modalを初期化する
+	$(this).find('input[type="file"]')[0].value = "";
+	$(this).find('.fileName')[0].textContent = "ファイルを選択またはドロップ";
+	$('.modal-body .alert-danger').remove();
+})
+
+function isEmptyImportFile(modal) {
+	return !$(modal).find('input[type="file"]')[0].value
+}

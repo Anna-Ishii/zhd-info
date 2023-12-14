@@ -3,21 +3,28 @@
 namespace App\Http\Controllers\Admin\Manual;
 
 use App\Enums\PublishStatus;
+use App\Exports\ManualListExport;
 use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
 use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
+use App\Http\Requests\Admin\Manual\FileUpdateApiRequest;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
+use App\Imports\ManualCsvImport;
 use App\Models\Manual;
 use App\Models\ManualCategory;
+use App\Models\ManualCategoryLevel1;
+use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
+use App\Models\ManualTagMaster;
 use App\Models\Shop;
 use App\Models\User;
 use App\Utils\ImageConverter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ManualPublishController extends Controller
@@ -29,9 +36,17 @@ class ManualPublishController extends Controller
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
+        $new_category_list = ManualCategoryLevel2::query()
+            ->select([
+                'manual_category_level2s.id as id',
+                DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+            ])
+            ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+            ->get();
 
         // request
         $category_id = $request->input('category');
+        $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
@@ -40,7 +55,7 @@ class ManualPublishController extends Controller
 
         $manual_list =
             Manual::query()
-            ->with('category', 'create_user', 'updated_user', 'brand')
+            ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->selectRaw('
                         manuals.*,
@@ -52,7 +67,12 @@ class ManualPublishController extends Controller
             ->groupBy(DB::raw('manuals.id'))
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
-                $query->whereLike('title', $q);
+                $query->where(function ($query) use ($q) {
+                    $query->whereLike('title', $q)
+                        ->orWhereHas('tag', function ($query) use ($q) {
+                            $query->where('name', $q);
+                        });
+                });
             })
             // 検索機能 状態
             ->when(isset($status), function ($query) use ($status) {
@@ -74,6 +94,9 @@ class ManualPublishController extends Controller
                 }
             })
             // 検索機能 カテゴリ
+            ->when(isset($new_category_id), function ($query) use ($new_category_id) {
+                $query->where('category_level2_id', $new_category_id);
+            })
             ->when(isset($category_id), function ($query) use ($category_id) {
                 $query->where('category_id', $category_id);
             })
@@ -104,6 +127,7 @@ class ManualPublishController extends Controller
 
         return view('admin.manual.publish.index', [
             'category_list' => $category_list,
+            'new_category_list' => $new_category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
             'brands' => $brands,
@@ -195,10 +219,18 @@ class ManualPublishController extends Controller
         $admin = session("admin");
 
         $category_list = ManualCategory::all();
+        $new_category_list = ManualCategoryLevel2::query()
+            ->select([
+                'manual_category_level2s.id as id',
+                DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+            ])
+            ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+            ->get();
         $brand_list = AdminRepository::getBrands($admin);
 
         return view('admin.manual.publish.new', [
             'category_list' => $category_list,
+            'new_category_list' => $new_category_list,
             'brand_list' => $brand_list,
         ]);
     }
@@ -211,44 +243,17 @@ class ManualPublishController extends Controller
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
         $manual_params['category_id'] = $request->category_id;
+        $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
+        $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-        $manual_params['thumbnails_url'] = ImageConverter::convert2image($manual_params['content_url']);
+        $manual_params['content_name'] = $request->file_name;
+        $manual_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+        $manual_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($manual_params['content_url']) : null;
         $manual_params['create_admin_id'] = $admin->id;
         $manual_params['organization1_id'] = $admin->organization1_id;
-        $number = Manual::where('organization1_id', $admin->organization1_id)->max('number');
-        $manual_params['number'] = (is_null($number)) ? 1 : $number + 1;
-        $manual_params['editing_flg'] = isset($request->save) ? true : false;
-
-        // manual_userに該当のユーザーを登録する
-        $target_users_data = [];
-        // 一時保存の時は、ユーザー登録しない
-        if (!isset($request->save)) {
-            // 該当のショップID
-            $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
-            // 該当のユーザー
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-            foreach ($target_users as $target_user) {
-                $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
-        }
-
-        // 手順を登録する
-        $content_data = [];
-        if(isset($request['manual_flow'])){
-            foreach ($request['manual_flow'] as $i => $r) {
-                $content_data[$i]['title'] = $r['title'];
-                $content_data[$i]['description'] = $r['detail'];
-                $content_data[$i]['order_no'] = $i + 1;
-                if ($request->hasFile('manual_flow.' . $i . '.file')) {
-                    $f = $request->file('manual_flow.' . $i . '.file');
-                    $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
-                    $content_data[$i]['thumbnails_url'] =
-                        ImageConverter::convert2image($content_data[$i]['content_url']);
-                }
-            }
-        }
+        $manual_params['number'] = Manual::getCurrentNumber($admin->organization1_id) + 1;
+        $manual_params['editing_flg'] = isset($request->save);
 
         try {
             DB::beginTransaction();
@@ -256,11 +261,25 @@ class ManualPublishController extends Controller
             $manual->updated_at = null;
             $manual->save();
             $manual->brand()->attach($request->brand);
-            $manual->user()->attach($target_users_data);
-            $manual->content()->createMany($content_data);
+            $manual->user()->attach(
+                !isset($request->save) ? $this->targetUserParam($request) : [] 
+            );
+            $manual->content()->createMany($this->manualContentsParam($request));
+
+            if (isset($request->tag_name)) {
+                $tag_ids = [];
+                foreach ($request->tag_name as $tag_name) {
+                    $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
+                    $tag_ids[] = $tag->id;
+                }
+                $manual->tag()->attach($tag_ids);
+            }
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            $this->rollbackRegisterFile($request->file_path);
+            $this->rollbackManualContentFile($request);
             return redirect()
                 ->back()
                 ->withInput()
@@ -287,12 +306,22 @@ class ManualPublishController extends Controller
             ->orderBy("order_no")
             ->get();
 
+        $new_category_list = ManualCategoryLevel2::query()
+                                ->select([
+                                    'manual_category_level2s.id as id',
+                                    DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+                                ])
+                                ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+                                ->get();
+
+
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'category_list' => $category_list,
             'brand_list' => $brand_list,
             'target_brand' => $target_brand,
-            'contents' => $contents
+            'contents' => $contents,
+            'new_category_list' => $new_category_list,
 
         ]);
     }
@@ -300,69 +329,73 @@ class ManualPublishController extends Controller
     public function update(PublishUpdateRequest $request, $manual_id)
     {
         $validated = $request->validated();
-        $admin = session('admin');
+        
+        // ファイルを移動したかフラグ
+        $manual_changed_flg = false;
+        $manualcontent_changed_flg = false;
 
+        $admin = session('admin');
+        $manual = Manual::find($manual_id);
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
         $manual_params['category_id'] = $request->category_id;
+        $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
+        $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        if(isset($request->file)) {
-            $manual_params = array_merge($manual_params, $this->uploadFile($request->file));
-            $manual_params['thumbnails_url'] = ImageConverter::convert2image($manual_params['content_url']);
+        if($this->isChangedFile($manual->content_url, $request->file_path)) {
+            $manual_params['content_name'] = $request->file_name;
+            $manual_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+            $manual_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($manual_params['content_url']) : null;
+            $manual_changed_flg = true;
+        } else {
+            $manual_params['content_name'] = $manual->content_name;
+            $manual_params['content_url'] = $manual->content_url;
+            $manual_params['thumbnails_url'] = $manual->thumbnails_url;
         }
         $manual_params['updated_admin_id'] = $admin->id;
         $manual_params['editing_flg'] = isset($request->save) ? true : false;
 
-        // manual_userに該当のユーザーを登録する
-        $target_user_data = [];
-        // 一時保存の時は、ユーザー登録しない
-        if (!isset($request->save)) {
-            // 該当のショップID
-            $shops_id = Shop::select('id')->whereIn('brand_id', $request->input('brand',[]))->get()->toArray();
-            // 該当のユーザー
-            $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-            foreach ($target_users as $target_user) {
-                $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-            }
-        }
 
         // 手順を登録する
         $content_data = []; 
         $count_order_no = 0;
+
+        try {
+            DB::beginTransaction();
         // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
-        $contents_id = $request->input('content_id', []); //登録されているコンテンツIDがpostされる
         $manual = Manual::find($manual_id);
-        $content = $manual->content()->whereNotIn('id', $contents_id);
-        $manual->content()->whereNotIn('id', $contents_id)->delete();
+        $content = $manual->content()->whereNotIn('id', $this->getExistContentIds($request['manual_flow']));
+        $content->delete();
 
         //手順を登録する
         if (isset($request['manual_flow'])) {
             foreach ($request['manual_flow'] as $i => $r) {
                 // 登録されている手順を変更する
-                if (isset($request->content_id[$i])) {
-                    $content = ManualContent::find($request->content_id[$i]);
-                    $content->title = $r['title'];
-                    $content->description = $r['detail'];
-                    $content->order_no = $i + 1;
+                if (isset( $r['content_id'])) {
+                    $id = (int)$r['content_id'];
+                    $manual_content = ManualContent::find($id);
+                    $manual_content->title = $r['title'];
+                    $manual_content->description = $r['detail'];
+                    $manual_content->order_no = $i + 1;
 
-                    // manual_fileがnullの場合は変更しない
-                    if ($request->hasFile('manual_flow.' . $i . '.file')) {
-                        $f = $request->file('manual_flow.' . $i . '.file');
-                        $file = $this->uploadFile($f);
-                        $content->content_url = $file['content_url'];
-                        $content->content_name = $file['content_name'];
-                        $content->thumbnails_url = ImageConverter::convert2image($content->content_url);
+                    // 変更部分だけ取り込む
+                    if ($this->isChangedFile($manual_content->content_url, $r['file_path'])) {
+                        $manual_content->content_name = $r['file_name'];
+                        $manual_content->content_url = $this->registerFile($r['file_path']);
+                        $manual_content->thumbnails_url = ImageConverter::convert2image($manual_content->content_url);
+                        $manualcontent_changed_flg = true;
                     }
-                    $content->save();
+
+                    $manual_content->save();
                 } else {
                     // 手順の新規登録
                     $content_data[$i]['title'] = $r['title'];
                     $content_data[$i]['description'] = $r['detail'];
                     $content_data[$i]['order_no'] = $i + 1;
-                    if ($request->hasFile('manual_flow.' . $i . '.file')) {
-                        $f = $request->file('manual_flow.' . $i . '.file');
-                        $content_data[$i] = array_merge($content_data[$i], $this->uploadFile($f));
+                    if (isset($r['file_name']) && isset($r['file_path'])) {
+                        $content_data[$i]['content_name'] = $r['file_name'];
+                        $content_data[$i]['content_url'] = $this->registerFile($r['file_path']);
                         $content_data[$i]['thumbnails_url'] =
                             ImageConverter::convert2image($content_data[$i]['content_url']);
                     }
@@ -371,17 +404,28 @@ class ManualPublishController extends Controller
             }
         }
 
-        try {
-            DB::beginTransaction();
+
             $manual->update($manual_params);
             $manual->brand()->sync($request->brand);
-            if(!isset($request->save)){ 
-                $manual->user()->sync($target_user_data);
-            }
+            $manual->user()->sync(
+                !isset($request->save) ? $this->targetUserParam($request) : [] 
+            );
             $manual->content()->createMany($content_data);
+
+            
+            $tag_ids = [];
+            foreach ($request->input('tag_name', []) as $tag_name) {
+                $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
+                $tag_ids[] = $tag->id;
+            }
+            $manual->tag()->sync($tag_ids);
+            
+
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
+            if ($manual_changed_flg) $this->rollbackRegisterFile($request->file_path);
+            if ($manualcontent_changed_flg) $this->rollbackManualContentFile($request);
             return redirect()
                 ->back()
                 ->withInput()
@@ -438,24 +482,186 @@ class ManualPublishController extends Controller
         );
     }
 
+    public function exportList(Request $request)
+    {
+        $admin = session('admin');
+        $organization1 = $admin->organization1->name;
+        $now = new Carbon('now');
+        $file_name = '動画マニュアル_' . $organization1 . $now->format('_Y_m_d') . '.csv';
+        return Excel::download(
+            new ManualListExport($request),
+            $file_name
+        );
+    }
+
+    public function fileUpload(FileUpdateApiRequest $request)
+    {
+        $validated = $request->validated();
+
+        $file = $request->file;
+        // $file->move(sys_get_temp_dir(),uniqid() . '.' . $file->getClientOriginalExtension());
+        $file_path = Storage::putFile('/tmp', $file);
+        $file_name = $file->getClientOriginalName();
+
+        return  response()->json([
+                    'content_name' => $file_name,
+                    'content_url' => $file_path
+                ]);
+    }
+
+    public function import(Request $request)
+    {
+        $csv = $request->file;
+
+        $admin = session('admin');
+
+        DB::beginTransaction();
+        try {
+            $messages = Excel::import(new ManualCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            // $this->importMessage($messages[0], $admin->organization1);
+            DB::table('manual_csv_logs')->insert([
+                'imported_datetime' => new Carbon('now'),
+                'is_success' => true
+            ]);
+            DB::commit();
+            return response()->json([
+                'message' => "インポート完了しました"
+            ], 200);
+        } catch (ValidationException $e) {
+            $failures = $e->failures();
+
+            $errorMessage = [];
+            foreach ($failures as $index => $failure) {
+                $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
+                $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+            }
+
+            return response()->json([
+                'error' => 'Validation failed',
+                'error_message' => $errorMessage
+            ], 422);
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+    
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 
-    private function uploadFile($file)
-    {
-        if (!isset($file)) return ['content_name' => null, 'content_url' => null];
+    private function hasManualFile($request): Bool {
+        if(!isset($request->file_name) || !isset($request->file_path)) return false;
+        return true;
+    }
 
-        $filename_upload = uniqid() . '.' . $file->getClientOriginalExtension();
-        $filename_input = $file->getClientOriginalName();
-        $path = public_path('uploads');
-        $file->move($path, $filename_upload);
-        $content_url = 'uploads/' . $filename_upload;
-        return [
-            'content_name' => $filename_input,
-            'content_url' => $content_url,
-        ];
+    private function hasManualContentFile($request): Bool {
+        if(isset($request['manual_flow'])){
+            foreach ($request['manual_flow'] as $i => $r) {
+                if(!isset($r['file_name']) || !isset($r['file_path'])){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private function isChangedFile($current_file_path, $next_file_path): Bool {
+        $currnt_path = $current_file_path? basename($current_file_path) : null;
+        $next_path = $next_file_path? basename($next_file_path) : null;
+
+        return !($currnt_path == $next_path);
+    }
+
+    private function targetUserParam($request): Array {
+        // manual_userに該当のユーザーを登録する
+        $target_users_data = [];
+        // 該当のショップID
+        $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
+        // 該当のユーザー
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+        foreach ($target_users as $target_user) {
+            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        }
+        return $target_users_data;
+    }
+
+    // 「手順」を登録するために加工する
+    private function manualContentsParam($request): Array {
+        if(!(isset($request['manual_flow']))) return [];
+        
+        $content_data = [];
+        foreach ($request['manual_flow'] as $i => $r) {
+            $content_data[$i]['title'] = $r['title'];
+            $content_data[$i]['description'] = $r['detail'];
+            $content_data[$i]['order_no'] = $i + 1;
+
+            if (isset($r['file_name']) && isset($r['file_path'])) {
+                $content_data[$i]['content_name'] = $r['file_name'];
+                $content_data[$i]['content_url'] = $this->registerFile($r['file_path']);
+                $content_data[$i]['thumbnails_url'] =
+                ImageConverter::convert2image($content_data[$i]['content_url']);
+            }
+        }
+        return $content_data;
+    }
+
+    private function rollbackManualContentFile($request): Void {
+        if(!(isset($request['manual_flow']))) return;
+        foreach ($request['manual_flow'] as $i => $r) {
+            if (isset($r['file_name']) && isset($r['file_path'])) {
+                $current_path = storage_path('app/' . $r['file_path']);
+                $next_path = public_path('uploads/' . basename($r['file_path']));
+                rename($next_path, $current_path);
+            }
+        }
+    }
+
+    private function registerFile($request_file_path): ?String {
+        $content_url = 'uploads/' . basename($request_file_path);
+        $current_path = storage_path('app/' . $request_file_path);
+        $next_path = public_path($content_url);
+        rename($current_path, $next_path);
+        return $content_url;
+
+    }
+    private function rollbackRegisterFile($request_file_path): Void 
+    {
+        if(!(isset($request_file_path))) return;
+        $content_url = 'uploads/' . basename($request_file_path);
+        $current_path = storage_path('app/' . $request_file_path);
+        $next_path = public_path($content_url);
+        rename($next_path, $current_path);
+        return;
+    }
+
+    private function getExistContentIds($request_manual_flow) : Array {
+        if(!isset($request_manual_flow)) return [];
+
+        $content_ids = [];
+        foreach ($request_manual_flow as $i => $r) {
+            if (isset($r['content_id'])) {
+                $id = (int)$r['content_id'];
+                $content_ids[] = $id;
+            }
+        }
+        return $content_ids;
+
+    }
+
+    private function level1CategoryParam($level2_category_id): ?Int {
+        if(!isset($level2_category_id) || $level2_category_id == "null") return null;
+        return ManualCategoryLevel2::find($level2_category_id)->level1;
+    }
+
+    private function level2CategoryParam($level2_category_id): ?Int {
+        if($level2_category_id == "null") return null;
+        return $level2_category_id;
     }
 }
 
