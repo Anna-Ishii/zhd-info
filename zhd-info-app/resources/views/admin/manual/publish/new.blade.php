@@ -38,6 +38,20 @@
 
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal" name="form">
         @csrf
+        <div class="form-group form-group-sm">
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
+            <div class="col-lg-6">      
+                <label class="mr16">
+                    <select class="form-control" name="new_category_id">
+                        <option value="null" hidden>カテゴリを選択</option>
+                            @foreach ($new_category_list as $category)
+                                <option class="mr8" value="{{$category->id}}" 
+                                    @if(old('new_category_id') == $category->id) selected @endif>{{ $category->name }}</option>
+                            @endforeach
+                    </select>
+                </label>
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
@@ -48,20 +62,6 @@
                     {{ $category->name }}
                 </label>
                 @endforeach
-            </div>
-        </div>
-        <div class="form-group form-group-sm">
-            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">      
-                <label class="mr16">
-                    <select class="form-control" name="new_category_id">
-                        <option value="null">カテゴリを選択</option>
-                            @foreach ($new_category_list as $category)
-                                <option class="mr8" value="{{$category->id}}" 
-                                    @if(old('new_category_id') == $category->id) selected @endif>{{ $category->name }}</option>
-                            @endforeach
-                    </select>
-                </label>
             </div>
         </div>
         <div class="form-group">
