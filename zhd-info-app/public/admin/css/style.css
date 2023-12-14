@@ -1042,8 +1042,7 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   color: #333;
   font-size: 12px;
 }
-
-.modal {
+.modal-dialog {
   top: 25%;
 }
 .modal-body {

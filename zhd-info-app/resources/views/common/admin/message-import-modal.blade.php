@@ -9,10 +9,10 @@
                 <div>
                     csvデータを業務連絡に上書きします
                 </div>
-                <form>
+                <form class="form-horizontal">
                     <div class="form-group">
-                        <label class="col-lg-2 control-label">CSV添付<span class="text-danger required">*<span></label>
-                        <div class="col-lg-9">
+                        <label class="col-sm-2 control-label">csv添付<span class="text-danger required">*<span></label>
+                        <div class="col-sm-9">
                             <label class="inputFile form-control">
                                 <span class="fileName">ファイルを選択またはドロップ</span>
                                 <input type="file" name="csv" accept=".csv">
@@ -20,13 +20,15 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <div class="text-right">
+                        <div class="col-sm-3 control-label">
+                            <span class="text-danger required">*</span>：必須項目
+                        </div>
+                        <div class="col-sm-2 col-sm-offset-6 control-label">
                             <input type="button" class="btn btn-admin" value="インポート">
                         </div>
                     </div>
                 </form>
             </div>
-        </div>
         </div>
     </div>
 </div>
