@@ -26,10 +26,9 @@
             <tr>
                 <td>{{$manual->number}}</td>
                 <td>
-                @if($manual->category_level1)
-                    {{"{$manual->category_level1?->name} |"}}
+                @if(isset($manual->category_level1) && isset($manual->category_level2))
+                    {{"{$manual->category_level1->name}|{$manual->category_level2->name}"}}
                 @endif
-                {{$manual->category_level2?->name}}
                 </td>
                 <td>{{$manual->category?->name}}</td>
                 <td>{{$manual->title}}</td>
