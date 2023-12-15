@@ -32,6 +32,7 @@ class MessageCsvImport implements
     use Importable;
 
     private $organization = [];
+    private $brand = [];
     private $organization5 = [];
     private $organization4 = [];
     private $organization3 = [];
@@ -40,9 +41,11 @@ class MessageCsvImport implements
     public function __construct()
     {
         $this->organization = $this->getOrganizationForm();
+        $this->brand = array_column($this->organization, 'brand_name');
         $this->organization5 = array_column($this->organization, 'organization5_name');
         $this->organization4 = array_column($this->organization, 'organization4_name');
         $this->organization3 = array_column($this->organization, 'organization3_name');
+        array_push(($this->brand), "全て");
         array_push(($this->organization5), "全て");
         array_push(($this->organization4), "全て");
         array_push(($this->organization3), "全て");
@@ -155,6 +158,7 @@ class MessageCsvImport implements
         return [
             '0' => ['required'],
             '2' => ['nullable', Rule::in($this->category_list)],
+            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
             '13' => ['nullable', new OrganizationRule(parameter: $this->organization5)],
             '14' => ['nullable', new OrganizationRule(parameter: $this->organization4)],
             '15' => ['nullable', new OrganizationRule(parameter: $this->organization3)],
@@ -192,13 +196,19 @@ class MessageCsvImport implements
         $organization1_id = $admin->organization1_id;
 
         return Shop::query()
+            ->leftjoin('brands', 'brand_id', '=', 'brands.id')
             ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
             ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
             ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('brand_id')
+            ->distinct('organization2_id')
+            ->distinct('organization3_id')
             ->distinct('organization4_id')
             ->distinct('organization5_id')
             ->select(
+                'brand_id',
+                'brands.name as brand_name',
                 'organization2_id',
                 'organization2.name as organization2_name',
                 'organization3_id',
@@ -208,15 +218,7 @@ class MessageCsvImport implements
                 'organization5_id',
                 'organization5.name as organization5_name'
             )
-            ->where('organization1_id', $organization1_id)
-            ->orderByRaw('organization2_id is null asc')
-            ->orderByRaw('organization3_id is null asc')
-            ->orderByRaw('organization4_id is null asc')
-            ->orderByRaw('organization5_id is null asc')
-            ->orderBy("organization2_id", "asc")
-            ->orderBy("organization3_id", "asc")
-            ->orderBy("organization4_id", "asc")
-            ->orderBy("organization5_id", "asc")
+            ->where('shops.organization1_id', $organization1_id)
             ->get()
             ->toArray();
     }

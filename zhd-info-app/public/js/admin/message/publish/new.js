@@ -4,7 +4,7 @@ $(document).ready(function(){
         // ファイルは送信しない
         $('input[type="file"]').prop('disabled', true);
 
-        if(emptyTagLabelForm() && !emptyTagInputForm()) {
+        if(!emptyTagInputForm()) {
             appendFormTagInput()
         }
         
