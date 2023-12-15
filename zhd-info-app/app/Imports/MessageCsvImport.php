@@ -91,7 +91,15 @@ class MessageCsvImport implements
             $message->title = $title;
             $message->start_datetime = $this->parseDateTime($start_datetime);
             $message->end_datetime = $this->parseDateTime($end_datetime);
+            $message->updated_admin_id = $admin->id;
+            // $message->updated_at = Carbon::now();
             $message->save();
+            if($message->wasChanged()) {
+                $admin->update([
+                    'updated_admin_id' => $admin->id
+                ]);
+            }
+
             MessageOrganization::where('message_id', $message->id)->delete();
 
             if (isset($org5_param)) {

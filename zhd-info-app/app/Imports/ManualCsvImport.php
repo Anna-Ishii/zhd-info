@@ -13,6 +13,8 @@ use App\Models\User;
 use App\Rules\Import\OrganizationRule;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
@@ -28,12 +30,15 @@ class ManualCsvImport implements
     use Importable;
 
     private $brand = [];
-    
+    private $category_list = [];
+
     public function __construct()
     {
         $admin = session('admin');
         $this->brand = $this->getBrandNameArray($admin->organization1_id);
         array_push(($this->brand), "全て");
+        $this->category_list = ManualCategory::pluck('name')->toArray();
+        $this->new_category_list = $this->getNewCategoryList();
     }
 
     public function collection(Collection $rows)
@@ -84,7 +89,14 @@ class ManualCsvImport implements
             $manual->start_datetime = $this->parseDateTime($start_datetime);
             $manual->end_datetime = $this->parseDateTime($end_datetime);
             $manual->description = $description;
+            $manual->updated_admin_id = $admin->id;
+            // $manual->updated_at = Carbon::now();
             $manual->save();
+            if ($manual->wasChanged()) {
+                $admin->update([
+                    'updated_admin_id' => $admin->id
+                ]);
+            }
             $manual->tag()->sync($this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]));
             $manual->brand()->sync($brand_param);
             $manual->user()->sync(
@@ -118,6 +130,8 @@ class ManualCsvImport implements
     {
         return [
             '0' => ['required'],
+            '1' => ['nullable', Rule::in($this->new_category_list)],
+            '2' => ['nullable', Rule::in($this->category_list)],
             '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
         ];
     }
@@ -127,6 +141,8 @@ class ManualCsvImport implements
         return [
             '0.required' => 'Noは必須です',
             '0.int' => 'Noは数値である必要があります',
+            '1.in' => 'カテゴリの項目が間違っています',
+            '2.in' => '旧カテゴリの項目が間違っています',
         ];
     }
 
@@ -216,6 +232,19 @@ class ManualCsvImport implements
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
             ->pluck('organization5.id')
             ->toArray();
+    }
+
+    private function getNewCategoryList(): array
+    {
+        $new_category_list = ManualCategoryLevel2::query()
+            ->select([
+                DB::raw('concat(manual_category_level1s.name, "|", manual_category_level2s.name) as name')
+            ])
+            ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
+            ->pluck('name')
+            ->toArray();
+        
+        return $new_category_list;
     }
 
     private function targetUserParam($brand): array
