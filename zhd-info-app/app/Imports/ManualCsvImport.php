@@ -10,6 +10,7 @@ use App\Models\ManualCategoryLevel2;
 use App\Models\ManualTagMaster;
 use App\Models\Shop;
 use App\Models\User;
+use App\Rules\Import\OrganizationRule;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -21,14 +22,18 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class ManualCsvImport implements
     ToCollection,
     WithCalculatedFormulas,
-    WithStartRow
-    // WithValidation
+    WithStartRow,
+    WithValidation
 {
     use Importable;
 
+    private $brand = [];
+    
     public function __construct()
     {
-
+        $admin = session('admin');
+        $this->brand = $this->getBrandNameArray($admin->organization1_id);
+        array_push(($this->brand), "全て");
     }
 
     public function collection(Collection $rows)
@@ -60,21 +65,21 @@ class ManualCsvImport implements
             
             if($manual->content) {
                 foreach ($manual->content as $key => $content) {
-                    $content_title = $row_contents[($key * 2) + 13] ?? '';
-                    $content_description = $row_contents[($key * 2) + 14] ?? '';
+                    $content_title = $row_contents[($key * 2) + 14] ?? '';
+                    $content_description = $row_contents[($key * 2) + 15] ?? '';
                     $content->title = $content_title;
                     $content->description = $content_description;
                     $content->save();
                 }
             }
-            $brand_param = ($brand == "全て") ? $this->getBrandAll($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+            $brand_param = ($brand == "全て") ? $this->getBrandIdArray($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
             $new_category_array = $new_cateory ? explode('|', $new_cateory) : null;
-            $new_category_level1_name = str_replace(' ', '', trim($new_category_array[0], "\""));
-            $new_category_level2_name = str_replace(' ', '', trim($new_category_array[1], "\""));
+            $new_category_level1_name = isset($new_category_array[0]) ? str_replace(' ', '', trim($new_category_array[0], "\"")) : NULL;
+            $new_category_level2_name = isset($new_category_array[1]) ? str_replace(' ', '', trim($new_category_array[1], "\"")) : NULL;
 
             $manual->category_id = $category ? ManualCategory::where('name', $category)->pluck('id')->first() : NULL;
-            $manual->category_level1_id = $new_category_array[0] ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
-            $manual->category_level2_id = $new_category_array[1] ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
+            $manual->category_level1_id = isset($new_category_array[0]) ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
+            $manual->category_level2_id = isset($new_category_array[1]) ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
             $manual->title = $title;
             $manual->start_datetime = $this->parseDateTime($start_datetime);
             $manual->end_datetime = $this->parseDateTime($end_datetime);
@@ -112,14 +117,16 @@ class ManualCsvImport implements
     public function rules(): array
     {
         return [
-            
+            '0' => ['required'],
+            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-
+            '0.required' => 'Noは必須です',
+            '0.int' => 'Noは数値である必要があります',
         ];
     }
 
@@ -166,11 +173,18 @@ class ManualCsvImport implements
         return $returnArray;
     }
 
-    private function getBrandAll(Int $org1_id): array
+    private function getBrandIdArray(Int $org1_id): array
     {
         return Brand::query()
             ->where('organization1_id', '=', $org1_id)
             ->pluck('id')
+            ->toArray();
+    }
+    private function getBrandNameArray(Int $org1_id): array
+    {
+        return Brand::query()
+            ->where('organization1_id', '=', $org1_id)
+            ->pluck('name')
             ->toArray();
     }
 
