@@ -2,129 +2,54 @@
 
 @section('content')
 
-<nav class="menu">
-    <ul class="menu__list flex">
-        <li class="menu__list__item isCurrent txtCenter txtBold"><a href="{{ route('top') }}">
-                <p>ホーム</p>
-            </a></li>
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('message.index') }}">
-                <p>業務連絡</p>
-            </a></li>
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('manual.index') }}">
-                <p>動画マニュアル</p>
-            </a></li>
-    </ul>
-</nav>
+<div class="content">
+  <div class="content__inner">
+    <div class="search">
+      <div class="search__inner">
+        <form method="post" action="#">
+          <div>
+            <label><input type="radio" name="type" value="1">業務連絡</label>
+            <label><input type="radio" name="type" value="2" checked="checked">マニュアル</label>
+          </div>
+          <div class="search__flexBox">
+            <input type="text" name="" class="search__flexBox__name" placeholder="キーワードを入れてください">
+            <select name="" class="search__flexBox__limit">
+              <option>検索期間を選択</option>
+              <option value="">全期間</option>
+              <option value="">過去1週間</option>
+              <option value="">過去1ヶ月</option>
+            </select>
+            <button type="submit" class="btnType1">検索</button>
+          </div>
+        </form>
+        <p>上位検索ワード：肉 レモン 酒</p>
+      </div>
 
-<main class="main">
-    <div class="main__inner">
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">
-                今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})の</span>お知らせ
-            </h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_thisweek as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10">
-                <span class="txtBlue">今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})</span>の動画マニュアル
-            </h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_thisweek as $ml)
-                        @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <details>
-            <summary>
-                <h2 class="mb10"><span class="txtBlue">
-                    先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>お知らせ
-                </h2>
-            </summary>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_lastweek as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-            </details>
-        </aricle>
-        <aricle class="indexList mb32">
-            <details>
-            <summary>
-                <h2 class="mb10">
-                    <span class="txtBlue">先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>動画マニュアル
-                </h2>
-            </summary>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_lastweek as $ml)
-                        @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-            </details>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">未読の</span>お知らせ</h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_unread as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">未読の</span>動画マニュアル</h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_unread as $ml)
-                    @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
     </div>
-</main>
 
-<div class="sidebarBg"></div>
-<nav class="sidebar">
-    <div class="sidebar__inner">
-        <div class="sidebar__close mb58">
-            <img src="{{ asset('/img/icon_folder.svg') }}" alt="閉じる">
+    <div class="top">
+      <a href="/message" class="top__link">
+        <p class="top__link__notice">新着10件</p>
+        <div class="top__link__box">
+          <img src="{{ asset('img/icon_attention.svg') }}" alt="">
+          <div class="top__link__txt">
+            <p>業務連絡<span>更新日：12/10 10:00</span></p>
+          </div>
         </div>
-        <ul class="sidebar__list">
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">スタッフ用</span>(120件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">キッチン用</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">店長向け</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">終了した業務</span>(30件)</a></li>
-        </ul>
-        <div class="btnSidebarLabel">
-            <img src="{{ asset('/img/icon_plus.svg') }}" alt="">
-            <p class="txtBold">ラベルを追加</p>
+      </a>
+      <a href="/manual" class="top__link">
+        <p class="top__link__notice">新着10件</p>
+        <div class="top__link__box">
+          <img src="{{ asset('img/icon_manual.svg') }}" alt="">
+          <div class="top__link__txt">
+            <p>マニュアル<span>更新日：12/10 10:00</span></p>
+          </div>
         </div>
-        <div class="sidebar__inputArea">
-            <form action="#">
-                <div class="flex">
-                    <input type="text" name="">
-                    <button class="btnAddLabel txtBold">追加</button>
-                </div>
-            </form>
-        </div>
+      </a>
     </div>
-</nav>
 
-@include('common.footer')
+  </div>
+</div>
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
 <script src="{{ asset('/js/detail.js') }}" defer></script>
