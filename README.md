@@ -55,6 +55,22 @@ git fetch origin release
 git reset --hard origin/release
 ```
 
+## Tools
+
+### コード整形する
+
+```sh
+./vendor/bin/pint (--test) (-v)
+```
+
+--test: 整形せずチェックだけ　-v: 整形内容を表示
+
+### コード解析する
+
+```sh
+./vendor/bin/phpstan analyse
+```
+
 ## Help
 
 ### configのキャッシュをクリアする
