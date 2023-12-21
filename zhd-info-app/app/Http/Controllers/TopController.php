@@ -82,7 +82,10 @@ class TopController extends Controller
         if($type == 1) {
             return redirect()->route('message.index', $param);
         } elseif($type == 2) {
-            return redirect()->route('manual.index', $param);
+            return redirect()->route('manual.index', array_merge(
+                $param,
+                ['category_menu_active' => true]
+            ));
         }
     }
     
