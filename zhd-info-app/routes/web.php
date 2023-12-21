@@ -28,6 +28,7 @@ Route::post('/member/auth', [MemberAuthController::class, 'login']);
 Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
+Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
