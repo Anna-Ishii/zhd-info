@@ -1,5 +1,38 @@
 @extends('layouts.admin.parent')
 
+@section('sideber')
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav">
+                <li>
+                    <a href="#" class="nav-label">業務連絡</a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/message/publish/">配信</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">動画マニュアル</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/manual/publish/">配信</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+@endsection
+
+@section('content')
 @section('content')
 <div id="page-wrapper">
     @include('common.admin.page-head',['title' => 'パスワード変更'])

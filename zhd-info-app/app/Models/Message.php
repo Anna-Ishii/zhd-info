@@ -99,6 +99,11 @@ class Message extends Model
         return $this->belongsToMany(Brand::class, 'message_brand', 'message_id', 'brand_id');
     }
 
+    public function tag(): BelongsToMany
+    {
+        return $this->belongsToMany(MessageTagMaster::class, 'message_tags', 'message_id', 'tag_id');
+    }
+
     public function brands_string($brandList = [])
     {
         // リレーションからnameプロパティを取得して配列に変換
@@ -158,11 +163,25 @@ class Message extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getFormattedStartDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
+    }
+
     public function getFormattedEndDatetimeAttribute()
     {
         $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
+    }
+
+    public function getFormattedEndDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
     }
     
     // public function getViewRateAttribute() : float

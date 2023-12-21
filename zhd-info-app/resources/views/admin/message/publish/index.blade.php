@@ -8,14 +8,12 @@
                     <a href="#" class="nav-label">業務連絡</a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/message/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="#" class="nav-label">動画マニュアル</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/manual/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
@@ -119,7 +117,15 @@
 		<div class="pagenation-top">
 		@include('common.admin.pagenation', ['objects' => $message_list])
 			<div>
-				<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+				<div>
+					<input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageImportModal" value="インポート">
+				</div>
+				<div>
+					<a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
+				</div>
+				<div>
+					<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+				</div>
 			</div>
 		</div>
 
@@ -132,6 +138,7 @@
 						<th class="text-center" nowrap>ラベル</th>
 						<th class="text-center" nowrap>カテゴリ</th>
 						<th class="text-center" nowrap>タイトル</th>
+						<th class="text-center" nowrap>検索タグ</th>
 						<th class="text-center" nowrap>添付ファイル</th>
 						<th class="text-center" colspan="2">掲載期間</th>
 						<th class="text-center" nowrap>状態</th>
@@ -164,6 +171,16 @@
 							@else
 								{{$message->title}}
 							@endif
+						</td>
+						<td class="label-tags">
+							<div>
+								@foreach ($message->tag as $tag)
+									<div class="label-tags-mark">
+									{{$tag->name}}
+									</div>
+								@endforeach
+							</div>
+
 						</td>
 						<td>
 							<div>{{$message->content_file_size}}</div>

@@ -23,6 +23,8 @@ class Manual extends Model
         'title',
         'description',
         'category_id',
+        'category_level1_id',
+        'category_level2_id',
         'content_name',
         'content_url',
         'thumbnails_url',
@@ -74,9 +76,24 @@ class Manual extends Model
         return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
+    public function category_level1(): HasOne
+    {
+        return $this->hasOne(ManualCategoryLevel1::class, foreignKey: 'id', localKey: 'category_level1_id');
+    }
+
+    public function category_level2(): HasOne
+    {
+        return $this->hasOne(ManualCategoryLevel2::class, foreignKey: 'id', localKey: 'category_level2_id');
+    }
+
     public function brand(): BelongsToMany
     {
         return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');
+    }
+
+    public function tag(): BelongsToMany
+    {
+        return $this->belongsToMany(ManualTagMaster::class, 'manual_tags', 'manual_id', 'tag_id');
     }
 
     public function brands_string($brandList = [])
@@ -153,6 +170,14 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getFormattedStartDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
+    }
+
+
     public function getFormattedEndDatetimeAttribute()
     {
         $before_datetime = $this->attributes['end_datetime'];
@@ -160,6 +185,12 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd) HH:mm') : null;
     }
 
+    public function getFormattedEndDatetimeForExportAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
+    }
     // public function getViewRateAttribute(): float
     // {
     //     $user_count = $this->withCount('user')->get();
@@ -232,5 +263,9 @@ class Manual extends Model
         $min = isset($min) ? $min : 0;
         $max = isset($max) ? $max : 100;
         $query->havingRaw('ROUND((read_users / total_users) * 100, 2) BETWEEN ? AND ?', [$min, $max]);
+    }
+
+    public static function getCurrentNumber($organization1_id): Int{
+        return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
     }
 }
