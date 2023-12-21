@@ -8,14 +8,12 @@
                     <a href="#" class="nav-label">業務連絡</a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/message/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
                     <a href="#" class="nav-label">動画マニュアル</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/manual/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li class="nav-current-page">

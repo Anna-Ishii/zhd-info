@@ -8,14 +8,12 @@
                     <a href="#" class="nav-label">業務連絡</a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/message/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/message/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li class="nav-current-page">
                     <a href="#" class="nav-label">動画マニュアル</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/manual/publish/">配信</a></li>
-                        <li style="display:none"><a href="/admin/manual/manage/">管理</a></li>
                     </ul>
                 </li>
                 <li>
@@ -51,6 +49,15 @@
             </div> 
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
+                <select name="new_category" class="form-control">
+                    <option value="">指定なし</option>
+                    @foreach ($new_category_list as $category)
+                    <option value="{{ $category->id }}" {{ request()->input('new_category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="input-group col-lg-2 spMb16">
+                <label class="input-group-addon">旧カテゴリ</label>
                 <select name="category" class="form-control">
                     <option value="">指定なし</option>
                     @foreach ($category_list as $category)
@@ -58,7 +65,6 @@
                     @endforeach
                 </select>
             </div>
-
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">状態</label>
                 <select name="status" class="form-control duration-form-text">
@@ -112,7 +118,15 @@
             <div class="pagenation-top">
             @include('common.admin.pagenation', ['objects' => $manual_list])
                 <div>
-                    <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                    <div>
+                        <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#manualImportModal" value="インポート">
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
+                    </div>
+                    <div>
+                        <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                    </div>
                 </div>
             </div>
 
@@ -123,8 +137,11 @@
                                 <th class="text-center" nowrap>No</th>
                                 <th class="text-center" nowrap>対象業態</th>
                                 <th class="text-center" nowrap>カテゴリ</th>
+                                <th class="text-center" nowrap>旧カテゴリ</th>
                                 <th class="text-center" nowrap>タイトル</th>
+                                <th class="text-center" nowrap>検索タグ</th>
                                 <th class="text-center" colspan="2" nowrap>添付ファイル</th>
+                                <th class="text-center" nowrap>再生時間</th>
                                 <th class="text-center" colspan="2" nowrap>掲載期間</th>
                                 <th class="text-center" nowrap>状態</th>
                                 <th class="text-center" colspan="3" nowrap>閲覧率</th>
@@ -145,6 +162,12 @@
                                         @endif">
                                 <td class="shop-id">{{$manual->number}}</td>
                                 <td>{{$manual->brands_string($brands)}}</td>
+                                <td>
+                                    @if($manual->category_level1)
+                                        {{"{$manual->category_level1?->name} |"}}
+                                    @endif
+                                    {{$manual->category_level2?->name}}
+                                </td>
                                 <td>{{$manual->category?->name}}</td>
                                 <td class="label-title">
                                     @if(isset($manual->content_url))
@@ -156,6 +179,15 @@
                                         {{$manual->title}}
                                     @endif
                                 </td>
+                                <td class="label-tags">
+                                    <div>
+                                        @foreach ($manual->tag as $tag)
+                                            <div class="label-tags-mark">
+                                            {{$tag->name}}
+                                            </div>
+                                        @endforeach
+                                    </div>
+						        </td>
                                 <td>
                                     @if(isset($manual->content_url))
                                         <div>{{$manual->content_type}}</div>
@@ -164,6 +196,7 @@
                                 <td>
                                     <div>{{$manual->content_file_size}}</div>
                                 </td>
+                                <td class="label-movie-time"> - </td>
                                 <td class="date-time"><div>{{$manual->formatted_start_datetime}}</div></td>
                                 <td class="date-time"><div>{{$manual->formatted_end_datetime}}</div></td>
                                 <td>{{$manual->status->text()}}</td>
