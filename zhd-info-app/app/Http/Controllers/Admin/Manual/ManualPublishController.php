@@ -514,17 +514,29 @@ class ManualPublishController extends Controller
     public function import(Request $request)
     {
         $csv = $request->file;
+        $csv_path = Storage::putFile('csv', $csv);
 
         $admin = session('admin');
+        Log::info("マニュアルCSVインポート",[
+            'csv_path' => $csv_path,
+            'admin' => $admin
+        ]);
+        $log_id = DB::table('manual_csv_logs')->insertGetId([
+            'imported_datetime' => new Carbon('now'),
+            'is_success' => false
+        ]);
+        
 
         DB::beginTransaction();
         try {
-            $messages = Excel::import(new ManualCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            Excel::import(new ManualCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
             // $this->importMessage($messages[0], $admin->organization1);
-            DB::table('manual_csv_logs')->insert([
-                'imported_datetime' => new Carbon('now'),
-                'is_success' => true
-            ]);
+            DB::table('manual_csv_logs')
+                ->where('id', $log_id)
+                ->update([
+                    'imported_datetime' => new Carbon('now'),
+                    'is_success' => true
+                ]);
             DB::commit();
             return response()->json([
                 'message' => "インポート完了しました"
