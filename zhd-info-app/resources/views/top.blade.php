@@ -1,4 +1,5 @@
 @extends('layouts.parent')
+@section('previous_page')<a href="{{route('top')}}">ホーム</a>@endsection
 @section('title', 'ホーム')
 
 @section('content')
