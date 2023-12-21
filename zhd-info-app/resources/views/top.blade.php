@@ -9,11 +9,14 @@
       <div class="search__inner">
         <form method="get" action="/search">
           <div>
-            <label><input type="radio" name="type" value="1" {{ request()->input('type') == "1" ? 'checked="checked"' : '' }}>業務連絡</label>
-            <label><input type="radio" name="type" value="2" {{ request()->input('type', 2) == "2" ? 'checked="checked"' : '' }}>マニュアル</label>
+            <input type="radio" name="type" value="1"  id="topRadio1" {{ request()->input('type') == "1" ? 'checked="checked"' : '' }}><label for="toRadio1">業務連絡</label>
+            <input type="radio" name="type" value="2"  id="topRadio2" {{ request()->input('type', 2) == "2" ? 'checked="checked"' : '' }}><label for="toRadio2">マニュアル</label>
           </div>
           <div class="search__flexBox">
-            <input type="text" name="keyword" class="search__flexBox__name" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '') }} ">
+            <div class="search__flexBox__name">
+              <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '') }} ">
+              <p>上位検索ワード：肉 レモン 酒</p>
+            </div>
             <select name="search_period" class="search__flexBox__limit">
               <option>検索期間を選択</option>
               @foreach (App\Enums\SearchPeriod::cases() as $case)
@@ -23,7 +26,6 @@
             <button type="submit" class="btnType1">検索</button>
           </div>
         </form>
-        <p>上位検索ワード：肉 レモン 酒</p>
       </div>
 
     </div>
