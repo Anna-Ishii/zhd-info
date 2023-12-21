@@ -618,17 +618,28 @@ class MessagePublishController extends Controller
     public function import(Request $request)
     {
         $csv = $request->file;
+        $csv_path = Storage::putFile('csv', $csv);
 
         $admin = session('admin');
+        Log::info("業連CSVインポート", [
+            'csv_path' => $csv_path,
+            'admin' => $admin
+        ]);
+        $log_id = DB::table('message_csv_logs')->insertGetId([
+            'imported_datetime' => new Carbon('now'),
+            'is_success' => false
+        ]);
 
         DB::beginTransaction();
         try {
-            $messages = Excel::import(new MessageCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            Excel::import(new MessageCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
             // $this->importMessage($messages[0], $admin->organization1);
-            DB::table('message_csv_logs')->insert([
-                'imported_datetime' => new Carbon('now'),
-                'is_success' => true
-            ]);
+            DB::table('message_csv_logs')
+                ->where('id', $log_id)
+                ->update([
+                    'imported_datetime' => new Carbon('now'),
+                    'is_success' => true
+                ]);
             DB::commit();
             return response()->json([
                 'message' => "インポート完了しました"
