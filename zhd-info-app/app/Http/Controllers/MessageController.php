@@ -12,7 +12,7 @@ class MessageController extends Controller
 {
     function index(Request $request)
     {
-        $q = $request->input('keyword');
+        $keyword = $request->input('keyword');
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
@@ -20,11 +20,11 @@ class MessageController extends Controller
         $messages = $user->message()
             ->with('category', 'tag')
             ->publishingMessage()
-            ->when(isset($q), function ($query) use ($q) {
-                $query->where(function ($query) use ($q) {
-                    $query->whereLike('title', $q)
-                        ->orWhereHas('tag', function ($query) use ($q) {
-                            $query->where('name', $q);
+            ->when(isset($keyword), function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->whereLike('title', $keyword)
+                        ->orWhereHas('tag', function ($query) use ($keyword) {
+                            $query->where('name', $keyword);
                         });
                 });
             })
