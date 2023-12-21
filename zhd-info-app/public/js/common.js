@@ -26,10 +26,15 @@ $(document).on('click' , '.btnAddLabel' , function(){
 	}
 });
 
-"use strict";
-
 $(document).on('click' , '.btnSort', function(){
-	$('.sortMenu').addClass('isActive');
+	let chkMenu = $('.sortMenu');
+	if(!chkMenu.is(':visible')){
+		event.preventDefault();
+		$('.sortMenu').addClass('isActive');
+		$('.btnSort').empty().text('ホーム');
+	}else{
+		return true;
+	}
 });
 
 /* ソートカテゴリ選択 */
@@ -42,7 +47,9 @@ $(document).on('change' , '.selectAll' , function(){
 				$(this).prop('checked' , true);
 			}
 		});
+		$(this).addClass('isSelectAll');
 	}else{
+		$(this).siblings('label').removeClass('isSelectAll');
 		target.each(function(){
 			if($(this).prop('checked')){
 				$(this).prop('checked' , false);
@@ -51,17 +58,38 @@ $(document).on('change' , '.selectAll' , function(){
 	}
 });
 
+let targetInput;
+let cnt;
+let chkBulkTarget;
+function changeBulk(e){
+	if(cnt >= 1){
+		chkBulkTarget.removeClass('isSelectAll');
+	}
+}
 $(document).on('change' , '.sortMenu__list__item input[type=checkbox]' , function(){
-	let chkTarget = $(this).parents('.sortMenu__list').find('input[type=checkbox]');
-	/* 一回チェックを外す */
-	$(this).parents('.sortMenu__box').find('.selectAll').prop('checked' , false);
+	targetInput = $(this);
+	chkBulk(changeBulk);
+});
+function chkBulk(callback){
+	let chkTarget = targetInput.parents('.sortMenu__list').find('input[type=checkbox]');
+	/* 一回一括のチェックを外す */
+	chkBulkTarget = targetInput.parents('.sortMenu__box').find('.selectAll');
+	chkBulkTarget.prop('checked' , false);
+	/* 全部チェックされているか判別する */
+	cnt = 0;
 	chkTarget.each(function(){
 		if($(this).prop('checked')){
-			$(this).parents('.sortMenu__box').find('.selectAll').prop('checked' , true);
-			return false;
+			console.log(chkBulkTarget.length);
+			chkBulkTarget.prop('checked' , true);
+			chkBulkTarget.addClass('isSelectAll');
+		}else{
+			cnt = cnt + 1;
+			console.log(cnt);
 		}
 	});
-});
+	callback();
+}
+
 
 $(document).on('click' , '.btnSearchReset', function(){
 	let target = $('.sortMenu').find('input[type=checkbox]');
@@ -70,8 +98,11 @@ $(document).on('click' , '.btnSearchReset', function(){
 	});
 });
 
-/* 検索処理（仮置き） */
+/* 検索処理 */
 $(document).on('click' , '.btnSearch', function(){
+	/* 仮置き（必要に応じて削除してください） */
 	$('.sortMenu').removeClass('isActive');
-});
 
+	/* フッターのリンク入れ替え */
+	$('.btnSort').empty().text('カテゴリ選択');
+});
