@@ -1,4 +1,13 @@
 @extends('layouts.parent')
+@section('previous_page')
+  @if (request()->input('category_menu_active'))
+    <a href="{{route('top')}}">ホーム</a>
+  @else 
+    <a href="{{request()->fullUrlWithQuery(['category_menu_active' => 'true'])}}">カテゴリ選択へ</a>
+  @endif
+
+@endsection
+@section('title', 'マニュアル') 
 
 @section('content')
 <nav class="menu">

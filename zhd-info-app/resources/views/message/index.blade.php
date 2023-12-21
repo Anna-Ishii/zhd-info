@@ -1,5 +1,8 @@
 @extends('layouts.parent')
 @section('title', '業務連絡')
+@section('previous_page')
+<a href="{{route('top')}}">ホーム</a>
+@endsection
 @section('content')
 
 <div class="content">
