@@ -10,120 +10,79 @@
 @section('title', 'マニュアル') 
 
 @section('content')
-<nav class="menu">
-    <ul class="menu__list flex">
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('top') }}">
-                <p>ホーム</p>
-            </a></li>
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('message.index') }}">
-                <p>業務連絡</p>
-            </a></li>
-        <li class="menu__list__item isCurrent txtCenter txtBold"><a href="{{ route('manual.index') }}">
-                <p>動画マニュアル</p>
-            </a></li>
-    </ul>
-</nav>
 
-<main class="main">
-    <div class="main__inner">
-        <nav class="sliderMenu mb16">
-            <div class="sliderMenu__inner">
-                <ul class="sliderMenu__list flex">
-                    <li class="sliderMenu__list__item txtBold {{ is_null(request()->input('category')) ? 'isActive' : ''}}"><a href="{{ route('manual.index') }}">全て</a></li>
-                    @foreach($categories as $category)
-                    <li class="sliderMenu__list__item txtBold {{ request()->input('category') == $category->id ? 'isActive' : ''}}"><a href="{{ route('manual.index', ['category' => $category->id]) }}">{{ $category->name }}</a></li>
-                    @endforeach
-                </ul>
+<div class="content">
+  <div class="content__inner">
+    <div class="search">
+      <div class="search__inner">
+        <form method="get">
+          @if (is_array(request()->input("category_level2")))
+              @foreach (request()->input("category_level2") as $category_level2)
+                  <input type="hidden" name="category_level2[]" value="{{$category_level2}}">
+              @endforeach
+          @endif
+          <div class="search__flexBox">
+            <div class="search__flexBox__name">
+              <input type="text" name="keyword"  placeholder="キーワードを入れてください"  value="{{ request()->input('keyword', '')}} ">
+              <p>上位検索ワード：肉 レモン 酒</p>
             </div>
-        </nav>
-
-        {{-- <div class="search mb24" style="display: none">
-            <div class="search__inner flex">
-                <p class="search__status txtBold spmb8">「<span>{{ is_null(request()->input('category')) ? '全て' : $categories[request()->input('category') - 1]->name}}</span>」{{ $manuals->total() }}件を表示中</p>
-                <div class="search__btnList">
-                    <form action="#" name="sort">
-                        <!-- 昇順：isAscending 降順：isDescending -->
-                        <button class="btnSort txtBold isAscending">新着順</button>
-                    </form>
-                </div>
-            </div>
-        </div> --}}
-
-        <article class="list mb14">
-            @foreach($manuals as $manual)
-                {{-- 手順が一つもないものは遷移後自動再生する --}}
-                @if($manual->content->isEmpty())
-                    <a href="{{ route('manual.detail', ['manual_id' => $manual->id, "autoplay" => true]) }}" class="mb4">
-                @else
-                    <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
-                @endif
-                <div class="list__box flex">
-                    <div class="list__box__thumb">
-                        <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
-                    </div>
-                    <div class="list__box__txtInner">
-                        <p class="list__box__title mb2 {{($manual->pivot->read_flg) ? "" : "list__box__title_large txtBold unread"}}">{{ $manual->title }}</p>
-                        <time datetime="{{$manual->start_datetime}}" class="mr8 txtInline">{{ $manual->formatted_start_datetime }}</time>
-                    </div>
-                </div>
-            </a>
-            @endforeach
+            <select name="search_period" class="search__flexBox__limit">
+              <option value="null" hidden>検索期間を選択</option>
+              @foreach (App\Enums\SearchPeriod::cases() as $case)
+                  <option value="{{$case->value}}" {{ request()->input("search_period") == $case->value ? 'selected' : ''}}>{{$case->text()}}</option>
+              @endforeach
+            </select>
+            <button type="submit" class="btnType1">検索</button>
+          </div>
+        </form>
+      </div>
 
     </div>
-    </article>
 
-    <nav class="pager mb18">
-        <div class="pager__inner flex">
-            <a href="{{ $manuals->url(1) }}" class="pager__btn txtCenter">
-                <img src="{{ asset('img/icon_tofirst.svg')}}" alt="最初のページへ移動">
-            </a>
-            <a href="{{ $manuals->previousPageUrl() }}" class="pager__btn txtCenter">
-                <img src=" {{ asset('img/icon_prev.svg')}}" alt="前のページ">
-            </a>
-            <div class="pager__number txtBold txtCenter">
+    @include('common.navigation', ['objects' => $manuals])
 
-                <p>{{$manuals->currentPage()}}<span>of</span>{{ceil($manuals->total() / $manuals->perPage())}}</p>
+		<div class="list">
+      <div class="list__inner">
+        <div class="list__headItem">
+          <div class="list__no">No.</div>
+          <div class="list__img"></div>
+          <div class="list__category btnSort">カテゴリ</div>
+          <div class="list__title">
+            タイトル
+          </div>
+          <div class="list__limit">掲載期間</div>
+        </div>
+        @foreach ($manuals as $manual)
+          @if($manual->content->isEmpty())
+              <a href="{{ route('manual.detail', ['manual_id' => $manual->id, "autoplay" => true]) }}" class="mb4">
+          @else
+              <a href="{{ route('manual.detail', ['manual_id' => $manual->id ]) }}" class="mb4">
+          @endif
+          <div class="list__item">
+            <div class="list__no">{{$manual->number}}</div>
+            <div class="list__img"><img src="{{$manual->thumbnails_url}}" alt=""></div>
+            <div class="list__category">{{$manual->category_level2?->name}}</div>
+            <div class="list__title">
+              {{$manual->title}}
+              <ul class="tags">
+                @foreach ($manual->tag as $tag)
+                    <li>{{$tag->name}}</li>
+                @endforeach
+              </ul>
             </div>
-            <a href="{{ $manuals->nextPageUrl() }}" class="pager__btn txtCenter">
-                <img src="{{ asset('img/icon_next.svg')}}" alt="次のページ">
-            </a>
-            <a href="{{ $manuals->url($manuals->lastPage()) }}" class="pager__btn txtCenter">
-                <img src="{{ asset('img/icon_tolast.svg')}}" alt="最後のページへ移動">
-            </a>
-        </div>
-    </nav>
+            <div class="list__limit">{{$manual->start_datetime?->isoFormat('MM/DD')}}{{$manual->end_datetime ? "〜{$manual->end_datetime->isoFormat('MM/DD')}" : ''}}</div>
+          </div>
+        </a>
+        @endforeach
+      </div>
+		</div>
 
-    </div>
-</main>
+  </div>
+</div>
 
-@include('common.footer')
-
-<div class="sidebarBg"></div>
-<nav class="sidebar">
-    <div class="sidebar__inner">
-        <div class="sidebar__close mb58">
-            <img src="{{ asset('img/icon_folder.svg')}}" alt="閉じる">
-        </div>
-        <ul class="sidebar__list">
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">スタッフ用</span>(120件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">キッチン用</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">店長向け</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">終了した業務</span>(30件)</a></li>
-        </ul>
-        <div class="btnSidebarLabel">
-            <img src="../assets/img/icon_plus.svg" alt="">
-            <p class="txtBold">ラベルを追加</p>
-        </div>
-        <div class="sidebar__inputArea">
-            <form action="#">
-                <div class="flex">
-                    <input type="text" name="">
-                    <button class="btnAddLabel txtBold">追加</button>
-                </div>
-            </form>
-        </div>
-    </div>
-</nav>
+@include('common.sortmenu', [
+  'category_level1s' => $category_level1s
+])
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
 @endsection
