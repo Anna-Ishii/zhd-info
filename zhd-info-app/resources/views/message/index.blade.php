@@ -16,7 +16,7 @@
               <p>上位検索ワード：肉 レモン 酒</p>
             </div>
             <select name="search_period" class="search__flexBox__limit">
-              <option>検索期間を選択</option>
+              <option value="null" hidden>検索期間を選択</option>
               @foreach (App\Enums\SearchPeriod::cases() as $case)
                   <option value="{{$case->value}}" {{ request()->input("search_period") == $case->value ? 'selected' : ''}}>{{$case->text()}}</option>
               @endforeach
