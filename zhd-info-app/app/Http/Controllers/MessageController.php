@@ -13,7 +13,7 @@ class MessageController extends Controller
     function index(Request $request)
     {
         $q = $request->input('keyword');
-        $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All));
+        $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
         // 掲示中のデータをとってくる
