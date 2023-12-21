@@ -22,20 +22,14 @@
 
     @yield('content')
 
-    <div class="version-number">
+    {{-- <div class="version-number">
         Ver. {{config('version.version')}}
-    </div>
+    </div> --}}
 
+    @include('common.footer')
+   
     <script src="{{ asset('/js/timer.js') }}" defer></script>
-    <script>
-        // ブラウザバックの時、リロードする
-        // 既読処理のレイアウトを再描画させるため
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                    window.location.reload();
-            }
-        };
-    </script>
+    <script src="{{ asset('/js/common.js') }}" defer></script>
     @livewireScripts
 </body>
 

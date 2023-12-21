@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SearchPeriod;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use Carbon\Carbon;
@@ -11,53 +12,45 @@ class MessageController extends Controller
 {
     function index(Request $request)
     {
-        $category_id = $request->input('category');
-        $emergency = $request->input('emergency');
-
-        $search_status_name = '全て';
+        $q = $request->input('keyword');
+        $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All));
 
         $user = session("member");
         // 掲示中のデータをとってくる
         $messages = $user->message()
-            ->when(isset($emergency), function ($query) {
-                $query->where('emergency_flg', true);
-            })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
-            })
+            ->with('category', 'tag')
             ->publishingMessage()
+            ->when(isset($q), function ($query) use ($q) {
+                $query->where(function ($query) use ($q) {
+                    $query->whereLike('title', $q)
+                        ->orWhereHas('tag', function ($query) use ($q) {
+                            $query->where('name', $q);
+                        });
+                });
+            })
+            ->when(isset($search_period), function ($query) use ($search_period) {
+                switch ($search_period) {
+                    case SearchPeriod::All:
+                        break;
+                    case SearchPeriod::Past_week:
+                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subWeek()->isoFormat('YYYY/MM/DD'));
+                        break;
+                    case SearchPeriod::Past_month:
+                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subMonth()->isoFormat('YYYY/MM/DD'));
+                        break;
+                    default:
+                        break;
+                }
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->appends(request()->query());
 
         $categories = MessageCategory::get();
 
-        if (isset($emergency)){
-            $search_status_name = '重要';
-        }elseif(isset($category_id)) {
-            $search_status_name = $categories[$category_id - 1]->name;
-        }
-
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
-            'search_status_name' => $search_status_name,
         ]);
     }
-
-    // function detail($message_id)
-    // {
-    //     $member = session('member');
-    //     $message = Message::find($message_id);
-
-    //     // 既読をつける
-    //     $member->message()->updateExistingPivot($message_id, [
-    //         'read_flg' => true,
-    //         'readed_datetime' => Carbon::now(), 
-    //     ]);
-
-    //     return view('message.detail', [
-    //         'message' => $message
-    //     ]);
-    // }
 }

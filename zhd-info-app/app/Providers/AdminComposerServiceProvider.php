@@ -22,7 +22,7 @@ class AdminComposerServiceProvider extends ServiceProvider
     {
         View::composers(
             [
-                \App\Http\ViewComposers\AdminComposer::class => 'common.header',
+                \App\Http\ViewComposers\AdminComposer::class => 'common.*',
             ]
         );
     }
