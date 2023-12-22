@@ -8,6 +8,7 @@ use App\Models\ManualCategory;
 use App\Models\ManualCategoryLevel1;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ManualController extends Controller
 {
@@ -56,9 +57,17 @@ class ManualController extends Controller
                                         ->with('level2s')
                                         ->get();
 
+        $keywords = DB::table("manual_search_logs")
+                ->select('keyword', DB::raw('COUNT(*) as count'))
+                ->groupBy('keyword')
+                    ->orderBy('count', 'desc')
+                    ->limit(3)
+                    ->get();
+
         return view('manual.index', [
             'manuals' => $manuals,
-            'category_level1s' => $category_level1s
+            'category_level1s' => $category_level1s,
+            'keywords' => $keywords
         ]);
     }
 
@@ -92,7 +101,25 @@ class ManualController extends Controller
             return response()->json(['error' => 'エラーメッセージ'], 500);
         }
         
-    
         return response()->json(['message' => '閲覧しました']);
+    }
+
+    function search(Request $request)
+    {
+        $user = session('member');
+        $param = [
+            'keyword' => $request['keyword'],
+            'search_period' => $request['search_period']
+        ];
+
+        if ($request->filled('keyword')) {
+            DB::table('manual_search_logs')->insert([
+                'keyword' => $request['keyword'],
+                'shop_id' => $user->shop_id,
+                'searched_datetime' => new Carbon('now')
+            ]);
+        }
+
+        return redirect()->route('manual.index', $param);
     }
 }

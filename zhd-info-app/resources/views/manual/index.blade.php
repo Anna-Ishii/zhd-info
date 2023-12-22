@@ -15,7 +15,7 @@
   <div class="content__inner">
     <div class="search">
       <div class="search__inner">
-        <form method="get">
+        <form method="get"  action="/manual/search">
           @if (is_array(request()->input("category_level2")))
               @foreach (request()->input("category_level2") as $category_level2)
                   <input type="hidden" name="category_level2[]" value="{{$category_level2}}">
@@ -24,7 +24,10 @@
           <div class="search__flexBox">
             <div class="search__flexBox__name">
               <input type="text" name="keyword"  placeholder="キーワードを入れてください"  value="{{ request()->input('keyword', '')}} ">
-              <p>上位検索ワード：肉 レモン 酒</p>
+               <p>上位検索ワード：
+                @foreach ($keywords as $k)
+                    {{$k->keyword}}
+                @endforeach
             </div>
             <select name="search_period" class="search__flexBox__limit">
               <option value="null" hidden>検索期間を選択</option>

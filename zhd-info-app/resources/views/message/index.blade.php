@@ -9,11 +9,15 @@
   <div class="content__inner">
     <div class="search">
       <div class="search__inner">
-        <form method="get">
+        <form method="get" action="/message/search">
           <div class="search__flexBox">
             <div class="search__flexBox__name">
               <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '')}} ">
-              <p>上位検索ワード：肉 レモン 酒</p>
+              <p>上位検索ワード：
+                @foreach ($keywords as $k)
+                    {{$k->keyword}}
+                @endforeach
+              </p>
             </div>
             <select name="search_period" class="search__flexBox__limit">
               <option value="null" hidden>検索期間を選択</option>
