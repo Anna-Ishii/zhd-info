@@ -58,6 +58,7 @@ $(document).on('change' , '.selectAll' , function(){
 	}
 });
 
+
 let targetInput;
 let cnt;
 let chkBulkTarget;
@@ -100,9 +101,6 @@ $(document).on('click' , '.btnSearchReset', function(){
 
 /* 検索処理 */
 $(document).on('click' , '.btnSearch', function(){
-	/* 仮置き（必要に応じて削除してください） */
-	$('.sortMenu').removeClass('isActive');
-
 	/* フッターのリンク入れ替え */
 	$('.btnSort').empty().text('カテゴリ選択');
 });
