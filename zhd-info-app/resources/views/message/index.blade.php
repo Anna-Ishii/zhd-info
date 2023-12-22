@@ -48,7 +48,7 @@
         <a href="{{$message->content_url}}" class="">
           <div class="list__item">
             <div class="list__no">{{$message->number}}</div>
-            <div class="list__category">{{$message->category->name}}</div>
+            <div class="list__category">{{$message->category?->name}}</div>
             <div class="list__title">
               {{$message->title}}
               <ul class="tags">
