@@ -7,6 +7,7 @@ use App\Models\MessageCategory;
 use App\Models\Message;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
@@ -48,9 +49,36 @@ class MessageController extends Controller
 
         $categories = MessageCategory::get();
 
+        $keywords = DB::table("message_search_logs")
+                    ->select('keyword', DB::raw('COUNT(*) as count'))
+                    ->groupBy('keyword')
+                    ->orderBy('count', 'desc')
+                        ->limit(3)
+                        ->get();
+
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
+            'keywords' => $keywords
         ]);
+    }
+
+    function search(Request $request)
+    {
+        $user = session('member');
+        $param = [
+            'keyword' => $request['keyword'],
+            'search_period' => $request['search_period']
+        ];
+
+        if ($request->filled('keyword')) {
+            DB::table('message_search_logs')->insert([
+                'keyword' => $request['keyword'],
+                'shop_id' => $user->shop_id,
+                'searched_datetime' => new Carbon('now')
+            ]);
+        }
+
+        return redirect()->route('message.index', $param);
     }
 }

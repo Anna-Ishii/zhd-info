@@ -4,15 +4,10 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TopController extends Controller
 {
-    public function __init()
-    {
-
-        view()->share('page_name', 'ホーム');
-    }
-
     public function index()
     {
         $user = session('member');
@@ -61,18 +56,26 @@ class TopController extends Controller
                                 ->orderBy('start_datetime', 'desc')
                                 ->limit(1)
                                 ->get();
-        view()->share('page_name', 'ホーム');
+        
+        $keywords = DB::table(DB::raw("(SELECT keyword FROM message_search_logs UNION ALL SELECT keyword FROM manual_search_logs) as keyword_tables"))
+                    ->select('keyword', DB::raw('COUNT(*) as count'))
+                    ->groupBy('keyword')
+                    ->orderBy('count', 'desc')
+                    ->limit(3)
+                    ->get();
+                        
         return view('top', [
             'recent_messages' => $recent_messages,
             'recent_message_start_datetime' => $recent_message_start_datetime,
             'recent_manuals' => $recent_manuals,
             'recent_manual_start_datetime' => $recent_manual_start_datetime,
+            'keywords' => $keywords
         ]);
     }
 
     public function search(Request $request)
     {
-        $_request = $request; 
+        $user = session('member');
         $type = $request['type'];
         $param = [
             'keyword' => $request['keyword'],
@@ -80,8 +83,23 @@ class TopController extends Controller
         ];
 
         if($type == 1) {
+            if($request->filled('keyword')){
+                DB::table('message_search_logs')->insert([
+                    'keyword' => $request['keyword'],
+                    'shop_id' => $user->shop_id,
+                    'searched_datetime' => new Carbon('now')
+                ]);
+            }
             return redirect()->route('message.index', $param);
         } elseif($type == 2) {
+            if ($request->filled('keyword')) {
+                DB::table('manual_search_logs')->insert([
+                    'keyword' => $request['keyword'],
+                    'shop_id' => $user->shop_id,
+                    'searched_datetime' => new Carbon('now')
+                ]);
+            }
+
             return redirect()->route('manual.index', array_merge(
                 $param,
                 ['category_menu_active' => true]
