@@ -11,11 +11,10 @@ class PublishStoreRequest extends FormRequest
     {
         // 一時保存の時は、バリデーショnしない
         if ($this->input('save')) return [
-            'title' => 'max:20',
         ];
         
         return [
-            'title' => 'required|max:20',
+            'title' => 'required',
             'tag_name' => ['nullable', new TagRule()],
             'file_path' => 'required',
             'category_id' => 'required',
