@@ -36,7 +36,7 @@
     </div>
 
     <div class="top">
-      <a href="/message" class="top__link">
+      <a href="/message/?search_period=past_month" class="top__link">
         @if ($recent_messages->count() > 0)
             <p class="top__link__notice">新着{{$recent_messages->count()}}件</p>
         @endif
