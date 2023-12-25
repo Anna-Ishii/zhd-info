@@ -64,7 +64,10 @@
           <div class="list__item">
             <div class="list__no">{{$manual->number}}</div>
             <div class="list__img"><img src="{{$manual->thumbnails_url}}" alt=""></div>
-            <div class="list__category">{{$manual->category_level2?->name}}</div>
+            <div class="list__category">
+              <p>{{$manual->category_level1?->name}}</p>
+              <p>{{$manual->category_level2?->name}}</p>
+            </div>
             <div class="list__title">
               {{$manual->title}}
               <ul class="tags">
