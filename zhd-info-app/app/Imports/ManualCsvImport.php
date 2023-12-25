@@ -18,6 +18,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
@@ -25,7 +26,8 @@ class ManualCsvImport implements
     ToCollection,
     WithCalculatedFormulas,
     WithStartRow,
-    WithValidation
+    WithValidation,
+    WithCustomCsvSettings
 {
     use Importable;
 
@@ -160,6 +162,14 @@ class ManualCsvImport implements
     {
         // キューにエラー情報を追加するなどの処理を実装
         // 例えば、キューに追加して別のジョブでエラー処理を行うなど
+    }
+
+    public function getCsvSettings(): array
+    {
+        return [
+            'use_bom' => false,
+            'input_encoding' => 'CP932'
+        ];
     }
 
     private function tagImportParam(?array $tags): array
