@@ -57,7 +57,7 @@
                 @endforeach
               </ul>
             </div>
-            <div class="list__limit">{{$message->start_datetime?->isoFormat('MM/DD')}}{{$message->end_datetime ? "〜{$message->end_datetime->isoFormat('MM/DD')}" : ''}}</div>
+            <div class="list__limit">{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}}</div>
           </div>
         </a>
         @endforeach
