@@ -1,6 +1,6 @@
 <div class="sortMenu {{ request()->input('category_menu_active') ? 'isActive' : '' }}" >
   <div class="sortMenu__inner">
-    <p class="sortMenu__title">確認したいマニュアルの、カテゴリーを選択してください（複数選択可）</p>
+    <p class="sortMenu__title">確認したいマニュアルの、カテゴリを選択してください（複数選択可）</p>
     <form method="get">
       <input type="hidden" name="keyword" value="{{request()->input('keyword')}}">
       <input type="hidden" name="search_period" value="{{request()->input('search_period', 'past_month')}}">
