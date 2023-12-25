@@ -2569,6 +2569,7 @@ input, select {
 .sortMenu__list__item {
   position: relative;
   width: 100%;
+  max-width: calc(33% - 12px);
   margin-right: 24px;
 }
 .sortMenu__list__item:nth-last-child(3n+1) {
