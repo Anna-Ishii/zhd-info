@@ -7,7 +7,13 @@
   @endif
 
 @endsection
-@section('title', 'マニュアル') 
+@section('title')
+  @if (request()->input('category_menu_active'))
+    カテゴリ選択
+  @else 
+    マニュアル 
+  @endif
+@endsection
 
 @section('content')
 
