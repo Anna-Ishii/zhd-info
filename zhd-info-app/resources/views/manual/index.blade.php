@@ -76,7 +76,7 @@
                 @endforeach
               </ul>
             </div>
-            <div class="list__limit">{{$manual->start_datetime?->isoFormat('MM/DD')}}{{$manual->end_datetime ? "〜{$manual->end_datetime->isoFormat('MM/DD')}" : ''}}</div>
+            <div class="list__limit">{{$manual->start_datetime?->isoFormat('MM/DD')}}〜{{$manual->end_datetime?->isoFormat('MM/DD')}}</div>
           </div>
         </a>
         @endforeach
