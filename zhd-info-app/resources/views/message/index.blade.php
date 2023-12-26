@@ -15,7 +15,8 @@
               <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '')}} ">
               <p>上位検索ワード：
                 @foreach ($keywords as $k)
-                    {{$k->keyword}}
+                    <a href="{{ route("message.index",
+                      array_merge(request()->query(), ["keyword" => $k->keyword])) }}">{{$k->keyword}}</a>
                 @endforeach
               </p>
             </div>

@@ -109,7 +109,8 @@ class ManualController extends Controller
         $user = session('member');
         $param = [
             'keyword' => $request['keyword'],
-            'search_period' => $request['search_period']
+            'search_period' => $request['search_period'],
+            'category_level2' => $request['category_level2']
         ];
 
         if ($request->filled('keyword')) {
