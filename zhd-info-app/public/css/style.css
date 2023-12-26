@@ -2504,6 +2504,17 @@ input, select {
   background: rgba(118, 118, 128, 0.12);
   font-size: 1.4rem;
 }
+.list .title li {
+  display: inline-block;
+  margin-right: 4px;
+}
+.list__link__notice {
+  padding: 0 13px 0 8px;
+  border-radius: 11px;
+  background: #FF0000;
+  color: #FFF;
+  line-height: 22px;
+}
 
 .sortMenu {
   z-index: 10000;

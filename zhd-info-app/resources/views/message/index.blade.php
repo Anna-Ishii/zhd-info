@@ -51,7 +51,12 @@
             <div class="list__no">{{$message->number}}</div>
             <div class="list__category">{{$message->category?->name}}</div>
             <div class="list__title">
-              {{$message->title}}
+              <ul class="title">
+                @if ($message->emergency_flg)
+                    <li class="list__link__notice">重要</li>
+                @endif
+                <li>{{$message->title}}</li>
+              </ul>
               <ul class="tags">
                 @foreach ($message->tag as $tag)
                     <li>{{$tag->name}}</li>
