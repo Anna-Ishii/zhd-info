@@ -25,6 +25,7 @@ class ManualCategoryLevel2 extends Model
 
     public function manuals():HasMany
     {
-        return $this->hasMany(Manual::class, 'category_level2_id', 'id');
+        return $this->hasMany(Manual::class, 'category_level2_id', 'id')
+                    ->RecentPublishing();
     }
 }

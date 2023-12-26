@@ -13,6 +13,9 @@
         <ul class="sortMenu__list">
           @foreach ($category_level1->level2s as $category_level2)
           <li class="sortMenu__list__item">
+            @if ($category_level2->manuals->count() != 0)
+                <p class="sortMenu__link_notice">新着{{$category_level2->manuals->count()}}件</p>
+            @endif
             <input type="checkbox" name="category_level2[]" value="{{$category_level2->id}}" id="tag{{$category_level2->id}}" 
               {{in_array((string)$category_level2->id, request()->input('category_level2', []), true) ? 'checked' : ''}}>
             <label for="tag{{$category_level2->id}}">{{$category_level2->name}}</label>
