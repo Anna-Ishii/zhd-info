@@ -2279,6 +2279,9 @@ input, select {
   margin-left: 16px;
   color: #337ab7;;
 }
+.search__flexBox__name .keyword_button {
+  cursor: pointer;
+}
 .search__flexBox__limit {
   max-width: 24.7%;
   height: 48px;

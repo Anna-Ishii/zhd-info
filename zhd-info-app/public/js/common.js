@@ -104,3 +104,13 @@ $(document).on('click' , '.btnSearch', function(){
 	/* フッターのリンク入れ替え */
 	$('.btnSort').empty().text('カテゴリ選択');
 });
+
+$(document).on('click', '.keyword_button', function(e) {
+	let type = $("input[name='type']:checked").val()
+	if(type == '1'){
+		location.href=`message?keyword=${e.target.innerText}`
+	}else if(type == '2'){
+		location.href=`manual?keyword=${e.target.innerText}`
+	}else{
+	}
+})
