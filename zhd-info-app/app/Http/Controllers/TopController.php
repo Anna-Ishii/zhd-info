@@ -101,8 +101,7 @@ class TopController extends Controller
             }
 
             return redirect()->route('manual.index', array_merge(
-                $param,
-                ['category_menu_active' => true]
+                $param
             ));
         }
     }
