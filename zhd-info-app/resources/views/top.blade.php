@@ -18,7 +18,7 @@
               <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '') }} ">
               <p>上位検索ワード：
                 @foreach ($keywords as $k)
-                    {{$k->keyword}}
+                    <a class="keyword_button">{{$k->keyword}}</a>
                 @endforeach
               </p>
             </div>
@@ -66,6 +66,7 @@
 </div>
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
-<script src="{{ asset('/js/detail.js') }}" defer></script>
+<script>
 
+</script>
 @endsection
