@@ -1,5 +1,8 @@
 @extends('layouts.parent')
-
+@section('title', 'マニュアル')
+@section('previous_page')
+<a href="{{{ session('current_url', route('manual.index')) }}}">マニュアル一覧へ</a>
+@endsection
 @section('content')
     <header class="header header--detail">
         <section class="header__inner flex">
