@@ -1,4 +1,7 @@
 @extends('layouts.parent')
+@push('css')
+    <link href="{{ asset('/css/detail.css') }}" rel="stylesheet">
+@endpush
 @section('title', 'マニュアル')
 @section('previous_page')
 <a href="{{{ session('current_url', route('manual.index')) }}}">マニュアル一覧へ</a>
