@@ -62,6 +62,7 @@
           </div>
           <div class="list__limit">掲載期間</div>
         </div>
+        <div class="list__items">
         @foreach ($manuals as $manual)
           @if($manual->content->isEmpty())
               <a href="{{ route('manual.detail', ['manual_id' => $manual->id, "autoplay" => true]) }}" class="mb4">
@@ -87,6 +88,7 @@
           </div>
         </a>
         @endforeach
+       </div>
       </div>
 		</div>
 

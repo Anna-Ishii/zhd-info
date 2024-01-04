@@ -45,6 +45,7 @@
           </div>
           <div class="list__limit">掲載期間</div>
         </div>
+        <div class="list__items">
         @foreach ($messages as $message)
         <a href="{{ asset($message->content_url)}}" class="">
           <div class="list__item">
@@ -67,6 +68,7 @@
           </div>
         </a>
         @endforeach
+      </div>
       </div>
 		</div>
 
