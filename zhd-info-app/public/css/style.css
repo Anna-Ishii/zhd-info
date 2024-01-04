@@ -203,25 +203,19 @@ input, select {
   max-width: 352px;
   justify-content: space-between;
 }
-.result__pager__prev, .result__pager__next {
-  width: 80px;
-  text-align: center;
-}
 .result__pager__prev {
-  padding-left: 24px;
-  border-top-left-radius: 16px;
-  border-bottom-left-radius: 16px;
-  border-top-right-radius: 4px;
-  border-bottom-right-radius: 4px;
-  background: url(../img/icon_arrow_left.svg) center left 12px no-repeat;
+  background: url(../img/icon_arrow_left.svg) center no-repeat;
+}
+.result__pager__first {
+  background: url(../img/icon_prev.png) center no-repeat;
+  background-size: 25px;
 }
 .result__pager__next {
-  padding-right: 24px;
-  border-top-left-radius: 4px;
-  border-bottom-left-radius: 4px;
-  border-top-right-radius: 16px;
-  border-bottom-right-radius: 16px;
-  background: url(../img/icon_arrow_right.svg) center right 12px no-repeat;
+  background: url(../img/icon_arrow_right.svg) center no-repeat;
+}
+.result__pager__last{
+  background: url(../img/icon_next.png) center no-repeat;
+  background-size: 25px;
 }
 .result__pager li {
   margin-right: 8px;
@@ -236,7 +230,7 @@ input, select {
   line-height: 32px;
   color: #0060B0;
 }
-.result__pager li a:not(.result__pager__prev):not(.result__pager__next) {
+.result__pager li a {
   width: 32px;
   border-radius: 4px;
   text-align: center;
