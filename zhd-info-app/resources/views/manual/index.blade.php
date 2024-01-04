@@ -3,7 +3,7 @@
   @if (request()->input('category_menu_active'))
     <a href="{{route('top')}}">ホーム</a>
   @else 
-    <a href="{{request()->fullUrlWithQuery(['category_menu_active' => 'true'])}}">カテゴリ選択へ</a>
+    <a href="{{request()->fullUrlWithQuery(['category_menu_active' => 'true'])}}">カテゴリ選択</a>
   @endif
 
 @endsection
