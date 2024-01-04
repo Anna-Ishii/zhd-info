@@ -313,6 +313,9 @@ input, select {
   background: #FFF;
   transition: 0.3s;
 }
+.list__item > .list__no {
+  text-align: right;
+}
 .list__item:hover {
   background: #EEE;
 }
