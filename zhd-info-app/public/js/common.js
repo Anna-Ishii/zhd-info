@@ -107,10 +107,11 @@ $(document).on('click' , '.btnSearch', function(){
 
 $(document).on('click', '.keyword_button', function(e) {
 	let type = $("input[name='type']:checked").val()
+	let search_period = $('select[name="search_period"]').val()
 	if(type == '1'){
-		location.href=`message?keyword=${e.target.innerText}`
+		location.href=`message?keyword=${e.target.innerText}&search_period=${search_period}`
 	}else if(type == '2'){
-		location.href=`manual?keyword=${e.target.innerText}`
+		location.href=`manual?keyword=${e.target.innerText}&search_period=${search_period}`
 	}else{
 	}
 })

@@ -10,13 +10,13 @@
     <div class="search">
       <div class="search__inner">
         <form method="get" action="/message/search">
+          <input type="radio" name="type" value="1" checked hidden>
           <div class="search__flexBox">
             <div class="search__flexBox__name">
               <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '')}} ">
               <p>上位検索ワード：
                 @foreach ($keywords as $k)
-                    <a href="{{ route("message.index",
-                      array_merge(request()->query(), ["keyword" => $k->keyword])) }}">{{$k->keyword}}</a>
+                    <a class="keyword_button">{{$k->keyword}}</a>
                 @endforeach
               </p>
             </div>

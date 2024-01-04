@@ -22,6 +22,7 @@
     <div class="search">
       <div class="search__inner">
         <form method="get"  action="/manual/search">
+          <input type="radio" name="type" value="2" checked hidden>
           @if (is_array(request()->input("category_level2")))
               @foreach (request()->input("category_level2") as $category_level2)
                   <input type="hidden" name="category_level2[]" value="{{$category_level2}}">
@@ -32,8 +33,7 @@
               <input type="text" name="keyword"  placeholder="キーワードを入れてください"  value="{{ request()->input('keyword', '')}} ">
                <p>上位検索ワード：
                 @foreach ($keywords as $k)
-                    <a href="{{ route("manual.index",
-                      array_merge(request()->query(), ["keyword" => $k->keyword])) }}">{{$k->keyword}}</a>
+                  <a class="keyword_button">{{$k->keyword}}</a>
                 @endforeach
             </div>
             <select name="search_period" class="search__flexBox__limit">
