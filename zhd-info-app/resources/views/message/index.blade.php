@@ -46,7 +46,7 @@
           <div class="list__limit">掲載期間</div>
         </div>
         @foreach ($messages as $message)
-        <a href="{{$message->content_url}}" class="">
+        <a href="{{ asset($message->content_url)}}" class="">
           <div class="list__item">
             <div class="list__no">{{$message->number}}</div>
             <div class="list__category">{{$message->category?->name}}</div>
