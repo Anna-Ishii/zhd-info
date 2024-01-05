@@ -220,6 +220,8 @@ input, select {
 }
 .result__pager li {
   margin-right: 8px;
+  display: list-item;
+  list-style: none;
 }
 .result__pager li:last-of-type {
   margin-right: 0;
@@ -309,7 +311,7 @@ input, select {
   border-right: none;
 }
 .list__items {
-  overflow: hidden scroll;
+  overflow-y: scroll;
   /* マージンの高さ(71px 100px) 検索ボックス 検索ボックスmargin-bottom 検索結果 検索結果margin-bottom ヘッダー(47pxpx)    */
   height: calc(100vh - 71px - 21px - 100px - 87px - 62px - 31px - 16px - 47px );
 }
@@ -505,6 +507,9 @@ input, select {
 .footer__list__item {
   width: 100%;
   text-align: center;
+  display: list-item;
+  list-style: none;
+  
 }
 .footer__list__item a {
   padding-left: 32px;
