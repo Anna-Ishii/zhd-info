@@ -18,6 +18,7 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 
@@ -25,7 +26,8 @@ class ManualCsvImport implements
     ToCollection,
     WithCalculatedFormulas,
     WithStartRow,
-    WithValidation
+    WithValidation,
+    WithCustomCsvSettings
 {
     use Importable;
 
@@ -68,7 +70,7 @@ class ManualCsvImport implements
                 ->first();
             $row_contents = $rows[$index]->slice(13);
             
-            if($manual->content) {
+            if(isset($manual->content)) {
                 foreach ($manual->content as $key => $content) {
                     $content_title = $row_contents[($key * 2) + 14] ?? '';
                     $content_description = $row_contents[($key * 2) + 15] ?? '';
@@ -78,11 +80,11 @@ class ManualCsvImport implements
                 }
             }
             $brand_param = ($brand == "全て") ? $this->getBrandIdArray($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-            $new_category_array = $new_cateory ? explode('|', $new_cateory) : null;
+            $new_category_array = isset($new_cateory) ? explode('|', $new_cateory) : null;
             $new_category_level1_name = isset($new_category_array[0]) ? str_replace(' ', '', trim($new_category_array[0], "\"")) : NULL;
             $new_category_level2_name = isset($new_category_array[1]) ? str_replace(' ', '', trim($new_category_array[1], "\"")) : NULL;
 
-            $manual->category_id = $category ? ManualCategory::where('name', $category)->pluck('id')->first() : NULL;
+            $manual->category_id = isset($category) ? ManualCategory::where('name', $category)->pluck('id')->first() : NULL;
             $manual->category_level1_id = isset($new_category_array[0]) ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
             $manual->category_level2_id = isset($new_category_array[1]) ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
             $manual->title = $title;
@@ -160,6 +162,14 @@ class ManualCsvImport implements
     {
         // キューにエラー情報を追加するなどの処理を実装
         // 例えば、キューに追加して別のジョブでエラー処理を行うなど
+    }
+
+    public function getCsvSettings(): array
+    {
+        return [
+            'use_bom' => false,
+            'input_encoding' => 'CP932'
+        ];
     }
 
     private function tagImportParam(?array $tags): array
