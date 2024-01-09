@@ -24,7 +24,8 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
     public function getCsvSettings(): array
     {
         return [
-            'use_bom' => true
+            'use_bom' => false,
+            'output_encoding' => 'CP932',
         ];
     }
     
