@@ -11,24 +11,21 @@ class PublishUpdateRequest extends FormRequest
     {
         // 一時保存
         if ($this->input('save')) return [
-            'title' => 'max:20',
-            'description' => 'max:30',
-            'manual_flow.*.title' => 'max:20',
-            'manual_flow.*.detail' => 'max:30',
+
         ];
 
         return [
-            'title' => 'required|max:20',
+            'title' => 'required',
             'tag_name' => ['nullable', new TagRule()],
             'file_path' => 'required',
-            'description' => 'nullable|max:30',
+            'description' => 'nullable',
             'category_id' => 'required',
             'new_category_id' => 'prohibited_if:new_category_id,null',
             'brand' => 'required',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
-            'manual_flow.*.title' => 'required|max:20',
-            'manual_flow.*.detail' => 'nullable|max:30',
+            'manual_flow.*.title' => 'required',
+            'manual_flow.*.detail' => 'nullable',
             'manual_flow.*.file_path' => 'required',
             'content_id.*' => 'nullable',
         ];
