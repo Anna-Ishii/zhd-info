@@ -3,7 +3,7 @@
     <p class="sortMenu__title">確認したいマニュアルの、カテゴリを選択してください（複数選択可）</p>
     <form method="get">
       <input type="hidden" name="keyword" value="{{request()->input('keyword')}}">
-      <input type="hidden" name="search_period" value="{{request()->input('search_period', 'past_month')}}">
+      <input type="hidden" name="search_period" value="{{request()->input('search_period', 'all')}}">
       @foreach ($category_level1s as $category_level1)
       <div class="sortMenu__box">
         <div class="sortMenu__box__head">
