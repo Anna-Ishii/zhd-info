@@ -6,8 +6,12 @@ use App\Models\Message;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class MessageViewRateExport implements FromView, ShouldAutoSize
+class MessageViewRateExport implements 
+    FromView, 
+    ShouldAutoSize,
+    WithCustomCsvSettings
 {
     protected $message_id;
     protected $request;
@@ -16,6 +20,13 @@ class MessageViewRateExport implements FromView, ShouldAutoSize
     {
         $this->message_id = $message_id;
         $this->request = $request;
+    }
+
+    public function getCsvSettings(): array
+    {
+        return [
+            'output_encoding' => 'CP932',
+        ];
     }
     
     public function view(): View
