@@ -10,9 +10,15 @@
         <p>全 0 件</p>
     @else
         <p>全 {{$objects->total()}} 件中 {{$min}} 件 〜 {{$max}} 件を表示</p>
+    @endif
         <ul class="result__pager">
+        @if ($totalPage > 1)
             <li><a href="{{ $objects->url($objects->url(1)) }}" class="result__pager__first"></a></li>
             <li><a href="{{ $objects->previousPageUrl() }}" class="result__pager__prev"></a></li>
+        @else
+            <li></li>
+            <li></li>
+        @endif
         @if ( $totalPage <= 4)
             @for ($i = 1; $i <= ceil($objects->total() / $objects->perPage()); $i++)
                 <li>
@@ -41,9 +47,13 @@
                 @endif
             @endfor
         @endif
+        @if ($totalPage > 1)
             <li><a href= "{{ $objects->nextPageUrl() }}"class="result__pager__next"></a></li>
             <li><a href="{{ $objects->url($objects->lastPage()) }}" class="result__pager__last"></a></li>
+        @else
+            <li></li>
+            <li></li>
+        @endif
         </ul>
-    @endif   
     </div>
 </div>
