@@ -32,7 +32,7 @@ Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth'
 Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
-    Route::get('/{message_id}', [MessageController::class, 'show'])->name('show')->where('message_id', '^\d+$');
+    Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
     Route::get('/search', [MessageController::class, 'search'])->name('search');
 });
 Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {

@@ -63,7 +63,7 @@ class MessageController extends Controller
         ]);
     }
 
-    function show($message_id)
+    function detail($message_id)
     {
         $user = session('member');
         $message = Message::findOrFail($message_id);
