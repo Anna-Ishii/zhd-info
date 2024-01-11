@@ -47,7 +47,7 @@
         </div>
         <div class="list__items">
         @foreach ($messages as $message)
-        <a href="{{ asset($message->content_url)}}" class="">
+        <a href="{{ route('message.show',['message_id' => $message->id])}}" class="">
           <div class="list__item">
             <div class="list__no">{{$message->number}}</div>
             <div class="list__category">{{$message->category?->name}}</div>
