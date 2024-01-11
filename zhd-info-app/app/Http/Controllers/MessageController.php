@@ -63,6 +63,19 @@ class MessageController extends Controller
         ]);
     }
 
+    function show($message_id)
+    {
+        $user = session('member');
+        $message = Message::findOrFail($message_id);
+
+        $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
+            'read_flg' => true,
+            'readed_datetime' => Carbon::now(),
+        ]);
+
+        return redirect()->to($message->content_url);
+    }
+
     function search(Request $request)
     {
         $user = session('member');
