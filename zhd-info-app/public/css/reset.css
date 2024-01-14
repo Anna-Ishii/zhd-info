@@ -66,6 +66,7 @@
 }
 
 :where(ul, ol) {
+	display: list-item;
 	list-style: none;
 }
 

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="111" height="176" viewBox="0 0 111 176">
+  <defs>
+    <clipPath id="clip-path">
+      <rect id="長方形_4011" data-name="長方形 4011" width="111" height="176" rx="4" transform="translate(291 206)" fill="#fff"/>
+    </clipPath>
+    <clipPath id="clip-path-2">
+      <rect id="長方形_3960" data-name="長方形 3960" width="105" height="105" transform="translate(548 3883.982)" fill="#0060b0" stroke="#707070" stroke-width="1"/>
+    </clipPath>
+  </defs>
+  <g id="マスクグループ_25" data-name="マスクグループ 25" transform="translate(-291 -206)" clip-path="url(#clip-path)">
+    <g id="icon_document" transform="translate(-251 -3641.982)" clip-path="url(#clip-path-2)">
+      <g id="_i_icon_15757_icon_157570" transform="translate(567.404 3893.108)">
+        <path id="パス_1964" data-name="パス 1964" d="M119.15,56.585h-6.887V60.97a7.482,7.482,0,0,1-.163,1.541h7.787a1.562,1.562,0,0,1,1.562,1.562v60.395a1.562,1.562,0,0,1-1.562,1.562H67.9a1.562,1.562,0,0,1-1.562-1.562V64.073A1.562,1.562,0,0,1,67.9,62.511h7.787a7.458,7.458,0,0,1-.163-1.541V56.585H68.634A7.811,7.811,0,0,0,60.823,64.4v61.538a7.811,7.811,0,0,0,7.811,7.811H119.15a7.811,7.811,0,0,0,7.811-7.811V64.4A7.811,7.811,0,0,0,119.15,56.585Z" transform="translate(-60.823 -46.998)" fill="#0060b0"/>
+        <path id="パス_1965" data-name="パス 1965" d="M168.522,18.659h21.858a4.686,4.686,0,0,0,4.687-4.687V9.279a4.686,4.686,0,0,0-4.687-4.687h-5.923a5.025,5.025,0,0,0-10.013,0h-5.922a4.686,4.686,0,0,0-4.687,4.687v4.693A4.686,4.686,0,0,0,168.522,18.659Zm10.929-15.9a2.3,2.3,0,1,1-2.3,2.3A2.3,2.3,0,0,1,179.45,2.756Z" transform="translate(-146.382)" fill="#0060b0"/>
+        <g id="_i_icon_12589_icon_125890" transform="translate(12.13 26.422)">
+          <rect id="長方形_4014" data-name="長方形 4014" width="41.615" height="5.117" transform="translate(0 0)" fill="#0060b0"/>
+          <rect id="長方形_4015" data-name="長方形 4015" width="41.615" height="5.117" transform="translate(0 12.791)" fill="#0060b0"/>
+          <rect id="長方形_4016" data-name="長方形 4016" width="41.615" height="5.117" transform="translate(0 25.583)" fill="#0060b0"/>
+          <rect id="長方形_4019" data-name="長方形 4019" width="41.615" height="5.117" transform="translate(0 38.374)" fill="#0060b0"/>
+        </g>
+      </g>
+    </g>
+  </g>
+</svg>

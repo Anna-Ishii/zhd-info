@@ -75,7 +75,7 @@
             <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{ old('title', $manual->title) }}" id="title">
             </div>
-            <div class="counter">入力数 {{mb_strlen(old('title', $manual->title))}}/20文字</div>
+            {{-- <div class="counter">入力数 {{mb_strlen(old('title', $manual->title))}}/20文字</div> --}}
         </div>
         <div class="form-group tag-form">
             <label class="col-lg-2 control-label">検索タグ</label>
@@ -131,7 +131,7 @@
                     <div class="col-lg-4">
                         <input class="form-control" value="" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title">
                     </div>
-                    <div class="counter">入力数 0/20文字</div>
+                    {{-- <div class="counter">入力数 0/20文字</div> --}}
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger required">*<span></label>
@@ -153,7 +153,7 @@
                     <div class="col-lg-4">
                         <textarea class="form-control" data-variable-name="manual_flow_detail"></textarea>
                     </div>
-                    <div class="counter">入力数 0/30文字</div>
+                    {{-- <div class="counter">入力数 0/30文字</div> --}}
                 </div>
                 <div class="form-group">
                     <div class="col-lg-7 text-right">
@@ -173,7 +173,7 @@
                             <div class="col-lg-4">
                                 <input class="form-control" value="{{$old_manual['title'] ?? ''}}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" name="manual_flow[{{$index}}][title]">
                             </div>
-                            <div class="counter">入力数 {{mb_strlen($old_manual['title'])}}/20文字</div>
+                            {{-- <div class="counter">入力数 {{mb_strlen($old_manual['title'])}}/20文字</div> --}}
                         </div>
                         <div class="form-group">
                             <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger required">*<span></label>
@@ -195,7 +195,7 @@
                             <div class="col-lg-4">
                                 <textarea class="form-control" data-variable-name="manual_flow_detail" name="manual_flow[{{$index}}][detail]">{{$old_manual['detail']}}</textarea>
                             </div>
-                            <div class="counter">入力数 {{mb_strlen($old_manual['detail'])}}/20文字</div>
+                            {{-- <div class="counter">入力数 {{mb_strlen($old_manual['detail'])}}/20文字</div> --}}
                         </div>
                         <div class="form-group">
                             <div class="col-lg-7 text-right">
@@ -214,7 +214,7 @@
                     <div class="col-lg-4">
                         <input class="form-control" name="manual_flow[{{$index}}][title]" value="{{ $content->title }}" placeholder="例：手順1　プリンタのカバーを開ける" data-variable-name="manual_flow_title" >
                     </div>
-                    <div class="counter">入力数 {{mb_strlen($content->title)}}/20文字</div>
+                    {{-- <div class="counter">入力数 {{mb_strlen($content->title)}}/20文字</div> --}}
                 </div>
                 <div class="form-group">
                     <label class="col-lg-2 control-label">手順ファイル添付<span class="text-danger required">*<span></label>
@@ -236,7 +236,7 @@
                     <div class="col-lg-4">
                         <textarea name="manual_flow[{{$index}}][detail]" class="form-control" data-variable-name="manual_flow_detail" >{{ $content->description }}</textarea>
                     </div>
-                    <div class="counter">入力数 {{mb_strlen($content->description)}}/20文字</div>
+                    {{-- <div class="counter">入力数 {{mb_strlen($content->description)}}/20文字</div> --}}
                 </div>
                 <div class="form-group">
                     <div class="col-lg-7 text-right">
@@ -315,7 +315,7 @@
             <div class="col-lg-4">
                 <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description', $manual->description)}}</textarea>
             </div>
-            <div class="counter">入力数 {{mb_strlen(old('description', $manual->description))}}/30文字</div>
+            {{-- <div class="counter">入力数 {{mb_strlen(old('description', $manual->description))}}/30文字</div> --}}
         </div>
         <div class="form-group text-left">
             <div class="col-lg-2 control-label">

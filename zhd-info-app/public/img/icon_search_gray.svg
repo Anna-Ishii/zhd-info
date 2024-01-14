@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="24" height="24.001" viewBox="0 0 24 24.001">
+  <defs>
+    <clipPath id="clip-path">
+      <rect width="24" height="24.001" fill="none"/>
+    </clipPath>
+  </defs>
+  <g id="リピートグリッド_1" data-name="リピートグリッド 1" clip-path="url(#clip-path)">
+    <g transform="translate(-0.009 0.006)">
+      <path id="パス_1959" data-name="パス 1959" d="M21.094,2.91A9.948,9.948,0,0,0,5.533,15.074l-4.82,4.82a2.4,2.4,0,1,0,3.4,3.4L8.93,18.471A9.949,9.949,0,0,0,21.094,2.91ZM18.376,14.27a6.11,6.11,0,1,1,1.791-4.322A6.085,6.085,0,0,1,18.376,14.27Z" fill="#ccc"/>
+    </g>
+  </g>
+</svg>

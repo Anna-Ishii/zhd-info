@@ -26,3 +26,92 @@ $(document).on('click' , '.btnAddLabel' , function(){
 	}
 });
 
+$(document).on('click' , '.btnSort', function(){
+	let chkMenu = $('.sortMenu');
+	if(!chkMenu.is(':visible')){
+		event.preventDefault();
+		$('.sortMenu').addClass('isActive');
+		$('.btnSort').empty().text('ホーム');
+	}else{
+		return true;
+	}
+});
+
+/* ソートカテゴリ選択 */
+$(document).on('change' , '.selectAll' , function(){
+	let chkStatus = $(this).prop('checked');
+	let target = $(this).parents('.sortMenu__box').find('input[type=checkbox]');
+	if(chkStatus){
+		target.each(function(){
+			if(!$(this).prop('checked')){
+				$(this).prop('checked' , true);
+			}
+		});
+		$(this).addClass('isSelectAll');
+	}else{
+		$(this).siblings('label').removeClass('isSelectAll');
+		target.each(function(){
+			if($(this).prop('checked')){
+				$(this).prop('checked' , false);
+			}
+		});
+	}
+});
+
+
+let targetInput;
+let cnt;
+let chkBulkTarget;
+function changeBulk(e){
+	if(cnt >= 1){
+		chkBulkTarget.removeClass('isSelectAll');
+	}
+}
+$(document).on('change' , '.sortMenu__list__item input[type=checkbox]' , function(){
+	targetInput = $(this);
+	chkBulk(changeBulk);
+});
+function chkBulk(callback){
+	let chkTarget = targetInput.parents('.sortMenu__list').find('input[type=checkbox]');
+	/* 一回一括のチェックを外す */
+	chkBulkTarget = targetInput.parents('.sortMenu__box').find('.selectAll');
+	chkBulkTarget.prop('checked' , false);
+	/* 全部チェックされているか判別する */
+	cnt = 0;
+	chkTarget.each(function(){
+		if($(this).prop('checked')){
+			console.log(chkBulkTarget.length);
+			chkBulkTarget.prop('checked' , true);
+			chkBulkTarget.addClass('isSelectAll');
+		}else{
+			cnt = cnt + 1;
+			console.log(cnt);
+		}
+	});
+	callback();
+}
+
+
+$(document).on('click' , '.btnSearchReset', function(){
+	let target = $('.sortMenu').find('input[type=checkbox]');
+	target.each(function(){
+		$(this).prop('checked' , false);
+	});
+});
+
+/* 検索処理 */
+$(document).on('click' , '.btnSearch', function(){
+	/* フッターのリンク入れ替え */
+	$('.btnSort').empty().text('カテゴリ選択');
+});
+
+$(document).on('click', '.keyword_button', function(e) {
+	let type = $("input[name='type']:checked").val()
+	let search_period = $('select[name="search_period"]').val()
+	if(type == '1'){
+		location.href=`message?keyword=${e.target.innerText}&search_period=${search_period}`
+	}else if(type == '2'){
+		location.href=`manual?keyword=${e.target.innerText}&search_period=${search_period}`
+	}else{
+	}
+})

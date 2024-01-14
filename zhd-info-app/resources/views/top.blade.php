@@ -1,132 +1,71 @@
 @extends('layouts.parent')
+@section('title', 'ホーム')
 
 @section('content')
 
-<nav class="menu">
-    <ul class="menu__list flex">
-        <li class="menu__list__item isCurrent txtCenter txtBold"><a href="{{ route('top') }}">
-                <p>ホーム</p>
-            </a></li>
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('message.index') }}">
-                <p>業務連絡</p>
-            </a></li>
-        <li class="menu__list__item txtCenter txtBold"><a href="{{ route('manual.index') }}">
-                <p>動画マニュアル</p>
-            </a></li>
-    </ul>
-</nav>
+<div class="content">
+  <div class="content__inner">
+    <div class="search">
+      <div class="search__inner">
+        <form method="get" action="/search">
+          <div>
+            <input type="radio" name="type" value="1" id="topRadio1" {{ request()->input('type') == "1" ? 'checked="checked"' : ""}}><label for="topRadio1">業務連絡</label>
+            <input type="radio" name="type" value="2" id="topRadio2" {{ request()->input('type', "2") == "2" ? 'checked="checked"' : ""}}"><label for="topRadio2">マニュアル</label>
+          </div>
+          <div class="search__flexBox">
+            <div class="search__flexBox__name">
+              <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '') }} ">
+              <p>上位検索ワード：
+                @foreach ($keywords as $k)
+                    <a class="keyword_button">{{$k->keyword}}</a>
+                @endforeach
+              </p>
+            </div>
+            <select name="search_period" class="search__flexBox__limit">
+              <option value="null" hidden>検索期間を選択</option>
+              @foreach (App\Enums\SearchPeriod::cases() as $case)
+                  <option value="{{$case->value}}" {{ request()->input("search_period") == $case->value ? 'selected' : ''}}>{{$case->text()}}</option>
+              @endforeach
+            </select>
+            <button type="submit" class="btnType1">検索</button>
+          </div>
+        </form>
+      </div>
 
-<main class="main">
-    <div class="main__inner">
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">
-                今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})の</span>お知らせ
-            </h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_thisweek as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10">
-                <span class="txtBlue">今週({{$thisweek_start->format('Y/m/d')}}〜{{$thisweek_end->format('Y/m/d')}})</span>の動画マニュアル
-            </h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_thisweek as $ml)
-                        @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <details>
-            <summary>
-                <h2 class="mb10"><span class="txtBlue">
-                    先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>お知らせ
-                </h2>
-            </summary>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_lastweek as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-            </details>
-        </aricle>
-        <aricle class="indexList mb32">
-            <details>
-            <summary>
-                <h2 class="mb10">
-                    <span class="txtBlue">先週({{$lastweek_start->format('Y/m/d')}}〜{{$lastweek_end->format('Y/m/d')}})の</span>動画マニュアル
-                </h2>
-            </summary>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_lastweek as $ml)
-                        @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-            </details>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">未読の</span>お知らせ</h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($message_unread as $ms)
-                        @livewire('top.message-component', ['ms' => $ms], key($ms->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
-        <aricle class="indexList mb32">
-            <h2 class="mb10"><span class="txtBlue">未読の</span>動画マニュアル</h2>
-            <div class="indexList__inner">
-                <div class="flex">
-                    @foreach($manual_unread as $ml)
-                    @livewire('top.manual-component', ['ml' => $ml], key($ml->id))
-                    @endforeach
-                </div>
-            </div>
-        </aricle>
     </div>
-</main>
 
-<div class="sidebarBg"></div>
-<nav class="sidebar">
-    <div class="sidebar__inner">
-        <div class="sidebar__close mb58">
-            <img src="{{ asset('/img/icon_folder.svg') }}" alt="閉じる">
+    <div class="top">
+      <a href="/message/?search_period=past_month" class="top__link">
+        @if ($recent_messages->count() > 0)
+            <p class="top__link__notice">新着{{$recent_messages->count()}}件</p>
+        @endif
+        <div class="top__link__box">
+          <img src="{{ asset('img/icon_attention.svg') }}" alt="">
+          <div class="top__link__txt">
+            <p>業務連絡
+              <span>更新日：{{isset($recent_message_start_datetime[0]) ? $recent_message_start_datetime[0]->start_datetime->isoFormat('MM/DD HH:mm') : ''}}</span>
+            </p>
+          </div>
         </div>
-        <ul class="sidebar__list">
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">スタッフ用</span>(120件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">キッチン用</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">店長向け</span>(30件)</a></li>
-            <li class="sidebar__list__item mb18"><a href="#"><span class="txtBlue">終了した業務</span>(30件)</a></li>
-        </ul>
-        <div class="btnSidebarLabel">
-            <img src="{{ asset('/img/icon_plus.svg') }}" alt="">
-            <p class="txtBold">ラベルを追加</p>
+      </a>
+      <a href="/manual?category_menu_active=true" class="top__link">
+        @if ($recent_manuals->count() > 0)
+            <p class="top__link__notice">新着{{$recent_manuals->count()}}件</p>
+        @endif
+        <div class="top__link__box">
+          <img src="{{ asset('img/icon_manual.svg') }}" alt="">
+          <div class="top__link__txt">
+            <p>マニュアル<span>更新日：{{isset($recent_manual_start_datetime[0]) ? $recent_manual_start_datetime[0]->start_datetime->isoFormat('MM/DD HH:mm') : ''}}</span></p>
+          </div>
         </div>
-        <div class="sidebar__inputArea">
-            <form action="#">
-                <div class="flex">
-                    <input type="text" name="">
-                    <button class="btnAddLabel txtBold">追加</button>
-                </div>
-            </form>
-        </div>
+      </a>
     </div>
-</nav>
 
-@include('common.footer')
+  </div>
+</div>
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
-<script src="{{ asset('/js/detail.js') }}" defer></script>
+<script>
 
+</script>
 @endsection
