@@ -620,6 +620,13 @@ class MessagePublishController extends Controller
         $csv = $request->file;
         $csv_path = Storage::putFile('csv', $csv);
 
+        $csv_content = file_get_contents($csv);
+        $encoding = mb_detect_encoding($csv_content);
+        if($encoding == "UTF-8") {
+            $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
+            file_put_contents($csv, $shift_jis_content);
+        }
+
         $admin = session('admin');
         Log::info("業連CSVインポート", [
             'csv_path' => $csv_path,
