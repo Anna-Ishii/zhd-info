@@ -1,13 +1,15 @@
 @extends('layouts.parent')
-
+@push('css')
+    <link href="{{ asset('/css/detail.css') }}" rel="stylesheet">
+@endpush
+@section('title', 'マニュアル')
+@section('previous_page')
+<a href="{{{ session('current_url', route('manual.index')) }}}">マニュアル</a>
+@endsection
 @section('content')
     <header class="header header--detail">
         <section class="header__inner flex">
             <div class="header__titleBox flex">
-                <a href="{{ url()->previous() }}" class="header__prev txtCenter">
-                    <img src="{{ asset('img/icon_prev.svg') }}" alt="" class="mr10 spmr4">
-                    <p class="txtBold">戻る</p>
-                </a>
                 <section class="header__title">
                     <h1 class="txtBold txtBlue">{{ $manual->title }}</h1>
                     <time datetime="{{ $manual->formatted_start_datetime }}" class="mr8 txtBold">{{ $manual->formatted_start_datetime }}</time>

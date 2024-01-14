@@ -10,7 +10,10 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class MessageListExport implements FromView, ShouldAutoSize, WithCustomCsvSettings
+class MessageListExport implements 
+    FromView, 
+    ShouldAutoSize, 
+    WithCustomCsvSettings
 {
     protected $manual_id;
     protected $request;
@@ -23,7 +26,8 @@ class MessageListExport implements FromView, ShouldAutoSize, WithCustomCsvSettin
     public function getCsvSettings(): array
     {
         return [
-            'use_bom' => true
+            'use_bom' => false,
+            'output_encoding' => 'CP932',
         ];
     }
 
