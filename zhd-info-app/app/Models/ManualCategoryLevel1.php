@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class ManualCategoryLevel1 extends Model
 {
     use HasFactory;
 
-    public function level2s():BelongsTo
+    protected $fillable = 
+    [
+        'name'
+    ];
+
+    public function level2s(): HasMany
     {
-        return $this->belongsTo(ManualCategoryLevel2::class, 'id', 'level1');
+        return $this->hasMany(ManualCategoryLevel2::class, 'level1', 'id');
     }
 }

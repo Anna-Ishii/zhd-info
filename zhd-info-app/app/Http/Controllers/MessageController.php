@@ -2,62 +2,96 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\SearchPeriod;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
     function index(Request $request)
     {
-        $category_id = $request->input('category');
-        $emergency = $request->input('emergency');
-
-        $search_status_name = '全て';
+        $keyword = $request->input('keyword');
+        $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
         // 掲示中のデータをとってくる
         $messages = $user->message()
-            ->when(isset($emergency), function ($query) {
-                $query->where('emergency_flg', true);
-            })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
-            })
+            ->with('category', 'tag')
             ->publishingMessage()
+            ->when(isset($keyword), function ($query) use ($keyword) {
+                $query->where(function ($query) use ($keyword) {
+                    $query->whereLike('title', $keyword)
+                        ->orWhereHas('tag', function ($query) use ($keyword) {
+                            $query->where('name', $keyword);
+                        });
+                });
+            })
+            ->when(isset($search_period), function ($query) use ($search_period) {
+                switch ($search_period) {
+                    case SearchPeriod::All:
+                        break;
+                    case SearchPeriod::Past_week:
+                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subWeek()->isoFormat('YYYY/MM/DD'));
+                        break;
+                    case SearchPeriod::Past_month:
+                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subMonth()->isoFormat('YYYY/MM/DD'));
+                        break;
+                    default:
+                        break;
+                }
+            })
             ->orderBy('created_at', 'desc')
             ->paginate(20)
             ->appends(request()->query());
 
         $categories = MessageCategory::get();
 
-        if (isset($emergency)){
-            $search_status_name = '重要';
-        }elseif(isset($category_id)) {
-            $search_status_name = $categories[$category_id - 1]->name;
-        }
+        $keywords = DB::table("message_search_logs")
+                    ->select('keyword', DB::raw('COUNT(*) as count'))
+                    ->groupBy('keyword')
+                    ->orderBy('count', 'desc')
+                        ->limit(3)
+                        ->get();
 
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
-            'search_status_name' => $search_status_name,
+            'keywords' => $keywords
         ]);
     }
 
-    // function detail($message_id)
-    // {
-    //     $member = session('member');
-    //     $message = Message::find($message_id);
+    function detail($message_id)
+    {
+        $user = session('member');
+        $message = Message::findOrFail($message_id);
 
-    //     // 既読をつける
-    //     $member->message()->updateExistingPivot($message_id, [
-    //         'read_flg' => true,
-    //         'readed_datetime' => Carbon::now(), 
-    //     ]);
+        $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
+            'read_flg' => true,
+            'readed_datetime' => Carbon::now(),
+        ]);
 
-    //     return view('message.detail', [
-    //         'message' => $message
-    //     ]);
-    // }
+        return redirect()->to($message->content_url);
+    }
+
+    function search(Request $request)
+    {
+        $user = session('member');
+        $param = [
+            'keyword' => $request['keyword'],
+            'search_period' => $request['search_period']
+        ];
+
+        if ($request->filled('keyword')) {
+            DB::table('message_search_logs')->insert([
+                'keyword' => $request['keyword'],
+                'shop_id' => $user->shop_id,
+                'searched_datetime' => new Carbon('now')
+            ]);
+        }
+
+        return redirect()->route('message.index', $param);
+    }
 }

@@ -7,6 +7,7 @@
     <title>業務連絡一覧 | 業連・動画配信システム</title>
     <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
     <link rel="stylesheet" href="{{ asset('/css/style.css') }}?20231012">
+    @stack('css')
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
@@ -22,20 +23,14 @@
 
     @yield('content')
 
-    <div class="version-number">
+    {{-- <div class="version-number">
         Ver. {{config('version.version')}}
-    </div>
+    </div> --}}
 
+    @include('common.footer')
+   
     <script src="{{ asset('/js/timer.js') }}" defer></script>
-    <script>
-        // ブラウザバックの時、リロードする
-        // 既読処理のレイアウトを再描画させるため
-        window.onpageshow = function(event) {
-            if (event.persisted) {
-                    window.location.reload();
-            }
-        };
-    </script>
+    <script src="{{ asset('/js/common.js') }}" defer></script>
     @livewireScripts
 </body>
 

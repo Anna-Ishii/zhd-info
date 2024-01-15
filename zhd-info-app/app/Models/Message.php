@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -37,6 +38,8 @@ class Message extends Model
     protected $casts = [
         'emergency_flg' => 'boolean',
         'editing_flg' => 'boolean',
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime',
     ];
 
     // 多対多のリレーションを定義
@@ -256,5 +259,23 @@ class Message extends Model
         $min = isset($min) ? $min : 0;
         $max = isset($max) ? $max : 100;
         $query->havingRaw('ROUND((read_users / total_users) * 100, 2) BETWEEN ? AND ?', [$min, $max]);
+    }
+
+    public function scopeStartDatetimeFromDayAgo(Builder $query, $days)
+    {
+        // 特定の日数前から現在までの期間を計算
+        $startDateTime = Carbon::now()->subDays($days);
+
+        return $query
+                ->where('start_datetime', '<=', now('Asia/Tokyo'))
+                ->where(function ($q) {
+                    $q->where('end_datetime', '>', now('Asia/Tokyo'))
+                    ->orWhereNull('end_datetime');
+                })
+                ->where('editing_flg',
+                    false
+                );
+
+        return $query->where('start_datetime', '>=', $startDateTime);
     }
 }

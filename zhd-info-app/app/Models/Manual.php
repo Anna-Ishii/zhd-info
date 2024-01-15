@@ -39,6 +39,8 @@ class Manual extends Model
 
     protected $casts = [
         'editing_flg' => 'boolean',
+        'start_datetime' => 'datetime',
+        'end_datetime' => 'datetime'
     ];
 
     public function user(): BelongsToMany
@@ -263,6 +265,29 @@ class Manual extends Model
         $min = isset($min) ? $min : 0;
         $max = isset($max) ? $max : 100;
         $query->havingRaw('ROUND((read_users / total_users) * 100, 2) BETWEEN ? AND ?', [$min, $max]);
+    }
+
+    public function scopeStartDatetimeFromDayAgo(Builder $query, $days)
+    {
+        // 特定の日数前から現在までの期間を計算
+        $startDateTIme = Carbon::now()->subDays($days);
+
+        $query->where('start_datetime', '>=', $startDateTime);
+    }
+
+    //  新着件数
+    public function scopeRecentPublishing($query)
+    {
+        $start_date_time = Carbon::now()->subDays(7)->startOfDay();
+
+        return $query
+            ->whereBetween('start_datetime', [$start_date_time, now('Asia/Tokyo')])
+            ->where('start_datetime', '<=', now('Asia/Tokyo'))
+            ->where(function ($q) {
+                $q->where('end_datetime', '>', now('Asia/Tokyo'))
+                ->orWhereNull('end_datetime');
+            })
+            ->where('editing_flg', false);
     }
 
     public static function getCurrentNumber($organization1_id): Int{
