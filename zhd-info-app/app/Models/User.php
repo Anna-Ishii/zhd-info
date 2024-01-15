@@ -6,6 +6,7 @@ use App\Models\Traits\WhereLike;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class User extends Model
@@ -57,5 +58,10 @@ class User extends Model
     public function shop(): BelongsTo
     {
         return $this->belongsTo(Shop::class, 'shop_id', 'id');
+    }
+
+    public function crew(): HasMany
+    {
+        return $this->hasMany(Crew::class, 'user_id', 'id');
     }
 }
