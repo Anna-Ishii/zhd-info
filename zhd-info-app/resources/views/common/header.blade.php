@@ -1,8 +1,9 @@
-    <header class="header">
-        <section class="header__inner flex">
-            <p class="header__name txtBold">
-                <span class="mr16">{{ $user->shop->name }}</span>
-                {{ $user->roll->name}}
-            </p>
-        </section>
-    </header>
+<header class="header">
+  <div class="header__inner">
+        {{-- <select name="" class="header__name">
+            <option selected>名前を選択してください</option>
+            <option value="1">テキストテキストテキスト</option>
+            <option value="2">テキストテキストテキスト</option>
+        </select> --}}
+    </div>
+</header>

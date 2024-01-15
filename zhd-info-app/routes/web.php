@@ -10,6 +10,7 @@ use App\Http\Controllers\AuthController as MemberAuthController;
 use App\Http\Controllers\ManualController;
 use App\Http\Controllers\MessageController;
 use App\Http\Controllers\TopController;
+use Symfony\Component\Mime\MessageConverter;
 
 /*
 |--------------------------------------------------------------------------
@@ -28,14 +29,17 @@ Route::post('/member/auth', [MemberAuthController::class, 'login']);
 Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
+Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
 Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
+    Route::get('/search', [MessageController::class, 'search'])->name('search');
 });
 Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
     Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
     Route::put('/watched', [ManualController::class, 'watched'])->name('watched');
+    Route::get('/search', [ManualController::class, 'search'])->name('search');
 });
 
 // 管理画面へのログイン画面
