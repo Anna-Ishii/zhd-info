@@ -33,6 +33,7 @@ body {
   font-family: "游ゴシック体", YuGothic, "游ゴシック", "Yu Gothic", Helvetica Neue, Segoe UI, Arial, Hiragino Kaku Gothic ProN, Hiragino Sans, BIZ UDPGothic, Meiryo, sans-serif;
   background: #F3F3F3;
   color: #5E5E5E;
+  overflow: visible;
 }
 
 * {
