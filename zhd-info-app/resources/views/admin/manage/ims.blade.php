@@ -56,10 +56,10 @@
             <tr>
                 <td>{{$l->import_at->isoFormat('YYYY/MM/DD')}}</td>
                 <td class="text-center {{$l->import_crew_error || $l->import_department_error ? 'error' : ''}}">
-                    {{is_null($l->import_crew_error) ? '-' : $l->import_crew_at->isoFormat('HH:mm:ss')}}
+                    {{$l->import_crew_error !== false ? '-' : $l->import_crew_at?->isoFormat('HH:mm:ss')}}
                 </td>
                 <td class="text-center {{$l->import_crew_error || $l->import_department_error ? 'error' : ''}}">
-                    {{is_null($l->import_department_error) ? '-' : $l->import_department_at?->isoFormat('HH:mm:ss')}}
+                    {{$l->import_department_error !== false ? '-' : $l->import_department_at?->isoFormat('HH:mm:ss')}}
                 </td>
             </tr>
         @endforeach
