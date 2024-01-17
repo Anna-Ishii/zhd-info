@@ -16,10 +16,11 @@
                         <li><a href="/admin/manual/publish/">配信</a></li>
                     </ul>
                 </li>
-                <li class="nav-current-page">
+                <li>
                     <a href="#" class="nav-label">アカウント管理</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">アカウント</a></li>
+                        <li class="active"><a href="/admin/account/">アカウント</a></li>
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">IMS連携</a>
                     </ul>
                 </li>
                 <li>
