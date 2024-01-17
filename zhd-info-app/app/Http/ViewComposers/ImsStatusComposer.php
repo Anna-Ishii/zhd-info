@@ -11,7 +11,7 @@ class ImsStatusComposer
     {
         $log = ImsSyncLog::orderBy('created_at', 'DESC')->orderBy('id', 'DESC')->first();
         $view->with([
-            'is_error_ims' =>  $log->is_error()
+            'is_error_ims' =>  $log ? $log->is_error() : false
         ]);
     }
 }
