@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Account\AccountController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\Manage\ImsController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Setting\ChangePasswordController;
@@ -92,6 +93,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
+    });
+    Route::group(['prefix' => 'manage', 'as' => 'manage'], function () {
+        Route::get('ims', [ImsController::class, 'index'])->name('index');
     });
 
     // パスが/admin/から始まる場合のフォールバックルート
