@@ -4,10 +4,10 @@
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
-                <li class="nav-current-page">
+                <li>
                     <a href="#" class="nav-label">業務連絡</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">配信</a></li>
+                        <li class="active"><a href="/admin/message/publish/">配信</a></li>
                     </ul>
                 </li>
                 <li>
@@ -20,6 +20,7 @@
                     <a href="#" class="nav-label">アカウント管理</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/account/">アカウント</a></li>
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">IMS連携</a>
                     </ul>
                 </li>
                 <li>
