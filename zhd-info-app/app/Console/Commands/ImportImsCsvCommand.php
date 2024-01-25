@@ -9,6 +9,7 @@ use App\Models\Brand;
 use App\Models\Crew;
 use App\Models\Manual;
 use App\Models\MessageOrganization;
+use App\Models\Organization1;
 use App\Models\Organization2;
 use App\Models\Organization3;
 use App\Models\Organization4;
@@ -44,19 +45,19 @@ class ImportImsCsvCommand extends Command
         //
         $this->info('start');
 
-        if (!Storage::disk('s3')->exists('Depertment.csv')) {
-            $this->error('Depertment.csvが存在しません');
-
+        if (!Storage::disk('s3')->exists('DEPARTMENT_20240110.csv')) {
+            $this->error('DEPARTMENT_20240110.csvが存在しません');
         }
-        if (!Storage::disk('s3')->exists('Crew.csv')) {
-            $this->error('Crew.csvが存在しません');
+        
+        if (!Storage::disk('s3')->exists('CREW_20240110.csv')) {
+            $this->error('CREW_20240110.csvが存在しません');
         }
 
         $this->info("csvファイルを読み込みます");
         $shops_data = (new ShopsIMSImport)
-                            ->toCollection('Depertment.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
+                            ->toCollection('DEPARTMENT_20240110.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
         $crews_data =  (new CrewsIMSImport)
-                            ->toCollection('Crew.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
+                            ->toCollection('CREW_20240110.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
         $this->info("csv読み込み完了");
 
         DB::beginTransaction();
@@ -86,7 +87,7 @@ class ImportImsCsvCommand extends Command
             $organization4_id = null; // AR
             $organization5_id = null; // BL
 
-            for ($i=4; $i < 24; $i+=4) {
+            for ($i=5; $i < 26; $i+=4) {
                 if (!isset($shop[$i])) break;
                 $this->info($index.$shop[$i]);
                 $this->info($shop[$i+1]);
@@ -122,12 +123,16 @@ class ImportImsCsvCommand extends Command
                 }
             }
 
-            $brand_code = $shop[0];
-            $brand = Brand::where('brand_code', $brand_code)->first();
+            $brand_name = $shop[2];
+            if ($brand_name == "S-VS") $brand_name = "VS";
+            if ($brand_name == "S-BB") $brand_name = "BB";
+            $brand = Brand::where('name', $brand_name)->first();
+            if (!isset($brand)) continue;
+
             $brand_id = $brand->id;
             $organization1_id = $brand->organization1->id;
-            $shop_code = $shop[2];
-            $shop_name = $shop[3];
+            $shop_code = $shop[3];
+            $shop_name = $shop[4];
 
             //店舗コードを更新(IMS連携の初回のみ)
             Shop::update_shopcode($shop_code, $brand_id);
@@ -300,12 +305,12 @@ class ImportImsCsvCommand extends Command
         $new_crew = [];
         
         foreach ($crews_data as $index => $crew) {
-            $brand = Brand::where('brand_code', $crew[0])->first();
-            $brand_id = $brand->id;
+            $org1 = Organization1::where('name', $crew[0])->first();
+            $org1_id = $org1->id;
             // クルーの情報を更新
             $shop = Shop::query()
-                            ->where('brand_id', $brand_id)
-                            ->where('shop_code', $crew[14])
+                            ->where('organization1_id', $org1_id)
+                            ->where('shop_code', $crew[15])
                             ->first();
             if (empty($shop)) {
                 $undefind_shop[] = $crew;
@@ -318,10 +323,10 @@ class ImportImsCsvCommand extends Command
                 continue;
             }
 
-            $part_code = $crew[12];
-            $name = $crew[13];
-            $birth_date = $this->parseDateTime($crew[16]);
-            $register_date = $this->parseDateTime($crew[17]);
+            $part_code = $crew[13];
+            $name = $crew[14];
+            $birth_date = $this->parseDateTime($crew[17]);
+            $register_date = $this->parseDateTime($crew[18]);
             $crew_id = Crew::query()
                             ->where('part_code', $part_code)
                             ->value('id');
@@ -377,7 +382,7 @@ class ImportImsCsvCommand extends Command
         $this->info("---店舗が見つからないエラー---");
         if (!empty($undefind_shop)) {
             foreach ($undefind_shop as $c) {
-                $this->info("店舗コード" . $c[14] . " 店舗名" . $c[15]);
+                $this->info("店舗コード" . $c[15] . " 店舗名" . $c[16]);
             }
         }
         $this->info("---店舗ユーザーが見つからないエラー---");
