@@ -64,4 +64,51 @@ class User extends Model
     {
         return $this->hasMany(Crew::class, 'user_id', 'id');
     }
+
+    public function distributeMessages(): Void
+    {
+        $shop = Shop::find($this->shop_id);
+        $messages = [];
+        if (isset($shop->organization5_id)) {
+            $messages = MessageOrganization::query()
+                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                ->select('message_organization.message_id as id')
+                ->where('message_organization.organization5_id', $shop->organization5_id)
+                ->where('message_brand.brand_id', $shop->brand_id)
+                ->get()
+                ->toArray();
+        } elseif (isset($shop->organization4_id)) {
+            $messages = MessageOrganization::query()
+                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                ->select('message_organization.message_id as id')
+                ->where('message_organization.organization4_id', $shop->organization4_id)
+                ->where('message_brand.brand_id', $shop->brand_id)
+                ->get()
+                ->toArray();
+        } elseif (isset($shop->organization3_id)) {
+            $messages = MessageOrganization::query()
+                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                ->select('message_organization.message_id as id')
+                ->where('message_organization.organization3_id', $shop->organization3_id)
+                ->where('message_brand.brand_id', $shop->brand_id)
+                ->get()
+                ->toArray();
+        } elseif (isset($shop->organization2_id)) {
+            $messages = MessageOrganization::query()
+                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
+                ->select('message_organization.message_id as id')
+                ->where('message_organization.organization2_id', $shop->organization2_id)
+                ->where('message_brand.brand_id', $shop->brand_id)
+                ->get()
+                ->toArray();
+        }
+
+        $message_data = [];
+        foreach ($messages as $message) {
+            $message_data[$message['id']] = ['shop_id' => $shop->id];
+        }
+
+        $user = User::find($this->id);
+        $user->message()->sync($message_data);
+    }
 }
