@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use App\Imports\ShopsIMSImport;
 use App\Models\Brand;
 use App\Models\Crew;
+use App\Models\ImsSyncLog;
 use App\Models\Manual;
 use App\Models\MessageOrganization;
 use App\Models\Organization1;
@@ -44,6 +45,9 @@ class ImportImsCsvCommand extends Command
     {
         //
         $this->info('start');
+        $ims_log = new ImsSyncLog();
+        $ims_log->import_at = new Carbon('now');
+        $ims_log->save();
 
         if (!Storage::disk('s3')->exists('DEPARTMENT_20240110.csv')) {
             $this->error('DEPARTMENT_20240110.csvが存在しません');
@@ -62,8 +66,26 @@ class ImportImsCsvCommand extends Command
 
         DB::beginTransaction();
         try {
-            $this->import_shops($shops_data[0]);
-            $this->import_crews($crews_data[0]);
+            // 組織情報の取り込み
+            try {
+                $this->import_shops($shops_data[0]);
+                $ims_log->import_department_at = new Carbon('now');
+                $ims_log->import_department_error = false;
+            } catch (\Throwable $th) {
+                $ims_log->import_department_message = $th->getMessage();
+                $ims_log->import_department_error = true;
+                throw $th;
+            }
+            // クルーの取り込み
+            try {
+                $this->import_crews($crews_data[0]);
+                $ims_log->import_crew_at = new Carbon('now');
+                $ims_log->import_crew_error = false;
+            } catch (\Throwable $th) {
+                $ims_log->import_crew_message = $th->getMessage();
+                $ims_log->import_crew_error = true;
+                throw $th;
+            }
 
             DB::commit();     
         }catch(\Throwable $th){
@@ -72,23 +94,33 @@ class ImportImsCsvCommand extends Command
             $th_msg  = $th->getMessage();
             $this->info("$th_msg");
         }
-
+        $ims_log->save();
         $this->info('end');
     }
 
     private function import_shops($shops_data)
     {
         $new_shop = []; // 新店舗を格納する配列
+        $close_shop = []; // 削除する店舗を格納する配列
         $shop_list = Shop::query()->pluck('id')->toArray();
+        $today = Carbon::now();
+
         foreach ($shops_data as $index => $shop) {
+            $organization1_id = Organization1::where('name', $shop[0])->value('id');
+
+            $close_date = $this->parseDateTime($shop[25]);
+            // 閉店の店舗
+            if (is_null($close_date) || $today->gte($close_date)) {
+                $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
+                continue;
+            }
             // 営業部、DS、AR、BLの登録  
             $organization2_id = null; // 営業部
             $organization3_id = null; // DS
             $organization4_id = null; // AR
             $organization5_id = null; // BL
 
-            for ($i=5; $i < 26; $i+=4) {
-                if (!isset($shop[$i])) break;
+            for ($i=5; $i < 25; $i+=4) {
                 $this->info($index.$shop[$i]);
                 $this->info($shop[$i+1]);
 
@@ -130,7 +162,6 @@ class ImportImsCsvCommand extends Command
             if (!isset($brand)) continue;
 
             $brand_id = $brand->id;
-            $organization1_id = $brand->organization1->id;
             $shop_code = $shop[3];
             $shop_name = $shop[4];
 
@@ -164,6 +195,7 @@ class ImportImsCsvCommand extends Command
                 $this->create_user($shop);
             }
 
+            // 店舗の情報が更新された時
             if ($shop->wasChanged()) {
                 // 店舗更新
                 $change_shop[] = $shop;
@@ -174,8 +206,10 @@ class ImportImsCsvCommand extends Command
 
         // 削除する店舗一覧のID
         $diff_shop_id = array_diff($shop_list, $regiter_shop_id);
-        $diff_shop = Shop::whereIn('id', $diff_shop_id)->get();
-        $diff_shop_user = User::query()->whereIn('shop_id', $diff_shop_id)->get();
+        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();;
+
+        $delete_shop = array_merge($diff_shop, $close_shop);
+        $diff_shop_user = User::query()->whereIn('shop_id', $delete_shop)->get();
         foreach ($diff_shop_user as $key => $user) {
             $user->message()->detach();
             $user->manual()->detach();
@@ -199,9 +233,9 @@ class ImportImsCsvCommand extends Command
         }
 
         $this->info("---削除する店舗---");
-        if (!$diff_shop->isEmpty()) {
+        if (!empty($diff_shop)) {
             foreach ($diff_shop as $s) {
-                $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+                $this->info("shopID" . $s);
             }
         }
     }
@@ -222,48 +256,7 @@ class ImportImsCsvCommand extends Command
             'roll_id' => $ROLL_ID,
         ]);
 
-        // TODO 掲載終了したものを配布するかどうか。
-        $messages = [];
-        if (isset($shop->organization5_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization5_id', $shop->organization5_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization4_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization4_id', $shop->organization4_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization3_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization3_id', $shop->organization3_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization2_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization2_id', $shop->organization2_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        }
-
-        $message_data = [];
-        foreach ($messages as $message) {
-            $message_data[$message['id']] = ['shop_id' => $shop->id];
-        }
-
-        $user->message()->sync($message_data);
+        $user->distributeMessages();
 
         $manual_data = [];
         $_brand_id = $shop->brand_id;
