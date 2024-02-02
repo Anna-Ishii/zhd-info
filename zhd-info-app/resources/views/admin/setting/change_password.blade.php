@@ -17,6 +17,12 @@
                     </ul>
                 </li>
                 <li>
+					<a href="#" class="nav-label">データ抽出</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/analyse/personal">業務連絡の閲覧状況</a></li>
+                    </ul>
+				</li>
+                <li>
                     <a href="#" class="nav-label">アカウント管理</span></a>
                     <ul class="nav nav-second-level">
                         <li class="active"><a href="/admin/account/">アカウント</a></li>
