@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Account\AccountController;
+use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
 use App\Http\Controllers\Admin\Manage\ImsController;
@@ -97,7 +98,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'manage', 'as' => 'manage'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
     });
-
+    Route::group(['prefix' => 'analyse', 'as' => 'analyse'], function () {
+        Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
+    });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {
         return redirect(route('admin.message.publish.index'));

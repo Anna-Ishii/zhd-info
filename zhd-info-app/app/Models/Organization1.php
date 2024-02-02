@@ -22,21 +22,74 @@ class Organization1 extends Model
         return $this->hasMany(Brand::class, 'organization1_id', 'id');
     }
 
-    public function shop(): BelongsTo
+    public function shop(): HasMany
     {
-        return $this->belongsTo(Shop::class, 'id', 'organization1_id');
+        return $this->hasMany(Shop::class, 'id', 'organization1_id');
     }
 
-    public function getOrganization5(): array
+    public function getOrganization5()
     {
         $organization5 = Shop::query()
-            ->select('organization5.name')
+            ->select(['organization5.id', 'organization5.name'])
             ->distinct('organization5.name')
             ->where('organization1_id', '=', $this->id)
+            ->whereNotNull('organization5_id')
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-            ->get()
-            ->toArray();
+            ->get();
 
         return $organization5;
+    }
+
+    public function getOrganization4()
+    {
+        $organization4 = Shop::query()
+            ->select(['organization4.id','organization4.name'])
+            ->distinct('organization4.name')
+            ->where('organization1_id', '=', $this->id)
+            ->whereNotNull('organization4_id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->get();
+
+        return $organization4; 
+    }
+
+    public function getOrganization3()
+    {
+        $organization3 = Shop::query()
+            ->select(['organization3.id', 'organization3.name'])
+            ->distinct('organization3.name')
+            ->where('organization1_id', '=', $this->id)
+            ->whereNotNull('organization3_id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->get();
+
+        return $organization3;
+    }
+
+    // ブロックがあるか
+    public function isExistOrg5()
+    {
+        return Shop::query()
+            ->where('organization1_id', $this->id)
+            ->whereNotNull('organization5_id')
+            ->exists();
+    }
+
+    // エリアがあるか
+    public function isExistOrg4()
+    {
+        return Shop::query()
+            ->where('organization1_id', $this->id)
+            ->whereNotNull('organization4_id')
+            ->exists();
+    }
+
+    // ディストリクトがあるか
+    public function isExistOrg3()
+    {
+        return Shop::query()
+            ->where('organization1_id', $this->id)
+            ->whereNotNull('organization3_id')
+            ->exists();
     }
 }
