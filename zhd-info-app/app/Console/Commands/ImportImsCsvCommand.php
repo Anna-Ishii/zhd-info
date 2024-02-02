@@ -192,7 +192,6 @@ class ImportImsCsvCommand extends Command
             // 新規店舗の場合
             if (is_null($shop_id)) {
                 $new_shop[] = $shop;
-                $this->create_user($shop);
             }
 
             // 店舗の情報が更新された時
@@ -202,6 +201,32 @@ class ImportImsCsvCommand extends Command
             } 
 
             $regiter_shop_id[] = $shop->id;
+        }
+
+
+        /// 初回のみパッチ
+        DB::insert('insert into message_organization (
+                with m_o5 as (
+                select distinct m_u.message_id as message_id, s.organization1_id as organization1_id, s.organization5_id as organization5_id from message_user as m_u
+                left join users as u on m_u.user_id = u.id
+                left join shops as s on u.shop_id = s.id
+                inner join organization5 as o5 on s.organization5_id = o5.id
+                )
+                select message_id, organization1_id, NULL as organization2_id, NULL as organization3_id, NULL as organization4_id, organization5_id, ? as created_at, ? as updated_at from m_o5
+                );', [new Carbon('now'), new Carbon('now')]);
+
+        // DB::delete(
+        //     'DELETE FROM message_organization WHERE organization5_id IN (
+        //             select id from organization5 where id not in (
+        //                 select distinct organization5_id from shops where organization5_id is not null
+        //             )
+        //         )'
+        // );
+        ///　初回のみパッチ
+
+        // 新店舗のユーザー作成
+        foreach($new_shop as $n_s) {
+            $this->create_user($n_s);
         }
 
         // 削除する店舗一覧のID
