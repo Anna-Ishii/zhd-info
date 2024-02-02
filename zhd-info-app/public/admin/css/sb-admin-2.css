@@ -707,3 +707,9 @@ table.personal thead>tr>th.head2 {
 table.personal tbody>tr>td.message-viewlate {
   border-left: 1px solid black;
 }
+table.personal td[class*="org"] {
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+  vertical-align: middle;
+  text-align: center;
+}
