@@ -91,7 +91,7 @@
 				<button class="btn btn-admin">検索</button>
 			</div>
             <div class="input-group">
-				<button class="btn btn-admin">エクスポート</button>
+            <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
 			</div>
 		</div>
     </form>
