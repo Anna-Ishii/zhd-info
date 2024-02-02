@@ -30,7 +30,7 @@ class PersonalContoller extends Controller
                         ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
                         ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
                         ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
-                        ->where('shops.organization1_id','=', $admin->organization1_id)
+                        ->where('messages.organization1_id','=', $admin->organization1_id)
                         ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
                             $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
                                 $query
@@ -121,8 +121,8 @@ class PersonalContoller extends Controller
                 ->get();
   
             $viewrates['org1'][] = $viewrate_org1;
-            $viewrates['org1_sum'] = ($viewrates['org1_sum'] ?? 0) + $viewrate_org1[0]->count;
-            $viewrates['org1_readed_sum'] = ($viewrates['org1_readed_sum'] ?? 0) +  $viewrate_org1[0]->readed_count;
+            $viewrates['org1_sum'] = ($viewrates['org1_sum'] ?? 0) + ($viewrate_org1[0]->count ?? 0);
+            $viewrates['org1_readed_sum'] = ($viewrates['org1_readed_sum'] ?? 0) +  ($viewrate_org1[0]->readed_count ?? 0);
 
             // 組織ごと
             if (in_array('DS', $orgazanizations)) {

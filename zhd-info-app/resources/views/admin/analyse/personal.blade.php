@@ -107,7 +107,13 @@
                 @foreach ($messages as $m)
                     <th class="head2" colspan="2">
                         <div>{{$m->start_datetime?->isoFormat('YYYY/MM/DD')}}</div>
-                        <div>{{$m->title}}</div>
+                        <div>
+                            @isset($m->content_url)
+                                <a href="{{ asset($m->content_url)}}">{{$m->title}}</a>
+                            @else
+                                {{$m->title}}
+                            @endisset
+                        </div>
                     </th>
                 @endforeach
             </tr>
@@ -125,12 +131,20 @@
                 </td>
             @isset($viewrates['org1'])
                 @foreach ($viewrates['org1'] as $key => $v_org1)
-                <td nowrap>
-                    {{$v_org1[0]->readed_count}} / {{$v_org1[0]->count}}
-                </td>
-                <td nowrap>
-                    {{$v_org1[0]->view_rate}}%
-                </td>
+                    @isset($v_org1[0]->count)
+                    <td nowrap>
+                        <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        {{$v_org1[0]->readed_count}} / {{$v_org1[0]->count}}
+                        </a>
+                    </td>
+                    <td nowrap>
+                        {{$v_org1[0]->view_rate}}%
+                    </td>
+                    @else
+                    <td></td>
+                    <td></td>
+                @endisset
+
                 @endforeach
             @endisset
             </tr>
@@ -152,13 +166,20 @@
                         round( $viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id], 1) : 0.0 }}%
                 </td>
                 @foreach ($messages as $key => $ms)
-                <td class="message-viewlate">
-                    {{$viewrates[$organization][$key][$v_org_key]->readed_count ?? ""}} /
-                    {{$viewrates[$organization][$key][$v_org_key]->count ?? ""}}
-                </td>
-                <td data-message={{$ms->id}} class="message-viewlate">
-                    {{$viewrates[$organization][$key][$v_org_key]->view_rate ?? ""}}%
-                </td>
+                    @isset($viewrates[$organization][$key][$v_org_key]->count)
+                    <td class="message-viewlate">
+                        <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        {{$viewrates[$organization][$key][$v_org_key]->readed_count}} /
+                        {{$viewrates[$organization][$key][$v_org_key]->count}}
+                        </a>
+                    </td>
+                    <td data-message={{$ms->id}} class="message-viewlate">
+                        {{$viewrates[$organization][$key][$v_org_key]->view_rate}}%
+                    </td>
+                    @else
+                    <td></td>
+                    <td></td>
+                    @endisset
                 @endforeach
             </tr>
             @endforeach
@@ -184,12 +205,19 @@
                     {{$viewrates['shop_sum'][$m_c->shop_code] ? round(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1) : 0.0}}%
                 </td>
                 @foreach ($messages as $key => $ms)
-                <td nowrap>
-                    {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
-                </td nowrap>
-                <td data-message={{$ms->id}} nowrap>
-                    {{$viewrates['shop'][$key][$v_key]->view_rate}}%
-                </td>
+                    @isset($viewrates['shop'][$key][$v_key]->count)
+                    <td nowrap>
+                        <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
+                        </a>
+                    </td nowrap>
+                    <td data-message={{$ms->id}} nowrap>
+                        {{$viewrates['shop'][$key][$v_key]->view_rate}}%
+                    </td>
+                    @else
+                    <td></td>
+                    <td></td>
+                    @endisset
                 @endforeach
             </tr>
             @endforeach
