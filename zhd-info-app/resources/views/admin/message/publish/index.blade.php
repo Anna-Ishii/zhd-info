@@ -16,6 +16,12 @@
                         <li><a href="/admin/manual/publish/">配信</a></li>
                     </ul>
                 </li>
+				<li>
+					<a href="#" class="nav-label">データ抽出</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/analyse/personal">業務連絡の閲覧状況</a></li>
+                    </ul>
+				</li>
                 <li>
                     <a href="#" class="nav-label">アカウント管理</span></a>
                     <ul class="nav nav-second-level">

@@ -688,3 +688,22 @@ table.ims>tbody>tr>td.error {
   padding-top: 30px;
   padding-bottom: 10px;
 }
+table.personal thead,tbody:not(:last-child)>tr:last-child>td {
+  border-bottom: 3px double black;
+}
+table.personal thead>tr>th.head1 {
+  background-color: #bbb;
+  vertical-align: middle;
+  text-align: center;
+  border: solid 1px;
+
+}
+table.personal thead>tr>th.head2 {
+  background-color: rgb(209,218,239);
+  vertical-align: middle;
+  text-align: center;
+  border: solid 1px;
+}
+table.personal tbody>tr>td.message-viewlate {
+  border-left: 1px solid black;
+}
