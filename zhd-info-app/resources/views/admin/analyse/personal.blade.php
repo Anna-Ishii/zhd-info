@@ -124,11 +124,16 @@
             <tr>
                 <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
                 <td nowrap>{{$viewrates['org1_readed_sum'] ?? 0}} / {{$viewrates['org1_sum'] ?? 0}}</td>
-                <td>
-                    @if(isset($viewrates['org1_readed_sum']) && isset($viewrates['org1_sum']))
-                        {{round(($viewrates['org1_readed_sum'] / $viewrates['org1_sum']) * 100, 1)}}%
-                    @endif
-                </td>
+                @if(isset($viewrates['org1_readed_sum']) && (($viewrates['org1_sum'] ?? 0) > 0 ))
+                    @php
+                        $viewrate=0;
+                        $viewrate=number_format(($viewrates['org1_readed_sum'] / $viewrates['org1_sum']) * 100, 1);
+                    @endphp
+                    <td class={{$viewrate < 10 ? "under-quota" : ""}}><div>{{$viewrate}}%</div></td>
+                @else
+                    <td class="under-quota"><div>0.0%</div></td>
+                @endif
+                
             @isset($viewrates['org1'])
                 @foreach ($viewrates['org1'] as $key => $v_org1)
                     @isset($v_org1[0]->count)
@@ -137,14 +142,13 @@
                         {{$v_org1[0]->readed_count}} / {{$v_org1[0]->count}}
                         </a>
                     </td>
-                    <td nowrap>
-                        {{$v_org1[0]->view_rate}}%
+                    <td class={{$v_org1[0]->view_rate < 10 ? "under-quota" : ""}} nowrap>
+                        <div>{{$v_org1[0]->view_rate}}%</div>
                     </td>
                     @else
-                    <td></td>
-                    <td></td>
-                @endisset
-
+                    <td nowrap>0 / 0</td>
+                    <td class="under-quota"><div>0.0%</div></td>
+                    @endisset
                 @endforeach
             @endisset
             </tr>
@@ -157,28 +161,33 @@
             @foreach ($viewrates[$organization][0] as $v_org_key => $v_o)
             <tr>
                 <td colspan="{{count($organizations) + 2}}">{{$v_o->name}}</td>
-                <td>
+                <td nowrap>
                     {{$viewrates[$organization.'_readed_sum'][$v_o->id]}} /
                     {{$viewrates[$organization.'_sum'][$v_o->id]}}
                 </td>
-                <td>
-                    {{$viewrates[$organization.'_sum'][$v_o->id] ? 
-                        round( $viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id], 1) : 0.0 }}%
-                </td>
+                @if (isset($viewrates[$organization.'_readed_sum'][$v_o->id]) && (($viewrates[$organization.'_sum'][$v_o->id] ?? 0) > 0))
+                    @php
+                        $viewrate=0;
+                        $viewrate=number_format($viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id], 1);
+                    @endphp
+                    <td class={{$viewrate < 10 ? "under-quota" : ""}}><div>{{$viewrate}}%</div></td>
+                @else
+                    <td class="under-quota"><div>0.0%</div></td>
+                @endif
                 @foreach ($messages as $key => $ms)
                     @isset($viewrates[$organization][$key][$v_org_key]->count)
-                    <td class="message-viewlate">
+                    <td class="message-viewlate" nowrap>
                         <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
                         {{$viewrates[$organization][$key][$v_org_key]->readed_count}} /
                         {{$viewrates[$organization][$key][$v_org_key]->count}}
                         </a>
                     </td>
-                    <td data-message={{$ms->id}} class="message-viewlate">
-                        {{$viewrates[$organization][$key][$v_org_key]->view_rate}}%
+                    <td data-message={{$ms->id}} class="message-viewlate {{$viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? "under-quota" : ""}}">
+                        <div>{{$viewrates[$organization][$key][$v_org_key]->view_rate}}%</div>
                     </td>
                     @else
-                    <td></td>
-                    <td></td>
+                    <td nowrap>0 / 0</td>
+                    <td class="under-quota"><div>0.0%</div></td>
                     @endisset
                 @endforeach
             </tr>
@@ -198,26 +207,32 @@
                 @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@endisset
                 <td nowrap>{{$m_c->shop_code}}</td>
                 <td nowrap>{{$m_c->shop_name}}</td>
-                <td> 
+                <td nowrap> 
                     {{$viewrates['shop_readed_sum'][$m_c->shop_code]}} / {{$viewrates['shop_sum'][$m_c->shop_code]}}
                 </td>
-                <td>
-                    {{$viewrates['shop_sum'][$m_c->shop_code] ? round(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1) : 0.0}}%
-                </td>
+                @if (isset($viewrates['shop_readed_sum'][$m_c->shop_code]) && (($viewrates['shop_sum'][$m_c->shop_code] ?? 0) > 0))
+                    @php
+                        $viewrate=0;
+                        $viewrate=number_format(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1);
+                    @endphp
+                    <td class={{$viewrate < 10 ? "under-quota" : ""}}><div>{{$viewrate}}%</div></td>
+                @else
+                <td class="under-quota"><div>0.0%</div></td>
+                @endif
                 @foreach ($messages as $key => $ms)
-                    @isset($viewrates['shop'][$key][$v_key]->count)
+                    @if(($viewrates['shop'][$key][$v_key]->count ?? 0) > 0)
                     <td nowrap>
                         <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
                         {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
                         </a>
                     </td nowrap>
-                    <td data-message={{$ms->id}} nowrap>
-                        {{$viewrates['shop'][$key][$v_key]->view_rate}}%
+                    <td data-message={{$ms->id}} class={{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? "under-quota" : ""}} nowrap>
+                        <div>{{$viewrates['shop'][$key][$v_key]->view_rate ?? 0.0}}%</div>
                     </td>
                     @else
-                    <td></td>
-                    <td></td>
-                    @endisset
+                    <td nowrap>0 / 0</td>
+                    <td class="under-quota"><div>0.0%</div></td>
+                    @endif
                 @endforeach
             </tr>
             @endforeach
