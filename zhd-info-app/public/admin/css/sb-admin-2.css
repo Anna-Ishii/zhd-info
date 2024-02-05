@@ -688,8 +688,13 @@ table.ims>tbody>tr>td.error {
   padding-top: 30px;
   padding-bottom: 10px;
 }
+table.personal thead {
+  position: sticky;
+    top: 0;
+    z-index: 10;
+}
 table.personal thead,tbody:not(:last-child)>tr:last-child>td {
-  border-bottom: 3px double black;
+  border-bottom: 3px double black !important;
 }
 table.personal thead>tr>th.head1 {
   background-color: #bbb;
