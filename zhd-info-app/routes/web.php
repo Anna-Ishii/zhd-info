@@ -98,8 +98,9 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'manage', 'as' => 'manage'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
     });
-    Route::group(['prefix' => 'analyse', 'as' => 'analyse'], function () {
+    Route::group(['prefix' => 'analyse', 'as' => 'analyse.'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
+        Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
     });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {

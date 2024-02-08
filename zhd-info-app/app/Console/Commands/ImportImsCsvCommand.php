@@ -44,31 +44,30 @@ class ImportImsCsvCommand extends Command
     public function handle()
     {
         //
+        ini_set('memory_limit', '512M');
         $this->info('start');
         $ims_log = new ImsSyncLog();
         $ims_log->import_at = new Carbon('now');
         $ims_log->save();
 
-        if (!Storage::disk('s3')->exists('DEPARTMENT_20240110.csv')) {
+        if (!Storage::disk('local')->exists('DEPARTMENT_20240110.csv')) {
             $this->error('DEPARTMENT_20240110.csvが存在しません');
         }
-        
-        if (!Storage::disk('s3')->exists('CREW_20240110.csv')) {
+
+        if (!Storage::disk('local')->exists('CREW_20240110.csv')) {
             $this->error('CREW_20240110.csvが存在しません');
         }
-
-        $this->info("csvファイルを読み込みます");
-        $shops_data = (new ShopsIMSImport)
-                            ->toCollection('DEPARTMENT_20240110.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
-        $crews_data =  (new CrewsIMSImport)
-                            ->toCollection('CREW_20240110.csv', 's3', \Maatwebsite\Excel\Excel::CSV);
-        $this->info("csv読み込み完了");
 
         DB::beginTransaction();
         try {
             // 組織情報の取り込み
             try {
+                $this->info("DEPARTMENT.csvファイルを読み込みます");
+                $shops_data = (new ShopsIMSImport)
+                    ->toCollection('DEPARTMENT_20240110.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
+                $this->info("DEPARTMENT.csvファイル読み込み完了");
                 $this->import_shops($shops_data[0]);
+                unset($shops_data);
                 $ims_log->import_department_at = new Carbon('now');
                 $ims_log->import_department_error = false;
             } catch (\Throwable $th) {
@@ -78,7 +77,12 @@ class ImportImsCsvCommand extends Command
             }
             // クルーの取り込み
             try {
+                $this->info("Crew.csvファイルを読み込みます");
+                $crews_data =  (new CrewsIMSImport)
+                    ->toCollection('CREW_20240110.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
+                $this->info("Crew.csvファイル読み込み完了");
                 $this->import_crews($crews_data[0]);
+                unset($crews_data);
                 $ims_log->import_crew_at = new Carbon('now');
                 $ims_log->import_crew_error = false;
             } catch (\Throwable $th) {
@@ -87,8 +91,8 @@ class ImportImsCsvCommand extends Command
                 throw $th;
             }
 
-            DB::commit();     
-        }catch(\Throwable $th){
+            DB::commit();
+        } catch (\Throwable $th) {
 
             DB::rollBack();
             $th_msg  = $th->getMessage();
@@ -120,14 +124,14 @@ class ImportImsCsvCommand extends Command
             $organization4_id = null; // AR
             $organization5_id = null; // BL
 
-            for ($i=5; $i < 25; $i+=4) {
-                $this->info($index.$shop[$i]);
-                $this->info($shop[$i+1]);
+            for ($i = 5; $i < 25; $i += 4) {
+                $this->info($index . $shop[$i]);
+                $this->info($shop[$i + 1]);
 
                 $organization_name = $shop[$i + 1];
                 if ($shop[$i] == "営業部") {
                     $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
-                    if(is_null($organization2_id)){
+                    if (is_null($organization2_id)) {
                         $organization2 = Organization2::create(["name" => $organization_name]);
                         $organization2_id = $organization2->id;
                     }
@@ -169,9 +173,9 @@ class ImportImsCsvCommand extends Command
             Shop::update_shopcode($shop_code, $brand_id);
             // 店舗が存在するか
             $shop_id = Shop::query()
-                            ->where('shop_code', $shop_code)
-                            ->where('brand_id', $brand_id)    
-                            ->value('id');
+                ->where('shop_code', $shop_code)
+                ->where('brand_id', $brand_id)
+                ->value('id');
             // 店舗を更新
             $shop = Shop::updateOrCreate(
                 [
@@ -192,16 +196,41 @@ class ImportImsCsvCommand extends Command
             // 新規店舗の場合
             if (is_null($shop_id)) {
                 $new_shop[] = $shop;
-                $this->create_user($shop);
             }
 
             // 店舗の情報が更新された時
             if ($shop->wasChanged()) {
                 // 店舗更新
                 $change_shop[] = $shop;
-            } 
+            }
 
             $regiter_shop_id[] = $shop->id;
+        }
+
+
+        /// 初回のみパッチ
+        DB::insert('insert into message_organization (
+                with m_o5 as (
+                select distinct m_u.message_id as message_id, s.organization1_id as organization1_id, s.organization5_id as organization5_id from message_user as m_u
+                left join users as u on m_u.user_id = u.id
+                left join shops as s on u.shop_id = s.id
+                inner join organization5 as o5 on s.organization5_id = o5.id
+                )
+                select message_id, organization1_id, NULL as organization2_id, NULL as organization3_id, NULL as organization4_id, organization5_id, ? as created_at, ? as updated_at from m_o5
+                );', [new Carbon('now'), new Carbon('now')]);
+
+        DB::delete(
+            'DELETE FROM message_organization WHERE organization5_id IN (
+                    select id from organization5 where id not in (
+                        select distinct organization5_id from shops where organization5_id is not null
+                    )
+                )'
+        );
+        ///　初回のみパッチ
+
+        // 新店舗のユーザー作成
+        foreach ($new_shop as $n_s) {
+            $this->create_user($n_s);
         }
 
         // 削除する店舗一覧のID
@@ -279,14 +308,14 @@ class ImportImsCsvCommand extends Command
         $shop_number = substr($shop_code, -4); // 店舗コード
         if ($shop->organization1_id == 3) { // tagの場合
             $employee_code = 'tag' . $shop_number;
-        }else {
-            $employee_code = $brand_label.$shop_number;
+        } else {
+            $employee_code = $brand_label . $shop_number;
         }
 
         return $employee_code;
     }
 
-    
+
     private function import_crews($crews_data)
     {
         $ROLL_ID = 4;
@@ -296,22 +325,22 @@ class ImportImsCsvCommand extends Command
         $register_crews = [];
         $change_crew = [];
         $new_crew = [];
-        
+
         foreach ($crews_data as $index => $crew) {
             $org1 = Organization1::where('name', $crew[0])->first();
             $org1_id = $org1->id;
             // クルーの情報を更新
             $shop = Shop::query()
-                            ->where('organization1_id', $org1_id)
-                            ->where('shop_code', $crew[15])
-                            ->first();
+                ->where('organization1_id', $org1_id)
+                ->where('shop_code', $crew[15])
+                ->first();
             if (empty($shop)) {
                 $undefind_shop[] = $crew;
                 continue;
             }
             $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
 
-            if(empty($user)) {
+            if (empty($user)) {
                 $undefind_user[] = $crew;
                 continue;
             }
@@ -321,8 +350,8 @@ class ImportImsCsvCommand extends Command
             $birth_date = $this->parseDateTime($crew[17]);
             $register_date = $this->parseDateTime($crew[18]);
             $crew_id = Crew::query()
-                            ->where('part_code', $part_code)
-                            ->value('id');
+                ->where('part_code', $part_code)
+                ->value('id');
             $crew = Crew::updateOrCreate(
                 [
                     'part_code' => $part_code,
@@ -347,8 +376,8 @@ class ImportImsCsvCommand extends Command
         }
         // クルーの削除
         $crew_list = Crew::query()
-                ->pluck('part_code')
-                ->toArray();
+            ->pluck('part_code')
+            ->toArray();
         $diff_crew_id = array_diff($crew_list, $register_crews);
         $diff_crew = Crew::whereIn('part_code', $diff_crew_id)->get();
         Crew::whereIn('part_code', $diff_crew_id)->delete();
@@ -390,5 +419,4 @@ class ImportImsCsvCommand extends Command
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
-
 }
