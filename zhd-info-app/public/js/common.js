@@ -115,3 +115,24 @@ $(document).on('click', '.keyword_button', function(e) {
 	}else{
 	}
 })
+
+$(document).on('click', '.crew>input', function(e) {
+	let crew_id = this.getAttribute('data-crew-id');
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+	console.log(csrfToken);
+	$.ajax({
+		type: 'POST',
+		url: '/message/crews',
+		data: {
+			crew: crew_id
+		},
+		dataType: 'json',
+		headers: {
+		'X-CSRF-TOKEN': csrfToken,
+		},
+	})
+	.done(function(res) {
+		console.log(res.messages);
+	})
+})

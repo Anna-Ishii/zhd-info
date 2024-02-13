@@ -46,6 +46,17 @@
           <div class="list__limit">掲載期間</div>
         </div>
         <div class="list__items">
+@foreach ($user->crew as $crew)
+    <div class="crew">
+      <div>
+      {{$crew->id}} {{$crew->part_code}} {{$crew->name}}さん
+      @if (in_array((int)$crew->id, session()->get('crews', []), true))
+          <span>チェック</span>
+      @endif
+      </div>
+      <input type="button" data-crew-id="{{$crew->id}}" value="選択">
+    </div>
+@endforeach
         @foreach ($messages as $message)
         <a href="{{ route('message.detail',['message_id' => $message->id])}}" class="">
           <div class="list__item">
@@ -61,7 +72,7 @@
               <ul class="tags">
                 @foreach ($message->tag as $tag)
                     <li>{{$tag->name}}</li>
-                @endforeach
+                @endforeach    
               </ul>
             </div>
             <div class="list__limit" hidden>{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}} </div>
