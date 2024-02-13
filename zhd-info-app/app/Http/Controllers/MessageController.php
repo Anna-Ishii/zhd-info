@@ -89,6 +89,7 @@ class MessageController extends Controller
     function detail($message_id)
     {
         $user = session('member');
+        $crews = session('crews');
         $message = Message::findOrFail($message_id);
 
         $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
@@ -96,6 +97,7 @@ class MessageController extends Controller
             'readed_datetime' => Carbon::now(),
         ]);
 
+        $message->putCrewRead($crews);
         return redirect()->to($message->content_url);
     }
 
@@ -116,5 +118,22 @@ class MessageController extends Controller
         }
 
         return redirect()->route('message.index', $param);
+    }
+
+    public function putCrews(Request $request) 
+    {
+        $crew = $request->input('crew');
+        $crews = [];
+
+        $crews = session('crews',[]);
+        if(!empty($crews) && in_array((int)$crew, $crews, true)){
+            $crews = array_diff($crews, array((int)$crew));
+        } else {
+            $crews[] += (int)$crew;
+        }
+        $request->session()->put('crews', $crews);
+
+        return response()->json(['message' => '完了']);
+
     }
 }
