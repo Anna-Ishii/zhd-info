@@ -64,7 +64,8 @@
                 @endforeach
               </ul>
             </div>
-            <div class="list__limit">{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}}</div>
+            <div class="list__limit" hidden>{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}} </div>
+            <div class="list__limit">{{$message->view_rate}}%( {{$message->readed_crew_count}}/ {{$message->crew_count}})</div>
           </div>
         </a>
         @endforeach
