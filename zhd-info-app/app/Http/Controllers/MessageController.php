@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    function index(Request $request)
+    public function index(Request $request)
     {
         $keyword = $request->input('keyword');
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
@@ -82,11 +82,12 @@ class MessageController extends Controller
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
-            'keywords' => $keywords
+            'keywords' => $keywords,
+            'user' => $user
         ]);
     }
 
-    function detail($message_id)
+    public function detail($message_id)
     {
         $user = session('member');
         $crews = session('crews');
@@ -101,7 +102,7 @@ class MessageController extends Controller
         return redirect()->to($message->content_url);
     }
 
-    function search(Request $request)
+    public function search(Request $request)
     {
         $user = session('member');
         $param = [
