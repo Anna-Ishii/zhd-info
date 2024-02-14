@@ -44,18 +44,18 @@ class ImportImsCsvCommand extends Command
     public function handle()
     {
         //
-        ini_set('memory_limit', '512M');
+        ini_set('memory_limit', '-1');
         $this->info('start');
         $ims_log = new ImsSyncLog();
         $ims_log->import_at = new Carbon('now');
         $ims_log->save();
 
-        if (!Storage::disk('local')->exists('DEPARTMENT_20240110.csv')) {
-            $this->error('DEPARTMENT_20240110.csvが存在しません');
+        if (!Storage::disk('local')->exists('organization_20240207.csv')) {
+            $this->error('organization_20240207.csvが存在しません');
         }
 
-        if (!Storage::disk('local')->exists('CREW_20240110.csv')) {
-            $this->error('CREW_20240110.csvが存在しません');
+        if (!Storage::disk('local')->exists('crew_20240207.csv')) {
+            $this->error('crew_20240207.csvが存在しません');
         }
 
         DB::beginTransaction();
@@ -64,7 +64,7 @@ class ImportImsCsvCommand extends Command
             try {
                 $this->info("DEPARTMENT.csvファイルを読み込みます");
                 $shops_data = (new ShopsIMSImport)
-                    ->toCollection('DEPARTMENT_20240110.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
+                    ->toCollection('organization_20240207.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("DEPARTMENT.csvファイル読み込み完了");
                 $this->import_shops($shops_data[0]);
                 unset($shops_data);
@@ -79,7 +79,7 @@ class ImportImsCsvCommand extends Command
             try {
                 $this->info("Crew.csvファイルを読み込みます");
                 $crews_data =  (new CrewsIMSImport)
-                    ->toCollection('CREW_20240110.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
+                    ->toCollection('crew_20240207.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("Crew.csvファイル読み込み完了");
                 $this->import_crews($crews_data[0]);
                 unset($crews_data);
@@ -108,11 +108,12 @@ class ImportImsCsvCommand extends Command
         $close_shop = []; // 削除する店舗を格納する配列
         $shop_list = Shop::query()->pluck('id')->toArray();
         $today = Carbon::now();
+        $regiter_shop_id = [];
 
         foreach ($shops_data as $index => $shop) {
             $organization1_id = Organization1::where('name', $shop[0])->value('id');
 
-            $close_date = $this->parseDateTime($shop[25]);
+            $close_date = $this->parseDateTime($shop[30]);
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
@@ -124,36 +125,74 @@ class ImportImsCsvCommand extends Command
             $organization4_id = null; // AR
             $organization5_id = null; // BL
 
-            for ($i = 5; $i < 25; $i += 4) {
-                $this->info($index . $shop[$i]);
-                $this->info($shop[$i + 1]);
-
+            for ($i = 5; $i < 30; $i += 5) {
                 $organization_name = $shop[$i + 1];
+                $order_no = (int)$shop[$i + 2];
                 if ($shop[$i] == "営業部") {
                     $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
+                    // 初回のみ
+                    Organization2::where('name', $shop[$i + 1])->update([
+                        'order_no' => $order_no,
+                        'display_name' => $organization_name
+                    ]);
+                    //
                     if (is_null($organization2_id)) {
-                        $organization2 = Organization2::create(["name" => $organization_name]);
+                        $organization2 = Organization2::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name
+                        ]);
                         $organization2_id = $organization2->id;
                     }
                 }
                 if ($shop[$i] == "DS") {
                     $organization3_id = Organization3::where('name', $shop[$i + 1])->value('id');
+                    // 初回のみ
+                    Organization3::where('name', $shop[$i + 1])->update([
+                        'order_no' => $order_no,
+                        'display_name' => $organization_name
+                    ]);
+                    //
                     if (is_null($organization3_id)) {
-                        $organization3 = Organization3::create(["name" => $organization_name]);
+                        $organization3 = Organization3::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name
+                        ]);
                         $organization3_id = $organization3->id;
                     }
                 }
                 if ($shop[$i] == "AR") {
                     $organization4_id = Organization4::where('name', $shop[$i + 1])->value('id');
+                    // 初回のみ
+                    Organization4::where('name', $shop[$i + 1])->update([
+                        'order_no' => $order_no,
+                        'display_name' => $organization_name
+                    ]);
+                    //
                     if (is_null($organization4_id)) {
-                        $organization4 = Organization4::create(["name" => $organization_name]);
+                        $organization4 = Organization4::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name
+                        ]);
                         $organization4_id = $organization4->id;
                     }
                 }
                 if ($shop[$i] == "BL") {
                     $organization5_id = Organization5::where('name', $shop[$i + 1])->value('id');
+                    // 初回のみ
+                    Organization5::where('name', $shop[$i + 1])->update([
+                        'order_no' => $order_no,
+                        'display_name' => $this->formatOrg5Name($organization_name)
+                    ]);
+                    //
                     if (is_null($organization5_id)) {
-                        $organization5 = Organization5::create(["name" => $organization_name]);
+                        $organization5 = Organization5::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $this->formatOrg5Name($organization_name)
+                        ]);
                         $organization5_id = $organization5->id;
                     }
                 }
@@ -184,6 +223,7 @@ class ImportImsCsvCommand extends Command
                 ],
                 [
                     'name' => $shop_name,
+                    'display_name' => $this->formatShopName($shop_name),
                     'organization1_id' => $organization1_id,
                     'organization2_id' => $organization2_id,
                     'organization3_id' => $organization3_id,
@@ -332,7 +372,7 @@ class ImportImsCsvCommand extends Command
             // クルーの情報を更新
             $shop = Shop::query()
                 ->where('organization1_id', $org1_id)
-                ->where('shop_code', $crew[15])
+                ->where('shop_code', $crew[16])
                 ->first();
             if (empty($shop)) {
                 $undefind_shop[] = $crew;
@@ -347,8 +387,10 @@ class ImportImsCsvCommand extends Command
 
             $part_code = $crew[13];
             $name = $crew[14];
-            $birth_date = $this->parseDateTime($crew[17]);
-            $register_date = $this->parseDateTime($crew[18]);
+            $name_kana = $crew[15];
+            $my_number = $crew[12];
+            $birth_date = $this->parseDateTime($crew[18]);
+            $register_date = $this->parseDateTime($crew[19]);
             $crew_id = Crew::query()
                 ->where('part_code', $part_code)
                 ->value('id');
@@ -359,6 +401,8 @@ class ImportImsCsvCommand extends Command
                 [
                     'user_id' => $user->id,
                     'name' => $name,
+                    'name_kana' => $name_kana,
+                    'my_number' => $my_number,
                     'birth_date' =>  $birth_date,
                     'register_date' => $register_date
                 ]
@@ -404,13 +448,13 @@ class ImportImsCsvCommand extends Command
         $this->info("---店舗が見つからないエラー---");
         if (!empty($undefind_shop)) {
             foreach ($undefind_shop as $c) {
-                $this->info("店舗コード" . $c[15] . " 店舗名" . $c[16]);
+                $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
             }
         }
         $this->info("---店舗ユーザーが見つからないエラー---");
         if (!empty($undefind_user)) {
             foreach ($undefind_user as $c) {
-                $this->info("店舗コード" . $c[14] . " 店舗名" . $c[15]);
+                $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
             }
         }
     }
@@ -418,5 +462,29 @@ class ImportImsCsvCommand extends Command
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
+    }
+
+    private function formatShopName($name)
+    {
+        $trim_words = ["VS", "BB", "ＪＰ", "JO", "NIB", "YCP", "T", "TJ", "ＮＩＢ", "G"];
+        $trimed_word = $name;
+        // 正規表現のパターンを生成
+        $pattern = '/' . implode('|', array_map('preg_quote', $trim_words)) . '/';
+
+        $trimed_word = preg_replace($pattern, '', $name);
+
+        return $trimed_word;
+    }
+
+    public function formatOrg5Name($name)
+    {
+        $trim_words = ["ブロック", "BL", "ON_", "ON"];
+        $trimed_word = $name;
+        // 正規表現のパターンを生成
+        $pattern = '/' . implode('|', array_map('preg_quote', $trim_words)) . '/';
+
+        $trimed_word = preg_replace($pattern, '', $name);
+
+        return $trimed_word;
     }
 }
