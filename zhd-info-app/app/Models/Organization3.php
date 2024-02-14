@@ -12,5 +12,6 @@ class Organization3 extends Model
     [
         'id',
         'name',
+        'display_name'
     ];
 }
