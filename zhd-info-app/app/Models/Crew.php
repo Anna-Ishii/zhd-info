@@ -11,7 +11,9 @@ class Crew extends Model
     [
         'user_id',
         'name',
+        'name_kana',
         'part_code',
+        'my_number',
         'birth_date',
         'register_date',
     ];
