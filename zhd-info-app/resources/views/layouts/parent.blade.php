@@ -7,7 +7,7 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>業務連絡一覧 | 業連・動画配信システム</title>
     <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?20231012">
+    <link rel="stylesheet" href="{{ asset('/css/style.css') }}">
     @stack('css')
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
