@@ -1,14 +1,7 @@
 @charset "UTF-8";
-/* google fonts */
-/* fallback */
-@font-face {
-  font-family: 'Material Symbols Outlined';
-  font-style: normal;
-  font-weight: 100 700;
-  src: url(https://fonts.gstatic.com/s/materialsymbolsoutlined/v138/kJEhBvYX7BgnkSrUwT8OhrdQw4oELdPIeeII9v6oFsLjBuVY.woff2) format('woff2');
+* {
+  box-sizing: border-box;
 }
-
-
 
 html {
   font-size: 62.5%;
@@ -49,6 +42,65 @@ a {
   color: #0060B0;
 }
 
+.btnType3 {
+  width: 100%;
+  max-width: 140px;
+  margin-left: auto;
+  height: 48px;
+  border: 1px solid rgba(60, 60, 67, 0.36);
+  border-radius: 4px;
+  background: #F3F3F3;
+}
+
+.modalBg {
+  display: none;
+  z-index: 10002;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.modal {
+  display: none;
+  z-index: 10003;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  height: 100%;
+  max-height: 73.8vh;
+  max-height: 73.8svh;
+  border-radius: 4px;
+  background: #FFF;
+}
+.modal__inner {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  padding-bottom: 80px;
+}
+.modal__btnInner {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 16px;
+  border-top: 1px solid #707070;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background: #FFF;
+  text-align: center;
+}
+
+.modalbg.isActive, .modal.isActive {
+  display: block;
+}
+
 input, select {
   background: #FFF;
 }
@@ -59,7 +111,7 @@ input, select {
   top: 0;
   left: 0;
   width: 100%;
-  height: 48px;
+  height: 64px;
   box-shadow: 0 1px 2px 2px rgba(0, 0, 0, 0.16);
 }
 .header__inner {
@@ -82,7 +134,7 @@ input, select {
 }
 
 .content {
-  padding: 71px 0 100px;
+  padding: 100px 0;
   width: 100%;
 }
 .content__inner {
@@ -91,9 +143,10 @@ input, select {
 
 .search {
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 62px;
 }
 .search__inner {
+  position: relative;
   width: 100%;
   padding: 0 32px;
 }
@@ -101,6 +154,10 @@ input, select {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  margin-bottom: 16px;
+}
+.search__flexBox.alignCenter {
+  align-items: center;
 }
 .search__flexBox__name, .search__flexBox__limit {
   width: 100%;
@@ -110,7 +167,6 @@ input, select {
   margin-right: 16px;
 }
 .search__flexBox__name input[type=text] {
-  margin-bottom: 5px;
   padding: 0 16px;
   background: none;
   line-height: 4.6rem; /* border2px分引く */
@@ -204,24 +260,28 @@ input, select {
   max-width: 352px;
   justify-content: space-between;
 }
-.result__pager__prev {
-  background: url(../img/icon_arrow_left.svg) center no-repeat;
+.result__pager__prev, .result__pager__next {
+  width: 80px;
+  text-align: center;
 }
-.result__pager__first {
-  background: url(../img/icon_prev.png) center no-repeat;
-  background-size: 25px;
+.result__pager__prev {
+  padding-left: 24px;
+  border-top-left-radius: 16px;
+  border-bottom-left-radius: 16px;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background: url(../img/icon_arrow_left.svg) center left 12px no-repeat;
 }
 .result__pager__next {
-  background: url(../img/icon_arrow_right.svg) center no-repeat;
-}
-.result__pager__last{
-  background: url(../img/icon_next.png) center no-repeat;
-  background-size: 25px;
+  padding-right: 24px;
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
+  border-top-right-radius: 16px;
+  border-bottom-right-radius: 16px;
+  background: url(../img/icon_arrow_right.svg) center right 12px no-repeat;
 }
 .result__pager li {
   margin-right: 8px;
-  display: list-item;
-  list-style: none;
 }
 .result__pager li:last-of-type {
   margin-right: 0;
@@ -233,7 +293,7 @@ input, select {
   line-height: 32px;
   color: #0060B0;
 }
-.result__pager li a {
+.result__pager li a:not(.result__pager__prev):not(.result__pager__next) {
   width: 32px;
   border-radius: 4px;
   text-align: center;
@@ -310,24 +370,16 @@ input, select {
 .list__headItem div:last-of-type {
   border-right: none;
 }
-.list__items {
-  overflow-y: scroll;
-  /* マージンの高さ(71px 100px) 検索ボックス 検索ボックスmargin-bottom 検索結果 検索結果margin-bottom ヘッダー(47pxpx)    */
-  height: calc(100vh - 71px - 21px - 100px - 87px - 20px - 31px - 16px - 47px );
-}
 .list__item {
   padding: 12px 0 12px 32px;
   border-bottom: 1px solid rgba(60, 60, 67, 0.36);
   background: #FFF;
   transition: 0.3s;
 }
-.list__item > .list__no {
-  text-align: right;
-}
 .list__item:hover {
   background: #EEE;
 }
-.list__no, .list__img, .list__category, .list__title, .list__limit {
+.list__no, .list__img, .list__category, .list__title, .list__status {
   width: 100%;
   padding: 0 16px;
   flex-grow: 1;
@@ -350,8 +402,11 @@ input, select {
 .list__img + .list__category {
   max-width: 18.6%;
 }
-.list__limit {
+.list__status {
   max-width: 21.4%;
+}
+.list__status__read {
+  display: none;
 }
 .list .tags li {
   display: inline-block;
@@ -360,17 +415,6 @@ input, select {
   border-radius: 4px;
   background: rgba(118, 118, 128, 0.12);
   font-size: 1.4rem;
-}
-.list .title li {
-  display: inline-block;
-  margin-right: 4px;
-}
-.list__link__notice {
-  padding: 0 13px 0 8px;
-  border-radius: 11px;
-  background: #FF0000;
-  color: #FFF;
-  line-height: 22px;
 }
 
 .sortMenu {
@@ -439,7 +483,7 @@ input, select {
 }
 .sortMenu__list {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
 }
 .sortMenu__list__item {
   position: relative;
@@ -460,24 +504,13 @@ input, select {
   display: block;
   padding: 14px 0;
   border: 1px solid #0060B0;
-  border-radius: 8px;
+  border-radius: 4px;
   font-weight: bold;
   text-align: center;
   transition: 0.3s;
 }
 .sortMenu__list__item input[type=checkbox]:checked + label {
   background: #ADDAFF;
-}
-.sortMenu__link_notice {
-  position: absolute;
-  top: 5%;
-  right: 3%;
-  padding: 0 13px 0 8px;
-  border-radius: 11px;
-  background: #FF0000;
-  color: #FFF;
-  line-height: 110%;
-  font-size: 100%;
 }
 .sortMenu__btnInner {
   display: flex;
@@ -507,9 +540,6 @@ input, select {
 .footer__list__item {
   width: 100%;
   text-align: center;
-  display: list-item;
-  list-style: none;
-  
 }
 .footer__list__item a {
   padding-left: 32px;
@@ -524,6 +554,55 @@ input, select {
 }
 .footer__list .btnReturn {
   display: none;
+}
+
+.readUser {
+  width: 100%;
+  padding: 24px;
+}
+.readUser__switch {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  border: 2px solid #0060B0;
+  border-radius: 4px;
+}
+.readUser__switch__item {
+  width: 50%;
+  background: #FFF;
+  font-size: 1.7rem;
+  line-height: 3.6rem;
+  text-align: center;
+  cursor: pointer;
+}
+.readUser__switch__item.isSelected {
+  background: #0060B0;
+  color: #FFF;
+}
+.readUser__sort {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.readUser__sort p {
+  margin-right: 16px;
+}
+.readUser__sort button {
+  width: 100%;
+  max-width: 120px;
+  height: 32px;
+  margin-right: 16px;
+  border: 1px solid #0060B0;
+  border-radius: 4px;
+  background: #FFF;
+}
+.readUser__sort button.isSelected {
+  background: #ADDAFF;
+}
+.readUser__list__item {
+  padding: 12px;
+  border-bottom: 1px solid #707070;
 }
 
 @media screen and (max-width: 768px) {
@@ -553,12 +632,6 @@ input, select {
   }
   .search__flexBox__name {
     margin-bottom: 8px;
-  }
-  .search__flexBox__name > p {
-    margin-top: 16px;
-  }
-  .search__flexBox__name > p > a{
-    margin-left: 16px;
   }
   .search__flexBox input[type=text], .search__flexBox select {
     display: inline-block;

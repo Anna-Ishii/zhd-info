@@ -99,6 +99,76 @@ $(document).on('click' , '.btnSearchReset', function(){
 	});
 });
 
+/* 汎用モーダル処理 */
+function modalAnim(e){
+	let modalTarget = $('.modal[data-modal-target='+e+']')
+	if(modalTarget.length){
+		$('.modalBg').show();
+		modalTarget.show();	
+	}
+}
+
+/* 汎用モーダル表示 */
+$(document).on('click' , '.btnModal', function(){
+	event.preventDefault();
+	let target = $(this).data('modal-target');
+	modalAnim(target);
+
+	if(target == 'read'){
+		let target = $('.readUser__sort').find('.isSelected');
+		userSort(target);
+	}
+});
+$(document).on('click' , '.modal__close, .modalBg', function(e){
+	if($(this).hasClass('modalBg') && $(e).closest('.modal')){
+		$('.modalBg').hide();
+		$('.modal').hide();
+	}else{
+		$('.modalBg').hide();
+		$('.modal').hide();
+	}
+});
+
+/* モーダル内の未読・既読表示変更 */
+$(document).on('click' , '.readUser__switch__item', function(){
+	let chkTab = $(this).data('readuser-target');
+	$('.readUser__switch__item').removeClass('isSelected');
+	$('.readUser__list').hide();
+	$(this).addClass('isSelected');
+	$('.readUser__list[data-readuser-target='+chkTab+']').show();
+
+	/* 所属未所属をチェック */
+	let chkTabBelongs = $('.readUser__sort').find('.isSelected').data('readuser-belong');
+	let users = $('.readUser__list:visible').find('.readUser__list__item');
+	users.each(function(){
+		if($(this).data('readuser-belong') == chkTabBelongs){
+			$(this).show();
+		}else{
+			$(this).hide();	
+		}
+	});
+});
+
+/* 所属・未所属表示変更 */
+function userSort(e){
+	let chkTabBelongs = $(e).data('readuser-belong');
+	$('.readUser__sort').find('button').removeClass('isSelected');
+	$(e).addClass('isSelected');
+	
+	let users = $('.readUser__list:visible').find('.readUser__list__item');
+	users.each(function(){
+		if($(this).data('readuser-belong') == chkTabBelongs){
+			$(this).show();
+		}else{
+			$(this).hide();	
+		}
+	});
+}
+$(document).on('click' , '.readUser__sort button', function(){
+	let targegt = $(this);
+	userSort(targegt);
+});
+
 /* 検索処理 */
 $(document).on('click' , '.btnSearch', function(){
 	/* フッターのリンク入れ替え */
@@ -136,3 +206,15 @@ $(document).on('click', '.crew>input', function(e) {
 		console.log(res.messages);
 	})
 })
+
+$(document).on('click' , '.btnChangeStatus' , function(){
+	if($('.list__status__limit').is(':visible')){
+		$('.list__status__limit , .list__status__read').hide();
+		$('.list__status__read').show();
+		$(this).text('掲載期間の表示');
+	}else if($('.list__status__read').is(':visible')){
+		$('.list__status__limit , .list__status__read').hide();
+		$('.list__status__limit').show();
+		$(this).text('閲覧状況の表示');
+	}
+});
