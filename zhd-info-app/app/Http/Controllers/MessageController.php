@@ -70,7 +70,16 @@ class MessageController extends Controller
                         break;
                 }
             })
+            ->when(!empty($crews), function ($query) {
+                $query->orderByRaw('
+                    case 
+                        when readed_crew_count = 0 or readed_crew_count is null then 0
+                        else 1
+                    end, readed_crew_count asc
+                ');
+            })
             ->orderBy('created_at', 'desc')
+            
             ->paginate(20)
             ->appends(request()->query());
 
