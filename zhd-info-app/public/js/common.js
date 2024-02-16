@@ -196,8 +196,8 @@ $(document).on('click', '.keyword_button', function(e) {
 	}
 })
 
-$(document).on('click', '.crew>input', function(e) {
-	let crew_id = this.getAttribute('data-crew-id');
+$(document).on('click', '.readEdit__list__accordion input', function(e) {
+	let crew_id = this.data('crew-id');
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 	$.ajax({
@@ -324,5 +324,59 @@ $(document).on('click', '.btnModal', function(e) {
 	}).fail(function(error){
 		console.log(error);
 	})
-
 })
+
+$(document).on('click' , '.readEdit__list__head' , function(){
+	$(this).toggleClass('isOpen');
+})
+
+/* 各従業員の閲覧管理 */
+$(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , function(){
+	if($(this).prop('checked')){
+		$(this).siblings('label').text('選択');
+	}else{
+		$(this).siblings('label').text('未選択');
+	}
+	let chkTarget = $(this).parents('.readEdit__list').find('input[type=checkbox]:checked');
+	let txtReplaceTarget = $(this).parents('.modal__inner').find('button[type=submit]');
+	txtReplaceTarget.text('表示する('+chkTarget.length+'人選択中)');
+});
+/* 閲覧従業員選択 */
+$(document).on('change' , '.readEdit__list__accordion input[type=radio]' , function(){
+	let txtResetTarget = $(this).parents('.readEdit__list').find('.readEdit__list__check');
+	txtResetTarget.text('未選択');
+	if($(this).prop('checked')){
+		$(this).siblings('label').text('選択');
+	}else{
+		$(this).siblings('label').text('未選択');
+	}
+
+	let chkRadioEnable = $(this).parents('.readEdit__list').find('input[type=radio]:checked');
+	let buttonTarget = $(this).parents('.modal__inner').find('button[type=submit]');
+	if(chkRadioEnable.length){
+		buttonTarget.removeClass('isDisabled').prop('disabled' , false);
+	}else{
+		buttonTarget.addClass('isDisabled').prop('disabled' , true);		
+	}
+});
+
+/* 選択中のみ表示 */
+$(document).on('change' , '#read_users_sort' , function(){
+	if($(this).is(':checked')){
+		let targetCheck = $(this).siblings('.readEdit__list').find('input[type=checkbox]');
+		targetCheck.each(function(){
+			/* 各従業員のチェックを確認 */
+			if(!$(this).is(':checked')){
+				let parents = $(this).parents('li').hide();
+			}
+		});
+	}else{
+		let targetList = $(this).siblings('.readEdit__list').find('li');
+		targetList.show();
+	}
+});
+
+/* 名前・従業員番号切り替え仮置き（必要なら） */
+$(document).on('change' , '.readEdit__menu__inner input[type=radio]' , function(){
+	console.log('ajax');
+});
