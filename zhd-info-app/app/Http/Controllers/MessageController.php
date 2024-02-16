@@ -14,6 +14,7 @@ class MessageController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
+        $crews = $request->input('crews', []);
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
@@ -32,6 +33,9 @@ class MessageController extends Controller
                             ->where('c_m_l.message_id', '=', DB::raw('messages.id'));
                     })
                     ->where('m_u.user_id', '=', $user->id)
+                    ->when(!empty($crews), function($query) use ($crews) {
+                        $query->whereIn('c.id', $crews);
+                    })
                     ->groupBy('messages.id');
 
         // 掲示中のデータをとってくる
@@ -43,7 +47,7 @@ class MessageController extends Controller
                 'sub.view_rate as view_rate'
                 ])
             ->publishingMessage()
-            ->JoinSub($sub, 'sub', 'messages.id', 'sub.message_id')
+            ->LeftJoinSub($sub, 'sub', 'messages.id', 'sub.message_id')
             ->when(isset($keyword), function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $query->whereLike('title', $keyword)
@@ -121,6 +125,9 @@ class MessageController extends Controller
         return redirect()->route('message.index', $param);
     }
 
+    //
+    // API
+    //
     public function putCrews(Request $request) 
     {
         $crew = $request->input('crew');
@@ -137,4 +144,46 @@ class MessageController extends Controller
         return response()->json(['message' => '完了']);
 
     }
+
+    public function getCrewsMessage(Request $request)
+    {
+        $message = $request->input('message');
+        $user = session('member');
+
+        $crews = DB::table('messages as m')
+                    ->select([
+                        DB::raw('c.*'),
+                        DB::raw('m.start_datetime'),
+                        DB::raw('c_m_l.*'),
+                        DB::raw('
+                            case 
+                                when c.register_date >= m.start_datetime then true else false
+                            end as new_face 
+                        '),
+                        DB::raw('
+                            case 
+                                when c_m_l.id is null then false else true
+                            end as readed
+                        '),
+                    ])
+                    ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
+                    ->leftJoin('users as u', 'm_u.user_id', 'u.id')
+                    ->leftJoin('crews as c', 'u.id', 'c.user_id')
+                    ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
+                        $join->on('c_m_l.crew_id', '=', 'c.id')
+                            ->where('c_m_l.message_id', '=', $message);
+                    })
+                    ->where('m.id', '=', $message)
+                    ->where('u.id', '=', $user->id)
+                    ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
+    }
+
+    // public function getCrewsMessage(Request $request)
+    // {
+
+    // }
 }
