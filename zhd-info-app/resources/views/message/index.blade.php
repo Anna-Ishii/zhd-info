@@ -64,8 +64,10 @@
     </div>
 @endforeach --}}
         @foreach ($messages as $message)
-        <a href="{{ route('message.detail',['message_id' => $message->id])}}" class="">
-          <div class="list__item">
+        <a href="" class="btnModal" data-modal-target="read">
+            
+          <div class="list__item {{isset($message->readed_crew_count) && $message->readed_crew_count != 0 ? 'readed' : ''}}">
+            <div class="list__id" hidden>{{$message->id}}</div>
             <div class="list__no">{{$message->number}}</div>
             <div class="list__category">{{$message->category?->name}}</div>
             <div class="list__title">
