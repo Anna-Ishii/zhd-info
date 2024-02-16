@@ -181,11 +181,10 @@ input, select {
 .search__flexBox__name > p {
   margin-top: 16px;
 }
-.search__flexBox__name > p > a{
-  margin-left: 16px;
+
+.keyword_button {
+    margin-left: 16px;
   color: #337ab7;;
-}
-.search__flexBox__name .keyword_button {
   cursor: pointer;
 }
 .search__flexBox__limit {
