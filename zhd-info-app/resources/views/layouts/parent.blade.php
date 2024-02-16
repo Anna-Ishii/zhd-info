@@ -27,11 +27,18 @@
     {{-- <div class="version-number">
         Ver. {{config('version.version')}}
     </div> --}}
+    <div class="modalBg"></div>
+    @include('common.modal-check')
+    @include('common.modal-edit')
 
     @include('common.footer')
    
     <script src="{{ asset('/js/timer.js') }}" defer></script>
     <script src="{{ asset('/js/common.js') }}" defer></script>
+    {{-- <script>
+        const crew = @json($user->crew);
+        console.log(crew);
+    </script> --}}
     @livewireScripts
 </body>
 

@@ -97,7 +97,7 @@
   </div>
 </div>
 
-<div class="modalBg"></div>
+
 <div class="modal" data-modal-target="read">
   <div class="modal__inner">
     <div class="readUser">
@@ -131,5 +131,7 @@
     </div>  
   </div>
 </div>
+
+
 <script src="{{ asset('/js/common.js') }}" defer></script>
 @endsection

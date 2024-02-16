@@ -242,22 +242,29 @@ input, select {
 }
 
 .result {
+  z-index: 10001;
+  position: fixed;
+  bottom: 50px;
+  left: 0;
   width: 100%;
-  margin-bottom: 16px;
-  padding: 0 32px;
+  height: 56px;
+  padding: 12px 32px;
+  backdrop-filter: blur(6px);
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0, -1px 2px rgba(0, 0, 0, 0.16);
 }
 .result__flexBox {
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
+  align-items: center;
 }
 .result__flexBox p {
-  width: 100%;
+  margin-right: 16px;
 }
 .result__pager {
   display: flex;
-  width: 100%;
   max-width: 352px;
-  justify-content: space-between;
+  justify-content: flex-end;
 }
 .result__pager__prev, .result__pager__next {
   width: 80px;
@@ -423,7 +430,7 @@ input, select {
   top: 48px;
   left: 0;
   width: 100%;
-  height: calc(100% - 48px);
+  height: calc(100% - 104px);
   padding-bottom: 52px;
   background: #FFF;
   /* /box */
@@ -599,11 +606,175 @@ input, select {
 .readUser__sort button.isSelected {
   background: #ADDAFF;
 }
+.readUser__list {
+  border-top: 1px solid #707070;
+}
 .readUser__list__item {
   padding: 12px;
   border-bottom: 1px solid #707070;
 }
 
+.readEdit {
+  position: relative;
+  width: 100%;
+  padding: 24px;
+}
+.readEdit__change {
+  display: block;
+  position: relative;
+  margin-bottom: 15px;
+  padding-left: 30px;
+}
+.readEdit__change:before, .readEdit__change:after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  content: "";
+}
+.readEdit__change:before {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 96, 176, 0.5);
+  border-radius: 2px;
+  background: #FFF;
+}
+.readEdit__change:after {
+  opacity: 0;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(0, 96, 176, 0.5);
+  border-radius: 2px;
+  background: #0060B0 url(../img/icon_checked2.svg) center no-repeat;
+  background-size: 12px auto;
+}
+.readEdit__menu {
+  margin-bottom: 16px;
+}
+.readEdit__menu__inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.readEdit__menu__inner div {
+  width: 100%;
+}
+.readEdit__menu__inner input[type=radio] {
+  opacity: 0;
+  position: absolute;
+}
+.readEdit__menu__inner label {
+  display: inline-block;
+  width: 100%;
+  max-width: 120px;
+  height: 32px;
+  line-height: 32px;
+  border: 1px solid #0060B0;
+  border-radius: 4px;
+  text-align: center;
+}
+.readEdit__menu__inner input[type=radio]:checked + label {
+  background: #ADDAFF;
+}
+.readEdit__menu__inner input[type=text] {
+  width: 100%;
+  max-width: 228px;
+  padding-left: 56px;
+  border: 1px solid rgba(60, 60, 67, 0.36);
+  border-radius: 4px;
+  background: url(../img/icon_search.png) center left 16px no-repeat;
+  line-height: 48px;
+}
+.readEdit__list {
+  border-top: 1px solid #707070;
+}
+.readEdit__list__head {
+  padding: 10px 10px 10px 24px;
+  border-bottom: 1px solid #707070;
+  background: url(../img/icon_sort_right.svg) center left no-repeat;
+  line-height: 2.5rem;
+  cursor: pointer;
+}
+.readEdit__list__head.isOpen {
+  background: url(../img/icon_sort.svg) center left no-repeat;
+}
+.readEdit__list__accordion {
+  /* opacity: 0;
+  height: 0;
+  transform: translateY(-100%); */
+  transition: 0.3s;
+  overflow: hidden;
+}
+.readEdit__list__accordion ul li {
+  position: relative;
+  padding: 10px 10px 10px 24px;
+  border-bottom: 1px solid #707070;
+  line-height: 2.5rem;
+}
+.readEdit__list__accordion ul li label {
+  display: block;
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 100%;
+  max-width: 64px;
+  height: 32px;
+  border: 1px solid #0060B0;
+  border-radius: 4px;
+  text-align: center;
+  line-height: 32px;
+}
+.readEdit__list__accordion ul li input[type=checkbox]:checked + label, .readEdit__list__accordion ul li input[type=radio]:checked + label {
+  background: #ADDAFF;
+}
+.readEdit__list__head.isOpen + .readEdit__list__accordion {
+  opacity: 1;
+  height: auto;
+  transform: translateY(0);
+}
+.readEdit__btnInner {
+  display: flex;
+  justify-content: space-between;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  padding: 16px 24px;
+  border-top: 1px solid #707070;
+  line-height: 4.8rem;
+  background: #FFF;
+}
+.readEdit__btnInner button {
+  padding: 0 30px;
+  border-radius: 4px;
+}
+.readEdit__btnInner button:first-of-type {
+  border: 1px solid #0060B0;
+  background: #FFF;
+}
+.readEdit__btnInner button:last-of-type {
+  border: none;
+  background: #0060B0;
+  color: #FFF;
+}
+.readEdit__btnInner button.isDisabled {
+  border: 1px solid #CCCCCC;
+  background: #CCCCCC;
+  color: #FFF;
+}
+.readEdit input[type=checkbox] {
+  opacity: 0;
+  position: absolute;
+}
+.readEdit input[type=checkbox]:checked + .readEdit__change:after {
+  /* 「選択中のみ表示」 */
+  opacity: 1;
+}
+.readEdit input[type=radio] {
+  opacity: 0;
+  position: absolute;
+}
 @media screen and (max-width: 768px) {
   .list {
     overflow-x: scroll;
