@@ -196,26 +196,6 @@ $(document).on('click', '.keyword_button', function(e) {
 	}
 })
 
-$(document).on('click', '.readEdit__list__accordion input', function(e) {
-	let crew_id = this.data('crew-id');
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
-
-	$.ajax({
-		type: 'POST',
-		url: '/message/crews',
-		data: {
-			crew: crew_id
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
-	})
-	.done(function(res) {
-		console.log(res.messages);
-	})
-})
-
 $(document).on('click' , '.btnChangeStatus' , function(){
 	if($('.list__status__limit').is(':visible')){
 		$('.list__status__limit , .list__status__read').hide();
@@ -236,11 +216,12 @@ var modalReadCrewNotBelong = 0;
 var modalNotReadCrewBelong = 0;
 var modalNotReadCrewNotBelong = 0;
 
-$(document).on('click', '.btnModal', function(e) {
+$(document).on('click', '.list__status__read', function(e) {
 	e.preventDefault();
-	let btnModel = $(this);
+	e.stopPropagation();
+	let btnModel = $(this).closest('.btnModal');
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
-	var message = $(this).find('.list__item>.list__id').text();
+	var message = btnModel.find('.list__item>.list__id').text();
 
 	$.ajax({
 		type: 'GET',
@@ -314,6 +295,7 @@ $(document).on('click', '.btnModal', function(e) {
 		}
 
 		let target = btnModel.data('modal-target');
+		target = 'read';
 		modalAnim(target);
 
 		if(target == 'read'){
@@ -325,6 +307,71 @@ $(document).on('click', '.btnModal', function(e) {
 		console.log(error);
 	})
 })
+
+$(document).on('click', '.btnModal[data-modal-target="check"]', function(e) {
+	e.preventDefault();
+	let target = "check";
+	modalAnim(target);
+})
+
+$(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
+	e.preventDefault();
+
+	let btnModel = $(this).closest('.btnModal');
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	var message = btnModel.find('.list__item>.list__id').text();
+
+	if (true) {
+		let continueUserListTargetForm = $('.modal[data-modal-target="continue"] form');
+		continueUserListTargetForm.append(`
+			<input type="hidden" name="message" value="${message}">
+		`);
+		modalAnim('continue');
+	}
+
+	$.ajax({
+		type: 'GET',
+		url: '/message/crews-message',
+		data: {
+			message: message
+		},
+		dataType: 'json',
+		headers: {
+		'X-CSRF-TOKEN': csrfToken,
+		},
+	})
+	.done(function(res) {
+		let crews = res.crews;
+
+		let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
+		editUserListTargetForm.append(`
+			<input type="hidden" name="message" value="${message}">
+		`);
+
+		let editUserListTargetElement = $('.modal[data-modal-target="edit"] .readEdit__list ul');
+
+		crews.forEach((value, index, array) => {
+			if (value.readed == 0) {
+				editUserListTargetElement.append(`
+					<li>
+						${value.part_code} ${value.name}
+						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
+						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
+					</li>
+				`)
+			}
+		})
+
+
+		let target = btnModel.data('modal-target');
+		target = "edit";
+		modalAnim(target);
+
+	}).fail(function(error){
+		console.log(error);
+	})
+})
+
 
 $(document).on('click' , '.readEdit__list__head' , function(){
 	$(this).toggleClass('isOpen');

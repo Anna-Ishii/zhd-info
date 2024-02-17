@@ -9,7 +9,7 @@
         @if ($objects->total() == 0)
             <p>全 0 件</p>
         @else
-            <p>全 {{ $objects->total() }} 件中 {{ $min }} 件 〜 {{ $max }} 件を表示</p>
+            <p>全 {{ $objects->total() }} 件</p>
         @endif
         <ul class="result__pager">
             @if ($totalPage > 1)
