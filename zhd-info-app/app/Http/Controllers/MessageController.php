@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SearchPeriod;
+use App\Models\Crew;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use Carbon\Carbon;
@@ -14,7 +15,7 @@ class MessageController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-        $crews = $request->input('crews', []);
+        $check_crew = session("check_crew", null);
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
@@ -33,8 +34,8 @@ class MessageController extends Controller
                             ->where('c_m_l.message_id', '=', DB::raw('messages.id'));
                     })
                     ->where('m_u.user_id', '=', $user->id)
-                    ->when(!empty($crews), function($query) use ($crews) {
-                        $query->whereIn('c.id', $crews);
+                    ->when(isset($check_crew), function($query) use ($check_crew) {
+                        $query->where('c.id', $check_crew->id);
                     })
                     ->groupBy('messages.id');
 
@@ -112,7 +113,7 @@ class MessageController extends Controller
         ]);
 
         $message->putCrewRead($crews);
-        return redirect()->to($message->content_url);
+        return redirect()->to($message->content_url)->withInput();
     }
 
     public function search(Request $request)
@@ -134,25 +135,47 @@ class MessageController extends Controller
         return redirect()->route('message.index', $param);
     }
 
+    public function putCrews(Request $request)
+    {
+        $check_crew = $request->input('read_edit_radio');
+        $crew = Crew::findOrFail($check_crew);
+        $request->session()->put('check_crew', $crew);
+        return back()->withInput();
+    }
+
+    public function putReading(Request $request)
+    {
+        $reading_crews = $request->input('read_edit_radio',[]);
+        $message_id = $request->input('message');
+        
+        // セッションの登録
+        $request->session()->put('reading_crews', $reading_crews);
+
+        // 既読機能
+        try {
+            DB::beginTransaction();
+            $message = Message::findOrFail($message_id);
+            $message->putCrewRead($reading_crews);
+            DB::commit();
+            return
+            redirect()->to($message->content_url)->withInput();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withInput();
+        }
+        //　既読が無事できたらpdfへ
+    }
+
+    public function crewsLogout(Request $request)
+    {
+        $request->session()->forget('check_crew');
+
+        return back()->withInput();
+    }
+
     //
     // API
     //
-    public function putCrews(Request $request) 
-    {
-        $crew = $request->input('crew');
-        $crews = [];
-
-        $crews = session('crews',[]);
-        if(!empty($crews) && in_array((int)$crew, $crews, true)){
-            $crews = array_diff($crews, array((int)$crew));
-        } else {
-            $crews[] += (int)$crew;
-        }
-        $request->session()->put('crews', $crews);
-
-        return response()->json(['message' => '完了']);
-
-    }
 
     public function getCrewsMessage(Request $request)
     {
@@ -161,7 +184,11 @@ class MessageController extends Controller
 
         $crews = DB::table('messages as m')
                     ->select([
-                        DB::raw('c.*'),
+                        DB::raw('
+                            c.part_code as part_code,
+                            c.name as name,
+                            c.id as c_id
+                        '),
                         DB::raw('m.start_datetime'),
                         DB::raw('c_m_l.*'),
                         DB::raw('
@@ -191,8 +218,5 @@ class MessageController extends Controller
         ], 200);
     }
 
-    // public function getCrewsMessage(Request $request)
-    // {
 
-    // }
 }

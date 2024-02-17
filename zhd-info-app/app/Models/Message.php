@@ -288,7 +288,7 @@ class Message extends Model
                 ->where('crew_id', $crew)
                 ->where('message_id', $this->attributes['id'])
                 ->exists();
-            if($exists) continue;
+            if($exists) continue; // すでに既読してたら、登録しない
             $params[] = [
                 'crew_id' => $crew,
                 'message_id' => $this->attributes['id'],

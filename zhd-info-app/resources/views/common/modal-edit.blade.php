@@ -1,6 +1,7 @@
 <div class="modal" data-modal-target="edit" style="max-width: 664px;">
   <div class="modal__inner">
-    <form>
+    <form method="post" action="/message/reading">
+    @csrf
     <div class="readEdit">
       <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
       <div class="readEdit__menu">
@@ -23,7 +24,8 @@
         <div class="readEdit__list__head">ア行</div>
         <div class="readEdit__list__accordion">
           <ul>
-            <li>
+
+            {{-- <li>
               1234567890 相田 智d
               <input type="checkbox" name="" id="user_1234567890" value="user_1234567890">
               <label for="user_1234567890" class="readEdit__list__check">未選択</label>
@@ -47,10 +49,10 @@
               1234567894 太田 久志
               <input type="checkbox" name="" id="user_1234567894" value="user_1234567894">
               <label for="user_1234567894" class="readEdit__list__check">未選択</label>
-            </li>
+            </li> --}}
           </ul>
         </div>
-        <div class="readEdit__list__head">カ行</div>
+        {{-- <div class="readEdit__list__head">カ行</div>
         <div class="readEdit__list__accordion">
           <ul>
             <li>
@@ -109,7 +111,7 @@
               <label for="user_1234567804" class="readEdit__list__check">未選択</label>
             </li>
           </ul>
-        </div>
+        </div> --}}
       </div>
       
     </div>
