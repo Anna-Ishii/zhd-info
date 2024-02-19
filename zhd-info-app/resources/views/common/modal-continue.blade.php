@@ -1,4 +1,4 @@
-<div class="modal" data-modal-target="continue" style="max-width: 664px;">
+<div class="modal" data-modal-target="continue" style="max-width: 664px; max-height: 200px">
   <div class="modal__inner">
     <form method="post" action="/message/reading">
     @csrf
