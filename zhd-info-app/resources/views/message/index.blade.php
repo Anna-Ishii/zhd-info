@@ -29,7 +29,15 @@
                     <a class="keyword_button">{{$k->keyword}}</a>
                 @endforeach
               </p>
-              <button type="button" class="btnType3 btnChangeStatus" data-view-status="limit">閲覧状況の表示</button>
+
+              @if (session('check_crew'))
+                <div>
+                  <input type="checkbox" id="not_read_check" name="not_read_check" value="1" {{ request()->input('not_read_check') == '1' ? 'checked' : ''}}>
+                  <label for="not_read_check">未読（白）のみ表示</label>
+                </div>
+              @else
+                <button type="button" class="btnType3 btnChangeStatus" data-view-status="limit">閲覧状況の表示</button>
+              @endif
             </div>
         </form>
       </div>
@@ -110,19 +118,7 @@
         <button type="button" class="" data-readuser-belong="2">未所属()</button>
       </div>
       <ul class="readUser__list" data-readuser-target="1">
-        
-        <li class="readUser__list__item" data-readuser-belong="1">123456789 未読所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="1">123456789 未読所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2" style="display: none;">123456789 未読未所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2" style="display: none;">123456789 未読未所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2" style="display: none;">123456789 未読未所属氏名氏名</li>
-      </ul>
-      <ul class="readUser__list" data-readuser-target="2" style="display:none;">
-        <li class="readUser__list__item" data-readuser-belong="1">123456789 既読所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="1">123456789 既読所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2">123456789 既読未所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2">123456789 既読未所属氏名氏名</li>
-        <li class="readUser__list__item" data-readuser-belong="2">123456789 既読未所属氏名氏名</li>
+      
       </ul>
     </div>
     <div class="modal__btnInner">

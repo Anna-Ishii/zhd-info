@@ -15,6 +15,7 @@ class MessageController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
+        $not_read_check = $request->input('not_read_check');
         $check_crew = session("check_crew", null);
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
@@ -79,6 +80,9 @@ class MessageController extends Controller
                     end, readed_crew_count asc
                 ');
             })
+            ->when(isset($not_read_check) && isset($check_crew[0]), function($query){
+                $query->where('sub.readed_crew_count', '<', 1);
+            })
             ->orderBy('created_at', 'desc')
             
             ->paginate(20)
@@ -121,7 +125,8 @@ class MessageController extends Controller
         $user = session('member');
         $param = [
             'keyword' => $request['keyword'],
-            'search_period' => $request['search_period']
+            'search_period' => $request['search_period'],
+            'not_read_check' => $request['not_read_check']
         ];
 
         if ($request->filled('keyword')) {
