@@ -613,6 +613,10 @@ input, select {
   padding: 12px;
   border-bottom: 1px solid #707070;
 }
+.readUser__list[data-readuser-target="2"] .readUser__list__item > div {
+  display: flex;
+  justify-content: space-between;
+}
 
 .readEdit {
   position: relative;

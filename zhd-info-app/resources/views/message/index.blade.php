@@ -117,9 +117,8 @@
         <button type="button" class="isSelected" data-readuser-belong="1">所属()</button>
         <button type="button" class="" data-readuser-belong="2">未所属()</button>
       </div>
-      <ul class="readUser__list" data-readuser-target="1">
-      
-      </ul>
+      <ul class="readUser__list" data-readuser-target="1"></ul>
+      <ul class="readUser__list" data-readUser-target="2" style="display:none;">
     </div>
     <div class="modal__btnInner">
       <button type="button" class="btnType3 modal__close">閉じる</button>
