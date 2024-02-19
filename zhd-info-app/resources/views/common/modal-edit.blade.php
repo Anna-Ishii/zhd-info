@@ -16,102 +16,60 @@
           <input type="text" placeholder="キーワードで検索">
         </div>
       </div>
-
+      @if (session('reading_crews'))
+        <div id="reading_crews" hidden></div>
+      @endif
       <input type="checkbox" id="read_users_sort">
       <label for="read_users_sort" class="readEdit__change">選択中のみ表示</label>
       
-      <div class="readEdit__list">
+      <div class="readEdit__list sort_name">
         <div class="readEdit__list__head">ア行</div>
-        <div class="readEdit__list__accordion">
-          <ul>
-
-            {{-- <li>
-              1234567890 相田 智d
-              <input type="checkbox" name="" id="user_1234567890" value="user_1234567890">
-              <label for="user_1234567890" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567891 飯田 太郎
-              <input type="checkbox" name="" id="user_1234567891" value="user_1234567891">
-              <label for="user_1234567891" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567892 宇多川 次郎
-              <input type="checkbox" name="" id="user_1234567892" value="user_1234567892">
-              <label for="user_1234567892" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567893 江頭 とおる
-              <input type="checkbox" name="" id="user_1234567893" value="user_1234567893">
-              <label for="user_1234567893" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567894 太田 久志
-              <input type="checkbox" name="" id="user_1234567894" value="user_1234567894">
-              <label for="user_1234567894" class="readEdit__list__check">未選択</label>
-            </li> --}}
-          </ul>
+        <div class="readEdit__list__accordion" data-sort-num="1">
+          <ul></ul>
         </div>
-        {{-- <div class="readEdit__list__head">カ行</div>
-        <div class="readEdit__list__accordion">
-          <ul>
-            <li>
-              1234567890 相田 智
-              <input type="checkbox" name="" id="user_1234567895" value="user_1234567895">
-              <label for="user_1234567895" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567891 飯田 太郎
-              <input type="checkbox" name="" id="user_1234567896" value="user_1234567896">
-              <label for="user_1234567896" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567892 宇多川 次郎
-              <input type="checkbox" name="" id="user_1234567897" value="user_1234567897">
-              <label for="user_1234567897" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567893 江頭 とおる
-              <input type="checkbox" name="" id="user_1234567898" value="user_1234567898">
-              <label for="user_1234567898" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567894 太田 久志
-              <input type="checkbox" name="" id="user_1234567899" value="user_1234567899">
-              <label for="user_1234567899" class="readEdit__list__check">未選択</label>
-            </li>
-          </ul>
+        <div class="readEdit__list__head">カ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="2">
+          <ul></ul>
         </div>
         <div class="readEdit__list__head">サ行</div>
-        <div class="readEdit__list__accordion">
-          <ul>
-            <li>
-              1234567890 相田 智
-              <input type="checkbox" name="" id="user_1234567800" value="user_1234567800">
-              <label for="user_1234567800" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567891 飯田 太郎
-              <input type="checkbox" name="" id="user_1234567801" value="user_1234567801">
-              <label for="user_1234567801" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567892 宇多川 次郎
-              <input type="checkbox" name="" id="user_1234567802" value="user_1234567802">
-              <label for="user_1234567802" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567893 江頭 とおる
-              <input type="checkbox" name="" id="user_1234567803" value="user_1234567803">
-              <label for="user_1234567803" class="readEdit__list__check">未選択</label>
-            </li>
-            <li>
-              1234567894 太田 久志
-              <input type="checkbox" name="" id="user_1234567804" value="user_1234567804">
-              <label for="user_1234567804" class="readEdit__list__check">未選択</label>
-            </li>
-          </ul>
-        </div> --}}
+        <div class="readEdit__list__accordion" data-sort-num="3">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">タ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="4">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">ナ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="5">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">ハ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="6">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">マ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="7">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">ヤ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="8">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">ラ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="9">
+          <ul></ul>
+        </div>
+        <div class="readEdit__list__head">ワ行</div>
+        <div class="readEdit__list__accordion" data-sort-num="10">
+          <ul></ul>
+        </div>                
+        <div class="readEdit__list__head">その他</div>
+        <div class="readEdit__list__accordion" data-sort-num="0">
+        <ul></ul>
+        </div>
+      </div>
+
+      <div class="readEdit__list sort_code" style="display: none;">
       </div>
       
     </div>

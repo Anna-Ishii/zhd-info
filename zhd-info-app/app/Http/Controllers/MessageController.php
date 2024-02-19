@@ -34,8 +34,8 @@ class MessageController extends Controller
                             ->where('c_m_l.message_id', '=', DB::raw('messages.id'));
                     })
                     ->where('m_u.user_id', '=', $user->id)
-                    ->when(isset($check_crew), function($query) use ($check_crew) {
-                        $query->where('c.id', $check_crew->id);
+                    ->when(isset($check_crew[0]), function($query) use ($check_crew) {
+                        $query->where('c.id', $check_crew[0]->id);
                     })
                     ->groupBy('messages.id');
 
@@ -139,6 +139,7 @@ class MessageController extends Controller
     {
         $check_crew = $request->input('read_edit_radio');
         $crew = Crew::findOrFail($check_crew);
+
         $request->session()->put('check_crew', $crew);
         return back()->withInput();
     }
@@ -176,6 +177,36 @@ class MessageController extends Controller
     //
     // API
     //
+    public function getCrews(Request $request)
+    {
+        $user = session('member');
+        $crews = $user->crew()
+            ->select([
+                DB::raw("
+                            * 
+                        "),
+                DB::raw("
+                            case
+                                when name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when name_kana regexp '^[ｶ-ｺ]' then 2
+                                when name_kana regexp '^[ｻ-ｿ]' then 3
+                                when name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when name_kana regexp '^[ﾜ-ｦ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
+            ])
+            ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
+    }
 
     public function getCrewsMessage(Request $request)
     {
@@ -187,6 +218,7 @@ class MessageController extends Controller
                         DB::raw('
                             c.part_code as part_code,
                             c.name as name,
+                            c.name_kana as name_kana,
                             c.id as c_id
                         '),
                         DB::raw('m.start_datetime'),
@@ -201,6 +233,21 @@ class MessageController extends Controller
                                 when c_m_l.id is null then false else true
                             end as readed
                         '),
+                        DB::raw("
+                            case
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｶ-ｺ]' then 2
+                                when c.name_kana regexp '^[ｻ-ｿ]' then 3
+                                when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when c.name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when c.name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when c.name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when c.name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when c.name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when c.name_kana regexp '^[ﾜ-ｦ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
                     ])
                     ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
                     ->leftJoin('users as u', 'm_u.user_id', 'u.id')
