@@ -170,6 +170,7 @@ class MessageController extends Controller
     public function crewsLogout(Request $request)
     {
         $request->session()->forget('check_crew');
+        $request->session()->forget('reading_crews');
 
         return back()->withInput();
     }
