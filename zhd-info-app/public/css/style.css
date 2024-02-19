@@ -619,6 +619,11 @@ input, select {
   width: 100%;
   padding: 24px;
 }
+.modal[data-modal-target="continue"] .readEdit {
+  display: flex;
+  justify-content: space-between;
+}
+
 .readEdit__change {
   display: block;
   position: relative;
@@ -699,9 +704,9 @@ input, select {
   background: url(../img/icon_sort.svg) center left no-repeat;
 }
 .readEdit__list__accordion {
-  /* opacity: 0;
+  opacity: 0;
   height: 0;
-  transform: translateY(-100%); */
+  transform: translateY(-100%);
   transition: 0.3s;
   overflow: hidden;
 }

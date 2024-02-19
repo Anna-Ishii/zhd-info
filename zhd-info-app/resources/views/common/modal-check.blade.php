@@ -18,21 +18,49 @@
             </div>
         
             <div class="readEdit__list">
-                <div class="readEdit__list__accordion">
-                    <ul>
-                    @foreach ($user->crew as $crew)
-                        <li>
-                        {{$crew->part_code}} {{$crew->name}}
-                        @if ($crew->id == $check_crew?->id)
-                            <input type="radio" name="read_edit_radio" id="user_{{$crew->id}}_radio" value="{{$crew->id}}" checked>
-                            <label for="user_{{$crew->id}}_radio" class="readEdit__list__check">選択</label>
-                        @else
-                            <input type="radio" name="read_edit_radio" id="user_{{$crew->id}}_radio" value="{{$crew->id}}" >
-                            <label for="user_{{$crew->id}}_radio" class="readEdit__list__check">未選択</label>
-                        @endif
-                        </li>
-                    @endforeach
-                    </ul>
+                <div class="readEdit__list__head">ア行</div>
+                <div class="readEdit__list__accordion" data-sort-num="1">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">カ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="2">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">サ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="3">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">タ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="4">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">ナ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="5">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">ハ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="6">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">マ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="7">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">ヤ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="8">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">ラ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="9">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">ワ行</div>
+                <div class="readEdit__list__accordion" data-sort-num="10">
+                <ul></ul>
+                </div>
+                <div class="readEdit__list__head">その他</div>
+                <div class="readEdit__list__accordion" data-sort-num="0">
+                <ul></ul>
                 </div>
             </div>
         </div>

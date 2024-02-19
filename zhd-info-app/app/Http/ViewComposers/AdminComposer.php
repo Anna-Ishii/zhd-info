@@ -13,7 +13,7 @@ class AdminComposer
         $check_crew = session('check_crew');
 
         $readed_crews_id = session('reading_crews');
-        $readed_crew = Crew::find($readed_crews_id[0]);
+        $readed_crew = isset($readed_crews_id[0])? Crew::find($readed_crews_id[0]) : null;
 
         $view->with([
             'user' => $user,
