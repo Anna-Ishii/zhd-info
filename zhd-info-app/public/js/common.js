@@ -153,28 +153,28 @@ $(document).on('click', '.modal[data-modal-target="continue"] .modal__close', fu
 		`);
 
 		let sortCodeHeader = "";
-		let _index = "";
+		let from_part_code = "";
 		let count = 0;
 		crews.forEach((value, index, array) => {
 			if (value.readed == 0) {
 				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
 					<li>
-						${value.part_code} ${value.name} ${value.name_kana} ${value.name_sort}
+						${value.part_code} ${value.name}
 						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
 						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
 					</li>
 				`)
 
-				if(count === 0) _index = value.part_code
+				if(count === 0) from_part_code = value.part_code
 
-				sortCodeHeader += `<li>${value.part_code} ${value.name} ${value.name_kana} ${value.name_sort}
+				sortCodeHeader += `<li>${value.part_code} ${value.name}
 						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
 						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
 				`;
 
-				if((count + 1) % 3 == 0 || count == crews.length + 1) {
+				if((count + 1) % 10 == 0 || count == crews.length + 1) {
 					let head = `
-						<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
+						<div class="readEdit__list__head">${from_part_code} ~ ${value.part_code}</div>
 						<div class="readEdit__list__accordion">
 							<ul>
 								${sortCodeHeader}
@@ -183,7 +183,7 @@ $(document).on('click', '.modal[data-modal-target="continue"] .modal__close', fu
 					`;
 					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
 					sortCodeHeader = "";
-					_index = crews[index+1].part_code;
+					from_part_code = crews[index+1]?.part_code;
 				}
 
 				count++;
@@ -285,12 +285,12 @@ $(document).on('click' , '.btnChangeStatus' , function(){
 });
 
 
-var modalReadCrew = 0;
-var modalNotReadCrew = 0;
-var modalReadCrewBelong = 0;
-var modalReadCrewNotBelong = 0;
-var modalNotReadCrewBelong = 0;
-var modalNotReadCrewNotBelong = 0;
+var modalReadCrew = 0; // 既読数
+var modalNotReadCrew = 0; // 未読数
+var modalReadCrewBelong = 0; // 所属・既読数
+var modalReadCrewNotBelong = 0; // 未所属・既読数
+var modalNotReadCrewBelong = 0; // 所属・未読数
+var modalNotReadCrewNotBelong = 0; // 未所属・未読数
 
 $(document).on('click', '.list__status__read', function(e) {
 	e.preventDefault();
@@ -307,7 +307,7 @@ $(document).on('click', '.list__status__read', function(e) {
 		},
 		dataType: 'json',
 		headers: {
-		'X-CSRF-TOKEN': csrfToken.addEventListener('type', listener, options)
+		'X-CSRF-TOKEN': csrfToken
 		},
 	})
 	.done(function(res) {
@@ -346,12 +346,22 @@ $(document).on('click', '.list__status__read', function(e) {
 				if(value.new_face == 0) {
 					modalReadCrewBelong++
 					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="1">${value.part_code} ${value.name}</li>
+						<li class="readUser__list__item" data-readuser-belong="1">
+							<div>
+								<div>${value.part_code} ${value.name}</div>
+								<div>${value.readed_at}</div>
+							</div>
+						</li>
 					`)
 				}else {
 					modalReadCrewNotBelong++
 					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="2">${value.part_code} ${value.name}</li>
+						<li class="readUser__list__item" data-readuser-belong="2">
+							<div>
+								<div>${value.part_code} ${value.name}</div>
+								<div>${value.readed_at}</div>
+							</div>	
+						</li>
 					`)
 				}
 			}
@@ -408,7 +418,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', function(e) {
 
 			$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
 				<li>
-					${value.part_code} ${value.name} ${value.name_kana} ${value.name_sort}
+					${value.part_code} ${value.name} 
 					<input type="radio" name="read_edit_radio[]" id="user_${value.part_code}_radio" value="${value.id}">
 					<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
 				</li>
@@ -471,8 +481,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 		crews.forEach((value, index, array) => {
 			if (value.readed == 0) {
 				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-					<li>
-						${value.part_code} ${value.name} ${value.name_kana} ${value.name_sort}
+					<li> ${value.part_code} ${value.name}
 						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
 						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
 					</li>
@@ -480,12 +489,12 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 
 				if(count === 0) _index = value.part_code
 
-				sortCodeHeader += `<li>${value.part_code} ${value.name} ${value.name_kana} ${value.name_sort}
+				sortCodeHeader += `<li>${value.part_code} ${value.name}
 						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
 						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
 				`;
 
-				if((count + 1) % 3 == 0 || count == crews.length + 1) {
+				if((count + 1) % 10 == 0 || count == crews.length + 1) {
 					let head = `
 						<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
 						<div class="readEdit__list__accordion">
@@ -496,7 +505,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 					`;
 					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
 					sortCodeHeader = "";
-					_index = crews[index+1].part_code;
+					_index = crews[index+1]?.part_code;
 				}
 
 				count++;

@@ -228,7 +228,7 @@ class MessageController extends Controller
                             c.id as c_id
                         '),
                         DB::raw('m.start_datetime'),
-                        DB::raw('c_m_l.*'),
+                        DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
                         DB::raw('
                             case 
                                 when c.register_date >= m.start_datetime then true else false
