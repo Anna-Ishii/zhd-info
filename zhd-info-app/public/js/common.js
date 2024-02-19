@@ -455,6 +455,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 			<input type="hidden" name="message" value="${message}">
 		`);
 		modalAnim('continue');
+		return;
 	}
 
 	$.ajax({
