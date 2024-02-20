@@ -4,7 +4,7 @@
       <div>
           <form action="/message/crews-logout" id="logoutForm" method="post">
           @csrf
-          <input type="button" class="btnType3 crewLogout" id="crewLogout" value="ログアウト">
+          <button type="button" class="btnType3 crewLogout" id="crewLogout">ログアウト</button>
           </form>
         <div>{{$check_crew[0]->part_code ?? ""}} {{$check_crew[0]->name ?? ""}}さんの未読/既読を表示中です。</div>
       </div>
