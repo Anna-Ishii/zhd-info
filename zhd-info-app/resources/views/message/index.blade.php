@@ -128,29 +128,4 @@
 
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
-<script>
-  // ログアウト関数
-function logout() {
-  document.getElementById('logoutForm').submit();
-}
-
-// 操作があった場合にタイマーをリセットする関数
-function resetTimer() {
-  clearTimeout(timer);
-  startTimer();
-}
-
-// イベントリスナーを追加して操作を監視する
-document.addEventListener("mousemove", resetTimer);
-document.addEventListener("keydown", resetTimer);
-document.addEventListener("scroll", resetTimer);
-
-// タイマーを開始する関数
-function startTimer() {
-  timer = setTimeout(logout, 5 * 60000); // 5分操作がなかった場合にログアウト
-}
-
-// 初回のタイマーを開始する
-startTimer();
-</script>
 @endsection
