@@ -586,3 +586,8 @@ $(document).on('change' , '.readEdit__menu__inner input[type=radio]' , function(
 		$('.readEdit__list.sort_code').show();
 	}
 });
+
+// ログアウトサブミット
+$(document).on('click', '#crewLogout', function (){
+	document.getElementById('logoutForm').submit();
+})
