@@ -6,13 +6,6 @@
       <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
       <div class="readEdit__menu">
         <div class="readEdit__menu__inner">
-          <div>
-            <span>表示切り替え：</span>
-            <input type="radio" name="edit_sort" value="1" id="editSort1" checked="checked">
-            <label for="editSort1">名前</label>
-            <input type="radio" name="edit_sort" value="2" id="editSort2">
-            <label for="editSort2">従業員番号</label>
-          </div>
           <input type="text" placeholder="キーワードで検索">
         </div>
       </div>
