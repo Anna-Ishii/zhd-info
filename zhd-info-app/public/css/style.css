@@ -46,10 +46,11 @@ a {
   width: 100%;
   max-width: 140px;
   margin-left: auto;
-  height: 48px;
+  height: 36px;
   border: 1px solid rgba(60, 60, 67, 0.36);
   border-radius: 4px;
   background: #F3F3F3;
+  font-size: 75%;
 }
 
 .modalBg {
@@ -120,6 +121,16 @@ input, select {
   height: 100%;
   padding: 7px 32px;
   background: #FFF;
+}
+.header__inner > div {
+  display: flex;
+  margin-left: 0px;
+  margin-right: auto;
+  gap: 0 20px;
+}
+.header__inner > button {
+  margin-left: 0px;
+  margin-right: auto;
 }
 .header__name {
   appearance: none;
@@ -423,8 +434,18 @@ input, select {
   font-size: 1.4rem;
 }
 
+.list__link__notice {
+  padding: 0 13px 0 8px;
+  border-radius: 11px;
+  background: #FF0000;
+  color: #FFF;
+  line-height: 22px;
+  white-space: nowrap;
+  width: 50px;
+}
+
 .sortMenu {
-  z-index: 10000;
+  z-index: 10010;
   display: none;
   position: fixed;
   top: 48px;
@@ -797,6 +818,9 @@ label[for="not_read_check"]::before {
   margin: 0 0 0 0;
 }
 
+.btnType3.btnChangeStatus {
+  margin-right: -20px !important;
+}
 @media screen and (max-width: 768px) {
   .list {
     overflow-x: scroll;
