@@ -264,6 +264,7 @@ class MessageController extends Controller
                     })
                     ->where('m.id', '=', $message)
                     ->where('u.id', '=', $user->id)
+                    ->orderBy('c.name_kana', 'asc')
                     ->get();
 
         return response()->json([
