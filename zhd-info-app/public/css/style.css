@@ -75,8 +75,8 @@ a {
   width: calc(100% - 32px);
   max-width: 448px;
   height: 100%;
-  max-height: 73.8vh;
-  max-height: 73.8svh;
+  max-height: 90vh;
+  max-height: 90svh;
   border-radius: 4px;
   background: #FFF;
 }
@@ -161,7 +161,7 @@ input, select {
 
 .search {
   width: 100%;
-  margin-bottom: 62px;
+  margin-bottom: 10px;
 }
 .search__inner {
   position: relative;
@@ -742,6 +742,13 @@ input, select {
   transition: 0.3s;
   overflow: hidden;
 }
+.not_readEdit__list__accordion {
+  opacity: 1; /* デフォルトの不透明度にリセット */
+  height: auto; /* デフォルトの高さにリセット（autoは要素の内容に合わせた高さ） */
+  transform: translateY(0); /* デフォルトの位置にリセット */
+  transition: none; /* トランジションを無効にする */
+  overflow: visible; /* オーバーフローを表示にリセット */
+}
 .readEdit__list__accordion ul li {
   position: relative;
   padding: 10px 10px 10px 24px;
@@ -823,6 +830,9 @@ label[for="not_read_check"]::before {
 #not_read_check {
   transform: scale(1.5);
   margin: 0 0 0 0;
+}
+#not_read_check > label:after {
+  background: #0060B0 url(../img/icon_checked2.svg) center no-repeat;
 }
 
 .btnType3.btnChangeStatus {

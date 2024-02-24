@@ -1,6 +1,6 @@
 <header class="header">
   <div class="header__inner">
-    @if (request()->is('/') || request()->is('message'))
+    @if (request()->is('message'))
       @if (session('check_crew'))
         <div>
             <form action="/message/crews-logout" id="logoutForm" method="post">
