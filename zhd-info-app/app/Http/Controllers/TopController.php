@@ -59,14 +59,14 @@ class TopController extends Controller
         $organization1_id =  $user->shop->organization1->id;
         $keywords = DB::table(
                         DB::raw(
-                            "(SELECT keyword FROM message_search_logs 
+                            "(SELECT keyword, shop_id FROM message_search_logs 
                                 UNION ALL 
-                                SELECT keyword FROM manual_search_logs
+                                SELECT keyword, shop_id FROM manual_search_logs
                         ) as keyword_tables")
                     )->select([
                             'keyword',
                             DB::raw('COUNT(*) as count'),
-                    ])->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
+                    ])->leftJoin('shops as s', 's.id', 'keyword_tables.shop_id')
                       ->Join('organization1 as o1', function ($join) use ($organization1_id) {
                             $join->on('o1.id', '=', 's.organization1_id')
                                 ->where('o1.id', '=', $organization1_id);
