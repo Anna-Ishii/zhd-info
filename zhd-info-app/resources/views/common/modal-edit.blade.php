@@ -1,4 +1,4 @@
-<div class="modal" data-modal-target="edit" style="max-width: 664px;">
+<div class="modal" data-modal-target="edit" style="max-width: 750px;">
   <div class="modal__inner">
     <form method="post" action="/message/reading">
     @csrf
@@ -62,8 +62,8 @@
         </div>
       </div>
 
-      <div class="readEdit__list sort_code" style="display: none;">
-      </div>
+      <div class="readEdit__list sort_code" style="display: none;"></div>
+      <div class="readEdit__list filter_word"><div class="readEdit__list__accordion not_readEdit__list__accordion"><ul></ul></div></div>
       
     </div>
 

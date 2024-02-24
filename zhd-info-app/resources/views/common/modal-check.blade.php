@@ -1,9 +1,8 @@
-<div class="modal" data-modal-target="check" style="max-width: 664px;">
+<div class="modal" data-modal-target="check" style="max-width: 750px;">
   <div class="modal__inner">
     <form method="post" action="/message/crews">
         @csrf
         <div class="readEdit">
-            <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
             <div class="readEdit__menu">
                 <div class="readEdit__menu__inner">
                     <input type="text" placeholder="キーワードで検索">

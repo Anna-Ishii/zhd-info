@@ -312,6 +312,7 @@ $(document).on('click', '.list__status__read', function(e) {
 	})
 	.done(function(res) {
 		let crews = res.crews;
+		getCrewsData = res.crews;
 
 		let readUserListTarget1Element = $('.readUser__list[data-readuser-target="1"]');
 		let readUserListTarget2Element = $('.readUser__list[data-readuser-target="2"]');
@@ -435,6 +436,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', function(e) {
 })
 
 var clickMessage;
+var getCrewsData;
 $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 	e.preventDefault();
 
@@ -471,6 +473,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 	})
 	.done(function(res) {
 		let crews = res.crews;
+		getCrewsData = res.crews;
 
 		editUserListTargetForm.append(`
 			<input type="hidden" name="message" value="${message}">
@@ -591,3 +594,59 @@ $(document).on('change' , '.readEdit__menu__inner input[type=radio]' , function(
 $(document).on('click', '#crewLogout', function (){
 	document.getElementById('logoutForm').submit();
 })
+
+$(document).on('input', '.modal input[type="text"]', function () {
+	const PARTCODE_INDEX = 0;
+	const NAME_INDEX = 1;
+	const NAMEKANA_INDEX = 2;
+	let searchText = $(this).val();
+	let searchText_formatted = normalizeString(searchText);
+	let readEdit_sortName = $(this).parents('.readEdit').find('.readEdit__list.sort_name');
+	let readEdit_sortCode = $(this).parents('.readEdit').find('.readEdit__list.sort_code');
+	let readEdit_filterWord = $(this).parents('.readEdit').find('.readEdit__list.filter_word');
+	readEdit_filterWord.find('ul').empty()
+	let li_crew_dom = ``;
+	if(searchText.length == 0){
+		readEdit_sortName.show()
+		// readEdit_sortCode.show()
+		readEdit_filterWord.hide()
+	}else{
+		readEdit_sortName.hide();
+		// readEdit_sortCode.hide();
+		readEdit_filterWord.show()
+
+		const filteredData = []  // フィルタリング
+		getCrewsData.filter(item =>
+			Object.values(item).some((value, index) => {
+				if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
+					if(value.toString().includes(searchText_formatted)){
+						filteredData.push(item);
+
+						let isChecked = $(`#user_${item['part_code']}`).prop('checked');
+						li_crew_dom += 
+							`<li>${item['part_code']} ${item['name']}
+								<input type="checkbox"  value="${item['c_id']}" ${isChecked ? "checked" : ""}>
+								<label for="user_${item['part_code']}" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+							</li>`;
+						
+					}
+				}
+			})
+		);
+		readEdit_filterWord.find('ul').append(li_crew_dom);
+	}
+
+})
+
+function normalizeString(str) {
+    // ひらがなを半角カタカナに変換する関数
+    function hiraganaToKatakana(hiragana) {
+        return hiragana.replace(/[\u3041-\u3096]/g, function(match) {
+            var chr = match.charCodeAt(0) + 0x60;
+            return String.fromCharCode(chr);
+        });
+    }
+
+    // 文字列を正規化して返す
+    return hiraganaToKatakana(str).toLowerCase();
+}

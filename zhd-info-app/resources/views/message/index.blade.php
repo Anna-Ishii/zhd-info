@@ -32,7 +32,7 @@
 
               @if (session('check_crew'))
                 <div>
-                  <input type="checkbox" id="not_read_check" name="not_read_check" value="1" {{ request()->input('not_read_check') == '1' ? 'checked' : ''}}>
+                  <input type="checkbox" id="not_read_check" name="not_read_check" value="1" {{ request()->input('not_read_check') == 1 ? 'checked' : ''}}>
                   <label for="not_read_check">未読（白）のみ表示</label>
                 </div>
               @else

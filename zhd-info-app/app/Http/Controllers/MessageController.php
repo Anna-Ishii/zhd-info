@@ -89,13 +89,21 @@ class MessageController extends Controller
             ->appends(request()->query());
 
         $categories = MessageCategory::get();
-
-        $keywords = DB::table("message_search_logs")
-                    ->select('keyword', DB::raw('COUNT(*) as count'))
-                    ->groupBy('keyword')
+        $organization1_id =  $user->shop->organization1->id;
+        $keywords = DB::table("message_search_logs as m_s_l")
+                    ->select([
+                        'keyword', 
+                        DB::raw('COUNT(*) as count'),
+                    ])
+                    ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
+                    ->Join('organization1 as o1', function ($join) use ($organization1_id) {
+                        $join->on('o1.id', '=', 's.organization1_id')
+                             ->where('o1.id', '=', $organization1_id);
+                    })
+                    ->groupBy('keyword','o1.id')
                     ->orderBy('count', 'desc')
-                        ->limit(3)
-                        ->get();
+                    ->limit(3)
+                    ->get();
 
         return view('message.index', [
             'messages' => $messages,
@@ -142,11 +150,14 @@ class MessageController extends Controller
 
     public function putCrews(Request $request)
     {
+        $previousUrl = app('url')->previous();
         $check_crew = $request->input('read_edit_radio');
         $crew = Crew::findOrFail($check_crew);
 
+        $separator = parse_url($previousUrl, PHP_URL_QUERY) ? '&' : '?';
+
         $request->session()->put('check_crew', $crew);
-        return back()->withInput();
+        return redirect()->to($previousUrl . $separator . http_build_query(['not_read_check' => 1]))->withInput();
     }
 
     public function putReading(Request $request)
@@ -217,6 +228,7 @@ class MessageController extends Controller
     public function getCrewsMessage(Request $request)
     {
         $message = $request->input('message');
+        $text = $request->input('text');
         $user = session('member');
 
         $crews = DB::table('messages as m')
@@ -264,6 +276,11 @@ class MessageController extends Controller
                     })
                     ->where('m.id', '=', $message)
                     ->where('u.id', '=', $user->id)
+                    ->when(isset($text), function ($query) use ($text) {
+                        $query->where('c.name', 'like', '%' . addcslashes($text, '%_\\') . '%')
+                            ->orWhere('c.part_code', 'like', '%' . addcslashes($text, '%_\\') . '%')
+                            ->orWhere('c.name_kana', 'like', '%' . addcslashes($text, '%_\\') . '%');
+                    })
                     ->orderBy('c.name_kana', 'asc')
                     ->get();
 
