@@ -3,11 +3,12 @@
     <form method="post" action="/message/reading">
     @csrf
     <div class="readEdit">
-      <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
+
       <div class="readEdit__menu">
-        <div class="readEdit__menu__inner">
+        <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
+        {{-- <div class="readEdit__menu__inner">
           <input type="text" placeholder="キーワードで検索">
-        </div>
+        </div> --}}
       </div>
       @if (session('reading_crews'))
         <div id="reading_crews" hidden></div>
