@@ -576,6 +576,17 @@ input, select {
   display: flex;
   justify-content: space-between;
 }
+.sortMenu__link_notice {
+  position: absolute;
+  top: 5%;
+  right: 3%;
+  padding: 0 13px 0 8px;
+  border-radius: 11px;
+  background: #FF0000;
+  color: #FFF;
+  line-height: 110%;
+  font-size: 100%;
+}
 .sortMenu.isActive {
   display: block;
 }
