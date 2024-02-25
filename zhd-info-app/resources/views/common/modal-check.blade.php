@@ -4,9 +4,10 @@
         @csrf
         <div class="readEdit">
             <div class="readEdit__menu">
-                <div class="readEdit__menu__inner">
+                <p>業務連絡の閲覧状況を確認する方の名前を選択してください。</p>
+                {{-- <div class="readEdit__menu__inner">
                     <input type="text" placeholder="キーワードで検索">
-                </div>
+                </div> --}}
             </div>
             <div class="readEdit__list">
                 <div class="readEdit__list__head">ア行</div>
