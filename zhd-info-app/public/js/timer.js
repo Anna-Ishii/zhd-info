@@ -10,7 +10,7 @@ function logout() {
 // 操作があった場合にタイマーをリセットする関数
 function resetTimer() {
   clearTimeout(timer1);
-  clearTimeout(timer2);
+  clearInterval(timer2);
   startTimer();
 }
 
@@ -22,7 +22,15 @@ document.addEventListener("scroll", resetTimer);
 // タイマーを開始する関数
 function startTimer() {
   timer1 = setTimeout(redirectIfInactive, 40 * 60000); // 40分操作がなかった場合にリダイレクトする
-  timer2 = setTimeout(logout, 5 * 60000); // 5分操作がなかった場合にログアウト
+  
+  let targetTime = Date.now() + (5 * 60 * 1000);
+  timer2 = setInterval(function(){
+    if (Date.now() > targetTime) {
+      clearInterval(timer2);
+      if($('#logoutForm').length)$('#logoutForm').submit();
+    }
+
+  }, 500);
 }
 
 // 初回のタイマーを開始する
