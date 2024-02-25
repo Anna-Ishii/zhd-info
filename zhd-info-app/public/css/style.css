@@ -429,7 +429,7 @@ input, select {
 .list__item:hover {
   background: #EEE;
 }
-.list__no, .list__img, .list__category, .list__title, .list__status {
+.list__no, .list__img, .list__category, .list__title, .list__status, .list__limit {
   width: 100%;
   padding: 0 16px;
   flex-grow: 1;
