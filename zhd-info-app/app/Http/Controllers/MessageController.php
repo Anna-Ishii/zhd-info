@@ -243,7 +243,7 @@ class MessageController extends Controller
                         DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
                         DB::raw('
                             case 
-                                when c.register_date >= m.start_datetime then true else false
+                                when c.register_date > m.start_datetime then true else false
                             end as new_face 
                         '),
                         DB::raw('
