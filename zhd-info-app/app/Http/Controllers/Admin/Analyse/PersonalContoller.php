@@ -33,6 +33,8 @@ class PersonalContoller extends Controller
                         ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
                         ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
                         ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
+                        ->where('start_datetime', '<=', now('Asia/Tokyo'))
+                        ->where('editing_flg', false)
                         ->where('messages.organization1_id','=', $admin->organization1_id)
                         ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
                             $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
@@ -295,6 +297,7 @@ class PersonalContoller extends Controller
                     DB::raw('organization4.name as o4_name'), 
                     DB::raw('organization3.name as o3_name'),
                     DB::raw('shops.name as shop_name'),
+                    DB::raw('shops.display_name as shop_display_name'),
                     DB::raw('shops.shop_code as shop_code'),
                     DB::raw('view_rate.*')
                 ])
