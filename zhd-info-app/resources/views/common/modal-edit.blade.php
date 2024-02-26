@@ -5,6 +5,7 @@
     <div class="readEdit">
 
       <div class="readEdit__menu">
+        <p>業務連絡を閲覧する方の名前を選択してください。</p>
         <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
         {{-- <div class="readEdit__menu__inner">
           <input type="text" placeholder="キーワードで検索">
