@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SearchPeriod;
+use App\Models\Crew;
 use App\Models\MessageCategory;
 use App\Models\Message;
 use Carbon\Carbon;
@@ -11,16 +12,44 @@ use Illuminate\Support\Facades\DB;
 
 class MessageController extends Controller
 {
-    function index(Request $request)
+    public function index(Request $request)
     {
         $keyword = $request->input('keyword');
+        $not_read_check = $request->input('not_read_check');
+        $check_crew = session("check_crew", null);
         $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
 
         $user = session("member");
+
+        $sub = DB::table('messages')
+                    ->select([
+                        DB::raw('messages.id as message_id'),
+                        DB::raw('count(c.id) as crew_count'),
+                        DB::raw('count(c_m_l.crew_id) as readed_crew_count'),
+                        DB::raw('round((count(c_m_l.crew_id) / count(c.id)) * 100, 0) as view_rate')
+                    ])
+                    ->leftjoin('message_user as m_u', 'messages.id', '=', 'm_u.message_id')
+                    ->leftjoin('crews as c', 'm_u.user_id', '=', 'c.user_id')
+                    ->leftjoin('crew_message_logs as c_m_l', function($join){
+                        $join->on('c_m_l.crew_id', '=', 'c.id')
+                            ->where('c_m_l.message_id', '=', DB::raw('messages.id'));
+                    })
+                    ->where('m_u.user_id', '=', $user->id)
+                    ->when(isset($check_crew[0]), function($query) use ($check_crew) {
+                        $query->where('c.id', $check_crew[0]->id);
+                    })
+                    ->groupBy('messages.id');
+
         // 掲示中のデータをとってくる
         $messages = $user->message()
             ->with('category', 'tag')
+            ->select([
+                'sub.crew_count as crew_count',
+                'sub.readed_crew_count as readed_crew_count',
+                'sub.view_rate as view_rate'
+                ])
             ->publishingMessage()
+            ->LeftJoinSub($sub, 'sub', 'messages.id', 'sub.message_id')
             ->when(isset($keyword), function ($query) use ($keyword) {
                 $query->where(function ($query) use ($keyword) {
                     $query->whereLike('title', $keyword)
@@ -43,29 +72,51 @@ class MessageController extends Controller
                         break;
                 }
             })
+            ->when(!empty($crews), function ($query) {
+                $query->orderByRaw('
+                    case 
+                        when readed_crew_count = 0 or readed_crew_count is null then 0
+                        else 1
+                    end, readed_crew_count asc
+                ');
+            })
+            ->when(isset($not_read_check) && isset($check_crew[0]), function($query){
+                $query->where('sub.readed_crew_count', '<', 1);
+            })
             ->orderBy('created_at', 'desc')
+            
             ->paginate(20)
             ->appends(request()->query());
 
         $categories = MessageCategory::get();
-
-        $keywords = DB::table("message_search_logs")
-                    ->select('keyword', DB::raw('COUNT(*) as count'))
-                    ->groupBy('keyword')
+        $organization1_id =  $user->shop->organization1->id;
+        $keywords = DB::table("message_search_logs as m_s_l")
+                    ->select([
+                        'keyword', 
+                        DB::raw('COUNT(*) as count'),
+                    ])
+                    ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
+                    ->Join('organization1 as o1', function ($join) use ($organization1_id) {
+                        $join->on('o1.id', '=', 's.organization1_id')
+                             ->where('o1.id', '=', $organization1_id);
+                    })
+                    ->groupBy('keyword','o1.id')
                     ->orderBy('count', 'desc')
-                        ->limit(3)
-                        ->get();
+                    ->limit(3)
+                    ->get();
 
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
-            'keywords' => $keywords
+            'keywords' => $keywords,
+            'user' => $user
         ]);
     }
 
-    function detail($message_id)
+    public function detail($message_id)
     {
         $user = session('member');
+        $crews = session('crews');
         $message = Message::findOrFail($message_id);
 
         $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
@@ -73,15 +124,17 @@ class MessageController extends Controller
             'readed_datetime' => Carbon::now(),
         ]);
 
-        return redirect()->to($message->content_url);
+        $message->putCrewRead($crews);
+        return redirect()->to($message->content_url)->withInput();
     }
 
-    function search(Request $request)
+    public function search(Request $request)
     {
         $user = session('member');
         $param = [
             'keyword' => $request['keyword'],
-            'search_period' => $request['search_period']
+            'search_period' => $request['search_period'],
+            'not_read_check' => $request['not_read_check']
         ];
 
         if ($request->filled('keyword')) {
@@ -94,4 +147,147 @@ class MessageController extends Controller
 
         return redirect()->route('message.index', $param);
     }
+
+    public function putCrews(Request $request)
+    {
+        $previousUrl = app('url')->previous();
+        $check_crew = $request->input('read_edit_radio');
+        $crew = Crew::findOrFail($check_crew);
+
+        $separator = parse_url($previousUrl, PHP_URL_QUERY) ? '&' : '?';
+
+        $request->session()->put('check_crew', $crew);
+        return redirect()->to($previousUrl . $separator . http_build_query(['not_read_check' => 1]))->withInput();
+    }
+
+    public function putReading(Request $request)
+    {
+        $reading_crews = $request->input('read_edit_radio',[]);
+        $message_id = $request->input('message');
+        
+        // セッションの登録
+        $request->session()->put('reading_crews', $reading_crews);
+
+        // 既読機能
+        try {
+            DB::beginTransaction();
+            $message = Message::findOrFail($message_id);
+            $message->putCrewRead($reading_crews);
+            DB::commit();
+            return
+            redirect()->to($message->content_url)->withInput();
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return back()->withInput();
+        }
+        //　既読が無事できたらpdfへ
+    }
+
+    public function crewsLogout(Request $request)
+    {
+        $request->session()->forget('check_crew');
+        $request->session()->forget('reading_crews');
+
+        return back()->withInput();
+    }
+
+    //
+    // API
+    //
+    public function getCrews(Request $request)
+    {
+        $user = session('member');
+        $crews = $user->crew()
+            ->select([
+                DB::raw("
+                            * 
+                        "),
+                DB::raw("
+                            case
+                                when name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when name_kana regexp '^[ｶ-ｺ]' then 2
+                                when name_kana regexp '^[ｻ-ｿ]' then 3
+                                when name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when name_kana regexp '^[ﾜ-ｦ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
+            ])
+            ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
+    }
+
+    public function getCrewsMessage(Request $request)
+    {
+        $message = $request->input('message');
+        $text = $request->input('text');
+        $user = session('member');
+
+        $crews = DB::table('messages as m')
+                    ->select([
+                        DB::raw('
+                            c.part_code as part_code,
+                            c.name as name,
+                            c.name_kana as name_kana,
+                            c.id as c_id
+                        '),
+                        DB::raw('m.start_datetime'),
+                        DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
+                        DB::raw('
+                            case 
+                                when c.register_date > m.start_datetime then true else false
+                            end as new_face 
+                        '),
+                        DB::raw('
+                            case 
+                                when c_m_l.id is null then false else true
+                            end as readed
+                        '),
+                        DB::raw("
+                            case
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｶ-ｺ]' then 2
+                                when c.name_kana regexp '^[ｻ-ｿ]' then 3
+                                when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when c.name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when c.name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when c.name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when c.name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when c.name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when c.name_kana regexp '^[ﾜ-ｦ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
+                    ])
+                    ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
+                    ->leftJoin('users as u', 'm_u.user_id', 'u.id')
+                    ->leftJoin('crews as c', 'u.id', 'c.user_id')
+                    ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
+                        $join->on('c_m_l.crew_id', '=', 'c.id')
+                            ->where('c_m_l.message_id', '=', $message);
+                    })
+                    ->where('m.id', '=', $message)
+                    ->where('u.id', '=', $user->id)
+                    ->when(isset($text), function ($query) use ($text) {
+                        $query->where('c.name', 'like', '%' . addcslashes($text, '%_\\') . '%')
+                            ->orWhere('c.part_code', 'like', '%' . addcslashes($text, '%_\\') . '%')
+                            ->orWhere('c.name_kana', 'like', '%' . addcslashes($text, '%_\\') . '%');
+                    })
+                    ->orderBy('c.name_kana', 'asc')
+                    ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
+    }
+
+
 }

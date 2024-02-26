@@ -56,10 +56,18 @@ class ManualController extends Controller
         $category_level1s = ManualCategoryLevel1::query()
                                         ->with('level2s')
                                         ->get();
-
-        $keywords = DB::table("manual_search_logs")
-                ->select('keyword', DB::raw('COUNT(*) as count'))
-                ->groupBy('keyword')
+        $organization1_id =  $user->shop->organization1->id;
+        $keywords = DB::table("manual_search_logs as m_s_l")
+                    ->select([
+                        'keyword',
+                        DB::raw('COUNT(*) as count'),
+                    ])
+                    ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
+                    ->Join('organization1 as o1', function ($join) use ($organization1_id) {
+                        $join->on('o1.id', '=', 's.organization1_id')
+                        ->where('o1.id', '=', $organization1_id);
+                    })
+                    ->groupBy('keyword', 'o1.id')
                     ->orderBy('count', 'desc')
                     ->limit(3)
                     ->get();
