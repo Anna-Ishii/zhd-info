@@ -5,29 +5,23 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 <li>
-                    <a href="#" class="nav-label">業務連絡</a>
+                    <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#" class="nav-label">動画マニュアル</span></a>
+                    <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li class="active"><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
                     </ul>
                 </li>
                 <li>
-					<a href="#" class="nav-label">データ抽出</span></a>
+                    <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
-                        <li class="active"><a href="/admin/analyse/personal">業務連絡の閲覧状況</a></li>
-                    </ul>
-				</li>
-                <li>
-                <li>
-                    <a href="#" class="nav-label">アカウント管理</span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">アカウント</a></li>
-                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">IMS連携</a>
+                        <li><a href="/admin/account/">3-1.アカウント</a></li>
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
                         </li>
                     </ul>
                 </li>
@@ -93,11 +87,15 @@
             <div class="input-group">
             <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
 			</div>
+            <div class="input-group">
+                <p>※ 直近の業連を最大10件表示しています。</p>
+                <p>それ以外を確認したい場合は、条件を指定してください</p>
+            </div>
 		</div>
     </form>
 
     <div class="message-tableInner table-responsive-xxl">
-        <table class="personal table table-bordered">
+        <table id="table" class="personal table table-bordered">
             <thead>
                 <tr>
                     @foreach ($organizations as $organization)
@@ -207,7 +205,7 @@
                     @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@endisset
                     @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@endisset
                     <td nowrap>{{$m_c->shop_code}}</td>
-                    <td nowrap>{{$m_c->shop_name}}</td>
+                    <td nowrap>{{$m_c->shop_display_name}}</td>
                     <td nowrap> 
                         {{$viewrates['shop_readed_sum'][$m_c->shop_code]}} / {{$viewrates['shop_sum'][$m_c->shop_code]}}
                     </td>
