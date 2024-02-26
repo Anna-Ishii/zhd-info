@@ -36,6 +36,11 @@ Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth']
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
     Route::get('/search', [MessageController::class, 'search'])->name('search');
+    Route::get('/crews', [MessageController::class, 'getCrews'])->name('get-crews');
+    Route::post('/crews', [MessageController::class, 'putCrews'])->name('crews');
+    Route::post('/reading', [MessageController::class, 'putReading'])->name('reading');
+    Route::get('/crews-message', [MessageController::class, 'getCrewsMessage'])->name('crew-message');
+    Route::post('/crews-logout', [MessageController::class, 'crewsLogout'])->name("crew-logout");
 });
 Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');

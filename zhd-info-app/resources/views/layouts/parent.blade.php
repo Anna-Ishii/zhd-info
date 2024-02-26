@@ -4,9 +4,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>業務連絡一覧 | 業連・動画配信システム</title>
-    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?20231012">
+    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}?data=20240216">
+    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?data=20240216">
     @stack('css')
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
@@ -26,11 +27,19 @@
     {{-- <div class="version-number">
         Ver. {{config('version.version')}}
     </div> --}}
+    <div class="modalBg"></div>
+    @include('common.modal-check')
+    @include('common.modal-edit')
+    @include('common.modal-continue')
 
     @include('common.footer')
    
     <script src="{{ asset('/js/timer.js') }}" defer></script>
     <script src="{{ asset('/js/common.js') }}" defer></script>
+    {{-- <script>
+        const crew = @json($user->crew);
+        console.log(crew);
+    </script> --}}
     @livewireScripts
 </body>
 
