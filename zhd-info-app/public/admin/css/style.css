@@ -1140,10 +1140,15 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
 }
 .readUser__list {
   border-top: 1px solid #707070;
+  list-style-type: none;
+  padding: 0;
 }
 .readUser__list__item {
   padding: 12px;
   border-bottom: 1px solid #707070;
+}
+.readUser__list__item:before, .readUser__list__item:after  {
+  padding: 0px;
 }
 .readUser__list[data-readuser-target="2"] .readUser__list__item > div {
   display: flex;
@@ -1158,4 +1163,8 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
     border-radius: 4px;
     background: #F3F3F3;
     font-size: 75%;
+}
+.view_rate {
+  color: #337ab7;;
+  cursor: pointer;
 }
