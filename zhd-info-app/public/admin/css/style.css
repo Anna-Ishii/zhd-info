@@ -1181,3 +1181,22 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   color: #337ab7;;
   cursor: pointer;
 }
+.view_rate_container {
+  display: flex;
+  /* padding-right: 5px;
+  white-space: nowrap; */
+}
+.view_rate_container div {
+  flex: 1;
+}
+.view_rate_container > div:first-child {
+  padding-right: 0px;
+  text-align: right;
+}
+.view_rate_container > div:last-child {
+  text-align: right;
+}
+/* td > div.row > div:first-child {
+  padding-right: 0px;
+  text-align: right;
+} */

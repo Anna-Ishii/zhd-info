@@ -123,7 +123,16 @@
             <tbody>
                 <tr>
                     <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
-                    <td nowrap>{{$viewrates['org1_readed_sum'] ?? 0}} / {{$viewrates['org1_sum'] ?? 0}}</td>
+                    <td nowrap>
+                         <div class="view_rate_container">
+                            <div>
+                            {{$viewrates['org1_readed_sum'] ?? 0}} / 
+                             </div>
+                             <div>
+                            {{$viewrates['org1_sum'] ?? 0}}
+                             </div>
+                         </div>
+                    </td>
                     @if(isset($viewrates['org1_readed_sum']) && (($viewrates['org1_sum'] ?? 0) > 0 ))
                         @php
                             $viewrate=0;
@@ -138,16 +147,22 @@
                     @foreach ($viewrates['org1'] as $key => $v_org1)
                         @isset($v_org1[0]->count)
                         <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$admin->organization1->id}}" nowrap>
-                            <div class="view_rate" data-view-type="orgs">
-                            {{$v_org1[0]->readed_count}} / {{$v_org1[0]->count}}
-                            </a>
+                            <div class="view_rate view_rate_container" data-view-type="orgs">
+                                <div>{{$v_org1[0]->readed_count}} / </div>
+                                <div>{{$v_org1[0]->count}}</div>
+                            </div>
 
                         </td>
                         <td class={{$v_org1[0]->view_rate < 10 ? "under-quota" : ""}} nowrap>
                             <div>{{$v_org1[0]->view_rate}}%</div>
                         </td>
                         @else
-                        <td nowrap>0 / 0</td>
+                        <td nowrap>
+                            <div class="view_rate_container">
+                                <div>0 / </div>
+                                <div>0 </div>
+                            </div>
+                        </td>
                         <td class="under-quota"><div>0.0%</div></td>
                         @endisset
                     @endforeach
@@ -163,8 +178,14 @@
                 <tr>
                     <td colspan="{{count($organizations) + 2}}">{{$v_o->name}}</td>
                     <td nowrap>
-                        {{$viewrates[$organization.'_readed_sum'][$v_o->id]}} /
-                        {{$viewrates[$organization.'_sum'][$v_o->id]}}
+                        <div class="view_rate_container">
+                            <div>
+                                {{$viewrates[$organization.'_readed_sum'][$v_o->id]}} /
+                            </div>
+                            <div>
+                                {{$viewrates[$organization.'_sum'][$v_o->id]}}
+                            </div>
+                        </div>
                     </td>
                     @if (isset($viewrates[$organization.'_readed_sum'][$v_o->id]) && (($viewrates[$organization.'_sum'][$v_o->id] ?? 0) > 0))
                         @php
@@ -178,16 +199,21 @@
                     @foreach ($messages as $key => $ms)
                         @isset($viewrates[$organization][$key][$v_org_key]->count)
                         <td class="message-viewlate" data-message={{$messages[$key]->id}} data-org-id={{$v_o->id}} data-org-type={{$organization}} nowrap>
-                            <div class="view_rate" data-view-type="orgs">
-                            {{$viewrates[$organization][$key][$v_org_key]->readed_count}} /
-                            {{$viewrates[$organization][$key][$v_org_key]->count}}
+                            <div class="view_rate view_rate_container" data-view-type="orgs">
+                                <div>{{$viewrates[$organization][$key][$v_org_key]->readed_count}} / </div>
+                                <div>{{$viewrates[$organization][$key][$v_org_key]->count}}</div>
                             </div>
                         </td>
                         <td data-message={{$ms->id}} class="message-viewlate {{$viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? "under-quota" : ""}}">
                             <div>{{$viewrates[$organization][$key][$v_org_key]->view_rate}}%</div>
                         </td>
                         @else
-                        <td nowrap>0 / 0</td>
+                        <td nowrap>
+                            <div class="view_rate_container">
+                                <div>0 / </div>
+                                <div>0 </div>
+                            </div>
+                        </td>
                         <td class="under-quota"><div>0.0%</div></td>
                         @endisset
                     @endforeach
@@ -211,7 +237,14 @@
                     <td nowrap>{{$m_c->shop_code}}</td>
                     <td nowrap>{{$m_c->shop_display_name}}</td>
                     <td nowrap> 
-                        {{$viewrates['shop_readed_sum'][$m_c->shop_code]}} / {{$viewrates['shop_sum'][$m_c->shop_code]}}
+                        <div class="view_rate_container">
+                            <div>
+                            {{$viewrates['shop_readed_sum'][$m_c->shop_code]}} / 
+                            </div>
+                            <div>
+                            {{$viewrates['shop_sum'][$m_c->shop_code]}}
+                            </div>
+                        </div>
                     </td>
                     @if (isset($viewrates['shop_readed_sum'][$m_c->shop_code]) && (($viewrates['shop_sum'][$m_c->shop_code] ?? 0) > 0))
                         @php
@@ -225,15 +258,21 @@
                     @foreach ($messages as $key => $ms)
                         @if(($viewrates['shop'][$key][$v_key]->count ?? 0) > 0)
                         <td data-message={{$ms->id}} data-shop={{$viewrates['shop'][$key][$v_key]->_shop_id}} nowrap>
-                            <div class="view_rate" data-view-type="shops">
-                            {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
+                            <div class="view_rate view_rate_container" data-view-type="shops">
+                                <div>{{$viewrates['shop'][$key][$v_key]->readed_count}} / </div>
+                                <div>{{$viewrates['shop'][$key][$v_key]->count}}</div>
                             </div>
                         </td nowrap>
                         <td class={{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? "under-quota" : ""}} nowrap>
                             <div>{{$viewrates['shop'][$key][$v_key]->view_rate ?? 0.0}}%</div>
                         </td>
                         @else
-                        <td nowrap>0 / 0</td>
+                        <td nowrap>
+                            <div class="view_rate_container">
+                                <div>0 / </div>
+                                <div>0 </div>
+                            </div>
+                        </td>
                         <td class="under-quota"><div>0.0%</div></td>
                         @endif
                     @endforeach
