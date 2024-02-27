@@ -470,6 +470,9 @@ class PersonalContoller extends Controller
             ->Join('users as u', 'm_u.user_id', 'u.id')
             ->Join('shops as s', function ($join) use ($org_id, $org_type) {
                 $join->on('s.id', '=', 'u.shop_id')
+                    ->when($org_type == 'Org1', function ($join) use ($org_id) {
+                        $join->where('s.organization1_id', '=', $org_id);
+                    })
                     ->when($org_type == 'DS', function($join) use ($org_id) {
                         $join->where('s.organization3_id', '=', $org_id);
                     })
@@ -480,7 +483,7 @@ class PersonalContoller extends Controller
                         $join->where('s.organization5_id', '=', $org_id);
                     });
             })
-            ->leftJoin('crews as c', 'u.id', 'c.user_id')
+            ->Join('crews as c', 'u.id', 'c.user_id')
             ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
                 $join->on('c_m_l.crew_id', '=', 'c.id')
                 ->where('c_m_l.message_id', '=', $message);

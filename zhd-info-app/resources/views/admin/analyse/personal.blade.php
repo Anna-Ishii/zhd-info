@@ -136,10 +136,11 @@
                 @isset($viewrates['org1'])
                     @foreach ($viewrates['org1'] as $key => $v_org1)
                         @isset($v_org1[0]->count)
-                        <td nowrap>
-                            <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$admin->organization1->id}}" nowrap>
+                            <div class="view_rate" data-view-type="orgs">
                             {{$v_org1[0]->readed_count}} / {{$v_org1[0]->count}}
                             </a>
+
                         </td>
                         <td class={{$v_org1[0]->view_rate < 10 ? "under-quota" : ""}} nowrap>
                             <div>{{$v_org1[0]->view_rate}}%</div>
