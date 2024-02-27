@@ -1125,10 +1125,12 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   line-height: 3.6rem;
   text-align: center;
   cursor: pointer;
+  list-style-type: none;
 }
 .readUser__switch__item.isSelected {
   background: #0060B0;
   color: #FFF;
+  list-style-type: none;
 }
 .readUser__sort {
   display: flex;
