@@ -1056,3 +1056,106 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   margin-left: 30px;
   margin-right: 30px;
 }
+
+.modal {
+  display: none;
+  z-index: 999999;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: calc(100% - 32px);
+  max-width: 448px;
+  height: 100%;
+  max-height: 90vh;
+  max-height: 90svh;
+  border-radius: 4px;
+  background: #FFF;
+}
+.modal__inner {
+  position: relative;
+  height: 100%;
+  overflow-y: scroll;
+  padding-bottom: 80px;
+}
+.modal__btnInner {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  padding: 16px;
+  border-top: 1px solid #707070;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+  background: #FFF;
+  text-align: center;
+}
+
+.modalbg.isActive, .modal.isActive {
+  display: block;
+}
+.readUser {
+  width: 100%;
+  padding: 24px;
+}
+.readUser__switch {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  border: 2px solid #0060B0;
+  border-radius: 4px;
+  padding: 0;
+}
+.readUser__switch__item {
+  width: 50%;
+  background: #FFF;
+  font-size: 1.7rem;
+  line-height: 3.6rem;
+  text-align: center;
+  cursor: pointer;
+}
+.readUser__switch__item.isSelected {
+  background: #0060B0;
+  color: #FFF;
+}
+.readUser__sort {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  margin-bottom: 16px;
+}
+.readUser__sort p {
+  margin-right: 16px;
+}
+.readUser__sort button {
+  width: 100%;
+  max-width: 120px;
+  height: 32px;
+  margin-right: 16px;
+  border: 1px solid #0060B0;
+  border-radius: 4px;
+  background: #FFF;
+}
+.readUser__sort button.isSelected {
+  background: #ADDAFF;
+}
+.readUser__list {
+  border-top: 1px solid #707070;
+}
+.readUser__list__item {
+  padding: 12px;
+  border-bottom: 1px solid #707070;
+}
+.readUser__list[data-readuser-target="2"] .readUser__list__item > div {
+  display: flex;
+  justify-content: space-between;
+}
+.btnType3 {
+    width: 100%;
+    max-width: 140px;
+    margin-left: auto;
+    height: 36px;
+    border: 1px solid rgba(60, 60, 67, 0.36);
+    border-radius: 4px;
+    background: #F3F3F3;
+    font-size: 75%;
+}

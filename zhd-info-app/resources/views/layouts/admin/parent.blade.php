@@ -84,6 +84,26 @@
     </div>
 
         <!-- モーダル・ダイアログ -->
+    <div class="modal" data-modal-target="read">
+        <div class="modal__inner">
+            <div class="readUser">
+                <ul class="readUser__switch">
+                    <li class="readUser__switch__item isSelected" data-readuser-target="1">未読()</li>
+                    <li class="readUser__switch__item" data-readuser-target="2">既読()</li>
+                </ul>
+                <div class="readUser__sort">
+                    <p>配信時：</p>
+                    <button type="button" class="isSelected" data-readuser-belong="1">所属()</button>
+                    <button type="button" class="" data-readuser-belong="2">未所属()</button>
+                </div>
+                <ul class="readUser__list" data-readuser-target="1"></ul>
+                <ul class="readUser__list" data-readUser-target="2" style="display:none;">
+            </div>
+            <div class="modal__btnInner">
+                <button type="button" class="btnType3 modal__close">閉じる</button>
+            </div>  
+        </div>
+    </div>
     @include('common.admin.message-import-modal')
     @include('common.admin.manual-import-modal')
     

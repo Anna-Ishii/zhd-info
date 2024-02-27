@@ -220,12 +220,12 @@
                     @endif
                     @foreach ($messages as $key => $ms)
                         @if(($viewrates['shop'][$key][$v_key]->count ?? 0) > 0)
-                        <td nowrap>
-                            <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        <td data-message={{$ms->id}} data-shop={{$viewrates['shop'][$key][$v_key]->_shop_id}} nowrap>
+                            <div class="view_rate">
                             {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
-                            </a>
+                            </div>
                         </td nowrap>
-                        <td data-message={{$ms->id}} class={{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? "under-quota" : ""}} nowrap>
+                        <td class={{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? "under-quota" : ""}} nowrap>
                             <div>{{$viewrates['shop'][$key][$v_key]->view_rate ?? 0.0}}%</div>
                         </td>
                         @else
