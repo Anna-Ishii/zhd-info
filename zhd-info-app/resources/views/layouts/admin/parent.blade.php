@@ -82,7 +82,7 @@
             <span class="spinner"></span>
         </div>
     </div>
-
+    <div class="modalBg"></div>
         <!-- モーダル・ダイアログ -->
     <div class="modal" data-modal-target="read">
         <div class="modal__inner">
