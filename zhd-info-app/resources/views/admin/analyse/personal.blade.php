@@ -119,6 +119,7 @@
             </thead>
 
             {{-- 業態 (計) --}}
+            @if (!request('shop_freeword'))
             <tbody>
                 <tr>
                     <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
@@ -195,6 +196,8 @@
                 @endisset
             </tbody>
             @endforeach
+
+            @endif
 
             {{-- 店舗ごと --}}
             <tbody>
