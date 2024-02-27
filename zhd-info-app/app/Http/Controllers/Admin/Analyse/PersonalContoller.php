@@ -425,8 +425,10 @@ class PersonalContoller extends Controller
 
     public function getOrgMessageViewRate(Request $request)
     {
-        $organization = $request["organization"];
+        $org_type = $request["org_type"];
+        $org_id = $request["org_id"];
         $message = $request["message"];
+
 
         $crews = DB::table('messages as m')
         ->select([
@@ -465,9 +467,18 @@ class PersonalContoller extends Controller
                         "),
         ])
             ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
-            ->Join('users as u', function ($join) use ($shop) {
-                $join->on('m_u.user_id', '=', 'u.id')
-                ->where('u.shop_id', '=', $shop);
+            ->Join('users as u', 'm_u.user_id', 'u.id')
+            ->Join('shops as s', function ($join) use ($org_id, $org_type) {
+                $join->on('s.id', '=', 'u.shop_id')
+                    ->when($org_type == 'DS', function($join) use ($org_id) {
+                        $join->where('s.organization3_id', '=', $org_id);
+                    })
+                    ->when($org_type == 'AR', function ($join) use ($org_id) {
+                        $join->where('s.organization4_id', '=', $org_id);
+                    })
+                    ->when($org_type == 'BL', function ($join) use ($org_id) {
+                        $join->where('s.organization5_id', '=', $org_id);
+                    });
             })
             ->leftJoin('crews as c', 'u.id', 'c.user_id')
             ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {

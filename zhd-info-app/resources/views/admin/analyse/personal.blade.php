@@ -175,11 +175,11 @@
                     @endif
                     @foreach ($messages as $key => $ms)
                         @isset($viewrates[$organization][$key][$v_org_key]->count)
-                        <td class="message-viewlate" nowrap>
-                            <a href="{{route('admin.message.publish.show',['message_id' => $messages[$key]->id])}}">
+                        <td class="message-viewlate" data-message={{$messages[$key]->id}} data-org-id={{$v_o->id}} data-org-type={{$organization}} nowrap>
+                            <div class="view_rate" data-view-type="orgs">
                             {{$viewrates[$organization][$key][$v_org_key]->readed_count}} /
                             {{$viewrates[$organization][$key][$v_org_key]->count}}
-                            </a>
+                            </div>
                         </td>
                         <td data-message={{$ms->id}} class="message-viewlate {{$viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? "under-quota" : ""}}">
                             <div>{{$viewrates[$organization][$key][$v_org_key]->view_rate}}%</div>
@@ -221,7 +221,7 @@
                     @foreach ($messages as $key => $ms)
                         @if(($viewrates['shop'][$key][$v_key]->count ?? 0) > 0)
                         <td data-message={{$ms->id}} data-shop={{$viewrates['shop'][$key][$v_key]->_shop_id}} nowrap>
-                            <div class="view_rate">
+                            <div class="view_rate" data-view-type="shops">
                             {{$viewrates['shop'][$key][$v_key]->readed_count}} / {{$viewrates['shop'][$key][$v_key]->count}}
                             </div>
                         </td nowrap>
