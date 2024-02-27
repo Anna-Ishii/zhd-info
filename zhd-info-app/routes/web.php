@@ -107,6 +107,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
         Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
         Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
+        Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);
     });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {
