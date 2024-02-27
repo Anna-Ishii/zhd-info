@@ -50,22 +50,38 @@ class ImportImsCsvCommand extends Command
         $ims_log->import_at = new Carbon('now');
         $ims_log->save();
 
-        if (!Storage::disk('local')->exists('organization_20240207.csv')) {
-            $this->error('organization_20240207.csvが存在しません');
+        $now = new Carbon('now');
+        $now_str = $now->format("Ymd");
+        $now_str = "20240221";
+        $organization_filename = "organization_{$now_str}.csv";
+        $crews_filename = "crew_{$now_str}.csv";
+        $directory = "IMS2/FR_BUSINESS/";
+        $organization_path = $directory.$organization_filename;
+        $crews_path = $directory.$crews_filename;
+        $this->info($organization_path);
+        $this->info($crews_path);
+
+        if (!Storage::disk('s3')->exists($organization_path)) {
+            $this->error("{$organization_path}が存在しません");
+            $this->info('end');
+            exit();
+
         }
 
-        if (!Storage::disk('local')->exists('crew_20240207.csv')) {
-            $this->error('crew_20240207.csvが存在しません');
+        if (!Storage::disk('s3')->exists($crews_path)) {
+            $this->error("{$crews_path}が存在しません");
+            $this->info('end');
+            exit();
         }
 
         DB::beginTransaction();
         try {
             // 組織情報の取り込み
             try {
-                $this->info("DEPARTMENT.csvファイルを読み込みます");
+                $this->info("{$organization_filename}ファイルを読み込みます");
                 $shops_data = (new ShopsIMSImport)
-                    ->toCollection('organization_20240207.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
-                $this->info("DEPARTMENT.csvファイル読み込み完了");
+                    ->toCollection($organization_path, 's3', \Maatwebsite\Excel\Excel::CSV);
+                $this->info("{$organization_filename}ファイル読み込み完了");
                 $this->import_shops($shops_data[0]);
                 unset($shops_data);
                 $ims_log->import_department_at = new Carbon('now');
@@ -77,10 +93,10 @@ class ImportImsCsvCommand extends Command
             }
             // クルーの取り込み
             try {
-                $this->info("Crew.csvファイルを読み込みます");
+                $this->info("{$crews_filename}ファイルを読み込みます");
                 $crews_data =  (new CrewsIMSImport)
-                    ->toCollection('crew_20240207.csv', 'local', \Maatwebsite\Excel\Excel::CSV);
-                $this->info("Crew.csvファイル読み込み完了");
+                    ->toCollection($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
+                $this->info("{$crews_filename}ファイル読み込み完了");
                 $this->import_crews($crews_data[0]);
                 unset($crews_data);
                 $ims_log->import_crew_at = new Carbon('now');
