@@ -17,6 +17,7 @@ class Shop extends Model
     protected $fillable = 
         [
          'name',
+         'display_name',
          'shop_code',
          'brand_id',
          'organization5_id',
@@ -70,5 +71,20 @@ class Shop extends Model
     public function userCount()
     {
         return $this->user()->count();
+    }
+
+    // 現状は「業態省略名」+「店舗コード(4桁)」で登録していたので、
+    // IMS連携に対応するため、初回のみ店舗コードをcsvの店舗コード(7桁 ~ )で更新する
+    public static function update_shopcode($shop_code, $brand_id)
+    {
+        $code = substr($shop_code, -4);
+        $shop = Shop::query()
+            ->where("brand_id", $brand_id)
+            ->whereRaw("substring(shop_code,-4) = ?", [$code])
+            ->first();
+        
+        if(empty($shop)) return;
+        $shop->shop_code = $shop_code;
+        $shop->save();
     }
 }

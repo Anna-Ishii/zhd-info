@@ -24,6 +24,7 @@ class ViewComposerServiceProvider extends ServiceProvider
             [
                 \App\Http\ViewComposers\UserComposer::class => 'admin.*',
                 \App\Http\ViewComposers\PublishStatusComposer::class => 'admin.*',
+                \App\Http\ViewComposers\ImsStatusComposer::class => 'admin.*',
                 
             ]
         );

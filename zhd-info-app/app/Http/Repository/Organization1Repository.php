@@ -16,13 +16,22 @@ class Organization1Repository
                 ->exists();
     }
 
-    // ブロックがあるか
+    // エリアがあるか
     public static function isExistOrg4($organization1_id)
     {
         return Shop::query()
                 ->where('organization1_id', $organization1_id)
                 ->whereNotNull('organization4_id')
                 ->exists();
+    }
+
+    // ディストリクトがあるか
+    public static function isExistOrg3($organization1_id)
+    {
+        return Shop::query()
+            ->where('organization1_id', $organization1_id)
+            ->whereNotNull('organization3_id')
+            ->exists();
     }
 
     public static function getOrg5($organization1_id)

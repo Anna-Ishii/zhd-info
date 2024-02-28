@@ -7,7 +7,7 @@ use App\Console\Commands\AdminCreateCommand;
 use App\Console\Commands\ExportCrewFakerCsvCommand;
 use App\Console\Commands\ExportShopCsvCommand;
 use App\Console\Commands\MessageUserUpdateCommand;
-use App\Console\Commands\ShopCreateCommnad;
+use App\Console\Commands\ShopCreateCommand;
 use App\Console\Commands\ShopUserCreateCommnad;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -19,7 +19,7 @@ class Kernel extends ConsoleKernel
         AdminCreateCommand::class,
         ShopUserCreateCommnad::class,
         MessageUserUpdateCommand::class,
-        ShopCreateCommnad::class,
+        ShopCreateCommand::class,
         ExportShopCsvCommand::class,
         ExportCrewFakerCsvCommand::class,
     ];
