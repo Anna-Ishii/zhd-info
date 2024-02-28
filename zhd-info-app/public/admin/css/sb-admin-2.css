@@ -151,21 +151,32 @@ body {
   pointer-events: none;
   color: black;
 }
-.sidebar ul.nav .nav-current-page .nav-second-level li:first-child{
+.sidebar ul.nav .nav-second-level li.active {
  background-color: #337ab7;
 }
-.sidebar ul.nav .nav-current-page .nav-second-level li:first-child:hover{
+.sidebar ul.nav.nav-second-level li.active :hover{
  background-color: white;
 }
-.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a{
+.sidebar ul.nav.nav-second-level li.active a {
  color: white;
 }
-.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a:hover{
+.sidebar ul.nav.nav-second-level li.active :hover{
  background-color: #337ab7;
 }
-.sidebar ul.nav .nav-current-page .nav-second-level li:first-child a:focus{
+.sidebar ul.nav.nav-second-level li.active :focus{
  background-color: #337ab7;
 }
+.sidebar ul.nav .nav-second-level li.warning a::after {
+  content: '';
+  background: url(../../img/icon_warning.png) no-repeat;
+  display: inline-block;
+  background-size: contain;
+  vertical-align: middle;
+  width: 20px;
+  height: 20px;
+  margin-left: 10px;
+}
+
 @media (min-width: 768px) {
   .sidebar {
     z-index: 1;
@@ -656,4 +667,53 @@ table.table-list tbody td.date-time div{
   width: 110px;
   margin-left: auto;
   margin-right: auto;
+}
+table.ims {
+  width: 400px;
+}
+table.ims thead {
+  background-color: #D9E1F2;
+}
+table.ims td, thead, tbody {
+  border: 1px solid black;
+}
+table.ims>thead>tr>th {
+  border: 1px solid black;
+  vertical-align: middle;
+}
+table.ims>tbody>tr>td.error {
+  background-color: red;
+}
+#page-wrapper div.ims-count {
+  padding-top: 30px;
+  padding-bottom: 10px;
+}
+table.personal thead {
+  position: sticky;
+    top: 0;
+    z-index: 10;
+}
+table.personal thead,tbody:not(:last-child)>tr:last-child>td {
+  border-bottom: 3px double black !important;
+}
+table.personal thead>tr>th.head1 {
+  background-color: #bbb;
+  vertical-align: middle;
+  text-align: center;
+  border: solid 1px;
+
+}
+table.personal thead>tr>th.head2 {
+  background-color: rgb(209,218,239);
+  vertical-align: middle;
+  text-align: center;
+  border: solid 1px;
+}
+table.personal tbody>tr>td.message-viewlate {
+  border-left: 1px solid black;
+}
+table.personal td[class*="org"] {
+  text-orientation: upright;
+  vertical-align: middle;
+  text-align: center;
 }

@@ -8,9 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class TopController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = session('member');
+
+        $request->session()->forget('check_crew');
+        $request->session()->forget('reading_crews');
 
         $start_date_time = Carbon::now()->subDays(7)->startOfDay();
         // 新着件数
@@ -56,9 +59,21 @@ class TopController extends Controller
                                 ->orderBy('start_datetime', 'desc')
                                 ->limit(1)
                                 ->get();
-        
-        $keywords = DB::table(DB::raw("(SELECT keyword FROM message_search_logs UNION ALL SELECT keyword FROM manual_search_logs) as keyword_tables"))
-                    ->select('keyword', DB::raw('COUNT(*) as count'))
+        $organization1_id =  $user->shop->organization1->id;
+        $keywords = DB::table(
+                        DB::raw(
+                            "(SELECT keyword, shop_id FROM message_search_logs 
+                                UNION ALL 
+                                SELECT keyword, shop_id FROM manual_search_logs
+                        ) as keyword_tables")
+                    )->select([
+                            'keyword',
+                            DB::raw('COUNT(*) as count'),
+                    ])->leftJoin('shops as s', 's.id', 'keyword_tables.shop_id')
+                      ->Join('organization1 as o1', function ($join) use ($organization1_id) {
+                            $join->on('o1.id', '=', 's.organization1_id')
+                                ->where('o1.id', '=', $organization1_id);
+                    })
                     ->groupBy('keyword')
                     ->orderBy('count', 'desc')
                     ->limit(3)

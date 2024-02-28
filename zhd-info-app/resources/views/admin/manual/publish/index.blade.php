@@ -5,21 +5,24 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 <li>
-                    <a href="#" class="nav-label">業務連絡</a>
+                    <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">配信</a></li>
-                    </ul>
-                </li>
-                <li class="nav-current-page">
-                    <a href="#" class="nav-label">動画マニュアル</span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">アカウント</a></li>
+                        <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">3.管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">3-1.アカウント</a></li>
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
+                        </li>
                     </ul>
                 </li>
                 <li>
