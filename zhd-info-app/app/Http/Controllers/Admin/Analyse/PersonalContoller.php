@@ -33,6 +33,8 @@ class PersonalContoller extends Controller
                         ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
                         ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
                         ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
+                        ->where('start_datetime', '<=', now('Asia/Tokyo'))
+                        ->where('editing_flg', false)
                         ->where('messages.organization1_id','=', $admin->organization1_id)
                         ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
                             $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
@@ -295,6 +297,7 @@ class PersonalContoller extends Controller
                     DB::raw('organization4.name as o4_name'), 
                     DB::raw('organization3.name as o3_name'),
                     DB::raw('shops.name as shop_name'),
+                    DB::raw('shops.display_name as shop_display_name'),
                     DB::raw('shops.shop_code as shop_code'),
                     DB::raw('view_rate.*')
                 ])
@@ -354,5 +357,143 @@ class PersonalContoller extends Controller
             $file_name,
             \Maatwebsite\Excel\Excel::XLSX
         );
+    }
+
+    //
+    // API
+    //
+    public function getShopMessageViewRate(Request $request)
+    {
+        $shop = $request["shop"];
+        $message = $request["message"];
+
+        $crews = DB::table('messages as m')
+        ->select([
+            DB::raw('
+                     c.part_code as part_code,
+                     c.name as name,
+                     c.name_kana as name_kana,
+                     c.id as c_id
+                    '),
+            DB::raw('m.start_datetime'),
+            DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
+            DB::raw('
+                            case 
+                                when c.register_date > m.start_datetime then true else false
+                            end as new_face 
+                        '),
+            DB::raw('
+                            case 
+                                when c_m_l.id is null then false else true
+                            end as readed
+                        '),
+            DB::raw("
+                            case
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｶ-ｺ]' then 2
+                                when c.name_kana regexp '^[ｻ-ｿ]' then 3
+                                when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when c.name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when c.name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when c.name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when c.name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when c.name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when c.name_kana regexp '^[ﾜ-ﾝ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
+        ])
+            ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
+            ->join('users as u', function($join) use ($shop) {
+                $join->on('m_u.user_id', '=', 'u.id')
+                    ->where('u.shop_id', '=', $shop);
+            })
+            ->leftJoin('crews as c', 'u.id', 'c.user_id')
+            ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
+                $join->on('c_m_l.crew_id', '=', 'c.id')
+                    ->where('c_m_l.message_id', '=', $message);
+            })
+            ->where('m.id', '=', $message)
+            ->orderBy('c.name_kana', 'asc')
+            ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
+
+    }
+
+    public function getOrgMessageViewRate(Request $request)
+    {
+        $org_type = $request["org_type"];
+        $org_id = $request["org_id"];
+        $message = $request["message"];
+
+
+        $crews = DB::table('messages as m')
+        ->select([
+            DB::raw('
+                     c.part_code as part_code,
+                     c.name as name,
+                     c.name_kana as name_kana,
+                     c.id as c_id
+                    '),
+            DB::raw('m.start_datetime'),
+            DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
+            DB::raw('
+                            case 
+                                when c.register_date > m.start_datetime then true else false
+                            end as new_face 
+                        '),
+            DB::raw('
+                            case 
+                                when c_m_l.id is null then false else true
+                            end as readed
+                        '),
+            DB::raw("
+                            case
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｶ-ｺ]' then 2
+                                when c.name_kana regexp '^[ｻ-ｿ]' then 3
+                                when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
+                                when c.name_kana regexp '^[ﾅ-ﾉ]' then 5
+                                when c.name_kana regexp '^[ﾊ-ﾎ]' then 6
+                                when c.name_kana regexp '^[ﾏ-ﾓ]' then 7
+                                when c.name_kana regexp '^[ﾔ-ﾖ]' then 8
+                                when c.name_kana regexp '^[ﾗ-ﾛ]' then 9
+                                when c.name_kana regexp '^[ﾜ-ﾝ]' then 10
+                                else 0
+                            end as name_sort
+                        "),
+        ])
+            ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
+            ->Join('users as u', 'm_u.user_id', 'u.id')
+            ->Join('shops as s', function ($join) use ($org_id, $org_type) {
+                $join->on('s.id', '=', 'u.shop_id')
+                    ->when($org_type == 'Org1', function ($join) use ($org_id) {
+                        $join->where('s.organization1_id', '=', $org_id);
+                    })
+                    ->when($org_type == 'DS', function($join) use ($org_id) {
+                        $join->where('s.organization3_id', '=', $org_id);
+                    })
+                    ->when($org_type == 'AR', function ($join) use ($org_id) {
+                        $join->where('s.organization4_id', '=', $org_id);
+                    })
+                    ->when($org_type == 'BL', function ($join) use ($org_id) {
+                        $join->where('s.organization5_id', '=', $org_id);
+                    });
+            })
+            ->Join('crews as c', 'u.id', 'c.user_id')
+            ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
+                $join->on('c_m_l.crew_id', '=', 'c.id')
+                ->where('c_m_l.message_id', '=', $message);
+            })
+            ->where('m.id', '=', $message)
+            ->orderBy('c.name_kana', 'asc')
+            ->get();
+
+        return response()->json([
+            'crews' => $crews,
+        ], 200);
     }
 }

@@ -213,7 +213,7 @@ class MessageController extends Controller
                                 when name_kana regexp '^[ﾏ-ﾓ]' then 7
                                 when name_kana regexp '^[ﾔ-ﾖ]' then 8
                                 when name_kana regexp '^[ﾗ-ﾛ]' then 9
-                                when name_kana regexp '^[ﾜ-ｦ]' then 10
+                                when name_kana regexp '^[ﾜ-ﾝ]' then 10
                                 else 0
                             end as name_sort
                         "),
@@ -262,7 +262,7 @@ class MessageController extends Controller
                                 when c.name_kana regexp '^[ﾏ-ﾓ]' then 7
                                 when c.name_kana regexp '^[ﾔ-ﾖ]' then 8
                                 when c.name_kana regexp '^[ﾗ-ﾛ]' then 9
-                                when c.name_kana regexp '^[ﾜ-ｦ]' then 10
+                                when c.name_kana regexp '^[ﾜ-ﾝ]' then 10
                                 else 0
                             end as name_sort
                         "),

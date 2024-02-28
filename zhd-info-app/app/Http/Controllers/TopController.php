@@ -8,9 +8,12 @@ use Illuminate\Support\Facades\DB;
 
 class TopController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = session('member');
+
+        $request->session()->forget('check_crew');
+        $request->session()->forget('reading_crews');
 
         $start_date_time = Carbon::now()->subDays(7)->startOfDay();
         // 新着件数
