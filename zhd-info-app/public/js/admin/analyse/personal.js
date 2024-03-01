@@ -31,7 +31,7 @@ $(window).on('load' , function(){
 
 /* 汎用モーダル処理 */
 function modalAnim(e){
-	let modalTarget = $('.modal[data-modal-target='+e+']')
+	let modalTarget = $('.modal2[data-modal-target='+e+']')
 	if(modalTarget.length){
 		$('.modalBg').show();
 		modalTarget.show();	
@@ -68,12 +68,12 @@ $(document).on('click' , '.readUser__switch__item', function(){
 });
 
 $(document).on('click' , '.modal__close, .modalBg', function(e){
-	if($(this).hasClass('modalBg') && $(e).closest('.modal')){
+	if($(this).hasClass('modalBg') && $(e).closest('.modal2')){
 		$('.modalBg').hide();
-		$('.modal').hide();
+		$('.modal2').hide();
 	}else{
 		$('.modalBg').hide();
-		$('.modal').hide();
+		$('.modal2').hide();
 	}
 });
 
