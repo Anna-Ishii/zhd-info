@@ -291,16 +291,17 @@ class ImportImsCsvCommand extends Command
 
         // 削除する店舗一覧のID
         $diff_shop_id = array_diff($shop_list, $regiter_shop_id);
-        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();;
+        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
 
         $delete_shop = array_merge($diff_shop, $close_shop);
-        $diff_shop_user = User::query()->whereIn('shop_id', $delete_shop)->get();
+        $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
         foreach ($diff_shop_user as $key => $user) {
             $user->message()->detach();
             $user->manual()->detach();
+
         }
-        User::query()->whereIn('shop_id', $diff_shop_id)->forceDelete();
-        Shop::whereIn('id', $diff_shop_id)->delete();
+        User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
+        Shop::whereIn('id', $delete_shop)->delete();
 
         // ログ出力
         $this->info("---新しい店舗---");
