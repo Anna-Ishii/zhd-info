@@ -1070,7 +1070,7 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   cursor: pointer;
 }
 
-.modal {
+.modal2 {
   display: none;
   z-index: 999999;
   position: fixed;
