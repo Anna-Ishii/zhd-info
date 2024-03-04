@@ -52,7 +52,6 @@ class ImportImsCsvCommand extends Command
 
         $now = new Carbon('now');
         $now_str = $now->format("Ymd");
-        $now_str = "20240221";
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
