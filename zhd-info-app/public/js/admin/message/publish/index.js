@@ -75,7 +75,7 @@ $(window).on('load' , function(){
 		 defaultDate: d,
 	});	
     $('#readedDateFrom').datetimepicker({
-		format:'Y/m/d(D) H:i',
+		format:'Y/m/d (D) H:i',
 		onShow:function( ct ){
 			this.setOptions({
 				maxDate:jQuery('#readedDateTo').val()?jQuery('#readedDateTo').val():false
@@ -84,7 +84,7 @@ $(window).on('load' , function(){
 		 defaultDate: d,
 	});	
 	$('#readedDateTo').datetimepicker({
-		format:'Y/m/d(D) H:i',
+		format:'Y/m/d (D) H:i',
 		onShow:function( ct ){
 			this.setOptions({
 				minDate:jQuery('#readedDateFrom').val()?jQuery('#readedDateFrom').val():false

@@ -5,21 +5,24 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 <li>
-                    <a href="#" class="nav-label">業務連絡</a>
+                    <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">配信</a></li>
-                    </ul>
-                </li>
-                <li class="nav-current-page">
-                    <a href="#" class="nav-label">動画マニュアル</span></a>
-                    <ul class="nav nav-second-level">
-                        <li><a href="/admin/manual/publish/">配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
                 <li>
-                    <a href="#" class="nav-label">アカウント管理</span></a>
+                    <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">アカウント</a></li>
+                        <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">3.管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">3-1.アカウント</a></li>
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
+                        </li>
                     </ul>
                 </li>
                 <li>
@@ -73,15 +76,6 @@
                     @endforeach
                 </select>
             </div>    
-
-			<div class="input-group spMb16">
-                <label class="input-group-addon">店舗コード</label>
-                <input type="text" name="shop_code" class="form-control" value="{{ request()->input('shop_code')}}">
-            </div>
-            <div class="input-group spMb16">
-                <label class="input-group-addon">店舗名</label>
-                <input type="text" name="shop_name" class="form-control" value="{{ request()->input('shop_name')}}">
-            </div>
             <div class="input-group spMb16">
                 <label class="input-group-addon">DS</label>
                 <select name="org3" class="form-control">
@@ -110,6 +104,10 @@
                     <option value="{{ $org4->organization_id }}" {{ request()->input('org4') == $org4->organization_id ? 'selected' : ''}}>{{ $org4->organization_name }}</option>
                     @endforeach
                 </select>
+            </div>
+            <div class="input-group spMb16">
+                <label class="input-group-addon">店舗</label>
+                <input type="text" name="shop_freeword" class="form-control" value="{{ request()->input('shop_freeword')}}">
             </div>
             <div class="input-group spMb16">
                 <label class="input-group-addon">既読状況</label>
@@ -144,6 +142,7 @@
         <table id="list" class="table-list table table-bordered table-hover table-condensed text-center">
             <thead>
                 <tr>
+                    <th class="text-center">業態</th>
                     <th class="text-center">DS</th>
                     <th class="text-center">BL</th>
                     <th class="text-center">AR</th>
@@ -155,10 +154,11 @@
             <tbody>
                 @foreach ($user_list as $user)
                 <tr>
+                    <td>{{$user->shop->brand->name}}</td>
                     <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
                     <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>
                     <td>{{$user->shop->organization4 ? $user->shop->organization4->name : "-"}}</td>
-                    <td>{{$user->shop->shop_code}}</td>
+                    <td>{{substr($user->shop->shop_code, -4)}}</td>
                     <td>{{$user->shop->name}}</td>
                     <td>{{$user->pivot->read_flg ? "既読" : "未読"}}</td>
                     <td>{{$user->pivot->formatted_readed_datetime}}</td>

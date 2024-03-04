@@ -18,7 +18,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 
-class ShopCreateCommnad extends Command
+class ShopCreateCommand extends Command
 {
     /**
      * The name and signature of the console command.

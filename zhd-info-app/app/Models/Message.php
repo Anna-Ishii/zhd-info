@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\DB;
 
 class Message extends Model
 {
@@ -277,5 +278,25 @@ class Message extends Model
                 );
 
         return $query->where('start_datetime', '>=', $startDateTime);
+    }
+
+    public function putCrewRead(array $crews = []) :Void
+    {
+        $params = [];
+        foreach ($crews as $crew) {
+            $exists = DB::table('crew_message_logs')
+                ->where('crew_id', $crew)
+                ->where('message_id', $this->attributes['id'])
+                ->exists();
+            if($exists) continue; // すでに既読してたら、登録しない
+            $params[] = [
+                'crew_id' => $crew,
+                'message_id' => $this->attributes['id'],
+                'readed_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+        DB::table('crew_message_logs')->insert($params);
     }
 }
