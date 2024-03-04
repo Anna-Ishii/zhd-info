@@ -1,8 +1,10 @@
 <?php
 
 use App\Http\Controllers\Admin\Account\AccountController;
+use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\Manage\ImsController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
 use App\Http\Controllers\Admin\Setting\ChangePasswordController;
@@ -34,6 +36,11 @@ Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth']
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
     Route::get('/search', [MessageController::class, 'search'])->name('search');
+    Route::get('/crews', [MessageController::class, 'getCrews'])->name('get-crews');
+    Route::post('/crews', [MessageController::class, 'putCrews'])->name('crews');
+    Route::post('/reading', [MessageController::class, 'putReading'])->name('reading');
+    Route::get('/crews-message', [MessageController::class, 'getCrewsMessage'])->name('crew-message');
+    Route::post('/crews-logout', [MessageController::class, 'crewsLogout'])->name("crew-logout");
 });
 Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
@@ -93,7 +100,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
-
+    Route::group(['prefix' => 'manage', 'as' => 'manage'], function () {
+        Route::get('ims', [ImsController::class, 'index'])->name('index');
+    });
+    Route::group(['prefix' => 'analyse', 'as' => 'analyse.'], function () {
+        Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
+        Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
+        Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
+        Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);
+    });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {
         return redirect(route('admin.message.publish.index'));

@@ -14,11 +14,6 @@
           <div class="search__flexBox">
             <div class="search__flexBox__name">
               <input type="text" name="keyword" placeholder="キーワードを入れてください" value="{{ request()->input('keyword', '')}} ">
-              <p>上位検索ワード：
-                @foreach ($keywords as $k)
-                    <a class="keyword_button">{{$k->keyword}}</a>
-                @endforeach
-              </p>
             </div>
             <select name="search_period" class="search__flexBox__limit">
               <option value="null" hidden>検索期間を選択</option>
@@ -28,6 +23,22 @@
             </select>
             <button type="submit" class="btnType1">検索</button>
           </div>
+            <div class="search__flexBox alignCenter">
+              <p>上位検索ワード：
+                @foreach ($keywords as $k)
+                    <a class="keyword_button">{{$k->keyword}}</a>
+                @endforeach
+              </p>
+
+              @if (session('check_crew'))
+                <div>
+                  <input type="checkbox" id="not_read_check" name="not_read_check" value="1" {{ request()->input('not_read_check') == 1 ? 'checked' : ''}}>
+                  <label for="not_read_check">未読（白）のみ表示</label>
+                </div>
+              @else
+                <button type="button" class="btnType3 btnChangeStatus" data-view-status="limit">閲覧状況の表示</button>
+              @endif
+            </div>
         </form>
       </div>
 
@@ -43,12 +54,27 @@
           <div class="list__title">
             タイトル
           </div>
-          <div class="list__limit">掲載期間</div>
+          <div class="list__status">
+            <div class="list__status__limit">掲載期間</div>
+            <div class="list__status__read">閲覧履歴</div>
+          </div>
         </div>
-        <div class="list__items">
+
+{{-- @foreach ($user->crew as $crew)
+    <div class="crew">
+      <div>
+      {{$crew->id}} {{$crew->part_code}} {{$crew->name}}さん
+      @if (in_array((int)$crew->id, session()->get('crews', []), true))
+          <span>チェック</span>
+      @endif
+      </div>
+      <input type="button" data-crew-id="{{$crew->id}}" value="選択">
+    </div>
+@endforeach --}}
         @foreach ($messages as $message)
-        <a href="{{ route('message.detail',['message_id' => $message->id])}}" class="">
-          <div class="list__item">
+        <a href="" class="btnModal" data-modal-target="read">
+          <div class="list__item {{ session('check_crew') && isset($message->readed_crew_count) && $message->readed_crew_count != 0 ? 'readed' : ''}}">
+            <div class="list__id" hidden>{{$message->id}}</div>
             <div class="list__no">{{$message->number}}</div>
             <div class="list__category">{{$message->category?->name}}</div>
             <div class="list__title">
@@ -61,10 +87,13 @@
               <ul class="tags">
                 @foreach ($message->tag as $tag)
                     <li>{{$tag->name}}</li>
-                @endforeach
+                @endforeach    
               </ul>
             </div>
-            <div class="list__limit">{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}}</div>
+            <div class="list__status">
+              <div class="list__status__limit">{{$message->start_datetime?->isoFormat('MM/DD')}}〜{{$message->end_datetime?->isoFormat('MM/DD')}}</div>
+              <div class="list__status__read">{{$message->view_rate}}%( {{$message->readed_crew_count}}/ {{$message->crew_count}})</div>
+            </div>
           </div>
         </a>
         @endforeach
@@ -74,6 +103,29 @@
 
   </div>
 </div>
+
+
+<div class="modal" data-modal-target="read">
+  <div class="modal__inner">
+    <div class="readUser">
+      <ul class="readUser__switch">
+        <li class="readUser__switch__item isSelected" data-readuser-target="1">未読()</li>
+        <li class="readUser__switch__item" data-readuser-target="2">既読()</li>
+      </ul>
+      <div class="readUser__sort">
+        <p>配信時：</p>
+        <button type="button" class="isSelected" data-readuser-belong="1">所属()</button>
+        <button type="button" class="" data-readuser-belong="2">未所属()</button>
+      </div>
+      <ul class="readUser__list" data-readuser-target="1"></ul>
+      <ul class="readUser__list" data-readUser-target="2" style="display:none;">
+    </div>
+    <div class="modal__btnInner">
+      <button type="button" class="btnType3 modal__close">閉じる</button>
+    </div>  
+  </div>
+</div>
+
 
 <script src="{{ asset('/js/common.js') }}" defer></script>
 @endsection

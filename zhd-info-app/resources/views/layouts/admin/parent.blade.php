@@ -25,8 +25,8 @@
     <link href="{{ asset('/admin/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
 
     <!-- Custom CSS -->
-    <link href="{{ asset('/admin/css/sb-admin-2.css') }}" rel="stylesheet">
-    <link href="{{ asset('/admin/css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/sb-admin-2.css') }}?20240117" rel="stylesheet">
+    <link href="{{ asset('/admin/css/style.css') }}?20240117" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.css" integrity="sha512-bYPO5jmStZ9WI2602V2zaivdAnbAhtfzmxnEGh9RwtlI00I9s8ulGe4oBa5XxiC6tCITJH/QG70jswBhbLkxPw==" crossorigin="anonymous" />
 
     <script src="{{ asset('/admin/js/jquery.min.js') }}"></script>
@@ -82,8 +82,28 @@
             <span class="spinner"></span>
         </div>
     </div>
-
+    <div class="modalBg"></div>
         <!-- モーダル・ダイアログ -->
+    <div class="modal" data-modal-target="read">
+        <div class="modal__inner">
+            <div class="readUser">
+                <ul class="readUser__switch">
+                    <li class="readUser__switch__item isSelected" data-readuser-target="1">未読()</li>
+                    <li class="readUser__switch__item" data-readuser-target="2">既読()</li>
+                </ul>
+                <div class="readUser__sort">
+                    <p>配信時：</p>
+                    <button type="button" class="isSelected" data-readuser-belong="1">所属()</button>
+                    <button type="button" class="" data-readuser-belong="2">未所属()</button>
+                </div>
+                <ul class="readUser__list" data-readuser-target="1"></ul>
+                <ul class="readUser__list" data-readUser-target="2" style="display:none;">
+            </div>
+            <div class="modal__btnInner">
+                <button type="button" class="btnType3 modal__close">閉じる</button>
+            </div>  
+        </div>
+    </div>
     @include('common.admin.message-import-modal')
     @include('common.admin.manual-import-modal')
     
