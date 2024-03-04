@@ -84,7 +84,7 @@
     </div>
     <div class="modalBg"></div>
         <!-- モーダル・ダイアログ -->
-    <div class="modal" data-modal-target="read">
+    <div class="modal2" data-modal-target="read">
         <div class="modal__inner">
             <div class="readUser">
                 <ul class="readUser__switch">

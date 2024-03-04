@@ -288,5 +288,5 @@
 
 </script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.0.2/list.min.js"></script>
-<script src="{{ asset('/js/admin/analyse/personal.js') }}" defer></script>
+<script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
 @endsection
