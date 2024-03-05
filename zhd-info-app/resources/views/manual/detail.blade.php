@@ -17,11 +17,6 @@
             </div>
             <ul class="header__menu flex">
                 <li>
-                    <a href="#" class="btnMoveFolder" data-target-name="moveFolder">
-                        <img src="{{ asset('img/icon_folder_open.svg') }}" alt="">
-                    </a>
-                </li>
-                <li>
                     <button type="button" class="btnPrint">
                         <img src="{{ asset('img/icon_print.svg') }}" alt="印刷する">
                     </button>
