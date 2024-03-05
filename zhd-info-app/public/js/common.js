@@ -5,6 +5,9 @@ window.addEventListener('pageshow', function (event) {
         window.location.reload();
     }
 });
+if($('.sortMenu').hasClass('isActive')){
+	$("body").css("position", "fixed");
+}
 $(document).on('click', '.btnSidebar , .sidebar__close' , function(){
 	$('.sidebarBg , .sidebar').toggleClass('isActive');
 });
@@ -31,11 +34,12 @@ $(document).on('click' , '.btnAddLabel' , function(){
 	}
 });
 
-$(document).on('click' , '.btnSort', function(){
+$(document).on('click' , '.btnSort', function(event){
 	let chkMenu = $('.sortMenu');
 	if(!chkMenu.is(':visible')){
 		event.preventDefault();
 		$('.sortMenu').addClass('isActive');
+		$("body").css("position", "fixed");
 		$('.btnSort').empty().text('ホーム');
 	}else{
 		return true;
