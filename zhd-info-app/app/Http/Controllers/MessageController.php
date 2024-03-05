@@ -162,6 +162,7 @@ class MessageController extends Controller
 
     public function putReading(Request $request)
     {
+        $user = session('member');
         $reading_crews = $request->input('read_edit_radio',[]);
         $message_id = $request->input('message');
         
@@ -173,9 +174,12 @@ class MessageController extends Controller
             DB::beginTransaction();
             $message = Message::findOrFail($message_id);
             $message->putCrewRead($reading_crews);
+            $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message_id, [
+                'read_flg' => true,
+                'readed_datetime' => Carbon::now(),
+            ]);
             DB::commit();
-            return
-            redirect()->to($message->content_url)->withInput();
+            return redirect()->to($message->content_url)->withInput();
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
