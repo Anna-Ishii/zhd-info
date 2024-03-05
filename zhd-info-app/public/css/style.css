@@ -478,13 +478,13 @@ input, select {
 }
 
 .sortMenu {
-  z-index: 10010;
+  z-index: 10001;
   display: none;
   position: fixed;
   top: 48px;
   left: 0;
   width: 100%;
-  height: calc(100% - 104px);
+  height: calc(100% - 98px);
   padding-bottom: 52px;
   background: #FFF;
   /* /box */
