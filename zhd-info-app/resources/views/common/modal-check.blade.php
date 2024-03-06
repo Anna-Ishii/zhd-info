@@ -5,11 +5,18 @@
         <div class="readEdit">
             <div class="readEdit__menu">
                 <p>業務連絡の閲覧状況を確認する方の名前を選択してください。</p>
-                {{-- <div class="readEdit__menu__inner">
+                <div class="readEdit__menu__inner">
+                    <div>
+                        <span>表示切り替え：</span>
+                        <input type="radio" name="edit_sort" value="3" id="editSort3" checked="checked">
+                        <label for="editSort3">名前</label>
+                        <input type="radio" name="edit_sort" value="4" id="editSort4">
+                        <label for="editSort4">従業員番号</label>
+                    </div>
                     <input type="text" placeholder="キーワードで検索">
-                </div> --}}
+                </div>
             </div>
-            <div class="readEdit__list">
+            <div class="readEdit__list sort_name">
                 <div class="readEdit__list__head">ア行</div>
                 <div class="readEdit__list__accordion" data-sort-num="1">
                 <ul></ul>
@@ -54,6 +61,15 @@
                 <div class="readEdit__list__accordion" data-sort-num="0">
                 <ul></ul>
                 </div>
+            </div>
+            <div class="readEdit__list sort_code" style="display: none;">
+            </div>
+            <div class="readEdit__list filter_word" style="display: none;">
+                <div class="readEdit__list__head isOpen" style="display: none;"></div>
+                <div class="readEdit__list__accordion">
+                    <ul></ul>
+                </div>
+                
             </div>
         </div>
 

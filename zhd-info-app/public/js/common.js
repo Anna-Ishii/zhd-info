@@ -1,4 +1,6 @@
 "use strict";
+const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
 window.addEventListener('pageshow', function (event) {
     if (event.persisted) {
         // バックボタンでページが再表示された場合にリロードする
@@ -399,43 +401,66 @@ $(document).on('click', '.list__status__read', function(e) {
 	})
 })
 
-$(document).on('click', '.btnModal[data-modal-target="check"]', function(e) {
+$(document).on('click', '.btnModal[data-modal-target="check"]', async function(e) {
 	e.preventDefault();
-	console.log(window.location.href);
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+	// 初期化
+	$('.modal input[type="text"]').val("");
+	$(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
+	$(`.modal[data-modal-target="check"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
+	$('.modal[data-modal-target="check"] form input[name="current_url"]').remove();
+
 	$('.modal[data-modal-target="check"] form').append(`
 		<input type="hidden" name="current_url" value="${window.location.href}">
 	`);
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews',
-		data: {
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+
+	await crewsData.fetchCheckCrews()
+	
+	crewsData.crews.forEach((value, index) => {
+		// 名前
+		$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+			<li>
+				${value.part_code} ${value.name} 
+				<input type="radio" name="read_edit_radio[]" id="user_${value.part_code}_radio" data-code="${value.part_code}" value="${value.id}">
+				<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
+			</li>
+		`)
 	})
-	.done(function(res) {
-		let crews = res.crews;
 
-		crews.forEach((value, index, array) => {
+	crewsData.sortCode();
 
-			$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-				<li>
-					${value.part_code} ${value.name} 
-					<input type="radio" name="read_edit_radio[]" id="user_${value.part_code}_radio" value="${value.id}">
+	let sortCodeHeader = "";
+	let _index = "";
+	let count = 0;
+	crewsData.crews.forEach((value, index, array) => {
+		// 従業員番号
+		if(count === 0) _index = value.part_code
+
+			sortCodeHeader += 
+				`<li>${value.part_code} ${value.name}
+					<input type="radio" id="user_${value.part_code}" data-code="${value.part_code}" value="${value.c_id}">
 					<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
 				</li>
-			`)
+			`;
 
-		});
-
-		let target = "check";
-		modalAnim(target);
-	}).fail(function(error){
-		console.log(error);
+			if((count + 1) % 10 == 0 || count == crewsData.crews.length + 1) {
+				let head = `
+					<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
+					<div class="readEdit__list__accordion">
+						<ul>
+							${sortCodeHeader}
+						</ul>
+					</div>
+				`;
+				$(`.modal[data-modal-target="check"] .sort_code`).append(head);
+				sortCodeHeader = "";
+				_index = crewsData.crews[index+1]?.part_code;
+			}
+		count++;
 	})
+
+	let target = "check";
+	modalAnim(target);
 
 })
 
@@ -546,14 +571,23 @@ $(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , fu
 	let txtReplaceTarget = $(this).parents('.modal__inner').find('button[type=submit]');
 	txtReplaceTarget.text('表示する('+chkTarget.length+'人選択中)');
 });
+
+$(document).on('click' , '.readEdit__list__accordion input[type=radio]' , function(){
+	let code = $(this).data("code");
+	$(this).parents('div[data-modal-target="check"]').find(`.readEdit__list input`).prop('checked', false);
+	let checkRadio = $(this).parents('div[data-modal-target="check"]').find(`input[data-code="${code}"]`);
+	checkRadio.prop('checked',true);
+});
+
 /* 閲覧従業員選択 */
 $(document).on('change' , '.readEdit__list__accordion input[type=radio]' , function(){
-	let txtResetTarget = $(this).parents('.readEdit__list').find('.readEdit__list__check');
+	let txtResetTarget = $(this).parents('.readEdit').find('.readEdit__list__check');
 	txtResetTarget.text('未選択');
+	let id = $(this).attr('id');
 	if($(this).prop('checked')){
-		$(this).siblings('label').text('選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
 	}else{
-		$(this).siblings('label').text('未選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
 	}
 
 	let chkRadioEnable = $(this).parents('.readEdit__list').find('input[type=radio]:checked');
@@ -581,9 +615,14 @@ $(document).on('change' , '#read_users_sort' , function(){
 	}
 });
 
+var currnt_sort_value = 1;
 /* 名前・従業員番号切り替え仮置き（必要なら） */
 $(document).on('change' , '.readEdit__menu__inner input[type=radio]' , function(){
 	let sort_value = $(this).val();
+	currnt_sort_value = sort_value;
+	let searchText = $(this).parents('.readEdit__menu__inner').find('input[type="text"]').val();
+	if(searchText.length != 0) return;
+
 	if(sort_value == 1 || sort_value == 3){
 		$('.readEdit__list.sort_name').show();
 		$('.readEdit__list.sort_code').hide();
@@ -611,30 +650,34 @@ $(document).on('input', '.modal input[type="text"]', function () {
 	readEdit_filterWord.find('ul').empty()
 	let li_crew_dom = ``;
 	if(searchText.length == 0){
-		readEdit_sortName.show()
-		// readEdit_sortCode.show()
+		// let sort_value = $(this).parents('.readEdit').find(".readEdit__menu__inner input[type=radio]").val()
+		if(currnt_sort_value == 1 || currnt_sort_value == 3){
+			readEdit_sortName.show()
+			readEdit_sortCode.hide()
+		}
+		if(currnt_sort_value == 2 || currnt_sort_value == 4){
+			readEdit_sortName.hide()
+			readEdit_sortCode.show()
+		}
 		readEdit_filterWord.hide()
 	}else{
 		readEdit_sortName.hide();
-		// readEdit_sortCode.hide();
+		readEdit_sortCode.hide();
 		readEdit_filterWord.show()
 
-		const filteredData = []  // フィルタリング
-		getCrewsData.filter(item =>
+		crewsData.crews.filter(item =>
 			Object.values(item).some((value, index) => {
-				if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
+				// if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
 					if(value.toString().includes(searchText_formatted)){
-						filteredData.push(item);
-
-						let isChecked = $(`#user_${item['part_code']}`).prop('checked');
+						let isChecked = $(`#user_${item.part_code}`).prop('checked');
 						li_crew_dom += 
-							`<li>${item['part_code']} ${item['name']}
-								<input type="checkbox"  value="${item['c_id']}" ${isChecked ? "checked" : ""}>
-								<label for="user_${item['part_code']}" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+							`<li>${item.part_code} ${item.name}
+								<input type="checkbox"  value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+								<label for="user_${item.part_code}_radio" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
 							</li>`;
 						
 					}
-				}
+				// }
 			})
 		);
 		readEdit_filterWord.find('ul').append(li_crew_dom);
@@ -653,4 +696,60 @@ function normalizeString(str) {
 
     // 文字列を正規化して返す
     return hiraganaToKatakana(str).toLowerCase();
+}
+
+const crewsData = {
+	crews: null,
+	
+	// 既読チェックするときのクルーを取得
+	fetchCheckCrews: async function () {
+		const url = '/message/crews';
+
+		await fetchData(url)
+			.done(data => {
+				this.crews = data.crews
+			})
+	},
+
+	// 既読するときのクルーを取得
+	fetchReadCrews: function (message_id) {
+		const url = '/message/crews-message';
+
+		fetchData(url)
+			.done(data => {
+				this.crews = data.crews
+			})
+	},
+	// フリーワード検索
+	searchCrews: function (text) {
+		
+	},
+	// 従業員番号でソートする
+	sortCode: function () {
+		this.crews.sort((a, b) => {
+			return a.id - b.id;
+		})
+	} 
+}
+
+function fetchData(url, options = {}) {
+  // デフォルトの設定を指定
+  const defaultOptions = {
+    method: 'GET',
+    dataType: 'json', // 応答のデータタイプ
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+    // 他のオプションをここに追加できます
+    ...options,
+  };
+
+  // jQueryの$.ajax()を使用してAjaxリクエストを実行
+  return $.ajax({
+    url,
+    ...defaultOptions,
+  }).fail((jqXHR, textStatus, errorThrown) => {
+    console.error('Ajax error:', textStatus, errorThrown);
+    throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
+  });
 }
