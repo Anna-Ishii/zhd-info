@@ -404,8 +404,13 @@ $(document).on('click', '.list__status__read', function(e) {
 $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e) {
 	e.preventDefault();
 
-	// 初期化
+	$('#editSort3').prop('checked', true);
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.sort_name').show();
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.sort_code').hide();
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.filter_word').hide();
 	$('.modal input[type="text"]').val("");
+
+	// 初期化
 	$(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
 	$(`.modal[data-modal-target="check"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
 	$('.modal[data-modal-target="check"] form input[name="current_url"]').remove();
@@ -438,12 +443,12 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 
 			sortCodeHeader += 
 				`<li>${value.part_code} ${value.name}
-					<input type="radio" id="user_${value.part_code}" data-code="${value.part_code}" value="${value.c_id}">
+					<input type="radio" data-code="${value.part_code}" value="${value.c_id}">
 					<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
 				</li>
 			`;
 
-			if((count + 1) % 10 == 0 || count == crewsData.crews.length + 1) {
+			if((count + 1) % 10 == 0 || index + 1 == crewsData.crews.length) {
 				let head = `
 					<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
 					<div class="readEdit__list__accordion">
@@ -466,8 +471,14 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 
 var clickMessage;
 var getCrewsData;
-$(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
+$(document).on('click', '.btnModal[data-modal-target="read"]', async function(e) {
 	e.preventDefault();
+
+	$('#editSort1').prop('checked', true);
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.sort_name').show();
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.sort_code').hide();
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.filter_word').hide();
+	$('.modal input[type="text"]').val("");
 
 	let btnModel = $(this).closest('.btnModal');
 	clickMessage = btnModel;
@@ -477,6 +488,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 	
 	// 初期化
 	$(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
+	$(`.modal[data-modal-target="edit"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
 	$('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
 
@@ -489,70 +501,60 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 		return;
 	}
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+	await crewsData.fetchReadCrews(message);
+	
+	editUserListTargetForm.append(`
+		<input type="hidden" name="message" value="${message}">
+	`);
+
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+				<li> ${value.part_code} ${value.name}
+					<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}_check" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label>
+				</li>
+			`)
+		}
 	})
-	.done(function(res) {
-		let crews = res.crews;
-		getCrewsData = res.crews;
 
-		editUserListTargetForm.append(`
-			<input type="hidden" name="message" value="${message}">
-		`);
+	crewsData.sortCode();
+	let sortCodeHeader = "";
+	let _index = "";
+	let count = 0;
 
-		let sortCodeHeader = "";
-		let _index = "";
-		let count = 0;
-		crews.forEach((value, index, array) => {
-			if (value.readed == 0) {
-				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-					<li> ${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
-					</li>
-				`)
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			if(count === 0) _index = value.part_code
 
-				if(count === 0) _index = value.part_code
+			sortCodeHeader += `<li>${value.part_code} ${value.name}
+					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
+			`;
 
-				sortCodeHeader += `<li>${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
+			console.log(`${index}, ${crewsData.crews.length}`);
+			if((count + 1) % 10 == 0 || index + 1 == crewsData.crews.length ) {
+				let head = `
+					<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
+					<div class="readEdit__list__accordion">
+						<ul>
+							${sortCodeHeader}
+						</ul>
+					</div>
 				`;
-
-				if((count + 1) % 10 == 0 || count == crews.length + 1) {
-					let head = `
-						<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
-						<div class="readEdit__list__accordion">
-							<ul>
-								${sortCodeHeader}
-							</ul>
-						</div>
-					`;
-					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
-					sortCodeHeader = "";
-					_index = crews[index+1]?.part_code;
-				}
-
-				count++;
+				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+				sortCodeHeader = "";
+				_index = crewsData.crews[index+1]?.part_code;
 			}
-		})
 
-
-		let target = btnModel.data('modal-target');
-		target = "edit";
-		modalAnim(target);
-
-	}).fail(function(error){
-		console.log(error);
+			count++;
+		}
 	})
+	
+	let target = btnModel.data('modal-target');
+	target = "edit";
+	modalAnim(target);
+
 })
 
 
@@ -560,12 +562,27 @@ $(document).on('click' , '.readEdit__list__head' , function(){
 	$(this).toggleClass('isOpen');
 })
 
+$(document).on('click' , '.readEdit__list__accordion input[type=checkbox]' , function(){
+	let code = $(this).data("code");
+
+	let check = $(this).parents('div[data-modal-target="edit"]').find(`input[data-code="${code}"]`);
+
+	if($(this).prop('checked')){
+		// $(this).siblings('label').text('選択');
+		check.prop('checked', true)
+	}else{
+		// $(this).siblings('label').text('未選択');
+		check.prop('checked', false)
+	}
+});
+
 /* 各従業員の閲覧管理 */
 $(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , function(){
+	let id = $(this).attr('id');
 	if($(this).prop('checked')){
-		$(this).siblings('label').text('選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
 	}else{
-		$(this).siblings('label').text('未選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
 	}
 	let chkTarget = $(this).parents('.readEdit__list').find('input[type=checkbox]:checked');
 	let txtReplaceTarget = $(this).parents('.modal__inner').find('button[type=submit]');
@@ -665,21 +682,51 @@ $(document).on('input', '.modal input[type="text"]', function () {
 		readEdit_sortCode.hide();
 		readEdit_filterWord.show()
 
-		crewsData.crews.filter(item =>
-			Object.values(item).some((value, index) => {
-				// if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
-					if(value.toString().includes(searchText_formatted)){
-						let isChecked = $(`#user_${item.part_code}`).prop('checked');
-						li_crew_dom += 
-							`<li>${item.part_code} ${item.name}
-								<input type="checkbox"  value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
-								<label for="user_${item.part_code}_radio" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
-							</li>`;
+		let modal_target = $(this).parents('.modal').data('modal-target');
+		if (modal_target == "check") {
+			crewsData.crews.filter(item =>
+				Object.values(item).some((value, index) => {
+					// if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
+						if(value?.toString().includes(kanaFullToHalf(searchText_formatted))){
+							let isChecked = $(`#user_${item.part_code}_radio`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="radio"  value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_radio" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
+					// }
+				})
+			);
+		}else if(modal_target == "edit") {
+			crewsData.crews.filter(item =>
+				Object.values(item).some((value, index) => {
+					if(index == PARTCODE_INDEX || index == NAME_INDEX){
+						if(value?.toString().includes(searchText_formatted) && item.readed == 0){
+							let isChecked = $(`#user_${item.part_code}_check`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="checkbox" value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_check" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
 						
+					}else if(index == NAMEKANA_INDEX){
+						if(value.includes(kanaFullToHalf(searchText_formatted)) && item.readed == 0){
+							let isChecked = $(`#user_${item.part_code}_check`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="checkbox" value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_check" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
 					}
-				// }
-			})
-		);
+				})
+			);
+		}
 		readEdit_filterWord.find('ul').append(li_crew_dom);
 	}
 
@@ -712,10 +759,13 @@ const crewsData = {
 	},
 
 	// 既読するときのクルーを取得
-	fetchReadCrews: function (message_id) {
+	fetchReadCrews: async function (message_id) {
 		const url = '/message/crews-message';
-
-		fetchData(url)
+		const data = { message : message_id}
+		const options = {
+			data: data
+		}
+		await fetchData(url, options)
 			.done(data => {
 				this.crews = data.crews
 			})
@@ -727,7 +777,7 @@ const crewsData = {
 	// 従業員番号でソートする
 	sortCode: function () {
 		this.crews.sort((a, b) => {
-			return a.id - b.id;
+			return a.part_code - b.part_code;
 		})
 	} 
 }
@@ -752,4 +802,33 @@ function fetchData(url, options = {}) {
     console.error('Ajax error:', textStatus, errorThrown);
     throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
   });
+}
+
+function kanaFullToHalf(str){
+    let kanaMap = {
+        "ガ": "ｶﾞ", "ギ": "ｷﾞ", "グ": "ｸﾞ", "ゲ": "ｹﾞ", "ゴ": "ｺﾞ",
+        "ザ": "ｻﾞ", "ジ": "ｼﾞ", "ズ": "ｽﾞ", "ゼ": "ｾﾞ", "ゾ": "ｿﾞ",
+        "ダ": "ﾀﾞ", "ヂ": "ﾁﾞ", "ヅ": "ﾂﾞ", "デ": "ﾃﾞ", "ド": "ﾄﾞ",
+        "バ": "ﾊﾞ", "ビ": "ﾋﾞ", "ブ": "ﾌﾞ", "ベ": "ﾍﾞ", "ボ": "ﾎﾞ",
+        "パ": "ﾊﾟ", "ピ": "ﾋﾟ", "プ": "ﾌﾟ", "ペ": "ﾍﾟ", "ポ": "ﾎﾟ",
+        "ヴ": "ｳﾞ", "ヷ": "ﾜﾞ", "ヺ": "ｦﾞ",
+        "ア": "ｱ", "イ": "ｲ", "ウ": "ｳ", "エ": "ｴ", "オ": "ｵ",
+        "カ": "ｶ", "キ": "ｷ", "ク": "ｸ", "ケ": "ｹ", "コ": "ｺ",
+        "サ": "ｻ", "シ": "ｼ", "ス": "ｽ", "セ": "ｾ", "ソ": "ｿ",
+        "タ": "ﾀ", "チ": "ﾁ", "ツ": "ﾂ", "テ": "ﾃ", "ト": "ﾄ",
+        "ナ": "ﾅ", "ニ": "ﾆ", "ヌ": "ﾇ", "ネ": "ﾈ", "ノ": "ﾉ",
+        "ハ": "ﾊ", "ヒ": "ﾋ", "フ": "ﾌ", "ヘ": "ﾍ", "ホ": "ﾎ",
+        "マ": "ﾏ", "ミ": "ﾐ", "ム": "ﾑ", "メ": "ﾒ", "モ": "ﾓ",
+        "ヤ": "ﾔ", "ユ": "ﾕ", "ヨ": "ﾖ",
+        "ラ": "ﾗ", "リ": "ﾘ", "ル": "ﾙ", "レ": "ﾚ", "ロ": "ﾛ",
+        "ワ": "ﾜ", "ヲ": "ｦ", "ン": "ﾝ",
+        "ァ": "ｧ", "ィ": "ｨ", "ゥ": "ｩ", "ェ": "ｪ", "ォ": "ｫ",
+        "ッ": "ｯ", "ャ": "ｬ", "ュ": "ｭ", "ョ": "ｮ",
+        "。": "｡", "、": "､", "ー": "ｰ", "「": "｢", "」": "｣", "・": "･",
+        "　": " "
+    };
+    let reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g');
+    return str.replace(reg, function(s){
+        return kanaMap[s];
+    }).replace(/゛/g, 'ﾞ').replace(/゜/g, 'ﾟ');
 }

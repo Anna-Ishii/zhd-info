@@ -69,7 +69,6 @@
                 <div class="readEdit__list__accordion">
                     <ul></ul>
                 </div>
-                
             </div>
         </div>
 
