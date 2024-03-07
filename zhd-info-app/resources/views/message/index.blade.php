@@ -127,5 +127,5 @@
 </div>
 
 
-<script src="{{ asset('/js/common.js') }}" defer></script>
+<script src="{{ asset('/js/common.js') }}?date=20240307" defer></script>
 @endsection
