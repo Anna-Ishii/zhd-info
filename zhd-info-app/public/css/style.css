@@ -814,6 +814,11 @@ input, select {
   height: auto;
   transform: translateY(0);
 }
+.readEdit__list__head.isOpen_check + .readEdit__list__accordion {
+  opacity: 1;
+  height: auto;
+  transform: translateY(0);
+}
 .readEdit__btnInner {
   display: flex;
   justify-content: space-between;

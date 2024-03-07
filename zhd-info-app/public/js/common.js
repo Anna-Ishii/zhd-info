@@ -170,7 +170,6 @@ $(document).on('click', '.modal[data-modal-target="continue"] .modal__close', as
 					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
 			`;
 
-			console.log(`${index}, ${crewsData.crews.length}`);
 			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
 				let head = `
 					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
@@ -414,17 +413,15 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	let count = 0;
 	const maxRow = 15; // アコーディオンの最大行数
 	crewsData.crews.forEach((value, index, array) => {
-		// 従業員番号
-		if(count === 0) headFrom_part_code = value.part_code
+		if (value.readed == 0) {
+			if(count === 0) headFrom_part_code = value.part_code
 
-			sortCodeHeader += 
-				`<li>${value.part_code} ${value.name}
-					<input type="radio" data-code="${value.part_code}" value="${value.c_id}">
-					<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
-				</li>
+			sortCodeHeader += `<li>${value.part_code} ${value.name}
+					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
 			`;
 
-			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length) {
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
 				let head = `
 					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
 					<div class="readEdit__list__accordion">
@@ -433,11 +430,13 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 						</ul>
 					</div>
 				`;
-				$(`.modal[data-modal-target="check"] .sort_code`).append(head);
+				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
 				sortCodeHeader = "";
 				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
-		count++;
+
+			count++;
+		}
 	})
 
 	let target = "check";
@@ -455,6 +454,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 	$('.modal[data-modal-target="edit"]').find('.readEdit__list.sort_code').hide();
 	$('.modal[data-modal-target="edit"]').find('.readEdit__list.filter_word').hide();
 	$('.modal input[type="text"]').val("");
+	$('#read_users_sort').prop('checked', false)
 
 	let btnModel = $(this).closest('.btnModal');
 	clickMessage = btnModel;
@@ -507,7 +507,6 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
 			`;
 
-			console.log(`${index}, ${crewsData.crews.length}`);
 			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
 				let head = `
 					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
@@ -593,17 +592,22 @@ $(document).on('change' , '.readEdit__list__accordion input[type=radio]' , funct
 
 /* 選択中のみ表示 */
 $(document).on('change' , '#read_users_sort' , function(){
+	let targetListHead = $(this).siblings('.readEdit__list').find('.readEdit__list__head');
 	if($(this).is(':checked')){
 		let targetCheck = $(this).siblings('.readEdit__list').find('input[type=checkbox]');
+		targetListHead.hide();
+		targetListHead.addClass("isOpen_check");
 		targetCheck.each(function(){
 			/* 各従業員のチェックを確認 */
 			if(!$(this).is(':checked')){
-				let parents = $(this).parents('li').hide();
+				$(this).parents('li').hide();
 			}
 		});
 	}else{
 		let targetList = $(this).siblings('.readEdit__list').find('li');
 		targetList.show();
+		targetListHead.show();
+		targetListHead.removeClass("isOpen_check");
 	}
 });
 
