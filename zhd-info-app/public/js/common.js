@@ -384,6 +384,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	$('.modal[data-modal-target="check"]').find('.readEdit__list.filter_word').hide();
 	$('.modal input[type="text"]').val("");
 
+
 	// 初期化
 	$(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
 	$(`.modal[data-modal-target="check"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
@@ -392,6 +393,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	$('.modal[data-modal-target="check"] form').append(`
 		<input type="hidden" name="current_url" value="${window.location.href}">
 	`);
+	currnt_sort_value = 1
 
 	await crewsData.fetchCheckCrews()
 	
@@ -413,30 +415,30 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	let count = 0;
 	const maxRow = 15; // アコーディオンの最大行数
 	crewsData.crews.forEach((value, index, array) => {
-		if (value.readed == 0) {
-			if(count === 0) headFrom_part_code = value.part_code
 
-			sortCodeHeader += `<li>${value.part_code} ${value.name}
-					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
-					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
+		if(count === 0) headFrom_part_code = value.part_code
+
+		sortCodeHeader += `<li>${value.part_code} ${value.name}
+				<input type="radio" data-code="${value.part_code}" value="${value.c_id}">
+				<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label></li>
+		`;
+
+		if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
+			let head = `
+				<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
+				<div class="readEdit__list__accordion">
+					<ul>
+						${sortCodeHeader}
+					</ul>
+				</div>
 			`;
-
-			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
-				let head = `
-					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
-					<div class="readEdit__list__accordion">
-						<ul>
-							${sortCodeHeader}
-						</ul>
-					</div>
-				`;
-				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
-				sortCodeHeader = "";
-				headFrom_part_code = crewsData.crews[index+1]?.part_code;
-			}
-
-			count++;
+			$(`.modal[data-modal-target="check"] .sort_code`).append(head);
+			sortCodeHeader = "";
+			headFrom_part_code = crewsData.crews[index+1]?.part_code;
 		}
+
+		count++;
+		
 	})
 
 	let target = "check";
@@ -592,7 +594,7 @@ $(document).on('change' , '.readEdit__list__accordion input[type=radio]' , funct
 
 /* 選択中のみ表示 */
 $(document).on('change' , '#read_users_sort' , function(){
-	let targetListHead = $(this).siblings('.readEdit__list').find('.readEdit__list__head');
+	let targetListHead = $(this).siblings('.readEdit__list:not(".filter_word")').find('.readEdit__list__head');
 	if($(this).is(':checked')){
 		let targetCheck = $(this).siblings('.readEdit__list').find('input[type=checkbox]');
 		targetListHead.hide();
