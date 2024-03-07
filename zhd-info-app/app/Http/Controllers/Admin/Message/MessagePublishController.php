@@ -220,19 +220,20 @@ class MessagePublishController extends Controller
                                 ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
                                 ->distinct('organization4_id')
                                 ->distinct('organization5_id')
-                                ->select('organization2_id', 'organization2.name as organization2_name', 
-                                         'organization3_id', 'organization3.name as organization3_name',
-                                         'organization4_id', 'organization4.name as organization4_name',
-                                         'organization5_id', 'organization5.name as organization5_name')
+                                ->select('organization2_id', 'organization2.name as organization2_name', 'organization2.order_no as organization2_order_no',
+                                         'organization3_id', 'organization3.name as organization3_name', 'organization3.order_no as organization3_order_no',
+                                         'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
+                                         'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
+                                         )
                                 ->where('organization1_id', $admin->organization1_id)
                                 ->orderByRaw('organization2_id is null asc')
                                 ->orderByRaw('organization3_id is null asc')
                                 ->orderByRaw('organization4_id is null asc')
                                 ->orderByRaw('organization5_id is null asc')
-                                ->orderBy("organization2_id", "asc")
-                                ->orderBy("organization3_id", "asc")
-                                ->orderBy("organization4_id", "asc")
-                                ->orderBy("organization5_id", "asc")
+                                ->orderBy("organization2_order_no", "asc")
+                                ->orderBy("organization3_order_no", "asc")
+                                ->orderBy("organization4_order_no", "asc")
+                                ->orderBy("organization5_order_no", "asc")
                                 ->get()
                                 ->toArray();
 
@@ -365,28 +366,29 @@ class MessagePublishController extends Controller
 
         $organization_list = [];
         $organization_list = Shop::query()
-                                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
-                                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-                                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-                                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-                                ->distinct('organization4_id')
-                                ->distinct('organization5_id')
-                                ->select('organization2_id', 'organization2.name as organization2_name',
-                                         'organization3_id', 'organization3.name as organization3_name',
-                                         'organization4_id', 'organization4.name as organization4_name',
-                                         'organization5_id', 'organization5.name as organization5_name')
-                                ->where('organization1_id', $admin->organization1_id)
-                                ->orderByRaw('organization2_id is null asc')
-                                ->orderByRaw('organization3_id is null asc')
-                                ->orderByRaw('organization4_id is null asc')
-                                ->orderByRaw('organization5_id is null asc')
-                                ->orderBy("organization2_id", "asc")
-                                ->orderBy("organization3_id", "asc")
-                                ->orderBy("organization4_id", "asc")
-                                ->orderBy("organization5_id", "asc")
-                                ->get()
-                                ->toArray();
-
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id', 'organization2.name as organization2_name', 'organization2.order_no as organization2_order_no',
+                'organization3_id', 'organization3.name as organization3_name', 'organization3.order_no as organization3_order_no',
+                'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
+                'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $admin->organization1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
                     
         $organization_type = 5;  // ブロックを表示する
         if (!Organization1Repository::isExistOrg5($admin->organization1_id)) {
