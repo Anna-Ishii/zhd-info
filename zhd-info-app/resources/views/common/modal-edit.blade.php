@@ -7,9 +7,16 @@
       <div class="readEdit__menu">
         <p>業務連絡を閲覧する方の名前を選択してください。</p>
         <p>履歴を残さない場合は選択せずに「表示する」を押してください。</p>
-        {{-- <div class="readEdit__menu__inner">
-          <input type="text" placeholder="キーワードで検索">
-        </div> --}}
+        <div class="readEdit__menu__inner">
+            <div>
+                <span>表示切り替え：</span>
+                <input type="radio" name="edit_sort" value="1" id="editSort1" checked="checked">
+                <label for="editSort1">名前</label>
+                <input type="radio" name="edit_sort" value="2" id="editSort2">
+                <label for="editSort2">従業員番号</label>
+            </div>
+            <input type="text" placeholder="キーワードで検索">
+        </div>
       </div>
       @if (session('reading_crews'))
         <div id="reading_crews" hidden></div>
@@ -64,9 +71,14 @@
         </div>
       </div>
 
-      <div class="readEdit__list sort_code" style="display: none;"></div>
-      <div class="readEdit__list filter_word"><div class="readEdit__list__accordion not_readEdit__list__accordion"><ul></ul></div></div>
-      
+      <div class="readEdit__list sort_code" style="display: none;">
+      </div>
+      <div class="readEdit__list filter_word" style="display: none;">
+          <div class="readEdit__list__head isOpen" style="display: none;"></div>
+          <div class="readEdit__list__accordion">
+              <ul></ul>
+          </div>
+      </div>
     </div>
 
     <div class="readEdit__btnInner">
