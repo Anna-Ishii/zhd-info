@@ -318,8 +318,10 @@ class PersonalContoller extends Controller
                     $query->where('shops.organization5_id', '=', $org['BL']);
                 })
                 ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
-                    $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
-                        ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
+                    $query->where(function ($query) use ($shop_freeword) {
+                        $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
+                            ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
+                    });
                 })
                 ->orderBy('organization3.id')
                 ->orderBy('organization4.id')
