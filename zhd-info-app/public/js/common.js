@@ -130,9 +130,8 @@ function modalAnim(e){
 // 		userSort(target);
 // 	}
 // });
-$(document).on('click', '.modal[data-modal-target="continue"] .modal__close', function(e) {
+$(document).on('click', '.modal[data-modal-target="continue"] .modal__close', async function() {
 	let btnModel = clickMessage;
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 	let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 	
@@ -140,65 +139,60 @@ $(document).on('click', '.modal[data-modal-target="continue"] .modal__close', fu
 	$(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
 	$('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+	await crewsData.fetchReadCrews(message);
+	
+	editUserListTargetForm.append(`
+		<input type="hidden" name="message" value="${message}">
+	`);
+
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+				<li> ${value.part_code} ${value.name}
+					<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}_check" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label>
+				</li>
+			`)
+		}
 	})
-	.done(function(res) {
-		let crews = res.crews;
 
-		editUserListTargetForm.append(`
-			<input type="hidden" name="message" value="${message}">
-		`);
+	crewsData.sortCode();
+	let sortCodeHeader = "";
+	let headFrom_part_code = "";
+	let count = 0;
+	const maxRow = 15; // アコーディオンの最大行数
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			if(count === 0) headFrom_part_code = value.part_code
 
-		let sortCodeHeader = "";
-		let from_part_code = "";
-		let count = 0;
-		crews.forEach((value, index, array) => {
-			if (value.readed == 0) {
-				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-					<li>
-						${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
-					</li>
-				`)
+			sortCodeHeader += `<li>${value.part_code} ${value.name}
+					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
+			`;
 
-				if(count === 0) from_part_code = value.part_code
-
-				sortCodeHeader += `<li>${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
+			console.log(`${index}, ${crewsData.crews.length}`);
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
+				let head = `
+					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
+					<div class="readEdit__list__accordion">
+						<ul>
+							${sortCodeHeader}
+						</ul>
+					</div>
 				`;
-
-				if((count + 1) % 10 == 0 || count == crews.length + 1) {
-					let head = `
-						<div class="readEdit__list__head">${from_part_code} ~ ${value.part_code}</div>
-						<div class="readEdit__list__accordion">
-							<ul>
-								${sortCodeHeader}
-							</ul>
-						</div>
-					`;
-					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
-					sortCodeHeader = "";
-					from_part_code = crews[index+1]?.part_code;
-				}
-
-				count++;
+				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+				sortCodeHeader = "";
+				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
-		})
-		let target = btnModel.data('modal-target');
-		target = "edit";
-		modalAnim(target);
+
+			count++;
+		}
 	})
+	
+	let target = btnModel.data('modal-target');
+	target = "edit";
+	modalAnim(target);
+	
 })
 
 $(document).on('click' , '.modal__close, .modalBg', function(e){
@@ -298,107 +292,88 @@ var modalReadCrewNotBelong = 0; // 未所属・既読数
 var modalNotReadCrewBelong = 0; // 所属・未読数
 var modalNotReadCrewNotBelong = 0; // 未所属・未読数
 
-$(document).on('click', '.list__status__read', function(e) {
+$(document).on('click', '.list__status__read', async function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	let btnModel = $(this).closest('.btnModal');
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken
-		},
-	})
-	.done(function(res) {
-		let crews = res.crews;
-		getCrewsData = res.crews;
+	await crewsData.fetchReadCrews(message);
 
-		let readUserListTarget1Element = $('.readUser__list[data-readuser-target="1"]');
-		let readUserListTarget2Element = $('.readUser__list[data-readuser-target="2"]');
+	let readUserListTarget1Element = $('.readUser__list[data-readuser-target="1"]');
+	let readUserListTarget2Element = $('.readUser__list[data-readuser-target="2"]');
 
-		readUserListTarget1Element.empty()
-		readUserListTarget2Element.empty()
-		modalReadCrew = 0;
-		modalNotReadCrew = 0;
-		modalReadCrewBelong = 0;
-		modalReadCrewNotBelong = 0;
-		modalNotReadCrewBelong = 0;
-		modalNotReadCrewNotBelong = 0;
+	readUserListTarget1Element.empty()
+	readUserListTarget2Element.empty()
+	modalReadCrew = 0;
+	modalNotReadCrew = 0;
+	modalReadCrewBelong = 0;
+	modalReadCrewNotBelong = 0;
+	modalNotReadCrewBelong = 0;
+	modalNotReadCrewNotBelong = 0;
 
-
-		crews.forEach((value, index, array) => {
-			let belong = value.new_face == 0 ? 1 : 2;
-			if (value.readed == 0) {
-				modalNotReadCrew++
-				if(value.new_face == 0) {
-					modalNotReadCrewBelong++
-					readUserListTarget1Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="1">${value.part_code} ${value.name}</li>
-					`)
-				}else {
-					modalNotReadCrewNotBelong++
-					readUserListTarget1Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="2">${value.part_code} ${value.name}</li>
-					`)
-				}
+	crewsData.crews.forEach((value) => {
+		if (value.readed == 0) {
+			modalNotReadCrew++
+			if(value.new_face == 0) {
+				modalNotReadCrewBelong++
+				readUserListTarget1Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="1">${value.part_code} ${value.name}</li>
+				`)
 			}else {
-				modalReadCrew++
-				if(value.new_face == 0) {
-					modalReadCrewBelong++
-					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="1">
-							<div>
-								<div>${value.part_code} ${value.name}</div>
-								<div>${value.readed_at}</div>
-							</div>
-						</li>
-					`)
-				}else {
-					modalReadCrewNotBelong++
-					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="2">
-							<div>
-								<div>${value.part_code} ${value.name}</div>
-								<div>${value.readed_at}</div>
-							</div>	
-						</li>
-					`)
-				}
+				modalNotReadCrewNotBelong++
+				readUserListTarget1Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="2">${value.part_code} ${value.name}</li>
+				`)
 			}
-		})
-
-		$(".readUser__switch__item[data-readuser-target='1']").text(`未読(${modalNotReadCrew})`);
-		$(".readUser__switch__item[data-readuser-target='2']").text(`既読(${modalReadCrew})`);
-
-
-		let chkTab = $(".readUser__switch__item.isSelected").data('readuser-target');
-		if(chkTab == 1) {
-			$('button[data-readuser-belong="1"]').text(`所属(${modalNotReadCrewBelong})`)
-			$('button[data-readuser-belong="2"]').text(`未所属(${modalNotReadCrewNotBelong})`)
 		}else {
-			$('button[data-readuser-belong="1"]').text(`所属(${modalReadCrewBelong})`)
-			$('button[data-readuser-belong="2"]').text(`未所属(${modalReadCrewNotBelong})`)
+			modalReadCrew++
+			if(value.new_face == 0) {
+				modalReadCrewBelong++
+				readUserListTarget2Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="1">
+						<div>
+							<div>${value.part_code} ${value.name}</div>
+							<div>${value.readed_at}</div>
+						</div>
+					</li>
+				`)
+			}else {
+				modalReadCrewNotBelong++
+				readUserListTarget2Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="2">
+						<div>
+							<div>${value.part_code} ${value.name}</div>
+							<div>${value.readed_at}</div>
+						</div>	
+					</li>
+				`)
+			}
 		}
-
-		let target = btnModel.data('modal-target');
-		target = 'read';
-		modalAnim(target);
-
-		if(target == 'read'){
-			let target = $('.readUser__sort').find('.isSelected');
-			userSort(target);
-		}
-
-	}).fail(function(error){
-		console.log(error);
 	})
+
+	$(".readUser__switch__item[data-readuser-target='1']").text(`未読(${modalNotReadCrew})`);
+	$(".readUser__switch__item[data-readuser-target='2']").text(`既読(${modalReadCrew})`);
+
+
+	let chkTab = $(".readUser__switch__item.isSelected").data('readuser-target');
+	if(chkTab == 1) {
+		$('button[data-readuser-belong="1"]').text(`所属(${modalNotReadCrewBelong})`)
+		$('button[data-readuser-belong="2"]').text(`未所属(${modalNotReadCrewNotBelong})`)
+	}else {
+		$('button[data-readuser-belong="1"]').text(`所属(${modalReadCrewBelong})`)
+		$('button[data-readuser-belong="2"]').text(`未所属(${modalReadCrewNotBelong})`)
+	}
+
+	let target = btnModel.data('modal-target');
+	target = 'read';
+	modalAnim(target);
+
+	if(target == 'read'){
+		let target = $('.readUser__sort').find('.isSelected');
+		userSort(target);
+	}
+
 })
 
 $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e) {
@@ -435,11 +410,12 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	crewsData.sortCode();
 
 	let sortCodeHeader = "";
-	let _index = "";
+	let headFrom_part_code = "";
 	let count = 0;
+	const maxRow = 15; // アコーディオンの最大行数
 	crewsData.crews.forEach((value, index, array) => {
 		// 従業員番号
-		if(count === 0) _index = value.part_code
+		if(count === 0) headFrom_part_code = value.part_code
 
 			sortCodeHeader += 
 				`<li>${value.part_code} ${value.name}
@@ -448,9 +424,9 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 				</li>
 			`;
 
-			if((count + 1) % 10 == 0 || index + 1 == crewsData.crews.length) {
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length) {
 				let head = `
-					<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
+					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
 					<div class="readEdit__list__accordion">
 						<ul>
 							${sortCodeHeader}
@@ -459,7 +435,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 				`;
 				$(`.modal[data-modal-target="check"] .sort_code`).append(head);
 				sortCodeHeader = "";
-				_index = crewsData.crews[index+1]?.part_code;
+				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
 		count++;
 	})
@@ -482,7 +458,6 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 
 	let btnModel = $(this).closest('.btnModal');
 	clickMessage = btnModel;
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 	let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 	
@@ -520,12 +495,12 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 
 	crewsData.sortCode();
 	let sortCodeHeader = "";
-	let _index = "";
+	let headFrom_part_code = "";
 	let count = 0;
-
+	const maxRow = 15; // アコーディオンの最大行数
 	crewsData.crews.forEach((value, index, array) => {
 		if (value.readed == 0) {
-			if(count === 0) _index = value.part_code
+			if(count === 0) headFrom_part_code = value.part_code
 
 			sortCodeHeader += `<li>${value.part_code} ${value.name}
 					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
@@ -533,9 +508,9 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 			`;
 
 			console.log(`${index}, ${crewsData.crews.length}`);
-			if((count + 1) % 10 == 0 || index + 1 == crewsData.crews.length ) {
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
 				let head = `
-					<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
+					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
 					<div class="readEdit__list__accordion">
 						<ul>
 							${sortCodeHeader}
@@ -544,7 +519,7 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 				`;
 				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
 				sortCodeHeader = "";
-				_index = crewsData.crews[index+1]?.part_code;
+				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
 
 			count++;
@@ -562,16 +537,15 @@ $(document).on('click' , '.readEdit__list__head' , function(){
 	$(this).toggleClass('isOpen');
 })
 
+/* 各従業員の閲覧管理　チェックした情報をモーダル内で同期させる処理 */
 $(document).on('click' , '.readEdit__list__accordion input[type=checkbox]' , function(){
 	let code = $(this).data("code");
 
 	let check = $(this).parents('div[data-modal-target="edit"]').find(`input[data-code="${code}"]`);
 
 	if($(this).prop('checked')){
-		// $(this).siblings('label').text('選択');
 		check.prop('checked', true)
 	}else{
-		// $(this).siblings('label').text('未選択');
 		check.prop('checked', false)
 	}
 });
@@ -589,6 +563,7 @@ $(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , fu
 	txtReplaceTarget.text('表示する('+chkTarget.length+'人選択中)');
 });
 
+/* 閲覧従業員選択  選択した情報をモーダル内で同期させる処理*/
 $(document).on('click' , '.readEdit__list__accordion input[type=radio]' , function(){
 	let code = $(this).data("code");
 	$(this).parents('div[data-modal-target="check"]').find(`.readEdit__list input`).prop('checked', false);
@@ -667,7 +642,6 @@ $(document).on('input', '.modal input[type="text"]', function () {
 	readEdit_filterWord.find('ul').empty()
 	let li_crew_dom = ``;
 	if(searchText.length == 0){
-		// let sort_value = $(this).parents('.readEdit').find(".readEdit__menu__inner input[type=radio]").val()
 		if(currnt_sort_value == 1 || currnt_sort_value == 3){
 			readEdit_sortName.show()
 			readEdit_sortCode.hide()
@@ -686,7 +660,6 @@ $(document).on('input', '.modal input[type="text"]', function () {
 		if (modal_target == "check") {
 			crewsData.crews.filter(item =>
 				Object.values(item).some((value, index) => {
-					// if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
 						if(value?.toString().includes(kanaFullToHalf(searchText_formatted))){
 							let isChecked = $(`#user_${item.part_code}_radio`).prop('checked');
 							li_crew_dom += 
@@ -696,7 +669,6 @@ $(document).on('input', '.modal input[type="text"]', function () {
 								</li>`;
 							
 						}
-					// }
 				})
 			);
 		}else if(modal_target == "edit") {
@@ -770,10 +742,7 @@ const crewsData = {
 				this.crews = data.crews
 			})
 	},
-	// フリーワード検索
-	searchCrews: function (text) {
-		
-	},
+
 	// 従業員番号でソートする
 	sortCode: function () {
 		this.crews.sort((a, b) => {
