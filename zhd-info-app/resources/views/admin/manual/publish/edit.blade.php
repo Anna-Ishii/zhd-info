@@ -62,18 +62,6 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8"
-                      {{ ( old('category_id') ?  old('category_id') : $manual->category_id) == $category->id ? 'checked' : '' }}>
-                    {{ $category->name }}
-                </label>
-                @endforeach
-            </div>
-        </div>
-        <div class="form-group">
             <label class="col-lg-2 control-label" for="title">タイトル<span class="text-danger required">*<span></label>
             <div class="col-lg-4">
                 <input class="form-control" name="title" value="{{ old('title', $manual->title) }}" id="title">
