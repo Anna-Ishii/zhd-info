@@ -4,7 +4,6 @@ namespace App\Imports;
 
 use App\Models\Brand;
 use App\Models\Manual;
-use App\Models\ManualCategory;
 use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
 use App\Models\ManualTagMaster;
@@ -39,7 +38,6 @@ class ManualCsvImport implements
         $admin = session('admin');
         $this->brand = $this->getBrandNameArray($admin->organization1_id);
         array_push(($this->brand), "全て");
-        $this->category_list = ManualCategory::pluck('name')->toArray();
         $this->new_category_list = $this->getNewCategoryList();
     }
 
@@ -52,7 +50,6 @@ class ManualCsvImport implements
         foreach ($rows as $index => [
             $no,
             $new_cateory,
-            $category,
             $title,
             $tag1,
             $tag2,
@@ -84,7 +81,6 @@ class ManualCsvImport implements
             $new_category_level1_name = isset($new_category_array[0]) ? str_replace(' ', '', trim($new_category_array[0], "\"")) : NULL;
             $new_category_level2_name = isset($new_category_array[1]) ? str_replace(' ', '', trim($new_category_array[1], "\"")) : NULL;
 
-            $manual->category_id = isset($category) ? ManualCategory::where('name', $category)->pluck('id')->first() : NULL;
             $manual->category_level1_id = isset($new_category_array[0]) ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
             $manual->category_level2_id = isset($new_category_array[1]) ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
             $manual->title = $title;
@@ -133,7 +129,6 @@ class ManualCsvImport implements
         return [
             '0' => ['required'],
             '1' => ['nullable', Rule::in($this->new_category_list)],
-            '2' => ['nullable', Rule::in($this->category_list)],
             '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
         ];
     }
@@ -144,7 +139,6 @@ class ManualCsvImport implements
             '0.required' => 'Noは必須です',
             '0.int' => 'Noは数値である必要があります',
             '1.in' => 'カテゴリの項目が間違っています',
-            '2.in' => '旧カテゴリの項目が間違っています',
         ];
     }
 
