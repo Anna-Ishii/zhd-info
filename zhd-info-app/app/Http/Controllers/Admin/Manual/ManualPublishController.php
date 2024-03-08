@@ -14,7 +14,6 @@ use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Imports\ManualCsvImport;
 use App\Models\Manual;
-use App\Models\ManualCategory;
 use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
@@ -35,7 +34,6 @@ class ManualPublishController extends Controller
     public function index(Request $request)
     {
         $admin = session('admin');
-        $category_list = ManualCategory::all();
         $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
@@ -48,7 +46,6 @@ class ManualPublishController extends Controller
             ->get();
 
         // request
-        $category_id = $request->input('category');
         $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
@@ -58,7 +55,7 @@ class ManualPublishController extends Controller
 
         $manual_list =
             Manual::query()
-            ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
+            ->with('create_user', 'updated_user', 'brand', 'tag')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->selectRaw('
                         manuals.*,
@@ -100,9 +97,6 @@ class ManualPublishController extends Controller
             ->when(isset($new_category_id), function ($query) use ($new_category_id) {
                 $query->where('category_level2_id', $new_category_id);
             })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
-            })
             ->when(isset($brand_id), function ($query) use ($brand_id) {
                 $query->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
                     ->where('manual_brand.brand_id', '=', $brand_id);
@@ -129,7 +123,6 @@ class ManualPublishController extends Controller
             ->appends(request()->query());
 
         return view('admin.manual.publish.index', [
-            'category_list' => $category_list,
             'new_category_list' => $new_category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
