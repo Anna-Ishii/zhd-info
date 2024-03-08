@@ -289,7 +289,6 @@ class ManualPublishController extends Controller
         // ログインユーザーとは違う業態のものは編集画面を出さない
         if($manual->organization1_id != $admin->organization1_id) return redirect()->route('admin.manual.publish.index');
 
-        $category_list = ManualCategory::all();
         // 業態一覧を取得する
         $brand_list = AdminRepository::getBrands($admin);
         $target_brand = $manual->brand()->pluck('brands.id')->toArray();
@@ -308,7 +307,6 @@ class ManualPublishController extends Controller
 
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
-            'category_list' => $category_list,
             'brand_list' => $brand_list,
             'target_brand' => $target_brand,
             'contents' => $contents,
@@ -329,7 +327,6 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id);
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
-        $manual_params['category_id'] = $request->category_id;
         $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
         $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
