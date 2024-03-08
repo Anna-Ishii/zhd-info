@@ -241,6 +241,5 @@
 
     @include('common.footer')
 
-    <script src="{{ asset('/js/common.js') }}" defer></script>
     <script src="{{ asset('/js/detail.js') }}" defer></script>
     @endsection
