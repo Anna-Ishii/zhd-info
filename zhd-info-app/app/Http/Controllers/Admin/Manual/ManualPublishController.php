@@ -212,7 +212,6 @@ class ManualPublishController extends Controller
     {
         $admin = session("admin");
 
-        $category_list = ManualCategory::all();
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
                 'manual_category_level2s.id as id',
@@ -223,7 +222,6 @@ class ManualPublishController extends Controller
         $brand_list = AdminRepository::getBrands($admin);
 
         return view('admin.manual.publish.new', [
-            'category_list' => $category_list,
             'new_category_list' => $new_category_list,
             'brand_list' => $brand_list,
         ]);
@@ -236,7 +234,6 @@ class ManualPublishController extends Controller
         $admin = session('admin');
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
-        $manual_params['category_id'] = $request->category_id;
         $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
         $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
         $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
