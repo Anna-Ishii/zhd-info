@@ -4,7 +4,6 @@ namespace App\Exports;
 
 use App\Enums\PublishStatus;
 use App\Models\Manual;
-use App\Models\ManualCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
