@@ -153,6 +153,7 @@ class PersonalContoller extends Controller
                     DB::table('shops')
                     ->select([
                         DB::raw('organization3.id as id'),
+                        DB::raw('organization3.order_no as order_no'),
                         DB::raw('organization3.name as name'),
                         DB::raw('sub.count as count'),
                         DB::raw('sub.readed_count as readed_count'),
@@ -167,7 +168,7 @@ class PersonalContoller extends Controller
                         $query->where('shops.organization3_id', '=', $org['DS']);
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization3.id')
+                    ->orderBy('organization3.order_no')
                     ->get(); 
 
                 $viewrates['DS'][] = $viewrate;
@@ -201,6 +202,7 @@ class PersonalContoller extends Controller
                     DB::table('shops')
                     ->select([
                         DB::raw('organization4.id as id'),
+                        DB::raw('organization4.order_no as order_no'),
                         DB::raw('organization4.name as name'),
                         DB::raw('sub.count as count'),
                         DB::raw('sub.readed_count as readed_count'),
@@ -215,7 +217,7 @@ class PersonalContoller extends Controller
                         $query->where('shops.organization4_id', '=', $org['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization4.id')
+                    ->orderBy('organization4.order_no')
                     ->get(); 
 
                 $viewrates['AR'][] = $viewrate;
@@ -248,6 +250,7 @@ class PersonalContoller extends Controller
                     DB::table('shops')
                     ->select([
                         DB::raw('organization5.id as id'),
+                        DB::raw('organization5.order_no as order_no'),
                         DB::raw('organization5.name as name'),
                         DB::raw('sub.count as count'),
                         DB::raw('sub.readed_count as readed_count'),
@@ -262,7 +265,7 @@ class PersonalContoller extends Controller
                         $query->where('shops.organization5_id', '=', $org['BL']);
                     })
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization5.id')
+                    ->orderBy('organization5.order_no')
                     ->get();
 
                 $viewrates['BL'][] = $viewrate;
@@ -323,10 +326,10 @@ class PersonalContoller extends Controller
                             ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
                     });
                 })
-                ->orderBy('organization3.id')
-                ->orderBy('organization4.id')
-                ->orderBy('organization5.id')
-                ->groupBy('shops.id')
+                ->orderBy('organization3.order_no')
+                ->orderBy('organization4.order_no')
+                ->orderBy('organization5.order_no')
+                ->groupBy('shops.id','shops.shop_code', 'shops.display_name','shops.name','organization3.name','organization3.order_no', 'organization4.name', 'organization4.order_no', 'organization5.name', 'organization4.order_no',)
                 ->get();
                 
             $viewrates['shop'][] = $viewrate;
