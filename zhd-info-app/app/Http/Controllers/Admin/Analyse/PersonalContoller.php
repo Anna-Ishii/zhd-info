@@ -212,7 +212,7 @@ class PersonalContoller extends Controller
                     })
                     ->where('shops.organization1_id', '=', $admin->organization1_id)
                     ->when(isset($org['AR']), function ($query) use ($org) {
-                        $query->where('shops_organization4_id', '=', $org['AR']);
+                        $query->where('shops.organization4_id', '=', $org['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization4.id')
