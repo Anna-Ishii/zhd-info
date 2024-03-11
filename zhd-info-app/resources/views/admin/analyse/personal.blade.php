@@ -240,7 +240,7 @@
                     @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@endisset
                     @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@endisset
                     <td nowrap>{{$m_c->shop_code}}</td>
-                    <td nowrap>{{$m_c->shop_display_name}}</td>
+                    <td nowrap>{{$m_c->shop_name}}</td>
                     <td nowrap> 
                         <div class="view_rate_container">
                             <div>
