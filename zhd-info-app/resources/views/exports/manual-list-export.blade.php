@@ -3,7 +3,6 @@
         <tr>
             <th>No</th>
             <th>カテゴリ</th>
-            <th>旧カテゴリ</th>
             <th>タイトル</th>
             <th>タグ(1)</th>
             <th>タグ(2)</th>
@@ -30,7 +29,6 @@
                     {{"{$manual->category_level1->name}|{$manual->category_level2->name}"}}
                 @endif
                 </td>
-                <td>{{$manual->category?->name}}</td>
                 <td>{{$manual->title}}</td>
                 <td>{{$manual->tag->get(0)?->name}}</td>
                 <td>{{$manual->tag->get(1)?->name}}</td>
