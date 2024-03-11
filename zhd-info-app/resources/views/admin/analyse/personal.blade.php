@@ -41,17 +41,22 @@
         <!-- 絞り込み部分 -->
     <form method="get" class="mb24">
         <div class="form-group form-inline mb16 ">
-            @foreach ($organizations as $organization)
+            @foreach (['DS', 'AR', 'BL'] as $organization)
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">{{$organization}}</label>
-                <select name="org[{{$organization}}]" class="form-control">
-                    <option value="">全て</option>
-                    @foreach ($organization_list[$organization] as $org)
-                    <option value="{{ $org->id }}" {{ request()->input('org.'.$organization) == $org->id ? 'selected' : ''}}>{{ $org->name }}</option>
-                    @endforeach
-                </select>
+                @if(in_array($organization, $organizations, true))
+                    <select name="org[{{$organization}}]" class="form-control" >
+                        <option value="">全て</option>
+                            @foreach ($organization_list[$organization] as $org)
+                            <option value="{{ $org->id }}" {{ request()->input('org.'.$organization) == $org->id ? 'selected' : ''}}>{{ $org->name }}</option>
+                            @endforeach
+                    </select>
+                @else
+                    <select class="form-control" disabled></select>
+                @endif
             </div>   
             @endforeach
+
 			<div class="input-group spMb16">
                 <label class="input-group-addon">店舗</label>
                 <input type="text" name="shop_freeword" class="form-control" value="{{ request()->input('shop_freeword')}}">
