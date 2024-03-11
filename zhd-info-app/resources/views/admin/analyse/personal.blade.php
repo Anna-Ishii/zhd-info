@@ -103,7 +103,7 @@
         <table id="table" class="personal table table-bordered">
             <thead>
                 <tr>
-                    @foreach ($organizations as $organization)
+                    @foreach (['DS', 'AR', 'BL'] as $organization)
                         <th class="head1">{{$organization}}</th>
                     @endforeach
                     <th class="head1" colspan="2">店舗</th>
@@ -127,7 +127,7 @@
             @if (!request('shop_freeword'))
             <tbody>
                 <tr>
-                    <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
+                    <td colspan=5>{{$admin->organization1->name}}計</td>
                     <td nowrap>
                          <div class="view_rate_container">
                             <div>
@@ -181,7 +181,7 @@
                 @isset($viewrates[$organization][0])
                 @foreach ($viewrates[$organization][0] as $v_org_key => $v_o)
                 <tr>
-                    <td colspan="{{count($organizations) + 2}}">{{$v_o->name}}</td>
+                    <td colspan="5">{{$v_o->name}}</td>
                     <td nowrap>
                         <div class="view_rate_container">
                             <div>
@@ -234,11 +234,11 @@
             <tbody>
                 
                 @isset($viewrates['shop'][0])
-                                @foreach ($viewrates['shop'][0] as $v_key =>$m_c)
+                @foreach ($viewrates['shop'][0] as $v_key =>$m_c)
                 <tr>
-                    @isset($m_c->o3_name)<td class="orgDS" nowrap>{{$m_c->o3_name}}</td>@endisset
-                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@endisset
-                    @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@endisset
+                    @isset($m_c->o3_name)<td class="orgDS" nowrap>{{$m_c->o3_name}}</td>@else<td></td>@endisset
+                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@else<td></td>@endisset
+                    @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@else<td></td>@endisset
                     <td nowrap>{{$m_c->shop_code}}</td>
                     <td nowrap>{{$m_c->shop_name}}</td>
                     <td nowrap> 
