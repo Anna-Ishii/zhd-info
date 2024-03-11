@@ -63,8 +63,6 @@
 
   </div>
 </div>
-
-<script src="{{ asset('/js/common.js') }}?date=20240307" defer></script>
 <script>
 
 </script>
