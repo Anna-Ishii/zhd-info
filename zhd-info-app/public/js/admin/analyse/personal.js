@@ -24,6 +24,31 @@ $(window).on('load' , function(){
 		 defaultDate: d,
 	});	
 });
+$(document).ready(function () {
+	// テーブルソートの初期化
+	$("#table").tablesorter({
+		headers: {
+			'0': { 
+				sorter: false 
+			},
+			'1': { 
+				sorter: false 
+			},
+			'2': { 
+				sorter: false 
+			},
+			'3': { 
+				sorter: false 
+			},
+			'4': { 
+				sorter: false 
+			},
+			// '.head2': {
+			// 	sorter: "float",
+			// },
+		},
+	});
+});
 
 //
 // 店舗のポプアップのjs
