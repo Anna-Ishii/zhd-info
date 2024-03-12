@@ -41,7 +41,7 @@
         <!-- 絞り込み部分 -->
     <form method="get" class="mb24">
         <div class="form-group form-inline mb16 ">
-            @foreach (['DS', 'AR', 'BL'] as $organization)
+            @foreach (['DS', 'BL', 'AR'] as $organization)
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">{{$organization}}</label>
                 @if(in_array($organization, $organizations, true))
@@ -103,7 +103,7 @@
         <table id="table" class="personal table table-bordered {sorter:'metadata'}">
             <thead>
                 <tr>
-                    @foreach (['DS', 'AR', 'BL'] as $organization)
+                    @foreach (['DS', 'BL', 'AR'] as $organization)
                         <th class="head1">{{$organization}}</th>
                     @endforeach
                     <th class="head1" colspan="2">店舗</th>
@@ -237,8 +237,8 @@
                 @foreach ($viewrates['shop'][0] as $v_key =>$m_c)
                 <tr>
                     @isset($m_c->o3_name)<td class="orgDS" nowrap>{{$m_c->o3_name}}</td>@else<td></td>@endisset
-                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@else<td></td>@endisset
                     @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@else<td></td>@endisset
+                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@else<td></td>@endisset
                     <td nowrap>{{$m_c->shop_code}}</td>
                     <td nowrap>{{$m_c->shop_name}}</td>
                     <td nowrap> 
