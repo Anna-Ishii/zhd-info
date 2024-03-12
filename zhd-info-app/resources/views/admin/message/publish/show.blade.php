@@ -7,8 +7,8 @@
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
-                        <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                        <li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
                 <li>
