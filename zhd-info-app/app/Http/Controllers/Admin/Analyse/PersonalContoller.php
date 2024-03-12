@@ -300,7 +300,6 @@ class PersonalContoller extends Controller
                     DB::raw('organization4.name as o4_name'), 
                     DB::raw('organization3.name as o3_name'),
                     DB::raw('shops.name as shop_name'),
-                    DB::raw('shops.display_name as shop_display_name'),
                     DB::raw('shops.shop_code as shop_code'),
                     DB::raw('view_rate.*')
                 ])
@@ -329,7 +328,17 @@ class PersonalContoller extends Controller
                 ->orderBy('organization3.order_no')
                 ->orderBy('organization4.order_no')
                 ->orderBy('organization5.order_no')
-                ->groupBy('shops.id','shops.shop_code', 'shops.display_name','shops.name','organization3.name','organization3.order_no', 'organization4.name', 'organization4.order_no', 'organization5.name', 'organization4.order_no',)
+                ->orderBy('shops.shop_code')
+                ->groupBy(
+                    'shops.id',
+                    'shops.shop_code', 
+                    'shops.name',
+                    'organization3.name',
+                    'organization3.order_no', 
+                    'organization4.name', 
+                    'organization4.order_no', 
+                    'organization5.name', 
+                    'organization4.order_no',)
                 ->get();
                 
             $viewrates['shop'][] = $viewrate;
