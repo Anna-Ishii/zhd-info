@@ -203,9 +203,7 @@ class MessageController extends Controller
         $user = session('member');
         $crews = $user->crew()
             ->select([
-                DB::raw("
-                            * 
-                        "),
+                DB::raw(" * "),
                 DB::raw("
                             case
                                 when name_kana regexp '^[ｱ-ｵ]' then 1 
@@ -222,6 +220,7 @@ class MessageController extends Controller
                             end as name_sort
                         "),
             ])
+            ->orderBy("name_kana", 'asc')
             ->get();
 
         return response()->json([

@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Enums\SearchPeriod;
 use App\Models\Manual;
-use App\Models\ManualCategory;
 use App\Models\ManualCategoryLevel1;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

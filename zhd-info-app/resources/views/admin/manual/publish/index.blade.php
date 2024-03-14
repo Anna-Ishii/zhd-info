@@ -7,7 +7,7 @@
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
                         <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
@@ -56,15 +56,6 @@
                     <option value="">指定なし</option>
                     @foreach ($new_category_list as $category)
                     <option value="{{ $category->id }}" {{ request()->input('new_category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="input-group col-lg-2 spMb16">
-                <label class="input-group-addon">旧カテゴリ</label>
-                <select name="category" class="form-control">
-                    <option value="">指定なし</option>
-                    @foreach ($category_list as $category)
-                    <option value="{{ $category->id }}" {{ request()->input('category') == $category->id ? 'selected' : ''}}>{{ $category->name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -140,7 +131,6 @@
                                 <th class="text-center" nowrap>No</th>
                                 <th class="text-center" nowrap>対象業態</th>
                                 <th class="text-center" nowrap>カテゴリ</th>
-                                <th class="text-center" nowrap>旧カテゴリ</th>
                                 <th class="text-center" nowrap>タイトル</th>
                                 <th class="text-center" nowrap>検索タグ</th>
                                 <th class="text-center" colspan="2" nowrap>添付ファイル</th>
@@ -171,7 +161,6 @@
                                     @endif
                                     {{$manual->category_level2?->name}}
                                 </td>
-                                <td>{{$manual->category?->name}}</td>
                                 <td class="label-title">
                                     @if(isset($manual->content_url))
                                         <a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a>

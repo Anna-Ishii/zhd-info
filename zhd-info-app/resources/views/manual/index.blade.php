@@ -99,5 +99,4 @@
   'category_level1s' => $category_level1s
 ])
 
-<script src="{{ asset('/js/common.js') }}" defer></script>
 @endsection

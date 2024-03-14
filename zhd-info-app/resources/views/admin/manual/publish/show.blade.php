@@ -7,7 +7,7 @@
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
                         <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
@@ -53,7 +53,11 @@
             <tbody>
                 <tr>
                     <td>{{$manual->title}}</td>
-                    <td>{{$manual->category?->name}}</td>
+                    <td>@if($manual->category_level1)
+                            {{"{$manual->category_level1?->name} |"}}
+                        @endif
+                        {{$manual->category_level2?->name}}
+                    </td>
                     <td>{{$manual->brands_string($brands)}}</td>
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>

@@ -63,8 +63,6 @@
 
   </div>
 </div>
-
-<script src="{{ asset('/js/common.js') }}" defer></script>
 <script>
 
 </script>

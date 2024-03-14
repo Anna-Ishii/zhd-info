@@ -7,7 +7,7 @@
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
                         <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
@@ -41,17 +41,22 @@
         <!-- 絞り込み部分 -->
     <form method="get" class="mb24">
         <div class="form-group form-inline mb16 ">
-            @foreach ($organizations as $organization)
+            @foreach (['DS', 'BL', 'AR'] as $organization)
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">{{$organization}}</label>
-                <select name="org[{{$organization}}]" class="form-control">
-                    <option value="">全て</option>
-                    @foreach ($organization_list[$organization] as $org)
-                    <option value="{{ $org->id }}" {{ request()->input('org.'.$organization) == $org->id ? 'selected' : ''}}>{{ $org->name }}</option>
-                    @endforeach
-                </select>
+                @if(in_array($organization, $organizations, true))
+                    <select name="org[{{$organization}}]" class="form-control" >
+                        <option value="">全て</option>
+                            @foreach ($organization_list[$organization] as $org)
+                            <option value="{{ $org->id }}" {{ request()->input('org.'.$organization) == $org->id ? 'selected' : ''}}>{{ $org->name }}</option>
+                            @endforeach
+                    </select>
+                @else
+                    <select class="form-control" disabled></select>
+                @endif
             </div>   
             @endforeach
+
 			<div class="input-group spMb16">
                 <label class="input-group-addon">店舗</label>
                 <input type="text" name="shop_freeword" class="form-control" value="{{ request()->input('shop_freeword')}}">
@@ -95,16 +100,16 @@
     </form>
 
     <div class="message-tableInner table-responsive-xxl">
-        <table id="table" class="personal table table-bordered">
+        <table id="table" class="personal table table-bordered {sorter:'metadata'}">
             <thead>
                 <tr>
-                    @foreach ($organizations as $organization)
+                    @foreach (['DS', 'BL', 'AR'] as $organization)
                         <th class="head1">{{$organization}}</th>
                     @endforeach
                     <th class="head1" colspan="2">店舗</th>
                     <th class="head1" colspan="2">期間計</th>
                     @foreach ($messages as $m)
-                        <th class="head2" colspan="2">
+                        <th class="head2 {sorter:'metadata'}" colspan="2">
                             <div>{{$m->start_datetime?->isoFormat('YYYY/MM/DD')}}</div>
                             <div>
                                 @isset($m->content_url)
@@ -122,7 +127,7 @@
             @if (!request('shop_freeword'))
             <tbody>
                 <tr>
-                    <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
+                    <td colspan=5>{{$admin->organization1->name}}計</td>
                     <td nowrap>
                          <div class="view_rate_container">
                             <div>
@@ -176,7 +181,7 @@
                 @isset($viewrates[$organization][0])
                 @foreach ($viewrates[$organization][0] as $v_org_key => $v_o)
                 <tr>
-                    <td colspan="{{count($organizations) + 2}}">{{$v_o->name}}</td>
+                    <td colspan="5">{{$v_o->name}}</td>
                     <td nowrap>
                         <div class="view_rate_container">
                             <div>
@@ -192,19 +197,19 @@
                             $viewrate=0;
                             $viewrate=number_format($viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id], 1);
                         @endphp
-                        <td class={{$viewrate < 10 ? "under-quota" : ""}}><div>{{$viewrate}}%</div></td>
+                        <td class="{{$viewrate < 10 ? 'under-quota' : ''}} {sortValue: {{$viewrate}} }" ><div>{{$viewrate}}%</div></td>
                     @else
-                        <td class="under-quota"><div>0.0%</div></td>
+                        <td class="under-quota {sortValue: 0.0}"><div>0.0%</div></td>
                     @endif
                     @foreach ($messages as $key => $ms)
                         @isset($viewrates[$organization][$key][$v_org_key]->count)
-                        <td class="message-viewlate" data-message={{$messages[$key]->id}} data-org-id={{$v_o->id}} data-org-type={{$organization}} nowrap>
+                        <td class="message-viewlate {sortValue: {{$viewrates[$organization][$key][$v_org_key]->view_rate}} }" data-message={{$messages[$key]->id}} data-org-id={{$v_o->id}} data-org-type={{$organization}} nowrap>
                             <div class="view_rate view_rate_container" data-view-type="orgs">
                                 <div>{{$viewrates[$organization][$key][$v_org_key]->readed_count}} / </div>
                                 <div>{{$viewrates[$organization][$key][$v_org_key]->count}}</div>
                             </div>
                         </td>
-                        <td data-message={{$ms->id}} class="message-viewlate {{$viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? "under-quota" : ""}}">
+                        <td data-message={{$ms->id}} class="message-viewlate {{$viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? "under-quota" : ""}} ">
                             <div>{{$viewrates[$organization][$key][$v_org_key]->view_rate}}%</div>
                         </td>
                         @else
@@ -214,7 +219,7 @@
                                 <div>0 </div>
                             </div>
                         </td>
-                        <td class="under-quota"><div>0.0%</div></td>
+                        <td class="under-quota {sortValue: 0.0}"><div>0.0%</div></td>
                         @endisset
                     @endforeach
                 </tr>
@@ -229,13 +234,13 @@
             <tbody>
                 
                 @isset($viewrates['shop'][0])
-                                @foreach ($viewrates['shop'][0] as $v_key =>$m_c)
+                @foreach ($viewrates['shop'][0] as $v_key =>$m_c)
                 <tr>
-                    @isset($m_c->o3_name)<td class="orgDS" nowrap>{{$m_c->o3_name}}</td>@endisset
-                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@endisset
-                    @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@endisset
+                    @isset($m_c->o3_name)<td class="orgDS" nowrap>{{$m_c->o3_name}}</td>@else<td></td>@endisset
+                    @isset($m_c->o5_name)<td class="orgBL" nowrap>{{$m_c->o5_name}}</td>@else<td></td>@endisset
+                    @isset($m_c->o4_name)<td class="orgAR" nowrap>{{$m_c->o4_name}}</td>@else<td></td>@endisset
                     <td nowrap>{{$m_c->shop_code}}</td>
-                    <td nowrap>{{$m_c->shop_display_name}}</td>
+                    <td nowrap>{{$m_c->shop_name}}</td>
                     <td nowrap> 
                         <div class="view_rate_container">
                             <div>
@@ -251,29 +256,29 @@
                             $viewrate=0;
                             $viewrate=number_format(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1);
                         @endphp
-                        <td class={{$viewrate < 10 ? "under-quota" : ""}}><div>{{$viewrate}}%</div></td>
+                        <td class="{{$viewrate < 10 ? 'under-quota' : ''}} {sortValue: {{$viewrate}}}"><div>{{$viewrate}}%</div></td>
                     @else
-                    <td class="under-quota"><div>0.0%</div></td>
+                    <td class="under-quota {sortValue: 0.0}"><div>0.0%</div></td>
                     @endif
                     @foreach ($messages as $key => $ms)
                         @if(($viewrates['shop'][$key][$v_key]->count ?? 0) > 0)
-                        <td data-message={{$ms->id}} data-shop={{$viewrates['shop'][$key][$v_key]->_shop_id}} nowrap>
+                        <td data-message={{$ms->id}} data-shop={{$viewrates['shop'][$key][$v_key]->_shop_id}} class="{sortValue: {{$viewrates['shop'][$key][$v_key]->view_rate}}}" nowrap>
                             <div class="view_rate view_rate_container" data-view-type="shops">
                                 <div>{{$viewrates['shop'][$key][$v_key]->readed_count}} / </div>
                                 <div>{{$viewrates['shop'][$key][$v_key]->count}}</div>
                             </div>
                         </td nowrap>
-                        <td class={{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? "under-quota" : ""}} nowrap>
+                        <td class="{{$viewrates['shop'][$key][$v_key]->view_rate <  10 ? 'under-quota' : ''}} {sortValue: {{$viewrates['shop'][$key][$v_key]->view_rate}}}" nowrap>
                             <div>{{$viewrates['shop'][$key][$v_key]->view_rate ?? 0.0}}%</div>
                         </td>
                         @else
-                        <td nowrap>
+                        <td class="{sortValue: 0.0}" nowrap>
                             <div class="view_rate_container">
                                 <div>0 / </div>
                                 <div>0 </div>
                             </div>
                         </td>
-                        <td class="under-quota"><div>0.0%</div></td>
+                        <td class="under-quota {sortValue: 0.0}"><div>0.0%</div></td>
                         @endif
                     @endforeach
                 </tr>
@@ -287,6 +292,5 @@
 <script>
 
 </script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/1.0.2/list.min.js"></script>
 <script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
 @endsection

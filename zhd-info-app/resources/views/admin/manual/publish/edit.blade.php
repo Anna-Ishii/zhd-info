@@ -7,7 +7,7 @@
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡配信</a></li>
+                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
                         <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
                     </ul>
                 </li>
@@ -59,18 +59,6 @@
                         @endif
                     </select>
                 </label>
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-lg-2 control-label">旧カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">
-                @foreach ($category_list as $category)
-                <label class="mr16">
-                    <input type="radio" name="category_id" value="{{$category->id}}" class="mr8"
-                      {{ ( old('category_id') ?  old('category_id') : $manual->category_id) == $category->id ? 'checked' : '' }}>
-                    {{ $category->name }}
-                </label>
-                @endforeach
             </div>
         </div>
         <div class="form-group">
