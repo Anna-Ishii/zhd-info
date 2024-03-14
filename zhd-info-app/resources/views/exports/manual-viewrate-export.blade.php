@@ -23,7 +23,12 @@
     @foreach ($users as $user)
     <tr>
         <td>{{$manual->brands_string($brands)}}</td>
-        <td>{{$manual->category?->name}}</td>
+        <td>
+            @if($manual->category_level1)
+                {{"{$manual->category_level1?->name} |"}}
+            @endif
+            {{$manual->category_level2?->name}}
+        </td>
         <td>{{$manual->title}}</td>
         <td>{{$manual->formatted_start_datetime}}</td>
         <td>{{$manual->formatted_end_datetime}}</td>

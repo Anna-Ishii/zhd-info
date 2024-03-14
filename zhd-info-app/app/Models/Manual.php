@@ -6,7 +6,6 @@ use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -22,7 +21,6 @@ class Manual extends Model
     [
         'title',
         'description',
-        'category_id',
         'category_level1_id',
         'category_level2_id',
         'content_name',
@@ -71,11 +69,6 @@ class Manual extends Model
     public function updated_user(): HasOne
     {
         return $this->hasOne(Admin::class, 'id', 'updated_admin_id')->withTrashed();
-    }
-
-    public function category(): HasOne
-    {
-        return $this->hasOne(ManualCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
     public function category_level1(): HasOne

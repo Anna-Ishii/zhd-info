@@ -1,10 +1,15 @@
 "use strict";
+const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
 window.addEventListener('pageshow', function (event) {
     if (event.persisted) {
         // バックボタンでページが再表示された場合にリロードする
         window.location.reload();
     }
 });
+if($('.sortMenu').hasClass('isActive')){
+	$("body").css("position", "fixed");
+}
 $(document).on('click', '.btnSidebar , .sidebar__close' , function(){
 	$('.sidebarBg , .sidebar').toggleClass('isActive');
 });
@@ -31,11 +36,12 @@ $(document).on('click' , '.btnAddLabel' , function(){
 	}
 });
 
-$(document).on('click' , '.btnSort', function(){
+$(document).on('click' , '.btnSort', function(event){
 	let chkMenu = $('.sortMenu');
 	if(!chkMenu.is(':visible')){
 		event.preventDefault();
 		$('.sortMenu').addClass('isActive');
+		$("body").css("position", "fixed");
 		$('.btnSort').empty().text('ホーム');
 	}else{
 		return true;
@@ -124,9 +130,8 @@ function modalAnim(e){
 // 		userSort(target);
 // 	}
 // });
-$(document).on('click', '.modal[data-modal-target="continue"] .modal__close', function(e) {
+$(document).on('click', '.modal[data-modal-target="continue"] .modal__close', async function() {
 	let btnModel = clickMessage;
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 	let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 	
@@ -134,65 +139,59 @@ $(document).on('click', '.modal[data-modal-target="continue"] .modal__close', fu
 	$(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
 	$('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+	await crewsData.fetchReadCrews(message);
+	
+	editUserListTargetForm.append(`
+		<input type="hidden" name="message" value="${message}">
+	`);
+
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+				<li> ${value.part_code} ${value.name}
+					<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}_check" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label>
+				</li>
+			`)
+		}
 	})
-	.done(function(res) {
-		let crews = res.crews;
 
-		editUserListTargetForm.append(`
-			<input type="hidden" name="message" value="${message}">
-		`);
+	crewsData.sortCode();
+	let sortCodeHeader = "";
+	let headFrom_part_code = "";
+	let count = 0;
+	const maxRow = 15; // アコーディオンの最大行数
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			if(count === 0) headFrom_part_code = value.part_code
 
-		let sortCodeHeader = "";
-		let from_part_code = "";
-		let count = 0;
-		crews.forEach((value, index, array) => {
-			if (value.readed == 0) {
-				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-					<li>
-						${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
-					</li>
-				`)
+			sortCodeHeader += `<li>${value.part_code} ${value.name}
+					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
+			`;
 
-				if(count === 0) from_part_code = value.part_code
-
-				sortCodeHeader += `<li>${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
+				let head = `
+					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
+					<div class="readEdit__list__accordion">
+						<ul>
+							${sortCodeHeader}
+						</ul>
+					</div>
 				`;
-
-				if((count + 1) % 10 == 0 || count == crews.length + 1) {
-					let head = `
-						<div class="readEdit__list__head">${from_part_code} ~ ${value.part_code}</div>
-						<div class="readEdit__list__accordion">
-							<ul>
-								${sortCodeHeader}
-							</ul>
-						</div>
-					`;
-					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
-					sortCodeHeader = "";
-					from_part_code = crews[index+1]?.part_code;
-				}
-
-				count++;
+				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+				sortCodeHeader = "";
+				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
-		})
-		let target = btnModel.data('modal-target');
-		target = "edit";
-		modalAnim(target);
+
+			count++;
+		}
 	})
+	
+	let target = btnModel.data('modal-target');
+	target = "edit";
+	modalAnim(target);
+	
 })
 
 $(document).on('click' , '.modal__close, .modalBg', function(e){
@@ -292,162 +291,181 @@ var modalReadCrewNotBelong = 0; // 未所属・既読数
 var modalNotReadCrewBelong = 0; // 所属・未読数
 var modalNotReadCrewNotBelong = 0; // 未所属・未読数
 
-$(document).on('click', '.list__status__read', function(e) {
+$(document).on('click', '.list__status__read', async function(e) {
 	e.preventDefault();
 	e.stopPropagation();
 	let btnModel = $(this).closest('.btnModal');
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken
-		},
-	})
-	.done(function(res) {
-		let crews = res.crews;
-		getCrewsData = res.crews;
+	await crewsData.fetchReadCrews(message);
 
-		let readUserListTarget1Element = $('.readUser__list[data-readuser-target="1"]');
-		let readUserListTarget2Element = $('.readUser__list[data-readuser-target="2"]');
+	let readUserListTarget1Element = $('.readUser__list[data-readuser-target="1"]');
+	let readUserListTarget2Element = $('.readUser__list[data-readuser-target="2"]');
 
-		readUserListTarget1Element.empty()
-		readUserListTarget2Element.empty()
-		modalReadCrew = 0;
-		modalNotReadCrew = 0;
-		modalReadCrewBelong = 0;
-		modalReadCrewNotBelong = 0;
-		modalNotReadCrewBelong = 0;
-		modalNotReadCrewNotBelong = 0;
+	readUserListTarget1Element.empty()
+	readUserListTarget2Element.empty()
+	modalReadCrew = 0;
+	modalNotReadCrew = 0;
+	modalReadCrewBelong = 0;
+	modalReadCrewNotBelong = 0;
+	modalNotReadCrewBelong = 0;
+	modalNotReadCrewNotBelong = 0;
 
-
-		crews.forEach((value, index, array) => {
-			let belong = value.new_face == 0 ? 1 : 2;
-			if (value.readed == 0) {
-				modalNotReadCrew++
-				if(value.new_face == 0) {
-					modalNotReadCrewBelong++
-					readUserListTarget1Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="1">${value.part_code} ${value.name}</li>
-					`)
-				}else {
-					modalNotReadCrewNotBelong++
-					readUserListTarget1Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="2">${value.part_code} ${value.name}</li>
-					`)
-				}
+	crewsData.crews.forEach((value) => {
+		if (value.readed == 0) {
+			modalNotReadCrew++
+			if(value.new_face == 0) {
+				modalNotReadCrewBelong++
+				readUserListTarget1Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="1">${value.part_code} ${value.name}</li>
+				`)
 			}else {
-				modalReadCrew++
-				if(value.new_face == 0) {
-					modalReadCrewBelong++
-					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="1">
-							<div>
-								<div>${value.part_code} ${value.name}</div>
-								<div>${value.readed_at}</div>
-							</div>
-						</li>
-					`)
-				}else {
-					modalReadCrewNotBelong++
-					readUserListTarget2Element.append(`
-						<li class="readUser__list__item" data-readuser-belong="2">
-							<div>
-								<div>${value.part_code} ${value.name}</div>
-								<div>${value.readed_at}</div>
-							</div>	
-						</li>
-					`)
-				}
+				modalNotReadCrewNotBelong++
+				readUserListTarget1Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="2">${value.part_code} ${value.name}</li>
+				`)
 			}
-		})
-
-		$(".readUser__switch__item[data-readuser-target='1']").text(`未読(${modalNotReadCrew})`);
-		$(".readUser__switch__item[data-readuser-target='2']").text(`既読(${modalReadCrew})`);
-
-
-		let chkTab = $(".readUser__switch__item.isSelected").data('readuser-target');
-		if(chkTab == 1) {
-			$('button[data-readuser-belong="1"]').text(`所属(${modalNotReadCrewBelong})`)
-			$('button[data-readuser-belong="2"]').text(`未所属(${modalNotReadCrewNotBelong})`)
 		}else {
-			$('button[data-readuser-belong="1"]').text(`所属(${modalReadCrewBelong})`)
-			$('button[data-readuser-belong="2"]').text(`未所属(${modalReadCrewNotBelong})`)
+			modalReadCrew++
+			if(value.new_face == 0) {
+				modalReadCrewBelong++
+				readUserListTarget2Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="1">
+						<div>
+							<div>${value.part_code} ${value.name}</div>
+							<div>${value.readed_at}</div>
+						</div>
+					</li>
+				`)
+			}else {
+				modalReadCrewNotBelong++
+				readUserListTarget2Element.append(`
+					<li class="readUser__list__item" data-readuser-belong="2">
+						<div>
+							<div>${value.part_code} ${value.name}</div>
+							<div>${value.readed_at}</div>
+						</div>	
+					</li>
+				`)
+			}
 		}
-
-		let target = btnModel.data('modal-target');
-		target = 'read';
-		modalAnim(target);
-
-		if(target == 'read'){
-			let target = $('.readUser__sort').find('.isSelected');
-			userSort(target);
-		}
-
-	}).fail(function(error){
-		console.log(error);
 	})
+
+	$(".readUser__switch__item[data-readuser-target='1']").text(`未読(${modalNotReadCrew})`);
+	$(".readUser__switch__item[data-readuser-target='2']").text(`既読(${modalReadCrew})`);
+
+
+	let chkTab = $(".readUser__switch__item.isSelected").data('readuser-target');
+	if(chkTab == 1) {
+		$('button[data-readuser-belong="1"]').text(`所属(${modalNotReadCrewBelong})`)
+		$('button[data-readuser-belong="2"]').text(`未所属(${modalNotReadCrewNotBelong})`)
+	}else {
+		$('button[data-readuser-belong="1"]').text(`所属(${modalReadCrewBelong})`)
+		$('button[data-readuser-belong="2"]').text(`未所属(${modalReadCrewNotBelong})`)
+	}
+
+	let target = btnModel.data('modal-target');
+	target = 'read';
+	modalAnim(target);
+
+	if(target == 'read'){
+		let target = $('.readUser__sort').find('.isSelected');
+		userSort(target);
+	}
+
 })
 
-$(document).on('click', '.btnModal[data-modal-target="check"]', function(e) {
+$(document).on('click', '.btnModal[data-modal-target="check"]', async function(e) {
 	e.preventDefault();
-	console.log(window.location.href);
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+	$('#editSort3').prop('checked', true);
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.sort_name').show();
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.sort_code').hide();
+	$('.modal[data-modal-target="check"]').find('.readEdit__list.filter_word').hide();
+	$('.modal input[type="text"]').val("");
+
+
+	// 初期化
+	$(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
+	$(`.modal[data-modal-target="check"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
+	$('.modal[data-modal-target="check"] form input[name="current_url"]').remove();
+
 	$('.modal[data-modal-target="check"] form').append(`
 		<input type="hidden" name="current_url" value="${window.location.href}">
 	`);
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews',
-		data: {
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+	currnt_sort_value = 1
+
+	await crewsData.fetchCheckCrews()
+	
+	crewsData.crews.forEach((value, index) => {
+		// 名前
+		$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+			<li>
+				${value.part_code} ${value.name} 
+				<input type="radio" name="read_edit_radio[]" id="user_${value.part_code}_radio" data-code="${value.part_code}" value="${value.id}">
+				<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
+			</li>
+		`)
 	})
-	.done(function(res) {
-		let crews = res.crews;
 
-		crews.forEach((value, index, array) => {
+	crewsData.sortCode();
 
-			$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-				<li>
-					${value.part_code} ${value.name} 
-					<input type="radio" name="read_edit_radio[]" id="user_${value.part_code}_radio" value="${value.id}">
-					<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label>
-				</li>
-			`)
+	let sortCodeHeader = "";
+	let headFrom_part_code = "";
+	let count = 0;
+	const maxRow = 15; // アコーディオンの最大行数
+	crewsData.crews.forEach((value, index, array) => {
 
-		});
+		if(count === 0) headFrom_part_code = value.part_code
 
-		let target = "check";
-		modalAnim(target);
-	}).fail(function(error){
-		console.log(error);
+		sortCodeHeader += `<li>${value.part_code} ${value.name}
+				<input type="radio" data-code="${value.part_code}" value="${value.c_id}">
+				<label for="user_${value.part_code}_radio" class="readEdit__list__check">未選択</label></li>
+		`;
+
+		if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
+			let head = `
+				<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
+				<div class="readEdit__list__accordion">
+					<ul>
+						${sortCodeHeader}
+					</ul>
+				</div>
+			`;
+			$(`.modal[data-modal-target="check"] .sort_code`).append(head);
+			sortCodeHeader = "";
+			headFrom_part_code = crewsData.crews[index+1]?.part_code;
+		}
+
+		count++;
+		
 	})
+
+	let target = "check";
+	modalAnim(target);
 
 })
 
 var clickMessage;
 var getCrewsData;
-$(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
+$(document).on('click', '.btnModal[data-modal-target="read"]', async function(e) {
 	e.preventDefault();
+
+	$('#editSort1').prop('checked', true);
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.sort_name').show();
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.sort_code').hide();
+	$('.modal[data-modal-target="edit"]').find('.readEdit__list.filter_word').hide();
+	$('.modal input[type="text"]').val("");
+	$('#read_users_sort').prop('checked', false)
 
 	let btnModel = $(this).closest('.btnModal');
 	clickMessage = btnModel;
-	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	var message = btnModel.find('.list__item>.list__id').text();
 	let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 	
 	// 初期化
 	$(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
+	$(`.modal[data-modal-target="edit"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
 	$('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
 
@@ -460,70 +478,59 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {
 		return;
 	}
 
-	$.ajax({
-		type: 'GET',
-		url: '/message/crews-message',
-		data: {
-			message: message
-		},
-		dataType: 'json',
-		headers: {
-		'X-CSRF-TOKEN': csrfToken,
-		},
+	await crewsData.fetchReadCrews(message);
+	
+	editUserListTargetForm.append(`
+		<input type="hidden" name="message" value="${message}">
+	`);
+
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
+				<li> ${value.part_code} ${value.name}
+					<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}_check" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label>
+				</li>
+			`)
+		}
 	})
-	.done(function(res) {
-		let crews = res.crews;
-		getCrewsData = res.crews;
 
-		editUserListTargetForm.append(`
-			<input type="hidden" name="message" value="${message}">
-		`);
+	crewsData.sortCode();
+	let sortCodeHeader = "";
+	let headFrom_part_code = "";
+	let count = 0;
+	const maxRow = 15; // アコーディオンの最大行数
+	crewsData.crews.forEach((value, index, array) => {
+		if (value.readed == 0) {
+			if(count === 0) headFrom_part_code = value.part_code
 
-		let sortCodeHeader = "";
-		let _index = "";
-		let count = 0;
-		crews.forEach((value, index, array) => {
-			if (value.readed == 0) {
-				$(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
-					<li> ${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label>
-					</li>
-				`)
+			sortCodeHeader += `<li>${value.part_code} ${value.name}
+					<input type="checkbox" data-code="${value.part_code}" value="${value.c_id}">
+					<label for="user_${value.part_code}_check" class="readEdit__list__check">未選択</label></li>
+			`;
 
-				if(count === 0) _index = value.part_code
-
-				sortCodeHeader += `<li>${value.part_code} ${value.name}
-						<input type="checkbox" name="read_edit_radio[]" id="user_${value.part_code}" value="${value.c_id}">
-						<label for="user_${value.part_code}" class="readEdit__list__check">未選択</label></li>
+			if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
+				let head = `
+					<div class="readEdit__list__head">${headFrom_part_code} ~ ${value.part_code}</div>
+					<div class="readEdit__list__accordion">
+						<ul>
+							${sortCodeHeader}
+						</ul>
+					</div>
 				`;
-
-				if((count + 1) % 10 == 0 || count == crews.length + 1) {
-					let head = `
-						<div class="readEdit__list__head">${_index} ~ ${value.part_code}</div>
-						<div class="readEdit__list__accordion">
-							<ul>
-								${sortCodeHeader}
-							</ul>
-						</div>
-					`;
-					$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
-					sortCodeHeader = "";
-					_index = crews[index+1]?.part_code;
-				}
-
-				count++;
+				$(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+				sortCodeHeader = "";
+				headFrom_part_code = crewsData.crews[index+1]?.part_code;
 			}
-		})
 
-
-		let target = btnModel.data('modal-target');
-		target = "edit";
-		modalAnim(target);
-
-	}).fail(function(error){
-		console.log(error);
+			count++;
+		}
 	})
+	
+	let target = btnModel.data('modal-target');
+	target = "edit";
+	modalAnim(target);
+
 })
 
 
@@ -531,25 +538,49 @@ $(document).on('click' , '.readEdit__list__head' , function(){
 	$(this).toggleClass('isOpen');
 })
 
+/* 各従業員の閲覧管理　チェックした情報をモーダル内で同期させる処理 */
+$(document).on('click' , '.readEdit__list__accordion input[type=checkbox]' , function(){
+	let code = $(this).data("code");
+
+	let check = $(this).parents('div[data-modal-target="edit"]').find(`input[data-code="${code}"]`);
+
+	if($(this).prop('checked')){
+		check.prop('checked', true)
+	}else{
+		check.prop('checked', false)
+	}
+});
+
 /* 各従業員の閲覧管理 */
 $(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , function(){
+	let id = $(this).attr('id');
 	if($(this).prop('checked')){
-		$(this).siblings('label').text('選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
 	}else{
-		$(this).siblings('label').text('未選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
 	}
 	let chkTarget = $(this).parents('.readEdit__list').find('input[type=checkbox]:checked');
 	let txtReplaceTarget = $(this).parents('.modal__inner').find('button[type=submit]');
 	txtReplaceTarget.text('表示する('+chkTarget.length+'人選択中)');
 });
+
+/* 閲覧従業員選択  選択した情報をモーダル内で同期させる処理*/
+$(document).on('click' , '.readEdit__list__accordion input[type=radio]' , function(){
+	let code = $(this).data("code");
+	$(this).parents('div[data-modal-target="check"]').find(`.readEdit__list input`).prop('checked', false);
+	let checkRadio = $(this).parents('div[data-modal-target="check"]').find(`input[data-code="${code}"]`);
+	checkRadio.prop('checked',true);
+});
+
 /* 閲覧従業員選択 */
 $(document).on('change' , '.readEdit__list__accordion input[type=radio]' , function(){
-	let txtResetTarget = $(this).parents('.readEdit__list').find('.readEdit__list__check');
+	let txtResetTarget = $(this).parents('.readEdit').find('.readEdit__list__check');
 	txtResetTarget.text('未選択');
+	let id = $(this).attr('id');
 	if($(this).prop('checked')){
-		$(this).siblings('label').text('選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
 	}else{
-		$(this).siblings('label').text('未選択');
+		$(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
 	}
 
 	let chkRadioEnable = $(this).parents('.readEdit__list').find('input[type=radio]:checked');
@@ -563,23 +594,33 @@ $(document).on('change' , '.readEdit__list__accordion input[type=radio]' , funct
 
 /* 選択中のみ表示 */
 $(document).on('change' , '#read_users_sort' , function(){
+	let targetListHead = $(this).siblings('.readEdit__list:not(".filter_word")').find('.readEdit__list__head');
 	if($(this).is(':checked')){
 		let targetCheck = $(this).siblings('.readEdit__list').find('input[type=checkbox]');
+		targetListHead.hide();
+		targetListHead.addClass("isOpen_check");
 		targetCheck.each(function(){
 			/* 各従業員のチェックを確認 */
 			if(!$(this).is(':checked')){
-				let parents = $(this).parents('li').hide();
+				$(this).parents('li').hide();
 			}
 		});
 	}else{
 		let targetList = $(this).siblings('.readEdit__list').find('li');
 		targetList.show();
+		targetListHead.show();
+		targetListHead.removeClass("isOpen_check");
 	}
 });
 
+var currnt_sort_value = 1;
 /* 名前・従業員番号切り替え仮置き（必要なら） */
 $(document).on('change' , '.readEdit__menu__inner input[type=radio]' , function(){
 	let sort_value = $(this).val();
+	currnt_sort_value = sort_value;
+	let searchText = $(this).parents('.readEdit__menu__inner').find('input[type="text"]').val();
+	if(searchText.length != 0) return;
+
 	if(sort_value == 1 || sort_value == 3){
 		$('.readEdit__list.sort_name').show();
 		$('.readEdit__list.sort_code').hide();
@@ -607,32 +648,63 @@ $(document).on('input', '.modal input[type="text"]', function () {
 	readEdit_filterWord.find('ul').empty()
 	let li_crew_dom = ``;
 	if(searchText.length == 0){
-		readEdit_sortName.show()
-		// readEdit_sortCode.show()
+		if(currnt_sort_value == 1 || currnt_sort_value == 3){
+			readEdit_sortName.show()
+			readEdit_sortCode.hide()
+		}
+		if(currnt_sort_value == 2 || currnt_sort_value == 4){
+			readEdit_sortName.hide()
+			readEdit_sortCode.show()
+		}
 		readEdit_filterWord.hide()
 	}else{
 		readEdit_sortName.hide();
-		// readEdit_sortCode.hide();
+		readEdit_sortCode.hide();
 		readEdit_filterWord.show()
 
-		const filteredData = []  // フィルタリング
-		getCrewsData.filter(item =>
-			Object.values(item).some((value, index) => {
-				if(index == PARTCODE_INDEX || index == NAME_INDEX || index == NAMEKANA_INDEX){
-					if(value.toString().includes(searchText_formatted)){
-						filteredData.push(item);
-
-						let isChecked = $(`#user_${item['part_code']}`).prop('checked');
-						li_crew_dom += 
-							`<li>${item['part_code']} ${item['name']}
-								<input type="checkbox"  value="${item['c_id']}" ${isChecked ? "checked" : ""}>
-								<label for="user_${item['part_code']}" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
-							</li>`;
+		let modal_target = $(this).parents('.modal').data('modal-target');
+		if (modal_target == "check") {
+			crewsData.crews.filter(item =>
+				Object.values(item).some((value, index) => {
+						if(value?.toString().includes(kanaFullToHalf(searchText_formatted))){
+							let isChecked = $(`#user_${item.part_code}_radio`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="radio"  value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_radio" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
+				})
+			);
+		}else if(modal_target == "edit") {
+			crewsData.crews.filter(item =>
+				Object.values(item).some((value, index) => {
+					if(index == PARTCODE_INDEX || index == NAME_INDEX){
+						if(value?.toString().includes(searchText_formatted) && item.readed == 0){
+							let isChecked = $(`#user_${item.part_code}_check`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="checkbox" value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_check" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
 						
+					}else if(index == NAMEKANA_INDEX){
+						if(value.includes(kanaFullToHalf(searchText_formatted)) && item.readed == 0){
+							let isChecked = $(`#user_${item.part_code}_check`).prop('checked');
+							li_crew_dom += 
+								`<li>${item.part_code} ${item.name}
+									<input type="checkbox" value="${item.c_id}" data-code="${item.part_code}" ${isChecked ? "checked" : ""}>
+									<label for="user_${item.part_code}_check" class="readEdit__list__check">${isChecked ? "選択" : "未選択"}</label>
+								</li>`;
+							
+						}
 					}
-				}
-			})
-		);
+				})
+			);
+		}
 		readEdit_filterWord.find('ul').append(li_crew_dom);
 	}
 
@@ -649,4 +721,89 @@ function normalizeString(str) {
 
     // 文字列を正規化して返す
     return hiraganaToKatakana(str).toLowerCase();
+}
+
+const crewsData = {
+	crews: null,
+	
+	// 既読チェックするときのクルーを取得
+	fetchCheckCrews: async function () {
+		const url = '/message/crews';
+
+		await fetchData(url)
+			.done(data => {
+				this.crews = data.crews
+			})
+	},
+
+	// 既読するときのクルーを取得
+	fetchReadCrews: async function (message_id) {
+		const url = '/message/crews-message';
+		const data = { message : message_id}
+		const options = {
+			data: data
+		}
+		await fetchData(url, options)
+			.done(data => {
+				this.crews = data.crews
+			})
+	},
+
+	// 従業員番号でソートする
+	sortCode: function () {
+		this.crews.sort((a, b) => {
+			return a.part_code - b.part_code;
+		})
+	} 
+}
+
+function fetchData(url, options = {}) {
+  // デフォルトの設定を指定
+  const defaultOptions = {
+    method: 'GET',
+    dataType: 'json', // 応答のデータタイプ
+	headers: {
+		'X-CSRF-TOKEN': csrfToken,
+	},
+    // 他のオプションをここに追加できます
+    ...options,
+  };
+
+  // jQueryの$.ajax()を使用してAjaxリクエストを実行
+  return $.ajax({
+    url,
+    ...defaultOptions,
+  }).fail((jqXHR, textStatus, errorThrown) => {
+    console.error('Ajax error:', textStatus, errorThrown);
+    throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
+  });
+}
+
+function kanaFullToHalf(str){
+    let kanaMap = {
+        "ガ": "ｶﾞ", "ギ": "ｷﾞ", "グ": "ｸﾞ", "ゲ": "ｹﾞ", "ゴ": "ｺﾞ",
+        "ザ": "ｻﾞ", "ジ": "ｼﾞ", "ズ": "ｽﾞ", "ゼ": "ｾﾞ", "ゾ": "ｿﾞ",
+        "ダ": "ﾀﾞ", "ヂ": "ﾁﾞ", "ヅ": "ﾂﾞ", "デ": "ﾃﾞ", "ド": "ﾄﾞ",
+        "バ": "ﾊﾞ", "ビ": "ﾋﾞ", "ブ": "ﾌﾞ", "ベ": "ﾍﾞ", "ボ": "ﾎﾞ",
+        "パ": "ﾊﾟ", "ピ": "ﾋﾟ", "プ": "ﾌﾟ", "ペ": "ﾍﾟ", "ポ": "ﾎﾟ",
+        "ヴ": "ｳﾞ", "ヷ": "ﾜﾞ", "ヺ": "ｦﾞ",
+        "ア": "ｱ", "イ": "ｲ", "ウ": "ｳ", "エ": "ｴ", "オ": "ｵ",
+        "カ": "ｶ", "キ": "ｷ", "ク": "ｸ", "ケ": "ｹ", "コ": "ｺ",
+        "サ": "ｻ", "シ": "ｼ", "ス": "ｽ", "セ": "ｾ", "ソ": "ｿ",
+        "タ": "ﾀ", "チ": "ﾁ", "ツ": "ﾂ", "テ": "ﾃ", "ト": "ﾄ",
+        "ナ": "ﾅ", "ニ": "ﾆ", "ヌ": "ﾇ", "ネ": "ﾈ", "ノ": "ﾉ",
+        "ハ": "ﾊ", "ヒ": "ﾋ", "フ": "ﾌ", "ヘ": "ﾍ", "ホ": "ﾎ",
+        "マ": "ﾏ", "ミ": "ﾐ", "ム": "ﾑ", "メ": "ﾒ", "モ": "ﾓ",
+        "ヤ": "ﾔ", "ユ": "ﾕ", "ヨ": "ﾖ",
+        "ラ": "ﾗ", "リ": "ﾘ", "ル": "ﾙ", "レ": "ﾚ", "ロ": "ﾛ",
+        "ワ": "ﾜ", "ヲ": "ｦ", "ン": "ﾝ",
+        "ァ": "ｧ", "ィ": "ｨ", "ゥ": "ｩ", "ェ": "ｪ", "ォ": "ｫ",
+        "ッ": "ｯ", "ャ": "ｬ", "ュ": "ｭ", "ョ": "ｮ",
+        "。": "｡", "、": "､", "ー": "ｰ", "「": "｢", "」": "｣", "・": "･",
+        "　": " "
+    };
+    let reg = new RegExp('(' + Object.keys(kanaMap).join('|') + ')', 'g');
+    return str.replace(reg, function(s){
+        return kanaMap[s];
+    }).replace(/゛/g, 'ﾞ').replace(/゜/g, 'ﾟ');
 }
