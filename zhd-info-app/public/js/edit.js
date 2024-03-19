@@ -232,6 +232,7 @@ $('#messageImportModal input[type="button"]').click(function(e){
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let formData = new FormData();
 	formData.append("file", $('#messageImportModal input[name="csv"]')[0].files[0]);
+	formData.append("organization1", $('#messageImportModal input[name="organization1"]').val())
 	
 	var overlay = document.getElementById('overlay');
 	overlay.style.display = 'block';

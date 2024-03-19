@@ -25,8 +25,22 @@ class Admin extends Model
     {
         return $this->belongsTo(Organization1::class, 'organization1_id', 'id');
     }
-    // public function getOrganization1()
-    // {
-    //     $org1 = DB::
-    // }
+
+    public function getBrand()
+    {
+        $admin_id = $this->attributes['id'];
+        return Brand::query()
+            ->join('admin_organization1', function ($join) use ($admin_id){
+                $join->on('admin_organization1.organization1_id', '=', 'brands.organization1_id');
+                $join->where('admin_organization1.admin_id', '=', $admin_id);
+            })
+            ->orderBy('brands.id', 'asc')
+            ->get();
+    }
+
+    public function firstBrand()
+    {
+        $brands = $this->getBrand();
+        return $brands[0];
+    }
 }

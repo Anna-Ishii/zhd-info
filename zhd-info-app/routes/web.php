@@ -50,8 +50,8 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 });
 
 // 管理画面へのログイン画面
-Route::get('/admin/{organization1}/auth', [AuthController::class, 'index'])->name('admin.auth');
-Route::post('/admin/{organization1}/auth', [AuthController::class, 'login']);
+Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
+Route::post('/admin/auth', [AuthController::class, 'login']);
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
@@ -61,8 +61,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
-            Route::get('new', [MessagePublishController::class, 'new'])->name('new');
-            Route::post('new', [MessagePublishController::class, 'store'])->name('new.store');
+            Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
+            Route::post('{organization1}/new', [MessagePublishController::class, 'store'])->name('new.store');
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');

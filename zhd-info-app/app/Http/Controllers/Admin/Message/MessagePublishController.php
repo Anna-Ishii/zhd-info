@@ -14,13 +14,13 @@ use App\Models\Message;
 use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
-use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
 use App\Models\Brand;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
+use App\Models\Organization1;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use Illuminate\Http\Request;
@@ -36,18 +36,18 @@ class MessagePublishController extends Controller
     {
         $admin = session('admin');
         $category_list = MessageCategory::all();
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
-        $brands = $_brand->pluck('name')->toArray();
-        $brand_list = $_brand->get();
+        $brand_list = $admin->getBrand();
 
         // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
-        $brand_id = $request->input('brand');
+        $brand_id = $request->input('brand', $brand_list[0]->id);
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
+        $organization1 = Brand::find($brand_id)->organization1;
+
         $message_list =
             Message::query()
                 ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
@@ -58,7 +58,7 @@ class MessagePublishController extends Controller
                             count(message_user.user_id) as total_users,
                             round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate
                         ')
-                ->where('messages.organization1_id', $admin->organization1_id)
+                ->where('messages.organization1_id', $organization1->id)
                 ->groupBy(DB::raw('messages.id'))
                 ->when(isset($q), function ($query) use ($q) {
                     $query->where(function ($query) use ($q) {
@@ -91,7 +91,8 @@ class MessagePublishController extends Controller
                 })
                 ->when(isset($brand_id), function ($query) use ($brand_id) {
                     $query->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-                    ->where('message_brand.brand_id', '=', $brand_id);
+                            ->whereNull('message_brand.brand_id')
+                            ->orWhere('message_brand.brand_id', '=', $brand_id);
                 })
                 ->when(isset($label), function ($query) use ($label) {
                     $query->where('emergency_flg', true);
@@ -121,24 +122,26 @@ class MessagePublishController extends Controller
             'category_list' => $category_list,
             'message_list' => $message_list,
             'brand_list' => $brand_list,
-            'brands' => $brands,
+            'organization1' => $organization1,
         ]);
     }
 
     public function show(Request $request, $message_id)
     {
         $admin = session('admin');
+        $admin_org1 = $admin->organization1();
+        $organization1 = $request->input('organization1', $admin_org1->first());
         $message = Message::where('id', $message_id)
             ->withCount(['user as total_users'])
             ->withCount(['readed_user as read_users'])
             ->first();
 
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $_brand = $organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
-        $org3_list = Organization1Repository::getOrg3($admin->organization1_id);
-        $org4_list = Organization1Repository::getOrg4($admin->organization1_id);
-        $org5_list = Organization1Repository::getOrg5($admin->organization1_id);
+        $org3_list = Organization1Repository::getOrg3($organization1);
+        $org4_list = Organization1Repository::getOrg4($organization1);
+        $org5_list = Organization1Repository::getOrg5($organization1);
         
         // request
         $brand_id = $request->input('brand');
@@ -203,14 +206,15 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    public function new()
+    public function new(Organization1 $organization1)
     {
         $admin = session("admin");
+
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
         // ブランド一覧を取得する
-        $brand_list = AdminRepository::getBrands($admin);
+        $brand_list = Brand::where('organization1_id', $organization1->id)->get();
         
         $organization_list = [];
         $organization_list = Shop::query()
@@ -225,7 +229,7 @@ class MessagePublishController extends Controller
                                          'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
                                          'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
                                          )
-                                ->where('organization1_id', $admin->organization1_id)
+                                ->where('organization1_id', $organization1->id)
                                 ->orderByRaw('organization2_id is null asc')
                                 ->orderByRaw('organization3_id is null asc')
                                 ->orderByRaw('organization4_id is null asc')
@@ -238,7 +242,7 @@ class MessagePublishController extends Controller
                                 ->toArray();
 
         $organization_type = 5;  // ブロックを表示する
-        if (!Organization1Repository::isExistOrg5($admin->organization1_id)) {
+        if (!Organization1Repository::isExistOrg5($organization1)) {
             $organization_type = 4; // エリアを表示する
         }
 
@@ -251,7 +255,7 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    public function store(PublishStoreRequest $request)
+    public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
         $validated = $request->validated();
 
@@ -268,14 +272,11 @@ class MessagePublishController extends Controller
         $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
         $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
         $msg_params['create_admin_id'] = $admin->id;
-        $msg_params['organization1_id'] = $admin->organization1_id;
-        $number = Message::where('organization1_id', $admin->organization1_id)->max('number');
+        $msg_params['organization1_id'] = $organization1->id;
+        $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
         $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
-
-        // ブロックかエリアかを判断するタイプ
-        $organization_type = $request->organization_type;
 
         try {
             DB::beginTransaction();
@@ -288,7 +289,7 @@ class MessagePublishController extends Controller
                 foreach ($request->organization['org5'] as $org5_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
-                        'organization1_id' => $admin->organization1_id,
+                        'organization1_id' => $organization1->id,
                         'organization5_id' => $org5_id
                     ]);
                 }
@@ -297,7 +298,7 @@ class MessagePublishController extends Controller
                 foreach ($request->organization['org4'] as $org4_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
-                        'organization1_id' => $admin->organization1_id,
+                        'organization1_id' => $organization1->id,
                         'organization4_id' => $org4_id
                     ]);
                 }
@@ -306,7 +307,7 @@ class MessagePublishController extends Controller
                 foreach ($request->organization['org3'] as $org3_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
-                        'organization1_id' => $admin->organization1_id,
+                        'organization1_id' => $organization1->id,
                         'organization3_id' => $org3_id
                     ]);
                 }
@@ -315,7 +316,7 @@ class MessagePublishController extends Controller
                 foreach ($request->organization['org2'] as $org2_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
-                        'organization1_id' => $admin->organization1_id,
+                        'organization1_id' => $organization1->id,
                         'organization2_id' => $org2_id
                     ]);
                 }
@@ -355,14 +356,12 @@ class MessagePublishController extends Controller
         if(empty($message)) return redirect()->route('admin.message.publish.index');
 
         $admin = session('admin');
-        // ログインユーザーとは違う業態のものは編集画面を出さない
-        if ($message->organization1_id != $admin->organization1_id) return redirect()->route('admin.message.publish.index');
 
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get();
         // 業態一覧を取得する
-        $brand_list = AdminRepository::getBrands($admin);
+        $brand_list = Brand::where('organization1_id', $message->organization1_id)->get();
 
         $organization_list = [];
         $organization_list = Shop::query()
@@ -378,7 +377,7 @@ class MessagePublishController extends Controller
                 'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
                 'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $admin->organization1_id)
+            ->where('organization1_id', $message->organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -391,7 +390,7 @@ class MessagePublishController extends Controller
             ->toArray();
                     
         $organization_type = 5;  // ブロックを表示する
-        if (!Organization1Repository::isExistOrg5($admin->organization1_id)) {
+        if (!Organization1Repository::isExistOrg5($message->organization1_id)) {
             $organization_type = 4; // エリアを表示する
         }
 
@@ -445,9 +444,6 @@ class MessagePublishController extends Controller
         }
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
-
-        // ブロックかエリアかを判断するタイプ
-        $organization_type = $request->organization_type;
         
         try {
             DB::beginTransaction();
@@ -539,6 +535,7 @@ class MessagePublishController extends Controller
         return response()->json(['message' => '停止しました']);
     }
 
+    // 詳細画面のエクスポート
     public function export(Request $request, $message_id)
     {
         $now = new Carbon('now');
@@ -549,12 +546,15 @@ class MessagePublishController extends Controller
         );
     }
 
+    // 業務連絡一覧のエクスポート
     public function exportList(Request $request)
     {
         $admin = session('admin');
-        $organization1 = $admin->organization1->name;
-        $now = new Carbon('now');
-        $file_name = '業務連絡_' . $organization1 . $now->format('_Y_m_d') . '.csv';
+
+        $brand_id = $request->input('brand', $admin->firstBrand()->id);
+        $organization1 = Brand::find($brand_id)->organization1;
+
+        $file_name = '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
         return Excel::download(
             new MessageListExport($request),
             $file_name
@@ -577,48 +577,10 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    public function csvUpload($request)
-    {
-        $validated = $request->validated();
-        $file = $request->file;
-
-        $messages = (new MessageCsvImport)
-            ->toCollection($csv, \Maatwebsite\Excel\Excel::CSV);
-
-        $organization_list = Shop::query()
-            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
-            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-            ->distinct('organization4_id')
-            ->distinct('organization5_id')
-            ->select(
-                'organization2_id',
-                'organization2.name as organization2_name',
-                'organization3_id',
-                'organization3.name as organization3_name',
-                'organization4_id',
-                'organization4.name as organization4_name',
-                'organization5_id',
-                'organization5.name as organization5_name'
-            )
-            ->where('organization1_id', $admin->organization1_id)
-            ->orderByRaw('organization2_id is null asc')
-            ->orderByRaw('organization3_id is null asc')
-            ->orderByRaw('organization4_id is null asc')
-            ->orderByRaw('organization5_id is null asc')
-            ->orderBy("organization2_id", "asc")
-            ->orderBy("organization3_id", "asc")
-            ->orderBy("organization4_id", "asc")
-            ->orderBy("organization5_id", "asc")
-            ->get()
-            ->toArray();
-        
-    }
-
     public function import(Request $request)
     {
         $csv = $request->file;
+        $organization1 = (int) $request->input('organization1');
         $csv_path = Storage::putFile('csv', $csv);
 
         $csv_content = file_get_contents($csv);
@@ -640,8 +602,7 @@ class MessagePublishController extends Controller
 
         DB::beginTransaction();
         try {
-            Excel::import(new MessageCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
-            // $this->importMessage($messages[0], $admin->organization1);
+            Excel::import(new MessageCsvImport($organization1), $csv, \Maatwebsite\Excel\Excel::CSV);
             DB::table('message_csv_logs')
                 ->where('id', $log_id)
                 ->update([
