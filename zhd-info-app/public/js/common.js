@@ -384,6 +384,7 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	$('.modal[data-modal-target="check"]').find('.readEdit__list.filter_word').hide();
 	$('.modal input[type="text"]').val("");
 
+	await crewsData.fetchCheckCrews()
 
 	// 初期化
 	$(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
@@ -395,8 +396,6 @@ $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e
 	`);
 	currnt_sort_value = 1
 
-	await crewsData.fetchCheckCrews()
-	
 	crewsData.crews.forEach((value, index) => {
 		// 名前
 		$(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(`
@@ -463,6 +462,8 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 	var message = btnModel.find('.list__item>.list__id').text();
 	let editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 	
+	await crewsData.fetchReadCrews(message);
+
 	// 初期化
 	$(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
 	$(`.modal[data-modal-target="edit"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
@@ -477,8 +478,6 @@ $(document).on('click', '.btnModal[data-modal-target="read"]', async function(e)
 		modalAnim('continue');
 		return;
 	}
-
-	await crewsData.fetchReadCrews(message);
 	
 	editUserListTargetForm.append(`
 		<input type="hidden" name="message" value="${message}">

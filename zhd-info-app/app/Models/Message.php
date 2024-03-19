@@ -283,7 +283,8 @@ class Message extends Model
     public function putCrewRead(array $crews = []) :Void
     {
         $params = [];
-        foreach ($crews as $crew) {
+        $crews_unique = array_unique($crews);
+        foreach ($crews_unique as $crew) {
             $exists = DB::table('crew_message_logs')
                 ->where('crew_id', $crew)
                 ->where('message_id', $this->attributes['id'])
