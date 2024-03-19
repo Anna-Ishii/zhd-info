@@ -33,6 +33,7 @@ class MessageCsvImport implements
 {
     use Importable;
 
+    private $organization1;
     private $organization = [];
     private $brand = [];
     private $organization5 = [];
@@ -40,9 +41,10 @@ class MessageCsvImport implements
     private $organization3 = [];
     private $category_list = [];
 
-    public function __construct()
+    public function __construct($organization1)
     {
-        $this->organization = $this->getOrganizationForm();
+        $this->organization1 = $organization1;
+        $this->organization = $this->getOrganizationForm($organization1);
         $this->brand = array_column($this->organization, 'brand_name');
         $this->organization5 = array_column($this->organization, 'organization5_name');
         $this->organization4 = array_column($this->organization, 'organization4_name');
@@ -58,7 +60,7 @@ class MessageCsvImport implements
     {
         //
         $admin = session("admin");
-        $organization1_id = $admin->organization1_id;
+        $organization1_id = $this->organization1;
 
         foreach ($rows as $index => [
             $no,
@@ -208,11 +210,8 @@ class MessageCsvImport implements
         ];
     }
 
-    private function getOrganizationForm()
+    private function getOrganizationForm($organization1_id)
     {
-        $admin = session("admin");
-        $organization1_id = $admin->organization1_id;
-
         return Shop::query()
             ->leftjoin('brands', 'brand_id', '=', 'brands.id')
             ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')

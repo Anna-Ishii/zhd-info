@@ -44,7 +44,6 @@
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">業態</label>
                 <select name="brand" class="form-control">
-                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
@@ -127,7 +126,7 @@
 					<a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
 				</div>
 				<div>
-					<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+					<a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"" class=" btn btn-admin">新規登録</a>
 				</div>
 			</div>
 		</div>
@@ -161,7 +160,7 @@
 								@elseif($message->status == App\Enums\PublishStatus::Editing) editing
 								@endif">
 						<td class="shop-id">{{$message->number}}</td>
-						<td>{{$message->brands_string($brands)}}</td>
+						<td>{{$message->brands_string}}</td>
 						@if ($message->emergency_flg)
 						<td class="label-colum-danger"><div>重要</div></td>
 						@else
@@ -230,5 +229,6 @@
 	</form>
 
 </div>
+@include('common.admin.message-import-modal', ['organization1' => $organization1])
 <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
 @endsection

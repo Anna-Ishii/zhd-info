@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
-    public function index ($organization1)
+    public function index ()
     {
         //ログイン中か確認
         $admin = session('admin');
@@ -19,20 +19,15 @@ class AuthController extends Controller
         if (isset($admin)) {
             return redirect()->route('admin.message.publish.index');
         }
-        // 業態がなければ404を返す
-        if(!Organization1::where('name', $organization1)->exists()) abort(404);
+
         return view('admin.auth.index');
     }
 
-    public function login (AuthLoginRequest $request, $organization1)
+    public function login (AuthLoginRequest $request)
     {
         $validated = $request->validated();
-        
-        $org1 = Organization1::where('name', $organization1)
-                                ->firstOrFail();
 
-        $admin = Admin::where('organization1_id', $org1->id)
-                        ->where('employee_code', $request->employee_code)->first();
+        $admin = Admin::where('employee_code', $request->employee_code)->first();
 
         if (empty($admin)) {
             return redirect()
@@ -56,8 +51,7 @@ class AuthController extends Controller
     public function logout ()
     {
         $admin = session('admin');
-        $organization1 = Organization1::find($admin->organization1_id);
         session()->forget('admin');
-        return redirect()->route('admin.auth', ['organization1' => $organization1->name]);
+        return redirect()->route('admin.auth');
     }
 }
