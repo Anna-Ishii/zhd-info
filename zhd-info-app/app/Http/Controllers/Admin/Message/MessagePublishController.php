@@ -48,17 +48,38 @@ class MessagePublishController extends Controller
         $publish_date = $request->input('publish-date');
         $organization1 = Brand::find($brand_id)->organization1;
 
+        $sub = DB::table('messages as m')
+                    ->select([
+                        'm.id as m_id',
+                        DB::raw('
+                            case
+                                when (count(distinct b.name)) = 0 then ""
+                                else group_concat(distinct b.name order by b.id)
+                            end as b_name
+                        ')
+                    ])
+                    ->leftjoin('message_brand as m_b', 'm.id', 'm_b.message_id')
+                    ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
+                    ->groupBy('m.id');
         $message_list =
             Message::query()
-                ->with('category', 'create_user', 'updated_user', 'brand', 'tag')
+                ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
                 ->leftjoin('message_user','messages.id', '=', 'message_id')
-                ->selectRaw('
-                            messages.*,
-                            ifnull(sum(message_user.read_flg),0) as read_users, 
-                            count(message_user.user_id) as total_users,
-                            round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate
-                        ')
+                ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+                ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
+                ->leftJoinSub($sub, 'sub', function($join) {
+                    $join->on('sub.m_id', '=', 'messages.id');
+                })
+                ->select([
+                    'messages.*',
+                    DB::raw('ifnull(sum(message_user.read_flg),0) as read_users'),
+                    DB::raw('count(message_user.user_id) as total_users'),
+                    DB::raw('round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate'),
+                    DB::raw('sub.b_name as brand_name')    
+                ])
                 ->where('messages.organization1_id', $organization1->id)
+                ->whereNull('message_brand.brand_id')
+                ->orWhere('message_brand.brand_id', '=', $brand_id)
                 ->groupBy(DB::raw('messages.id'))
                 ->when(isset($q), function ($query) use ($q) {
                     $query->where(function ($query) use ($q) {
@@ -88,11 +109,6 @@ class MessagePublishController extends Controller
                 })
                 ->when(isset($category_id), function ($query) use ($category_id) {
                     $query->where('category_id', $category_id);
-                })
-                ->when(isset($brand_id), function ($query) use ($brand_id) {
-                    $query->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-                            ->whereNull('message_brand.brand_id')
-                            ->orWhere('message_brand.brand_id', '=', $brand_id);
                 })
                 ->when(isset($label), function ($query) use ($label) {
                     $query->where('emergency_flg', true);

@@ -160,7 +160,7 @@
 								@elseif($message->status == App\Enums\PublishStatus::Editing) editing
 								@endif">
 						<td class="shop-id">{{$message->number}}</td>
-						<td>{{$message->brands_string}}</td>
+						<td>{{$message->brand_name}}</td>
 						@if ($message->emergency_flg)
 						<td class="label-colum-danger"><div>重要</div></td>
 						@else
