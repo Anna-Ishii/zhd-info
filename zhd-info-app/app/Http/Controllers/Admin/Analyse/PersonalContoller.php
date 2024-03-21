@@ -368,8 +368,11 @@ class PersonalContoller extends Controller
     public function export(Request $request) 
     {
         $admin = session('admin');
+        $organization1_list = $admin->organization1()->orderby('name')->get();
+        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1 = Organization1::find($organization1_id);
 
-        $organization1 = $admin->organization1->name;
+        $organization1 = $organization1->name;
         $now = new Carbon('now');
         $file_name = '業務連絡閲覧状況_' . $organization1 . $now->format('_Y_m_d') . '.xlsx';
         return Excel::download(
