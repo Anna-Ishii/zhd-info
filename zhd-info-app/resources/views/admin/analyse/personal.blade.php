@@ -41,6 +41,14 @@
         <!-- 絞り込み部分 -->
     <form method="get" class="mb24">
         <div class="form-group form-inline mb16 ">
+            <div class="input-group col-lg-1 spMb16">
+                <label class="input-group-addon">業態</label>
+                <select name="organization1" class="form-control" >
+                        @foreach ($organization1_list as $org1)
+                        <option value="{{ $org1->id }}" {{ request()->input('organization1') == $org1->id ? 'selected' : ''}}>{{ $org1->name }}</option>
+                        @endforeach
+                </select>
+            </div>  
             @foreach (['DS', 'BL', 'AR'] as $organization)
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">{{$organization}}</label>
@@ -52,7 +60,7 @@
                             @endforeach
                     </select>
                 @else
-                    <select class="form-control" disabled></select>
+                    <select name="org[{{$organization}}]" class="form-control" disabled></select>
                 @endif
             </div>   
             @endforeach
@@ -127,7 +135,7 @@
             @if (!request('shop_freeword'))
             <tbody>
                 <tr>
-                    <td colspan=5>{{$admin->organization1->name}}計</td>
+                    <td colspan=5>{{$organization1->name}}計</td>
                     <td nowrap>
                          <div class="view_rate_container">
                             <div>
@@ -151,7 +159,7 @@
                 @isset($viewrates['org1'])
                     @foreach ($viewrates['org1'] as $key => $v_org1)
                         @isset($v_org1[0]->count)
-                        <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$admin->organization1->id}}" nowrap>
+                        <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$organization1->id}}" nowrap>
                             <div class="view_rate view_rate_container" data-view-type="orgs">
                                 <div>{{$v_org1[0]->readed_count}} / </div>
                                 <div>{{$v_org1[0]->count}}</div>
