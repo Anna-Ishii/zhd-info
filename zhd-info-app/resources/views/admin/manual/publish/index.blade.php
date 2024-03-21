@@ -104,7 +104,7 @@
                 <button class="btn btn-admin">検索</button>
             </div>
         </div>
-
+        <div>※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>  
     </form>
 
         <form method="post" action="#">
