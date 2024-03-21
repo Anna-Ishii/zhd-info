@@ -13,6 +13,7 @@ use App\Http\Requests\Admin\Manual\FileUpdateApiRequest;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
 use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Imports\ManualCsvImport;
+use App\Models\Brand;
 use App\Models\Manual;
 use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
@@ -34,9 +35,6 @@ class ManualPublishController extends Controller
     public function index(Request $request)
     {
         $admin = session('admin');
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
-        $brands = $_brand->pluck('name')->toArray();
-        $brand_list = $_brand->get();
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
                 'manual_category_level2s.id as id',
@@ -45,25 +43,49 @@ class ManualPublishController extends Controller
             ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
             ->get();
 
+        $brand_list = $admin->getBrand();
         // request
         $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
-        $brand_id = $request->input('brand');
+        $brand_id = $request->input('brand', $brand_list[0]->id);
         $publish_date = $request->input('publish-date');
 
+        $organization1 = Brand::find($brand_id)->organization1;
+
+        $sub = DB::table('manuals as m')
+                    ->select([
+                        'm.id as m_id',
+                        DB::raw('
+                            case
+                                when (count(distinct b.name)) = 0 then ""
+                                else group_concat(distinct b.name order by b.id)
+                            end as b_name
+                        ')
+                    ])
+                    ->leftjoin('manual_brand as m_b', 'm.id', 'm_b.manual_id')
+                    ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
+                    ->groupBy('m.id');
         $manual_list =
             Manual::query()
-            ->with('create_user', 'updated_user', 'brand', 'tag')
+            ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
-            ->selectRaw('
-                        manuals.*,
-                        ifnull(sum(manual_user.read_flg),0) as read_users, 
-                        count(manual_user.user_id) as total_users,
-                        round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate
-                        ')
-            ->where('manuals.organization1_id', $admin->organization1_id)
+            ->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
+            ->leftjoin('brands', 'brands.id', '=', 'manual_brand.brand_id')
+            ->leftJoinSub($sub, 'sub', function ($join) {
+                $join->on('sub.m_id', '=', 'manuals.id');
+            })
+            ->select([
+                'manuals.*',
+                DB::raw('ifnull(sum(manual_user.read_flg),0) as read_users'),
+                DB::raw('count(manual_user.user_id) as total_users'),
+                DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
+                DB::raw('sub.b_name as brand_name'),
+            ])
+            ->where('manuals.organization1_id', $organization1->id)
+            ->whereNull('manual_brand.brand_id')
+            ->orWhere('manual_brand.brand_id', '=', $brand_id)
             ->groupBy(DB::raw('manuals.id'))
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
@@ -97,10 +119,6 @@ class ManualPublishController extends Controller
             ->when(isset($new_category_id), function ($query) use ($new_category_id) {
                 $query->where('category_level2_id', $new_category_id);
             })
-            ->when(isset($brand_id), function ($query) use ($brand_id) {
-                $query->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
-                    ->where('manual_brand.brand_id', '=', $brand_id);
-            })
             ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
                 $min = isset($rate[0]) ? $rate[0] : 0;
                 $max = isset($rate[1]) ? $rate[1] : 100;
@@ -126,7 +144,7 @@ class ManualPublishController extends Controller
             'new_category_list' => $new_category_list,
             'manual_list' => $manual_list,
             'brand_list' => $brand_list,
-            'brands' => $brands,
+            'organization1' => $organization1,
         ]);
     }
 

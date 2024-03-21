@@ -28,7 +28,6 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'editing_flg',
-        'organization1_id',
         'number',
         'updated_admin_id',
         'start_datetime',
