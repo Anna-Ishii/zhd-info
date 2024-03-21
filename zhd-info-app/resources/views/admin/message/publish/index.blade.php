@@ -110,8 +110,8 @@
 			<div class="input-group col-lg-1">
 				<button class="btn btn-admin">検索</button>
 			</div>
+			<div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div> 
 		</div>
-		<div>※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>
     </form>
 	<!-- 検索結果 -->
 	<form method="post" action="#">
