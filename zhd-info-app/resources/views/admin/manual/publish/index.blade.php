@@ -44,7 +44,6 @@
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">業態</label>
                 <select name="brand" class="form-control">
-                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
@@ -154,7 +153,7 @@
                                         @elseif($manual->status == App\Enums\PublishStatus::Editing) editing
                                         @endif">
                                 <td class="shop-id">{{$manual->number}}</td>
-                                <td>{{$manual->brands_string($brands)}}</td>
+                                <td>{{$manual->brand_name}}</td>
                                 <td>
                                     @if($manual->category_level1)
                                         {{"{$manual->category_level1?->name} |"}}
