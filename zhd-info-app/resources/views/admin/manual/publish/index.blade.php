@@ -118,7 +118,7 @@
                         <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
                     </div>
                     <div>
-                        <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                        <a href="{{ route('admin.manual.publish.new', ['organization1' => $organization1]) }}" class="btn btn-admin">新規登録</a>
                     </div>
                 </div>
             </div>
@@ -229,6 +229,7 @@
 
 
 </div>
+@include('common.admin.manual-import-modal', ['organization1' => $organization1])
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
 <script src="{{ asset('/js/index.js') }}" defer></script>
 @endsection

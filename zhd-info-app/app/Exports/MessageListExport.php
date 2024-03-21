@@ -80,7 +80,7 @@ class MessageListExport implements
                         DB::raw('
                             CASE
                                 WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
-                                ELSE group_concat(distinct b.name)
+                                ELSE group_concat(distinct b.name order by b.name)
                             END as brand_name')
                     ])
                     ->leftjoin('message_organization as m_o', 'messages.id', '=', 'm_o.message_id')

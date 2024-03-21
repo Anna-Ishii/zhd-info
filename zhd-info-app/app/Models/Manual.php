@@ -28,6 +28,7 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'editing_flg',
+        'organization1_id',
         'number',
         'updated_admin_id',
         'start_datetime',
@@ -78,6 +79,11 @@ class Manual extends Model
     public function category_level2(): HasOne
     {
         return $this->hasOne(ManualCategoryLevel2::class, foreignKey: 'id', localKey: 'category_level2_id');
+    }
+
+    public function organization1(): HasOne
+    {
+        return $this->hasOne(Organization1::class, 'id', 'organization1_id');
     }
 
     public function brand(): BelongsToMany

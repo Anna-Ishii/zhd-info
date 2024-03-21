@@ -107,8 +107,6 @@
             </div>  
         </div>
     </div>
-
-    @include('common.admin.manual-import-modal')
     
     <script src="{{ asset('/js/edit.js') }}" defer></script>
     @livewireScripts

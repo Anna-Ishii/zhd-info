@@ -30,13 +30,14 @@ class ManualCsvImport implements
 {
     use Importable;
 
+    private $organization1;
     private $brand = [];
     private $category_list = [];
 
-    public function __construct()
+    public function __construct($organization1)
     {
-        $admin = session('admin');
-        $this->brand = $this->getBrandNameArray($admin->organization1_id);
+        $this->organization1 = $organization1;
+        $this->brand = $this->getBrandNameArray($this->organization1);
         array_push(($this->brand), "全て");
         $this->new_category_list = $this->getNewCategoryList();
     }
@@ -45,7 +46,7 @@ class ManualCsvImport implements
     {
         //
         $admin = session("admin");
-        $organization1_id = $admin->organization1_id;
+        $organization1_id = $this->organization1;
 
         foreach ($rows as $index => [
             $no,
@@ -129,7 +130,7 @@ class ManualCsvImport implements
         return [
             '0' => ['required'],
             '1' => ['nullable', Rule::in($this->new_category_list)],
-            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
+            '11' => ['nullable', new OrganizationRule(parameter: $this->brand)],
         ];
     }
 
