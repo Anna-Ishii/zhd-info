@@ -77,8 +77,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
             Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
-            Route::get('new', [ManualPublishController::class, 'new'])->name('new');
-            Route::post('new', [ManualPublishController::class, 'store'])->name('new.store');
+            Route::get('{organization1}/new', [ManualPublishController::class, 'new'])->name('new');
+            Route::post('{organization1}/new', [ManualPublishController::class, 'store'])->name('new.store');
             Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
             Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');

@@ -19,6 +19,7 @@ use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
 use App\Models\ManualTagMaster;
+use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
 use App\Utils\ImageConverter;
@@ -60,7 +61,7 @@ class ManualPublishController extends Controller
                         DB::raw('
                             case
                                 when (count(distinct b.name)) = 0 then ""
-                                else group_concat(distinct b.name order by b.id)
+                                else group_concat(distinct b.name order by b.name)
                             end as b_name
                         ')
                     ])
@@ -150,18 +151,18 @@ class ManualPublishController extends Controller
 
     public function show(Request $request, $manual_id)
     {
-        $admin = session('admin');
         $manual = Manual::where('id', $manual_id)
             ->withCount(['user as total_users'])
             ->withCount(['readed_user as read_users'])
             ->first();
 
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $organization1 = $manual->organization1;
+        $_brand = $organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
-        $org3_list = Organization1Repository::getOrg3($admin->organization1_id);
-        $org4_list = Organization1Repository::getOrg4($admin->organization1_id);
-        $org5_list = Organization1Repository::getOrg5($admin->organization1_id);
+        $org3_list = Organization1Repository::getOrg3($organization1);
+        $org4_list = Organization1Repository::getOrg4($organization1);
+        $org5_list = Organization1Repository::getOrg5($organization1);
 
         // request
         $brand_id = $request->input('brand');
@@ -226,10 +227,8 @@ class ManualPublishController extends Controller
         ]);
     }
 
-    public function new()
+    public function new(Organization1 $organization1)
     {
-        $admin = session("admin");
-
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
                 'manual_category_level2s.id as id',
@@ -237,7 +236,9 @@ class ManualPublishController extends Controller
             ])
             ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
             ->get();
-        $brand_list = AdminRepository::getBrands($admin);
+
+        // ブランド一覧を取得する
+        $brand_list = Brand::where('organization1_id', $organization1->id)->get();
 
         return view('admin.manual.publish.new', [
             'new_category_list' => $new_category_list,
@@ -245,7 +246,7 @@ class ManualPublishController extends Controller
         ]);
     }
 
-    public function store(PublishStoreRequest $request)
+    public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
         $validated = $request->validated();
 
@@ -260,8 +261,8 @@ class ManualPublishController extends Controller
         $manual_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
         $manual_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($manual_params['content_url']) : null;
         $manual_params['create_admin_id'] = $admin->id;
-        $manual_params['organization1_id'] = $admin->organization1_id;
-        $manual_params['number'] = Manual::getCurrentNumber($admin->organization1_id) + 1;
+        $manual_params['organization1_id'] = $organization1->id;
+        $manual_params['number'] = Manual::getCurrentNumber($organization1->id) + 1;
         $manual_params['editing_flg'] = isset($request->save);
 
         try {
@@ -304,11 +305,9 @@ class ManualPublishController extends Controller
         if (empty($manual)) return redirect()->route('admin.manual.publish.index');
 
         $admin = session('admin');
-        // ログインユーザーとは違う業態のものは編集画面を出さない
-        if($manual->organization1_id != $admin->organization1_id) return redirect()->route('admin.manual.publish.index');
 
         // 業態一覧を取得する
-        $brand_list = AdminRepository::getBrands($admin);
+        $brand_list = Brand::where('organization1_id', $manual->organization1_id)->get();
         $target_brand = $manual->brand()->pluck('brands.id')->toArray();
         $contents = $manual->content()
             ->orderBy("order_no")
@@ -447,7 +446,6 @@ class ManualPublishController extends Controller
         $contents = $manual->content()
                             ->orderBy("order_no", "desc")
                             ->get();
-        $target_user = $manual->user;
         $target_org1 = $manual->organization1()->pluck('organization1.id')->toArray();
         $target_shop = Shop::whereIn("organization4_id", $target_org1)->get();
         
@@ -478,6 +476,7 @@ class ManualPublishController extends Controller
         return response()->json(['message' => '停止しました']);
     }
 
+    // 詳細画面のエクスポート
     public function export(Request $request, $manual_id)
     {
         $now = new Carbon('now');
@@ -488,12 +487,14 @@ class ManualPublishController extends Controller
         );
     }
 
+    // マニュアル一覧のエクスポート
     public function exportList(Request $request)
     {
         $admin = session('admin');
-        $organization1 = $admin->organization1->name;
-        $now = new Carbon('now');
-        $file_name = '動画マニュアル_' . $organization1 . $now->format('_Y_m_d') . '.csv';
+        $brand_id = $request->input('brand', $admin->firstBrand()->id);
+        $organization1 = Brand::find($brand_id)->organization1;
+
+        $file_name = '動画マニュアル_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
         return Excel::download(
             new ManualListExport($request),
             $file_name
@@ -518,6 +519,7 @@ class ManualPublishController extends Controller
     public function import(Request $request)
     {
         $csv = $request->file;
+        $organization1 = (int) $request->input('organization1');
         $csv_path = Storage::putFile('csv', $csv);
 
         $csv_content = file_get_contents($csv);
@@ -540,7 +542,7 @@ class ManualPublishController extends Controller
 
         DB::beginTransaction();
         try {
-            Excel::import(new ManualCsvImport, $csv, \Maatwebsite\Excel\Excel::CSV);
+            Excel::import(new ManualCsvImport($organization1), $csv, \Maatwebsite\Excel\Excel::CSV);
             // $this->importMessage($messages[0], $admin->organization1);
             DB::table('manual_csv_logs')
                 ->where('id', $log_id)
@@ -578,22 +580,6 @@ class ManualPublishController extends Controller
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
-    }
-
-    private function hasManualFile($request): Bool {
-        if(!isset($request->file_name) || !isset($request->file_path)) return false;
-        return true;
-    }
-
-    private function hasManualContentFile($request): Bool {
-        if(isset($request['manual_flow'])){
-            foreach ($request['manual_flow'] as $i => $r) {
-                if(!isset($r['file_name']) || !isset($r['file_path'])){
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 
     private function isChangedFile($current_file_path, $next_file_path): Bool {

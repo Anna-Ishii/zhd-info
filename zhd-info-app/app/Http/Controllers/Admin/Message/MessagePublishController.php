@@ -54,7 +54,7 @@ class MessagePublishController extends Controller
                         DB::raw('
                             case
                                 when (count(distinct b.name)) = 0 then ""
-                                else group_concat(distinct b.name order by b.id)
+                                else group_concat(distinct b.name order by b.name)
                             end as b_name
                         ')
                     ])
@@ -144,14 +144,12 @@ class MessagePublishController extends Controller
 
     public function show(Request $request, $message_id)
     {
-        $admin = session('admin');
-        $admin_org1 = $admin->organization1();
-        $organization1 = $request->input('organization1', $admin_org1->first());
         $message = Message::where('id', $message_id)
             ->withCount(['user as total_users'])
             ->withCount(['readed_user as read_users'])
             ->first();
 
+        $organization1 = $message->organization1;
         $_brand = $organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
         $brand_list = $_brand->get();
@@ -224,8 +222,6 @@ class MessagePublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        $admin = session("admin");
-
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
