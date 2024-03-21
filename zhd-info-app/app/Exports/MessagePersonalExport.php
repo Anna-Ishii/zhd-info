@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use App\Enums\PublishStatus;
 use App\Models\Message;
+use App\Models\Organization1;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -34,6 +35,7 @@ class MessagePersonalExport implements
     public function view(): View
     {
         $admin = session('admin');
+        $organization1_list = $admin->organization1()->orderby('name')->get();
 
         // request
         $publish_from_date = $this->request->input('publish-from-date');
@@ -43,7 +45,9 @@ class MessagePersonalExport implements
         $org = $this->request->input('org');
         $shop_freeword = $this->request->input('shop_freeword');
         $message_freeword = $this->request->input('message_freeword');
+        $organization1_id = $this->request->input('organization1', $organization1_list[0]->id);
 
+        $organization1 = Organization1::find($organization1_id);
         $orgazanizations = [];
         $viewrates = [];
 
@@ -53,7 +57,7 @@ class MessagePersonalExport implements
             ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
             ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
             ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
-            ->where('messages.organization1_id', '=', $admin->organization1_id)
+            ->where('messages.organization1_id', '=', $organization1->id)
             ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
                 $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
                     $query
@@ -109,17 +113,17 @@ class MessagePersonalExport implements
         $_messages = $messages->pluck('id')->toArray();
 
         // DS, AR, BLがあるかで処理を分ける
-        if ($admin->organization1->isExistOrg3()) {
+        if ($organization1->isExistOrg3()) {
             $orgazanizations[] = "DS";
-            $organization_list["DS"] = $admin->organization1->getOrganization3();
+            $organization_list["DS"] = $organization1->getOrganization3();
         }
-        if ($admin->organization1->isExistOrg4()) {
+        if ($organization1->isExistOrg4()) {
             $orgazanizations[] = "AR";
-            $organization_list["AR"] = $admin->organization1->getOrganization4();
+            $organization_list["AR"] = $organization1->getOrganization4();
         }
-        if ($admin->organization1->isExistOrg5()) {
+        if ($organization1->isExistOrg5()) {
             $orgazanizations[] = "BL";
-            $organization_list["BL"] = $admin->organization1->getOrganization5();
+            $organization_list["BL"] = $organization1->getOrganization5();
         }
 
         foreach ($_messages as $key => $ms) {
@@ -180,7 +184,7 @@ class MessagePersonalExport implements
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization3_id', '=', 'sub.o3_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['DS']), function ($query) use ($org) {
                         $query->where('shops.organization3_id', '=', $org['DS']);
                     })
@@ -227,7 +231,7 @@ class MessagePersonalExport implements
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization4_id', '=', 'sub.o4_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['AR']), function ($query) use ($org) {
                         $query->where('shops_organization4_id', '=', $org['AR']);
                     })
@@ -274,7 +278,7 @@ class MessagePersonalExport implements
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization5_id', '=', 'sub.o5_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['BL']), function ($query) use ($org) {
                         $query->where('shops.organization5_id', '=', $org['BL']);
                     })
@@ -323,7 +327,7 @@ class MessagePersonalExport implements
                 ->leftJoinSub($viewrate_sub, 'view_rate', function ($join) {
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
-                ->where('shops.organization1_id', '=', $admin->organization1_id)
+                ->where('shops.organization1_id', '=', $organization1->id)
                 ->when(isset($org['DS']), function ($query) use ($org) {
                     $query->where('shops.organization3_id', '=', $org['DS']);
                 })
@@ -357,6 +361,7 @@ class MessagePersonalExport implements
             'viewrates' => $viewrates,
             'organizations' => $orgazanizations,
             'organization_list' => $organization_list,
+            'organization1' => $organization1
         ]);
     }
 }
