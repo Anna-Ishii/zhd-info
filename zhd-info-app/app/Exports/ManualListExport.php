@@ -3,19 +3,24 @@
 namespace App\Exports;
 
 use App\Enums\PublishStatus;
+use App\Models\Brand;
 use App\Models\Manual;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSettings
+class ManualListExport implements 
+    FromView, 
+    ShouldAutoSize, 
+    WithCustomCsvSettings
 {
     protected $manual_id;
     protected $request;
 
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
@@ -31,16 +36,13 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
     public function view(): View
     {
         $admin = session('admin');
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
-        $brands = $_brand->pluck('name')->toArray();
-        $brand_list = $_brand->get();
 
-        // request
         $new_category_id = $this->request->input('new_category');
         $status = PublishStatus::tryFrom($this->request->input('status'));
         $q = $this->request->input('q');
         $rate = $this->request->input('rate');
-        $brand_id = $this->request->input('brand');
+        $brand_id = $this->request->input('brand', $admin->firstBrand()->id);
+        $organization1 = Brand::find($brand_id)->organization1_id;
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('manuals')
                     ->select([
@@ -48,12 +50,7 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
                         DB::raw('
                             CASE
                                 WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
-                                WHEN (
-                                    SELECT COUNT(DISTINCT _b.name) 
-                                    FROM brands as _b
-                                    WHERE _b.organization1_id = manuals.organization1_id
-                                ) = COUNT(DISTINCT b.name) THEN "全て"
-                                ELSE group_concat(distinct b.name)
+                                ELSE group_concat(distinct b.name order by b.name)
                             END as brand_name')
                         ])
                         ->leftjoin('manual_brand as m_b', 'manuals.id', '=', 'm_b.manual_id')
@@ -76,7 +73,7 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
             ->leftJoinSub($cte, 'org', function ($join) {
                 $join->on('manuals.id', '=', 'org.manual_id');
             })
-            ->where('manuals.organization1_id', $admin->organization1_id)
+            ->where('manuals.organization1_id', $organization1)
             ->groupBy('manuals.id')
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
@@ -136,7 +133,6 @@ class ManualListExport implements FromView, ShouldAutoSize, WithCustomCsvSetting
 
         return view('exports.manual-list-export', [
             'manual_list' => $manual_list,
-            'brand_list' => $brand_list,
         ]);
     }
 

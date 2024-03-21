@@ -81,6 +81,11 @@ class Manual extends Model
         return $this->hasOne(ManualCategoryLevel2::class, foreignKey: 'id', localKey: 'category_level2_id');
     }
 
+    public function organization1(): HasOne
+    {
+        return $this->hasOne(Organization1::class, 'id', 'organization1_id');
+    }
+
     public function brand(): BelongsToMany
     {
         return $this->BelongsToMany(Brand::class, 'manual_brand', 'manual_id', 'brand_id');

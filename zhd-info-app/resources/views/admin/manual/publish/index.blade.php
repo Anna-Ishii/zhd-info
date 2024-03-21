@@ -44,7 +44,6 @@
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">業態</label>
                 <select name="brand" class="form-control">
-                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
@@ -119,7 +118,7 @@
                         <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
                     </div>
                     <div>
-                        <a href="{{ route('admin.manual.publish.new') }}" class="btn btn-admin">新規登録</a>
+                        <a href="{{ route('admin.manual.publish.new', ['organization1' => $organization1]) }}" class="btn btn-admin">新規登録</a>
                     </div>
                 </div>
             </div>
@@ -154,7 +153,7 @@
                                         @elseif($manual->status == App\Enums\PublishStatus::Editing) editing
                                         @endif">
                                 <td class="shop-id">{{$manual->number}}</td>
-                                <td>{{$manual->brands_string($brands)}}</td>
+                                <td>{{$manual->brand_name}}</td>
                                 <td>
                                     @if($manual->category_level1)
                                         {{"{$manual->category_level1?->name} |"}}
@@ -230,6 +229,7 @@
 
 
 </div>
+@include('common.admin.manual-import-modal', ['organization1' => $organization1])
 <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
 <script src="{{ asset('/js/index.js') }}" defer></script>
 @endsection
