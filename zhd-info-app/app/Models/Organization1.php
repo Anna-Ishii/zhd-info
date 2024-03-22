@@ -30,11 +30,12 @@ class Organization1 extends Model
     public function getOrganization5()
     {
         $organization5 = Shop::query()
-            ->select(['organization5.id', 'organization5.name'])
+            ->select(['organization5.id','organization5.name', 'organization5.order_no'])
             ->distinct('organization5.name')
             ->where('organization1_id', '=', $this->id)
             ->whereNotNull('organization5_id')
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->orderby('organization5.order_no')
             ->get();
 
         return $organization5;
@@ -43,11 +44,12 @@ class Organization1 extends Model
     public function getOrganization4()
     {
         $organization4 = Shop::query()
-            ->select(['organization4.id','organization4.name'])
+            ->select(['organization4.id','organization4.name', 'organization4.order_no'])
             ->distinct('organization4.name')
             ->where('organization1_id', '=', $this->id)
             ->whereNotNull('organization4_id')
             ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->orderby('organization4.order_no')
             ->get();
 
         return $organization4; 
@@ -56,11 +58,12 @@ class Organization1 extends Model
     public function getOrganization3()
     {
         $organization3 = Shop::query()
-            ->select(['organization3.id', 'organization3.name'])
+            ->select(['organization3.id', 'organization3.name', 'organization3.order_no'])
             ->distinct('organization3.name')
             ->where('organization1_id', '=', $this->id)
             ->whereNotNull('organization3_id')
             ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->orderby('organization3.order_no')
             ->get();
 
         return $organization3;
