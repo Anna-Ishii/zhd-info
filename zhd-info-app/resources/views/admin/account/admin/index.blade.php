@@ -1,0 +1,119 @@
+@extends('layouts.admin.parent')
+
+@section('sideber')
+    <div class="navbar-default sidebar" role="navigation">
+        <div class="sidebar-nav navbar-collapse">
+            <ul class="nav">
+                <li>
+                    <a href="#" class="nav-label">1.配信</a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">2.データ抽出</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">3.管理</span></a>
+                    <ul class="nav nav-second-level">
+                        <li><a href="/admin/account/">3-1.アカウント</a></li>
+                        <li class="active"><a href="/admin/account/">3-2.本部アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">4.その他</span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">4-1.IMS連携</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- /.sidebar-collapse -->
+    </div>
+    <!-- /.navbar-static-side -->
+@endsection
+
+@section('content')
+
+<div id="page-wrapper">
+        <!-- 絞り込み部分 -->
+        
+    	<!-- 検索結果 -->
+	<form method="post" action="#">
+
+		<div class="pagenation-top">
+		@include('common.admin.pagenation', ['objects' => $admin_list])
+			<div>
+				<div>
+					<a  class=" btn btn-admin">新規登録</a>
+				</div>
+			</div>
+		</div>
+
+		<div class="message-tableInner table-responsive-xxl">
+			<table id="list" class="message-table table-list table-hover table-condensed text-center">
+				<thead>
+					<tr>
+						<th class="text-center" rowspan="2" nowrap>ID</th>
+						<th class="text-center" rowspan="2" nowrap>社員業態</th>
+						<th class="text-center" rowspan="2" nowrap>氏名</th>
+						<th class="text-center" colspan="{{$organization1_list->count()}}" nowrap>閲覧業態</th>
+                        <th class="text-center" rowspan="2" nowrap>権限</th>
+                        <th class="text-center" colspan="{{$page_list->count()}}" nowrap>閲覧権限</th>
+                        <th class="text-center" rowspan="2" nowrap>操作</th>
+					</tr>
+                    <tr>
+                        @foreach ($organization1_list as $organization1)
+                            <td>{{$organization1->name}}</td>
+                        @endforeach
+                        @foreach ($page_list as $page)
+                            <td>{{$page->name}}</td>
+                        @endforeach
+                    </tr>
+				</thead>
+
+				<tbody>
+					@foreach ($admin_list as $admin)
+					<tr class="{{$admin->deleted_at ? 'deleted' : ''}}">
+						<td class="admin-id">{{$admin->id}}</td>
+						<td>{{$admin->employee_code}}</td>
+						<td>{{$admin->name}}</td>
+                        @foreach ($organization1_list as $organization1)
+                            @if ($admin->organization1->contains('id', $organization1->id))
+                                <td>◯</td>
+                            @else
+                                <td></td>
+                            @endif
+                        @endforeach
+                        <td>
+                            {{$admin->ability->text()}}
+                        </td>
+                         @foreach ($page_list as $page)
+                            @if ($admin->allowpage->contains('id', $page->id))
+                                <td>◯</td>
+                            @else
+                                <td></td>
+                            @endif
+                        @endforeach
+                        <td>
+                            <div><input type="button" value="操作"></div>
+                        </td>
+					</tr>
+					@endforeach
+				</tbody>
+			</table>
+		</div>
+		<div class="pagenation-bottom">
+			@include('common.admin.pagenation', ['objects' => $admin_list])
+		</div>
+	</form>
+</div>
+<script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
+@endsection

@@ -717,3 +717,6 @@ table.personal td[class*="org"] {
   vertical-align: middle;
   text-align: center;
 }
+table tr.deleted {
+  background-color: #d9d9d9;;
+}
