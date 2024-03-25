@@ -111,7 +111,7 @@
                     @foreach ($ability_list as $ability)
                         <option value="{{$ability->value}}" class="mr8" 
                             @if(request()->old())
-                                {{($ability->value == old('ability_id')) ? "selected" : ""}}
+                                {{($ability->value == old('ability')) ? "selected" : ""}}
                             @else
                                 {{($ability->value == $edit_admin->ability->value) ? "selected" : ""}}
                             @endif
