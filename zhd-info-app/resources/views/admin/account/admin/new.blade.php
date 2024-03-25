@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">業態</label>
+            <label class="col-lg-2 control-label">閲覧業態</label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -109,7 +109,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">閲覧可能画面</label>
+            <label class="col-lg-2 control-label">閲覧画面</label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
