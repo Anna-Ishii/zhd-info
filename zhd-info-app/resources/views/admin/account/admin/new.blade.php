@@ -103,7 +103,7 @@
                 </div>
                 @foreach ($adminpage_list as $page)
                 <label class="mr16">
-                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="mr8" 
+                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8" 
                        {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}>
                     {{$page->name}}
                 </label>
