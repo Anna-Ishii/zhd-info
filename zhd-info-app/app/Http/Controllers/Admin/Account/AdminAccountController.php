@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin\Account;
 
 use App\Enums\AdminAbility;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Admin\Account\AdminAccountStoreRequest;
 use App\Models\Admin;
 use App\Models\AdminPage;
 use App\Models\Organization1;
@@ -37,8 +38,9 @@ class AdminAccountController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(AdminAccountStoreRequest $request)
     {
+        $request->validated();
         try {
             DB::beginTransaction();
             $admin = new Admin;
