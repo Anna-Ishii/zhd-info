@@ -81,7 +81,7 @@
 
 				<tbody>
 					@foreach ($admin_list as $a)
-					<tr class="{{$a->deleted_at ? 'deleted' : ''}}">
+					<tr class="{{$a->deleted_at ? 'deleted' : ''}}" data-admin_id="{{$a->id}}">
 						<td class="admin-id">{{$a->id}}</td>
 						<td>{{$a->employee_code}}</td>
 						<td>{{$a->name}}</td>
@@ -103,7 +103,9 @@
                             @endif
                         @endforeach
                         <td>
-                            <div><a href="{{route('admin.account.admin.edit', ['admin' => $a->id])}}"><input type="button" value="操作"></a></div>
+                            <div class="button-group">
+							    <button class="editBtn btn btn-admin">編集</button>
+							</div>
                         </td>
 					</tr>
 					@endforeach
@@ -115,5 +117,5 @@
 		</div>
 	</form>
 </div>
-<script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
+<script src="{{ asset('/js/admin/account/adminaccount/index.js') }}" defer></script>
 @endsection
