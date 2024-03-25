@@ -63,13 +63,15 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" checked>
+                        <input type="checkbox" id="checkAll" class="mr8" 
+                            {{(old('organization1', []) == $organization1_list->pluck('id')->toArray()) ? 'checked' : '' }}>
                         全て
                     </label>
                 </div>
                 @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8" checked>
+                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8" 
+                       {{ in_array((string)$organization1->id, old('organization1', []), true) ? 'checked' : ''}}>
                     {{ $organization1->name }}
                 </label>
                 @endforeach
@@ -81,10 +83,11 @@
                 <select name="ability" class="form-control">
                     @foreach ($ability_list as $ability)
                     <option value="{{$ability->value}}" class="mr8" 
-                        {{($ability->value == old('ability_id')) ? "checked" : ""}}>
+                        {{($ability->value == old('ability')) ? "selected" : ""}}>
                         {{$ability->text()}}
                     </option>
                     @endforeach
+                    
                 </select>
             </div>
         </div>
@@ -93,14 +96,15 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" checked>
+                        <input type="checkbox" id="checkAll" class="mr8"
+                            {{(old('page', []) == $adminpage_list->pluck('id')->toArray()) ? 'checked' : '' }}>
                         全て
                     </label>
                 </div>
                 @foreach ($adminpage_list as $page)
                 <label class="mr16">
                     <input type="checkbox" name="page[]" value="{{$page->id}}" class="mr8" 
-                        {{($page->id == old('page_id')) ? "checked" : ""}} checked>
+                       {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}>
                     {{$page->name}}
                 </label>
                 @endforeach
