@@ -20,7 +20,7 @@ class AdminAccountController extends Controller
     {
         $admin_list = Admin::withTrashed()->paginate(50);
         $organization1_list = Organization1::orderby('name')->get();
-        $page_list = Adminpage::get();
+        $page_list = Adminpage::orderby('name')->get();
         return view('admin.account.admin.index',[
             'admin_list' => $admin_list,
             'organization1_list' => $organization1_list,
@@ -31,7 +31,7 @@ class AdminAccountController extends Controller
     public function new()
     {
         $organization1_list = Organization1::orderby('name')->get();
-        $adminpage_list = AdminPage::get();
+        $adminpage_list = Adminpage::orderby('name')->get();
         return view('admin.account.admin.new', [
             'organization1_list' => $organization1_list,
             'ability_list' => AdminAbility::cases(),
@@ -73,7 +73,7 @@ class AdminAccountController extends Controller
             ->where('id', $admin_id)
             ->first();
         $organization1_list = Organization1::orderby('name')->get();
-        $adminpage_list = AdminPage::get();
+        $adminpage_list = Adminpage::orderby('name')->get();
         return view('admin.account.admin.edit', [
             'organization1_list' => $organization1_list,
             'ability_list' => AdminAbility::cases(),
