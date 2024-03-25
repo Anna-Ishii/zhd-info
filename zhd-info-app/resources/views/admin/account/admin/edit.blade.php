@@ -67,7 +67,7 @@
                             @if(request()->old())
                                 {{(old('organization1', []) == $organization1_list->pluck('id')->toArray()) ? 'checked' : ''}}
                             @else
-                                {{($edit_admin->organization1->pluck('id')->toArray() == $organization1_list->pluck('id')->toArray()) ? 'checked' : ''}}
+                                {{(empty(array_diff($organization1_list->pluck('id')->toArray(),$edit_admin->organization1->pluck('id')->toArray()))) ? 'checked' : ''}}
                             @endif
                         >
                         全て
@@ -122,7 +122,7 @@
                 </div>
                 @foreach ($adminpage_list as $page)
                 <label class="mr16">
-                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="mr8" 
+                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8" 
                         @if(request()->old())
                             {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}
                         @else
