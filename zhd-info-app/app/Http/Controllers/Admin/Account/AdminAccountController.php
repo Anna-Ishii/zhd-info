@@ -7,7 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Account\AdminAccountStoreRequest;
 use App\Http\Requests\Admin\Account\AdminAccountUpdateRequest;
 use App\Models\Admin;
-use App\Models\AdminPage;
+use App\Models\Adminpage;
 use App\Models\Organization1;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +20,7 @@ class AdminAccountController extends Controller
     {
         $admin_list = Admin::withTrashed()->paginate(50);
         $organization1_list = Organization1::orderby('name')->get();
-        $page_list = AdminPage::get();
+        $page_list = Adminpage::get();
         return view('admin.account.admin.index',[
             'admin_list' => $admin_list,
             'organization1_list' => $organization1_list,
@@ -85,7 +85,7 @@ class AdminAccountController extends Controller
     public function update(AdminAccountUpdateRequest $request, $admin_id)
     {
         $request->validated();
-        
+
         $is_valid = $request->is_valid;
 
         $admin = Admin::withTrashed()
