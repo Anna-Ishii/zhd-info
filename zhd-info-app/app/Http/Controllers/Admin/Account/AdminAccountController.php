@@ -9,7 +9,6 @@ use App\Http\Requests\Admin\Account\AdminAccountUpdateRequest;
 use App\Models\Admin;
 use App\Models\Adminpage;
 use App\Models\Organization1;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
@@ -103,7 +102,18 @@ class AdminAccountController extends Controller
             $admin->organization1()->sync($request->organization1);
             $admin->allowpage()->sync($request->page);
             $is_valid ? $admin->restore() : $admin->delete();
-            
+
+            $exist_account_admin =  Admin::query()
+                ->join('admin_page','admin.id', '=', 'admin_page.admin_id')
+                ->join('adminpages', function($join) {
+                    $join->on('admin_page.page_id', '=', 'adminpages.id')
+                        ->where('adminpages.code', '=', 'account-admin');
+                })
+                ->where('ability', '!=', 0)
+                ->exists();
+            if(!$exist_account_admin) {
+                throw new \Exception("本部アカウントを管理するアカウントは1つ以上存在する必要があります。");
+            }
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -111,7 +121,7 @@ class AdminAccountController extends Controller
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', 'データベースエラーです');
+                ->with('error', $th->getMessage());
         }
 
         return redirect()->route('admin.account.admin.index');
