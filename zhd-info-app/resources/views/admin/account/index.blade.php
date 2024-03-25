@@ -30,7 +30,7 @@
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
                         @if (in_array('account-shop', $arrow_pages, true))
-                            <li class="active"><a href="/admin/account/">3-1.アカウント</a></li>
+                            <li class="active"><a href="/admin/account/">3-1.店舗アカウント</a></li>
                         @endif
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
