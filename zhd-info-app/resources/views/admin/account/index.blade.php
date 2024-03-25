@@ -21,8 +21,13 @@
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
                         <li class="active"><a href="/admin/account/">3-1.アカウント</a></li>
-                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
-                        </li>
+                        <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#" class="nav-label">4.その他</span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">4-1.IMS連携</a></li>
                     </ul>
                 </li>
                 <li>

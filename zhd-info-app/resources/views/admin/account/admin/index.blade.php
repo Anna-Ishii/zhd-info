@@ -21,7 +21,7 @@
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/account/">3-1.アカウント</a></li>
-                        <li class="active"><a href="/admin/account/">3-2.本部アカウント</a></li>
+                        <li class="active"><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                     </ul>
                 </li>
                 <li>
@@ -52,7 +52,7 @@
 		@include('common.admin.pagenation', ['objects' => $admin_list])
 			<div>
 				<div>
-					<a  class=" btn btn-admin">新規登録</a>
+					<a href="{{route('admin.account.admin.new')}}" class="btn btn-admin">新規登録</a>
 				</div>
 			</div>
 		</div>
@@ -80,30 +80,30 @@
 				</thead>
 
 				<tbody>
-					@foreach ($admin_list as $admin)
-					<tr class="{{$admin->deleted_at ? 'deleted' : ''}}">
-						<td class="admin-id">{{$admin->id}}</td>
-						<td>{{$admin->employee_code}}</td>
-						<td>{{$admin->name}}</td>
+					@foreach ($admin_list as $a)
+					<tr class="{{$a->deleted_at ? 'deleted' : ''}}">
+						<td class="admin-id">{{$a->id}}</td>
+						<td>{{$a->employee_code}}</td>
+						<td>{{$a->name}}</td>
                         @foreach ($organization1_list as $organization1)
-                            @if ($admin->organization1->contains('id', $organization1->id))
+                            @if ($a->organization1->contains('id', $organization1->id))
                                 <td>◯</td>
                             @else
                                 <td></td>
                             @endif
                         @endforeach
                         <td>
-                            {{$admin->ability->text()}}
+                            {{$a->ability->text()}}
                         </td>
                          @foreach ($page_list as $page)
-                            @if ($admin->allowpage->contains('id', $page->id))
+                            @if ($a->allowpage->contains('id', $page->id))
                                 <td>◯</td>
                             @else
                                 <td></td>
                             @endif
                         @endforeach
                         <td>
-                            <div><input type="button" value="操作"></div>
+                            <div><a href="{{route('admin.account.admin.edit', ['admin' => $a->id])}}"><input type="button" value="操作"></a></div>
                         </td>
 					</tr>
 					@endforeach
