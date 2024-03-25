@@ -97,8 +97,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
 
         Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
             Route::get('/', [AdminAccountController::class, 'index'])->name('index');
-            // Route::get('new', [AccountController::class, 'new'])->name('new');
-            // Route::post('new', [AccountController::class, 'store'])->name('new.store');
+            Route::get('new', [AdminAccountController::class, 'new'])->name('new');
+            Route::post('new', [AdminAccountController::class, 'store'])->name('new.store');
+            Route::get('edit/{admin}', [AdminAccountController::class, 'edit'])->name('edit');
+            Route::post('edit/{admin}', [AdminAccountController::class, 'update'])->name('update');
             // Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
         });
     });

@@ -15,7 +15,6 @@ class Admin extends Model
     protected $fillable =
     [
         'name',
-        'email',
         'password',
         'employee_code',
         'ability'
@@ -28,6 +27,11 @@ class Admin extends Model
     public function organization1(): BelongsToMany
     {
         return $this->belongsToMany(Organization1::class, 'admin_organization1', 'admin_id', 'organization1_id');
+    }
+
+    public function allowpage()
+    {
+        return $this->belongsToMany(Adminpage::class, 'admin_page', 'admin_id', 'page_id');
     }
 
     public function getBrand()
@@ -48,8 +52,5 @@ class Admin extends Model
         return $brands[0];
     }
 
-    public function allowpage()
-    {
-        return $this->belongsToMany(Adminpage::class, 'admin_page', 'admin_id', 'page_id');
-    }
+
 }
