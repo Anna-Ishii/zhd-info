@@ -103,9 +103,9 @@
 				<tbody>
 					@foreach ($admin_list as $a)
 					<tr class="{{$a->deleted_at ? 'deleted' : ''}}" data-admin_id="{{$a->id}}">
-						<td class="admin-id">{{$a->id}}</td>
-						<td>{{$a->employee_code}}</td>
-						<td>{{$a->name}}</td>
+						<td class="admin-id text-right">{{$a->id}}</td>
+						<td class="text-left">{{$a->employee_code}}</td>
+						<td class="text-left">{{$a->name}}</td>
                         @foreach ($organization1_list as $organization1)
                             @if ($a->organization1->contains('id', $organization1->id))
                                 <td>◯</td>
