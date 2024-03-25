@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Account;
 use App\Enums\AdminAbility;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Account\AdminAccountStoreRequest;
+use App\Http\Requests\Admin\Account\AdminAccountUpdateRequest;
 use App\Models\Admin;
 use App\Models\AdminPage;
 use App\Models\Organization1;
@@ -81,8 +82,10 @@ class AdminAccountController extends Controller
         ]);
     }
 
-    public function update(Request $request, $admin_id)
+    public function update(AdminAccountUpdateRequest $request, $admin_id)
     {
+        $request->validated();
+        
         $is_valid = $request->is_valid;
 
         $admin = Admin::withTrashed()

@@ -63,7 +63,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8">
+                        <input type="checkbox" id="checkAll" class="mr8"
+                            @if(request()->old())
+                                {{(old('organization1', []) == $organization1_list->pluck('id')->toArray()) ? 'checked' : ''}}
+                            @else
+                                {{($edit_admin->organization1->pluck('id')->toArray() == $organization1_list->pluck('id')->toArray()) ? 'checked' : ''}}
+                            @endif
+                        >
                         全て
                     </label>
                 </div>
@@ -104,7 +110,13 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8">
+                        <input type="checkbox" id="checkAll" class="mr8"
+                            @if(request()->old())
+                                {{(old('page', []) == $adminpage_list->pluck('id')->toArray()) ? 'checked' : ''}}
+                            @else
+                                {{($edit_admin->allowpage->pluck('id')->toArray() == $adminpage_list->pluck('id')->toArray()) ? 'checked' : ''}}
+                            @endif
+                        >
                         全て
                     </label>
                 </div>
@@ -112,7 +124,7 @@
                 <label class="mr16">
                     <input type="checkbox" name="page[]" value="{{$page->id}}" class="mr8" 
                         @if(request()->old())
-                            {{ in_array((string)$page->id, old('page_id', []), true) ? 'checked' : ''}}
+                            {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}
                         @else
                             {{ in_array($page->id, $edit_admin->allowpage->pluck('id')->toArray(), true) ? 'checked' : ''}}
                         @endif
@@ -125,16 +137,10 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">有効アカウント</label>
             <div class="col-lg-10 checkArea">
-                <div class="mb8">
-                    <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8">
-                        全て
-                    </label>
-                </div>
                 <label class="mr16">
                     <input type="radio" name="is_valid" value="true" class="mr8" 
                         @if(request()->old())
-                            {{$edit_admin->trashed() ? '' : 'checked'}}
+                            {{!old("is_valid") ? '' : 'checked'}}
                         @else
                             {{$edit_admin->trashed() ? '' : 'checked'}}
                         @endif
@@ -144,7 +150,7 @@
                 <label class="mr16">
                     <input type="radio" name="is_valid" value="" class="mr8" 
                         @if(request()->old())
-                            {{$edit_admin->trashed() ? 'checked' : ''}}
+                            {{!old("is_valid") ? 'checked' : ''}}
                         @else
                             {{$edit_admin->trashed() ? 'checked' : ''}}
                         @endif
