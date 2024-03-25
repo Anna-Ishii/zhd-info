@@ -59,7 +59,7 @@
 
 @section('content')
 <div id="page-wrapper">
-    @include('common.admin.page-head',['title' => '本部アカウント登録'])
+    @include('common.admin.page-head',['title' => '本部アカウント編集'])
 
     <form method="post" class="form-horizontal">
         @csrf
@@ -76,7 +76,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">業態</label>
+            <label class="col-lg-2 control-label">閲覧業態</label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -123,7 +123,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">閲覧可能画面</label>
+            <label class="col-lg-2 control-label">閲覧画面</label>
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
@@ -152,7 +152,7 @@
             </div>
         </div>
         <div class="form-group">
-            <label class="col-lg-2 control-label">有効アカウント</label>
+            <label class="col-lg-2 control-label">状態</label>
             <div class="col-lg-10 checkArea">
                 <label class="mr16">
                     <input type="radio" name="is_valid" value="true" class="mr8" 

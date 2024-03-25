@@ -81,9 +81,9 @@
 				<thead>
 					<tr>
 						<th class="text-center" rowspan="2" nowrap>ID</th>
-						<th class="text-center" rowspan="2" nowrap>社員業態</th>
+						<th class="text-center" rowspan="2" nowrap>社員番号</th>
 						<th class="text-center" rowspan="2" nowrap>氏名</th>
-						<th class="text-center" colspan="{{$organization1_list->count()}}" nowrap>閲覧業態</th>
+						<th class="text-center" colspan="{{$organization1_list->count()}}" nowrap>閲覧画面</th>
                         <th class="text-center" rowspan="2" nowrap>権限</th>
                         <th class="text-center" colspan="{{$page_list->count()}}" nowrap>閲覧権限</th>
                         @if ($admin->ability == App\Enums\AdminAbility::Edit)
