@@ -143,7 +143,7 @@
                             <div>{{$m->start_datetime?->isoFormat('YYYY/MM/DD')}}</div>
                             <div>
                                 @isset($m->content_url)
-                                    <a href="{{ asset($m->content_url)}}">{{$m->title}}</a>
+                                    <a href="{{ asset($m->content_url)}}" target="_blank" rel="noopener noreferrer">{{$m->title}}</a>
                                 @else
                                     {{$m->title}}
                                 @endisset
