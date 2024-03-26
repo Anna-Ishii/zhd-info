@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Account\AccountController;
+use App\Http\Controllers\Admin\Account\AdminAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -93,7 +94,16 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::get('new', [AccountController::class, 'new'])->name('new');
         Route::post('new', [AccountController::class, 'store'])->name('new.store');
         Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+
+        Route::group(['prefix' => 'admin', 'as' => 'admin.'], function () {
+            Route::get('/', [AdminAccountController::class, 'index'])->name('index');
+            Route::get('new', [AdminAccountController::class, 'new'])->name('new');
+            Route::post('new', [AdminAccountController::class, 'store'])->name('new.store');
+            Route::get('edit/{admin}', [AdminAccountController::class, 'edit'])->name('edit');
+            Route::post('edit/{admin}', [AdminAccountController::class, 'update'])->name('update');
+        });
     });
+
     Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
         Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {
         Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
@@ -108,6 +118,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
         Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
         Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);
+        Route::get('/personal/organization', [PersonalContoller::class,  'getOrganization']);
     });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {
