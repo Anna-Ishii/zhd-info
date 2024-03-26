@@ -76,8 +76,8 @@
         @endif
 		</div>
 
-		<div class="message-tableInner table-responsive-xxl">
-			<table id="list" class="message-table table-list table-hover table-condensed text-center">
+		<div class="table-responsive-xxl">
+			<table id="list" class="table table-list table-hover table-condensed text-center">
 				<thead>
 					<tr>
 						<th class="text-center" rowspan="2" nowrap>ID</th>
