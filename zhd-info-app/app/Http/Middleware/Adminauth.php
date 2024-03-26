@@ -22,6 +22,8 @@ class Adminauth
             return redirect()->route('admin.auth');
         }
         $exists = Admin::where('id', $admin->id)->exists();
+        $_admin = Admin::find($admin->id);
+        $request->session()->put(['admin' => $_admin]);
         if (!$exists) {
             $request->session()->forget('admin');
             return redirect()->route('admin.auth');

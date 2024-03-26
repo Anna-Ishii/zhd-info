@@ -4,27 +4,49 @@
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
-                <li>
+                @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
+                <li>          
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
-                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                        @if (in_array('message', $arrow_pages, true))
+                            <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                        @endif
+                        @if (in_array('manual', $arrow_pages, true))
+                            <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                        @endif
                     </ul>
                 </li>
+                @endif
+                @if (in_array('message-analyse', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
                         <li class="active"><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
                     </ul>
                 </li>
+                @endif
+                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">3-1.アカウント</a></li>
-                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
-                        </li>
+                        @if (in_array('account-shop', $arrow_pages, true))
+                            <li><a href="/admin/account/">3-1.店舗アカウント</a></li>
+                        @endif
+                        @if (in_array('account-admin', $arrow_pages, true))
+                            <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
+                        @endif
+                        
                     </ul>
                 </li>
+                @endif
+                @if (in_array('ims', $arrow_pages, true))
+                <li>
+                    <a href="#" class="nav-label">4.その他</span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">4-1.IMS連携</a></li>
+                    </ul>
+                </li>
+                @endif
                 <li>
                     <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
                 </li>
@@ -41,6 +63,14 @@
         <!-- 絞り込み部分 -->
     <form method="get" class="mb24">
         <div class="form-group form-inline mb16 ">
+            <div class="input-group col-lg-1 spMb16">
+                <label class="input-group-addon">業態</label>
+                <select name="organization1" class="form-control" >
+                        @foreach ($organization1_list as $org1)
+                        <option value="{{ $org1->id }}" {{ request()->input('organization1') == $org1->id ? 'selected' : ''}}>{{ $org1->name }}</option>
+                        @endforeach
+                </select>
+            </div>  
             @foreach (['DS', 'BL', 'AR'] as $organization)
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">{{$organization}}</label>
@@ -52,7 +82,7 @@
                             @endforeach
                     </select>
                 @else
-                    <select class="form-control" disabled></select>
+                    <select name="org[{{$organization}}]" class="form-control" disabled></select>
                 @endif
             </div>   
             @endforeach
@@ -127,7 +157,7 @@
             @if (!request('shop_freeword'))
             <tbody>
                 <tr>
-                    <td colspan=5>{{$admin->organization1->name}}計</td>
+                    <td colspan=5>{{$organization1->name}}計</td>
                     <td nowrap>
                          <div class="view_rate_container">
                             <div>
@@ -151,7 +181,7 @@
                 @isset($viewrates['org1'])
                     @foreach ($viewrates['org1'] as $key => $v_org1)
                         @isset($v_org1[0]->count)
-                        <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$admin->organization1->id}}" nowrap>
+                        <td data-message="{{$messages[$key]->id}}" data-org-type="Org1" data-org-id="{{$organization1->id}}" nowrap>
                             <div class="view_rate view_rate_container" data-view-type="orgs">
                                 <div>{{$v_org1[0]->readed_count}} / </div>
                                 <div>{{$v_org1[0]->count}}</div>

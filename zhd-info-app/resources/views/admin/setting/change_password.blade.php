@@ -4,27 +4,48 @@
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
+				@if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
-                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+						@if (in_array('message', $arrow_pages, true))
+                        	<li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                        @endif
+						@if (in_array('manual', $arrow_pages, true))
+							<li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+						@endif
                     </ul>
                 </li>
+				@endif
+				@if(in_array('message-analyse', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
                     </ul>
                 </li>
+				@endif
+				@if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
-                        <li class="active"><a href="/admin/account/">3-1.アカウント</a></li>
-                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
-                        </li>
+						@if (in_array('account-shop', $arrow_pages, true))
+                        	<li><a href="/admin/account/">3-1.店舗アカウント</a></li>
+						@endif
+						@if (in_array('account-admin', $arrow_pages, true))
+							<li class="active"><a href="/admin/account/admin">3-2.本部アカウント</a></li>
+						@endif
                     </ul>
                 </li>
+				@endif
+				@if (in_array('ims', $arrow_pages, true))
+				<li>
+                    <a href="#" class="nav-label">4.その他</span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">4-1.IMS連携</a></li>
+                    </ul>
+                </li>
+				@endif
                 <li>
                     <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
                 </li>
