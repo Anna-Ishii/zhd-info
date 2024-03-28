@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\Account\AccountController;
+use App\Http\Controllers\Admin\Account\AdminAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -50,19 +51,19 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 });
 
 // 管理画面へのログイン画面
-Route::get('/admin/{organization1}/auth', [AuthController::class, 'index'])->name('admin.auth');
-Route::post('/admin/{organization1}/auth', [AuthController::class, 'login']);
+Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
+Route::post('/admin/auth', [AuthController::class, 'login']);
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
     // 管理画面-業務連絡
-    Route::group(['prefix' => 'message', 'as' => 'message.'], function(){
+    Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
-            Route::get('new', [MessagePublishController::class, 'new'])->name('new');
-            Route::post('new', [MessagePublishController::class, 'store'])->name('new.store');
+            Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
+            Route::post('{organization1}/new', [MessagePublishController::class, 'store'])->name('new.store');
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
@@ -73,12 +74,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
     });
     // 管理画面-動画マニュアル
-    Route::group(['prefix' => 'manual', 'as' => 'manual.'], function () {
+    Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'check.allowpage:manual'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
             Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
-            Route::get('new', [ManualPublishController::class, 'new'])->name('new');
-            Route::post('new', [ManualPublishController::class, 'store'])->name('new.store');
+            Route::get('{organization1}/new', [ManualPublishController::class, 'new'])->name('new');
+            Route::post('{organization1}/new', [ManualPublishController::class, 'store'])->name('new.store');
             Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
             Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
@@ -89,25 +90,36 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
-        Route::get('/', [AccountController::class, 'index'])->name('index');
-        Route::get('new', [AccountController::class, 'new'])->name('new');
-        Route::post('new', [AccountController::class, 'store'])->name('new.store');
-        Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+        Route::group(['middleware' => 'check.allowpage:account-shop'], function(){
+            Route::get('/', [AccountController::class, 'index'])->name('index');
+            Route::get('new', [AccountController::class, 'new'])->name('new');
+            Route::post('new', [AccountController::class, 'store'])->name('new.store');
+            Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+        });
+        Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'check.allowpage:account-admin'], function () {
+            Route::get('/', [AdminAccountController::class, 'index'])->name('index');
+            Route::get('new', [AdminAccountController::class, 'new'])->name('new');
+            Route::post('new', [AdminAccountController::class, 'store'])->name('new.store');
+            Route::get('edit/{admin}', [AdminAccountController::class, 'edit'])->name('edit');
+            Route::post('edit/{admin}', [AdminAccountController::class, 'update'])->name('update');
+        });
     });
+
     Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
         Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {
         Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
-    Route::group(['prefix' => 'manage', 'as' => 'manage'], function () {
+    Route::group(['prefix' => 'manage', 'as' => 'manage', 'middleware' => 'check.allowpage:ims'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
     });
-    Route::group(['prefix' => 'analyse', 'as' => 'analyse.'], function () {
+    Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
         Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
         Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
         Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);
+        Route::get('/personal/organization', [PersonalContoller::class,  'getOrganization']);
     });
     // パスが/admin/から始まる場合のフォールバックルート
     Route::fallback(function () {

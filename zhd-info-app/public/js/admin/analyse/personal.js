@@ -368,3 +368,97 @@ $(document).on('click', '.view_rate[data-view-type="orgs"]', function(e) {
 		console.log(error);
 	})
 })
+
+$(document).on('change', 'select[name="organization1"]', function(e) {
+	var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	const url = '/admin/analyse/personal/organization'
+	let organization1 = e.target.value;
+
+	let selectDS = $('select[name="org[DS]"]');
+	let selectBL = $('select[name="org[BL]"]');
+	let selectAR = $('select[name="org[AR]"]');
+
+	$.ajax({
+		type: 'GET',
+		url: url,
+		data: {
+			organization1: organization1
+		},
+		dataType: 'json',
+		headers: {
+		'X-CSRF-TOKEN': csrfToken
+		},
+	}).done(function(res) {
+		console.log(res);
+		selectDS.empty();
+		selectBL.empty();
+		selectAR.empty();
+		let resDS = res.organization3;
+		let resAR = res.organization4;
+		let resBL = res.organization5;
+
+		if(!resDS.length) {
+			selectDS.prop("disabled", true);
+		}else {
+			selectDS.prop("disabled", false);
+			let option1 = document.createElement("option")
+			option1.value="";
+			option1.textContent = "全て";
+			option1.selected = true;
+			selectDS.append(option1);
+
+			let option;
+			resDS.forEach((value, index) => {
+				option += `
+						<option value="${value.id}">${value.name}</option>
+					`
+			})
+			selectDS.append(option);
+		}
+
+		if(!resBL.length) {
+			selectBL.prop("disabled", true);
+		}else {
+			selectBL.prop("disabled", false);
+			let option1 = document.createElement("option")
+			option1.value="";
+			option1.textContent = "全て";
+			option1.selected = true;
+			selectBL.append(option1);
+
+			let option;
+			resBL.forEach((value, index) => {
+				option += `
+						<option value="${value.id}">${value.name}</option>
+					`
+			})
+			selectBL.append(option);
+		}
+
+		if(!resAR.length) {
+			selectAR.prop("disabled", true);
+		}else {
+			selectAR.prop("disabled", false);
+			let option1 = document.createElement("option")
+			option1.value="";
+			option1.textContent = "全て";
+			option1.selected = true;
+			selectAR.append(option1);
+
+			let option;
+			resAR.forEach((value, index) => {
+				option += `
+						<option value="${value.id}">${value.name}</option>
+					`
+			})
+			selectAR.append(option);
+		}
+
+
+	}).fail((jqXHR, textStatus, errorThrown) => {
+    	console.error('Ajax error:', textStatus, errorThrown);
+    	throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
+  	});
+	console.log(e.target.value);
+
+})

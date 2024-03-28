@@ -4,27 +4,48 @@
     <div class="navbar-default sidebar" role="navigation">
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
+				@if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
-                        <li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
-                        <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+						@if (in_array('message', $arrow_pages, true))
+                        	<li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                        @endif
+						@if (in_array('manual', $arrow_pages, true))
+							<li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+						@endif
                     </ul>
                 </li>
+				@endif
+				@if(in_array('message-analyse', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
                         <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
                     </ul>
                 </li>
+				@endif
+				@if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/account/">3-1.アカウント</a></li>
-                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">3-2.IMS連携</a>
-                        </li>
+						@if (in_array('account-shop', $arrow_pages, true))
+                        	<li><a href="/admin/account/">3-1.店舗アカウント</a></li>
+						@endif
+						@if (in_array('account-admin', $arrow_pages, true))
+							<li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
+						@endif
                     </ul>
                 </li>
+				@endif
+				@if (in_array('ims', $arrow_pages, true))
+				<li>
+                    <a href="#" class="nav-label">4.その他</span></a>
+                    <ul class="nav nav-second-level">
+                        <li class="{{$is_error_ims ? 'warning' : ''}}"><a href="/admin/manage/ims">4-1.IMS連携</a></li>
+                    </ul>
+                </li>
+				@endif
                 <li>
                     <a href="#" class="nav-label">Ver. {{config('version.admin_version')}}</span></a>
                 </li>
@@ -44,7 +65,6 @@
             <div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">業態</label>
                 <select name="brand" class="form-control">
-                    <option value="">指定なし</option>
                     @foreach ($brand_list as $brand)
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
@@ -111,25 +131,29 @@
 			<div class="input-group col-lg-1">
 				<button class="btn btn-admin">検索</button>
 			</div>
+			<div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div> 
 		</div>
     </form>
-
 	<!-- 検索結果 -->
 	<form method="post" action="#">
-
 		<div class="pagenation-top">
 		@include('common.admin.pagenation', ['objects' => $message_list])
 			<div>
+				@if ($admin->ability == App\Enums\AdminAbility::Edit)
 				<div>
 					<input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageImportModal" value="インポート">
 				</div>
+				@endif
 				<div>
 					<a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query())}}" class="btn btn-admin">エクスポート</a>
 				</div>
+				@if ($admin->ability == App\Enums\AdminAbility::Edit)
 				<div>
-					<a href="{{ route('admin.message.publish.new') }}"" class=" btn btn-admin">新規登録</a>
+					<a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"" class=" btn btn-admin">新規登録</a>
 				</div>
+				@endif
 			</div>
+			
 		</div>
 
 		<div class="message-tableInner table-responsive-xxl">
@@ -148,7 +172,9 @@
 						<th class="text-center" colspan="3" nowrap>閲覧率</th>
 						<th class="text-center" colspan="2" nowrap>登録</th>
 						<th class="text-center" colspan="2" nowrap>更新</th>
-						<th class="text-center" nowrap>操作</th>
+						@if ($admin->ability == App\Enums\AdminAbility::Edit)
+							<th class="text-center" nowrap>操作</th>
+						@endif
 					</tr>
 				</thead>
 
@@ -161,7 +187,7 @@
 								@elseif($message->status == App\Enums\PublishStatus::Editing) editing
 								@endif">
 						<td class="shop-id">{{$message->number}}</td>
-						<td>{{$message->brands_string($brands)}}</td>
+						<td>{{$message->brand_name}}</td>
 						@if ($message->emergency_flg)
 						<td class="label-colum-danger"><div>重要</div></td>
 						@else
@@ -170,7 +196,7 @@
 						<td>{{$message->category?->name}}</td>
 						<td class="label-title">
 							@if(isset($message->content_url))
-								<a href="{{ asset($message->content_url)}}">{{$message->title}}</a>								
+								<a href="{{ asset($message->content_url)}}" target="_blank" rel="noopener noreferrer">{{$message->title}}</a>								
 							@else
 								{{$message->title}}
 							@endif
@@ -211,13 +237,15 @@
 						<td class="date-time"><div>{{$message->formatted_created_at}}</div></td>
                         <td>{{isset($message->updated_user->name) ? $message->updated_user->name : ""}}</td>
 						<td class="date-time"><div>{{$message->formatted_updated_at}}</div></td>
+
+						@if ($admin->ability == App\Enums\AdminAbility::Edit)
 						<td nowrap>
 							<div class="button-group">
 							<button class="editBtn btn btn-admin">編集</button>
 							<button class="StopBtn btn btn-admin">配信停止</button>
 							</div>
 						</td>
-
+						@endif
 					</tr>
 					@endforeach
 
@@ -230,5 +258,6 @@
 	</form>
 
 </div>
+@include('common.admin.message-import-modal', ['organization1' => $organization1])
 <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
 @endsection

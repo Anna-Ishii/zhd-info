@@ -10,6 +10,8 @@
                     csvデータを業務連絡に上書きします
                 </div>
                 <form class="form-horizontal">
+                    @csrf
+                    <input type="hidden" name="organization1" value="{{$organization1->id}}">
                     <div class="form-group">
                         <label class="col-sm-2 control-label">csv添付<span class="text-danger required">*<span></label>
                         <div class="col-sm-9">

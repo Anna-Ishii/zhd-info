@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Analyse;
 use App\Exports\MessagePersonalExport;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
+use App\Models\Organization1;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -14,6 +15,7 @@ class PersonalContoller extends Controller
 {
     public function index(Request $request) {
         $admin = session('admin');
+        $organization1_list = $admin->organization1()->orderby('name')->get();
 
         // request
         $publish_from_date = $request->input('publish-from-date');
@@ -23,7 +25,9 @@ class PersonalContoller extends Controller
         $org = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
         $message_freeword = $request->input('message_freeword');
+        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
 
+        $organization1 = Organization1::find($organization1_id);
         $orgazanizations = [];
         $viewrates = [];
 
@@ -35,7 +39,7 @@ class PersonalContoller extends Controller
                         ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
                         ->where('start_datetime', '<=', now('Asia/Tokyo'))
                         ->where('editing_flg', false)
-                        ->where('messages.organization1_id','=', $admin->organization1_id)
+                        ->where('messages.organization1_id','=', $organization1->id)
                         ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
                             $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
                                 $query
@@ -91,17 +95,17 @@ class PersonalContoller extends Controller
         $_messages = $messages->pluck('id')->toArray();
 
         // DS, AR, BLがあるかで処理を分ける
-        if ($admin->organization1->isExistOrg3()) {
+        if ($organization1->isExistOrg3()) {
             $orgazanizations[] = "DS";
-            $organization_list["DS"] = $admin->organization1->getOrganization3();
+            $organization_list["DS"] = $organization1->getOrganization3();
         }
-        if ($admin->organization1->isExistOrg4()) {
+        if ($organization1->isExistOrg4()) {
             $orgazanizations[] = "AR";
-            $organization_list["AR"] = $admin->organization1->getOrganization4();
+            $organization_list["AR"] = $organization1->getOrganization4();
         }
-        if ($admin->organization1->isExistOrg5()) {
+        if ($organization1->isExistOrg5()) {
             $orgazanizations[] = "BL";
-            $organization_list["BL"] = $admin->organization1->getOrganization5();
+            $organization_list["BL"] = $organization1->getOrganization5();
         } 
 
         foreach ($_messages as $key => $ms) {
@@ -163,7 +167,7 @@ class PersonalContoller extends Controller
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization3_id', '=', 'sub.o3_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['DS']), function ($query) use ($org) {
                         $query->where('shops.organization3_id', '=', $org['DS']);
                     })
@@ -212,7 +216,7 @@ class PersonalContoller extends Controller
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization4_id', '=', 'sub.o4_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['AR']), function ($query) use ($org) {
                         $query->where('shops.organization4_id', '=', $org['AR']);
                     })
@@ -260,7 +264,7 @@ class PersonalContoller extends Controller
                     ->leftJoinSub($viewrates_org_sub, 'sub', function ($join) {
                         $join->on('shops.organization5_id', '=', 'sub.o5_id');
                     })
-                    ->where('shops.organization1_id', '=', $admin->organization1_id)
+                    ->where('shops.organization1_id', '=', $organization1->id)
                     ->when(isset($org['BL']), function ($query) use ($org) {
                         $query->where('shops.organization5_id', '=', $org['BL']);
                     })
@@ -309,7 +313,7 @@ class PersonalContoller extends Controller
                 ->leftJoinSub($viewrate_sub, 'view_rate', function($join) {
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
-                ->where('shops.organization1_id', '=', $admin->organization1_id)
+                ->where('shops.organization1_id', '=', $organization1->id)
                 ->when(isset($org['DS']), function($query) use ($org) {
                     $query->where('shops.organization3_id', '=', $org['DS']);
                 })
@@ -355,15 +359,20 @@ class PersonalContoller extends Controller
             'messages' => $messages,
             'viewrates' => $viewrates,
             'organizations' => $orgazanizations,
-            'organization_list' => $organization_list
+            'organization_list' => $organization_list,
+            'organization1' => $organization1,
+            'organization1_list' => $organization1_list
         ]);
     }
 
     public function export(Request $request) 
     {
         $admin = session('admin');
+        $organization1_list = $admin->organization1()->orderby('name')->get();
+        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1 = Organization1::find($organization1_id);
 
-        $organization1 = $admin->organization1->name;
+        $organization1 = $organization1->name;
         $now = new Carbon('now');
         $file_name = '業務連絡閲覧状況_' . $organization1 . $now->format('_Y_m_d') . '.xlsx';
         return Excel::download(
@@ -508,6 +517,21 @@ class PersonalContoller extends Controller
 
         return response()->json([
             'crews' => $crews,
+        ], 200);
+    }
+
+    public function getOrganization(Request $request) {
+        $organization1_id = $request->input("organization1");
+        $organization1 = Organization1::findOrFail($organization1_id);
+
+        $organization3 = $organization1->getOrganization3();
+        $organization4 = $organization1->getOrganization4();
+        $organization5 = $organization1->getOrganization5();
+
+        return response()->json([
+            'organization3' => $organization3,
+            'organization4' => $organization4,
+            'organization5' => $organization5,
         ], 200);
     }
 }
