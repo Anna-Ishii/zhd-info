@@ -220,7 +220,7 @@ body {
 .chat {
   margin: 0;
   padding: 0;
-.table-list-style: none;
+  table-list-style: none;
 }
 .chat li {
   margin-bottom: 10px;
@@ -716,4 +716,7 @@ table.personal td[class*="org"] {
   text-orientation: upright;
   vertical-align: middle;
   text-align: center;
+}
+table tr.deleted {
+  background-color: #d9d9d9;;
 }

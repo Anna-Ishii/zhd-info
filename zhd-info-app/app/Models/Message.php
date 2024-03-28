@@ -83,14 +83,9 @@ class Message extends Model
         return $this->hasOne(MessageCategory::class, foreignKey: 'id', localKey: 'category_id');
     }
 
-    public function organization5(): BelongsToMany
+    public function organization1(): HasOne
     {
-        return $this->belongsToMany(Organization5::class, 'message_organization5', 'message_id', 'organization5_id');
-    }
-
-    public function organization4(): BelongsToMany
-    {
-        return $this->belongsToMany(Organization4::class, 'message_organization4', 'message_id', 'organization4_id');
+        return $this->hasOne(Organization1::class, 'id', 'organization1_id');
     }
 
     public function organization(): BelongsTo
@@ -114,6 +109,12 @@ class Message extends Model
         $brandNames = $this->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         if ($brandList === $brandNames) return "全業態";
         // カンマ区切りの文字列として返す
+        return implode(',', $brandNames);
+    }
+    public function getBrandsStringAttribute()
+    {
+        // リレーションからnameプロパティを取得して配列に変換
+        $brandNames = $this->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
         return implode(',', $brandNames);
     }
 

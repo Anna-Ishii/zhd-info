@@ -19,13 +19,16 @@ class Adminauth
         //リクエスト前の処理
         $admin = $request->session()->get('admin');
         if (!isset($admin)) {
-            return abort(404);
+            return redirect()->route('admin.auth');
         }
         $exists = Admin::where('id', $admin->id)->exists();
+        $_admin = Admin::find($admin->id);
+        $request->session()->put(['admin' => $_admin]);
         if (!$exists) {
             $request->session()->forget('admin');
-            return abort(404);
+            return redirect()->route('admin.auth');
         }
+        
         return $next($request);
     }
 }

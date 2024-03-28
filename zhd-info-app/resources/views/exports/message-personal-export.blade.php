@@ -24,7 +24,7 @@
     {{-- 業態 (計) --}}
     <tbody>
         <tr>
-            <td colspan="{{count($organizations) + 2}}">{{$admin->organization1->name}}計</td>
+            <td colspan="{{count($organizations) + 2}}">{{$organization1->name}}計</td>
             <td>{{$viewrates['org1_readed_sum'] ?? 0}} / {{$viewrates['org1_sum'] ?? 0}}</td>
             <td>
                 @if(isset($viewrates['org1_readed_sum']) && isset($viewrates['org1_sum']))

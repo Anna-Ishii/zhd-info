@@ -3,22 +3,23 @@
 namespace App\Exports;
 
 use App\Enums\PublishStatus;
+use App\Models\Brand;
 use App\Models\Message;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Illuminate\Http\Request;
 
 class MessageListExport implements 
     FromView, 
     ShouldAutoSize, 
     WithCustomCsvSettings
 {
-    protected $manual_id;
     protected $request;
 
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
@@ -39,7 +40,8 @@ class MessageListExport implements
         $status = PublishStatus::tryFrom($this->request->input('status'));
         $q = $this->request->input('q');
         $rate = $this->request->input('rate');
-        $brand_id = $this->request->input('brand');
+        $brand_id = $this->request->input('brand', $admin->firstBrand()->id);
+        $organization1 = Brand::find($brand_id)->organization1_id;
         $label = $this->request->input('label');
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('messages')
@@ -78,12 +80,7 @@ class MessageListExport implements
                         DB::raw('
                             CASE
                                 WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
-                                WHEN (
-                                    SELECT COUNT(DISTINCT _b.name) 
-                                    FROM brands as _b
-                                    WHERE _b.organization1_id = messages.organization1_id
-                                ) = COUNT(DISTINCT b.name) THEN "全て"
-                                ELSE group_concat(distinct b.name)
+                                ELSE group_concat(distinct b.name order by b.name)
                             END as brand_name')
                     ])
                     ->leftjoin('message_organization as m_o', 'messages.id', '=', 'm_o.message_id')
@@ -106,7 +103,7 @@ class MessageListExport implements
                 ->leftJoinSub($cte, 'org', function($join) {
                     $join->on('messages.id', '=', 'org.message_id');
                 })
-                ->where('messages.organization1_id', $admin->organization1_id)
+                ->where('messages.organization1_id', $organization1)
                 ->groupBy('messages.id')
                 ->when(isset($q), function ($query) use ($q) {
                     $query->where(function ($query) use ($q) {
