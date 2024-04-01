@@ -37,7 +37,7 @@ class MessageViewRateExport implements
             ->withCount(['readed_user as read_users'])
             ->first();
 
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $_brand = $message->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
 
         $brand_id = $this->request->brand;
@@ -75,7 +75,7 @@ class MessageViewRateExport implements
 
         $user_list = $message
                         ->user()
-                        ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5'])
+                        ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5', 'shop.brand'])
                         ->when(isset($read_flg), function ($query) use ($read_flg) {
                             if($read_flg == 'true') $query->where('read_flg', true);
                             if($read_flg == 'false') $query->where('read_flg', false);
@@ -94,8 +94,16 @@ class MessageViewRateExport implements
                         ->get();
         return view('exports.message-viewrate-export', [
             'users' => $user_list,
-            'brands' => $brands,
-            'message' => $message
+            'brand' => $message->brands_string($brands),
+            'emergency_flg' => $message->emergency_flg ? "重要" : "",
+            'category_name' => $message->category?->name,
+            'title' => $message->title,
+            'start_datetime' => $message->formatted_start_datetime,
+            'end_datetime' => $message->formatted_end_datetime,
+            'status' => $message->status->text(),
+            'read_user' => $message->readed_user->count(),
+            'target_user' => $message->user->count(),
+            'read_rate' =>  (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0),
         ]);
     }
 }

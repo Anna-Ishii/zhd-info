@@ -80,7 +80,7 @@
                         @endif
                         {{$manual->category_level2?->name}}
                     </td>
-                    <td>{{$manual->brands_string($brands)}}</td>
+                    <td>{{$manual->brands_string}}</td>
                     <td>{{$manual->formatted_start_datetime}}</td>
                     <td>{{$manual->formatted_end_datetime}}</td>
                     <td>{{$manual->status->text()}}</td>

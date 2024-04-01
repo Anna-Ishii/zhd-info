@@ -104,6 +104,12 @@ class Manual extends Model
         // カンマ区切りの文字列として返す
         return implode(',', $brandNames);
     }
+    public function getBrandsStringAttribute()
+    {
+        // リレーションからnameプロパティを取得して配列に変換
+        $brandNames = $this->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
+        return implode(',', $brandNames);
+    }
 
     public function content(): HasMany
     {

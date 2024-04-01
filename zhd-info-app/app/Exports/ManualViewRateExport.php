@@ -37,7 +37,7 @@ class ManualViewRateExport implements
             ->withCount(['readed_user as read_users'])
             ->first();
 
-        $_brand = $admin->organization1->brand()->orderBy('id', 'asc');
+        $_brand = $manual->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
 
         $brand_id = $this->request->brand;
@@ -92,10 +92,18 @@ class ManualViewRateExport implements
             })
             ->wherePivotIn('shop_id', $shop_list)
             ->get();
+        $category_name = $manual->category_level1 ? $manual->category_level1?->name."|".$manual->category_level2->name : $manual->category_level2->name;
         return view('exports.manual-viewrate-export', [
             'users' => $user_list,
-            'brands' => $brands,
-            'manual' => $manual
+            'brand' => $manual->brands_string($brands),
+            'category_name' => $category_name,
+            'title' => $manual->title,
+            'start_datetime' => $manual->formatted_start_datetime,
+            'end_datetime' => $manual->formatted_end_datetime,
+            'status' => $manual->status->text(),
+            'read_user' => $manual->readed_user->count(),
+            'target_user' => $manual->user->count(),
+            'read_rate' =>  (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)
         ]);
     }
 }
