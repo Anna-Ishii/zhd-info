@@ -63,8 +63,8 @@ return [
      * \BeyondCode\QueryDetector\Outputs\Log::class
      */
     'output' => [
-        // \BeyondCode\QueryDetector\Outputs\Debugbar::class,
-        // \BeyondCode\QueryDetector\Outputs\Alert::class,
-        // \BeyondCode\QueryDetector\Outputs\Log::class,
+         \BeyondCode\QueryDetector\Outputs\Debugbar::class,
+         \BeyondCode\QueryDetector\Outputs\Alert::class,
+         \BeyondCode\QueryDetector\Outputs\Log::class,
     ]
 ];

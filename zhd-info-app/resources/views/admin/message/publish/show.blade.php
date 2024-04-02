@@ -81,7 +81,7 @@
                     @else
                     <td></td>
                     @endif
-                    <td>{{$message->brands_string($brands)}}</td>
+                    <td>{{$message->brands_string}}</td>
                     <td>{{$message->formatted_start_datetime}}</td>
                     <td>{{$message->formatted_end_datetime}}</td>
                     <td>{{$message->status->text()}}</td>
