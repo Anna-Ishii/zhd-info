@@ -23,16 +23,16 @@
   <tbody>
     @foreach ($users as $user)
     <tr>
-        <td>{{$message->brands_string($brands)}}</td>
-        <td>{{$message->emergency_flg ? "重要" : ""}}</td>
-        <td>{{$message->category?->name}}</td>
-        <td>{{$message->title}}</td>
-        <td>{{$message->formatted_start_datetime}}</td>
-        <td>{{$message->formatted_end_datetime}}</td>
-        <td>{{$message->status->text()}}</td>
-        <td>{{$message->readed_user->count()}}</td>
-        <td>{{$message->user->count()}}</td>
-        <td>{{ (($message->total_users != 0) ? round((($message->read_users / $message->total_users) * 100), 1) : 0)}}%</td>
+        <td>{{$brand}}</td>
+        <td>{{$emergency_flg}}</td>
+        <td>{{$category_name ?? ""}}</td>
+        <td>{{$title}}</td>
+        <td>{{$start_datetime}}</td>
+        <td>{{$end_datetime}}</td>
+        <td>{{$status}}</td>
+        <td>{{$read_user}}</td>
+        <td>{{$target_user}}</td>
+        <td>{{$read_rate}}%</td>
         <td>{{$user->shop->shop_code}}</td>
         <td>{{$user->shop->organization3 ? $user->shop->organization3->name : "-"}}</td>
         <td>{{$user->shop->organization5 ? $user->shop->organization5->name : "-"}}</td>

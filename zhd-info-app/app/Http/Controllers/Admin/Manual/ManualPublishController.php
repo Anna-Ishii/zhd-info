@@ -7,7 +7,6 @@ use App\Exports\ManualListExport;
 use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
-use App\Http\Repository\AdminRepository;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Manual\FileUpdateApiRequest;
 use App\Http\Requests\Admin\Manual\PublishStoreRequest;
@@ -15,7 +14,6 @@ use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Imports\ManualCsvImport;
 use App\Models\Brand;
 use App\Models\Manual;
-use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
 use App\Models\ManualTagMaster;
@@ -197,7 +195,7 @@ class ManualPublishController extends Controller
 
         $user_list = $manual
             ->user()
-            ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5'])
+            ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5', 'shop.brand'])
             ->when(isset($read_flg), function ($query) use ($read_flg) {
                 if ($read_flg == 'true') $query->where('read_flg', true);
                 if ($read_flg == 'false') $query->where('read_flg', false);
