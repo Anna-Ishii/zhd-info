@@ -14,6 +14,7 @@ use App\Http\Requests\Admin\Manual\PublishUpdateRequest;
 use App\Imports\ManualCsvImport;
 use App\Models\Brand;
 use App\Models\Manual;
+use App\Models\ManualCategoryLevel1;
 use App\Models\ManualCategoryLevel2;
 use App\Models\ManualContent;
 use App\Models\ManualTagMaster;
@@ -514,11 +515,11 @@ class ManualPublishController extends Controller
                 ]);
     }
 
-    public function import(Request $request)
+    public function csvUpload(Request $request)
     {
+        $admin = session('admin');
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
-        $csv_path = Storage::putFile('csv', $csv);
 
         $csv_content = file_get_contents($csv);
         $encoding = mb_detect_encoding($csv_content);
@@ -527,31 +528,80 @@ class ManualPublishController extends Controller
             file_put_contents($csv, $shift_jis_content);
         }
 
-        $admin = session('admin');
-        Log::info("マニュアルCSVインポート",[
+        $brands = $this->getBrandNameArray($organization1);
+
+        $csv_path = Storage::putFile('csv', $csv);
+        Log::info("マニュアルCSVインポー", [
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
-        $log_id = DB::table('manual_csv_logs')->insertGetId([
-            'imported_datetime' => new Carbon('now'),
-            'is_success' => false
-        ]);
-        
 
-        DB::beginTransaction();
         try {
-            Excel::import(new ManualCsvImport($organization1), $csv, \Maatwebsite\Excel\Excel::CSV);
-            // $this->importMessage($messages[0], $admin->organization1);
-            DB::table('manual_csv_logs')
-                ->where('id', $log_id)
-                ->update([
-                    'imported_datetime' => new Carbon('now'),
-                    'is_success' => true
+            Excel::import(new ManualCsvImport($organization1, $brands), $csv, \Maatwebsite\Excel\Excel::CSV);
+            $collection = Excel::toCollection(new ManualCsvImport($organization1, $brands), $csv, \Maatwebsite\Excel\Excel::CSV);
+
+            $count = $collection[0]->count();
+            if ($count >= 100) {
+                return response()->json([
+                    'message' => "100行以内にしてください"
+                ], 500);
+            }
+            $array = [];
+            foreach ($collection[0] as $index => [
+                $no,
+                $cateory,
+                $title,
+                $tag1,
+                $tag2,
+                $tag3,
+                $tag4,
+                $tag5,
+                $start_datetime,
+                $end_datetime,
+                $status,
+                $brand,
+                $description
+            ]) {
+                $manual = Manual::where('number', $no)
+                    ->where('organization1_id', $organization1)
+                    ->firstOrFail();
+
+                $CONTENTS_RAW_NUMBER = 13;
+                $row_contents = $collection[0][$index]->slice($CONTENTS_RAW_NUMBER);
+
+                $contents = [];
+                if (isset($manual->content)) {
+                    foreach ($manual->content as $key => $content) {
+                        $content = [];
+                        $content["title"] = $row_contents[($key * 2) + 13] ?? '';
+                        $content["description"] = $row_contents[($key * 2) + 14] ?? '';
+                        array_push($contents, $content);
+                    }
+                }
+                $brand_param = ($brand == "全て") ? $brands : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                $category_array = isset($cateory) ? explode('|', $cateory) : null;
+                $category_level1_name = isset($category_array[0]) ? str_replace(' ', '', trim($category_array[0], "\"")) : NULL;
+                $category_level2_name = isset($category_array[1]) ? str_replace(' ', '', trim($category_array[1], "\"")) : NULL;
+
+                array_push($array, [
+                    'id' => $manual->id,
+                    'number' => $no,
+                    'category_level1_id' =>  isset($category_array[0]) ? ManualCategoryLevel1::where('name', $category_level1_name)->pluck('id')->first() : NULL,
+                    'category_level2_id' =>  isset($category_array[1]) ? ManualCategoryLevel2::where('name', $category_level2_name)->pluck('id')->first() : NULL,
+                    'title' => $title,
+                    'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                    'start_datetime' => $start_datetime,
+                    'end_datetime' => $end_datetime,
+                    'brand' => $brand_param,
+                    'description' => $description,
+                    'contents' => $contents
                 ]);
-            DB::commit();
+            }
+
             return response()->json([
-                'message' => "インポート完了しました"
+                'json' => $array
             ], 200);
+
         } catch (ValidationException $e) {
             $failures = $e->failures();
 
@@ -564,9 +614,81 @@ class ManualPublishController extends Controller
             }
 
             return response()->json([
-                'error' => 'Validation failed',
-                'error_message' => $errorMessage
+                'message' => $errorMessage
             ], 422);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    public function import(Request $request)
+    {
+        $admin = session('admin');
+        $manuals = $request->json();
+
+        $admin = session('admin');
+
+        $log_id = DB::table('manual_csv_logs')->insertGetId([
+            'imported_datetime' => new Carbon('now'),
+            'is_success' => false
+        ]);
+        
+        try {
+            DB::beginTransaction();
+            foreach ($manuals as $key => $ml) {
+                $manual = Manual::find($ml["id"]);
+                $manual->number = $ml["number"];
+                $manual->description = $ml["description"];
+                $manual->category_level1_id = $ml["category_level1_id"];
+                $manual->category_level2_id = $ml["category_level2_id"];
+                $manual->title = $ml["title"];
+                $manual->tag()->sync($ml["tag"]);
+                $manual->start_datetime = $ml["start_datetime"];
+                $manual->end_datetime = $ml["end_datetime"];
+                if ($manual->isDirty()) $manual->updated_admin_id = $admin->id;
+                $manual->save();
+
+                $manual->brand()->sync($ml["brand"]);
+
+                if (isset($manual->content)) {
+                    foreach ($manual->content as $key => $content) {
+                        $content_title = $ml["contents"][$key]["title"] ?? '';
+                        $content_description = $ml["contents"][$key]["description"]  ?? '';
+                        $content->title = $content_title;
+                        $content->description = $content_description;
+                        $content->save();
+                    }
+                }
+
+                // ユーザー配信
+                if(!$manual->editing_flg) {
+                    $origin_user = $manual->user()->pluck('id')->toArray();
+                    $new_target_user = $this->targetUserParam($ml["brand"]);
+                    $new_target_user_id = array_keys($new_target_user);
+                    $detach_user = array_diff($origin_user, $new_target_user_id);
+                    $attach_user = array_diff($new_target_user_id, $origin_user);
+
+                    $manual->user()->detach($detach_user);
+                    foreach ($attach_user as $key => $user) {
+                        $manual->user()->attach([$user => $new_target_user[$user]]);
+                    }
+                }
+            }
+
+            DB::table('manual_csv_logs')
+                ->where('id', $log_id)
+                ->update([
+                    'imported_datetime' => new Carbon('now'),
+                    'is_success' => true
+                ]);
+            
+            DB::commit();
+            return response()->json([
+                'message' => "インポート完了しました"
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -587,11 +709,11 @@ class ManualPublishController extends Controller
         return !($currnt_path == $next_path);
     }
 
-    private function targetUserParam($request): Array {
+    private function targetUserParam($brand): Array {
         // manual_userに該当のユーザーを登録する
         $target_users_data = [];
         // 該当のショップID
-        $shops_id = Shop::select('id')->whereIn('brand_id', $request->brand)->get()->toArray();
+        $shops_id = Shop::select('id')->whereIn('brand_id', $brand)->get()->toArray();
         // 該当のユーザー
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
         foreach ($target_users as $target_user) {
@@ -671,6 +793,70 @@ class ManualPublishController extends Controller
     private function level2CategoryParam($level2_category_id): ?Int {
         if($level2_category_id == "null") return null;
         return $level2_category_id;
+    }
+
+    private function tagImportParam(?array $tags): array
+    {
+        if (!isset($tags)) return [];
+
+        $tags_pram = [];
+        foreach ($tags as $key => $tag_name) {
+            if (!isset($tag_name)) continue;
+            $tag = ManualTagMaster::firstOrCreate(['name' => trim($tag_name, "\"")]);
+            $tags_pram[] = $tag->id;
+        }
+        return $tags_pram;
+    }
+
+    private  function strToArray(?String $str): array
+    {
+        if (!isset($str)) return [];
+
+        $array = explode(',', $str);
+
+        $returnArray = [];
+        foreach ($array as $key => $value) {
+            $returnArray[] = trim($value, "\"");
+        }
+
+        return $returnArray;
+    }
+
+    private function getOrganizationForm($organization1_id)
+    {
+        return Shop::query()
+            ->leftjoin('brands', 'brand_id', '=', 'brands.id')
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('brand_id')
+            ->distinct('organization2_id')
+            ->distinct('organization3_id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'brand_id',
+                'brands.name as brand_name',
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization5_id',
+                'organization5.name as organization5_name'
+            )
+            ->where('shops.organization1_id', $organization1_id)
+            ->get()
+            ->toArray();
+    }
+    private function getBrandNameArray(Int $org1_id): array
+    {
+        return Brand::query()
+            ->where('organization1_id', '=', $org1_id)
+            ->pluck('name')
+            ->toArray();
     }
 }
 

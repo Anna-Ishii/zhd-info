@@ -18,6 +18,9 @@
                                 <span class="fileName">ファイルを選択またはドロップ</span>
                                 <input type="file" name="csv" accept=".csv">
                             </label>
+                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="form-group">
@@ -25,7 +28,7 @@
                             <span class="text-danger required">*</span>：必須項目
                         </div>
                         <div class="col-sm-2 col-sm-offset-6 control-label">
-                            <input type="button" class="btn btn-admin" value="インポート">
+                            <input type="button" class="btn btn-admin" value="インポート" disabled>
                         </div>
                     </div>
                 </form>

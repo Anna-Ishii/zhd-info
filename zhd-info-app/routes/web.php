@@ -71,6 +71,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
             Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
+            Route::post('/csv/upload', [MessagePublishController::class, 'csvUpload'])->name('csvUpload');
         });
     });
     // 管理画面-動画マニュアル
@@ -87,6 +88,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
             Route::get('export-list', [ManualPublishController::class, 'exportList'])->name('export-list');
             Route::post('import', [ManualPublishController::class, 'Import'])->name('import');
+            Route::post('/csv/upload', [ManualPublishController::class, 'csvUpload'])->name('csvUpload');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
