@@ -108,7 +108,7 @@
         </div>
     </div>
     
-    <script src="{{ asset('/js/edit.js') }}" defer></script>
+    <script src="{{ asset('/js/edit.js') }}?date=20240405" defer></script>
     @livewireScripts
 </body>
 
