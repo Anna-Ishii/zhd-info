@@ -25,6 +25,7 @@ use App\Utils\ImageConverter;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -517,6 +518,10 @@ class ManualPublishController extends Controller
 
     public function csvUpload(Request $request)
     {
+        $log_file_name = $request->input('log_file_name');
+        $file_path = public_path() . '/log/' . $log_file_name;
+        file_put_contents($file_path, "0");
+
         $admin = session('admin');
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
@@ -542,12 +547,13 @@ class ManualPublishController extends Controller
 
             $count = $collection[0]->count();
             if ($count >= 100) {
+                File::delete($file_path);
                 return response()->json([
                     'message' => "100行以内にしてください"
                 ], 500);
             }
             $array = [];
-            foreach ($collection[0] as $index => [
+            foreach ($collection[0] as $key => [
                 $no,
                 $cateory,
                 $title,
@@ -567,7 +573,7 @@ class ManualPublishController extends Controller
                     ->firstOrFail();
 
                 $CONTENTS_RAW_NUMBER = 13;
-                $row_contents = $collection[0][$index]->slice($CONTENTS_RAW_NUMBER);
+                $row_contents = $collection[0][$key]->slice($CONTENTS_RAW_NUMBER);
 
                 $contents = [];
                 if (isset($manual->content)) {
@@ -596,6 +602,8 @@ class ManualPublishController extends Controller
                     'description' => $description,
                     'contents' => $contents
                 ]);
+
+                file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
             }
 
             return response()->json([
@@ -613,15 +621,36 @@ class ManualPublishController extends Controller
                 $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
             }
 
+            File::delete($file_path);
             return response()->json([
                 'message' => $errorMessage
             ], 422);
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+
+            File::delete($file_path);
             return response()->json([
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    public function progress(Request $request)
+    {
+        $file_name = $request->file_name;
+        $file_path = public_path() . '/log/' . $file_name;
+        if (!File::exists($file_path)) {
+            return response()->json([
+                'message' => "ログファイルが存在しません"
+            ], 500);
+        }
+
+
+        $log = File::get($file_path);
+        if ($log == 100) {
+            File::delete($file_path);
+        }
+        return $log;
     }
 
     public function import(Request $request)

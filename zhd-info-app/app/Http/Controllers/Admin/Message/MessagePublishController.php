@@ -24,12 +24,16 @@ use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
+use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 
@@ -594,6 +598,10 @@ class MessagePublishController extends Controller
 
     public function csvUpload(Request $request)
     {
+        $log_file_name = $request->input('log_file_name');
+        $file_path = public_path() . '/log/'. $log_file_name;
+        file_put_contents($file_path, "0");
+        
         $admin = session('admin');
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
@@ -618,6 +626,7 @@ class MessagePublishController extends Controller
             $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
             $count = $collection[0]->count();
             if($count >= 100) {
+                File::delete($file_path);
                 return response()->json([
                     'message' => "100行以内にしてください"
                 ], 500);
@@ -666,6 +675,8 @@ class MessagePublishController extends Controller
                     'organization5' => $org5_param,
                     'roll' => $target_roll
                 ]);
+
+                file_put_contents($file_path, ceil((($key+1) / $count) * 100));
             }
 
             return response()->json([
@@ -674,7 +685,7 @@ class MessagePublishController extends Controller
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
-
+            
             $errorMessage = [];
             foreach ($failures as $index => $failure) {
                 $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
@@ -683,15 +694,36 @@ class MessagePublishController extends Controller
                 $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
             }
 
+            File::delete($file_path);
             return response()->json([
                 'message' => $errorMessage
             ], 422);
         } catch (\Throwable $th) {
             Log::error($th->getMessage());
+
+            File::delete($file_path);
             return response()->json([
                 'message' => "エラーが発生しました"
             ], 500);
         }
+    }
+
+    public function progress(Request $request)
+    {
+        $file_name = $request->file_name;
+        $file_path = public_path() . '/log/' . $file_name;
+        if(!File::exists($file_path)) {
+            return response()->json([
+                'message' => "ログファイルが存在しません"
+            ], 500);
+        }
+        
+
+        $log = File::get($file_path);
+        if($log == 100){
+            File::delete($file_path);
+        }
+        return $log;
     }
 
     public function import(Request $request)

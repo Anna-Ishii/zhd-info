@@ -231,9 +231,11 @@ const successTamplate = `
 let messageJson;
 $(document).on('change', '#messageImportModal input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let log_file_name = getNumericDateTime();
     let formData = new FormData();
     formData.append("file", $(this)[0].files[0]);
 	formData.append("organization1", $('#messageImportModal input[name="organization1"]').val())
+	formData.append("log_file_name", log_file_name)
 
 	let button = $('#messageImportModal input[type="button"]');
 
@@ -244,6 +246,8 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
     progressBar.hide();
     progressBar.css('width', 0 + '%');
     progress.show();
+
+	let progress_request = true;
 
 	$('#messageImportModal .modal-body .alert-danger').remove();
 
@@ -256,28 +260,8 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
         headers: {
             'X-CSRF-TOKEN': csrfToken,
         },
-        xhr: function(){
-			
-            var XHR = $.ajaxSettings.xhr();
-            if(XHR.upload){
-                XHR.upload.addEventListener('progress',function(e){
-                    var progVal = parseInt(e.loaded/e.total*10000)/100 ;
-                    progressBar.show();
-                    progressBar.css('width', progVal + '%');
-                    console.log(progVal);
-
-                    if (progVal == 100)
-                    {
-                        // アップロードが完了したら、サーバー側で保存処理が始まる
-                        setTimeout(() => {
-                            progress.hide();
-                        }, 1000);
-                    } 
-                }, false);
-            }
-            return XHR;
-        }
     }).done(function(response){
+		progress_request = false;
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
 		messageJson = response.json;
@@ -288,6 +272,7 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
 			</div>
 		`);
 		const errorUl =  $('#messageImportModal .modal-body .alert ul');
+		progress_request = false;
 		if (jqXHR.status === 422) {
 			jqXHR.responseJSON.message?.forEach((errorMessage)=>{
 				errorMessage['errors'].forEach((error) => {
@@ -309,6 +294,30 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
 		}
 
     });
+
+	let persent;
+	let id = setInterval(() => {
+		$.ajax({
+			url: '/admin/message/publish/csv/progress',
+			type: 'get',
+			data: {
+				file_name: log_file_name
+			},
+			contentType: 'text/plain'
+		}).done(function(response){
+			persent = response;
+			progressBar.show();
+			progressBar.css('width', persent + '%');
+			console.log(response);
+		}).fail(function(qXHR, textStatus, errorThrown){
+			console.log("終了");
+		})
+		if(persent == 100 || !progress_request) {
+			clearInterval(id);
+			console.log("終了");
+		}
+	}, 500);
+
 });
 
 
@@ -375,9 +384,11 @@ $('#messageImportModal input[type="button"]').click(function(e){
 let manualJson;
 $(document).on('change', '#manualImportModal input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let log_file_name = getNumericDateTime();
     let formData = new FormData();
     formData.append("file", $(this)[0].files[0]);
 	formData.append("organization1", $('#manualImportModal input[name="organization1"]').val())
+	formData.append("log_file_name", log_file_name)
 
 	let button = $('#manualImportModal input[type="button"]');
 
@@ -388,6 +399,8 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
     progressBar.hide();
     progressBar.css('width', 0 + '%');
     progress.show();
+
+	let progress_request = true;
 
 	$('#manualImportModal .modal-body .alert-danger').remove();
 	
@@ -400,27 +413,8 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
         headers: {
             'X-CSRF-TOKEN': csrfToken,
         },
-        xhr: function(){
-            var XHR = $.ajaxSettings.xhr();
-            if(XHR.upload){
-                XHR.upload.addEventListener('progress',function(e){
-                    var progVal = parseInt(e.loaded/e.total*10000)/100 ;
-                    progressBar.show();
-                    progressBar.css('width', progVal + '%');
-                    console.log(progVal);
-
-                    if (progVal == 100)
-                    {
-                        // アップロードが完了したら、サーバー側で保存処理が始まる
-                        setTimeout(() => {
-                            progress.hide();
-                        }, 1000);
-                    } 
-                }, false);
-            }
-            return XHR;
-        }
     }).done(function(response){
+		progress_request = false;
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
 		manualJson = response.json;
@@ -432,6 +426,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 			</div>
 		`);
 		const errorUl =  $('#manualImportModal .modal-body .alert ul');
+		progress_request = false;
 		if (jqXHR.status === 422) {
 			jqXHR.responseJSON.message?.forEach((errorMessage)=>{
 				errorMessage['errors'].forEach((error) => {
@@ -453,6 +448,31 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 		}
 
     });
+
+
+	let persent;
+	let id = setInterval(() => {
+		$.ajax({
+			url: '/admin/manual/publish/csv/progress',
+			type: 'get',
+			data: {
+				file_name: log_file_name
+			},
+			contentType: 'text/plain'
+		}).done(function(response){
+			persent = response;
+			progressBar.show();
+			progressBar.css('width', persent + '%');
+			console.log(response);
+		}).fail(function(qXHR, textStatus, errorThrown){
+			console.log("終了");
+		})
+		if(persent == 100 || !progress_request) {
+			clearInterval(id);
+			console.log("終了");
+		}
+	}, 500);
+
 });
 
 $('#manualImportModal input[type="button"]').click(function(e){
@@ -577,4 +597,20 @@ $('.modal').on('hidden.bs.modal', function (e) {
 
 function isEmptyImportFile(modal) {
 	return !$(modal).find('input[type="file"]')[0].value
+}
+
+function getNumericDateTime() {
+    // 今日の日時を取得
+    var today = new Date();
+
+    // 年、月、日、時、分、秒を取得
+    var year = today.getFullYear();
+    var month = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるので+1する
+    var day = ('0' + today.getDate()).slice(-2);
+    var hours = ('0' + today.getHours()).slice(-2);
+    var minutes = ('0' + today.getMinutes()).slice(-2);
+    var seconds = ('0' + today.getSeconds()).slice(-2);
+
+    // 数字のみの形式で表示して返す
+    return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
