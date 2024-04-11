@@ -34,74 +34,17 @@ class ManualCsvImport implements
     private $brand = [];
     private $category_list = [];
 
-    public function __construct($organization1)
+    public function __construct($organization1, $brand)
     {
         $this->organization1 = $organization1;
-        $this->brand = $this->getBrandNameArray($this->organization1);
+        $this->brand = $brand;
         array_push(($this->brand), "全て");
         $this->new_category_list = $this->getNewCategoryList();
     }
 
     public function collection(Collection $rows)
     {
-        //
-        $admin = session("admin");
-        $organization1_id = $this->organization1;
-
-        foreach ($rows as $index => [
-            $no,
-            $new_cateory,
-            $title,
-            $tag1,
-            $tag2,
-            $tag3,
-            $tag4,
-            $tag5,
-            $start_datetime,
-            $end_datetime,
-            $status,
-            $brand,
-            $description
-        ]) {
-            $manual = Manual::where('number', $no)
-                ->where('organization1_id', $organization1_id)
-                ->first();
-            $row_contents = $rows[$index]->slice(13);
-            
-            if(isset($manual->content)) {
-                foreach ($manual->content as $key => $content) {
-                    $content_title = $row_contents[($key * 2) + 14] ?? '';
-                    $content_description = $row_contents[($key * 2) + 15] ?? '';
-                    $content->title = $content_title;
-                    $content->description = $content_description;
-                    $content->save();
-                }
-            }
-            $brand_param = ($brand == "全て") ? $this->getBrandIdArray($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-            $new_category_array = isset($new_cateory) ? explode('|', $new_cateory) : null;
-            $new_category_level1_name = isset($new_category_array[0]) ? str_replace(' ', '', trim($new_category_array[0], "\"")) : NULL;
-            $new_category_level2_name = isset($new_category_array[1]) ? str_replace(' ', '', trim($new_category_array[1], "\"")) : NULL;
-
-            $manual->category_level1_id = isset($new_category_array[0]) ? ManualCategoryLevel1::where('name', $new_category_level1_name)->pluck('id')->first() : NULL;
-            $manual->category_level2_id = isset($new_category_array[1]) ? ManualCategoryLevel2::where('name', $new_category_level2_name)->pluck('id')->first() : NULL;
-            $manual->title = $title;
-            $manual->start_datetime = $this->parseDateTime($start_datetime);
-            $manual->end_datetime = $this->parseDateTime($end_datetime);
-            $manual->description = $description;
-            $manual->updated_admin_id = $admin->id;
-            // $manual->updated_at = Carbon::now();
-            $manual->save();
-            if ($manual->wasChanged()) {
-                $admin->update([
-                    'updated_admin_id' => $admin->id
-                ]);
-            }
-            $manual->tag()->sync($this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]));
-            $manual->brand()->sync($brand_param);
-            $manual->user()->sync(
-                !$manual->save ? $this->targetUserParam($brand_param) : []
-            );
-        }
+        
     }
 
     public function headingRow(): int

@@ -21,12 +21,19 @@ use App\Models\Brand;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\Organization1;
+use App\Models\Organization3;
+use App\Models\Organization4;
+use App\Models\Organization5;
+use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 
@@ -589,46 +596,96 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    public function import(Request $request)
+    public function csvUpload(Request $request)
     {
+        $log_file_name = $request->input('log_file_name');
+        $file_path = public_path() . '/log/'. $log_file_name;
+        file_put_contents($file_path, "0");
+        
+        $admin = session('admin');
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
-        $csv_path = Storage::putFile('csv', $csv);
 
         $csv_content = file_get_contents($csv);
         $encoding = mb_detect_encoding($csv_content);
-        if($encoding == "UTF-8") {
+        if ($encoding == "UTF-8") {
             $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
             file_put_contents($csv, $shift_jis_content);
         }
 
-        $admin = session('admin');
+        $organization = $this->getOrganizationForm($organization1);
+
+        $csv_path = Storage::putFile('csv', $csv);
         Log::info("業連CSVインポート", [
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
-        $log_id = DB::table('message_csv_logs')->insertGetId([
-            'imported_datetime' => new Carbon('now'),
-            'is_success' => false
-        ]);
-
-        DB::beginTransaction();
         try {
-            Excel::import(new MessageCsvImport($organization1), $csv, \Maatwebsite\Excel\Excel::CSV);
-            DB::table('message_csv_logs')
-                ->where('id', $log_id)
-                ->update([
-                    'imported_datetime' => new Carbon('now'),
-                    'is_success' => true
+            Excel::import(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+
+            $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+            $count = $collection[0]->count();
+            if($count >= 100) {
+                File::delete($file_path);
+                return response()->json([
+                    'message' => "100行以内にしてください"
+                ], 500);
+            }
+            $array = [];
+            foreach ($collection[0] as $key => [
+                $no,
+                $emergency_flg,
+                $category,
+                $title,
+                $tag1,
+                $tag2,
+                $tag3,
+                $tag4,
+                $tag5,
+                $start_datetime,
+                $end_datetime,
+                $status,
+                $brand,
+                $organization5,
+                $organization4,
+                $organization3
+            ]) {
+                $message = Message::where('number', $no)
+                    ->where('organization1_id', $organization1)
+                    ->firstOrFail();
+
+                $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
+                $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
+                $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+                $target_roll = $message->roll()->pluck('id')->toArray();
+
+                array_push($array, [
+                    'id' => $message->id,
+                    'number' => $no,
+                    'emergency_flg' => isset($emergency_flg),
+                    'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                    'title' => $title,
+                    'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                    'start_datetime' => $start_datetime,
+                    'end_datetime' => $end_datetime,
+                    'brand' => $brand_param,
+                    'organization3' => $org3_param,
+                    'organization4' => $org4_param,
+                    'organization5' => $org5_param,
+                    'roll' => $target_roll
                 ]);
-            DB::commit();
+
+                file_put_contents($file_path, ceil((($key+1) / $count) * 100));
+            }
+
             return response()->json([
-                'message' => "インポート完了しました"
+                'json' => $array
             ], 200);
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
-
+            
             $errorMessage = [];
             foreach ($failures as $index => $failure) {
                 $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
@@ -637,10 +694,123 @@ class MessagePublishController extends Controller
                 $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
             }
 
+            File::delete($file_path);
             return response()->json([
-                'error' => 'Validation failed', 
-                'error_message' => $errorMessage
+                'message' => $errorMessage
             ], 422);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+
+            File::delete($file_path);
+            return response()->json([
+                'message' => "エラーが発生しました"
+            ], 500);
+        }
+    }
+
+    public function progress(Request $request)
+    {
+        $file_name = $request->file_name;
+        $file_path = public_path() . '/log/' . $file_name;
+        if(!File::exists($file_path)) {
+            return response()->json([
+                'message' => "ログファイルが存在しません"
+            ], 500);
+        }
+        
+
+        $log = File::get($file_path);
+        if($log == 100){
+            File::delete($file_path);
+        }
+        return $log;
+    }
+
+    public function import(Request $request)
+    {
+        $admin = session('admin');
+        $messages = $request->json();
+
+        $log_id = DB::table('message_csv_logs')->insertGetId([
+            'imported_datetime' => new Carbon('now'),
+            'is_success' => false
+        ]);
+       
+        try {
+            DB::beginTransaction();
+            foreach ($messages as $key => $ms) {
+                $message = Message::find($ms["id"]);
+                $message->number = $ms["number"];
+                $message->emergency_flg = $ms["emergency_flg"];
+                $message->category_id = $ms["category"];
+                $message->title = $ms["title"];
+                $message->tag()->sync($ms["tag"]);
+                $message->start_datetime = $ms["start_datetime"];
+                $message->end_datetime = $ms["end_datetime"];
+                if($message->isDirty())$message->updated_admin_id = $admin->id;
+                $message->save();
+
+                MessageOrganization::where('message_id', $message->id)->delete();
+                foreach ($ms["organization5"] as $org5_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $message->organization1_id,
+                        'organization5_id' => $org5_id
+                    ]);
+                }
+
+                foreach ($ms["organization4"] as $org4_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $message->organization1_id,
+                        'organization4_id' => $org4_id
+                    ]);
+                }
+
+                foreach ($ms["organization3"] as $org3_id) {
+                    $message->organization()->create([
+                        'message_id' => $message->id,
+                        'organization1_id' => $message->organization1_id,
+                        'organization3_id' => $org3_id
+                    ]);
+                }
+
+                $message->brand()->sync($ms["brand"]);
+
+                if(!$message->editing_flg) {
+                    $origin_user = $message->user()->pluck('id')->toArray();
+                    $new_target_user = $this->targetUserParam((object)[
+                        'organization' => [
+                            'org5' => $ms["organization5"],
+                            'org4' => $ms["organization4"],
+                            'org3' => $ms["organization4"]
+                        ],
+                        'brand' => $ms["brand"],
+                        'target_roll' => $ms["roll"]
+                    ]);
+                    $new_target_user_id = array_keys($new_target_user);
+                    $detach_user = array_diff($origin_user, $new_target_user_id); 
+                    $attach_user = array_diff($new_target_user_id, $origin_user);
+
+                    $message->user()->detach($detach_user);
+                    foreach ($attach_user as $key => $user) {
+                        $message->user()->attach([$user => $new_target_user[$user]]);
+                    }
+                }
+
+            }
+
+            DB::table('message_csv_logs')
+                ->where('id', $log_id)
+                ->update([
+                    'imported_datetime' => new Carbon('now'),
+                    'is_success' => true
+                ]);
+
+            DB::commit();
+            return response()->json([
+                'message' => "インポート完了しました"
+            ], 200);
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -806,5 +976,35 @@ class MessagePublishController extends Controller
             ->toArray();
             
     }
-    
+
+    private function getOrganizationForm($organization1_id)
+    {
+        return Shop::query()
+            ->leftjoin('brands', 'brand_id', '=', 'brands.id')
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('brand_id')
+            ->distinct('organization2_id')
+            ->distinct('organization3_id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'brand_id',
+                'brands.name as brand_name',
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization5_id',
+                'organization5.name as organization5_name'
+            )
+            ->where('shops.organization1_id', $organization1_id)
+            ->get()
+            ->toArray();
+    }
+
 }
