@@ -22,3 +22,5 @@ yarn-error.log
 .well-known
 /public/thumbnail
 /public/movies
+
+/public/log/*
