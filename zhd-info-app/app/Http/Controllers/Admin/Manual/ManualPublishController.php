@@ -272,7 +272,7 @@ class ManualPublishController extends Controller
             $manual->save();
             $manual->brand()->attach($request->brand);
             $manual->user()->attach(
-                !isset($request->save) ? $this->targetUserParam($request) : [] 
+                !isset($request->save) ? $this->targetUserParam($request->brand) : [] 
             );
             $manual->content()->createMany($this->manualContentsParam($request));
 
@@ -290,6 +290,7 @@ class ManualPublishController extends Controller
             DB::rollBack();
             $this->rollbackRegisterFile($request->file_path);
             $this->rollbackManualContentFile($request);
+            Log::error($th->getMessage());
             return redirect()
                 ->back()
                 ->withInput()
@@ -413,7 +414,7 @@ class ManualPublishController extends Controller
             $manual->update($manual_params);
             $manual->brand()->sync($request->brand);
             $manual->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request) : [] 
+                !isset($request->save) ? $this->targetUserParam($request->brand) : [] 
             );
             $manual->content()->createMany($content_data);
 
@@ -431,6 +432,7 @@ class ManualPublishController extends Controller
             DB::rollBack();
             if ($manual_changed_flg) $this->rollbackRegisterFile($request->file_path);
             if ($manualcontent_changed_flg) $this->rollbackManualContentFile($request);
+            Log::error($th->getMessage());
             return redirect()
                 ->back()
                 ->withInput()
@@ -777,7 +779,11 @@ class ManualPublishController extends Controller
             if (isset($r['file_name']) && isset($r['file_path'])) {
                 $current_path = storage_path('app/' . $r['file_path']);
                 $next_path = public_path('uploads/' . basename($r['file_path']));
-                rename($next_path, $current_path);
+                try{
+                    rename($next_path, $current_path);
+                }catch(\Throwable $th){
+                    Log::error($th->getMessage());
+                }
             }
         }
     }
@@ -796,7 +802,11 @@ class ManualPublishController extends Controller
         $content_url = 'uploads/' . basename($request_file_path);
         $current_path = storage_path('app/' . $request_file_path);
         $next_path = public_path($content_url);
-        rename($next_path, $current_path);
+        try {
+            rename($next_path, $current_path);
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+        }
         return;
     }
 
