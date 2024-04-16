@@ -9,7 +9,7 @@ COPY ./config/php/php.ini /etc/php.ini
 RUN mkdir /run/php-fpm 
 
 RUN dnf update -y && \
-    dnf install -y httpd wget php-fpm php-mysqli php-json php php-devel php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel 
+    dnf install -y httpd wget php-fpm php-mysqli php-json php php-devel php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel mariadb105 poppler-utils
 
 RUN git clone https://github.com/xdebug/xdebug.git
 RUN cd /xdebug && \
