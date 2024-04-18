@@ -66,25 +66,21 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
-                @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        @if(request()->old())
-                            {{ ($category->id == old('category_id')) ? 'checked' : '' }}
-                        @else
-                            {{ ($category->id == $message->category_id) ? 'checked' : '' }}
-                        @endif
-                    >
-                    {{ $category->name }}
+                    <select name="category_id" class="form-control">
+                        <option value="">カテゴリを選択</option>
+                        @foreach ($category_list as $category)
+                            <option value="{{ $category->id }}" @if(request()->old('category_id') == $category->id || $message->category_id == $category->id) selected @endif>{{ $category->name }}</option>
+                        @endforeach
+                    </select>
                 </label>
-                @endforeach
             </div>
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ラベル</label>
             <div class="col-lg-4">
                 <label>
-                    <input type="checkbox" name="emergency_flg" class="mr8" 
+                    <input type="checkbox" name="emergency_flg" class="mr8"
                         @if(request()->old())
                             {{(old('emergency_flg') == "on") ? "checked" : ""}}
                         @else
@@ -125,7 +121,7 @@
                     @endif
                     <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
                 </div>
-                <div>複数入力する場合は「,」で区切る</div> 
+                <div>複数入力する場合は「,」で区切る</div>
             </div>
         </div>
         <div class="form-group">
@@ -151,11 +147,11 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載開始日時</label>
             <div class="col-lg-4 flex ai-center">
-                <input id="dateFrom" class="form-control mr16" name="start_datetime" 
-                    value="{{request()->old() ? old("start_datetime") : $message->start_datetime}}" 
+                <input id="dateFrom" class="form-control mr16" name="start_datetime"
+                    value="{{request()->old() ? old("start_datetime") : $message->start_datetime}}"
                     autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" 
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom"
                         @if(request()->old())
                             {{ empty(old("start_datetime")) ? 'checked' : ''  }}
                         @else
@@ -169,10 +165,10 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">掲載終了日時</label>
             <div class="col-lg-4 flex ai-center">
-                <input id="dateTo" class="form-control mr16" name="end_datetime" 
+                <input id="dateTo" class="form-control mr16" name="end_datetime"
                     value="{{ request()->old() ? old("end_datetime") : $message->end_datetime }}" autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateTo" 
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo"
                         @if(request()->old())
                             {{ empty(old("end_datetime")) ? 'checked' : ''  }}
                         @else
@@ -209,7 +205,7 @@
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8"
                         @if(request()->old())
                             {{ in_array((string)$brand->id, old("brand", []), true) ? 'checked' : '' }}
                         @else
@@ -264,7 +260,7 @@
                                     {{ in_array((string)$organization['organization3_id'], old("organization.org3", []), true) ? 'checked' : '' }}
                                 @else
                                     {{ in_array($organization['organization3_id'], $target_org['org3'], true) ? 'checked' : '' }}
-                                @endif                           
+                                @endif
                             >
                             {{$organization['organization3_name']}}直轄
                         </label>
@@ -275,7 +271,7 @@
                                     {{ in_array((string)$organization['organization2_id'], old("organization.org2", []), true) ? 'checked' : '' }}
                                 @else
                                     {{ in_array($organization['organization2_id'], $target_org['org2'], true) ? 'checked' : '' }}
-                                @endif 
+                                @endif
                             >
                             {{$organization['organization2_name']}}直轄
                         </label>

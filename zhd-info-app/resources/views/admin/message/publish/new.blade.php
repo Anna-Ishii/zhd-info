@@ -66,13 +66,16 @@
         <div class="form-group">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
-                @foreach ($category_list as $category)
                 <label class="mr16">
-                    <input type="radio" name="category_id" value="{{ $category->id }}" class="mr8" 
-                        {{( old('category_id') == $category->id) ? "checked" : ""}} >
-                    {{ $category->name }}
+                    <select name="category_id" class="form-control">
+                        <option value="">カテゴリを選択</option>
+                        @foreach ($category_list as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
                 </label>
-                @endforeach
             </div>
         </div>
         <div class="form-group">
@@ -106,7 +109,7 @@
                     @endif
                     <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
                 </div>
-                <div>複数入力する場合は「,」で区切る</div> 
+                <div>複数入力する場合は「,」で区切る</div>
             </div>
         </div>
         <div class="form-group">
@@ -163,7 +166,7 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" name="brandAll" class="mr8" 
+                        <input type="checkbox" id="checkAll" name="brandAll" class="mr8"
                             @if(request()->old())
                                 {{ old('brandAll') ? 'checked' : '' }}
                             @else
@@ -175,7 +178,7 @@
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8"
                         @if(old('brand'))
                             {{ in_array((string)$brand->id, old('brand',[]), true) ? 'checked' : '' }}
                         @elseif(!request()->old())
@@ -196,7 +199,7 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" name="organizationAll" class="mr8" 
+                        <input type="checkbox" id="checkAll" name="organizationAll" class="mr8"
                             @if(request()->old())
                                 {{ old('organizationAll') ? 'checked' : '' }}
                             @else
@@ -209,7 +212,7 @@
                 @foreach ($organization_list as $index => $organization)
                     @if (isset($organization['organization5_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8" 
+                            <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8"
                                 @if(old('organization.org5'))
                                     {{ in_array((string)$organization['organization5_id'], old('organization.org5',[]), true) ? 'checked' : '' }}
                                 @elseif(!request()->old())
@@ -221,7 +224,7 @@
                         </label>
                     @elseif (isset($organization['organization4_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8" 
+                            <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8"
                                 @if(old('organization.org4'))
                                     {{ in_array((string)$organization['organization4_id'], old('organization.org4',[]), true) ? 'checked' : '' }}
                                 @else
@@ -232,7 +235,7 @@
                         </label>
                     @elseif (isset($organization['organization3_name']))
                         <label class="mr16">
-                            <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8" 
+                            <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8"
                                 @if(old('organization.org3'))
                                     {{ in_array((string)$organization['organization3_id'], old('organization.org3',[]), true) ? 'checked' : '' }}
                                 @else
