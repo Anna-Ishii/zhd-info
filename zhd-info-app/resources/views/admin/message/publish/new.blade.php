@@ -63,12 +63,12 @@
 
     <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
         @csrf
-        <div class="form-group">
+        <div class="form-group form-group-sm">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
             <div class="col-lg-6">
                 <label class="mr16">
                     <select name="category_id" class="form-control">
-                        <option value="">カテゴリを選択</option>
+                        <option value="" hidden>カテゴリを選択</option>
                         @foreach ($category_list as $category)
                             <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                 {{ $category->name }}
