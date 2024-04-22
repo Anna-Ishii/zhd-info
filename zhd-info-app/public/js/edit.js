@@ -215,11 +215,116 @@ $(document).on('submit' , '#form' , function(event){
 //     $(this).parent().siblings('div.counter').text(counterText);
 // })
 
+const successTamplate = `
+	<div class="modal-body">
+		<div class="text-center">
+			<div class="form-group">
+				csv取り込み完了しました
+			</div>
+			<div class="text-right">
+				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
+			</div>
+		</div>
+	</div>
+`;
+
+let messageJson;
+$(document).on('change', '#messageImportModal input[type="file"]', function() {
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let log_file_name = getNumericDateTime();
+    let formData = new FormData();
+    formData.append("file", $(this)[0].files[0]);
+	formData.append("organization1", $('#messageImportModal input[name="organization1"]').val())
+	formData.append("log_file_name", log_file_name)
+
+	let button = $('#messageImportModal input[type="button"]');
+
+    var labelForm = $(this).parent();
+    var progress = labelForm.parent().find('.progress');
+    var progressBar = progress.children(".progress-bar");
+
+    progressBar.hide();
+    progressBar.css('width', 0 + '%');
+    progress.show();
+
+	let progress_request = true;
+
+	$('#messageImportModal .modal-body .alert-danger').remove();
+
+    $.ajax({
+        url: '/admin/message/publish/csv/upload',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+        },
+    }).done(function(response){
+		progress_request = false;
+		button.prop("disabled", false);
+        labelForm.parent().find('.text-danger').remove();
+		messageJson = response.json;
+    }).fail(function(jqXHR, textStatus, errorThrown){
+		$('#messageImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		const errorUl =  $('#messageImportModal .modal-body .alert ul');
+		progress_request = false;
+		if (jqXHR.status === 422) {
+			jqXHR.responseJSON.message?.forEach((errorMessage)=>{
+				errorMessage['errors'].forEach((error) => {
+					errorUl.append(
+						`<li>${errorMessage['row']}行目：${error}</li>`
+					);
+				})
+			})
+		}
+		if (jqXHR.status === 504) {
+			errorUl.append(
+				`<li>タイムアウトエラーです</li>`
+			);
+		}
+		if(jqXHR.status === 500) {
+			errorUl.append(
+				`<li>${jqXHR.responseJSON.message}</li>`
+			);
+		}
+
+    });
+
+	let persent;
+	let id = setInterval(() => {
+		$.ajax({
+			url: '/admin/message/publish/csv/progress',
+			type: 'get',
+			data: {
+				file_name: log_file_name
+			},
+			contentType: 'text/plain'
+		}).done(function(response){
+			persent = response;
+			progressBar.show();
+			progressBar.css('width', persent + '%');
+			console.log(response);
+		}).fail(function(qXHR, textStatus, errorThrown){
+			console.log("終了");
+		})
+		if(persent == 100 || !progress_request) {
+			clearInterval(id);
+			console.log("終了");
+		}
+	}, 500);
+
+});
+
 
 $('#messageImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
-	if(isEmptyImportFile($("#messageImportModal"))) {
+	if(!messageJson) {
 		$('#messageImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
 				<ul>
@@ -230,24 +335,23 @@ $('#messageImportModal input[type="button"]').click(function(e){
 		return;
 	}
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
-	let formData = new FormData();
-	formData.append("file", $('#messageImportModal input[name="csv"]')[0].files[0]);
-	formData.append("organization1", $('#messageImportModal input[name="organization1"]').val())
-	
+
 	var overlay = document.getElementById('overlay');
 	overlay.style.display = 'block';
 
 	$('#messageImportModal .modal-body .alert-danger').remove();
 	$.ajax({
-	url: '/admin/message/publish/import',
-	type: 'post',
-	data: formData,
-	processData: false,
-	contentType: false,
-	headers: {
-		'X-CSRF-TOKEN': csrfToken,
-	},
+		url: '/admin/message/publish/import',
+		type: 'post',
+		data: JSON.stringify(messageJson),
+		processData: false,
+		contentType: "application/json; charset=utf-8",
+		headers: {
+			'X-CSRF-TOKEN': csrfToken,
+		},
+		
 	}).done(function(response){
+		console.log(response);
 		overlay.style.display = 'none';
 		$('#messageImportModal .modal-body').replaceWith(successTamplate);
 
@@ -262,8 +366,7 @@ $('#messageImportModal input[type="button"]').click(function(e){
 		// labelForm.parent().find('.text-danger').remove();
 		
 		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
-			let error_li;
-			
+
 			errorMessage['errors'].forEach((error) => {
 				$('#messageImportModal .modal-body .alert ul').append(
 					`<li>${errorMessage['row']}行目：${error}</li>`
@@ -278,11 +381,104 @@ $('#messageImportModal input[type="button"]').click(function(e){
 	});
 })
 
+let manualJson;
+$(document).on('change', '#manualImportModal input[type="file"]', function() {
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+	let log_file_name = getNumericDateTime();
+    let formData = new FormData();
+    formData.append("file", $(this)[0].files[0]);
+	formData.append("organization1", $('#manualImportModal input[name="organization1"]').val())
+	formData.append("log_file_name", log_file_name)
+
+	let button = $('#manualImportModal input[type="button"]');
+
+    var labelForm = $(this).parent();
+    var progress = labelForm.parent().find('.progress');
+    var progressBar = progress.children(".progress-bar");
+
+    progressBar.hide();
+    progressBar.css('width', 0 + '%');
+    progress.show();
+
+	let progress_request = true;
+
+	$('#manualImportModal .modal-body .alert-danger').remove();
+	
+    $.ajax({
+        url: '/admin/manual/publish/csv/upload',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+        },
+    }).done(function(response){
+		progress_request = false;
+		button.prop("disabled", false);
+        labelForm.parent().find('.text-danger').remove();
+		manualJson = response.json;
+		console.log(manualJson);
+    }).fail(function(jqXHR, textStatus, errorThrown){
+		$('#manualImportModal .modal-body').prepend(`
+			<div class="alert alert-danger">
+				<ul></ul>
+			</div>
+		`);
+		const errorUl =  $('#manualImportModal .modal-body .alert ul');
+		progress_request = false;
+		if (jqXHR.status === 422) {
+			jqXHR.responseJSON.message?.forEach((errorMessage)=>{
+				errorMessage['errors'].forEach((error) => {
+					errorUl.append(
+						`<li>${errorMessage['row']}行目：${error}</li>`
+					);
+				})
+			})
+		}
+		if (jqXHR.status === 504) {
+			errorUl.append(
+				`<li>タイムアウトエラーです</li>`
+			);
+		}
+		if(jqXHR.status === 500) {
+			errorUl.append(
+				`<li>${jqXHR.responseJSON.message}</li>`
+			);
+		}
+
+    });
+
+
+	let persent;
+	let id = setInterval(() => {
+		$.ajax({
+			url: '/admin/manual/publish/csv/progress',
+			type: 'get',
+			data: {
+				file_name: log_file_name
+			},
+			contentType: 'text/plain'
+		}).done(function(response){
+			persent = response;
+			progressBar.show();
+			progressBar.css('width', persent + '%');
+			console.log(response);
+		}).fail(function(qXHR, textStatus, errorThrown){
+			console.log("終了");
+		})
+		if(persent == 100 || !progress_request) {
+			clearInterval(id);
+			console.log("終了");
+		}
+	}, 500);
+
+});
 
 $('#manualImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
-	if(isEmptyImportFile($("#manualImportModal"))) {
+	if(!manualJson) {
 		$('#manualImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
 				<ul>
@@ -294,24 +490,22 @@ $('#manualImportModal input[type="button"]').click(function(e){
 	}
 
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
-	let formData = new FormData();
-	formData.append("file", $('#manualImportModal input[name="csv"]')[0].files[0]);
-	formData.append("organization1", $('#manualImportModal input[name="organization1"]').val())
 	
 	var overlay = document.getElementById('overlay');
 	overlay.style.display = 'block';
 
 	$('#manualImportModal .modal-body .alert-danger').remove();
 	$.ajax({
-	url: '/admin/manual/publish/import',
-	type: 'post',
-	data: formData,
-	processData: false,
-	contentType: false,
-	headers: {
-		'X-CSRF-TOKEN': csrfToken,
-	},
+		url: '/admin/manual/publish/import',
+		type: 'post',
+		data: JSON.stringify(manualJson),
+		processData: false,
+		contentType: "application/json; charset=utf-8",
+		headers: {
+			'X-CSRF-TOKEN': csrfToken,
+		},
 	}).done(function(response){
+		console.log(response);
 		overlay.style.display = 'none';
 		$('#manualImportModal .modal-body').replaceWith(successTamplate);
 
@@ -326,8 +520,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 		// labelForm.parent().find('.text-danger').remove();
 		
 		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
-			let error_li;
-			
+
 			errorMessage['errors'].forEach((error) => {
 				$('#manualImportModal .modal-body .alert ul').append(
 					`<li>${errorMessage['row']}行目：${error}</li>`
@@ -344,18 +537,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 
 
 
-const successTamplate = `
-	<div class="modal-body">
-		<div class="text-center">
-			<div class="form-group">
-				csv取り込み完了しました
-			</div>
-			<div class="text-right">
-				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
-			</div>
-		</div>
-	</div>
-`;
+
 
 //
 // 登録編集画面のタグ機能
@@ -415,4 +597,20 @@ $('.modal').on('hidden.bs.modal', function (e) {
 
 function isEmptyImportFile(modal) {
 	return !$(modal).find('input[type="file"]')[0].value
+}
+
+function getNumericDateTime() {
+    // 今日の日時を取得
+    var today = new Date();
+
+    // 年、月、日、時、分、秒を取得
+    var year = today.getFullYear();
+    var month = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるので+1する
+    var day = ('0' + today.getDate()).slice(-2);
+    var hours = ('0' + today.getHours()).slice(-2);
+    var minutes = ('0' + today.getMinutes()).slice(-2);
+    var seconds = ('0' + today.getSeconds()).slice(-2);
+
+    // 数字のみの形式で表示して返す
+    return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
