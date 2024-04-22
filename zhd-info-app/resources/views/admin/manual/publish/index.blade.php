@@ -191,7 +191,7 @@
                                 </td>
                                 <td class="label-title">
                                     @if(isset($manual->content_url))
-                                        <a href="{{ asset($manual->content_url)}}">{{$manual->title}}</a>
+                                        <a href="{{ asset($manual->content_url)}}" target="_blank" rel="noopener noreferrer">{{$manual->title}}</a>
                                         @if(in_array($manual->content_type, ['mp4', 'mov', 'MP4'], true ))
                                             <video preload="metadata" src="{{asset($manual->content_url)}}" hidden></video>
                                         @endif
