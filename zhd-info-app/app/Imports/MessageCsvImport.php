@@ -3,13 +3,8 @@
 namespace App\Imports;
 
 use App\Models\Brand;
-use App\Models\Message;
 use App\Models\MessageCategory;
-use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
-use App\Models\Organization3;
-use App\Models\Organization4;
-use App\Models\Organization5;
 use App\Models\Shop;
 use App\Models\User;
 use App\Rules\Import\OrganizationRule;
@@ -19,7 +14,6 @@ use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
-use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -41,115 +35,20 @@ class MessageCsvImport implements
     private $organization3 = [];
     private $category_list = [];
 
-    public function __construct($organization1)
+    public function __construct($organization1, $organization)
     {
         $this->organization1 = $organization1;
-        $this->organization = $this->getOrganizationForm($organization1);
-        $this->brand = array_column($this->organization, 'brand_name');
-        $this->organization5 = array_column($this->organization, 'organization5_name');
-        $this->organization4 = array_column($this->organization, 'organization4_name');
-        $this->organization3 = array_column($this->organization, 'organization3_name');
-        array_push(($this->brand), "全て");
-        array_push(($this->organization5), "全て");
-        array_push(($this->organization4), "全て");
-        array_push(($this->organization3), "全て");
+        $this->organization = $organization;
+        $this->brand = array_merge(array_column($this->organization, 'brand_name'), ["全て"]);
+        $this->organization5 = array_merge(array_column($this->organization, 'organization5_name'), ["全て"]);
+        $this->organization4 = array_merge(array_column($this->organization, 'organization4_name'), ["全て"]);
+        $this->organization3 = array_merge(array_column($this->organization, 'organization3_name'), ["全て"]);
         $this->category_list = MessageCategory::pluck('name')->toArray();
     }
     
     public function collection(Collection $rows)
     {
-        //
-        $admin = session("admin");
-        $organization1_id = $this->organization1;
-
-        foreach ($rows as $index => [
-            $no,
-            $emergency_flg,
-            $category,
-            $title,
-            $tag1,
-            $tag2,
-            $tag3,
-            $tag4,
-            $tag5,
-            $start_datetime,
-            $end_datetime,
-            $status,
-            $brand,
-            $organization5,
-            $organization4,
-            $organization3
-        ]) {
-            $message = Message::where('number', $no)
-                ->where('organization1_id', $organization1_id)
-                ->first();
-
-            $brand_param = ($brand == "全て") ? $this->getBrandAll($organization1_id) : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-            $org3_param = ($organization3 == "全て") ? $this->getOrg3All($organization1_id) : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
-            $org4_param = ($organization4 == "全て") ? $this->getOrg4All($organization1_id) : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
-            $org5_param = ($organization5 == "全て") ? $this->getOrg5All($organization1_id) : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
-            $target_roll = $message->roll()->pluck('id')->toArray();
-
-            $message->emergency_flg = isset($emergency_flg);
-            $message->category_id = $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL;
-            $message->title = $title;
-            $message->start_datetime = $this->parseDateTime($start_datetime);
-            $message->end_datetime = $this->parseDateTime($end_datetime);
-            $message->updated_admin_id = $admin->id;
-            // $message->updated_at = Carbon::now();
-            $message->save();
-            if($message->wasChanged()) {
-                $admin->update([
-                    'updated_admin_id' => $admin->id
-                ]);
-            }
-
-            MessageOrganization::where('message_id', $message->id)->delete();
-
-            if (isset($org5_param)) {
-                foreach ($org5_param as $org5_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $organization1_id,
-                        'organization5_id' => $org5_id
-                    ]);
-                }
-            }
-            if (isset($org4_param)) {
-                foreach ($org4_param as $org4_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $organization1_id,
-                        'organization4_id' => $org4_id
-                    ]);
-                }
-            }
-            if (isset($org3_param)) {
-                foreach ($org3_param as $org3_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $organization1_id,
-                        'organization3_id' => $org3_id
-                    ]);
-                }
-            }
-
-            $message->brand()->sync($brand_param);
-            $message->user()->sync(
-                !$message->editing_flg ? $this->targetUserParam((object)[
-                    'organization' => [
-                        'org5' => $org5_param,
-                        'org4' => $org4_param,
-                        'org3' => $org3_param
-                    ],
-                    'brand' => $brand_param,
-                    'target_roll' => $target_roll
-                ]) : []
-            );
-            $message->tag()->sync($this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]));
-            
-        }
-
+       
     }
 
     public function headingRow(): int
