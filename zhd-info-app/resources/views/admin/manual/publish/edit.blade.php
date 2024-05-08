@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -35,7 +35,7 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+
                     </ul>
                 </li>
                 @endif
@@ -64,18 +64,18 @@
         @csrf
         <div class="form-group form-group-sm">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">      
+            <div class="col-lg-6">
                 <label class="mr16">
                     <select class="form-control" name="new_category_id">
                         <option value="null" hidden>カテゴリを選択</option>
                         @if(request()->old())
                             @foreach ($new_category_list as $category)
-                                <option class="mr8" value="{{$category->id}}" 
+                                <option class="mr8" value="{{$category->id}}"
                                     @if(old('new_category_id') == $category->id) selected @endif>{{ $category->name }}</option>
                             @endforeach
                         @else
                             @foreach ($new_category_list as $category)
-                                <option class="mr8" value="{{$category->id}}" 
+                                <option class="mr8" value="{{$category->id}}"
                                     @if($manual->category_level2_id == $category->id) selected @endif>{{ $category->name }}</option>
                             @endforeach
                         @endif
@@ -113,7 +113,7 @@
                     @endif
                     <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
                 </div>
-                <div>複数入力する場合は「,」で区切る</div> 
+                <div>複数入力する場合は「,」で区切る</div>
             </div>
         </div>
         <div class="form-group">
@@ -217,7 +217,7 @@
                         </div>
 
                     </div>
-                @endforeach                
+                @endforeach
             @else
             @foreach ($contents as $index => $content)
             <div class="manualVariableBox">
@@ -270,10 +270,10 @@
             <label class="col-lg-2 control-label" for="dateFrom">掲載開始日時</label>
             <div class="col-lg-10 flex ai-center">
                 <input id="dateFrom" class="form-control mr16" name="start_datetime"
-                    value="{{ old("start_datetime") ? old("start_datetime") : $manual->start_datetime}}" 
+                    value="{{ old("start_datetime") ? old("start_datetime") : $manual->start_datetime}}"
                     autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateFrom" 
+                    <input type="checkbox" class="dateDisabled" data-target="dateFrom"
                         @if(old("start_datetime"))
                             {{ empty(old("start_datetime")) ? 'checked' : ''  }}
                         @else
@@ -289,7 +289,7 @@
             <div class="col-lg-10 flex ai-center">
                 <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{ old("end_datetime") ? old("end_datetime") : $manual->end_datetime}}" autocomplete="off">
                 <label>
-                    <input type="checkbox" class="dateDisabled" data-target="dateTo" 
+                    <input type="checkbox" class="dateDisabled" data-target="dateTo"
                          @if(old("end_datetime"))
                             {{ empty(old("end_datetime")) ? 'checked' : ''  }}
                         @else
@@ -311,7 +311,7 @@
                 </div>
                 @foreach ($brand_list as $brand)
                 <label class="mr16">
-                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8" 
+                    <input type="checkbox" name="brand[]" value="{{$brand->id}}" class="checkCommon mr8"
                         @if(old("brand"))
                             {{ in_array((string)$brand->id, old("brand", []), true) ? 'checked' : '' }}
                         @else
@@ -345,7 +345,7 @@
             </div>
             @endif
             <div class="col-lg-2">
-                <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+                <a href="{{ route('admin.manual.publish.index', ['brand' => session('brand_id')]) }}" class="btn btn-admin">一覧に戻る</a>
             </div>
         </div>
 
