@@ -61,7 +61,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
-            // Route::post('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
             Route::post('{organization1}/new', [MessagePublishController::class, 'store'])->name('new.store');

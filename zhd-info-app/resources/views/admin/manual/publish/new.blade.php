@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -35,7 +35,7 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+
                     </ul>
                 </li>
                 @endif
@@ -65,12 +65,12 @@
         @csrf
         <div class="form-group form-group-sm">
             <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
-            <div class="col-lg-6">      
+            <div class="col-lg-6">
                 <label class="mr16">
                     <select class="form-control" name="new_category_id">
                         <option value="null" hidden>カテゴリを選択</option>
                             @foreach ($new_category_list as $category)
-                                <option class="mr8" value="{{$category->id}}" 
+                                <option class="mr8" value="{{$category->id}}"
                                     @if(old('new_category_id') == $category->id) selected @endif>{{ $category->name }}</option>
                             @endforeach
                     </select>
@@ -98,9 +98,9 @@
                     @endif
                     <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
                 </div>
-                <div>複数入力する場合は「,」で区切る</div> 
+                <div>複数入力する場合は「,」で区切る</div>
             </div>
-            
+
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">ファイル添付<span class="text-danger required">*<span></label>
@@ -194,7 +194,7 @@
                         </div>
 
                     </div>
-                @endforeach                
+                @endforeach
             @endif
 
         </div>
@@ -262,7 +262,7 @@
                     <input class="btn btn-admin" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
                 </div>
                 <div class="col-lg-2">
-                    <a href="{{ route('admin.manual.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+                    <a href="{{ route('admin.manual.publish.index', ['brand' => session('brand_id')]) }}" class="btn btn-admin">一覧に戻る</a>
                 </div>
         </div>
 
