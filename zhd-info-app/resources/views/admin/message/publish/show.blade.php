@@ -103,7 +103,7 @@
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
                 </select>
-            </div>    
+            </div>
             <div class="input-group spMb16">
                 <label class="input-group-addon">DS</label>
                 <select name="org3" class="form-control">
@@ -145,7 +145,7 @@
                     <option value="false" {{ request()->input('read_flg') == "false" ? 'selected' : ''}}>未読</option>
                 </select>
             </div>
-        
+
 
             <div class="input-group spMb16 duration-form-text">
                 <label class="input-group-addon">閲覧日時</label>
@@ -198,7 +198,7 @@
     <div class="pagenation-bottom">
         @include('common.admin.pagenation', ['objects' => $user_list])
     </div>
-    <a href="{{route('admin.message.publish.index')}}">
+    <a href="{{route('admin.message.publish.index', ['brand' => session('brand_id')])}}">
         <button class="btn btn-admin">戻る</button>
     </a>
 
