@@ -294,7 +294,7 @@
             </div>
             @endif
             <div class="col-lg-2">
-                <a href="{{ route('admin.message.publish.index') }}" class="btn btn-admin">一覧に戻る</a>
+                <a href="{{ route('admin.message.publish.index', ['brand' => session('brand_id')]) }}" class="btn btn-admin">一覧に戻る</a>
             </div>
         </div>
 

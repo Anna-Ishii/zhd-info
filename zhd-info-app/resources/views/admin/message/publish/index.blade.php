@@ -69,7 +69,7 @@
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
                 </select>
-            </div>    
+            </div>
 			<div class="input-group col-lg-1 spMb16">
                 <label class="input-group-addon">ラベル</label>
                 <select name="label" class="form-control">
@@ -108,10 +108,10 @@
 				 max="100"
 				 min="0"
 				 step="0.1"
-				 name="rate[0]" 
-				 value="{{request()->input('rate.0')}}" 
-				 class="form-control" 
-				 placeholder="" 
+				 name="rate[0]"
+				 value="{{request()->input('rate.0')}}"
+				 class="form-control"
+				 placeholder=""
 				/>
 				<label class="input-group-addon">〜</label>
 				<input
@@ -119,10 +119,10 @@
 				 max="100"
 				 min="0"
 				 step="0.1"
-				 name="rate[1]" 
-				 value="{{request()->input('rate.1')}}" 
-				 class="form-control" 
-				 placeholder="" 
+				 name="rate[1]"
+				 value="{{request()->input('rate.1')}}"
+				 class="form-control"
+				 placeholder=""
 				/>
             </div>
 			<div class="input-group col-lg-1 spMb16">
@@ -131,7 +131,7 @@
 			<div class="input-group col-lg-1">
 				<button class="btn btn-admin">検索</button>
 			</div>
-			<div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div> 
+			<div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>
 		</div>
     </form>
 	<!-- 検索結果 -->
@@ -153,7 +153,7 @@
 				</div>
 				@endif
 			</div>
-			
+
 		</div>
 
 		<div class="message-tableInner table-responsive-xxl">
@@ -217,7 +217,7 @@
 						<td class="date-time"><div>{{$message->formatted_start_datetime}}</div></td>
 						<td class="date-time"><div>{{$message->formatted_end_datetime}}</div></td>
 						<td>{{$message->status->text()}}</td>
-						@if($message->status == App\Enums\PublishStatus::Wait || 
+						@if($message->status == App\Enums\PublishStatus::Wait ||
 							$message->status == App\Enums\PublishStatus::Editing)
 							<td></td>
 							<td></td>
