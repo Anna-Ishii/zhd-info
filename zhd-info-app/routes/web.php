@@ -79,7 +79,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'check.allowpage:manual'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
-            Route::post('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
             Route::get('{organization1}/new', [ManualPublishController::class, 'new'])->name('new');
             Route::post('{organization1}/new', [ManualPublishController::class, 'store'])->name('new.store');
@@ -98,14 +97,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::group(['middleware' => 'check.allowpage:account-shop'], function(){
             Route::get('/', [AccountController::class, 'index'])->name('index');
-            Route::post('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('new', [AccountController::class, 'new'])->name('new');
             Route::post('new', [AccountController::class, 'store'])->name('new.store');
             Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
         });
         Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'check.allowpage:account-admin'], function () {
             Route::get('/', [AdminAccountController::class, 'index'])->name('index');
-            Route::post('/', [MessagePublishController::class, 'index'])->name('index');
             Route::get('new', [AdminAccountController::class, 'new'])->name('new');
             Route::post('new', [AdminAccountController::class, 'store'])->name('new.store');
             Route::get('edit/{admin}', [AdminAccountController::class, 'edit'])->name('edit');
