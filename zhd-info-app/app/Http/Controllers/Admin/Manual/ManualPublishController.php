@@ -55,6 +55,9 @@ class ManualPublishController extends Controller
 
         $organization1 = Brand::find($brand_id)->organization1;
 
+        // セッションにデータを保存
+        session()->put('brand_id', $brand_id);
+
         $sub = DB::table('manuals as m')
                     ->select([
                         'm.id as m_id',
@@ -272,7 +275,7 @@ class ManualPublishController extends Controller
             $manual->save();
             $manual->brand()->attach($request->brand);
             $manual->user()->attach(
-                !isset($request->save) ? $this->targetUserParam($request->brand) : [] 
+                !isset($request->save) ? $this->targetUserParam($request->brand) : []
             );
             $manual->content()->createMany($this->manualContentsParam($request));
 
@@ -297,13 +300,13 @@ class ManualPublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
-        return redirect()->route('admin.manual.publish.index');
+        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')] );
     }
 
     public function edit($manual_id)
     {
         $manual = Manual::find($manual_id);
-        if (empty($manual)) return redirect()->route('admin.manual.publish.index');
+        if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')] );
 
         $admin = session('admin');
 
@@ -336,7 +339,7 @@ class ManualPublishController extends Controller
     public function update(PublishUpdateRequest $request, $manual_id)
     {
         $validated = $request->validated();
-        
+
         // ファイルを移動したかフラグ
         $manual_changed_flg = false;
         $manualcontent_changed_flg = false;
@@ -364,7 +367,7 @@ class ManualPublishController extends Controller
 
 
         // 手順を登録する
-        $content_data = []; 
+        $content_data = [];
         $count_order_no = 0;
 
         try {
@@ -406,7 +409,7 @@ class ManualPublishController extends Controller
                             ImageConverter::convert2image($content_data[$i]['content_url']);
                     }
                 }
-                
+
             }
         }
 
@@ -414,18 +417,18 @@ class ManualPublishController extends Controller
             $manual->update($manual_params);
             $manual->brand()->sync($request->brand);
             $manual->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request->brand) : [] 
+                !isset($request->save) ? $this->targetUserParam($request->brand) : []
             );
             $manual->content()->createMany($content_data);
 
-            
+
             $tag_ids = [];
             foreach ($request->input('tag_name', []) as $tag_name) {
                 $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
                 $tag_ids[] = $tag->id;
             }
             $manual->tag()->sync($tag_ids);
-            
+
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -439,7 +442,7 @@ class ManualPublishController extends Controller
                 ->with('error', '入力エラーがあります');
         }
 
-        return redirect()->route('admin.manual.publish.index');
+        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')] );
     }
 
     public function detail($manual_id)
@@ -450,7 +453,7 @@ class ManualPublishController extends Controller
                             ->get();
         $target_org1 = $manual->organization1()->pluck('organization1.id')->toArray();
         $target_shop = Shop::whereIn("organization4_id", $target_org1)->get();
-        
+
         return view('admin.manual.publish.edit',[
             "manual" => $manual,
             "contents" => $contents,
@@ -666,7 +669,7 @@ class ManualPublishController extends Controller
             'imported_datetime' => new Carbon('now'),
             'is_success' => false
         ]);
-        
+
         try {
             DB::beginTransaction();
             foreach ($manuals as $key => $ml) {
@@ -715,7 +718,7 @@ class ManualPublishController extends Controller
                     'imported_datetime' => new Carbon('now'),
                     'is_success' => true
                 ]);
-            
+
             DB::commit();
             return response()->json([
                 'message' => "インポート完了しました"
@@ -727,7 +730,7 @@ class ManualPublishController extends Controller
             ], 500);
         }
     }
-    
+
     private function parseDateTime($datetime)
     {
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
@@ -756,7 +759,7 @@ class ManualPublishController extends Controller
     // 「手順」を登録するために加工する
     private function manualContentsParam($request): Array {
         if(!(isset($request['manual_flow']))) return [];
-        
+
         $content_data = [];
         foreach ($request['manual_flow'] as $i => $r) {
             $content_data[$i]['title'] = $r['title'];
@@ -796,7 +799,7 @@ class ManualPublishController extends Controller
         return $content_url;
 
     }
-    private function rollbackRegisterFile($request_file_path): Void 
+    private function rollbackRegisterFile($request_file_path): Void
     {
         if(!(isset($request_file_path))) return;
         $content_url = 'uploads/' . basename($request_file_path);

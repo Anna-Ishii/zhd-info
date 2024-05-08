@@ -53,6 +53,7 @@ class MessagePublishController extends Controller
         $brand_id = $request->input('brand', $brand_list[0]->id);
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
+
         $organization1 = Brand::find($brand_id)->organization1;
 
         // セッションにデータを保存
