@@ -55,6 +55,9 @@ class MessagePublishController extends Controller
         $publish_date = $request->input('publish-date');
         $organization1 = Brand::find($brand_id)->organization1;
 
+        // セッションにデータを保存
+        session()->put('brand_id', $brand_id);
+
         $sub = DB::table('messages as m')
                     ->select([
                         'm.id as m_id',
@@ -82,7 +85,7 @@ class MessagePublishController extends Controller
                     DB::raw('ifnull(sum(message_user.read_flg),0) as read_users'),
                     DB::raw('count(message_user.user_id) as total_users'),
                     DB::raw('round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate'),
-                    DB::raw('sub.b_name as brand_name')    
+                    DB::raw('sub.b_name as brand_name')
                 ])
                 ->where('messages.organization1_id', $organization1->id)
                 ->whereNull('message_brand.brand_id')
@@ -137,7 +140,7 @@ class MessagePublishController extends Controller
                         });
                 })
                 ->join('admin', 'create_admin_id', '=', 'admin.id')
-                ->orderBy('messages.number', 'desc')               
+                ->orderBy('messages.number', 'desc')
                 ->paginate(50)
                 ->appends(request()->query());
 
@@ -163,7 +166,7 @@ class MessagePublishController extends Controller
         $org3_list = Organization1Repository::getOrg3($organization1);
         $org4_list = Organization1Repository::getOrg4($organization1);
         $org5_list = Organization1Repository::getOrg5($organization1);
-        
+
         // request
         $brand_id = $request->input('brand');
         $shop_freeword = $request->input('shop_freeword');
@@ -234,7 +237,6 @@ class MessagePublishController extends Controller
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
         // ブランド一覧を取得する
         $brand_list = Brand::where('organization1_id', $organization1->id)->get();
-        
         $organization_list = [];
         $organization_list = Shop::query()
                                 ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
@@ -366,13 +368,13 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
-        return redirect()->route('admin.message.publish.index');
+        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function edit($message_id)
     {
         $message = Message::find($message_id);
-        if(empty($message)) return redirect()->route('admin.message.publish.index');
+        if(empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
 
         $admin = session('admin');
 
@@ -407,7 +409,7 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
-                    
+
         $organization_type = 5;  // ブロックを表示する
         if (!Organization1Repository::isExistOrg5($message->organization1_id)) {
             $organization_type = 4; // エリアを表示する
@@ -421,7 +423,7 @@ class MessagePublishController extends Controller
 
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
-        
+
         $target_brand = $message->brand()->pluck('brands.id')->toArray();
 
         return view('admin.message.publish.edit', [
@@ -463,7 +465,7 @@ class MessagePublishController extends Controller
         }
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
-        
+
         try {
             DB::beginTransaction();
             $message = Message::find($message_id);
@@ -519,7 +521,6 @@ class MessagePublishController extends Controller
                 $tag_ids[] = $tag->id;
             }
             $message->tag()->sync($tag_ids);
-            
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -532,7 +533,7 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
-        return redirect()->route('admin.message.publish.index');
+        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function stop(Request $request)
@@ -550,7 +551,7 @@ class MessagePublishController extends Controller
             'updated_admin_id' => $admin->id,
             'editing_flg' => false
         ]);
-        
+
         return response()->json(['message' => '停止しました']);
     }
 
@@ -601,7 +602,7 @@ class MessagePublishController extends Controller
         $log_file_name = $request->input('log_file_name');
         $file_path = public_path() . '/log/'. $log_file_name;
         file_put_contents($file_path, "0");
-        
+
         $admin = session('admin');
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
@@ -685,7 +686,7 @@ class MessagePublishController extends Controller
 
         } catch (ValidationException $e) {
             $failures = $e->failures();
-            
+
             $errorMessage = [];
             foreach ($failures as $index => $failure) {
                 $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
@@ -717,7 +718,7 @@ class MessagePublishController extends Controller
                 'message' => "ログファイルが存在しません"
             ], 500);
         }
-        
+
 
         $log = File::get($file_path);
         if($log == 100){
@@ -735,7 +736,7 @@ class MessagePublishController extends Controller
             'imported_datetime' => new Carbon('now'),
             'is_success' => false
         ]);
-       
+
         try {
             DB::beginTransaction();
             foreach ($messages as $key => $ms) {
@@ -789,7 +790,7 @@ class MessagePublishController extends Controller
                         'target_roll' => $ms["roll"]
                     ]);
                     $new_target_user_id = array_keys($new_target_user);
-                    $detach_user = array_diff($origin_user, $new_target_user_id); 
+                    $detach_user = array_diff($origin_user, $new_target_user_id);
                     $attach_user = array_diff($new_target_user_id, $origin_user);
 
                     $message->user()->detach($detach_user);
@@ -909,7 +910,7 @@ class MessagePublishController extends Controller
         return !($currnt_path == $next_path);
     }
 
-    
+
 
     private function tagImportParam(?Array $tags): Array
     {
@@ -927,10 +928,10 @@ class MessagePublishController extends Controller
     private  function strToArray(?String $str): Array
     {
         if(!isset($str)) return [];
-        
+
         $array = explode(',', $str);
 
-        $returnArray = []; 
+        $returnArray = [];
         foreach ($array as $key => $value) {
             $returnArray[] = trim($value, "\"");
         }
@@ -945,7 +946,7 @@ class MessagePublishController extends Controller
             ->pluck('id')
             ->toArray();
     }
-    
+
     private function getOrg3All(Int $org1_id): Array
     {
         return Shop::query()
@@ -974,7 +975,7 @@ class MessagePublishController extends Controller
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
             ->pluck('organization5.id')
             ->toArray();
-            
+
     }
 
     private function getOrganizationForm($organization1_id)
