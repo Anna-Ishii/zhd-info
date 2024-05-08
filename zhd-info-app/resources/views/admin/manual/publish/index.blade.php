@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -35,7 +35,7 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+
                     </ul>
                 </li>
                 @endif
@@ -70,7 +70,7 @@
                     <option value="{{ $brand->id }}" {{ request()->input('brand') == $brand->id ? 'selected' : ''}}>{{ $brand->name }}</option>
                     @endforeach
                 </select>
-            </div> 
+            </div>
             <div class="input-group col-lg-2 spMb16">
                 <label class="input-group-addon">カテゴリ</label>
                 <select name="new_category" class="form-control">
@@ -102,10 +102,10 @@
 				 max="100"
 				 min="0"
 				 step="0.1"
-				 name="rate[0]" 
-				 value="{{request()->input('rate.0')}}" 
-				 class="form-control" 
-				 placeholder="" 
+				 name="rate[0]"
+				 value="{{request()->input('rate.0')}}"
+				 class="form-control"
+				 placeholder=""
 				/>
 				<label class="input-group-addon">〜</label>
 				<input
@@ -113,10 +113,10 @@
 				 max="100"
 				 min="0"
 				 step="0.1"
-				 name="rate[1]" 
-				 value="{{request()->input('rate.1')}}" 
-				 class="form-control" 
-				 placeholder="" 
+				 name="rate[1]"
+				 value="{{request()->input('rate.1')}}"
+				 class="form-control"
+				 placeholder=""
 				/>
             </div>
             <div class="input-group col-lg-1 spMb16">
@@ -125,9 +125,9 @@
             <div class="input-group col-lg-1">
                 <button class="btn btn-admin">検索</button>
             </div>
-            <div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div> 
+            <div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>
         </div>
-         
+
     </form>
 
         <form method="post" action="#">
@@ -169,13 +169,13 @@
                                 @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                     <th class="text-center" nowrap>操作</th>
                                 @endif
-                                
+
                             </tr>
                         </thead>
 
                         <tbody>
                             @foreach ($manual_list as $manual)
-                            <tr data-manual_id={{$manual->id}} 
+                            <tr data-manual_id={{$manual->id}}
                                 class="@if($manual->status == App\Enums\PublishStatus::Publishing) publishing
                                         @elseif($manual->status == App\Enums\PublishStatus::Published) published
                                         @elseif($manual->status == App\Enums\PublishStatus::Wait) wait
@@ -220,7 +220,7 @@
                                 <td class="date-time"><div>{{$manual->formatted_start_datetime}}</div></td>
                                 <td class="date-time"><div>{{$manual->formatted_end_datetime}}</div></td>
                                 <td>{{$manual->status->text()}}</td>
-                                @if($manual->status == App\Enums\PublishStatus::Wait || 
+                                @if($manual->status == App\Enums\PublishStatus::Wait ||
                                     $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>
