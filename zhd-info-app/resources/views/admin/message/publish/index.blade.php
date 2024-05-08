@@ -196,7 +196,7 @@
 						<td>{{$message->category?->name}}</td>
 						<td class="label-title">
 							@if(isset($message->content_url))
-								<a href="{{ asset($message->content_url)}}">{{$message->title}}</a>
+								<a href="{{ asset($message->content_url)}}" target="_blank" rel="noopener noreferrer">{{$message->title}}</a>								
 							@else
 								{{$message->title}}
 							@endif
