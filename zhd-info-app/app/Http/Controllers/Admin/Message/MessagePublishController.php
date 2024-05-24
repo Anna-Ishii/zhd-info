@@ -284,20 +284,21 @@ class MessagePublishController extends Controller
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
 
+        $message_contents = $this->messageContentsParam($request);
+
         $admin = session('admin');
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        $msg_params['content_name'] = $request->file_name;
-        $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+        $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+        $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
         $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
         $msg_params['create_admin_id'] = $admin->id;
         $msg_params['organization1_id'] = $organization1->id;
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
-        $msg_params['thumbnails_url'] = ImageConverter::pdf2image($msg_params['content_url']);
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         try {
@@ -349,6 +350,8 @@ class MessagePublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : []
             );
 
+            $message->content()->createMany($message_contents);
+
             if(isset($request->tag_name)) {
                 $tag_ids = [];
                 foreach ($request->tag_name as $tag_name) {
@@ -362,7 +365,12 @@ class MessagePublishController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error($th->getMessage());
-            if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
+            // if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
+            if ($message_changed_flg) {
+                foreach ($request->file_path as $file_path) {
+                    $this->rollbackRegisterFile($file_path);
+                }
+            }
             return redirect()
                 ->back()
                 ->withInput()
@@ -522,7 +530,6 @@ class MessagePublishController extends Controller
                 $tag_ids[] = $tag->id;
             }
             $message->tag()->sync($tag_ids);
-
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -583,18 +590,42 @@ class MessagePublishController extends Controller
     }
 
     // API
+    // public function fileUpload(FileUpdateApiRequest $request)
+    // {
+    //     $validated = $request->validated();
+
+    //     $file = $request->file;
+    //     // $file->move(sys_get_temp_dir(),uniqid() . '.' . $file->getClientOriginalExtension());
+    //     $file_path = Storage::putFile('/tmp', $file);
+    //     $file_name = $file->getClientOriginalName();
+
+    //     return  response()->json([
+    //         'content_name' => $file_name,
+    //         'content_url' => $file_path
+    //     ]);
+    // }
+
     public function fileUpload(FileUpdateApiRequest $request)
     {
         $validated = $request->validated();
 
-        $file = $request->file;
-        // $file->move(sys_get_temp_dir(),uniqid() . '.' . $file->getClientOriginalExtension());
-        $file_path = Storage::putFile('/tmp', $file);
-        $file_name = $file->getClientOriginalName();
+        $fileNames = [];
+        $filePaths = [];
 
-        return  response()->json([
-            'content_name' => $file_name,
-            'content_url' => $file_path
+        // 送信されたすべてのファイルを処理する
+        foreach ($request->file() as $key => $file) {
+            // 各ファイルの処理
+            $file_path = Storage::putFile('/tmp', $file);
+            $file_name = $file->getClientOriginalName();
+
+            // ファイル名とパスを配列に追加
+            $fileNames[] = $file_name;
+            $filePaths[] = $file_path;
+        }
+
+        return response()->json([
+            'content_names' => $fileNames,
+            'content_urls' => $filePaths
         ]);
     }
 
@@ -836,6 +867,25 @@ class MessagePublishController extends Controller
         return $content_url;
     }
 
+    // private function registerFiles(array $request_file_paths): array
+    // {
+    //     $content_urls = [];
+
+    //     foreach ($request_file_paths as $request_file_path) {
+    //         $content_url = 'uploads/' . basename($request_file_path);
+    //         $current_path = storage_path('app/' . $request_file_path);
+    //         $next_path = public_path($content_url);
+
+    //         if (rename($current_path, $next_path)) {
+    //             $content_urls[] = $content_url;
+    //         } else {
+    //             // エラーハンドリング（必要に応じて）
+    //         }
+    //     }
+
+    //     return $content_urls;
+    // }
+
     private function rollbackRegisterFile($request_file_path): Void
     {
         if (!(isset($request_file_path))) return;
@@ -896,6 +946,22 @@ class MessagePublishController extends Controller
         }
 
         return $target_user_data;
+    }
+
+    // 「手順」を登録するために加工する
+    private function messageContentsParam($request): Array {
+
+        if(!(isset($request->file_name))) return [];
+        $content_data = [];
+        foreach ($request->file_name as $i => $file_name) {
+            if (isset($file_name)) {
+                    $content_data[$i]['content_name'] = $file_name;
+                    $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
+                    $content_data[$i]['thumbnails_url'] =
+                    ImageConverter::convert2image($content_data[$i]['content_url']);
+            }
+        }
+        return $content_data;
     }
 
     private function hasRequestFile($request) {
