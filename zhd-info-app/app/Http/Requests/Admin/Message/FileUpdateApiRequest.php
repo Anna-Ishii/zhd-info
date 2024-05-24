@@ -9,10 +9,15 @@ class FileUpdateApiRequest extends ApiRequest
 {
 
     public function rules()
-    {       
-        return [
-            'file'  => 'required|mimes:pdf|max:150000',
-        ];
+    {
+        $rules = [];
+
+        // ファイル数だけルールを生成
+        for ($i = 0; $i < count(request()->file()); $i++) {
+            $rules['file' . $i] = 'required|mimes:pdf|max:150000';
+        }
+
+        return $rules;
     }
 
     public function messages()
