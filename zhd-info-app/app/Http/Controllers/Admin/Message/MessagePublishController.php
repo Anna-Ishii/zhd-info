@@ -590,21 +590,6 @@ class MessagePublishController extends Controller
     }
 
     // API
-    // public function fileUpload(FileUpdateApiRequest $request)
-    // {
-    //     $validated = $request->validated();
-
-    //     $file = $request->file;
-    //     // $file->move(sys_get_temp_dir(),uniqid() . '.' . $file->getClientOriginalExtension());
-    //     $file_path = Storage::putFile('/tmp', $file);
-    //     $file_name = $file->getClientOriginalName();
-
-    //     return  response()->json([
-    //         'content_name' => $file_name,
-    //         'content_url' => $file_path
-    //     ]);
-    // }
-
     public function fileUpload(FileUpdateApiRequest $request)
     {
         $validated = $request->validated();
@@ -866,25 +851,6 @@ class MessagePublishController extends Controller
         rename($current_path, $next_path);
         return $content_url;
     }
-
-    // private function registerFiles(array $request_file_paths): array
-    // {
-    //     $content_urls = [];
-
-    //     foreach ($request_file_paths as $request_file_path) {
-    //         $content_url = 'uploads/' . basename($request_file_path);
-    //         $current_path = storage_path('app/' . $request_file_path);
-    //         $next_path = public_path($content_url);
-
-    //         if (rename($current_path, $next_path)) {
-    //             $content_urls[] = $content_url;
-    //         } else {
-    //             // エラーハンドリング（必要に応じて）
-    //         }
-    //     }
-
-    //     return $content_urls;
-    // }
 
     private function rollbackRegisterFile($request_file_path): Void
     {
