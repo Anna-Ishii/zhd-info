@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 class Message extends Model
@@ -103,6 +104,11 @@ class Message extends Model
         return $this->belongsToMany(MessageTagMaster::class, 'message_tags', 'message_id', 'tag_id');
     }
 
+    public function content(): HasMany
+    {
+        return $this->hasMany(MessageContent::class);
+    }
+
     public function brands_string($brandList = [])
     {
         // リレーションからnameプロパティを取得して配列に変換
@@ -188,7 +194,7 @@ class Message extends Model
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD HH:mm') : null;
     }
-    
+
     // public function getViewRateAttribute() : float
     // {
     //     $user_count = $this->withCount('user')->get();
@@ -197,7 +203,7 @@ class Message extends Model
 
     //     return round((($readed_user_count / $user_count) * 100), 1);
     // }
-    
+
     public function getContentFileSizeAttribute()
     {
         if (!isset($this->content_url)) return "ファイルがありません";
@@ -255,7 +261,7 @@ class Message extends Model
                 ->where('end_datetime', '<=', now('Asia/Tokyo'))
                 ->where('editing_flg', false);
     }
-    
+
     public function scopeViewRateBetween($query, $min = 0, $max = 100)
     {
         $min = isset($min) ? $min : 0;
