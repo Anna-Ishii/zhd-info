@@ -128,7 +128,7 @@
             <label class="col-lg-2 control-label">PDF添付<span class="text-danger required">*<span></label>
             <div class="col-lg-4 fileInputs">
                 {{-- 複数ファイルの場合 --}}
-                @if($message_contents)
+                @if($message_contents->isNotEmpty())
                     @foreach ($message_contents as $message_content)
                         <div class="file-input-container">
                             <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}"  required>
