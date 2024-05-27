@@ -73,6 +73,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [MessagePublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [MessagePublishController::class, 'progress'])->name('progress');
+            Route::get('/output-contents-pdf', [MessagePublishController::class, 'outputContentsPdf'])->name('output.contents.pdf');
         });
     });
     // 管理画面-動画マニュアル
