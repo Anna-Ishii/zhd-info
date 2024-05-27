@@ -311,10 +311,12 @@ class MessageController extends Controller
                 $files[] = public_path('uploads/' . basename($content_path));
             }
 
-            // 単一PDFがある場合の表示処理
+        // 単一PDFがある場合の表示処理
         } else {
             $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
-            $files[] = public_path('uploads/' . basename($message_content));
+            // $files[] = public_path('uploads/' . basename($message_content));
+
+            return redirect()->to(asset($message_content->content_url));
         }
 
         // PDF を生成するための初期化
