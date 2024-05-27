@@ -316,7 +316,7 @@ class MessageController extends Controller
             $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
             // $files[] = public_path('uploads/' . basename($message_content));
 
-            return redirect()->to(asset($message_content->content_url));
+            return redirect()->to(asset($message_content));
         }
 
         // PDF を生成するための初期化
