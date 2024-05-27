@@ -18,6 +18,7 @@ use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
 use App\Models\Brand;
+use App\Models\MessageContent;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\Organization1;
@@ -365,7 +366,6 @@ class MessagePublishController extends Controller
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error($th->getMessage());
-            // if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
             if ($message_changed_flg) {
                 foreach ($request->file_path as $file_path) {
                     $this->rollbackRegisterFile($file_path);
@@ -383,6 +383,9 @@ class MessagePublishController extends Controller
     public function edit($message_id)
     {
         $message = Message::find($message_id);
+        // 複数ファイルの場合の処理
+        $message_contents = MessageContent::where('message_id', $message_id)->get();
+
         if(empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
 
         $admin = session('admin');
@@ -437,6 +440,7 @@ class MessagePublishController extends Controller
 
         return view('admin.message.publish.edit', [
             'message' => $message,
+            'message_contents' => $message_contents,
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
@@ -454,30 +458,79 @@ class MessagePublishController extends Controller
 
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
+        $message_content_changed_flg = false;
 
         $admin = session('admin');
         $message = Message::find($message_id);
+        // DB移行した時使うやつ（message_contents）
+        // // 複数ファイルの場合の処理
+        // $message_contents = MessageContent::where('message_id', $message_id)->get();
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        if ($this->isChangedFile($message->content_url, $request->file_path)) {
-            $msg_params['content_name'] = $request->file_name;
-            $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+        if ($this->isChangedFile($message->content_url, $request->file_path[0] ? $request->file_path[0] : null)) {
+            // $msg_params['content_name'] = $request->file_name;
+            $msg_params['content_name'] = $request->file_name[0] ? $request->file_name[0] : null;
+            // $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
+            $msg_params['content_url'] = $request->file_path[0] ? $request->file_path[0] : null;
+            // $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $message_changed_flg = true;
         } else {
             $message_params['content_name'] = $message->content_name;
             $message_params['content_url'] = $message->content_url;
             $message_params['thumbnails_url'] = $message->thumbnails_url;
+
+            // DB移行した時使うやつ（message_contents）
+            // $message_params['content_name'] = $message_contents->content_name[0];
+            // $message_params['content_url'] = $message_contents->content_url[0];
+            // $message_params['thumbnails_url'] = $message_contents->thumbnails_url[0];
         }
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
+
+        // 手順を登録する
+        $content_data = [];
+
         try {
             DB::beginTransaction();
+            // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
             $message = Message::find($message_id);
+            $content = $message->content()->whereNotIn('id', $this->getExistContentIds($request));
+            $content->delete();
+
+            //手順を登録する (編集)
+            if(isset($request->file_name)) {
+                foreach ($request->file_name as $i => $file_name) {
+                    // 登録されている手順を変更する
+                    if (isset($request->content_id[$i])) {
+                        $id = (int)$request->content_id[$i];
+                        $message_content = MessageContent::find($id);
+
+                        // 変更部分だけ取り込む
+                        if ($this->isChangedFile($message_content->content_url, $request->file_path[$i])) {
+                            $message_content->content_name = $file_name;
+                            $message_content->content_url = $this->registerFile($request->file_path[$i]);
+                            $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
+                            $message_content_changed_flg = true;
+                        }
+
+                        $message_content->save();
+                    } else {
+                        // 手順の新規登録
+                        if (isset($file_name)) {
+                            $content_data[$i]['content_name'] = $file_name;
+                            $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
+                            $content_data[$i]['thumbnails_url'] =
+                            ImageConverter::convert2image($content_data[$i]['content_url']);
+                        }
+                    }
+                }
+            }
+
             $message->update($msg_params);
             $message->roll()->sync($request->target_roll);
 
@@ -524,6 +577,8 @@ class MessagePublishController extends Controller
                 !isset($request->save) ? $this->targetUserParam($request) : []
             );
 
+            $message->content()->createMany($content_data);
+
             $tag_ids = [];
             foreach ($request->input('tag_name', []) as $tag_name) {
                 $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
@@ -533,7 +588,12 @@ class MessagePublishController extends Controller
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
-            if ($message_changed_flg) $this->rollbackRegisterFile($request->file_path);
+            if ($message_changed_flg) {
+                foreach ($request->file_path as $file_path) {
+                    $this->rollbackRegisterFile($file_path);
+                }
+            }
+            if ($message_content_changed_flg) $this->rollbackMessageContentFile($request);
             Log::error($th->getMessage());
             return redirect()
                 ->back()
@@ -862,6 +922,19 @@ class MessagePublishController extends Controller
         return;
     }
 
+    private function getExistContentIds($request) : Array
+    {
+        if(!isset($request)) return [];
+        $content_ids = [];
+        foreach ($request->content_id as $content_id) {
+            if (isset($content_id)) {
+                $id = (int)$content_id;
+                $content_ids[] = $id;
+            }
+        }
+        return $content_ids;
+    }
+
     private function targetUserParam($organizarions): Array {
         $shops_id = [];
         $target_user_data = [];
@@ -928,6 +1001,21 @@ class MessagePublishController extends Controller
             }
         }
         return $content_data;
+    }
+
+    private function rollbackMessageContentFile($request): Void {
+        if(!(isset($request->file_path))) return;
+        foreach ($request->file_path as $file_path) {
+            if (isset($file_path)) {
+                $current_path = storage_path('app/' . $file_path);
+                $next_path = public_path('uploads/' . basename($file_path));
+                try{
+                    rename($next_path, $current_path);
+                }catch(\Throwable $th){
+                    Log::error($th->getMessage());
+                }
+            }
+        }
     }
 
     private function hasRequestFile($request) {
