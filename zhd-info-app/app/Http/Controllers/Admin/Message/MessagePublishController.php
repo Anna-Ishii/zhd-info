@@ -37,6 +37,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
+use setasign\Fpdi\TcpdfFpdi;
+
+require_once(resource_path("outputpdf/libs/tcpdf/tcpdf.php"));
+require_once(resource_path("outputpdf/libs/fpdi/autoload.php"));
 
 class MessagePublishController extends Controller
 {
@@ -61,90 +65,90 @@ class MessagePublishController extends Controller
         session()->put('brand_id', $brand_id);
 
         $sub = DB::table('messages as m')
-                    ->select([
-                        'm.id as m_id',
-                        DB::raw('
+            ->select([
+                'm.id as m_id',
+                DB::raw('
                             case
                                 when (count(distinct b.name)) = 0 then ""
                                 else group_concat(distinct b.name order by b.name)
                             end as b_name
                         ')
-                    ])
-                    ->leftjoin('message_brand as m_b', 'm.id', 'm_b.message_id')
-                    ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
-                    ->groupBy('m.id');
+            ])
+            ->leftjoin('message_brand as m_b', 'm.id', 'm_b.message_id')
+            ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
+            ->groupBy('m.id');
         $message_list =
             Message::query()
-                ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
-                ->leftjoin('message_user','messages.id', '=', 'message_id')
-                ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-                ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
-                ->leftJoinSub($sub, 'sub', function($join) {
-                    $join->on('sub.m_id', '=', 'messages.id');
-                })
-                ->select([
-                    'messages.*',
-                    DB::raw('ifnull(sum(message_user.read_flg),0) as read_users'),
-                    DB::raw('count(message_user.user_id) as total_users'),
-                    DB::raw('round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate'),
-                    DB::raw('sub.b_name as brand_name')
-                ])
-                ->where('messages.organization1_id', $organization1->id)
-                ->whereNull('message_brand.brand_id')
-                ->orWhere('message_brand.brand_id', '=', $brand_id)
-                ->groupBy(DB::raw('messages.id'))
-                ->when(isset($q), function ($query) use ($q) {
-                    $query->where(function ($query) use ($q) {
-                        $query->whereLike('title', $q)
-                            ->orWhereHas('tag', function ($query) use ($q) {
-                                $query->where('name', $q);
-                            });
-                    });
-                })
-                ->when(isset($status), function ($query) use ($status) {
-                    switch ($status) {
-                        case PublishStatus::Wait:
-                            $query->waitMessage();
-                            break;
-                        case PublishStatus::Publishing:
-                            $query->publishingMessage();
-                            break;
-                        case PublishStatus::Published:
-                            $query->publishedMessage();
-                            break;
-                        case PublishStatus::Editing:
-                            $query->where('editing_flg', '=', true);
-                            break;
-                        default:
-                            break;
-                    }
-                })
-                ->when(isset($category_id), function ($query) use ($category_id) {
-                    $query->where('category_id', $category_id);
-                })
-                ->when(isset($label), function ($query) use ($label) {
-                    $query->where('emergency_flg', true);
-                })
-                ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                    $min = isset($rate[0]) ? $rate[0] : 0;
-                    $max = isset($rate[1]) ? $rate[1] : 100;
-                    $query->havingRaw('view_rate between ? and ?', [$min, $max]);
-                })
-                ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
-                    $query
-                        ->where('start_datetime', '>=', $publish_date[0]);
-                })
-                ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
-                    $query
-                        ->where(function ($query) use ($publish_date) {
-                            $query->where('end_datetime', '<=',$publish_date[1])
-                                ->orWhereNull('end_datetime');
+            ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
+            ->leftjoin('message_user', 'messages.id', '=', 'message_id')
+            ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+            ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
+            ->leftJoinSub($sub, 'sub', function ($join) {
+                $join->on('sub.m_id', '=', 'messages.id');
+            })
+            ->select([
+                'messages.*',
+                DB::raw('ifnull(sum(message_user.read_flg),0) as read_users'),
+                DB::raw('count(message_user.user_id) as total_users'),
+                DB::raw('round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate'),
+                DB::raw('sub.b_name as brand_name')
+            ])
+            ->where('messages.organization1_id', $organization1->id)
+            ->whereNull('message_brand.brand_id')
+            ->orWhere('message_brand.brand_id', '=', $brand_id)
+            ->groupBy(DB::raw('messages.id'))
+            ->when(isset($q), function ($query) use ($q) {
+                $query->where(function ($query) use ($q) {
+                    $query->whereLike('title', $q)
+                        ->orWhereHas('tag', function ($query) use ($q) {
+                            $query->where('name', $q);
                         });
-                })
-                ->join('admin', 'create_admin_id', '=', 'admin.id')
-                ->orderBy('messages.number', 'desc')
-                ->paginate(50)
-                ->appends(request()->query());
+                });
+            })
+            ->when(isset($status), function ($query) use ($status) {
+                switch ($status) {
+                    case PublishStatus::Wait:
+                        $query->waitMessage();
+                        break;
+                    case PublishStatus::Publishing:
+                        $query->publishingMessage();
+                        break;
+                    case PublishStatus::Published:
+                        $query->publishedMessage();
+                        break;
+                    case PublishStatus::Editing:
+                        $query->where('editing_flg', '=', true);
+                        break;
+                    default:
+                        break;
+                }
+            })
+            ->when(isset($category_id), function ($query) use ($category_id) {
+                $query->where('category_id', $category_id);
+            })
+            ->when(isset($label), function ($query) use ($label) {
+                $query->where('emergency_flg', true);
+            })
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
+                $query
+                    ->where('start_datetime', '>=', $publish_date[0]);
+            })
+            ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
+                $query
+                    ->where(function ($query) use ($publish_date) {
+                        $query->where('end_datetime', '<=', $publish_date[1])
+                            ->orWhereNull('end_datetime');
+                    });
+            })
+            ->join('admin', 'create_admin_id', '=', 'admin.id')
+            ->orderBy('messages.number', 'desc')
+            ->paginate(50)
+            ->appends(request()->query());
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
@@ -179,47 +183,47 @@ class MessagePublishController extends Controller
         $readed_date = $request->input('readed_date');
 
         $shop_list = $message
-                        ->shop()
-                        ->when(isset($brand_id), function ($query) use ($brand_id) {
-                            $query->where('brand_id', $brand_id);
-                        })
-                        ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
-                            $query->whereLike('name', $shop_freeword)
-                                    ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
-                        })
-                        ->when(isset($org3), function ($query) use ($org3) {
-                            $query->where('organization3_id', $org3);
-                        })
-                        ->when(isset($org4), function ($query) use ($org4) {
-                            $query->where('organization4_id', $org4);
-                        })
-                        ->when(isset($org5), function ($query) use ($org5) {
-                            $query->where('organization5_id', $org5);
-                        })
-                        ->pluck('id')
-                        ->unique()
-                        ->toArray();
+            ->shop()
+            ->when(isset($brand_id), function ($query) use ($brand_id) {
+                $query->where('brand_id', $brand_id);
+            })
+            ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
+                $query->whereLike('name', $shop_freeword)
+                    ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
+            })
+            ->when(isset($org3), function ($query) use ($org3) {
+                $query->where('organization3_id', $org3);
+            })
+            ->when(isset($org4), function ($query) use ($org4) {
+                $query->where('organization4_id', $org4);
+            })
+            ->when(isset($org5), function ($query) use ($org5) {
+                $query->where('organization5_id', $org5);
+            })
+            ->pluck('id')
+            ->unique()
+            ->toArray();
 
         $user_list = $message
-                        ->user()
-                        ->with(['shop', 'shop.organization3','shop.organization4', 'shop.organization5', 'shop.brand'])
-                        ->when(isset($read_flg), function ($query) use ($read_flg) {
-                            if($read_flg == 'true') $query->where('read_flg', true);
-                            if($read_flg == 'false') $query->where('read_flg', false);
-                        })
-                        ->when((isset($readed_date[0])), function ($query) use ($readed_date) {
-                            $from = Util::delweek_string($readed_date[0]);
-                            $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') >= ?", $from);
-                        })
-                        ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
-                            $to = Util::delweek_string($readed_date[1]);
-                            $query->where(function ($query) use ($to) {
-                                    $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') <= ?", $to);
-                                });
-                        })
-                        ->wherePivotIn('shop_id', $shop_list)
-                        ->paginate(50)
-                        ->appends(request()->query());
+            ->user()
+            ->with(['shop', 'shop.organization3', 'shop.organization4', 'shop.organization5', 'shop.brand'])
+            ->when(isset($read_flg), function ($query) use ($read_flg) {
+                if ($read_flg == 'true') $query->where('read_flg', true);
+                if ($read_flg == 'false') $query->where('read_flg', false);
+            })
+            ->when((isset($readed_date[0])), function ($query) use ($readed_date) {
+                $from = Util::delweek_string($readed_date[0]);
+                $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') >= ?", $from);
+            })
+            ->when((isset($readed_date[1])), function ($query) use ($readed_date) {
+                $to = Util::delweek_string($readed_date[1]);
+                $query->where(function ($query) use ($to) {
+                    $query->whereRaw("DATE_FORMAT(readed_datetime, '%Y/%m/%d %H:%i') <= ?", $to);
+                });
+            })
+            ->wherePivotIn('shop_id', $shop_list)
+            ->paginate(50)
+            ->appends(request()->query());
 
         return view('admin.message.publish.show', [
             'message' => $message,
@@ -241,28 +245,37 @@ class MessagePublishController extends Controller
         $brand_list = Brand::where('organization1_id', $organization1->id)->get();
         $organization_list = [];
         $organization_list = Shop::query()
-                                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
-                                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-                                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-                                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-                                ->distinct('organization4_id')
-                                ->distinct('organization5_id')
-                                ->select('organization2_id', 'organization2.name as organization2_name', 'organization2.order_no as organization2_order_no',
-                                         'organization3_id', 'organization3.name as organization3_name', 'organization3.order_no as organization3_order_no',
-                                         'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
-                                         'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
-                                         )
-                                ->where('organization1_id', $organization1->id)
-                                ->orderByRaw('organization2_id is null asc')
-                                ->orderByRaw('organization3_id is null asc')
-                                ->orderByRaw('organization4_id is null asc')
-                                ->orderByRaw('organization5_id is null asc')
-                                ->orderBy("organization2_order_no", "asc")
-                                ->orderBy("organization3_order_no", "asc")
-                                ->orderBy("organization4_order_no", "asc")
-                                ->orderBy("organization5_order_no", "asc")
-                                ->get()
-                                ->toArray();
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $organization1->id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
 
         $organization_type = 5;  // ブロックを表示する
         if (!Organization1Repository::isExistOrg5($organization1)) {
@@ -353,7 +366,7 @@ class MessagePublishController extends Controller
 
             $message->content()->createMany($message_contents);
 
-            if(isset($request->tag_name)) {
+            if (isset($request->tag_name)) {
                 $tag_ids = [];
                 foreach ($request->tag_name as $tag_name) {
                     $tag = MessageTagMaster::firstOrCreate(['name' => $tag_name]);
@@ -383,10 +396,10 @@ class MessagePublishController extends Controller
     public function edit($message_id)
     {
         $message = Message::find($message_id);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
-
-        if(empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
 
         $admin = session('admin');
 
@@ -405,10 +418,18 @@ class MessagePublishController extends Controller
             ->distinct('organization4_id')
             ->distinct('organization5_id')
             ->select(
-                'organization2_id', 'organization2.name as organization2_name', 'organization2.order_no as organization2_order_no',
-                'organization3_id', 'organization3.name as organization3_name', 'organization3.order_no as organization3_order_no',
-                'organization4_id', 'organization4.name as organization4_name', 'organization4.order_no as organization4_order_no',
-                'organization5_id', 'organization5.name as organization5_name', 'organization5.order_no as organization5_order_no',
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
             )
             ->where('organization1_id', $message->organization1_id)
             ->orderByRaw('organization2_id is null asc')
@@ -462,9 +483,6 @@ class MessagePublishController extends Controller
 
         $admin = session('admin');
         $message = Message::find($message_id);
-        // DB移行した時使うやつ（message_contents）
-        // // 複数ファイルの場合の処理
-        // $message_contents = MessageContent::where('message_id', $message_id)->get();
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
         $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
@@ -474,7 +492,7 @@ class MessagePublishController extends Controller
             // $msg_params['content_name'] = $request->file_name;
             $msg_params['content_name'] = $request->file_name[0] ? $request->file_name[0] : null;
             // $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
-            $msg_params['content_url'] = $request->file_path[0] ? $request->file_path[0] : null;
+            $msg_params['content_url'] = $request->file_path[0] ? str_replace("tmp/", "uploads/", $request->file_path[0]) : null;
             // $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $message_changed_flg = true;
@@ -482,11 +500,6 @@ class MessagePublishController extends Controller
             $message_params['content_name'] = $message->content_name;
             $message_params['content_url'] = $message->content_url;
             $message_params['thumbnails_url'] = $message->thumbnails_url;
-
-            // DB移行した時使うやつ（message_contents）
-            // $message_params['content_name'] = $message_contents->content_name[0];
-            // $message_params['content_url'] = $message_contents->content_url[0];
-            // $message_params['thumbnails_url'] = $message_contents->thumbnails_url[0];
         }
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
@@ -503,7 +516,7 @@ class MessagePublishController extends Controller
             $content->delete();
 
             //手順を登録する (編集)
-            if(isset($request->file_name)) {
+            if (isset($request->file_name)) {
                 foreach ($request->file_name as $i => $file_name) {
                     // 登録されている手順を変更する
                     if (isset($request->content_id[$i])) {
@@ -511,21 +524,30 @@ class MessagePublishController extends Controller
                         $message_content = MessageContent::find($id);
 
                         // 変更部分だけ取り込む
-                        if ($this->isChangedFile($message_content->content_url, $request->file_path[$i])) {
-                            $message_content->content_name = $file_name;
-                            $message_content->content_url = $this->registerFile($request->file_path[$i]);
-                            $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
-                            $message_content_changed_flg = true;
+                        if (isset($message_content->content_url)) {
+                            if ($this->isChangedFile($message_content->content_url, $request->file_path[$i] ?? null)) {
+                                $message_content->content_name = $file_name;
+                                $message_content->content_url = $this->registerFile($request->file_path[$i]);
+                                $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
+                                $message_content_changed_flg = true;
+                            }
+                            $message_content->save();
+                        } else {
+                            // 手順の新規登録
+                            if (isset($file_name)) {
+                                $content_data[$i]['content_name'] = $file_name;
+                                $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
+                                $content_data[$i]['thumbnails_url'] =
+                                    ImageConverter::convert2image($content_data[$i]['content_url']);
+                            }
                         }
-
-                        $message_content->save();
                     } else {
                         // 手順の新規登録
                         if (isset($file_name)) {
                             $content_data[$i]['content_name'] = $file_name;
                             $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
                             $content_data[$i]['thumbnails_url'] =
-                            ImageConverter::convert2image($content_data[$i]['content_url']);
+                                ImageConverter::convert2image($content_data[$i]['content_url']);
                         }
                     }
                 }
@@ -630,7 +652,7 @@ class MessagePublishController extends Controller
         $now->format('Y_m_d-H_i_s');
         return Excel::download(
             new MessageViewRateExport($message_id, $request),
-            $now->format('Y_m_d-H_i').'-業務連絡エクスポート.csv'
+            $now->format('Y_m_d-H_i') . '-業務連絡エクスポート.csv'
         );
     }
 
@@ -677,7 +699,7 @@ class MessagePublishController extends Controller
     public function csvUpload(Request $request)
     {
         $log_file_name = $request->input('log_file_name');
-        $file_path = public_path() . '/log/'. $log_file_name;
+        $file_path = public_path() . '/log/' . $log_file_name;
         file_put_contents($file_path, "0");
 
         $admin = session('admin');
@@ -703,7 +725,7 @@ class MessagePublishController extends Controller
 
             $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
             $count = $collection[0]->count();
-            if($count >= 100) {
+            if ($count >= 100) {
                 File::delete($file_path);
                 return response()->json([
                     'message' => "100行以内にしてください"
@@ -754,13 +776,12 @@ class MessagePublishController extends Controller
                     'roll' => $target_roll
                 ]);
 
-                file_put_contents($file_path, ceil((($key+1) / $count) * 100));
+                file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
             }
 
             return response()->json([
                 'json' => $array
             ], 200);
-
         } catch (ValidationException $e) {
             $failures = $e->failures();
 
@@ -790,7 +811,7 @@ class MessagePublishController extends Controller
     {
         $file_name = $request->file_name;
         $file_path = public_path() . '/log/' . $file_name;
-        if(!File::exists($file_path)) {
+        if (!File::exists($file_path)) {
             return response()->json([
                 'message' => "ログファイルが存在しません"
             ], 500);
@@ -798,7 +819,7 @@ class MessagePublishController extends Controller
 
 
         $log = File::get($file_path);
-        if($log == 100){
+        if ($log == 100) {
             File::delete($file_path);
         }
         return $log;
@@ -825,7 +846,7 @@ class MessagePublishController extends Controller
                 $message->tag()->sync($ms["tag"]);
                 $message->start_datetime = $ms["start_datetime"];
                 $message->end_datetime = $ms["end_datetime"];
-                if($message->isDirty())$message->updated_admin_id = $admin->id;
+                if ($message->isDirty()) $message->updated_admin_id = $admin->id;
                 $message->save();
 
                 MessageOrganization::where('message_id', $message->id)->delete();
@@ -855,7 +876,7 @@ class MessagePublishController extends Controller
 
                 $message->brand()->sync($ms["brand"]);
 
-                if(!$message->editing_flg) {
+                if (!$message->editing_flg) {
                     $origin_user = $message->user()->pluck('id')->toArray();
                     $new_target_user = $this->targetUserParam((object)[
                         'organization' => [
@@ -875,7 +896,6 @@ class MessagePublishController extends Controller
                         $message->user()->attach([$user => $new_target_user[$user]]);
                     }
                 }
-
             }
 
             DB::table('message_csv_logs')
@@ -889,13 +909,63 @@ class MessagePublishController extends Controller
             return response()->json([
                 'message' => "インポート完了しました"
             ], 200);
-
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
                 'message' => $th->getMessage()
             ], 500);
         }
+    }
+
+    // PDFの表示処理
+    public function outputContentsPdf(Request $request)
+    {
+        // request
+        $message_id = $request->input('message_id');
+
+        $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
+
+        $files = [];
+
+        // 複数PDFがある場合の表示処理
+        if (!empty($message_contents)) {
+            foreach ($message_contents as $content_path) {
+                $files[] = public_path('uploads/' . basename($content_path));
+            }
+
+            // 単一PDFがある場合の表示処理
+        } else {
+            $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
+            foreach ($message_content as $content_path) {
+                $files[] = public_path('uploads/' . basename($content_path));
+            }
+        }
+
+        // PDF を生成するための初期化
+        $pdf = new TcpdfFpdi();
+        $pdf->setPrintHeader(false);
+        $pdf->setPrintFooter(false);
+
+        // 各 PDF を追加
+        foreach ($files as $file) {
+            $count = $pdf->setSourceFile($file);
+            for ($i = 1; $i <= $count; $i++) {
+                $pdf->addPage();
+                $pdf->useTemplate($pdf->importPage($i));
+            }
+        }
+
+        // // PDF を出力して返す
+        // return $pdf->output('output_contents.pdf', 'I');
+
+    // PDFを出力して返す
+    $outputFileName = 'output_contents.pdf';
+    return response()->stream(function() use ($pdf, $outputFileName) {
+        $pdf->output($outputFileName, 'I');
+    }, 200, [
+        'Content-Type' => 'application/pdf',
+        'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
+    ]);
     }
 
     private function parseDateTime($datetime)
@@ -912,19 +982,25 @@ class MessagePublishController extends Controller
         return $content_url;
     }
 
-    private function rollbackRegisterFile($request_file_path): Void
+    private function rollbackRegisterFile($request_file_path): void
     {
-        if (!(isset($request_file_path))) return;
+        if (!isset($request_file_path)) return;
+
         $content_url = 'uploads/' . basename($request_file_path);
         $current_path = storage_path('app/' . $request_file_path);
         $next_path = public_path($content_url);
-        rename($next_path, $current_path);
+
+        // ファイルの存在をチェック
+        if (file_exists($next_path)) {
+            rename($next_path, $current_path);
+        }
+
         return;
     }
 
-    private function getExistContentIds($request) : Array
+    private function getExistContentIds($request): array
     {
-        if(!isset($request)) return [];
+        if (!isset($request)) return [];
         $content_ids = [];
         foreach ($request->content_id as $content_id) {
             if (isset($content_id)) {
@@ -935,7 +1011,8 @@ class MessagePublishController extends Controller
         return $content_ids;
     }
 
-    private function targetUserParam($organizarions): Array {
+    private function targetUserParam($organizarions): array
+    {
         $shops_id = [];
         $target_user_data = [];
 
@@ -988,38 +1065,41 @@ class MessagePublishController extends Controller
     }
 
     // 「手順」を登録するために加工する
-    private function messageContentsParam($request): Array {
+    private function messageContentsParam($request): array
+    {
 
-        if(!(isset($request->file_name))) return [];
+        if (!(isset($request->file_name))) return [];
         $content_data = [];
         foreach ($request->file_name as $i => $file_name) {
             if (isset($file_name)) {
-                    $content_data[$i]['content_name'] = $file_name;
-                    $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
-                    $content_data[$i]['thumbnails_url'] =
+                $content_data[$i]['content_name'] = $file_name;
+                $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
+                $content_data[$i]['thumbnails_url'] =
                     ImageConverter::convert2image($content_data[$i]['content_url']);
             }
         }
         return $content_data;
     }
 
-    private function rollbackMessageContentFile($request): Void {
-        if(!(isset($request->file_path))) return;
+    private function rollbackMessageContentFile($request): Void
+    {
+        if (!(isset($request->file_path))) return;
         foreach ($request->file_path as $file_path) {
             if (isset($file_path)) {
                 $current_path = storage_path('app/' . $file_path);
                 $next_path = public_path('uploads/' . basename($file_path));
-                try{
+                try {
                     rename($next_path, $current_path);
-                }catch(\Throwable $th){
+                } catch (\Throwable $th) {
                     Log::error($th->getMessage());
                 }
             }
         }
     }
 
-    private function hasRequestFile($request) {
-        if(!isset($request->file_name) || !isset($request->file_path)) return false;
+    private function hasRequestFile($request)
+    {
+        if (!isset($request->file_name) || !isset($request->file_path)) return false;
         return true;
     }
 
@@ -1033,22 +1113,22 @@ class MessagePublishController extends Controller
 
 
 
-    private function tagImportParam(?Array $tags): Array
+    private function tagImportParam(?array $tags): array
     {
-        if(!isset($tags)) return [];
+        if (!isset($tags)) return [];
 
         $tags_pram = [];
         foreach ($tags as $key => $tag_name) {
-            if(!isset($tag_name)) continue;
+            if (!isset($tag_name)) continue;
             $tag = MessageTagMaster::firstOrCreate(['name' => trim($tag_name, "\"")]);
             $tags_pram[] = $tag->id;
         }
         return $tags_pram;
     }
 
-    private  function strToArray(?String $str): Array
+    private  function strToArray(?String $str): array
     {
-        if(!isset($str)) return [];
+        if (!isset($str)) return [];
 
         $array = explode(',', $str);
 
@@ -1068,7 +1148,7 @@ class MessagePublishController extends Controller
             ->toArray();
     }
 
-    private function getOrg3All(Int $org1_id): Array
+    private function getOrg3All(Int $org1_id): array
     {
         return Shop::query()
             ->distinct('organization3.id')
@@ -1096,7 +1176,6 @@ class MessagePublishController extends Controller
             ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
             ->pluck('organization5.id')
             ->toArray();
-
     }
 
     private function getOrganizationForm($organization1_id)
@@ -1128,5 +1207,4 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
     }
-
 }

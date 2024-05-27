@@ -206,23 +206,65 @@ class Message extends Model
 
     public function getContentFileSizeAttribute()
     {
-        if (!isset($this->content_url)) return "ファイルがありません";
-        $path = public_path($this->content_url);
+        // 関連する全ての MessageContent インスタンスを取得
+        $message_contents = $this->hasMany(MessageContent::class, 'message_id', 'id')->get();
 
-        if (!file_exists($path)) return "ファイルがありません";
+        // 複数ファイルの場合の処理
+        if ($message_contents->isNotEmpty()) {
+            $total_filesize = 0;
 
-        $filesize = filesize($path);
+            // 各 MessageContent インスタンスを繰り返し処理
+            foreach ($message_contents as $message_content) {
+                $content_url = $message_content->content_url;
 
-        $K = 1000;
-        $M = 1000 * $K;
+                // content_url が設定されていない場合はスキップ
+                if (!isset($content_url)) {
+                    continue;
+                }
 
-        if ($M <= $filesize) {
-            return round($filesize / $M, 2) . "MB";
-        } else if ($K <= $filesize) {
-            return round($filesize / $K, 2) . "KB";
+                $path = public_path($content_url);
+
+                // ファイルが存在しない場合はスキップ
+                if (!file_exists($path)) {
+                    continue;
+                }
+
+                $total_filesize += filesize($path);
+            }
+
+            $K = 1000;
+            $M = 1000 * $K;
+
+            if ($M <= $total_filesize) {
+                return round($total_filesize / $M, 2) . "MB";
+            } elseif ($K <= $total_filesize) {
+                return round($total_filesize / $K, 2) . "KB";
+            }
+
+            return $total_filesize . "B";
+
+        // 単一ファイルの場合の処理
+        } else {
+
+            if (!isset($this->content_url)) return "ファイルがありません";
+
+            $path = public_path($this->content_url);
+
+            if (!file_exists($path)) return "ファイルがありません";
+
+            $filesize = filesize($path);
+
+            $K = 1000;
+            $M = 1000 * $K;
+
+            if ($M <= $filesize) {
+                return round($filesize / $M, 2) . "MB";
+            } elseif ($K <= $filesize) {
+                return round($filesize / $K, 2) . "KB";
+            }
+
+            return $filesize . "B";
         }
-
-        return $filesize . "B";
     }
 
     // 待機
