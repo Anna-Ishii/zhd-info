@@ -28,6 +28,7 @@ use App\Models\Organization5;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
+use App\Utils\OutputContentPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -926,18 +927,19 @@ class MessagePublishController extends Controller
         $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
 
         $files = [];
+        $tempFiles = [];
 
         // 複数PDFがある場合の表示処理
         if (!empty($message_contents)) {
             foreach ($message_contents as $content_path) {
-                $files[] = public_path('uploads/' . basename($content_path));
+                $originalFile = public_path('uploads/' . basename($content_path));
+                $tempFile = public_path('uploads/temp_' . basename($content_path));
+                OutputContentPdf::recompressPdf($originalFile, $tempFile);
+                $tempFiles[] = $tempFile;
             }
-
         // 単一PDFがある場合の表示処理
         } else {
             $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
-            // $files[] = public_path('uploads/' . basename($message_content));
-
             return redirect()->to(asset($message_content));
         }
 
@@ -947,7 +949,7 @@ class MessagePublishController extends Controller
         $pdf->setPrintFooter(false);
 
         // 各 PDF を追加
-        foreach ($files as $file) {
+        foreach ($tempFiles as $file) {
             $count = $pdf->setSourceFile($file);
             for ($i = 1; $i <= $count; $i++) {
                 $pdf->addPage();
@@ -955,17 +957,19 @@ class MessagePublishController extends Controller
             }
         }
 
-        // // PDF を出力して返す
-        // return $pdf->output('output_contents.pdf', 'I');
+        // 一時ファイルを削除
+        foreach ($tempFiles as $file) {
+            @unlink($file);
+        }
 
-    // PDFを出力して返す
-    $outputFileName = 'output_contents.pdf';
-    return response()->stream(function() use ($pdf, $outputFileName) {
-        $pdf->output($outputFileName, 'I');
-    }, 200, [
-        'Content-Type' => 'application/pdf',
-        'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
-    ]);
+        // PDFを出力して返す
+        $outputFileName = 'output_contents.pdf';
+        return response()->stream(function() use ($pdf, $outputFileName) {
+            $pdf->output($outputFileName, 'I');
+        }, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
+        ]);
     }
 
     private function parseDateTime($datetime)

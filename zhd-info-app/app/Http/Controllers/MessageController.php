@@ -8,6 +8,7 @@ use App\Models\MessageCategory;
 use App\Models\MessageContent;
 use App\Models\Message;
 use Carbon\Carbon;
+use App\Utils\OutputContentPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use setasign\Fpdi\TcpdfFpdi;
@@ -303,18 +304,20 @@ class MessageController extends Controller
     {
         $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
 
-        $files = [];
+        $tempFiles = [];
 
         // 複数PDFがある場合の表示処理
         if (!empty($message_contents)) {
             foreach ($message_contents as $content_path) {
-                $files[] = public_path('uploads/' . basename($content_path));
+                $originalFile = public_path('uploads/' . basename($content_path));
+                $tempFile = public_path('uploads/temp_' . basename($content_path));
+                OutputContentPdf::recompressPdf($originalFile, $tempFile);
+                $tempFiles[] = $tempFile;
             }
 
         // 単一PDFがある場合の表示処理
         } else {
             $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
-            // $files[] = public_path('uploads/' . basename($message_content));
 
             return redirect()->to(asset($message_content));
         }
@@ -325,12 +328,17 @@ class MessageController extends Controller
         $pdf->setPrintFooter(false);
 
         // 各 PDF を追加
-        foreach ($files as $file) {
+        foreach ($tempFiles as $file) {
             $count = $pdf->setSourceFile($file);
             for ($i = 1; $i <= $count; $i++) {
                 $pdf->addPage();
                 $pdf->useTemplate($pdf->importPage($i));
             }
+        }
+
+        // 一時ファイルを削除
+        foreach ($tempFiles as $file) {
+            @unlink($file);
         }
 
         // PDFを出力して返す
