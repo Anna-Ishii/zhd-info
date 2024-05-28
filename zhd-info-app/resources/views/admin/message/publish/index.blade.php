@@ -197,7 +197,7 @@
 						<td class="label-title">
 							@if(isset($message->content_url))
                                 <form method="get" id="pdf-form" style="padding: 0px;" action="{{ route('admin.message.publish.output.contents.pdf') }}" target="_blank">
-                                    <button type="submit" class="btn btn-link output-pdf" name="message_id" form="pdf-form" value="{{ $message->id }}" style="padding: 0px;">{{$message->title}}</button>
+                                    <button type="submit" class="btn btn-link output-pdf" name="message_id" form="pdf-form" value="{{ $message->id }}" style="padding: 0px; border: none; outline: none; background: transparent;">{{$message->title}}</button>
                                 </form>
 							@else
 								{{$message->title}}
