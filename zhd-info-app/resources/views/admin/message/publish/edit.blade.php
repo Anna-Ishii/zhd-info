@@ -133,14 +133,14 @@
                         <div class="file-input-container">
                             <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}"  required>
                             <label class="inputFile form-control">
-                                <span class="fileName">
+                                <span class="fileName" style="text-align: center;">
                                     @if(request()->old())
-                                        {{(old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ'}}
+                                        {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
                                     @else
-                                        {{$message_content->content_name ?? 'ファイルを選択またはドロップ'}}
+                                        {!! $message_content->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
                                     @endif
                                 </span>
-                                <input type="file" name="file" accept=".pdf" style="display:none">
+                                <input type="file" name="file" accept=".pdf">
                                 <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message_content->content_name)}}">
                                 <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message_content->content_url)}}">
                                 <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
@@ -155,14 +155,14 @@
                     <div class="file-input-container">
                         <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}"  required>
                         <label class="inputFile form-control">
-                            <span class="fileName">
+                            <span class="fileName" style="text-align: center;">
                                 @if(request()->old())
-                                    {{(old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ'}}
+                                    {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
                                 @else
-                                    {{$message->content_name ?? 'ファイルを選択またはドロップ'}}
+                                    {!! $message->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
                                 @endif
                             </span>
-                            <input type="file" name="file" accept=".pdf" style="display:none">
+                            <input type="file" name="file" accept=".pdf">
                             <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message->content_name)}}">
                             <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message->content_url)}}">
                             <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
@@ -171,13 +171,24 @@
                             <div class="progress-bar" style="width: 0%"></div>
                         </div>
                     </div>
+                    <div class="file-input-add">
+                        <label class="inputFile" style="float: right;">
+                            <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
+                            <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                        </label>
+                    </div>
                 @endif
-                <div class="file-input-add">
-                    <label class="inputFile" style="float: right;">
-                        <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                        <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple" style="display: none">
-                    </label>
-                </div>
+
+                @if($message_contents->isNotEmpty())
+                    @if($message_contents->count() < 10)
+                        <div class="file-input-add">
+                            <label class="inputFile" style="float: right;">
+                                <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
+                                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                            </label>
+                        </div>
+                    @endif
+                @endif
             </div>
         </div>
         <div class="form-group">
