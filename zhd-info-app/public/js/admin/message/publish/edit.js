@@ -36,6 +36,9 @@ $(document).on("change", '#fileUpload', function () {
 });
 
 
+// 初回アップロードを示すフラグ
+let initialUpload = true;
+
 $(document).on("change", 'input[type="file"]', function () {
     let csrfToken = $('meta[name="csrf-token"]').attr("content");
     let fileList = $(this)[0].files;
@@ -43,6 +46,23 @@ $(document).on("change", 'input[type="file"]', function () {
     let labelForm = $(this).parent();
     let progress = labelForm.parent().find(".progress");
     let progressBar = progress.children(".progress-bar");
+
+    // 初回アップロード時は1減らす
+    let existingFilesCount =  initialUpload ? $(".fileInputs .file-input-container").length - 1 : $(".fileInputs .file-input-container").length;
+
+    labelForm.parent().find(".text-danger").remove();
+
+    if (initialUpload || addFlg) {
+        // ファイル数が上限を超えているかチェック
+        let maxFiles = 10; // パラメータから上限数を取得（10）
+        if (existingFilesCount + fileList.length > maxFiles) {
+            labelForm.parent().append(`<div class="text-danger">登録可能なファイルの上限は${maxFiles}件です</div>`);
+            // ファイル入力をクリア
+            $(this).val('');
+            // 上限を超えていたら処理を中断
+            return;
+        }
+    }
 
     // ファイルをformDataに追加
     for (let i = 0; i < fileList.length; i++) {
@@ -86,6 +106,9 @@ $(document).on("change", 'input[type="file"]', function () {
     .done(function (response) {
         labelForm.parent().find(".text-danger").remove();
         handleResponse(response, fileName, filePath);
+
+        // 初回アップロードが完了したらフラグをfalseにする
+        initialUpload = false;
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
         labelForm.parent().find(".text-danger").remove();
@@ -110,12 +133,18 @@ function handleResponse(response, fileName, filePath) {
         if (fileInputAdd) {
             fileInputAdd.remove();
         }
+    // 追加ボタンではない場合の処理
+    } else {
+        fileInput.removeAttribute("multiple");
+        fileInput.name = "file";
+        if (!fileInputs.querySelector('.delete-btn')) {
+            addDeleteButton(fileInput);
+        }
     }
 
     // responseが複数ファイルに対応している場合
     response.content_names.forEach((content_name, i) => {
         let content_url = response.content_urls[i];
-
         // 追加ボタンを押した場合の処理
         if (addFlg) {
             addNewFileInput(content_name, content_url);
@@ -125,15 +154,34 @@ function handleResponse(response, fileName, filePath) {
             if (i === 0) {
                 fileName.val(content_name);
                 filePath.val(content_url);
+            } else {
+                addNewFileInput(content_name, content_url);
             }
         }
     });
 
-    if ($(".file-input-add").length === 0) {
-        addFileInputAddButton();
+    // 上限を超えていない場合、かつファイル数が上限に達していない場合のみ追加ボタンを表示
+    let maxFiles = 10; // パラメータから上限数を取得
+    if ($(".fileInputs .file-input-container").length < maxFiles) {
+        let fileInputAdd = document.querySelector(".file-input-add");
+        if (fileInputAdd === null) {
+            addFileInputAddButton();
+        }
     }
 
     addFlg = false;
+}
+
+// 削除ボタン
+function addDeleteButton(fileInput) {
+    let deleteButton = document.createElement("button");
+    deleteButton.type = "button";
+    deleteButton.className = "btn btn-danger btn-sm delete-btn";
+    deleteButton.style.position = "absolute";
+    deleteButton.style.top = "0";
+    deleteButton.style.right = "0";
+    deleteButton.textContent = "削除";
+    fileInput.parentNode.appendChild(deleteButton);
 }
 
 // 追加アップロードファイル欄
@@ -142,7 +190,7 @@ function addNewFileInput(content_name, content_url) {
         <div class="file-input-container">
             <label class="inputFile form-control">
                 <span class="fileName">${content_name}</span>
-                <input type="file" name="file" accept=".pdf" style="display:none">
+                <input type="file" name="file" accept=".pdf">
                 <input type="hidden" name="file_name[]" value="${content_name}">
                 <input type="hidden" name="file_path[]" value="${content_url}">
                 <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
@@ -160,7 +208,7 @@ function addFileInputAddButton() {
         <div class="file-input-add">
             <label class="inputFile" style="float: right;">
                 <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple" style="display: none">
+                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
             </label>
         </div>
     `);
@@ -172,4 +220,13 @@ $(document).on("click", ".delete-btn", function () {
     var labelInputFile = $(this).parent();
     var div = labelInputFile.parent();
     div.remove();
+
+    let fileInputAdd = document.querySelector(".file-input-add");
+    if (fileInputAdd === null) {
+        // 上限を超えていない場合、かつファイル数が上限に達していない場合のみ追加ボタンを表示
+        let maxFiles = 10; // パラメータから上限数を取得
+        if ($(".fileInputs .file-input-container").length < maxFiles) {
+            addFileInputAddButton();
+        }
+    }
 });
