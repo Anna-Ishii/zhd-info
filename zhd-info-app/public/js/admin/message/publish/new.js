@@ -178,7 +178,9 @@ function handleResponse(response, fileName, filePath) {
 function addDeleteButton(fileInput) {
     let deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.className = "btn btn-danger btn-sm delete-btn";
+    deleteButton.className = "btn btn-sm delete-btn";
+    deleteButton.style.backgroundColor = "#eee";
+    deleteButton.style.color = "#000";
     deleteButton.style.position = "absolute";
     deleteButton.style.top = "0";
     deleteButton.style.right = "0";
@@ -195,7 +197,7 @@ function addNewFileInput(content_name, content_url) {
                 <input type="file" name="file" accept=".pdf">
                 <input type="hidden" name="file_name[]" value="${content_name}">
                 <input type="hidden" name="file_path[]" value="${content_url}">
-                <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
             </label>
             <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar" style="width: 0%"></div>
