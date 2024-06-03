@@ -135,15 +135,15 @@
                             <label class="inputFile form-control">
                                 <span class="fileName" style="text-align: center;">
                                     @if(request()->old())
-                                        {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                        {!! (old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                     @else
-                                        {!! $message_content->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                        {!! $message_content->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                     @endif
                                 </span>
                                 <input type="file" name="file" accept=".pdf">
                                 <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message_content->content_name)}}">
                                 <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message_content->content_url)}}">
-                                <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                             </label>
                             <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar" style="width: 0%"></div>
@@ -157,15 +157,15 @@
                         <label class="inputFile form-control">
                             <span class="fileName" style="text-align: center;">
                                 @if(request()->old())
-                                    {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                    {!! (old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                 @else
-                                    {!! $message->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                    {!! $message->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                 @endif
                             </span>
                             <input type="file" name="file" accept=".pdf">
                             <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message->content_name)}}">
                             <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message->content_url)}}">
-                            <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                            <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                         </label>
                         <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar" style="width: 0%"></div>
