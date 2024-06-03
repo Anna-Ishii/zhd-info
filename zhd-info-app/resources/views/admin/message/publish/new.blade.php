@@ -117,7 +117,7 @@
             <div class="col-lg-4 fileInputs">
                 <div class="file-input-container">
                     <label class="inputFile form-control">
-                        <span class="fileName" style="text-align: center;">{!! old('file_name[]') ? old('file_name[]') : "複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください" !!}</span>
+                        <span class="fileName" style="text-align: center;">{!! old('file_name[]') ? old('file_name[]') : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能" !!}</span>
                         <input type="file" name="file[]" accept=".pdf" multiple="multiple">
                         <input type="hidden" name="file_name[]" value="{{old('file_name[]')}}">
                         <input type="hidden" name="file_path[]" value="{{old('file_path[]')}}">
