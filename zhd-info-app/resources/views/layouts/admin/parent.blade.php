@@ -104,10 +104,10 @@
             </div>
             <div class="modal__btnInner">
                 <button type="button" class="btnType3 modal__close">閉じる</button>
-            </div>  
+            </div>
         </div>
     </div>
-    
+
     <script src="{{ asset('/js/edit.js') }}?date=20240405" defer></script>
     @livewireScripts
 </body>
