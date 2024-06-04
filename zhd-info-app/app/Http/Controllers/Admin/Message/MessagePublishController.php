@@ -923,7 +923,7 @@ class MessagePublishController extends Controller
         $message_id = $request->input('message_id');
 
         // メモリ制限を一時的に増加
-        ini_set('memory_limit', '256M');
+        ini_set('memory_limit', '2048M');
 
         $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
 
@@ -955,10 +955,11 @@ class MessagePublishController extends Controller
 
         // 各 PDF を追加
         foreach ($tempFiles as $file) {
-            $count = $pdf->setSourceFile($file);
-            for ($i = 1; $i <= $count; $i++) {
-                $pdf->addPage();
-                $pdf->useTemplate($pdf->importPage($i));
+            $pageCount = $pdf->setSourceFile($file);
+            for ($i = 1; $i <= $pageCount; $i++) {
+                $pdf->AddPage();
+                $templateId = $pdf->importPage($i);
+                $pdf->useTemplate($templateId);
             }
         }
 
@@ -971,17 +972,16 @@ class MessagePublishController extends Controller
 
         // PDFを出力して返す
         $outputFileName = 'output_contents.pdf';
-        $response = response()->stream(function() use ($pdf, $outputFileName) {
+        return response()->stream(function() use ($pdf, $outputFileName) {
             $pdf->output($outputFileName, 'I');
+
+            // 元のメモリ制限に戻す
+            ini_restore('memory_limit');
+
         }, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
         ]);
-
-        // 元のメモリ制限に戻す
-        ini_restore('memory_limit');
-
-        return $response;
     }
 
     private function parseDateTime($datetime)
