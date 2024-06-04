@@ -131,19 +131,19 @@
                 @if($message_contents->isNotEmpty())
                     @foreach ($message_contents as $message_content)
                         <div class="file-input-container">
-                            <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}"  required>
+                            <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}" required>
                             <label class="inputFile form-control">
                                 <span class="fileName" style="text-align: center;">
                                     @if(request()->old())
-                                        {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                        {!! (old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                     @else
-                                        {!! $message_content->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                        {!! $message_content->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                     @endif
                                 </span>
                                 <input type="file" name="file" accept=".pdf">
                                 <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message_content->content_name)}}">
                                 <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message_content->content_url)}}">
-                                <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                             </label>
                             <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                 <div class="progress-bar" style="width: 0%"></div>
@@ -153,19 +153,19 @@
                 {{-- 単一ファイルの場合 --}}
                 @else
                     <div class="file-input-container">
-                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}"  required>
+                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}" required>
                         <label class="inputFile form-control">
                             <span class="fileName" style="text-align: center;">
                                 @if(request()->old())
-                                    {!! (old('file_name[]')) ? old('file_name[]') : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                    {!! (old('file_name[]')) ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                 @else
-                                    {!! $message->content_name ?? '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}
+                                    {!! $message->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
                                 @endif
                             </span>
                             <input type="file" name="file" accept=".pdf">
                             <input type="hidden" name="file_name[]" value="{{old('file_name[]', $message->content_name)}}">
                             <input type="hidden" name="file_path[]" value="{{old('file_path[]', $message->content_url)}}">
-                            <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                            <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                         </label>
                         <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar" style="width: 0%"></div>
@@ -173,8 +173,8 @@
                     </div>
                     <div class="file-input-add">
                         <label class="inputFile" style="float: right;">
-                            <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                            <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                            <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
+                            <input type="button" class="fileUploadButton" style="display: none;">
                         </label>
                     </div>
                 @endif
@@ -183,8 +183,8 @@
                     @if($message_contents->count() < 10)
                         <div class="file-input-add">
                             <label class="inputFile" style="float: right;">
-                                <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                                <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
+                                <input type="button" class="fileUploadButton" style="display: none;">
                             </label>
                         </div>
                     @endif
