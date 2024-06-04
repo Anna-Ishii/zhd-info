@@ -61,72 +61,68 @@
     <div id="page-wrapper">
         @include('common.admin.page-head', ['title' => '業務連絡新規登録'])
 
-        <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
-            @csrf
-            <div class="form-group form-group-sm">
-                <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
-                <div class="col-lg-6">
-                    <label class="mr16">
-                        <select name="category_id" class="form-control">
-                            <option value="" hidden>カテゴリを選択</option>
-                            @foreach ($category_list as $category)
-                                <option value="{{ $category->id }}"
-                                    {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                    {{ $category->name }}
-                                </option>
-                            @endforeach
-                        </select>
+    <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
+        @csrf
+        <div class="form-group form-group-sm">
+            <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
+            <div class="col-lg-6">
+                <label class="mr16">
+                    <select name="category_id" class="form-control">
+                        <option value="" hidden>カテゴリを選択</option>
+                        @foreach ($category_list as $category)
+                            <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                {{ $category->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">ラベル</label>
+            <div class="col-lg-4">
+                <label>
+                    <input type="checkbox" name="emergency_flg" class="mr8"
+                      {{( old('emergency_flg') == "on") ? "checked" : ""}}>
+                    重要
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">タイトル<span class="text-danger required">*<span></label>
+            <div class="col-lg-4">
+                <input class="form-control" name="title" value="{{old('title')}}">
+            </div>
+            {{-- <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div> --}}
+        </div>
+        <div class="form-group tag-form">
+            <label class="col-lg-2 control-label">検索タグ</label>
+            <div class="col-lg-4">
+                <div class="form-control">
+                    @if (old('tag_name'))
+                         @foreach (old('tag_name') as $index => $tag_name)
+                            <span class="focus:outline-none tag-form-label" nowrap>
+                                {{$tag_name}}<span class="tag-form-delete">×</span>
+                                <input type="hidden" name="tag_name[]" value='{{$tag_name}}'>
+                            </span>
+                        @endforeach
+                    @endif
+                    <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
+                </div>
+                <div>複数入力する場合は「,」で区切る</div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">PDF添付<span class="text-danger required">*<span></label>
+            <div class="col-lg-4 fileInputs">
+                <div class="file-input-container">
+                    <label class="inputFile form-control">
+                        <span class="fileName" style="text-align: center;">{!! old('file_name[]') ? old('file_name[]') : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能" !!}</span>
+                        <input type="file" name="file[]" accept=".pdf" multiple="multiple">
+                        <input type="hidden" name="file_name[]" value="{{old('file_name[]')}}">
+                        <input type="hidden" name="file_path[]" value="{{old('file_path[]')}}">
                     </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">ラベル</label>
-                <div class="col-lg-4">
-                    <label>
-                        <input type="checkbox" name="emergency_flg" class="mr8"
-                            {{ old('emergency_flg') == 'on' ? 'checked' : '' }}>
-                        重要
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">タイトル<span class="text-danger required">*<span></label>
-                <div class="col-lg-4">
-                    <input class="form-control" name="title" value="{{ old('title') }}">
-                </div>
-                {{-- <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div> --}}
-            </div>
-            <div class="form-group tag-form">
-                <label class="col-lg-2 control-label">検索タグ</label>
-                <div class="col-lg-4">
-                    <div class="form-control">
-                        @if (old('tag_name'))
-                            @foreach (old('tag_name') as $index => $tag_name)
-                                <span class="focus:outline-none tag-form-label" nowrap>
-                                    {{ $tag_name }}<span class="tag-form-delete">×</span>
-                                    <input type="hidden" name="tag_name[]" value='{{ $tag_name }}'>
-                                </span>
-                            @endforeach
-                        @endif
-                        <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
-                    </div>
-                    <div>複数入力する場合は「,」で区切る</div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">PDF添付<span class="text-danger required">*<span></label>
-                <div class="col-lg-4 fileInputs">
-                    <div class="file-input-container">
-                        <label class="inputFile form-control">
-                            <span class="fileName" style="text-align: center;">{!! old('file_name[]')
-                                ? old('file_name[]')
-                                : '複数ファイル送付の場合は、<br>まとめて選択（ドラッグも可）してください' !!}</span>
-                            <input type="file" name="file[]" accept=".pdf" multiple="multiple">
-                            <input type="hidden" name="file_name[]" value="{{ old('file_name[]') }}">
-                            <input type="hidden" name="file_path[]" value="{{ old('file_path[]') }}">
-                        </label>
-                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0"
-                            aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar" style="width: 0%"></div>
                         </div>
                     </div>

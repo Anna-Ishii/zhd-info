@@ -31,16 +31,6 @@ function appendFormTagInput() {
 }
 
 
-// 追加ボタンのクリックイベント
-let addFlg = false;
-$(document).on("change", '#fileUpload', function () {
-    addFlg = true;
-});
-
-
-// 初回アップロードを示すフラグ
-let initialUpload = true;
-
 $(document).on("change", 'input[type="file"]', function () {
     let csrfToken = $('meta[name="csrf-token"]').attr("content");
     let fileList = $(this)[0].files;
@@ -49,19 +39,17 @@ $(document).on("change", 'input[type="file"]', function () {
     let progress = labelForm.parent().find(".progress");
     let progressBar = progress.children(".progress-bar");
 
-    // 初回アップロード時は1減らす
-    let existingFilesCount =  initialUpload ? $(".fileInputs .file-input-container").length - 1 : $(".fileInputs .file-input-container").length;
-
+    // 以前のエラーメッセージを削除
     labelForm.parent().find(".text-danger").remove();
 
-    if (initialUpload || addFlg) {
-        // ファイル数が上限を超えているかチェック
-        let maxFiles = 10; // パラメータから上限数を取得（10）
-        if (existingFilesCount + fileList.length > maxFiles) {
+    // 既存のファイル数を取得 (ファイル入力欄の-1)
+    let existingFilesCount1 = $(".fileInputs .file-input-container").length - 1;
+    if (existingFilesCount1) {
+        let maxFiles = 10; // 上限数を設定（10）
+        if (existingFilesCount1 + fileList.length > maxFiles) {
             labelForm.parent().append(`<div class="text-danger">登録可能なファイルの上限は${maxFiles}件です</div>`);
             // ファイル入力をクリア
             $(this).val('');
-            // 上限を超えていたら処理を中断
             return;
         }
     }
@@ -109,8 +97,6 @@ $(document).on("change", 'input[type="file"]', function () {
         labelForm.parent().find(".text-danger").remove();
         handleResponse(response, fileName, filePath);
 
-        // 初回アップロードが完了したらフラグをfalseにする
-        initialUpload = false;
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
         labelForm.parent().find(".text-danger").remove();
@@ -125,60 +111,50 @@ $(document).on("change", 'input[type="file"]', function () {
     });
 });
 
-function handleResponse(response, fileName, filePath) {
-    let fileInputs = document.getElementsByClassName("fileInputs")[0];
-    let fileInput = fileInputs.querySelector('input[type="file"]');
 
-    // 追加ボタンを押した場合の処理
-    if (addFlg) {
-        let fileInputAdd = document.querySelector(".file-input-add");
-        if (fileInputAdd) {
-            fileInputAdd.remove();
-        }
-    // 追加ボタンではない場合の処理
-    } else {
+// アップロード完了後の処理
+function handleResponse(response, fileName, filePath) {
+    let fileInputs = document.querySelector(".fileInputs");
+    let fileInput = fileInputs.querySelector('input[name="file[]"]');
+
+    // 単一ファイル欄に加工
+    if (fileInput) {
         fileInput.removeAttribute("multiple");
         fileInput.name = "file";
-        if (!fileInputs.querySelector('.delete-btn')) {
-            addDeleteButton(fileInput);
-        }
+        // 削除ボタン追加
+        addDeleteButton(fileInput);
     }
 
     // responseが複数ファイルに対応している場合
     response.content_names.forEach((content_name, i) => {
         let content_url = response.content_urls[i];
-        // 追加ボタンを押した場合の処理
-        if (addFlg) {
-            addNewFileInput(content_name, content_url);
-
-        // 追加ボタンではない場合の処理
+        if (i === 0) {
+            fileName.val(content_name);
+            filePath.val(content_url);
         } else {
-            if (i === 0) {
-                fileName.val(content_name);
-                filePath.val(content_url);
-            } else {
-                addNewFileInput(content_name, content_url);
-            }
+            addNewFileInput(content_name, content_url);
         }
     });
 
     // 上限を超えていない場合、かつファイル数が上限に達していない場合のみ追加ボタンを表示
-    let maxFiles = 10; // パラメータから上限数を取得
-    if ($(".fileInputs .file-input-container").length < maxFiles) {
+    let existingFilesCount2 = $(".fileInputs .file-input-container").length; // 既存のファイル数を取得
+    let maxFiles = 10; // 上限数を設定（10）
+    if (existingFilesCount2 < maxFiles) {
         let fileInputAdd = document.querySelector(".file-input-add");
         if (fileInputAdd === null) {
             addFileInputAddButton();
         }
     }
-
-    addFlg = false;
 }
 
-// 削除ボタン
+
+// 削除ボタンを追加
 function addDeleteButton(fileInput) {
     let deleteButton = document.createElement("button");
     deleteButton.type = "button";
-    deleteButton.className = "btn btn-danger btn-sm delete-btn";
+    deleteButton.className = "btn btn-sm delete-btn";
+    deleteButton.style.backgroundColor = "#eee";
+    deleteButton.style.color = "#000";
     deleteButton.style.position = "absolute";
     deleteButton.style.top = "0";
     deleteButton.style.right = "0";
@@ -186,7 +162,8 @@ function addDeleteButton(fileInput) {
     fileInput.parentNode.appendChild(deleteButton);
 }
 
-// 追加アップロードファイル欄
+
+// 新しいファイル入力欄を追加
 function addNewFileInput(content_name, content_url) {
     $(".fileInputs").append(`
         <div class="file-input-container">
@@ -195,7 +172,7 @@ function addNewFileInput(content_name, content_url) {
                 <input type="file" name="file" accept=".pdf">
                 <input type="hidden" name="file_name[]" value="${content_name}">
                 <input type="hidden" name="file_path[]" value="${content_url}">
-                <button type="button" class="btn btn-danger btn-sm delete-btn" style="position: absolute; top: 0; right: 0;">削除</button>
+                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
             </label>
             <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                 <div class="progress-bar" style="width: 0%"></div>
@@ -204,13 +181,14 @@ function addNewFileInput(content_name, content_url) {
     `);
 }
 
-// 追加ボタン
+
+// 追加ボタンを追加
 function addFileInputAddButton() {
     $(".fileInputs").append(`
         <div class="file-input-add">
             <label class="inputFile" style="float: right;">
-                <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
+                <input type="button" class="fileUploadButton" style="display: none;">
             </label>
         </div>
     `);
@@ -241,6 +219,34 @@ function inputCheck() {
 }
 
 
+// 追加ボタンのクリックイベント
+$(document).on("click", '.custom-upload', function () {
+    // 追加ボタン削除
+    let fileInputAdd = document.querySelector(".file-input-add");
+    if (fileInputAdd) {
+        fileInputAdd.remove();
+    }
+
+    // 変数を初期化
+    let file_name = "";
+    let file_path = "";
+
+    $(".fileInputs").append(`
+        <div class="file-input-container">
+            <label class="inputFile form-control">
+                <span class="fileName" style="text-align: center;">${file_name ? file_name : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能"}</span>
+                <input type="file" name="file[]" accept=".pdf" multiple="multiple">
+                <input type="hidden" name="file_name[]" value="${file_name}">
+                <input type="hidden" name="file_path[]" value="${file_path}">
+            </label>
+            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                <div class="progress-bar" style="width: 0%"></div>
+            </div>
+        </div>
+    `);
+});
+
+
 // 削除ボタンのクリックイベント
 $(document).on("click", ".delete-btn", function () {
     var labelInputFile = $(this).parent();
@@ -248,12 +254,38 @@ $(document).on("click", ".delete-btn", function () {
     div.remove();
 
     let fileInputAdd = document.querySelector(".file-input-add");
-    if (fileInputAdd === null) {
-        // 上限を超えていない場合、かつファイル数が上限に達していない場合のみ追加ボタンを表示
-        let maxFiles = 10; // パラメータから上限数を取得
-        if ($(".fileInputs .file-input-container").length < maxFiles) {
-            addFileInputAddButton();
+    let existingFilesCount3 = $(".fileInputs .file-input-container").length;
+
+    // 上限を超えていない場合、かつファイル数が上限に達していない場合のみ追加ボタンを表示
+    let maxFiles = 10; // 上限数を設定（10）
+    if (fileInputAdd === null && existingFilesCount3 < maxFiles) {
+        addFileInputAddButton();
+    }
+
+    // ファイル入力欄がない際の追加処理
+    if (existingFilesCount3 === 0) {
+        // 追加ボタン削除
+        if (fileInputAdd) {
+            fileInputAdd.remove();
         }
+
+        // 変数を初期化
+        let file_name = "";
+        let file_path = "";
+
+        $(".fileInputs").append(`
+            <div class="file-input-container">
+                <label class="inputFile form-control">
+                    <span class="fileName" style="text-align: center;">${file_name ? file_name : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能"}</span>
+                    <input type="file" name="file[]" accept=".pdf" multiple="multiple">
+                    <input type="hidden" name="file_name[]" value="${file_name}">
+                    <input type="hidden" name="file_path[]" value="${file_path}">
+                </label>
+                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                    <div class="progress-bar" style="width: 0%"></div>
+                </div>
+            </div>
+        `);
     }
 });
 
