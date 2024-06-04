@@ -490,11 +490,8 @@ class MessagePublishController extends Controller
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
         if ($this->isChangedFile($message->content_url, $request->file_path[0] ? $request->file_path[0] : null)) {
-            // $msg_params['content_name'] = $request->file_name;
             $msg_params['content_name'] = $request->file_name[0] ? $request->file_name[0] : null;
-            // $msg_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
             $msg_params['content_url'] = $request->file_path[0] ? str_replace("tmp/", "uploads/", $request->file_path[0]) : null;
-            // $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
             $message_changed_flg = true;
         } else {
@@ -531,8 +528,9 @@ class MessagePublishController extends Controller
                                 $message_content->content_url = $this->registerFile($request->file_path[$i]);
                                 $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
                                 $message_content_changed_flg = true;
+
+                                $message_content->save();
                             }
-                            $message_content->save();
                         } else {
                             // 手順の新規登録
                             if (isset($file_name)) {
@@ -924,6 +922,9 @@ class MessagePublishController extends Controller
         // request
         $message_id = $request->input('message_id');
 
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '256M');
+
         $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
 
         $files = [];
@@ -940,6 +941,10 @@ class MessagePublishController extends Controller
         // 単一PDFがある場合の表示処理
         } else {
             $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
+
+            // 元のメモリ制限に戻す
+            ini_restore('memory_limit');
+
             return redirect()->to(asset($message_content));
         }
 
@@ -957,19 +962,26 @@ class MessagePublishController extends Controller
             }
         }
 
-        // 一時ファイルを削除
+        // 一時ファイルの確認と削除
         foreach ($tempFiles as $file) {
-            @unlink($file);
+            if (file_exists($file)) {
+                @unlink($file);
+            }
         }
 
         // PDFを出力して返す
         $outputFileName = 'output_contents.pdf';
-        return response()->stream(function() use ($pdf, $outputFileName) {
+        $response = response()->stream(function() use ($pdf, $outputFileName) {
             $pdf->output($outputFileName, 'I');
         }, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
         ]);
+
+        // 元のメモリ制限に戻す
+        ini_restore('memory_limit');
+
+        return $response;
     }
 
     private function parseDateTime($datetime)
