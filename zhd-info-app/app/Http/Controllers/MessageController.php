@@ -302,6 +302,9 @@ class MessageController extends Controller
     // PDFの表示処理
     private function outputContentsPdf($message_id)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '256M');
+
         $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
 
         $tempFiles = [];
@@ -343,11 +346,16 @@ class MessageController extends Controller
 
         // PDFを出力して返す
         $outputFileName = 'output_contents.pdf';
-        return response()->stream(function() use ($pdf, $outputFileName) {
+        $response = response()->stream(function() use ($pdf, $outputFileName) {
             $pdf->output($outputFileName, 'I');
         }, 200, [
             'Content-Type' => 'application/pdf',
             'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
         ]);
+
+        // 元のメモリ制限に戻す
+        ini_restore('memory_limit');
+
+        return $response;
     }
 }
