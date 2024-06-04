@@ -131,7 +131,7 @@
                 @if($message_contents->isNotEmpty())
                     @foreach ($message_contents as $message_content)
                         <div class="file-input-container">
-                            <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}"  required>
+                            <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}" required>
                             <label class="inputFile form-control">
                                 <span class="fileName" style="text-align: center;">
                                     @if(request()->old())
@@ -153,7 +153,7 @@
                 {{-- 単一ファイルの場合 --}}
                 @else
                     <div class="file-input-container">
-                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}"  required>
+                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}" required>
                         <label class="inputFile form-control">
                             <span class="fileName" style="text-align: center;">
                                 @if(request()->old())
@@ -173,8 +173,8 @@
                     </div>
                     <div class="file-input-add">
                         <label class="inputFile" style="float: right;">
-                            <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                            <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                            <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
+                            <input type="button" class="fileUploadButton" style="display: none;">
                         </label>
                     </div>
                 @endif
@@ -183,8 +183,8 @@
                     @if($message_contents->count() < 10)
                         <div class="file-input-add">
                             <label class="inputFile" style="float: right;">
-                                <label for="fileUpload" class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</label>
-                                <input type="file" id="fileUpload" name="file[]" accept=".pdf" multiple="multiple">
+                                <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
+                                <input type="button" class="fileUploadButton" style="display: none;">
                             </label>
                         </div>
                     @endif
