@@ -83,7 +83,7 @@
             <div class="col-lg-4">
                 <label>
                     <input type="checkbox" name="emergency_flg" class="mr8"
-                      {{( old('emergency_flg') == "on") ? "checked" : ""}}>
+                    {{( old('emergency_flg') == "on") ? "checked" : ""}}>
                     重要
                 </label>
             </div>
@@ -100,7 +100,7 @@
             <div class="col-lg-4">
                 <div class="form-control">
                     @if (old('tag_name'))
-                         @foreach (old('tag_name') as $index => $tag_name)
+                        @foreach (old('tag_name') as $index => $tag_name)
                             <span class="focus:outline-none tag-form-label" nowrap>
                                 {{$tag_name}}<span class="tag-form-delete">×</span>
                                 <input type="hidden" name="tag_name[]" value='{{$tag_name}}'>
@@ -198,352 +198,21 @@
                 <div class="col-lg-10 checkArea">
                     <div class="mb8 text-left">
                         <label class="mr16">
-                            <input type="checkbox" id="checkAll" name="organizationAll" class="mr8"
+                            {{-- <input type="checkbox" id="checkAll" name="organizationAll" class="mr8"
                                 @if (request()->old()) {{ old('organizationAll') ? 'checked' : '' }}
                             @else
                                 {{ 'checked' }} @endif>
-                            全店
+                            全店 --}}
+                            <input type="button" class="btn btn-admin" id="checkAll" name="organizationAll" value="全店">
                         </label>
 
                         <label class="mr16">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#storeModal">店舗選択</button>
+                            <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreModal" value="店舗選択">
                         </label>
 
                         <label class="mr16">
-                            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#importModal">CSV取込</button>
+                            <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreImportModal" value="CSV取込">
                         </label>
-                    </div>
-
-                    <!-- モーダル：店舗選択 -->
-                    <div class="modal fade" id="storeModal" tabindex="-1" role="dialog" aria-labelledby="storeModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document" style="top: 0%;">
-                            <div class="modal-content text-left">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="storeModalLabel">店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small></h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form class="mb-3">
-                                        <label for="storeSearch" class="form-label">2店舗選択中</label>
-                                    </form>
-                                    <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 30px; margin-right: 30px;">
-                                        <li class="nav-item active" role="presentation">
-                                            <a class="nav-link" id="byOrganization-tab" data-toggle="tab" href="#byOrganization" role="tab" aria-controls="byOrganization" aria-selected="true">組織単位</a>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <a class="nav-link" id="byStoreCode-tab" data-toggle="tab" href="#byStoreCode" role="tab" aria-controls="byStoreCode" aria-selected="false">店舗コード順</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content" id="myTabContent">
-                                        <div class="tab-pane fade in active" id="byOrganization" role="tabpanel" aria-labelledby="byOrganization-tab">
-                                            <ul class="list-group">
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStore" />
-                                                            東京・川崎BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        257保谷
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        272立川
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        372川崎中原
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="osakaStore" />
-                                                            多摩・湘南BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        264玉ニュータウン
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        273辻堂
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="nagoyaStore" />
-                                                            埼玉BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tachikawaStore" />
-                                                                        312新座片山
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="tab-pane fade" id="byStoreCode" role="tabpanel"
-                                            aria-labelledby="byStoreCode-tab">
-                                            <ul class="list-group">
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            257保谷
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            272立川
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            372川崎中原
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            264玉ニュータウン
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            273辻堂
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoStoreCode" />
-                                                            312新座片山
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" id="selectStoreBtn">選択</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <!-- モーダル：CSV取込 -->
-                    <div class="modal fade" id="importModal" tabindex="-1" role="dialog" aria-labelledby="importModalLabel" aria-hidden="true">
-                        <div class="modal-dialog modal-lg" role="document" style="top: 0%;">
-                            <div class="modal-content text-left">
-                                <div class="modal-header">
-                                    <h5 class="modal-title" id="importModalLabel">以下店舗で取り込みました。<br /><small class="text-muted">変更ある場合は、「再取込」もしくは下記で選択しなおしてください</small></h5>
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                                </div>
-                                <div class="modal-body">
-                                    <form class="mb-3">
-                                        <label for="storeSearch" class="form-label">2店舗選択中</label>
-                                    </form>
-                                    <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 30px; margin-right: 30px;">
-                                        <li class="nav-item active" role="presentation">
-                                            <a class="nav-link" id="byCsvOrganization-tab" data-toggle="tab" href="#byCsvOrganization" role="tab" aria-controls="byCsvOrganization" aria-selected="true">組織単位</a>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <a class="nav-link" id="byCsvCode-tab" data-toggle="tab" href="#byCsvCode" role="tab" aria-controls="byCsvCode" aria-selected="false">店舗コード順</a>
-                                        </li>
-                                    </ul>
-                                    <div class="tab-content" id="myTabContent">
-                                        <div class="tab-pane fade in active" id="byCsvOrganization" role="tabpanel" aria-labelledby="byCsvOrganization-tab">
-                                            <ul class="list-group">
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsv" />
-                                                            東京・川崎BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tokyoCsv" />
-                                                                        257保谷
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tokyoCsv" />
-                                                                        272立川
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tokyoCsv" />
-                                                                        372川崎中原
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tamaCsv" />
-                                                            多摩・湘南BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tamaCsv" />
-                                                                        264玉ニュータウン
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="tamaCsv" />
-                                                                        273辻堂
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="saitamaCsv" />
-                                                            埼玉BL
-                                                        </label>
-                                                        <ul class="list-group mt-2">
-                                                            <li class="list-group-item">
-                                                                <div class="checkbox">
-                                                                    <label>
-                                                                        <input type="checkbox" value="" id="saitamaCsv" />
-                                                                        312新座片山
-                                                                    </label>
-                                                                </div>
-                                                            </li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                        <div class="tab-pane fade" id="byCsvCode" role="tabpanel" aria-labelledby="byCsvCode-tab">
-                                            <ul class="list-group">
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            257保谷
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            272立川
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            372川崎中原
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            264玉ニュータウン
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            273辻堂
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                                <li class="list-group-item">
-                                                    <div class="checkbox">
-                                                        <label>
-                                                            <input type="checkbox" value="" id="tokyoCsvCode" />
-                                                            312新座片山
-                                                        </label>
-                                                    </div>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-primary" id="selectCsvBtn">選択</button>
-                                    <button type="button" class="btn btn-default" data-dismiss="modal">閉じる</button>
-                                </div>
-                            </div>
-                        </div>
                     </div>
 
 
@@ -620,5 +289,8 @@
 
         </form>
     </div>
+    @include('common.admin.message-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list])
+    {{-- @include('common.admin.message-store-import-modal', ['organization1' => $organization1]) --}}
+    @include('common.admin.message-store-import-modal')
     <script src="{{ asset('/js/admin/message/publish/new.js') }}" defer></script>
 @endsection

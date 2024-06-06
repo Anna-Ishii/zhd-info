@@ -965,7 +965,7 @@ form .form-group.tag-form > div {
   width: auto;
   /* col-lg-4のmin-widthを数値で指定 */
   /* widthでautoを使いたいため */
-  min-width: 33.3333%; 
+  min-width: 33.3333%;
 }
 
 form .form-group.tag-form .form-control span.tag-form-label {
@@ -1019,7 +1019,7 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   padding-top: 25px;
 }
 .pagenation-top > div {
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
   height: 0px;
@@ -1202,3 +1202,16 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   padding-right: 0px;
   text-align: right;
 } */
+
+div#id-collapse[aria-expanded="false"]:after {
+    font-size: 20px;
+    font-family: FontAwesome;
+    content: '\f0da'; /* 右向き矢印 */
+}
+
+div#id-collapse[aria-expanded="true"]:after {
+    font-size: 20px;
+    font-family: FontAwesome;
+    content: '\f0d7'; /* 下向き矢印 */
+}
+
