@@ -51,21 +51,21 @@ class MessagePublishController extends Controller
     {
         $admin = session('admin');
         $category_list = MessageCategory::all();
-        $brand_list = $admin->getBrand();
+        $organization1_list = $admin->getOrganization1();
 
         // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
-        $brand_id = $request->input('brand', $brand_list[0]->id);
+        $organization1_id = $request->input('brand', $organization1_list[0]->id);
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
 
-        $organization1 = Brand::find($brand_id)->organization1;
+        $organization1 = Organization1::find($organization1_id);
 
         // セッションにデータを保存
-        session()->put('brand_id', $brand_id);
+        session()->put('brand_id', $organization1_id);
 
         $sub = DB::table('messages as m')
             ->select([
@@ -96,9 +96,7 @@ class MessagePublishController extends Controller
                 DB::raw('round((sum(message_user.read_flg) / count(message_user.user_id)) * 100, 1) as view_rate'),
                 DB::raw('sub.b_name as brand_name')
             ])
-            ->where('messages.organization1_id', $organization1->id)
-            ->whereNull('message_brand.brand_id')
-            ->orWhere('message_brand.brand_id', '=', $brand_id)
+            ->where('messages.organization1_id', $organization1_id)
             ->groupBy(DB::raw('messages.id'))
             ->when(isset($q), function ($query) use ($q) {
                 $query->where(function ($query) use ($q) {
@@ -156,8 +154,8 @@ class MessagePublishController extends Controller
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
-            'brand_list' => $brand_list,
             'organization1' => $organization1,
+            'organization1_list' => $organization1_list,
         ]);
     }
 
@@ -1488,4 +1486,3 @@ class MessagePublishController extends Controller
             ->toArray();
     }
 }
-
