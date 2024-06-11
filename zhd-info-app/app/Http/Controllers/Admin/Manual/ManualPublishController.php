@@ -44,19 +44,20 @@ class ManualPublishController extends Controller
             ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
             ->get();
 
-        $brand_list = $admin->getBrand();
+        $organization1_list = $admin->getOrganization1();
+
         // request
         $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $rate = $request->input('rate');
-        $brand_id = $request->input('brand', $brand_list[0]->id);
+        $organization1_id = $request->input('brand', $organization1_list[0]->id);
         $publish_date = $request->input('publish-date');
 
-        $organization1 = Brand::find($brand_id)->organization1;
+        $organization1 = Organization1::find($organization1_id);
 
         // セッションにデータを保存
-        session()->put('brand_id', $brand_id);
+        session()->put('brand_id', $organization1_id);
 
         $sub = DB::table('manuals as m')
                     ->select([
@@ -87,9 +88,7 @@ class ManualPublishController extends Controller
                 DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
                 DB::raw('sub.b_name as brand_name'),
             ])
-            ->where('manuals.organization1_id', $organization1->id)
-            ->whereNull('manual_brand.brand_id')
-            ->orWhere('manual_brand.brand_id', '=', $brand_id)
+            ->where('manuals.organization1_id', $organization1_id)
             ->groupBy(DB::raw('manuals.id'))
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
@@ -147,8 +146,8 @@ class ManualPublishController extends Controller
         return view('admin.manual.publish.index', [
             'new_category_list' => $new_category_list,
             'manual_list' => $manual_list,
-            'brand_list' => $brand_list,
             'organization1' => $organization1,
+            'organization1_list' => $organization1_list,
         ]);
     }
 
