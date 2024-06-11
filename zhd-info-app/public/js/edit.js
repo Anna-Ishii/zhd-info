@@ -591,7 +591,10 @@ function createTag(tagLabelText) {
     )
 }
 
-$('.modal').on('hidden.bs.modal', function (e) {
+$('#messageImportModal').on('hidden.bs.modal', function (e) {
+	window.location.reload();
+})
+$('#manualImportModal').on('hidden.bs.modal', function (e) {
 	window.location.reload();
 })
 

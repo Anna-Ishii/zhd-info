@@ -1203,6 +1203,7 @@ form .form-group.tag-form .form-control span.tag-form-input:focus {
   text-align: right;
 } */
 
+
 div#id-collapse[aria-expanded="false"]:after {
     font-size: 20px;
     font-family: FontAwesome;
@@ -1215,3 +1216,8 @@ div#id-collapse[aria-expanded="true"]:after {
     content: '\f0d7'; /* 下向き矢印 */
 }
 
+input.check-selected {
+  background-color: #7e7e7e;
+  color: white;
+  border: 1px solid #7e7e7e;
+}
