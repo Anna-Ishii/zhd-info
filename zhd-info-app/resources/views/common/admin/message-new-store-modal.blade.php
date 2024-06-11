@@ -6,10 +6,8 @@
                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                 <h4 class="modal-title">店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small></h4>
             </div>
-            <div class="modal-body">
-                <form class="mb-3">
-                    <label for="storeSearch" class="form-label">2店舗選択中</label>
-                </form>
+            <div class="modal-body" id="storeModal">
+                <div id="storeSelected" class="mb-1">0店舗選択中</div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 30px; margin-right: 30px;">
                     <li class="nav-item active" role="presentation">
                         <a class="nav-link" id="byOrganization-tab" data-toggle="tab" href="#byOrganization" role="tab" aria-controls="byOrganization" aria-selected="true">組織単位</a>
@@ -21,34 +19,37 @@
                 <div class="tab-content modal-body-scroll" id="storeTabContent" style="max-height: 400px; overflow-y: auto;">
                     <div class="tab-pane fade in active" id="byOrganization" role="tabpanel" aria-labelledby="byOrganization-tab">
                         <ul class="list-group">
+                            @php
+                                $organization_shops = explode(',', old('organization_shops.0', ''));
+                            @endphp
                             @foreach ($organization_list as $index => $organization)
                                 @if (isset($organization['organization5_name']))
                                     <li class="list-group-item">
                                         <div class="checkbox">
-                                            <label class="mb-1">
-                                                <input type="checkbox" name="organization[org5][]" value="{{$organization['organization5_id']}}" class="checkCommon mr8"
-                                                @if (old('organization.org5'))
-                                                    {{ in_array((string)$organization['organization5_id'], old('organization.org5',[]), true) ? 'checked' : '' }}
-                                                @elseif(!request()->old())
-                                                    {{'checked'}}
-                                                @else
-                                                @endif
-                                                >
-                                                {{$organization['organization5_name']}}
-                                            </label>
-                                            <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            <div style="padding-bottom: 5px;">
+                                                <label>
+                                                    <input type="checkbox" name="organization[org5][]" data-organization-id="{{$organization['organization5_id']}}" value="{{$organization['organization5_id']}}" class="checkCommon mr8 org-checkbox"
+                                                    @if (old('organization.org5'))
+                                                        {{ in_array((string)$organization['organization5_id'], old('organization.org5',[]), true) ? 'checked' : '' }}
+                                                    @elseif(!request()->old())
+                                                        {{'checked'}}
+                                                    @endif
+                                                    >
+                                                    {{$organization['organization5_name']}}
+                                                </label>
+                                                <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            </div>
                                             <ul id="storeCollapse{{$index}}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization5_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div class="checkbox">
                                                                 <label>
-                                                                    <input type="checkbox"name="shops[org5][]" value="{{$shop['id']}}" class="checkCommon mr8"
-                                                                    @if (old('organization.org5'))
-                                                                        {{ in_array((string)$organization['organization5_id'], old('organization.org5',[]), true) ? 'checked' : '' }}
+                                                                    <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization5_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
+                                                                    @if (old('organization_shops'))
+                                                                        {{ in_array((string)$shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                                     @elseif(!request()->old())
                                                                         {{'checked'}}
-                                                                    @else
                                                                     @endif
                                                                     >
                                                                     {{$shop['shop_display_info']}}
@@ -63,30 +64,30 @@
                                 @elseif (isset($organization['organization4_name']))
                                     <li class="list-group-item">
                                         <div class="checkbox">
-                                            <label class="mb-1">
-                                                <input type="checkbox" name="organization[org4][]" value="{{$organization['organization4_id']}}" class="checkCommon mr8"
-                                                @if (old('organization.org4'))
-                                                    {{ in_array((string)$organization['organization4_id'], old('organization.org4',[]), true) ? 'checked' : '' }}
-                                                @elseif(!request()->old())
-                                                    {{'checked'}}
-                                                @else
-                                                @endif
-                                                >
-                                                {{$organization['organization4_name']}}
-                                            </label>
-                                            <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            <div style="padding-bottom: 5px;">
+                                                <label>
+                                                    <input type="checkbox" name="organization[org4][]" data-organization-id="{{$organization['organization4_id']}}" value="{{$organization['organization4_id']}}" class="checkCommon mr8 org-checkbox"
+                                                    @if (old('organization.org4'))
+                                                        {{ in_array((string)$organization['organization4_id'], old('organization.org4',[]), true) ? 'checked' : '' }}
+                                                    @elseif(!request()->old())
+                                                        {{'checked'}}
+                                                    @endif
+                                                    >
+                                                    {{$organization['organization4_name']}}
+                                                </label>
+                                                <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            </div>
                                             <ul id="storeCollapse{{$index}}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization4_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div class="checkbox">
                                                                 <label>
-                                                                    <input type="checkbox"name="shops[org4][]" value="{{$shop['id']}}" class="checkCommon mr8"
-                                                                    @if (old('organization.org4'))
-                                                                        {{ in_array((string)$organization['organization4_id'], old('organization.org4',[]), true) ? 'checked' : '' }}
+                                                                    <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization4_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
+                                                                    @if (old('organization_shops'))
+                                                                        {{ in_array((string)$shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                                     @elseif(!request()->old())
                                                                         {{'checked'}}
-                                                                    @else
                                                                     @endif
                                                                     >
                                                                     {{$shop['shop_display_info']}}
@@ -101,30 +102,30 @@
                                 @elseif (isset($organization['organization3_name']))
                                     <li class="list-group-item">
                                         <div class="checkbox">
-                                            <label class="mb-1">
-                                                <input type="checkbox" name="organization[org3][]" value="{{$organization['organization3_id']}}" class="checkCommon mr8"
-                                                @if (old('organization.org3'))
-                                                    {{ in_array((string)$organization['organization3_id'], old('organization.org3',[]), true) ? 'checked' : '' }}
-                                                @elseif(!request()->old())
-                                                    {{'checked'}}
-                                                @else
-                                                @endif
-                                                >
-                                                {{$organization['organization3_name']}}直轄
-                                            </label>
-                                            <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            <div style="padding-bottom: 5px;">
+                                                <label>
+                                                    <input type="checkbox" name="organization[org3][]" data-organization-id="{{$organization['organization3_id']}}" value="{{$organization['organization3_id']}}" class="checkCommon mr8 org-checkbox"
+                                                    @if (old('organization.org3'))
+                                                        {{ in_array((string)$organization['organization3_id'], old('organization.org3',[]), true) ? 'checked' : '' }}
+                                                    @elseif(!request()->old())
+                                                        {{'checked'}}
+                                                    @endif
+                                                    >
+                                                    {{$organization['organization3_name']}}直轄
+                                                </label>
+                                                <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            </div>
                                             <ul id="storeCollapse{{$index}}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization3_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div class="checkbox">
                                                                 <label>
-                                                                    <input type="checkbox"name="shops[org3][]" value="{{$shop['id']}}" class="checkCommon mr8"
-                                                                    @if (old('organization.org3'))
-                                                                        {{ in_array((string)$organization['organization3_id'], old('organization.org3',[]), true) ? 'checked' : '' }}
+                                                                    <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization3_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
+                                                                    @if (old('organization_shops'))
+                                                                        {{ in_array((string)$shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                                     @elseif(!request()->old())
                                                                         {{'checked'}}
-                                                                    @else
                                                                     @endif
                                                                     >
                                                                     {{$shop['shop_display_info']}}
@@ -139,30 +140,30 @@
                                 @elseif (isset($organization['organization2_name']))
                                     <li class="list-group-item">
                                         <div class="checkbox">
-                                            <label class="mb-1">
-                                                <input type="checkbox" name="organization[org2][]" value="{{$organization['organization2_id']}}" class="checkCommon mr8"
-                                                @if (old('organization.org2'))
-                                                    {{ in_array((string)$organization['organization2_id'], old('organization.org2',[]), true) ? 'checked' : '' }}
-                                                @elseif(!request()->old())
-                                                    {{'checked'}}
-                                                @else
-                                                @endif
-                                                >
-                                                {{$organization['organization2_name']}}直轄
-                                            </label>
-                                            <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            <div style="padding-bottom: 5px;">
+                                                <label>
+                                                    <input type="checkbox" name="organization[org2][]" data-organization-id="{{$organization['organization2_id']}}" value="{{$organization['organization2_id']}}" class="checkCommon mr8 org-checkbox"
+                                                    @if (old('organization.org2'))
+                                                        {{ in_array((string)$organization['organization2_id'], old('organization.org2',[]), true) ? 'checked' : '' }}
+                                                    @elseif(!request()->old())
+                                                        {{'checked'}}
+                                                    @endif
+                                                    >
+                                                    {{$organization['organization2_name']}}直轄
+                                                </label>
+                                                <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#storeCollapse{{$index}}" style=" float: right;"></div>
+                                            </div>
                                             <ul id="storeCollapse{{$index}}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization2_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div class="checkbox">
                                                                 <label>
-                                                                    <input type="checkbox"name="shops[org2][]" value="{{$shop['id']}}" class="checkCommon mr8"
-                                                                    @if (old('organization.org2'))
-                                                                        {{ in_array((string)$organization['organization2_id'], old('organization.org2',[]), true) ? 'checked' : '' }}
+                                                                    <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization2_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
+                                                                    @if (old('organization_shops'))
+                                                                        {{ in_array((string)$shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                                     @elseif(!request()->old())
                                                                         {{'checked'}}
-                                                                    @else
                                                                     @endif
                                                                     >
                                                                     {{$shop['shop_display_info']}}
@@ -178,15 +179,20 @@
                             @endforeach
                         </ul>
                     </div>
-                    <div class="tab-pane fade" id="byStoreCode" role="tabpanel"
-                        aria-labelledby="byStoreCode-tab">
+                    <div class="tab-pane fade" id="byStoreCode" role="tabpanel" aria-labelledby="byStoreCode-tab">
                         <ul class="list-group">
                             @foreach ($all_shop_list as $index => $shop_list)
                                 @if (isset($shop_list['shop_display_info']))
                                     <li class="list-group-item">
                                         <div class="checkbox">
                                             <label>
-                                                <input type="checkbox"name="shops[]" value="{{$shop_list['shop_id']}}" class="checkCommon mr8" checked >
+                                                <input type="checkbox"name="shops_code[]" data-store-id="{{$shop_list['shop_id']}}" value="{{$shop_list['shop_id']}}" class="checkCommon mr8 shop-checkbox"
+                                                @if (old('organization_shops'))
+                                                    {{ in_array((string)$shop_list['shop_id'], $organization_shops, true) ? 'checked' : '' }}
+                                                @elseif(!request()->old())
+                                                    {{'checked'}}
+                                                @endif
+                                                >
                                                 {{$shop_list['shop_display_info']}}
                                             </label>
                                         </div>
@@ -198,7 +204,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="selectStoreBtn">選択</button>
+                <button type="button" class="btn btn-admin" id="selectStoreBtn">選択</button>
             </div>
         </div>
     </div>

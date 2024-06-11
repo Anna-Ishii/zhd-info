@@ -21,6 +21,8 @@ use App\Models\Brand;
 use App\Models\MessageContent;
 use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
+use App\Models\MessageShop;
+use App\Models\MessageUser;
 use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
@@ -426,8 +428,10 @@ class MessagePublishController extends Controller
             $message->save();
             $message->roll()->attach($request->target_roll);
 
-            if (isset($request->organization['org5'])) {
-                foreach ($request->organization['org5'] as $org5_id) {
+            if (isset($request->organization['org5'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org5_ids = explode(',', $request->organization['org5'][0]);
+                foreach ($org5_ids as $org5_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $organization1->id,
@@ -435,8 +439,10 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org4'])) {
-                foreach ($request->organization['org4'] as $org4_id) {
+            if (isset($request->organization['org4'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org4_ids = explode(',', $request->organization['org4'][0]);
+                foreach ($org4_ids as $org4_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $organization1->id,
@@ -444,8 +450,10 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org3'])) {
-                foreach ($request->organization['org3'] as $org3_id) {
+            if (isset($request->organization['org3'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org3_ids = explode(',', $request->organization['org3'][0]);
+                foreach ($org3_ids as $org3_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $organization1->id,
@@ -453,13 +461,39 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org2'])) {
-                foreach ($request->organization['org2'] as $org2_id) {
+            if (isset($request->organization['org2'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org2_ids = explode(',', $request->organization['org2'][0]);
+                foreach ($org2_ids as $org2_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $organization1->id,
                         'organization2_id' => $org2_id
                     ]);
+                }
+            }
+
+            // message_shopにshop_idとmessage_idを格納
+            if (isset($request->organization_shops[0])) {
+                // カンマ区切りの文字列を配列に変換
+                $organization_shops = explode(',', $request->organization_shops[0]);
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    }
+                    // elseif (isset($request->select_organization['csv']) && $request->select_organization['csv'] === 'selected') {
+                    //     $selectedFlg = 'csv';
+                    // }
+                    if ($selectedFlg) {
+                        MessageShop::create([
+                            'message_id' => $message->id,
+                            'shop_id' => $_shop_id,
+                            'selected_flg' => $selectedFlg
+                        ]);
+                    }
                 }
             }
 
@@ -552,16 +586,137 @@ class MessagePublishController extends Controller
             $organization_type = 4; // エリアを表示する
         }
 
+        // shopを取得する
+        $all_shop_list = [];
+        foreach ($organization_list as $index => $organization) {
+
+            $organization_list[$index]['organization5_shop_list'] = [];
+            $organization_list[$index]['organization4_shop_list'] = [];
+            $organization_list[$index]['organization3_shop_list'] = [];
+            $organization_list[$index]['organization2_shop_list'] = [];
+
+            foreach ($brand_list as $brand) {
+                if (isset($organization['organization5_id'])) {
+                    $shops = Shop::where('organization5_id', $organization['organization5_id'])
+                        ->where('brand_id', $brand->id)
+                        ->get()
+                        ->toArray();
+
+                    // shop_codeとdisplay_nameを合体
+                    foreach ($shops as &$shop) {
+                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+
+                        // すべてのshopリスト
+                        $all_shop_list[] = [
+                            'shop_id' => $shop['id'],
+                            'shop_code' => $shop['shop_code'],
+                            'shop_display_info' => $shop['shop_display_info'],
+                        ];
+                    }
+
+                    $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
+                }
+                if (isset($organization['organization4_id'])) {
+                    $shops = Shop::where('organization4_id', $organization['organization4_id'])
+                        ->where('brand_id', $brand->id)
+                        ->get()
+                        ->toArray();
+
+                    // shop_codeとdisplay_nameを合体
+                    foreach ($shops as &$shop) {
+                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+
+                        // すべてのshopリスト
+                        $all_shop_list[] = [
+                            'shop_id' => $shop['id'],
+                            'shop_code' => $shop['shop_code'],
+                            'shop_display_info' => $shop['shop_display_info'],
+                        ];
+                    }
+
+                    $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
+                }
+                if (isset($organization['organization3_id'])) {
+                    $shops = Shop::where('organization3_id', $organization['organization3_id'])
+                        ->where('brand_id', $brand->id)
+                        ->whereNull('organization4_id')
+                        ->whereNull('organization5_id')
+                        ->get()
+                        ->toArray();
+
+                    // shop_codeとdisplay_nameを合体
+                    foreach ($shops as &$shop) {
+                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+
+                        // すべてのshopリスト
+                        $all_shop_list[] = [
+                            'shop_id' => $shop['id'],
+                            'shop_code' => $shop['shop_code'],
+                            'shop_display_info' => $shop['shop_display_info'],
+                        ];
+                    }
+
+                    $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
+                }
+                if (isset($organization['organization2_id'])) {
+                    $shops = Shop::where('organization2_id', $organization['organization2_id'])
+                        ->where('brand_id', $brand->id)
+                        ->whereNull('organization4_id')
+                        ->whereNull('organization5_id')
+                        ->get()
+                        ->toArray();
+
+                    // shop_codeとdisplay_nameを合体
+                    foreach ($shops as &$shop) {
+                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+
+                        // すべてのshopリスト
+                        $all_shop_list[] = [
+                            'shop_id' => $shop['id'],
+                            'shop_code' => $shop['shop_code'],
+                            'shop_display_info' => $shop['shop_display_info'],
+                        ];
+                    }
+
+                    $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
+                }
+            }
+        }
+
         $target_org = [];
         $target_org['org5'] = MessageOrganization::where('message_id', $message_id)->pluck('organization5_id')->toArray();
         $target_org['org4'] = MessageOrganization::where('message_id', $message_id)->pluck('organization4_id')->toArray();
         $target_org['org3'] = MessageOrganization::where('message_id', $message_id)->pluck('organization3_id')->toArray();
         $target_org['org2'] = MessageOrganization::where('message_id', $message_id)->pluck('organization2_id')->toArray();
 
+        // shopが閲覧可能か確認
+        $target_org['shops'] = [];
+        $target_org['select'] = null;
+        foreach ($all_shop_list as $shop) {
+            $shop_ids = MessageShop::where('message_id', $message_id)->where('shop_id', $shop['shop_id'])->pluck('shop_id')->toArray();
+            $selectedFlg = MessageShop::where('message_id', $message_id)->where('shop_id', $shop['shop_id'])->pluck('selected_flg')->first();
+
+            // message_shopにデータがない場合
+            if(empty($shop_ids)){
+                $shop_ids = MessageUser::where('message_id', $message_id)->where('shop_id', $shop['shop_id'])->pluck('shop_id')->toArray();
+                $target_org['select'] = 'oldStore';
+            }
+
+            $target_org['shops'] = array_merge($target_org['shops'], $shop_ids);
+            if ($selectedFlg) {
+                $target_org['select'] = $selectedFlg;
+            }
+        }
 
         $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
 
         $target_brand = $message->brand()->pluck('brands.id')->toArray();
+
+
+        // shop_codeを基準にソートするためのカスタム比較関数を定義
+        usort($all_shop_list, function ($a, $b) {
+            return strcmp($a['shop_code'], $b['shop_code']);
+        });
 
         return view('admin.message.publish.edit', [
             'message' => $message,
@@ -570,6 +725,7 @@ class MessagePublishController extends Controller
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
             'organization_list' => $organization_list,
+            'all_shop_list' => $all_shop_list,
             'message_target_roll' => $message_target_roll,
             'target_brand' => $target_brand,
             'target_org' => $target_org,
@@ -659,8 +815,11 @@ class MessagePublishController extends Controller
             $message->roll()->sync($request->target_roll);
 
             MessageOrganization::where('message_id', $message_id)->delete();
-            if (isset($request->organization['org5'])) {
-                foreach ($request->organization['org5'] as $org5_id) {
+
+            if (isset($request->organization['org5'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org5_ids = explode(',', $request->organization['org5'][0]);
+                foreach ($org5_ids as $org5_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $admin->organization1_id,
@@ -668,8 +827,10 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org4'])) {
-                foreach ($request->organization['org4'] as $org4_id) {
+            if (isset($request->organization['org4'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org4_ids = explode(',', $request->organization['org4'][0]);
+                foreach ($org4_ids as $org4_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $admin->organization1_id,
@@ -677,8 +838,10 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org3'])) {
-                foreach ($request->organization['org3'] as $org3_id) {
+            if (isset($request->organization['org3'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org3_ids = explode(',', $request->organization['org3'][0]);
+                foreach ($org3_ids as $org3_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $admin->organization1_id,
@@ -686,13 +849,41 @@ class MessagePublishController extends Controller
                     ]);
                 }
             }
-            if (isset($request->organization['org2'])) {
-                foreach ($request->organization['org2'] as $org2_id) {
+            if (isset($request->organization['org2'][0])) {
+                // カンマ区切りの文字列を配列に変換
+                $org2_ids = explode(',', $request->organization['org2'][0]);
+                foreach ($org2_ids as $org2_id) {
                     $message->organization()->create([
                         'message_id' => $message->id,
                         'organization1_id' => $admin->organization1_id,
                         'organization2_id' => $org2_id
                     ]);
+                }
+            }
+
+            MessageShop::where('message_id', $message_id)->delete();
+
+            // message_shopにshop_idとmessage_idを格納
+            if (isset($request->organization_shops[0])) {
+                // カンマ区切りの文字列を配列に変換
+                $organization_shops = explode(',', $request->organization_shops[0]);
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    }
+                    // elseif (isset($request->select_organization['csv']) && $request->select_organization['csv'] === 'selected') {
+                    //     $selectedFlg = 'csv';
+                    // }
+                    if ($selectedFlg) {
+                        MessageShop::create([
+                            'message_id' => $message->id,
+                            'shop_id' => $_shop_id,
+                            'selected_flg' => $selectedFlg
+                        ]);
+                    }
                 }
             }
 
@@ -1135,42 +1326,12 @@ class MessagePublishController extends Controller
         $shops_id = [];
         $target_user_data = [];
 
-        // organizationごとにshopを取得する
-        if (isset($organizarions->organization['org5'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization5_id', $organizarions->organization['org5'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org4'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization4_id', $organizarions->organization['org4'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org3'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization3_id', $organizarions->organization['org3'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->whereNull('organization4_id')
-                ->whereNull('organization5_id')
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org2'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization2_id', $organizarions->organization['org2'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->whereNull('organization4_id')
-                ->whereNull('organization5_id')
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
+        // shop_idを格納
+        if (isset($organizarions->organization_shops)) {
+            $organization_shops = explode(',', $organizarions->organization_shops[0]);
+            foreach ($organization_shops as $_shop_id) {
+                $shops_id[] = $_shop_id;
+            }
         }
 
         // 取得したshopのリストからユーザーを取得する
@@ -1327,3 +1488,4 @@ class MessagePublishController extends Controller
             ->toArray();
     }
 }
+

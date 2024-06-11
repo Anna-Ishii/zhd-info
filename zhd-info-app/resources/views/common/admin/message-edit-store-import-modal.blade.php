@@ -31,7 +31,7 @@
                         </div>
                         <div class="col-sm-2 col-sm-offset-6 control-label">
                             {{-- <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreEditModal" value="インポート" disabled> --}}
-                            <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreEditModal" value="インポート">
+                            <input type="button" id="importButton" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreEditModal" value="インポート">
                         </div>
                     </div>
                 </form>
@@ -40,7 +40,7 @@
     </div>
 </div>
 
-<div class="modal fade" id="messageStoreEditModal" tabindex="-1">
+<div class="modal fade" id="messageStoreEditModal" style="top: -20%;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -48,10 +48,8 @@
                 <h4 class="modal-title">以下店舗で取り込みました。<br /><small class="text-muted">変更ある場合は、「再取込」もしくは下記で選択しなおしてください</small></h4>
             </div>
 
-            <div class="modal-body">
-                <form class="mb-3">
-                    <label for="storeSearch" class="form-label">2店舗選択中</label>
-                </form>
+            <div class="modal-body" id="csvModal">
+                <div id="csvStoreSelected" class="mb-1">0店舗選択中</div>
                 <ul class="nav nav-tabs" id="myTab" role="tablist" style="margin-left: 30px; margin-right: 30px;">
                     <li class="nav-item active" role="presentation">
                         <a class="nav-link" id="byCsvOrganization-tab" data-toggle="tab" href="#byCsvOrganization" role="tab" aria-controls="byCsvOrganization" aria-selected="true">組織単位</a>
@@ -60,13 +58,13 @@
                         <a class="nav-link" id="byCsvCode-tab" data-toggle="tab" href="#byCsvCode" role="tab" aria-controls="byCsvCode" aria-selected="false">店舗コード順</a>
                     </li>
                 </ul>
-                <div class="tab-content" id="csvTabContent">
+                <div class="tab-content modal-body-scroll" id="csvTabContent" style="max-height: 400px; overflow-y: auto;">
                     <div class="tab-pane fade in active" id="byCsvOrganization" role="tabpanel" aria-labelledby="byCsvOrganization-tab">
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" value="" id="tokyoCsv" />
+                                    <label class="mb-1">
+                                        <input type="checkbox" name="organization[org5][]" data-organization-id="" value="" class="checkCommon mr8 org-checkbox">
                                         東京・川崎BL
                                     </label>
                                     <div id="id-collapse" data-toggle="collapse" aria-expanded="false" data-target="#csvCollapse" style=" float: right;"></div>
@@ -74,24 +72,8 @@
                                         <li class="list-group-item">
                                             <div class="checkbox">
                                                 <label>
-                                                    <input type="checkbox" value="" id="tokyoCsv" />
+                                                    <input type="checkbox" name="organization_shops[]" data-organization-id="" data-store-id="" value="" class="checkCommon mr8 shop-checkbox" >
                                                     257保谷
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" value="" id="tokyoCsv" />
-                                                    272立川
-                                                </label>
-                                            </div>
-                                        </li>
-                                        <li class="list-group-item">
-                                            <div class="checkbox">
-                                                <label>
-                                                    <input type="checkbox" value="" id="tokyoCsv" />
-                                                    372川崎中原
                                                 </label>
                                             </div>
                                         </li>
@@ -105,16 +87,8 @@
                             <li class="list-group-item">
                                 <div class="checkbox">
                                     <label>
-                                        <input type="checkbox" value="" id="tokyoCsvCode" />
+                                        <input type="checkbox"name="shops_code[]" data-store-id="" value="" class="checkCommon mr8 shop-checkbox" checked >
                                         257保谷
-                                    </label>
-                                </div>
-                            </li>
-                            <li class="list-group-item">
-                                <div class="checkbox">
-                                    <label>
-                                        <input type="checkbox" value="" id="tokyoCsvCode" />
-                                        272立川
                                     </label>
                                 </div>
                             </li>
@@ -123,7 +97,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="selectCsvBtn">選択</button>
+                <button type="button" class="btn btn-admin" id="selectCsvBtn">選択</button>
             </div>
         </div>
     </div>
