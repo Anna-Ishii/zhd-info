@@ -65,10 +65,10 @@
                 <div class="input-group col-lg-1 spMb16">
                     <label class="input-group-addon">業態</label>
                     <select name="brand" class="form-control">
-                        @foreach ($organization1_list as $organization1)
-                            <option value="{{ $organization1->id }}"
-                                {{ request()->input('brand') == $organization1->id ? 'selected' : '' }}>
-                                {{ $organization1->name }}</option>
+                        @foreach ($organization1_list as $org1)
+                            <option value="{{ $org1->id }}"
+                                {{ request()->input('brand') == $org1->id ? 'selected' : '' }}>
+                                {{ $org1->name }}</option>
                         @endforeach
                     </select>
                 </div>
