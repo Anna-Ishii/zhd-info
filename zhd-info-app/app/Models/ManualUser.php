@@ -7,6 +7,17 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 
 class ManualUser extends Pivot
 {
+    protected $table = 'manual_user';
+
+    protected $fillable = [
+        'user_id',
+        'manual_id',
+        'read_flg',
+        'shop_id',
+        'created_at',
+        'updated_at',
+        'readed_datetime',
+    ];
     protected $dates = ['readed_datetime'];
 
     public function getFormattedReadedDatetimeAttribute()

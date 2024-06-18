@@ -28,7 +28,7 @@ function appendFormTagInput() {
     }).appendTo($('#form'));
 }
 
-$(document).on('change', 'input[type="file"]', function() {
+$(document).on('change', '.fileInputs input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();
     formData.append("file", $(this)[0].files[0]);
@@ -40,7 +40,7 @@ $(document).on('change', 'input[type="file"]', function() {
     progressBar.hide();
     progressBar.css('width', 0 + '%');
     progress.show();
-    
+
     let fileName = $(this).siblings('input[data-variable-name="manual_file_name"]');
     let filePath = $(this).siblings('input[data-variable-name="manual_file_path"]');
 
@@ -68,7 +68,7 @@ $(document).on('change', 'input[type="file"]', function() {
                         setTimeout(() => {
                             progress.hide();
                         }, 1000);
-                    } 
+                    }
                 }, false);
             }
             return XHR;

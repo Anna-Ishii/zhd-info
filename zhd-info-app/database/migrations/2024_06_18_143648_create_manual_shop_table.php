@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('message_shop', function (Blueprint $table) {
-            $table->unsignedBigInteger('message_id');
+        Schema::create('manual_shop', function (Blueprint $table) {
+            $table->unsignedBigInteger('manual_id');
             $table->unsignedBigInteger('shop_id');
             $table->string('selected_flg')->nullable();
-            $table->foreign('message_id')->references('id')->on('messages');
+            $table->foreign('manual_id')->references('id')->on('manuals');
             $table->timestamps();
             $table->unsignedBigInteger('brand_id');
             $table->foreign('brand_id')->references('id')->on('brands');
@@ -27,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('message_shop');
+        Schema::dropIfExists('manual_shop');
     }
 };
