@@ -223,12 +223,12 @@ function changeFileName(e){
 		fileNameTarget.empty().text(chkFileName);
 	}
 }
-$(document).on('change' , '#messageStoreImportModal .inputFile input[type=file]' , function(){
+$(document).on('change' , '#messageStoreImportModal input[type=file]' , function(){
 	let changeTarget = $(this);
 	changeFileName(changeTarget);
 });
 
-let messageJson;
+let newMessageJson;
 $(document).on('change', '#messageStoreImportModal input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let log_file_name = getNumericDateTime();
@@ -265,7 +265,7 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 		progress_request = false;
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
-		messageJson = response.json;
+		newMessageJson = response.json;
 
     }).fail(function(jqXHR, textStatus, errorThrown){
 		$('#messageStoreImportModal .modal-body').prepend(`
@@ -310,6 +310,9 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
+            setTimeout(() => {
+                progress.hide();
+            }, 1000);
 			console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
@@ -326,7 +329,7 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 $('#messageStoreImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
-	if(!messageJson) {
+	if(!newMessageJson) {
 		$('#messageStoreImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
 				<ul>
@@ -345,7 +348,7 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 	$.ajax({
 		url: '/admin/message/publish/store/import',
 		type: 'post',
-		data: JSON.stringify(messageJson),
+		data: JSON.stringify(newMessageJson),
 		processData: false,
 		contentType: "application/json; charset=utf-8",
 		headers: {

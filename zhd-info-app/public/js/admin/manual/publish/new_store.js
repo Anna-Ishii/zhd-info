@@ -223,12 +223,12 @@ function changeFileName(e){
 		fileNameTarget.empty().text(chkFileName);
 	}
 }
-$(document).on('change' , '#manualStoreImportModal .inputFile input[type=file]' , function(){
+$(document).on('change' , '#manualStoreImportModal input[type=file]' , function(){
 	let changeTarget = $(this);
 	changeFileName(changeTarget);
 });
 
-let manualJson;
+let newManualJson;
 $(document).on('change', '#manualStoreImportModal input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let log_file_name = getNumericDateTime();
@@ -265,7 +265,7 @@ $(document).on('change', '#manualStoreImportModal input[type="file"]', function(
 		progress_request = false;
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
-		manualJson = response.json;
+		newManualJson = response.json;
 
     }).fail(function(jqXHR, textStatus, errorThrown){
 		$('#manualStoreImportModal .modal-body').prepend(`
@@ -310,6 +310,9 @@ $(document).on('change', '#manualStoreImportModal input[type="file"]', function(
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
+            setTimeout(() => {
+                progress.hide();
+            }, 1000);
 			console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
@@ -326,7 +329,7 @@ $(document).on('change', '#manualStoreImportModal input[type="file"]', function(
 $('#manualStoreImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
-	if(!manualJson) {
+	if(!newManualJson) {
 		$('#manualStoreImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
 				<ul>
@@ -345,7 +348,7 @@ $('#manualStoreImportModal input[type="button"]').click(function(e){
 	$.ajax({
 		url: '/admin/manual/publish/store/import',
 		type: 'post',
-		data: JSON.stringify(manualJson),
+		data: JSON.stringify(newManualJson),
 		processData: false,
 		contentType: "application/json; charset=utf-8",
 		headers: {
