@@ -1,5 +1,5 @@
 <!-- モーダル：CSV取込 -->
-<div class="modal fade" id="messageStoreImportModal" tabindex="-1">
+<div class="modal fade" id="manualStoreImportModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -30,7 +30,7 @@
                             <span class="text-danger required">*</span>：必須項目
                         </div>
                         <div class="col-sm-2 col-sm-offset-6 control-label">
-                            <input type="button" id="importButton" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreModal" value="インポート" disabled>
+                            <input type="button" id="importButton" class="btn btn-admin" data-toggle="modal" data-target="#manualStoreModal" value="インポート" disabled>
                         </div>
                     </div>
                 </form>
@@ -41,7 +41,7 @@
 
 
 <!-- モーダル：店舗選択 -->
-<div class="modal fade" id="messageStoreModal" tabindex="-1" style="top: -20%;">
+<div class="modal fade" id="manualStoreModal" tabindex="-1" style="top: -20%;">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">

@@ -12,9 +12,9 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class ManualListExport implements 
-    FromView, 
-    ShouldAutoSize, 
+class ManualListExport implements
+    FromView,
+    ShouldAutoSize,
     WithCustomCsvSettings
 {
     protected $manual_id;
@@ -32,7 +32,7 @@ class ManualListExport implements
             'output_encoding' => 'CP932',
         ];
     }
-    
+
     public function view(): View
     {
         $admin = session('admin');
@@ -41,8 +41,7 @@ class ManualListExport implements
         $status = PublishStatus::tryFrom($this->request->input('status'));
         $q = $this->request->input('q');
         $rate = $this->request->input('rate');
-        $brand_id = $this->request->input('brand', $admin->firstBrand()->id);
-        $organization1 = Brand::find($brand_id)->organization1_id;
+        $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('manuals')
                     ->select([
@@ -73,7 +72,7 @@ class ManualListExport implements
             ->leftJoinSub($cte, 'org', function ($join) {
                 $join->on('manuals.id', '=', 'org.manual_id');
             })
-            ->where('manuals.organization1_id', $organization1)
+            ->where('manuals.organization1_id', $organization1_id)
             ->groupBy('manuals.id')
             // 検索機能 キーワード
             ->when(isset($q), function ($query) use ($q) {
@@ -106,10 +105,6 @@ class ManualListExport implements
             // 検索機能 カテゴリ
             ->when(isset($new_category_id), function ($query) use ($new_category_id) {
                 $query->where('category_level2_id', $new_category_id);
-            })
-            ->when(isset($brand_id), function ($query) use ($brand_id) {
-                $query->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
-                    ->where('manual_brand.brand_id', '=', $brand_id);
             })
             ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
                 $min = isset($rate[0]) ? $rate[0] : 0;

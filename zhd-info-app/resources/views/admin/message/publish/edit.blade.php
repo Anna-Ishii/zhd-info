@@ -291,12 +291,36 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-lg-2 control-label">
-                    {{ $organization_type == 5 ? '対象ブロック' : '対象エリア' }}<span class="text-danger required">*<span>
-                </label>
-                <input type="text" name="organization_type" value='{{ $organization_type }}' hidden>
+                <label class="col-lg-2 control-label">対象店舗<span class="text-danger required">*<span></label>
                 <div class="col-lg-10 checkArea">
                     <div class="check-store-list mb8 text-left">
+
+                        @if (old('organization.org5.0'))
+                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="{{old('organization.org5.0')}}">
+                        @else
+                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
+                        @endif
+                        @if (old('organization.org4.0'))
+                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="{{old('organization.org4.0')}}">
+                        @else
+                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="">
+                        @endif
+                        @if (old('organization.org3.0'))
+                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="{{old('organization.org3.0')}}">
+                        @else
+                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="">
+                        @endif
+                        @if (old('organization.org2.0'))
+                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="{{old('organization.org2.0')}}">
+                        @else
+                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="">
+                        @endif
+                        @if (old('organization_shops'))
+                            <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="{{old('organization_shops')}}">
+                        @else
+                            <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="">
+                        @endif
+
                         <label class="mr16">
                             @if (old('select_organization.all') === 'selected')
                                 <input type="button" class="btn btn-admin check-selected" id="checkAll" name="organizationAll" value="全店">
@@ -332,46 +356,20 @@
                             @endif
                         </label>
 
-                        {{-- <label class="mr16">
+                        <label class="mr16">
                             @if (old('select_organization.csv') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="checkCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="CSV取込">
+                                <input type="button" class="btn btn-admin check-selected" id="checkCsv" data-toggle="modal" data-target="#messageStoreModal" value="インポート">
                                 <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
                             @else
-                                @if ($target_org['select'] === 'csv')
-                                    <input type="button" class="btn btn-admin check-selected" id="checkCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="CSV取込">
-                                    <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
-                                @else
-                                    <input type="button" class="btn btn-admin" id="checkCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="CSV取込">
-                                    <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
-                                @endif
+                                <input type="button" class="btn btn-admin" id="checkCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="インポート">
+                                <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
                             @endif
-                        </label> --}}
+                        </label>
 
-                        @if (old('organization.org5.0'))
-                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="{{old('organization.org5.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
-                        @endif
-                        @if (old('organization.org4.0'))
-                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="{{old('organization.org4.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="">
-                        @endif
-                        @if (old('organization.org3.0'))
-                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="{{old('organization.org3.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="">
-                        @endif
-                        @if (old('organization.org2.0'))
-                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="{{old('organization.org2.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="">
-                        @endif
-                        @if (old('organization_shops.0'))
-                            <input type="hidden" id="checkOrganizationShops" name="organization_shops[]" value="{{old('organization_shops.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganizationShops" name="organization_shops[]" value="">
-                        @endif
+                        <label class="mr16">
+                            <a href="{{ route('admin.message.publish.edit-store-export-list', $message->id) }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin">エクスポート</a>
+                        </label>
+
                     </div>
                 </div>
             </div>
@@ -397,7 +395,7 @@
 
         </form>
     </div>
-    @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org])
-    {{-- @include('common.admin.message-edit-store-import-modal') --}}
+    @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
     <script src="{{ asset('/js/admin/message/publish/edit.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}" defer></script>
 @endsection

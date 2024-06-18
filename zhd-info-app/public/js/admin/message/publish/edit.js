@@ -29,7 +29,7 @@ function appendFormTagInput() {
 }
 
 
-$(document).on("change", 'input[type="file"]', function () {
+$(document).on("change", '.fileInputs input[type="file"]', function () {
     let csrfToken = $('meta[name="csrf-token"]').attr("content");
     let fileList = $(this)[0].files;
     let formData = new FormData();
@@ -80,7 +80,7 @@ $(document).on("change", 'input[type="file"]', function () {
                     let progVal = parseInt((e.loaded / e.total) * 10000) / 100;
                     progressBar.show();
                     progressBar.css("width", progVal + "%");
-                    console.log(progVal);
+                    // console.log(progVal);
                     if (progVal === 100) {
                         setTimeout(() => {
                             progress.hide();
@@ -259,178 +259,3 @@ $(document).on("click", ".delete-btn", function () {
         `);
     }
 });
-
-
-
-// 店舗選択中の処理
-function updateSelectedStores() {
-    const selectedCount = document.querySelectorAll('#storeModal input[name="organization_shops[]"]:checked').length;
-    document.querySelector('#storeModal div[id="storeSelected"]').textContent = `${selectedCount}店舗選択中`;
-}
-
-// チェックボックスの連携を設定
-function syncCheckboxes(storeId, checked) {
-    document.querySelectorAll(`#storeModal input[data-store-id="${storeId}"]`).forEach(function(checkbox) {
-        checkbox.checked = checked;
-    });
-}
-
-// 親チェックボックスの状態を更新
-function updateParentCheckbox(organizationId) {
-    const parentCheckbox = document.querySelector(`#storeModal input[data-organization-id="${organizationId}"]`);
-    const childCheckboxes = document.querySelectorAll(`#storeModal input[data-organization-id="${organizationId}"].shop-checkbox`);
-    const allChecked = Array.from(childCheckboxes).every(checkbox => checkbox.checked);
-    parentCheckbox.checked = allChecked;
-}
-
-// 全ての親チェックボックスの状態を更新
-function updateAllParentCheckboxes() {
-    const parentCheckboxes = document.querySelectorAll('#storeModal input.org-checkbox');
-    parentCheckboxes.forEach(function(parentCheckbox) {
-        updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id'));
-    });
-}
-
-// 初期表示の更新
-updateSelectedStores();
-updateAllParentCheckboxes();
-
-// チェックボックスの変更イベントリスナーを追加
-document.querySelectorAll('#storeModal input[name="organization_shops[]"], #storeModal input[name="shops_code[]"]').forEach(function(checkbox) {
-    checkbox.addEventListener('change', function() {
-        syncCheckboxes(this.getAttribute('data-store-id'), this.checked);
-        updateSelectedStores();
-        if (this.classList.contains('shop-checkbox')) {
-            updateParentCheckbox(this.getAttribute('data-organization-id'));
-        }
-    });
-});
-
-// 親チェックボックスの変更イベントリスナーを追加
-document.querySelectorAll('#storeModal input.org-checkbox').forEach(function(checkbox) {
-    checkbox.addEventListener('change', function() {
-        const organizationId = this.getAttribute('data-organization-id');
-        const checked = this.checked;
-        document.querySelectorAll(`#storeModal input[data-organization-id="${organizationId}"].shop-checkbox`).forEach(function(childCheckbox) {
-            childCheckbox.checked = checked;
-            syncCheckboxes(childCheckbox.getAttribute('data-store-id'), checked);
-        });
-        updateSelectedStores();
-    });
-});
-
-// check-selected クラスを削除と隠し入力フィールドの値を空にする
-function removeSelectedClass() {
-    // すべてのボタンから check-selected クラスを削除
-    document.querySelectorAll('.check-store-list .btn').forEach(button => {
-        button.classList.remove('check-selected');
-    });
-
-    // 隠し入力フィールドの値を空にする
-    document.getElementById('checkOrganization5').value = '';
-    document.getElementById('checkOrganization4').value = '';
-    document.getElementById('checkOrganization3').value = '';
-    document.getElementById('checkOrganization2').value = '';
-    document.getElementById('checkOrganizationShops').value = '';
-
-    // フォームクリア（全店ボタン）
-    document.getElementById('selectOrganizationAll').value = '';
-    document.getElementById('selectStore').value = '';
-    // document.getElementById('selectCsv').value = '';
-}
-
-// チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
-function changeValues() {
-    // チェックされているチェックボックスの値を取得
-    const selectedOrg5Values = Array.from(document.querySelectorAll('#storeModal input[name="organization[org5][]"]:checked')).map(checkbox => checkbox.value);
-    const selectedOrg4Values = Array.from(document.querySelectorAll('#storeModal input[name="organization[org4][]"]:checked')).map(checkbox => checkbox.value);
-    const selectedOrg3Values = Array.from(document.querySelectorAll('#storeModal input[name="organization[org3][]"]:checked')).map(checkbox => checkbox.value);
-    const selectedOrg2Values = Array.from(document.querySelectorAll('#storeModal input[name="organization[org2][]"]:checked')).map(checkbox => checkbox.value);
-    const selectedShopValues = Array.from(document.querySelectorAll('#storeModal input[name="organization_shops[]"]:checked')).map(checkbox => checkbox.value);
-
-    // 隠し入力フィールドに値を割り当てる
-    document.getElementById('checkOrganization5').value = selectedOrg5Values.join(',');
-    document.getElementById('checkOrganization4').value = selectedOrg4Values.join(',');
-    document.getElementById('checkOrganization3').value = selectedOrg3Values.join(',');
-    document.getElementById('checkOrganization2').value = selectedOrg2Values.join(',');
-    document.getElementById('checkOrganizationShops').value = selectedShopValues.join(',');
-}
-
-
-
-$(document).ready(function(){
-    changeValues();
-
-    if (document.getElementById('selectStore').value === 'selected') {
-        // 店舗選択中の処理
-        const selectedCountStore = document.querySelectorAll('#storeModal input[name="organization_shops[]"]:checked').length;
-        document.getElementById('checkStore').value = `店舗選択(${selectedCountStore}店舗)`;
-    }
-});
-
-// 全店ボタン処理
-document.querySelectorAll('input[id="checkAll"][name="organizationAll"]').forEach(button => {
-    button.addEventListener('click', function() {
-        removeSelectedClass();
-
-        // 全ての organization_shops[] チェックボックスをチェックする
-        document.querySelectorAll('#storeModal input[name="organization_shops[]"]').forEach(checkbox => {
-            checkbox.checked = true;
-            syncCheckboxes(checkbox.getAttribute('data-store-id'), true);
-        });
-
-        // 全ての親チェックボックスをチェックする
-        document.querySelectorAll('#storeModal input.org-checkbox').forEach(checkbox => {
-            checkbox.checked = true;
-        });
-
-        // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
-        changeValues();
-
-        // フォームクリア（全店ボタン）
-        document.getElementById('selectOrganizationAll').value = 'selected';
-
-        // 店舗選択ボタンをもとに戻す
-        document.getElementById('checkStore').value = `店舗選択`;
-
-        // 選択中の店舗数を更新する
-        updateSelectedStores();
-
-        // ボタンの見た目を変更する
-        button.classList.add('check-selected');
-    });
-});
-
-
-
-// 店舗選択モーダル 選択処理
-document.getElementById('selectStoreBtn').addEventListener('click', () => {
-    removeSelectedClass();
-
-    // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
-    changeValues();
-
-    // フォームクリア（店舗選択ボタン）
-    document.getElementById('selectStore').value = 'selected';
-
-    // モーダルを閉じる
-    $('#messageStoreModal').modal('hide');
-
-    // check-selected クラスを追加
-    document.getElementById('checkStore').classList.add('check-selected');
-
-    // 店舗選択中の処理
-    const selectedCountStore = document.querySelectorAll('#storeModal input[name="organization_shops[]"]:checked').length;
-    document.querySelector('.check-store-list input[id="checkStore"]').value = `店舗選択(${selectedCountStore}店舗)`;
-});
-
-
-
-// // CSV取込モーダル 選択処理
-// document.getElementById('checkCsv').addEventListener('click', function() {
-//     // 他のボタンのアクティブな状態を解除
-//     removeSelectedClass();
-//     // フォームクリア（CSV取込ボタン）
-//     document.getElementById('selectStore').value = 'selected';
-//     this.classList.add('check-selected');
-// });
