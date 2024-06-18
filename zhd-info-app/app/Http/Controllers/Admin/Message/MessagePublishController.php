@@ -161,7 +161,7 @@ class MessagePublishController extends Controller
                 // すべての店舗数
                 $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
                 // チェックされている店舗数
-                $shop_count = MessageShop::where('message_id', $message->id)->where('brand_id', $message->brand_name)->count();
+                $shop_count = MessageShop::where('message_id', $message->id)->count();
                 if ($shop_count == 0) {
                     $shop_count = MessageUser::where('message_id', $message->id)->count();
                 }

@@ -225,7 +225,7 @@ function changeFileName(e){
 		fileNameTarget.empty().text(chkFileName);
 	}
 }
-$(document).on('change' , '#messageStoreImportModal .inputFile input[type=file]' , function(){
+$(document).on('change' , '#messageStoreImportModal input[type=file]' , function(){
 	let changeTarget = $(this);
 	changeFileName(changeTarget);
 });
@@ -312,6 +312,9 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
+            setTimeout(() => {
+                progress.hide();
+            }, 1000);
 			console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");

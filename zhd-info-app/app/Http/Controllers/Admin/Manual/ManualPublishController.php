@@ -156,7 +156,7 @@ class ManualPublishController extends Controller
             // すべての店舗数
             $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
             // チェックされている店舗数
-            $shop_count = ManualShop::where('manual_id', $manual->id)->where('brand_id', $manual->brand_name)->count();
+            $shop_count = ManualShop::where('manual_id', $manual->id)->count();
             if ($shop_count == 0) {
                 $shop_count = ManualUser::where('manual_id', $manual->id)->count();
             }

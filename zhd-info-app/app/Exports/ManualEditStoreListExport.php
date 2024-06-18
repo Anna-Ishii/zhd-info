@@ -2,9 +2,9 @@
 
 namespace App\Exports;
 
-use App\Models\Message;
-use App\Models\MessageShop;
-use App\Models\MessageUser;
+use App\Models\Manual;
+use App\Models\ManualShop;
+use App\Models\ManualUser;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
@@ -17,12 +17,12 @@ class ManualEditStoreListExport implements
     WithCustomCsvSettings
 {
     protected $request;
-    protected $message_id;
+    protected $manual_id;
 
-    public function __construct($request, $message_id = null)
+    public function __construct($request, $manual_id = null)
     {
         $this->request = $request;
-        $this->message_id = $message_id;
+        $this->manual_id = $manual_id;
     }
 
     public function getCsvSettings(): array
@@ -36,7 +36,7 @@ class ManualEditStoreListExport implements
     public function view(): View
     {
         $admin = session('admin');
-        $message = Message::find($this->message_id);
+        $manual = Manual::find($this->manual_id);
 
         $store_list =
             DB::table('shops')
@@ -48,22 +48,22 @@ class ManualEditStoreListExport implements
                 $join->on('shops.organization1_id', '=', 'brands.organization1_id')
                     ->on('shops.brand_id', '=', 'brands.id');
             })
-            ->where('shops.organization1_id', $message->organization1_id)
+            ->where('shops.organization1_id', $manual->organization1_id)
             ->groupBy('shops.id')
             ->get();
 
         $all_store_list = $store_list->toArray();
-        $target_brand = $message->brand()->pluck('brands.id')->toArray();
+        $target_brand = $manual->brand()->pluck('brands.id')->toArray();
 
         $shop_ids = [];
         foreach ($all_store_list as &$store) {
             foreach ($target_brand as $brand) {
-                $shop_ids = array_merge($shop_ids, MessageShop::where('message_id', $message->id)->where('brand_id', $brand)->pluck('shop_id')->toArray());
+                $shop_ids = array_merge($shop_ids, ManualShop::where('manual_id', $manual->id)->where('brand_id', $brand)->pluck('shop_id')->toArray());
             }
 
-            // MessageShopにshop_idが見つからない場合はMessageUserを確認
+            // manualShopにshop_idが見つからない場合はmanualUserを確認
             if (empty($shop_ids)) {
-                $shop_ids = MessageUser::where('message_id', $message->id)->pluck('shop_id')->toArray();
+                $shop_ids = ManualUser::where('manual_id', $manual->id)->pluck('shop_id')->toArray();
             }
 
             // 先行か通常かを設定
@@ -71,7 +71,7 @@ class ManualEditStoreListExport implements
         }
         unset($store); // 参照を解除
 
-        return view('exports.message-store-list-export', [
+        return view('exports.manual-store-list-export', [
             'store_list' => $all_store_list,
             'admin' => $admin
         ]);
