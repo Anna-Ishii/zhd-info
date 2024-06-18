@@ -64,5 +64,9 @@ class Admin extends Model
         return $brands[0];
     }
 
-
+    public function firstOrganization1()
+    {
+        $brands = $this->getOrganization1();
+        return $brands[0];
+    }
 }
