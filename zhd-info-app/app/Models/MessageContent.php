@@ -14,5 +14,6 @@ class MessageContent extends Model
         'content_name',
         'content_url',
         'thumbnails_url',
+        'join_flg'
     ];
 }

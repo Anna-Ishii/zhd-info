@@ -2,7 +2,7 @@
 
 namespace App\Utils;
 
-class OutputContentPdf
+class PdfFileJoin
 {
     public static function recompressPdf($filePath, $outputPath)
     {
