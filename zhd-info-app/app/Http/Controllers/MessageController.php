@@ -111,6 +111,52 @@ class MessageController extends Controller
             ->limit(3)
             ->get();
 
+        // 送付ファイル
+        foreach ($messages as &$message) {
+            $join_file_list = [];
+            $single_file_list = [];
+
+            $all_message_files = Message::where('id', $message->id)->get()->toArray();
+            $all_message_content_files = MessageContent::where('message_id', $message->id)->get()->toArray();
+
+            foreach ($all_message_files as $message_file) {
+                if ($message_file) {
+                    $join_file_list[] = [
+                        "file_name" => $message_file["content_name"],
+                        "file_url" => $message_file["content_url"],
+                    ];
+
+                    // PDFファイルのページ数を取得
+                    $pdf = new TcpdfFpdi();
+                    $file_path = $message_file["content_url"]; // PDFファイルのパス
+                    if (file_exists($file_path)) {
+                        try {
+                            $page_num = $pdf->setSourceFile($file_path);
+                            $message->join_file_count = $page_num;
+                        } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
+                            // 暗号化されたPDFの処理
+                            $message->join_file_count = '暗号化';
+                        }
+                    }
+                }
+            }
+
+            foreach ($all_message_content_files as $message_content_file) {
+                if ($message_content_file["join_flg"] === "single") {
+                    $single_file_list[] = [
+                        "file_name" => $message_content_file["content_name"],
+                        "file_url" => $message_content_file["content_url"],
+                    ];
+                }
+            }
+
+            $message->join_files = $join_file_list;
+            $message->single_files = $single_file_list;
+
+            // ファイルのカウント
+            $message->single_file_count = count($single_file_list);
+        }
+
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
@@ -187,7 +233,7 @@ class MessageController extends Controller
             DB::commit();
 
             // 既読が無事できたらpdfへ
-            return $this->outputContentsPdf($message_id);
+            return redirect()->to($message->content_url)->withInput();
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
@@ -297,67 +343,5 @@ class MessageController extends Controller
         return response()->json([
             'crews' => $crews,
         ], 200);
-    }
-
-    // PDFの表示処理
-    private function outputContentsPdf($message_id)
-    {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '2048M');
-
-        $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
-
-        $tempFiles = [];
-
-        // 複数PDFがある場合の表示処理
-        if (!empty($message_contents)) {
-            foreach ($message_contents as $content_path) {
-                $originalFile = public_path('uploads/' . basename($content_path));
-                $tempFile = public_path('uploads/temp_' . basename($content_path));
-                OutputContentPdf::recompressPdf($originalFile, $tempFile);
-                $tempFiles[] = $tempFile;
-            }
-
-        // 単一PDFがある場合の表示処理
-        } else {
-            $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
-
-            return redirect()->to(asset($message_content));
-        }
-
-        // PDF を生成するための初期化
-        $pdf = new TcpdfFpdi();
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-
-        // 各 PDF を追加
-        foreach ($tempFiles as $file) {
-            $pageCount = $pdf->setSourceFile($file);
-            for ($i = 1; $i <= $pageCount; $i++) {
-                $pdf->AddPage();
-                $templateId = $pdf->importPage($i);
-                $pdf->useTemplate($templateId);
-            }
-        }
-
-        // 一時ファイルの確認と削除
-        foreach ($tempFiles as $file) {
-            if (file_exists($file)) {
-                @unlink($file);
-            }
-        }
-
-        // PDFを出力して返す
-        $outputFileName = 'output_contents.pdf';
-        return response()->stream(function() use ($pdf, $outputFileName) {
-            $pdf->output($outputFileName, 'I');
-
-            // 元のメモリ制限に戻す
-            ini_restore('memory_limit');
-
-        }, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
-        ]);
     }
 }

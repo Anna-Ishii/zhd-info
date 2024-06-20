@@ -73,7 +73,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [MessagePublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [MessagePublishController::class, 'progress'])->name('progress');
-            Route::get('/output-contents-pdf', [MessagePublishController::class, 'outputContentsPdf'])->name('output.contents.pdf');
             Route::get('new-store-export-list/{organization1_id}', [MessagePublishController::class, 'newStoreExportList'])->name('new-store-export-list')->where('organization1_id', '^\d+$');
             Route::get('edit-store-export-list/{message_id}', [MessagePublishController::class, 'editStoreExportList'])->name('edit-store-export-list')->where('message_id', '^\d+$');
             Route::post('/store/import', [MessagePublishController::class, 'storeImport'])->name('storeImport');
