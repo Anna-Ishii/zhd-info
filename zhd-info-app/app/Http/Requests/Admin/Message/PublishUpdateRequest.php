@@ -16,7 +16,11 @@ class PublishUpdateRequest extends FormRequest
         return [
             'title' => 'required',
             'tag_name' => ['nullable', new TagRule()],
-            'file_path' => 'required',
+            'file_path' => ['required', 'array', function($attribute, $value, $fail) {
+                if (empty(array_filter($value))) {
+                    $fail('ファイルを添付してください');
+                }
+            }],
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
@@ -39,5 +43,12 @@ class PublishUpdateRequest extends FormRequest
             'organization_shops.required' => '対象店舗を選択してください',
         ];
         return $messages;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'file_path' => array_filter($this->input('file_path', [])),
+        ]);
     }
 }

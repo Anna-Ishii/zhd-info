@@ -78,6 +78,14 @@ class ManualPublishController extends Controller
             ->leftjoin('manual_brand as m_b', 'm.id', 'm_b.manual_id')
             ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
             ->groupBy('m.id');
+
+        $readUsersSub = DB::table('manual_user')
+            ->select([
+                'manual_user.manual_id',
+                DB::raw('sum(manual_user.read_flg) as read_users')
+            ])
+            ->groupBy('manual_user.manual_id');
+
         $manual_list =
             Manual::query()
             ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
@@ -87,11 +95,14 @@ class ManualPublishController extends Controller
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'manuals.id');
             })
+            ->leftJoinSub($readUsersSub, 'read_users_sub', function ($join) {
+                $join->on('read_users_sub.manual_id', '=', 'manuals.id');
+            })
             ->select([
                 'manuals.*',
-                DB::raw('ifnull(sum(manual_user.read_flg),0) as read_users'),
-                DB::raw('count(manual_user.user_id) as total_users'),
-                DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
+                DB::raw('ifnull(read_users_sub.read_users, 0) as read_users'),
+                DB::raw('count(distinct manual_user.user_id) as total_users'),
+                DB::raw('round((ifnull(read_users_sub.read_users, 0) / count(distinct manual_user.user_id)) * 100, 1) as view_rate'),
                 DB::raw('sub.b_name as brand_name'),
             ])
             ->where('manuals.organization1_id', $organization1_id)
@@ -508,7 +519,7 @@ class ManualPublishController extends Controller
 
             $manual->brand()->attach($request->brand);
             $manual->user()->attach(
-                !isset($request->save) ? $this->targetUserParam($request->brand) : []
+                !isset($request->save) ? $this->targetUserParam2($request) : []
             );
             $manual->content()->createMany($this->manualContentsParam($request));
 
@@ -905,7 +916,7 @@ class ManualPublishController extends Controller
 
             $manual->brand()->sync($request->brand);
             $manual->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request->brand) : []
+                !isset($request->save) ? $this->targetUserParam2($request) : []
             );
             $manual->content()->createMany($content_data);
 
@@ -1056,7 +1067,7 @@ class ManualPublishController extends Controller
         $brands = $this->getBrandNameArray($organization1);
 
         $csv_path = Storage::putFile('csv', $csv);
-        Log::info("マニュアルCSVインポー", [
+        Log::info("マニュアルCSVインポート", [
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
@@ -1266,7 +1277,7 @@ class ManualPublishController extends Controller
         $shop_list = $this->getShopForm($organization1);
 
         $csv_path = Storage::putFile('csv', $csv);
-        Log::info("業連CSVインポート", [
+        Log::info("マニュアルCSVインポート", [
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
@@ -1535,6 +1546,36 @@ class ManualPublishController extends Controller
             $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
         return $target_users_data;
+    }
+
+    private function targetUserParam2($organizations): array
+    {
+        $shops_id = [];
+        $target_user_data = [];
+
+        // shopを取得する
+        if (isset($organizations->organization_shops)) {
+            $organization_shops = explode(',', $organizations->organization_shops);
+            foreach ($organization_shops as $_shop_id) {
+                foreach ($organizations->brand as $brand) {
+                    $_shops_id = Shop::select('id')
+                        ->where('id', $_shop_id)
+                        ->where('brand_id', $brand)
+                        ->get()
+                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+            }
+        }
+
+        // 取得したshopのリストからユーザーを取得する
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+        // ユーザーに業務連絡の閲覧権限を与える
+        foreach ($target_users as $target_user) {
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        }
+
+        return $target_user_data;
     }
 
     // 「手順」を登録するために加工する
