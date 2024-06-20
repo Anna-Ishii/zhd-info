@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('thumbnails_url')->nullable();
             $table->foreign('message_id')->references('id')->on('messages');
             $table->timestamps();
+            $table->string('join_flg')->nullable();
         });
     }
 

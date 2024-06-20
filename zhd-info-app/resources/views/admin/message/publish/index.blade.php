@@ -103,15 +103,19 @@
                 </div>
                 <div class="input-group spMb16 ">
                     <label class="input-group-addon">掲載期間</label>
-                    <input id="publishDateFrom" class="form-control" name="publish-date[0]" value="{{ request()->input('publish-date.0') }}" autocomplete="off">
+                    <input id="publishDateFrom" class="form-control" name="publish-date[0]"
+                        value="{{ request()->input('publish-date.0') }}" autocomplete="off">
                     <label class="input-group-addon">〜</label>
-                    <input id="publishDateTo" class="form-control" name="publish-date[1]" value="{{ request()->input('publish-date.1') }}" autocomplete="off">
+                    <input id="publishDateTo" class="form-control" name="publish-date[1]"
+                        value="{{ request()->input('publish-date.1') }}" autocomplete="off">
                 </div>
                 <div class="input-group spMb16">
                     <label class="input-group-addon">閲覧率</label>
-                    <input type="number" max="100" min="0" step="0.1" name="rate[0]" value="{{ request()->input('rate.0') }}" class="form-control" placeholder="" />
+                    <input type="number" max="100" min="0" step="0.1" name="rate[0]"
+                        value="{{ request()->input('rate.0') }}" class="form-control" placeholder="" />
                     <label class="input-group-addon">〜</label>
-                    <input type="number" max="100" min="0" step="0.1" name="rate[1]" value="{{ request()->input('rate.1') }}" class="form-control" placeholder="" />
+                    <input type="number" max="100" min="0" step="0.1" name="rate[1]"
+                        value="{{ request()->input('rate.1') }}" class="form-control" placeholder="" />
                 </div>
                 <div class="input-group col-lg-1 spMb16">
                     <input name="q" value="{{ request()->input('q') }}" class="form-control"
@@ -130,15 +134,18 @@
                 <div>
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
-                            <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#messageImportModal" value="インポート">
+                            <input type="button" class="btn btn-admin" data-toggle="modal"
+                                data-target="#messageImportModal" value="インポート">
                         </div>
                     @endif
                     <div>
-                        <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin">エクスポート</a>
+                        <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
+                            class="btn btn-admin">エクスポート</a>
                     </div>
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
-                            <a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}" class=" btn btn-admin">新規登録</a>
+                            <a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"
+                                class=" btn btn-admin">新規登録</a>
                         </div>
                     @endif
                 </div>
@@ -154,10 +161,12 @@
                             <th class="text-center" nowrap>ラベル</th>
                             <th class="text-center" nowrap>カテゴリ</th>
                             <th class="text-center" nowrap>タイトル</th>
+                            <th class="text-center" nowrap>送付</th>
                             <th class="text-center" nowrap>検索タグ</th>
                             <th class="text-center" nowrap>添付ファイル</th>
                             <th class="text-center" colspan="2">掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
+                            <th class="text-center" nowrap>配信店舗数</th>
                             <th class="text-center" colspan="3" nowrap>閲覧率</th>
                             <th class="text-center" colspan="2" nowrap>登録</th>
                             <th class="text-center" colspan="2" nowrap>更新</th>
@@ -185,12 +194,21 @@
                                 @endif
                                 <td>{{ $message->category?->name }}</td>
                                 <td class="label-title">
-                                    @if (isset($message->content_url))
-                                        <form method="get" id="pdf-form" style="padding: 0px;" action="{{ route('admin.message.publish.output.contents.pdf') }}" target="_blank">
-                                            <button type="submit" class="btn btn-link output-pdf" name="message_id" form="pdf-form" value="{{ $message->id }}" style="padding: 0px; border: none; outline: none; background: transparent;">{{ $message->title }}</button>
-                                        </form>
+                                    @if(isset($message->content_url))
+                                        @if(empty($message->join_file_count) || ($message->join_file_count === '暗号化'))
+                                            <a href="{{ asset($message->content_url) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }}</a>
+                                        @else
+                                            <a href="{{ asset($message->content_url) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }} ({{ $message->join_file_count }}ページ)</a>
+                                        @endif
                                     @else
                                         {{ $message->title }}
+                                    @endif
+                                </td>
+                                <td class="label-file">
+                                    @if($message->single_file_count > 0)
+                                        <a href="#" data-toggle="modal" data-target="#singleFileModal{{ $message->id }}">
+                                            {{ $message->title }} ({{ $message->single_file_count }})
+                                        </a>
                                     @endif
                                 </td>
                                 <td class="label-tags">
@@ -213,6 +231,7 @@
                                     <div>{{ $message->formatted_end_datetime }}</div>
                                 </td>
                                 <td>{{ $message->status->text() }}</td>
+                                <td>{{ $message->shop_count }}</td>
                                 @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>
@@ -259,5 +278,6 @@
 
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
+    @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
 @endsection

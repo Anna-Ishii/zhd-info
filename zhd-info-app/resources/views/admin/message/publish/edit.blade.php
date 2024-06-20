@@ -130,91 +130,106 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-lg-2 control-label">PDF添付<span class="text-danger required">*<span></label>
-                <div class="col-lg-4 fileInputs">
+                <label class="col-lg-2 control-label"></label>
+                <div class="col-lg-12 fileInputs">
                     @if (request()->old())
                         @if (old('file_name'))
                             @foreach (old('file_name') as $index => $file_name)
                                 <div class="file-input-container">
-                                    <label class="inputFile form-control">
-                                        <span class="fileName" style="text-align: center;">{!! $file_name ? $file_name : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}</span>
-                                        <input type="file" name="file[]" accept=".pdf" multiple="multiple">
-                                        <input type="hidden" name="file_name[]" value="{{ $file_name }}">
-                                        <input type="hidden" name="file_path[]" value="{{ old('file_path')[$index] }}">
-                                        <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
-                                    </label>
-                                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar" style="width: 0%"></div>
+                                    <div class="row">
+                                        @if ($index = 0)
+                                            <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
+                                        @else
+                                            <label class="col-lg-2 control-label">添付{{$index}}</label>
+                                        @endif
+                                        <div class="col-lg-4">
+                                            <label class="inputFile form-control">
+                                                <span class="fileName" style="text-align: center;">{!! $file_name ? $file_name : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}</span>
+                                                <input type="file" name="file[]" accept=".pdf" multiple="multiple" data-cache="active">
+                                                <input type="hidden" name="file_name[]" value="{{ $file_name }}">
+                                                <input type="hidden" name="file_path[]" value="{{ old('file_path')[$index] }}">
+                                                <input type="hidden" name="join_flg[]" value="{{ old('join_flg')[$index] }}">
+                                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
+                                            </label>
+                                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        @if (old('join_flg')[$index] === 'join')
+                                            <label class="col-lg-2" style="padding-top: 10px;">結合</label>
+                                        @else
+                                            <label class="col-lg-2" style="padding-top: 10px; display: none;">結合</label>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
-                            @if (count(old('file_name')) < 10)
-                                <div class="file-input-add">
-                                    <label class="inputFile" style="float: right;">
-                                        <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
-                                        <input type="button" class="fileUploadButton" style="display: none;">
-                                    </label>
-                                </div>
-                            @endif
                         @endif
                     @else
                         {{-- 複数ファイルの場合 --}}
                         @if ($message_contents->isNotEmpty())
-                            @foreach ($message_contents as $message_content)
+                            @foreach ($message_contents as $index => $message_content)
                                 <div class="file-input-container">
-                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}" required>
-                                    <label class="inputFile form-control">
-                                        <span class="fileName" style="text-align: center;">
-                                            @if (request()->old())
-                                                {!! old('file_name[]') ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
-                                            @else
-                                                {!! $message_content->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
-                                            @endif
-                                        </span>
-                                        <input type="file" name="file" accept=".pdf">
-                                        <input type="hidden" name="file_name[]" value="{{ old('file_name[]', $message_content->content_name) }}">
-                                        <input type="hidden" name="file_path[]" value="{{ old('file_path[]', $message_content->content_url) }}">
-                                        <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
-                                    </label>
-                                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar" style="width: 0%"></div>
+                                    <div class="row">
+                                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}" required>
+                                        @if ($index === 0)
+                                            <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
+                                        @else
+                                            <label class="col-lg-2 control-label">添付{{$index}}</label>
+                                        @endif
+                                        <div class="col-lg-4">
+                                            <label class="inputFile form-control">
+                                                <span class="fileName" style="text-align: center;">
+                                                    @if (request()->old())
+                                                        {!! old('file_name[]') ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
+                                                    @else
+                                                        {!! $message_content->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
+                                                    @endif
+                                                </span>
+                                                <input type="file" name="file" accept=".pdf" data-cache="active">
+                                                <input type="hidden" name="file_name[]" value="{{ old('file_name[]', $message_content->content_name) }}">
+                                                <input type="hidden" name="file_path[]" value="{{ old('file_path[]', $message_content->content_url) }}">
+                                                <input type="hidden" name="join_flg[]" value="{{ old('join_flg[]', $message_content->join_flg) }}">
+                                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
+                                            </label>
+                                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                                <div class="progress-bar" style="width: 0%"></div>
+                                            </div>
+                                        </div>
+                                        @if ($message_content->join_flg === 'join')
+                                            <label class="col-lg-2" style="padding-top: 10px;">結合</label>
+                                        @else
+                                            <label class="col-lg-2" style="padding-top: 10px; display: none;">結合</label>
+                                        @endif
                                     </div>
                                 </div>
                             @endforeach
-                            @if ($message_contents->count() < 10)
-                                <div class="file-input-add">
-                                    <label class="inputFile" style="float: right;">
-                                        <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
-                                        <input type="button" class="fileUploadButton" style="display: none;">
-                                    </label>
-                                </div>
-                            @endif
                             {{-- 単一ファイルの場合 --}}
                         @else
                             <div class="file-input-container">
-                                <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}" required>
-                                <label class="inputFile form-control">
-                                    <span class="fileName" style="text-align: center;">
-                                        @if (request()->old())
-                                            {!! old('file_name[]') ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
-                                        @else
-                                            {!! $message->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
-                                        @endif
-                                    </span>
-                                    <input type="file" name="file" accept=".pdf">
-                                    <input type="hidden" name="file_name[]" value="{{ old('file_name[]', $message->content_name) }}">
-                                    <input type="hidden" name="file_path[]" value="{{ old('file_path[]', $message->content_url) }}">
-                                    <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
-                                </label>
-                                <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                    <div class="progress-bar" style="width: 0%"></div>
+                                <div class="row">
+                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message->id }}" required>
+                                    <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
+                                    <div class="col-lg-4">
+                                        <label class="inputFile form-control">
+                                            <span class="fileName" style="text-align: center;">
+                                                @if (request()->old())
+                                                    {!! old('file_name[]') ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
+                                                @else
+                                                    {!! $message->content_name ?? 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}
+                                                @endif
+                                            </span>
+                                            <input type="file" name="file" accept=".pdf" data-cache="active">
+                                            <input type="hidden" name="file_name[]" value="{{ old('file_name[]', $message->content_name) }}">
+                                            <input type="hidden" name="file_path[]" value="{{ old('file_path[]', $message->content_url) }}">
+                                            <input type="hidden" name="join_flg[]" value="{{ old('join_flg[]') }}">
+                                            <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
+                                        </label>
+                                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                            <div class="progress-bar" style="width: 0%"></div>
+                                        </div>
+                                    </div>
+                                    <label class="col-lg-2" style="padding-top: 10px; display: none;">結合</label>
                                 </div>
-                            </div>
-                            <div class="file-input-add">
-                                <label class="inputFile" style="float: right;">
-                                    <span class="custom-upload" style="background-color: #eee; padding: 10px 20px; border-radius: 5px; cursor: pointer; display: inline-block;">追　加</span>
-                                    <input type="button" class="fileUploadButton" style="display: none;">
-                                </label>
                             </div>
                         @endif
                     @endif
@@ -396,6 +411,7 @@
         </form>
     </div>
     @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
+    @include('common.admin.message-new-join-file-modal', [])
     <script src="{{ asset('/js/admin/message/publish/edit.js') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}" defer></script>
 @endsection
