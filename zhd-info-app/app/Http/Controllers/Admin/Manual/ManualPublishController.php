@@ -328,14 +328,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -348,14 +347,14 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
+
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -370,14 +369,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -392,14 +390,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -609,14 +606,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -629,14 +625,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -651,14 +646,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -673,14 +667,13 @@ class ManualPublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -1423,14 +1416,13 @@ class ManualPublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1443,14 +1435,13 @@ class ManualPublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1465,14 +1456,13 @@ class ManualPublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1487,14 +1477,13 @@ class ManualPublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1503,6 +1492,10 @@ class ManualPublishController extends Controller
                 }
             }
 
+            // shop_codeを基準にソートするためのカスタム比較関数を定義
+            usort($all_shop_list, function ($a, $b) {
+                return strcmp($a['shop_code'], $b['shop_code']);
+            });
 
             return response()
                 ->view('common.admin.manual-csv-store-modal', [

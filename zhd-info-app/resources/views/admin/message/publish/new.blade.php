@@ -302,7 +302,7 @@
                         </label>
 
                         <label class="mr16">
-                            <a href="{{ route('admin.message.publish.new-store-export-list', $organization1->id) }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin">エクスポート</a>
+                            <a href="{{ route('admin.message.publish.new-store-export-list', $organization1->id) }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin" id="export-link">エクスポート</a>
                         </label>
 
                     </div>
