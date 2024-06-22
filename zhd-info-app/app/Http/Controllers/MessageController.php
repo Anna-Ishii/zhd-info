@@ -113,19 +113,13 @@ class MessageController extends Controller
 
         // 送付ファイル
         foreach ($messages as &$message) {
-            $join_file_list = [];
-            $single_file_list = [];
+            $file_list = [];
 
             $all_message_files = Message::where('id', $message->id)->get()->toArray();
             $all_message_content_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
             foreach ($all_message_files as $message_file) {
                 if ($message_file) {
-                    $join_file_list[] = [
-                        "file_name" => $message_file["content_name"],
-                        "file_url" => $message_file["content_url"],
-                    ];
-
                     // PDFファイルのページ数を取得
                     $pdf = new TcpdfFpdi();
                     $file_path = $message_file["content_url"]; // PDFファイルのパス
@@ -142,19 +136,21 @@ class MessageController extends Controller
             }
 
             foreach ($all_message_content_files as $message_content_file) {
-                if ($message_content_file["join_flg"] === "single") {
-                    $single_file_list[] = [
-                        "file_name" => $message_content_file["content_name"],
-                        "file_url" => $message_content_file["content_url"],
-                    ];
-                }
+                $file_list[] = [
+                    "file_name" => $message_content_file["content_name"],
+                    "file_url" => $message_content_file["content_url"],
+                ];
             }
 
-            $message->join_files = $join_file_list;
-            $message->single_files = $single_file_list;
+            // 最初の要素を削除(業態ファイル)
+            if (!empty($file_list)) {
+                array_shift($file_list);
+            }
+
+            $message->content_files = $file_list;
 
             // ファイルのカウント
-            $message->single_file_count = count($single_file_list);
+            $message->file_count = count($file_list);
         }
 
         return view('message.index', [

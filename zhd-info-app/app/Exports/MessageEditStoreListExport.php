@@ -50,6 +50,7 @@ class MessageEditStoreListExport implements
             })
             ->where('shops.organization1_id', $message->organization1_id)
             ->groupBy('shops.id')
+            ->orderBy('shops.shop_code')
             ->get();
 
         $all_store_list = $store_list->toArray();

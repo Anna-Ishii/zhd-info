@@ -57,7 +57,7 @@
                         <div class="list__no">No.</div>
                         <div class="list__category">カテゴリ</div>
                         <div class="list__title">タイトル</div>
-                        <div class="list__file">送付</div>
+                        <div class="list__file">添付</div>
                         <div class="list__status">
                             <div class="list__status__limit">掲載期間</div>
                             <div class="list__status__read">閲覧履歴</div>
@@ -100,8 +100,8 @@
                                     </ul>
                                 </div>
                                 <div class="list__file">
-                                    @if ($message->single_file_count > 0)
-                                        <span class="openModalBtn" data-modal-target="singleFileModal{{ $message->id }}"> 有 ({{ $message->single_file_count }}) </span>
+                                    @if ($message->file_count > 0)
+                                        有 ({{ $message->file_count }})
                                     @endif
                                 </div>
                                 <div class="list__status">
@@ -143,5 +143,23 @@
         </div>
     </div>
 
-    @include('common.single-file-modal', ['messages' => $messages])
+    @foreach ($messages as $message)
+        <div class="modal" data-modal-target="singleFileModal{{ $message->id }}" style="height: 50%;">
+            <div class="modal__inner">
+                <div class="readUser">
+                    <div class="modal-header">
+                        <h4 class="modal-title">添付ファイル　全{{ $message->file_count }}件</h4>
+                    </div>
+                    <div class="modal-body" style="padding: 10px; max-height: 200px;">
+                        @foreach ($message->content_files as $file)
+                            <p><a href="{{ asset($file['file_url']) }}" target="_blank">{{ $file['file_name'] }}</a></p>
+                        @endforeach
+                    </div>
+                </div>
+                <div class="modal__btnInner">
+                    <button type="button" class="btnType3 modal__close">閉じる</button>
+                </div>
+            </div>
+        </div>
+    @endforeach
 @endsection

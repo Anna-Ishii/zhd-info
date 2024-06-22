@@ -27,9 +27,25 @@ function updateAllParentCheckboxes() {
     });
 }
 
+// 全選択/選択解除のチェックボックスの状態を更新
+function updateSelectAllCheckboxes() {
+    // 組織タブのチェックボックスの状態を更新
+    const organizationCheckboxes = document.querySelectorAll('#storeModal #byOrganization input.shop-checkbox');
+    const selectAllOrganizationCheckbox = document.querySelector('#selectAllOrganization');
+    const allCheckedOrganization = Array.from(organizationCheckboxes).every(checkbox => checkbox.checked);
+    selectAllOrganizationCheckbox.checked = allCheckedOrganization;
+
+    // 店舗コード順タブのチェックボックスの状態を更新
+    const storeCodeCheckboxes = document.querySelectorAll('#storeModal #byStoreCode input.shop-checkbox');
+    const selectAllStoreCodeCheckbox = document.querySelector('#selectAllStoreCode');
+    const allCheckedStoreCode = Array.from(storeCodeCheckboxes).every(checkbox => checkbox.checked);
+    selectAllStoreCodeCheckbox.checked = allCheckedStoreCode;
+}
+
 // 初期表示の更新
 updateSelectedStores();
 updateAllParentCheckboxes();
+updateSelectAllCheckboxes();
 
 // チェックボックスの変更イベントリスナーを追加
 $(document).on('change', '#storeModal input[name="organization_shops[]"], #storeModal input[name="shops_code[]"]', function() {
@@ -38,6 +54,7 @@ $(document).on('change', '#storeModal input[name="organization_shops[]"], #store
     if ($(this).hasClass('shop-checkbox')) {
         updateParentCheckbox($(this).attr('data-organization-id'));
     }
+    updateSelectAllCheckboxes();
 });
 
 // 親チェックボックスの変更イベントリスナーを追加
@@ -49,6 +66,33 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
         syncCheckboxes($(this).attr('data-store-id'), checked);
     });
     updateSelectedStores();
+    updateSelectAllCheckboxes();
+});
+
+// 組織単位タブの全選択/選択解除
+$(document).on('change', '#selectAllOrganization', function() {
+    const checked = this.checked;
+    $('#storeModal #byOrganization input[type="checkbox"]').each(function() {
+        this.checked = checked;
+        if ($(this).hasClass('shop-checkbox')) {
+            syncCheckboxes($(this).attr('data-store-id'), checked);
+        }
+    });
+    updateSelectedStores();
+    updateSelectAllCheckboxes();
+});
+
+// 店舗コード順タブの全選択/選択解除
+$(document).on('change', '#selectAllStoreCode', function() {
+    const checked = this.checked;
+    $('#storeModal #byStoreCode input[type="checkbox"]').each(function() {
+        this.checked = checked;
+        if ($(this).hasClass('shop-checkbox')) {
+            syncCheckboxes($(this).attr('data-store-id'), checked);
+        }
+    });
+    updateSelectedStores();
+    updateSelectAllCheckboxes();
 });
 
 // check-selected クラスを削除と隠し入力フィールドの値を空にする
@@ -87,8 +131,6 @@ function changeValues() {
 }
 
 $(document).ready(function () {
-    changeValues();
-
     if ($("#selectStore").val() === "selected") {
         // 店舗選択中の処理
         const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
@@ -213,7 +255,11 @@ $(document).on('click', '#selectCsvBtn', function() {
 $(document).on('click', '#csvImportBtn', function() {
     // モーダルを閉じる
     $("#manualStoreModal").modal("hide");
+
+    // ファイルを削除
+    $('#manualStoreImportModal input[type="file"]').val('');
 });
+
 
 /* ファイル検知 */
 function changeFileName(e){
