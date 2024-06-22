@@ -375,6 +375,22 @@ $(document).on('click', '.list__status__read', async function(e) {
 
 })
 
+$(document).on('click', '.list__file', async function(e) {
+	e.preventDefault();
+	e.stopPropagation();
+	let btnModel = $(this).closest('.btnModal');
+	var message = btnModel.find('.list__item>.list__id').text();
+
+	let target = btnModel.data('modal-target');
+	target = 'singleFileModal' + message;
+	modalAnim(target);
+
+	if(target == 'singleFileModal'){
+		let target = $('.readUser__sort').find('.isSelected');
+		userSort(target);
+	}
+})
+
 $(document).on('click', '.btnModal[data-modal-target="check"]', async function(e) {
 	e.preventDefault();
 

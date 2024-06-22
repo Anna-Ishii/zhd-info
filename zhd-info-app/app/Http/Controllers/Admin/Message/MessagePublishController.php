@@ -163,21 +163,15 @@ class MessagePublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
-            // 送付ファイル
+            // 添付ファイル
             foreach ($message_list as &$message) {
-                $join_file_list = [];
-                $single_file_list = [];
+                $file_list = [];
 
                 $all_message_files = Message::where('id', $message->id)->get()->toArray();
                 $all_message_content_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
                 foreach ($all_message_files as $message_file) {
                     if ($message_file) {
-                        $join_file_list[] = [
-                            "file_name" => $message_file["content_name"],
-                            "file_url" => $message_file["content_url"],
-                        ];
-
                         // PDFファイルのページ数を取得
                         $pdf = new TcpdfFpdi();
                         $file_path = $message_file["content_url"]; // PDFファイルのパス
@@ -194,19 +188,21 @@ class MessagePublishController extends Controller
                 }
 
                 foreach ($all_message_content_files as $message_content_file) {
-                    if ($message_content_file["join_flg"] === "single") {
-                        $single_file_list[] = [
-                            "file_name" => $message_content_file["content_name"],
-                            "file_url" => $message_content_file["content_url"],
-                        ];
-                    }
+                    $file_list[] = [
+                        "file_name" => $message_content_file["content_name"],
+                        "file_url" => $message_content_file["content_url"],
+                    ];
                 }
 
-                $message->join_files = $join_file_list;
-                $message->single_files = $single_file_list;
+                // 最初の要素を削除(業態ファイル)
+                if (!empty($file_list)) {
+                    array_shift($file_list);
+                }
+
+                $message->content_files = $file_list;
 
                 // ファイルのカウント
-                $message->single_file_count = count($single_file_list);
+                $message->file_count = count($file_list);
             }
 
             // 店舗数をカウント
@@ -372,14 +368,14 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
+
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -392,14 +388,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -414,14 +409,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -436,14 +430,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -477,7 +470,20 @@ class MessagePublishController extends Controller
         $message_contents = $this->messageContentsParam($request);
 
         // 結合処理
-        $join_file_list = $this->pdfFileJoin($message_contents);
+        $join_files = [];
+        foreach ($message_contents as $content) {
+            if ($content["join_flg"] === "join") {
+                $join_files[] = [
+                    "content_name" => $content["content_name"],
+                    "content_url" => $content["content_url"],
+                ];
+            }
+        }
+        if (!empty($join_files)) {
+            $join_file_list = $this->pdfFileJoin($join_files);
+        } else {
+            $join_file_list = [];
+        }
 
         $admin = session('admin');
         $msg_params['title'] = $request->title;
@@ -485,8 +491,14 @@ class MessagePublishController extends Controller
         $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        $msg_params['content_name'] = $request->file_name[0] ? $join_file_list[0]['content_name'] : null;
-        $msg_params['content_url'] = $request->file_path[0] ? $join_file_list[0]['content_url'] : null;
+        // 結合処理したか判定
+        if (!empty($join_file_list)) {
+            $msg_params['content_name'] = $join_file_list[0]['content_name'];
+            $msg_params['content_url'] = $join_file_list[0]['content_url'];
+        } else {
+            $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+            $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+        }
         $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
         $msg_params['create_admin_id'] = $admin->id;
         $msg_params['organization1_id'] = $organization1->id;
@@ -678,14 +690,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -698,14 +709,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -720,14 +730,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -742,14 +751,13 @@ class MessagePublishController extends Controller
                         ->toArray();
 
                     // shop_codeとdisplay_nameを合体
-                    foreach ($shops as &$shop) {
-                        $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                    foreach ($shops as $shop) {
 
                         // すべてのshopリスト
                         $all_shop_list[] = [
                             'shop_id' => $shop['id'],
                             'shop_code' => $shop['shop_code'],
-                            'shop_display_info' => $shop['shop_display_info'],
+                            'display_name' => $shop['display_name'],
                         ];
                     }
 
@@ -895,10 +903,30 @@ class MessagePublishController extends Controller
             $message_contents = array_merge($message_contents, $content_data);
 
             if ($this->isChangedFile($join_path_list, $request->file_path ?? null) || $this->isChangedFile($join_flg_list, array_filter($request->join_flg ?? []))) {
-                // 結合処理
-                $join_file_list = $this->pdfFileJoin($message_contents);
-                $msg_params['content_name'] = $request->file_name[0] ? $join_file_list[0]['content_name'] : null;
-                $msg_params['content_url'] = $request->file_path[0] ? $join_file_list[0]['content_url'] : null;
+            // 結合処理
+            $join_files = [];
+            foreach ($message_contents as $content) {
+                if ($content["join_flg"] === "join") {
+                    $join_files[] = [
+                        "content_name" => $content["content_name"],
+                        "content_url" => $content["content_url"],
+                    ];
+                }
+            }
+            if (!empty($join_files)) {
+                $join_file_list = $this->pdfFileJoin($join_files);
+            } else {
+                $join_file_list = [];
+            }
+
+            // 結合処理したか判定
+            if (!empty($join_file_list)) {
+                $msg_params['content_name'] = $join_file_list[0]['content_name'];
+                $msg_params['content_url'] = $join_file_list[0]['content_url'];
+            } else {
+                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+            }
                 $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
 
                 $message_changed_flg = true;
@@ -1506,14 +1534,13 @@ class MessagePublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1526,14 +1553,13 @@ class MessagePublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1548,14 +1574,13 @@ class MessagePublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1570,14 +1595,13 @@ class MessagePublishController extends Controller
                             ->toArray();
 
                         // shop_codeとdisplay_nameを合体
-                        foreach ($shops as &$shop) {
-                            $shop['shop_display_info'] = $shop['shop_code'] . ' ' . $shop['display_name'];
+                        foreach ($shops as $shop) {
 
                             // すべてのshopリスト
                             $all_shop_list[] = [
                                 'shop_id' => $shop['id'],
                                 'shop_code' => $shop['shop_code'],
-                                'shop_display_info' => $shop['shop_display_info'],
+                                'display_name' => $shop['display_name'],
                             ];
                         }
 
@@ -1586,6 +1610,10 @@ class MessagePublishController extends Controller
                 }
             }
 
+            // shop_codeを基準にソートするためのカスタム比較関数を定義
+            usort($all_shop_list, function ($a, $b) {
+                return strcmp($a['shop_code'], $b['shop_code']);
+            });
 
             return response()
             ->view('common.admin.message-csv-store-modal', [
@@ -1606,18 +1634,8 @@ class MessagePublishController extends Controller
     }
 
     // PDFの結合処理
-    private function pdfFileJoin($message_contents): array
+    private function pdfFileJoin($join_files): array
     {
-        $join_files = [];
-        foreach ($message_contents as $content) {
-            if ($content["join_flg"] === "join") {
-                $join_files[] = [
-                    "content_name" => $content["content_name"],
-                    "content_url" => $content["content_url"],
-                ];
-            }
-        }
-
         // メモリ制限を一時的に増加
         ini_set('memory_limit', '2048M');
 

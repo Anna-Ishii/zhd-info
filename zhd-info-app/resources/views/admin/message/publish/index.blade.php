@@ -161,7 +161,7 @@
                             <th class="text-center" nowrap>ラベル</th>
                             <th class="text-center" nowrap>カテゴリ</th>
                             <th class="text-center" nowrap>タイトル</th>
-                            <th class="text-center" nowrap>送付</th>
+                            <th class="text-center" nowrap>添付</th>
                             <th class="text-center" nowrap>検索タグ</th>
                             <th class="text-center" nowrap>添付ファイル</th>
                             <th class="text-center" colspan="2">掲載期間</th>
@@ -205,9 +205,9 @@
                                     @endif
                                 </td>
                                 <td class="label-file">
-                                    @if($message->single_file_count > 0)
+                                    @if($message->file_count > 0)
                                         <a href="#" data-toggle="modal" data-target="#singleFileModal{{ $message->id }}">
-                                            {{ $message->title }} ({{ $message->single_file_count }})
+                                            有 ({{ $message->file_count }})
                                         </a>
                                     @endif
                                 </td>

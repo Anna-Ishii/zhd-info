@@ -7,10 +7,10 @@
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
-                    <h4 class="modal-title" id="singleFileModalLabel{{ $message->id }}">添付ファイル　全{{ $message->single_file_count }}件</h4>
+                    <h4 class="modal-title" id="singleFileModalLabel{{ $message->id }}">添付ファイル　全{{ $message->file_count }}件</h4>
                 </div>
                 <div class="modal-body modal-body-scrollable" id="singleFiles" style="max-height: 300px; overflow-y: auto;">
-                    @foreach($message->single_files as $file)
+                    @foreach($message->content_files as $file)
                         <p><a href="{{ asset($file['file_url']) }}" target="_blank">{{ $file['file_name'] }}</a></p>
                     @endforeach
                 </div>
