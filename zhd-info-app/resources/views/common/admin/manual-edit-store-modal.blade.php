@@ -42,7 +42,7 @@
 
 <!-- モーダル：店舗選択 -->
 <div class="modal fade" id="manualStoreModal" tabindex="-1" style="top: -20%;">
-    <div class="modal-dialog">
+    <div class="modal-dialog" style="max-width: 450px;">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
@@ -61,6 +61,13 @@
                 <div class="tab-content modal-body-scroll" id="storeTabContent" style="max-height: 400px; overflow-y: auto;">
                     <div class="tab-pane fade in active" id="byOrganization" role="tabpanel" aria-labelledby="byOrganization-tab">
                         <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="selectAllOrganization"> 全て選択/選択解除
+                                    </label>
+                                </div>
+                            </li>
                             @php
                                 $organization_shops = explode(',', old('organization_shops', ''));
                             @endphp
@@ -85,7 +92,7 @@
                                                 @foreach ($organization['organization5_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
-                                                            <div class="checkbox">
+                                                            <div>
                                                                 <label>
                                                                     <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization5_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
                                                                     @if(request()->old())
@@ -94,7 +101,7 @@
                                                                         {{ in_array($shop['id'], $target_org['shops'], true) ? 'checked' : '' }}
                                                                     @endif
                                                                     >
-                                                                    {{$shop['shop_display_info']}}
+                                                                    {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
                                                                 </label>
                                                             </div>
                                                         </li>
@@ -123,7 +130,7 @@
                                                 @foreach ($organization['organization4_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
-                                                            <div class="checkbox">
+                                                            <div>
                                                                 <label>
                                                                     <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization4_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
                                                                     @if(request()->old())
@@ -132,7 +139,7 @@
                                                                         {{ in_array($shop['id'], $target_org['shops'], true) ? 'checked' : '' }}
                                                                     @endif
                                                                     >
-                                                                    {{$shop['shop_display_info']}}
+                                                                    {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
                                                                 </label>
                                                             </div>
                                                         </li>
@@ -161,7 +168,7 @@
                                                 @foreach ($organization['organization3_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
-                                                            <div class="checkbox">
+                                                            <div>
                                                                 <label>
                                                                     <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization3_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
                                                                     @if(request()->old())
@@ -170,7 +177,7 @@
                                                                         {{ in_array($shop['id'], $target_org['shops'], true) ? 'checked' : '' }}
                                                                     @endif
                                                                     >
-                                                                    {{$shop['shop_display_info']}}
+                                                                    {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
                                                                 </label>
                                                             </div>
                                                         </li>
@@ -199,7 +206,7 @@
                                                 @foreach ($organization['organization2_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
-                                                            <div class="checkbox">
+                                                            <div>
                                                                 <label>
                                                                     <input type="checkbox" name="organization_shops[]" data-organization-id="{{$organization['organization2_id']}}" data-store-id="{{$shop['id']}}" value="{{$shop['id']}}" class="checkCommon mr8 shop-checkbox"
                                                                     @if(request()->old())
@@ -208,7 +215,7 @@
                                                                         {{ in_array($shop['id'], $target_org['shops'], true) ? 'checked' : '' }}
                                                                     @endif
                                                                     >
-                                                                    {{$shop['shop_display_info']}}
+                                                                    {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
                                                                 </label>
                                                             </div>
                                                         </li>
@@ -223,10 +230,17 @@
                     </div>
                     <div class="tab-pane fade" id="byStoreCode" role="tabpanel" aria-labelledby="byStoreCode-tab">
                         <ul class="list-group">
+                            <li class="list-group-item">
+                                <div class="checkbox">
+                                    <label>
+                                        <input type="checkbox" id="selectAllStoreCode"> 全て選択/選択解除
+                                    </label>
+                                </div>
+                            </li>
                             @foreach ($all_shop_list as $index => $shop_list)
-                                @if (isset($shop_list['shop_display_info']))
+                                @if (isset($shop_list['shop_code']))
                                     <li class="list-group-item">
-                                        <div class="checkbox">
+                                        <div>
                                             <label>
                                                 <input type="checkbox"name="shops_code[]" data-store-id="{{$shop_list['shop_id']}}" value="{{$shop_list['shop_id']}}" class="checkCommon mr8 shop-checkbox"
                                                 @if(request()->old())
@@ -235,7 +249,7 @@
                                                     {{ in_array($shop_list['shop_id'], $target_org['shops'], true) ? 'checked' : '' }}
                                                 @endif
                                                 >
-                                                {{$shop_list['shop_display_info']}}
+                                                {{ $shop_list['shop_code'] }} {{ $shop_list['display_name'] }}
                                             </label>
                                         </div>
                                     </li>
