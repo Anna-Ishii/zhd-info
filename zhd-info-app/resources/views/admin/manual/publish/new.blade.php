@@ -35,7 +35,6 @@
                             @if (in_array('account-admin', $arrow_pages, true))
                                 <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                             @endif
-
                         </ul>
                     </li>
                 @endif
@@ -265,7 +264,6 @@
                 <label class="col-lg-2 control-label">対象店舗<span class="text-danger required">*<span></label>
                 <div class="col-lg-10 checkArea">
                     <div class="check-store-list mb8 text-left">
-
                         @if (old('organization.org5.0'))
                             <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="{{old('organization.org5.0')}}">
                         @else
@@ -291,7 +289,6 @@
                         @else
                             <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="">
                         @endif
-
                         <label class="mr16">
                             @if (old('select_organization.all') === 'selected')
                                 <input type="button" class="btn btn-admin check-selected" id="checkAll" name="organizationAll" value="全店">
@@ -301,7 +298,6 @@
                                 <input type="hidden" id="selectOrganizationAll" name="select_organization[all]" value="">
                             @endif
                         </label>
-
                         <label class="mr16">
                             @if (old('select_organization.store') === 'selected')
                                 <input type="button" class="btn btn-admin check-selected" id="checkStore" data-toggle="modal" data-target="#manualStoreModal" value="店舗選択">
@@ -311,21 +307,19 @@
                                 <input type="hidden" id="selectStore" name="select_organization[store]" value="">
                             @endif
                         </label>
-
                         <label class="mr16">
                             @if (old('select_organization.csv') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="checkCsv" data-toggle="modal" data-target="#manualStoreModal" value="インポート">
+                                <input type="button" class="btn btn-admin check-selected" id="importCsv" data-toggle="modal" data-target="#manualStoreModal" value="インポート">
                                 <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
                             @else
-                                <input type="button" class="btn btn-admin" id="checkCsv" data-toggle="modal" data-target="#manualStoreImportModal" value="インポート">
+                                <input type="button" class="btn btn-admin" id="importCsv" data-toggle="modal" data-target="#manualStoreImportModal" value="インポート">
                                 <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
                             @endif
                         </label>
-
                         <label class="mr16">
-                            <a href="{{ route('admin.manual.publish.new-store-export-list', $organization1->id) }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin">エクスポート</a>
+                            <input type="button" class="btn btn-admin" id="exportCsv" value="エクスポート">
+                            <input type="hidden" name="organization1_id" value="{{$organization1->id}}">
                         </label>
-
                     </div>
                 </div>
             </div>

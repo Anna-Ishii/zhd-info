@@ -405,6 +405,11 @@ class ManualPublishController extends Controller
             }
         }
 
+        // shop_codeを基準にソートするためのカスタム比較関数を定義
+        usort($all_shop_list, function ($a, $b) {
+            return strcmp($a['shop_code'], $b['shop_code']);
+        });
+
         return view('admin.manual.publish.new', [
             'organization1' => $organization1,
             'new_category_list' => $new_category_list,
@@ -515,9 +520,8 @@ class ManualPublishController extends Controller
             }
 
             $manual->brand()->attach($request->brand);
-            $manual->user()->attach(
-                !isset($request->save) ? $this->targetUserParam2($request) : []
-            );
+            $manual->user()->attach(!isset($request->save) ? $this->targetUserParam2($request) : []);
+
             $manual->content()->createMany($this->manualContentsParam($request));
 
             if (isset($request->tag_name)) {
@@ -755,10 +759,11 @@ class ManualPublishController extends Controller
 
         // ファイルを移動したかフラグ
         $manual_changed_flg = false;
-        $manualcontent_changed_flg = false;
+        $manual_content_changed_flg = false;
 
         $admin = session('admin');
         $manual = Manual::find($manual_id);
+
         $manual_params['title'] = $request->title;
         $manual_params['description'] = $request->description;
         $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
@@ -806,7 +811,7 @@ class ManualPublishController extends Controller
                             $manual_content->content_name = $r['file_name'];
                             $manual_content->content_url = $this->registerFile($r['file_path']);
                             $manual_content->thumbnails_url = ImageConverter::convert2image($manual_content->content_url);
-                            $manualcontent_changed_flg = true;
+                            $manual_content_changed_flg = true;
                         }
 
                         $manual_content->save();
@@ -818,13 +823,11 @@ class ManualPublishController extends Controller
                         if (isset($r['file_name']) && isset($r['file_path'])) {
                             $content_data[$i]['content_name'] = $r['file_name'];
                             $content_data[$i]['content_url'] = $this->registerFile($r['file_path']);
-                            $content_data[$i]['thumbnails_url'] =
-                                ImageConverter::convert2image($content_data[$i]['content_url']);
+                            $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
                         }
                     }
                 }
             }
-
 
             $manual->update($manual_params);
 
@@ -908,11 +911,8 @@ class ManualPublishController extends Controller
             }
 
             $manual->brand()->sync($request->brand);
-            $manual->user()->sync(
-                !isset($request->save) ? $this->targetUserParam2($request) : []
-            );
+            $manual->user()->sync(!isset($request->save) ? $this->targetUserParam2($request) : []);
             $manual->content()->createMany($content_data);
-
 
             $tag_ids = [];
             foreach ($request->input('tag_name', []) as $tag_name) {
@@ -921,12 +921,11 @@ class ManualPublishController extends Controller
             }
             $manual->tag()->sync($tag_ids);
 
-
             DB::commit();
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($manual_changed_flg) $this->rollbackRegisterFile($request->file_path);
-            if ($manualcontent_changed_flg) $this->rollbackManualContentFile($request);
+            if ($manual_content_changed_flg) $this->rollbackManualContentFile($request);
             Log::error($th->getMessage());
             return redirect()
                 ->back()
@@ -998,29 +997,39 @@ class ManualPublishController extends Controller
         );
     }
 
-    // 業務連絡店舗のエクスポート（新規登録）
-    public function newStoreExportList(Request $request, $organization1_id)
+    // 動画マニュアル店舗のエクスポート（新規登録）
+    public function newCsvStoreExport(Request $request)
     {
-        $admin = session('admin');
+        $organization1_id = (int) $request->input('organization1_id');
         $organization1 = Organization1::find($organization1_id);
 
-        $file_name = '店舗選択_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
+        if (!$organization1) {
+            return response()->json(['error' => 'Organization not found'], 404);
+        }
+
+        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+
         return Excel::download(
-            new ManualNewStoreListExport($request, $organization1_id),
+            new ManualNewStoreListExport($organization1_id),
             $file_name
         );
     }
 
-    // 業務連絡店舗のエクスポート（編集）
-    public function editStoreExportList(Request $request, $manual_id)
+    // 動画マニュアル店舗のエクスポート（編集）
+    public function editCsvStoreExport(Request $request)
     {
-        $admin = session('admin');
+        $manual_id = (int) $request->input('manual_id');
         $manual = Manual::find($manual_id);
         $organization1 = Organization1::find($manual->organization1_id);
 
-        $file_name = '店舗選択_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
+        if (!$organization1) {
+            return response()->json(['error' => 'Organization not found'], 404);
+        }
+
+        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+
         return Excel::download(
-            new ManualEditStoreListExport($request, $manual_id),
+            new ManualEditStoreListExport($manual_id),
             $file_name
         );
     }
@@ -1079,7 +1088,7 @@ class ManualPublishController extends Controller
             $array = [];
             foreach ($collection[0] as $key => [
                 $no,
-                $cateory,
+                $category,
                 $title,
                 $tag1,
                 $tag2,
@@ -1109,7 +1118,7 @@ class ManualPublishController extends Controller
                     }
                 }
                 $brand_param = ($brand == "全て") ? $brands : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-                $category_array = isset($cateory) ? explode('|', $cateory) : null;
+                $category_array = isset($category) ? explode('|', $category) : null;
                 $category_level1_name = isset($category_array[0]) ? str_replace(' ', '', trim($category_array[0], "\"")) : NULL;
                 $category_level2_name = isset($category_array[1]) ? str_replace(' ', '', trim($category_array[1], "\"")) : NULL;
 
@@ -1530,15 +1539,15 @@ class ManualPublishController extends Controller
     private function targetUserParam($brand): array
     {
         // manual_userに該当のユーザーを登録する
-        $target_users_data = [];
+        $target_user_data = [];
         // 該当のショップID
         $shops_id = Shop::select('id')->whereIn('brand_id', $brand)->get()->toArray();
         // 該当のユーザー
         $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
         foreach ($target_users as $target_user) {
-            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
-        return $target_users_data;
+        return $target_user_data;
     }
 
     private function targetUserParam2($organizations): array

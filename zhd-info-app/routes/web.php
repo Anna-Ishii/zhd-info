@@ -73,8 +73,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [MessagePublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [MessagePublishController::class, 'progress'])->name('progress');
-            Route::get('new-store-export-list/{organization1_id}', [MessagePublishController::class, 'newStoreExportList'])->name('new-store-export-list')->where('organization1_id', '^\d+$');
-            Route::get('edit-store-export-list/{message_id}', [MessagePublishController::class, 'editStoreExportList'])->name('edit-store-export-list')->where('message_id', '^\d+$');
+            Route::post('/csv/store/new-export', [MessagePublishController::class, 'newCsvStoreExport'])->name('newCsvStoreExport');
+            Route::post('/csv/store/edit-export', [MessagePublishController::class, 'editCsvStoreExport'])->name('editCsvStoreExport');
             Route::post('/store/import', [MessagePublishController::class, 'storeImport'])->name('storeImport');
             Route::post('/csv/store/upload', [MessagePublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [MessagePublishController::class, 'storeProgress'])->name('storeProgress');
@@ -96,8 +96,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [ManualPublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [ManualPublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [ManualPublishController::class, 'progress'])->name('progress');
-            Route::get('new-store-export-list/{organization1_id}', [ManualPublishController::class, 'newStoreExportList'])->name('new-store-export-list')->where('organization1_id', '^\d+$');
-            Route::get('edit-store-export-list/{manual_id}', [ManualPublishController::class, 'editStoreExportList'])->name('edit-store-export-list')->where('manual_id', '^\d+$');
+            Route::post('/csv/store/new-export', [ManualPublishController::class, 'newCsvStoreExport'])->name('newCsvStoreExport');
+            Route::post('/csv/store/edit-export', [ManualPublishController::class, 'editCsvStoreExport'])->name('editCsvStoreExport');
             Route::post('/store/import', [ManualPublishController::class, 'storeImport'])->name('storeImport');
             Route::post('/csv/store/upload', [ManualPublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [ManualPublishController::class, 'storeProgress'])->name('storeProgress');

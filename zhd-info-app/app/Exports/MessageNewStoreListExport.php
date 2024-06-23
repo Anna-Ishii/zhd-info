@@ -13,12 +13,10 @@ class MessageNewStoreListExport implements
     ShouldAutoSize,
     WithCustomCsvSettings
 {
-    protected $request;
     protected $organization1_id;
 
-    public function __construct($request, $organization1_id = null)
+    public function __construct($organization1_id = null)
     {
-        $this->request = $request;
         $this->organization1_id = $organization1_id;
     }
 
@@ -47,17 +45,16 @@ class MessageNewStoreListExport implements
             ->where('shops.organization1_id', $this->organization1_id)
             ->groupBy('shops.id')
             ->orderBy('shops.shop_code')
-            ->get();
+            ->get()
+            ->toArray();
 
-        $all_store_list = $store_list->toArray();
-
-        foreach ($all_store_list as &$store) {
+        foreach ($store_list as &$store) {
             $store->checked_store = '先行';
         }
         unset($store); // 参照を解除
 
         return view('exports.message-store-list-export', [
-            'store_list' => $all_store_list,
+            'store_list' => $store_list,
             'admin' => $admin
         ]);
     }
