@@ -16,12 +16,10 @@ class ManualEditStoreListExport implements
     ShouldAutoSize,
     WithCustomCsvSettings
 {
-    protected $request;
     protected $manual_id;
 
-    public function __construct($request, $manual_id = null)
+    public function __construct($manual_id = null)
     {
-        $this->request = $request;
         $this->manual_id = $manual_id;
     }
 

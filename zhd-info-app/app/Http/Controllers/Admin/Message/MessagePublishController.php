@@ -589,9 +589,7 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->attach($request->brand);
-            $message->user()->attach(
-                !isset($request->save) ? $this->targetUserParam($request) : []
-            );
+            $message->user()->attach(!isset($request->save) ? $this->targetUserParam2($request) : []);
 
             $message->content()->createMany($message_contents);
 
@@ -1019,9 +1017,7 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->sync($request->brand);
-            $message->user()->sync(
-                !isset($request->save) ? $this->targetUserParam($request) : []
-            );
+            $message->user()->sync(!isset($request->save) ? $this->targetUserParam2($request) : []);
 
             $message->content()->createMany($content_data);
 
@@ -1095,28 +1091,38 @@ class MessagePublishController extends Controller
     }
 
     // 業務連絡店舗のエクスポート（新規登録）
-    public function newStoreExportList(Request $request, $organization1_id)
+    public function newCsvStoreExport(Request $request)
     {
-        $admin = session('admin');
+        $organization1_id = (int) $request->input('organization1_id');
         $organization1 = Organization1::find($organization1_id);
 
-        $file_name = '店舗選択_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
+        if (!$organization1) {
+            return response()->json(['error' => 'Organization not found'], 404);
+        }
+
+        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+
         return Excel::download(
-            new MessageNewStoreListExport($request, $organization1_id),
+            new MessageNewStoreListExport($organization1_id),
             $file_name
         );
     }
 
     // 業務連絡店舗のエクスポート（編集）
-    public function editStoreExportList(Request $request, $message_id)
+    public function editCsvStoreExport(Request $request)
     {
-        $admin = session('admin');
+        $message_id = (int) $request->input('message_id');
         $message = Message::find($message_id);
         $organization1 = Organization1::find($message->organization1_id);
 
-        $file_name = '店舗選択_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
+        if (!$organization1) {
+            return response()->json(['error' => 'Organization not found'], 404);
+        }
+
+        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+
         return Excel::download(
-            new MessageEditStoreListExport($request, $message_id),
+            new MessageEditStoreListExport($message_id),
             $file_name
         );
     }
@@ -1771,7 +1777,60 @@ class MessagePublishController extends Controller
         return $content_ids;
     }
 
-    private function targetUserParam($organizations): array
+    private function targetUserParam($organizarions): Array {
+        $shops_id = [];
+        $target_user_data = [];
+
+        // organizationごとにshopを取得する
+        if (isset($organizarions->organization['org5'])) {
+            $_shops_id = Shop::select('id')
+                ->whereIn('organization5_id', $organizarions->organization['org5'])
+                ->whereIn('brand_id', $organizarions->brand)
+                ->get()
+                ->toArray();
+            $shops_id = array_merge($shops_id, $_shops_id);
+        }
+        if (isset($organizarions->organization['org4'])) {
+            $_shops_id = Shop::select('id')
+                ->whereIn('organization4_id', $organizarions->organization['org4'])
+                ->whereIn('brand_id', $organizarions->brand)
+                ->get()
+                ->toArray();
+            $shops_id = array_merge($shops_id, $_shops_id);
+        }
+        if (isset($organizarions->organization['org3'])) {
+            $_shops_id = Shop::select('id')
+                ->whereIn('organization3_id', $organizarions->organization['org3'])
+                ->whereIn('brand_id', $organizarions->brand)
+                ->whereNull('organization4_id')
+                ->whereNull('organization5_id')
+                ->get()
+                ->toArray();
+            $shops_id = array_merge($shops_id, $_shops_id);
+        }
+        if (isset($organizarions->organization['org2'])) {
+            $_shops_id = Shop::select('id')
+                ->whereIn('organization2_id', $organizarions->organization['org2'])
+                ->whereIn('brand_id', $organizarions->brand)
+                ->whereNull('organization4_id')
+                ->whereNull('organization5_id')
+                ->get()
+                ->toArray();
+            $shops_id = array_merge($shops_id, $_shops_id);
+        }
+
+        // 取得したshopのリストからユーザーを取得する
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizarions->target_roll)->get()->toArray();
+        // ユーザーに業務連絡の閲覧権限を与える
+        foreach ($target_users as $target_user) {
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        }
+
+        return $target_user_data;
+    }
+
+
+    private function targetUserParam2($organizations): array
     {
         $shops_id = [];
         $target_user_data = [];

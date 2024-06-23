@@ -30,12 +30,6 @@ function appendFormTagInput() {
         .appendTo($("#form"));
 }
 
-// エクスポート時にリンク動作を防ぐ
-// document.getElementById('export-link').addEventListener('click', function(event) {
-//     event.preventDefault();
-//     window.location.href = this.href;
-// });
-
 
 
 // PDFファイル処理
