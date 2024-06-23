@@ -13,12 +13,10 @@ class ManualNewStoreListExport implements
     ShouldAutoSize,
     WithCustomCsvSettings
 {
-    protected $request;
     protected $organization1_id;
 
-    public function __construct($request, $organization1_id = null)
+    public function __construct($organization1_id = null)
     {
-        $this->request = $request;
         $this->organization1_id = $organization1_id;
     }
 

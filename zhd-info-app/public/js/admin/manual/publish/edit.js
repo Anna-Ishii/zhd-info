@@ -40,7 +40,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
     progressBar.hide();
     progressBar.css('width', 0 + '%');
     progress.show();
-    
+
     let fileName = $(this).siblings('input[data-variable-name="manual_file_name"]');
     let filePath = $(this).siblings('input[data-variable-name="manual_file_path"]');
 
@@ -68,7 +68,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
                         setTimeout(() => {
                             progress.hide();
                         }, 1000);
-                    } 
+                    }
                 }, false);
             }
             return XHR;
