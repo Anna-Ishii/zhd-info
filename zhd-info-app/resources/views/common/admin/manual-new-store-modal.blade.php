@@ -45,7 +45,6 @@
     <div class="modal-dialog" style="max-width: 450px;">
         <div class="modal-content">
             <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                 <h4 class="modal-title">店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small></h4>
             </div>
             <div class="modal-body" id="storeModal">
@@ -66,8 +65,8 @@
                         aria-labelledby="byOrganization-tab">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <div class="checkbox">
-                                    <label>
+                                <div>
+                                    <label style="font-weight: 500 !important;">
                                         <input type="checkbox" id="selectAllOrganization"> 全て選択/選択解除
                                     </label>
                                 </div>
@@ -78,9 +77,9 @@
                             @foreach ($organization_list as $index => $organization)
                                 @if (isset($organization['organization5_name']))
                                     <li class="list-group-item">
-                                        <div class="checkbox">
-                                            <div style="padding-bottom: 5px;">
-                                                <label>
+                                        <div>
+                                            <div>
+                                                <label style="font-weight: 500 !important;">
                                                     <input type="checkbox" name="organization[org5][]"
                                                         data-organization-id="{{ $organization['organization5_id'] }}"
                                                         value="{{ $organization['organization5_id'] }}"
@@ -102,7 +101,7 @@
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label>
+                                                                <label style="font-weight: 500 !important;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization5_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -125,9 +124,9 @@
                                     </li>
                                 @elseif (isset($organization['organization4_name']))
                                     <li class="list-group-item">
-                                        <div class="checkbox">
-                                            <div style="padding-bottom: 5px;">
-                                                <label>
+                                        <div>
+                                            <div>
+                                                <label style="font-weight: 500 !important;">
                                                     <input type="checkbox" name="organization[org4][]"
                                                         data-organization-id="{{ $organization['organization4_id'] }}"
                                                         value="{{ $organization['organization4_id'] }}"
@@ -149,7 +148,7 @@
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label>
+                                                                <label style="font-weight: 500 !important;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization4_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -172,9 +171,9 @@
                                     </li>
                                 @elseif (isset($organization['organization3_name']))
                                     <li class="list-group-item">
-                                        <div class="checkbox">
-                                            <div style="padding-bottom: 5px;">
-                                                <label>
+                                        <div>
+                                            <div>
+                                                <label style="font-weight: 500 !important;">
                                                     <input type="checkbox" name="organization[org3][]"
                                                         data-organization-id="{{ $organization['organization3_id'] }}"
                                                         value="{{ $organization['organization3_id'] }}"
@@ -197,7 +196,7 @@
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label>
+                                                                <label style="font-weight: 500 !important;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization3_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -220,9 +219,9 @@
                                     </li>
                                 @elseif (isset($organization['organization2_name']))
                                     <li class="list-group-item">
-                                        <div class="checkbox">
-                                            <div style="padding-bottom: 5px;">
-                                                <label>
+                                        <div>
+                                            <div>
+                                                <label style="font-weight: 500 !important;">
                                                     <input type="checkbox" name="organization[org2][]"
                                                         data-organization-id="{{ $organization['organization2_id'] }}"
                                                         value="{{ $organization['organization2_id'] }}"
@@ -245,7 +244,7 @@
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label>
+                                                                <label style="font-weight: 500 !important;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization2_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -273,8 +272,8 @@
                     <div class="tab-pane fade" id="byStoreCode" role="tabpanel" aria-labelledby="byStoreCode-tab">
                         <ul class="list-group">
                             <li class="list-group-item">
-                                <div class="checkbox">
-                                    <label>
+                                <div>
+                                    <label style="font-weight: 500 !important;">
                                         <input type="checkbox" id="selectAllStoreCode"> 全て選択/選択解除
                                     </label>
                                 </div>
@@ -283,7 +282,7 @@
                                 @if (isset($shop_list['shop_code']))
                                     <li class="list-group-item">
                                         <div>
-                                            <label>
+                                            <label style="font-weight: 500 !important;">
                                                 <input type="checkbox"name="shops_code[]"
                                                     data-store-id="{{ $shop_list['shop_id'] }}"
                                                     value="{{ $shop_list['shop_id'] }}"
@@ -305,7 +304,8 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-admin" id="selectStoreBtn">選択</button>
+                <button type="button" class="btn btn-admin pull-left" id="cancelBtn" data-dismiss="modal">キャンセル</button>
+                <button type="button" class="btn btn-admin pull-right" id="selectStoreBtn">選択</button>
             </div>
         </div>
     </div>

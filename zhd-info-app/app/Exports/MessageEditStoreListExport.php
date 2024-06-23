@@ -16,12 +16,10 @@ class MessageEditStoreListExport implements
     ShouldAutoSize,
     WithCustomCsvSettings
 {
-    protected $request;
     protected $message_id;
 
-    public function __construct($request, $message_id = null)
+    public function __construct($message_id = null)
     {
-        $this->request = $request;
         $this->message_id = $message_id;
     }
 

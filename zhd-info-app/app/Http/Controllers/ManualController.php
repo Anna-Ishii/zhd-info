@@ -53,23 +53,23 @@ class ManualController extends Controller
             ->appends(request()->query());
 
         $category_level1s = ManualCategoryLevel1::query()
-                                        ->with('level2s')
-                                        ->get();
+            ->with('level2s')
+            ->get();
         $organization1_id =  $user->shop->organization1->id;
         $keywords = DB::table("manual_search_logs as m_s_l")
-                    ->select([
-                        'keyword',
-                        DB::raw('COUNT(*) as count'),
-                    ])
-                    ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
-                    ->Join('organization1 as o1', function ($join) use ($organization1_id) {
-                        $join->on('o1.id', '=', 's.organization1_id')
-                        ->where('o1.id', '=', $organization1_id);
-                    })
-                    ->groupBy('keyword', 'o1.id')
-                    ->orderBy('count', 'desc')
-                    ->limit(3)
-                    ->get();
+            ->select([
+                'keyword',
+                DB::raw('COUNT(*) as count'),
+            ])
+            ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
+            ->Join('organization1 as o1', function ($join) use ($organization1_id) {
+                $join->on('o1.id', '=', 's.organization1_id')
+                    ->where('o1.id', '=', $organization1_id);
+            })
+            ->groupBy('keyword', 'o1.id')
+            ->orderBy('count', 'desc')
+            ->limit(3)
+            ->get();
 
         return view('manual.index', [
             'manuals' => $manuals,
@@ -89,7 +89,7 @@ class ManualController extends Controller
             'readed_datetime' => Carbon::now(),
         ]);
         //
-        
+
         $contents = $manual->content;
         return view('manual.detail', [
             'manual' => $manual,
@@ -107,7 +107,7 @@ class ManualController extends Controller
         } catch (\Throwable $th) {
             return response()->json(['error' => 'エラーメッセージ'], 500);
         }
-        
+
         return response()->json(['message' => '閲覧しました']);
     }
 
