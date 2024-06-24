@@ -165,6 +165,9 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
             addJoinFileBtn();
         }
     }
+
+    // 「結合中」メッセージを更新する関数の呼び出し
+    updateModalFooterMessage();
 }
 
 // 削除ボタン追加
@@ -259,7 +262,7 @@ function addFileInputAdd() {
 function renumberSendLabels() {
     $(".file-input-container .control-label:contains('添付'), .file-input-container .control-label:contains('業連')").each(function(index) {
         if (index === 0) {
-            $(this).html('業連<span class="text-danger required">*</span>');
+            $(this).html('業連');
         } else {
             $(this).text(`添付${index}`);
         }
@@ -299,8 +302,18 @@ $(document).on("click", ".delete-btn", function () {
         addFileInputAdd();
         addJoinFileBtn();
     }
+
+    // 「結合中」メッセージを更新する関数の呼び出し
+    updateModalFooterMessage();
 });
 
+// 初期状態でボタンの有効/無効を設定し、メッセージを表示
+$(document).ready(function() {
+    // 「結合中」メッセージを更新する関数の呼び出し
+    updateModalFooterMessage();
+    // 初期状態でメッセージを表示
+    updateJoinFileCount();
+});
 
 // 結合の修正ボタン処理
 $(document).on("click", "#joinFileId", function () {
@@ -335,7 +348,7 @@ $(document).on("click", "#joinFileId", function () {
         selectedFiles.forEach(function(file, index) {
             var filePath = selectedFilePaths[index] || 'パスがありません';
             var isChecked = selectedJoinFiles[index] === "join" ? "checked" : "";
-            var labelText = (index === 0) ? '業連<span class="text-danger required">*</span>' : `添付${index}`;
+            var labelText = (index === 0) ? '業連' : `添付${index}`;
             var checkbox =
                 `<div class="checkbox">
                     <label>
@@ -344,6 +357,8 @@ $(document).on("click", "#joinFileId", function () {
                 </div>`;
             $modalBody.append(checkbox);
         });
+
+        // 選択されたファイルのカウントを更新する関数
         updateJoinFileCount();
     } else {
         $modalFooter.append(`<p style="float: left;">結合するファイルが選択されていません。</p>`);
@@ -360,7 +375,7 @@ $(document).on('click', '#joinFileBtn', function() {
 
     // 選択されたファイルパスを取得
     var selectedFilePaths = [];
-    $(".fileInputs [name='file_path[]']").each(function(){
+    $(".fileInputs [name='file_path[]']").each(function() {
         var value = $(this).val();
         if (value) {
             selectedFilePaths.push(value);
@@ -369,7 +384,7 @@ $(document).on('click', '#joinFileBtn', function() {
 
     // チェックされたファイルパスと一致するファイルパスのjoin_flg[]の値を"join"に設定し、ラベルを表示
     // チェックが外された場合は"single"に設定し、ラベルを非表示
-    $(".fileInputs [name='file_path[]']").each(function(index){
+    $(".fileInputs [name='file_path[]']").each(function(index) {
         var value = $(this).val();
         if (checkedFileValues.includes(value)) {
             $(".fileInputs [name='join_flg[]']").eq(index).val("join");
@@ -381,22 +396,62 @@ $(document).on('click', '#joinFileBtn', function() {
             $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
         }
     });
+
+    var modalFooterMessage = $(".fileInputs .join-file-btn .inputFile p");
+    if (modalFooterMessage.length) {
+        var checkedCount = checkedFileValues.length;
+        if (checkedCount >= 2) {
+            modalFooterMessage.text(`${checkedCount}ファイルを結合します。`).show();
+        } else {
+            modalFooterMessage.text("").hide();
+        }
+    }
+
     $("#joinFileModal").modal("hide");
 });
 
 // 結合モーダルのチェックボックス変更イベント処理
 $(document).on('change', '#fileCheckboxes input[type="checkbox"]', function() {
-    $("#joinFileModal .modal-footer").find('p').remove();
+    // 選択されたファイルのカウントを更新する関数
     updateJoinFileCount();
 });
 
 // 選択されたファイルのカウントを更新する関数
 function updateJoinFileCount() {
     var checkedCount = $('#joinFileModal #fileCheckboxes input[type="checkbox"]:checked').length;
-    $("#joinFileModal .modal-footer").append(`<p style="float: left;">${checkedCount}ファイルを結合します。よろしいでしょうか？</p>`);
+
+    // 既存のメッセージを削除
+    $("#joinFileModal .modal-footer p").remove();
+
+    // メッセージを追加
+    if (checkedCount >= 2) {
+        $("#joinFileModal .modal-footer").append(`<p style="float: left;">${checkedCount}ファイルを結合します。よろしいでしょうか？</p>`);
+    }
+
+    // ボタンの有効/無効を設定
+    var modalFooterJoinFileBtn = $("#joinFileModal .modal-footer #joinFileBtn");
+    if (modalFooterJoinFileBtn.length) {
+        modalFooterJoinFileBtn.prop('disabled', checkedCount < 2);
+    }
+}
+
+// 「結合中」メッセージを更新する関数の呼び出し
+function updateModalFooterMessage() {
+    var selectedJoinFiles = [];
+
+    $(".fileInputs [name='join_flg[]']").each(function() {
+        var value = $(this).val();
+        selectedJoinFiles.push(value);
+    });
+
+    var checkedCount = selectedJoinFiles.filter(value => value === "join").length;
 
     var modalFooterMessage = $(".fileInputs .join-file-btn .inputFile p");
     if (modalFooterMessage.length) {
-        modalFooterMessage.text(`${checkedCount}ファイルを結合します。`).show();;
+        if (checkedCount >= 2) {
+            modalFooterMessage.text(`${checkedCount}ファイルを結合します。`).show();
+        } else {
+            modalFooterMessage.text("").hide();
+        }
     }
 }
