@@ -166,15 +166,21 @@ class MessagePublishController extends Controller
             // 添付ファイル
             foreach ($message_list as &$message) {
                 $file_list = [];
+                $is_first_join = false;
 
                 $all_message_files = Message::where('id', $message->id)->get()->toArray();
                 $all_message_content_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
-                foreach ($all_message_files as $message_file) {
-                    if ($message_file) {
+                // 最初の要素をチェックしてフラグを設定
+                if (isset($all_message_content_files[0]) && $all_message_content_files[0]["join_flg"] === "join") {
+                    $is_first_join = true;
+                }
+
+                if ($is_first_join) {
+                    if ($all_message_files) {
                         // PDFファイルのページ数を取得
                         $pdf = new TcpdfFpdi();
-                        $file_path = $message_file["content_url"]; // PDFファイルのパス
+                        $file_path = $all_message_files[0]["content_url"]; // PDFファイルのパス
                         if (file_exists($file_path)) {
                             try {
                                 $page_num = $pdf->setSourceFile($file_path);
@@ -185,18 +191,48 @@ class MessagePublishController extends Controller
                             }
                         }
                     }
-                }
+                    foreach ($all_message_content_files as $message_content_file) {
+                        if ($message_content_file["join_flg"] === "single") {
+                            $file_list[] = [
+                                "file_name" => $message_content_file["content_name"],
+                                "file_url" => $message_content_file["content_url"],
+                            ];
+                        }
+                    }
 
-                foreach ($all_message_content_files as $message_content_file) {
-                    $file_list[] = [
-                        "file_name" => $message_content_file["content_name"],
-                        "file_url" => $message_content_file["content_url"],
-                    ];
-                }
-
-                // 最初の要素を削除(業態ファイル)
-                if (!empty($file_list)) {
-                    array_shift($file_list);
+                } else {
+                    if ($all_message_content_files) {
+                        // PDFファイルのページ数を取得
+                        $pdf = new TcpdfFpdi();
+                        $file_path = $all_message_content_files[0]["content_url"]; // PDFファイルのパス
+                        if (file_exists($file_path)) {
+                            try {
+                                $page_num = $pdf->setSourceFile($file_path);
+                                $message->join_file_count = $page_num;
+                            } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
+                                // 暗号化されたPDFの処理
+                                $message->join_file_count = '暗号化';
+                            }
+                        }
+                    }
+                    foreach ($all_message_content_files as $message_content_file) {
+                        if ($message_content_file["content_name"] === $all_message_files[0]["content_name"]) {
+                            $file_list[] = [
+                                "file_name" => $all_message_files[0]["content_name"],
+                                "file_url" => $all_message_files[0]["content_url"],
+                            ];
+                            continue;
+                        } else if ($message_content_file["join_flg"] === "single") {
+                            $file_list[] = [
+                                "file_name" => $message_content_file["content_name"],
+                                "file_url" => $message_content_file["content_url"],
+                            ];
+                        }
+                    }
+                    // 最初の要素を削除(業態ファイル)
+                    if (!empty($file_list)) {
+                        array_shift($file_list);
+                    }
                 }
 
                 $message->content_files = $file_list;
