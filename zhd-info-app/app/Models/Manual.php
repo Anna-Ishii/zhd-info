@@ -300,6 +300,13 @@ class Manual extends Model
             ->where('editing_flg', false);
     }
 
+    public function scopeOfUser($query, $userId)
+    {
+        return $query
+            ->join('manual_user', 'manuals.id', '=', 'manual_user.manual_id')
+            ->where('manual_user.user_id', $userId);
+    }
+
     public static function getCurrentNumber($organization1_id): Int{
         return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
     }
