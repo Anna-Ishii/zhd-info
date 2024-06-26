@@ -4,11 +4,11 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
-                <h4 class="modal-title">業務連絡csvインポート</h4>
+                <h4 class="modal-title">店舗選択csvインポート</h4>
             </div>
             <div class="modal-body">
                 <div>
-                    csvデータを業務連絡に上書きします
+                    csvデータを店舗選択モーダルに表示します
                 </div>
                 <form class="form-horizontal">
                     <input type="hidden" name="organization1" value="{{$organization1->id}}">

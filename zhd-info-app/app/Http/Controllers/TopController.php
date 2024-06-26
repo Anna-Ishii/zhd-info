@@ -17,7 +17,7 @@ class TopController extends Controller
 
         $start_date_time = Carbon::now()->subDays(7)->startOfDay();
         // 新着件数
-        // 過去1週間にの件数
+        // 過去1週間の件数
         $recent_messages = $user->message()
             ->whereBetween('start_datetime', [$start_date_time, now('Asia/Tokyo')])
             ->where(function ($query) {

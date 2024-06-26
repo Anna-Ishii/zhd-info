@@ -3,7 +3,6 @@ $(document).ready(function () {
     updateSelectedStores();
     updateAllParentCheckboxes();
     updateSelectAllCheckboxes();
-    changeValues();
 
     if ($("#selectStore").val() === "selected") {
         // 店舗選択中の処理
