@@ -87,10 +87,14 @@
                                         @if ($message->emergency_flg)
                                             <li class="list__link__notice">重要</li>
                                         @endif
-                                        @if (empty($message->join_file_count) || $message->join_file_count === '暗号化')
-                                            <li>{{ $message->title }}</li>
+                                        @if(isset($message->main_file))
+                                            @if($message->main_file_count < 2)
+                                                <li>{{ $message->title }}</li>
+                                            @else
+                                                <li>{{ $message->title }} ({{ $message->main_file_count }}ページ)</li>
+                                            @endif
                                         @else
-                                            <li>{{ $message->title }} ({{ $message->join_file_count }}ページ)</li>
+                                            <li>{{ $message->title }}</li>
                                         @endif
                                     </ul>
                                     <ul class="tags">

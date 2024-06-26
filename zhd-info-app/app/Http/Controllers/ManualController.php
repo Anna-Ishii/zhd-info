@@ -55,6 +55,7 @@ class ManualController extends Controller
         $category_level1s = ManualCategoryLevel1::query()
             ->with('level2s')
             ->get();
+
         $organization1_id =  $user->shop->organization1->id;
         $keywords = DB::table("manual_search_logs as m_s_l")
             ->select([

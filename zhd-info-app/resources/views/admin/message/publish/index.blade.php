@@ -195,10 +195,14 @@
                                 <td>{{ $message->category?->name }}</td>
                                 <td class="label-title">
                                     @if(isset($message->content_url))
-                                        @if(empty($message->join_file_count) || ($message->join_file_count === '暗号化'))
-                                            <a href="{{ asset($message->content_url) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }}</a>
+                                        @if(isset($message->main_file))
+                                            @if($message->main_file_count < 2)
+                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }}</a>
+                                            @else
+                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }} ({{ $message->main_file_count }}ページ)</a>
+                                            @endif
                                         @else
-                                            <a href="{{ asset($message->content_url) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }} ({{ $message->join_file_count }}ページ)</a>
+                                            {{ $message->title }}
                                         @endif
                                     @else
                                         {{ $message->title }}
