@@ -215,7 +215,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <input type="button" class="btn btn-admin pull-left" id="csvImportBtn" data-toggle="modal" data-target="#messageStoreImportModal" value="再インポート">
+            <input type="button" class="btn btn-admin pull-left" id="csvImportBtn" data-toggle="modal" data-target="#manualStoreImportModal" value="再インポート">
             <button type="button" class="btn btn-admin pull-left" id="cancelBtn" data-dismiss="modal" style="display: none;">キャンセル</button>
             <button type="button" class="btn btn-admin pull-right" id="selectCsvBtn">選択</button>
         </div>

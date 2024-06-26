@@ -169,7 +169,7 @@
                     <div class="col-lg-6 join-file-btn">
                         <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
                                 <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
-                                <input type="button" class="btn btn-admin joinFile" id="joinFileId" data-toggle="modal" data-target="#joinFileModal" value="結合の修正">
+                                <input type="button" class="btn btn-admin joinFile" id="joinFileId" data-toggle="modal" data-target="#joinFileModal" value="ファイルの結合">
                         </label>
                     </div>
                 </div>
@@ -289,7 +289,7 @@
                         </label>
                         <label class="mr16">
                             @if (old('select_organization.csv') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="importCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="インポート">
+                                <input type="button" class="btn btn-admin check-selected" id="importCsv" data-toggle="modal" data-target="#messageStoreModal" value="インポート">
                                 <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
                             @else
                                 <input type="button" class="btn btn-admin" id="importCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="インポート">
