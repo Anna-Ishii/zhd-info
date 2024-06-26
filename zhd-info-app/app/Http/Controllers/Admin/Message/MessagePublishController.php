@@ -168,64 +168,62 @@ class MessagePublishController extends Controller
                 $file_list = [];
                 $is_first_join = false;
 
-                $all_message_files = Message::where('id', $message->id)->get()->toArray();
-                $all_message_content_files = MessageContent::where('message_id', $message->id)->get()->toArray();
+                $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
+                $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
                 // 最初の要素をチェックしてフラグを設定
-                if (isset($all_message_content_files[0]) && $all_message_content_files[0]["join_flg"] === "join") {
+                if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
                     $is_first_join = true;
                 }
 
                 if ($is_first_join) {
-                    if ($all_message_files) {
+                    if ($all_message_join_file) {
                         // PDFファイルのページ数を取得
                         $pdf = new TcpdfFpdi();
-                        $file_path = $all_message_files[0]["content_url"]; // PDFファイルのパス
+                        $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
                         if (file_exists($file_path)) {
+                            $message->main_file = [
+                                "file_name" => $all_message_join_file[0]["content_name"],
+                                "file_url" => $all_message_join_file[0]["content_url"],
+                            ];
+
                             try {
                                 $page_num = $pdf->setSourceFile($file_path);
-                                $message->join_file_count = $page_num;
+                                $message->main_file_count = $page_num;
                             } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
                                 // 暗号化されたPDFの処理
-                                $message->join_file_count = '暗号化';
+                                $message->main_file_count = '暗号化';
                             }
                         }
                     }
-                    foreach ($all_message_content_files as $message_content_file) {
-                        if ($message_content_file["join_flg"] === "single") {
+                    foreach ($all_message_content_single_files as $message_content_single_file) {
+                        if ($message_content_single_file["join_flg"] === "single") {
                             $file_list[] = [
-                                "file_name" => $message_content_file["content_name"],
-                                "file_url" => $message_content_file["content_url"],
+                                "file_name" => $message_content_single_file["content_name"],
+                                "file_url" => $message_content_single_file["content_url"],
                             ];
                         }
                     }
 
                 } else {
-                    if ($all_message_content_files) {
-                        // PDFファイルのページ数を取得
-                        $pdf = new TcpdfFpdi();
-                        $file_path = $all_message_content_files[0]["content_url"]; // PDFファイルのパス
-                        if (file_exists($file_path)) {
-                            try {
-                                $page_num = $pdf->setSourceFile($file_path);
-                                $message->join_file_count = $page_num;
-                            } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
-                                // 暗号化されたPDFの処理
-                                $message->join_file_count = '暗号化';
-                            }
-                        }
+                    if ($all_message_content_single_files) {
+                        $message->main_file_count = 1;
+                        $message->main_file = [
+                            "file_name" => $all_message_content_single_files[0]["content_name"],
+                            "file_url" => $all_message_content_single_files[0]["content_url"],
+                        ];
                     }
-                    foreach ($all_message_content_files as $message_content_file) {
-                        if ($message_content_file["content_name"] === $all_message_files[0]["content_name"]) {
+                    foreach ($all_message_content_single_files as $message_content_single_file) {
+                        if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
                             $file_list[] = [
-                                "file_name" => $all_message_files[0]["content_name"],
-                                "file_url" => $all_message_files[0]["content_url"],
+                                "file_name" => $all_message_join_file[0]["content_name"],
+                                "file_url" => $all_message_join_file[0]["content_url"],
                             ];
                             continue;
-                        } else if ($message_content_file["join_flg"] === "single") {
+                        } else if ($message_content_single_file["join_flg"] === "single") {
                             $file_list[] = [
-                                "file_name" => $message_content_file["content_name"],
-                                "file_url" => $message_content_file["content_url"],
+                                "file_name" => $message_content_single_file["content_name"],
+                                "file_url" => $message_content_single_file["content_url"],
                             ];
                         }
                     }
@@ -902,9 +900,13 @@ class MessagePublishController extends Controller
 
                             // 変更部分だけ取り込む
                             if (isset($message_content->content_url)) {
-                                if ($this->isChangedFile($join_path_list, $request->file_path ?? null) || $this->isChangedFile($join_flg_list, array_filter($request->join_flg ?? []))) {
+                                if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
                                     $message_content->content_name = $file_name;
-                                    $message_content->content_url = $request->file_path[$i];
+                                    if ($this->isChangedFile($join_path_list[$i], isset($request->file_path[$i]) ? $request->file_path[$i] : null)) {
+                                        $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
+                                    } else {
+                                        $message_content->content_url = $request->file_path[$i];
+                                    }
                                     $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
                                     $message_content->join_flg = $request->join_flg[$i];
                                     $message_content_changed_flg = true;
@@ -936,7 +938,7 @@ class MessagePublishController extends Controller
             $message_contents = MessageContent::where('message_id', $message->id)->get()->toArray();
             $message_contents = array_merge($message_contents, $content_data);
 
-            if ($this->isChangedFile($join_path_list, $request->file_path ?? null) || $this->isChangedFile($join_flg_list, array_filter($request->join_flg ?? []))) {
+            if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
             // 結合処理
             $join_files = [];
             foreach ($message_contents as $content) {
@@ -1237,19 +1239,20 @@ class MessagePublishController extends Controller
                 $start_datetime,
                 $end_datetime,
                 $status,
-                $brand,
-                $organization5,
-                $organization4,
-                $organization3
+                $brand
+                // $organization5,
+                // $organization4,
+                // $organization3
             ]) {
                 $message = Message::where('number', $no)
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
 
                 $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-                $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
-                $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
-                $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+                // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
+                // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
+                // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+
                 $target_roll = $message->roll()->pluck('id')->toArray();
 
                 array_push($array, [
@@ -1262,9 +1265,9 @@ class MessagePublishController extends Controller
                     'start_datetime' => $start_datetime,
                     'end_datetime' => $end_datetime,
                     'brand' => $brand_param,
-                    'organization3' => $org3_param,
-                    'organization4' => $org4_param,
-                    'organization5' => $org5_param,
+                    // 'organization3' => $org3_param,
+                    // 'organization4' => $org4_param,
+                    // 'organization5' => $org5_param,
                     'roll' => $target_roll
                 ]);
 
@@ -1341,53 +1344,53 @@ class MessagePublishController extends Controller
                 if ($message->isDirty()) $message->updated_admin_id = $admin->id;
                 $message->save();
 
-                MessageOrganization::where('message_id', $message->id)->delete();
-                foreach ($ms["organization5"] as $org5_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $message->organization1_id,
-                        'organization5_id' => $org5_id
-                    ]);
-                }
+                // MessageOrganization::where('message_id', $message->id)->delete();
+                // foreach ($ms["organization5"] as $org5_id) {
+                //     $message->organization()->create([
+                //         'message_id' => $message->id,
+                //         'organization1_id' => $message->organization1_id,
+                //         'organization5_id' => $org5_id
+                //     ]);
+                // }
 
-                foreach ($ms["organization4"] as $org4_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $message->organization1_id,
-                        'organization4_id' => $org4_id
-                    ]);
-                }
+                // foreach ($ms["organization4"] as $org4_id) {
+                //     $message->organization()->create([
+                //         'message_id' => $message->id,
+                //         'organization1_id' => $message->organization1_id,
+                //         'organization4_id' => $org4_id
+                //     ]);
+                // }
 
-                foreach ($ms["organization3"] as $org3_id) {
-                    $message->organization()->create([
-                        'message_id' => $message->id,
-                        'organization1_id' => $message->organization1_id,
-                        'organization3_id' => $org3_id
-                    ]);
-                }
+                // foreach ($ms["organization3"] as $org3_id) {
+                //     $message->organization()->create([
+                //         'message_id' => $message->id,
+                //         'organization1_id' => $message->organization1_id,
+                //         'organization3_id' => $org3_id
+                //     ]);
+                // }
 
                 $message->brand()->sync($ms["brand"]);
 
-                if (!$message->editing_flg) {
-                    $origin_user = $message->user()->pluck('id')->toArray();
-                    $new_target_user = $this->targetUserParam((object)[
-                        'organization' => [
-                            'org5' => $ms["organization5"],
-                            'org4' => $ms["organization4"],
-                            'org3' => $ms["organization4"]
-                        ],
-                        'brand' => $ms["brand"],
-                        'target_roll' => $ms["roll"]
-                    ]);
-                    $new_target_user_id = array_keys($new_target_user);
-                    $detach_user = array_diff($origin_user, $new_target_user_id);
-                    $attach_user = array_diff($new_target_user_id, $origin_user);
+                // if (!$message->editing_flg) {
+                //     $origin_user = $message->user()->pluck('id')->toArray();
+                //     $new_target_user = $this->targetUserParam((object)[
+                //         'organization' => [
+                //             'org5' => $ms["organization5"],
+                //             'org4' => $ms["organization4"],
+                //             'org3' => $ms["organization4"]
+                //         ],
+                //         'brand' => $ms["brand"],
+                //         'target_roll' => $ms["roll"]
+                //     ]);
+                //     $new_target_user_id = array_keys($new_target_user);
+                //     $detach_user = array_diff($origin_user, $new_target_user_id);
+                //     $attach_user = array_diff($new_target_user_id, $origin_user);
 
-                    $message->user()->detach($detach_user);
-                    foreach ($attach_user as $key => $user) {
-                        $message->user()->attach([$user => $new_target_user[$user]]);
-                    }
-                }
+                //     $message->user()->detach($detach_user);
+                //     foreach ($attach_user as $key => $user) {
+                //         $message->user()->attach([$user => $new_target_user[$user]]);
+                //     }
+                // }
             }
 
             DB::table('message_csv_logs')
@@ -1950,7 +1953,15 @@ class MessagePublishController extends Controller
         return true;
     }
 
-    private function isChangedFile(array $current_join_flg, array $next_join_flg): Bool
+    private function isChangedFile($current_file_path, $next_file_path): Bool
+    {
+        $currnt_path = $current_file_path ? basename($current_file_path) : null;
+        $next_path = $next_file_path ? basename($next_file_path) : null;
+
+        return !($currnt_path == $next_path);
+    }
+
+    private function isChangedJoinFlg(array $current_join_flg, array $next_join_flg): Bool
     {
         // join_flgリストのサイズが異なる場合は変更されたとみなす
         if (count($current_join_flg) !== count($next_join_flg)) {

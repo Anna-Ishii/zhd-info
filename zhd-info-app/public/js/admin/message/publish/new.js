@@ -131,6 +131,7 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
         }
     });
 
+    // PDFファイルの上書きではない
     if (!dataCache) {
         let fileInputs = document.querySelector(".fileInputs");
         let fileInput = fileInputs.querySelector('input[name="file[]"]');
@@ -161,6 +162,18 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
             }
             addJoinFileBtn();
         }
+
+    // PDFファイルの上書き
+    } else {
+        $(".fileInputs [name='join_flg[]']").each(function() {
+            if ($(this).val() === "single") {
+                // 結合ラベルを非表示
+                $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
+            }
+        });
+
+        // "join" フラグがあるか
+        updateJoinFileLabel();
     }
 
     // 「結合中」メッセージを更新する関数の呼び出し
@@ -215,7 +228,7 @@ function addJoinFileBtn() {
         <div class="col-lg-6 join-file-btn">
             <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
                 <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
-                <input type="button" class="btn btn-admin joinFile" id="joinFileId" data-toggle="modal" data-target="#joinFileModal" value="結合の修正">
+                <input type="button" class="btn btn-admin joinFile" id="joinFileId" data-toggle="modal" data-target="#joinFileModal" value="ファイルの結合">
             </label>
         </div>
     `);
@@ -322,6 +335,9 @@ $(document).on("click", ".delete-btn", function () {
 
     // 「結合中」メッセージを更新する関数の呼び出し
     updateModalFooterMessage();
+
+    // "join" フラグがあるか
+    updateJoinFileLabel();
 });
 
 // 初期状態でボタンを無効化
@@ -329,7 +345,7 @@ $(document).ready(function() {
     $("#joinFileModal .modal-footer #joinFileBtn").prop('disabled', true);
 });
 
-// 結合の修正ボタン処理
+// ファイルの結合ボタン処理
 $(document).on("click", "#joinFileId", function () {
     var selectedFiles = [];
     var selectedFilePaths = [];
@@ -419,6 +435,9 @@ $(document).on('click', '#joinFileBtn', function() {
         }
     }
 
+    // "join" フラグがあるか
+    updateJoinFileLabel();
+
     $("#joinFileModal").modal("hide");
 });
 
@@ -437,12 +456,18 @@ function updateJoinFileCount() {
     // メッセージを追加
     if (checkedCount >= 2) {
         $("#joinFileModal .modal-footer").append(`<p style="float: left;">${checkedCount}ファイルを結合します。よろしいでしょうか？</p>`);
+    } else if (checkedCount == 0) {
+        $("#joinFileModal .modal-footer").append(`<p style="float: left;">結合するファイルが選択されていません。</p>`);
     }
 
     // ボタンの有効/無効を設定
     var modalFooterJoinFileBtn = $("#joinFileModal .modal-footer #joinFileBtn");
     if (modalFooterJoinFileBtn.length) {
-        modalFooterJoinFileBtn.prop('disabled', checkedCount < 2);
+        if (checkedCount === 1) {
+        modalFooterJoinFileBtn.prop('disabled', true);
+        } else {
+            modalFooterJoinFileBtn.prop('disabled', false);
+        }
     }
 }
 
@@ -464,5 +489,35 @@ function updateModalFooterMessage() {
         } else {
             modalFooterMessage.text("").hide();
         }
+    }
+}
+
+// "join" フラグがあるか
+function updateJoinFileLabel() {
+    // "join" フラグが1つ以下の場合に文言を変更
+    var joinFlagCount = $(".fileInputs [name='join_flg[]']").filter(function() {
+        return $(this).val() === "join";
+    }).length;
+
+    if (joinFlagCount <= 1) {
+        // "join" フラグが1つの場合に他の "join_flg" を "single" に変更
+        if (joinFlagCount === 1) {
+            $(".fileInputs [name='join_flg[]']").each(function() {
+                if ($(this).val() === "join") {
+                    $(this).val("single");
+                    // 結合ラベルを非表示
+                    $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
+                }
+            });
+        }
+
+        $(".inputFile #joinFileId").val("ファイルの結合");
+    }
+
+    // "join" フラグが一つでもあるかチェックして文言を変更
+    var hasJoinFlag = joinFlagCount > 1;
+
+    if (hasJoinFlag) {
+        $(".inputFile #joinFileId").val("結合の修正");
     }
 }
