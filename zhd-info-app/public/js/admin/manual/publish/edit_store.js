@@ -195,7 +195,8 @@ $(document).on('click', 'input[id="checkStore"]', function() {
     // モーダルタイトル変更
     var storeModalTitle = $("#manualStoreModal h4.modal-title");
     if (storeModalTitle.length) {
-        storeModalTitle.html('店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small>');
+        // storeModalTitle.html('店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small>');
+        storeModalTitle.html('店舗を選択してください。');
     }
 
     // 元のボタンのセレクターを取得して、新しいボタンのセレクターに変更
