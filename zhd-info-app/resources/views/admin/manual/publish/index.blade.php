@@ -222,7 +222,7 @@
                                     <div>{{ $manual->formatted_end_datetime }}</div>
                                 </td>
                                 <td>{{ $manual->status->text() }}</td>
-                                <td>{{ $manual->shop_count }}</td>
+                                <td style="text-align: right">{{ $manual->shop_count }}</td>
                                 @if ($manual->status == App\Enums\PublishStatus::Wait || $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>

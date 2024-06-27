@@ -235,7 +235,7 @@
                                     <div>{{ $message->formatted_end_datetime }}</div>
                                 </td>
                                 <td>{{ $message->status->text() }}</td>
-                                <td>{{ $message->shop_count }}</td>
+                                <td style="text-align: right">{{ $message->shop_count }}</td>
                                 @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>

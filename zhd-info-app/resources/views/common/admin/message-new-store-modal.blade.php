@@ -45,7 +45,8 @@
     <div class="modal-dialog" style="max-width: 450px;">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title">店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small></h4>
+                {{-- <h4 class="modal-title">店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small></h4> --}}
+                <h4 class="modal-title">店舗を選択してください。</h4>
             </div>
             <div class="modal-body" id="storeModal">
                 <div id="storeSelected" class="mb-1">0店舗選択中</div>
