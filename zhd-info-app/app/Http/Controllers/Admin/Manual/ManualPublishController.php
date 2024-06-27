@@ -320,8 +320,8 @@ class ManualPublishController extends Controller
             $organization_list[$index]['organization3_shop_list'] = [];
             $organization_list[$index]['organization2_shop_list'] = [];
 
-            foreach ($brand_list as $brand) {
-                if (isset($organization['organization5_id'])) {
+            if (isset($organization['organization5_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization5_id', $organization['organization5_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -340,7 +340,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
                 }
-                if (isset($organization['organization4_id'])) {
+            }
+            if (isset($organization['organization4_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization4_id', $organization['organization4_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -360,7 +362,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
                 }
-                if (isset($organization['organization3_id'])) {
+            }
+            if (isset($organization['organization3_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization3_id', $organization['organization3_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -381,7 +385,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
                 }
-                if (isset($organization['organization2_id'])) {
+            }
+            if (isset($organization['organization2_id'])) {
+                    foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization2_id', $organization['organization2_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -520,7 +526,7 @@ class ManualPublishController extends Controller
             }
 
             $manual->brand()->attach($request->brand);
-            $manual->user()->attach(!isset($request->save) ? $this->targetUserParam2($request) : []);
+            $manual->user()->attach(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
 
             $manual->content()->createMany($this->manualContentsParam($request));
 
@@ -602,8 +608,8 @@ class ManualPublishController extends Controller
             $organization_list[$index]['organization3_shop_list'] = [];
             $organization_list[$index]['organization2_shop_list'] = [];
 
-            foreach ($brand_list as $brand) {
-                if (isset($organization['organization5_id'])) {
+            if (isset($organization['organization5_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization5_id', $organization['organization5_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -622,7 +628,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
                 }
-                if (isset($organization['organization4_id'])) {
+            }
+            if (isset($organization['organization4_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization4_id', $organization['organization4_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -641,7 +649,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
                 }
-                if (isset($organization['organization3_id'])) {
+            }
+            if (isset($organization['organization3_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization3_id', $organization['organization3_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -662,7 +672,9 @@ class ManualPublishController extends Controller
 
                     $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
                 }
-                if (isset($organization['organization2_id'])) {
+            }
+            if (isset($organization['organization2_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization2_id', $organization['organization2_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -911,7 +923,7 @@ class ManualPublishController extends Controller
             }
 
             $manual->brand()->sync($request->brand);
-            $manual->user()->sync(!isset($request->save) ? $this->targetUserParam2($request) : []);
+            $manual->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
             $manual->content()->createMany($content_data);
 
             $tag_ids = [];
@@ -1550,7 +1562,7 @@ class ManualPublishController extends Controller
         return $target_user_data;
     }
 
-    private function targetUserParam2($organizations): array
+    private function getTargetUsersByShopId($organizations): array
     {
         $shops_id = [];
         $target_user_data = [];
