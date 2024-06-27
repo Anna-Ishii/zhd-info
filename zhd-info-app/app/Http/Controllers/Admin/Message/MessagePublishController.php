@@ -394,8 +394,9 @@ class MessagePublishController extends Controller
             $organization_list[$index]['organization3_shop_list'] = [];
             $organization_list[$index]['organization2_shop_list'] = [];
 
-            foreach ($brand_list as $brand) {
-                if (isset($organization['organization5_id'])) {
+
+            if (isset($organization['organization5_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization5_id', $organization['organization5_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -415,7 +416,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
                 }
-                if (isset($organization['organization4_id'])) {
+            }
+            if (isset($organization['organization4_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization4_id', $organization['organization4_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -434,7 +437,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
                 }
-                if (isset($organization['organization3_id'])) {
+            }
+            if (isset($organization['organization3_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization3_id', $organization['organization3_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -455,7 +460,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
                 }
-                if (isset($organization['organization2_id'])) {
+            }
+            if (isset($organization['organization2_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization2_id', $organization['organization2_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -623,7 +630,7 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->attach($request->brand);
-            $message->user()->attach(!isset($request->save) ? $this->targetUserParam2($request) : []);
+            $message->user()->attach(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
 
             $message->content()->createMany($message_contents);
 
@@ -714,8 +721,8 @@ class MessagePublishController extends Controller
             $organization_list[$index]['organization3_shop_list'] = [];
             $organization_list[$index]['organization2_shop_list'] = [];
 
-            foreach ($brand_list as $brand) {
-                if (isset($organization['organization5_id'])) {
+            if (isset($organization['organization5_id'])) {
+                    foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization5_id', $organization['organization5_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -734,7 +741,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
                 }
-                if (isset($organization['organization4_id'])) {
+            }
+            if (isset($organization['organization4_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization4_id', $organization['organization4_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -753,7 +762,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
                 }
-                if (isset($organization['organization3_id'])) {
+            }
+            if (isset($organization['organization3_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization3_id', $organization['organization3_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -774,7 +785,9 @@ class MessagePublishController extends Controller
 
                     $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
                 }
-                if (isset($organization['organization2_id'])) {
+            }
+            if (isset($organization['organization2_id'])) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization2_id', $organization['organization2_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -1055,7 +1068,7 @@ class MessagePublishController extends Controller
             }
 
             $message->brand()->sync($request->brand);
-            $message->user()->sync(!isset($request->save) ? $this->targetUserParam2($request) : []);
+            $message->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
 
             $message->content()->createMany($content_data);
 
@@ -1571,8 +1584,8 @@ class MessagePublishController extends Controller
                 $organization_list[$index]['organization3_shop_list'] = [];
                 $organization_list[$index]['organization2_shop_list'] = [];
 
-                foreach ($brand_list as $brand) {
-                    if (isset($organization['organization5_id'])) {
+                if (isset($organization['organization5_id'])) {
+                    foreach ($brand_list as $brand) {
                         $shops = Shop::where('organization5_id', $organization['organization5_id'])
                             ->where('brand_id', $brand->id)
                             ->get()
@@ -1591,7 +1604,9 @@ class MessagePublishController extends Controller
 
                         $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
                     }
-                    if (isset($organization['organization4_id'])) {
+                }
+                if (isset($organization['organization4_id'])) {
+                    foreach ($brand_list as $brand) {
                         $shops = Shop::where('organization4_id', $organization['organization4_id'])
                             ->where('brand_id', $brand->id)
                             ->get()
@@ -1610,7 +1625,9 @@ class MessagePublishController extends Controller
 
                         $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
                     }
-                    if (isset($organization['organization3_id'])) {
+                }
+                if (isset($organization['organization3_id'])) {
+                    foreach ($brand_list as $brand) {
                         $shops = Shop::where('organization3_id', $organization['organization3_id'])
                             ->where('brand_id', $brand->id)
                             ->whereNull('organization4_id')
@@ -1631,7 +1648,9 @@ class MessagePublishController extends Controller
 
                         $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
                     }
-                    if (isset($organization['organization2_id'])) {
+                }
+                if (isset($organization['organization2_id'])) {
+                    foreach ($brand_list as $brand) {
                         $shops = Shop::where('organization2_id', $organization['organization2_id'])
                             ->where('brand_id', $brand->id)
                             ->whereNull('organization4_id')
@@ -1869,7 +1888,7 @@ class MessagePublishController extends Controller
     }
 
 
-    private function targetUserParam2($organizations): array
+    private function getTargetUsersByShopId($organizations): array
     {
         $shops_id = [];
         $target_user_data = [];
@@ -1909,22 +1928,6 @@ class MessagePublishController extends Controller
                 $content_data[$i]['content_name'] = $file_name;
                 $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
                 $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                $content_data[$i]['join_flg'] = $request->join_flg[$i];
-            }
-        }
-        return $content_data;
-    }
-
-    private function messageContentsParam2($request): array
-    {
-        if (!(isset($request->file_name))) return [];
-        $content_data = [];
-        foreach ($request->file_name as $i => $file_name) {
-            if (isset($file_name)) {
-                $content_data[$i]['content_name'] = $file_name;
-                $content_data[$i]['content_url'] = $request->file_path[$i];
-                $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                $content_data[$i]['content_id'] = $request->content_id;
                 $content_data[$i]['join_flg'] = $request->join_flg[$i];
             }
         }
