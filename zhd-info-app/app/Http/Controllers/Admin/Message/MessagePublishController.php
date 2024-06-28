@@ -532,14 +532,18 @@ class MessagePublishController extends Controller
         $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        // 結合処理したか判定
-        if (!empty($join_file_list)) {
-            $msg_params['content_name'] = $join_file_list[0]['content_name'];
-            $msg_params['content_url'] = $join_file_list[0]['content_url'];
-        } else {
-            $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
-            $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+
+        if ($message_contents) {
+            // 結合処理したか判定
+            if (!empty($join_file_list)) {
+                $msg_params['content_name'] = $join_file_list[0]['content_name'];
+                $msg_params['content_url'] = $join_file_list[0]['content_url'];
+            } else {
+                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+            }
         }
+
         $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
         $msg_params['create_admin_id'] = $admin->id;
         $msg_params['organization1_id'] = $organization1->id;
@@ -880,6 +884,7 @@ class MessagePublishController extends Controller
 
         $admin = session('admin');
         $message = Message::find($message_id);
+        $message_content = MessageContent::find($message_id);
 
         $join_path_list = MessageContent::where('message_id', $message->id)->pluck('content_url')->toArray();
         $join_flg_list = MessageContent::where('message_id', $message->id)->pluck('join_flg')->toArray();
@@ -897,37 +902,50 @@ class MessagePublishController extends Controller
         $content_data = [];
         try {
             DB::beginTransaction();
+
             // 登録されているコンテンツが削除されていた場合、deleteフラグを立てる
-            $message = Message::find($message_id);
             $content = $message->content()->whereNotIn('id', $this->getExistContentIds($request));
             $content->delete();
 
             //手順を登録する (編集)
-            if (isset($request->file_name)) {
-                foreach ($request->file_name as $i => $file_name) {
-                    if (!empty($request->file_path[$i])) {
-                        // 登録されている手順を変更する
-                        if (isset($request->content_id[$i])) {
-                            $id = (int)$request->content_id[$i];
-                            $message_content = MessageContent::find($id);
+            if (!empty($join_path_list)) {
+                if (isset($request->file_name)) {
+                    foreach ($request->file_name as $i => $file_name) {
+                        if (!empty($request->file_path[$i])) {
+                            // 登録されている手順を変更する
+                            if (isset($request->content_id[$i])) {
+                                $id = (int)$request->content_id[$i];
+                                $message_content = MessageContent::find($id);
 
-                            // 変更部分だけ取り込む
-                            if (isset($message_content->content_url)) {
-                                if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
-                                    $message_content->content_name = $file_name;
-                                    if ($this->isChangedFile($join_path_list[$i], isset($request->file_path[$i]) ? $request->file_path[$i] : null)) {
-                                        $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
-                                    } else {
-                                        $message_content->content_url = $request->file_path[$i];
+                                // 変更部分だけ取り込む
+                                if (isset($message_content->content_url)) {
+                                    if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
+                                        $message_content->content_name = $file_name;
+
+                                        if ($this->isChangedFile($join_path_list[$i], isset($request->file_path[$i]) ? $request->file_path[$i] : null)) {
+                                            $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
+                                        } else {
+                                            $message_content->content_url = $request->file_path[$i];
+                                        }
+
+                                        $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
+                                        $message_content->join_flg = $request->join_flg[$i];
+                                        $message_content_changed_flg = true;
+
+                                        $message_content->save();
                                     }
-                                    $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
-                                    $message_content->join_flg = $request->join_flg[$i];
-                                    $message_content_changed_flg = true;
-
-                                    $message_content->save();
-                                }
-                            } else {
                                 // 手順の新規登録
+                                } else {
+                                    if (isset($file_name)) {
+                                        $content_data[$i]['content_name'] = $file_name;
+                                        $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
+                                        $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
+                                        $content_data[$i]['join_flg'] = $request->join_flg[$i];
+                                    }
+                                }
+
+                            // 手順の新規登録
+                            } else {
                                 if (isset($file_name)) {
                                     $content_data[$i]['content_name'] = $file_name;
                                     $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
@@ -935,50 +953,69 @@ class MessagePublishController extends Controller
                                     $content_data[$i]['join_flg'] = $request->join_flg[$i];
                                 }
                             }
-                        } else {
-                            // 手順の新規登録
-                            if (isset($file_name)) {
-                                $content_data[$i]['content_name'] = $file_name;
-                                $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
-                                $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                                $content_data[$i]['join_flg'] = $request->join_flg[$i];
-                            }
                         }
+                    }
+                }
+
+            } else {
+                $message_path_list = Message::where('id', $message_id)->pluck('content_url')->toArray();
+                foreach ($request->file_name as $i => $file_name) {
+                    if (isset($request->file_path[$i])) {
+                        $message_content = new MessageContent();
+                        $message_content->message_id = $message_id;
+                        $message_content->content_name = $file_name;
+
+                        $existing_file_path = isset($message_path_list[$i]) ? $message_path_list[$i] : null;
+                        if ($this->isChangedFile($existing_file_path, $request->file_path[$i] ?? null)) {
+                            $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
+                        } else {
+                            $message_content->content_url = $request->file_path[$i];
+                        }
+
+                        $message_content->thumbnails_url = ImageConverter::convert2image($request->file_path[$i]);
+                        $message_content->join_flg = $request->join_flg[$i];
+                        $message_content->save();
                     }
                 }
             }
 
             $message_contents = MessageContent::where('message_id', $message->id)->get()->toArray();
-            $message_contents = array_merge($message_contents, $content_data);
+            if (!empty($message_contents)) {
+                $message_contents = array_merge($message_contents, $content_data);
 
-            if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
-            // 結合処理
-            $join_files = [];
-            foreach ($message_contents as $content) {
-                if ($content["join_flg"] === "join") {
-                    $join_files[] = [
-                        "content_name" => $content["content_name"],
-                        "content_url" => $content["content_url"],
-                    ];
+                if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
+                    // 結合処理
+                    $join_files = [];
+                    foreach ($message_contents as $content) {
+                        if ($content["join_flg"] === "join") {
+                            $join_files[] = [
+                                "content_name" => $content["content_name"],
+                                "content_url" => $content["content_url"],
+                            ];
+                        }
+                    }
+                    if (!empty($join_files)) {
+                        $join_file_list = $this->pdfFileJoin($join_files);
+                    } else {
+                        $join_file_list = [];
+                    }
+
+                    // 結合処理したか判定
+                    if (!empty($join_file_list)) {
+                        $msg_params['content_name'] = $join_file_list[0]['content_name'];
+                        $msg_params['content_url'] = $join_file_list[0]['content_url'];
+                    } else {
+                        $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+                        $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+                    }
+                        $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
+
+                        $message_changed_flg = true;
+                } else {
+                    $message_params['content_name'] = $message->content_name;
+                    $message_params['content_url'] = $message->content_url;
+                    $message_params['thumbnails_url'] = $message->thumbnails_url;
                 }
-            }
-            if (!empty($join_files)) {
-                $join_file_list = $this->pdfFileJoin($join_files);
-            } else {
-                $join_file_list = [];
-            }
-
-            // 結合処理したか判定
-            if (!empty($join_file_list)) {
-                $msg_params['content_name'] = $join_file_list[0]['content_name'];
-                $msg_params['content_url'] = $join_file_list[0]['content_url'];
-            } else {
-                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
-                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
-            }
-                $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
-
-                $message_changed_flg = true;
             } else {
                 $message_params['content_name'] = $message->content_name;
                 $message_params['content_url'] = $message->content_url;
