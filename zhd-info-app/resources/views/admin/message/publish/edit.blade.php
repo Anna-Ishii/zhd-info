@@ -132,12 +132,13 @@
             <div class="form-group">
                 <label class="col-lg-2 control-label"></label>
                 <div class="col-lg-12 fileInputs">
-                    @if (request()->old())
-                        @if (old('file_name'))
-                            @foreach (old('file_name') as $index => $file_name)
+                    @if (old('file_name'))
+                        @foreach (old('file_name') as $index => $file_name)
+                            @if (isset($file_name))
                                 <div class="file-input-container">
                                     <div class="row">
-                                        @if ($index = 0)
+                                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ old('content_id')[$index] }}" required>
+                                        @if ($index === 0)
                                             <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
                                         @else
                                             <label class="col-lg-2 control-label">添付{{$index}}</label>
@@ -162,15 +163,15 @@
                                         @endif
                                     </div>
                                 </div>
-                            @endforeach
-                        @endif
+                            @endif
+                        @endforeach
                     @else
                         {{-- 複数ファイルの場合 --}}
                         @if ($message_contents->isNotEmpty())
                             @foreach ($message_contents as $index => $message_content)
                                 <div class="file-input-container">
                                     <div class="row">
-                                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ $message_content->id }}" required>
+                                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="{{ old('content_id[]', $message_content->id) }}" required>
                                         @if ($index === 0)
                                             <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
                                         @else
