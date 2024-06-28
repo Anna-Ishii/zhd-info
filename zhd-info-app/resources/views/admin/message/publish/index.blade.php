@@ -202,7 +202,7 @@
                                                 <a href="{{ asset($message->main_file['file_url']) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }} ({{ $message->main_file_count }}ページ)</a>
                                             @endif
                                         @else
-                                            {{ $message->title }}
+                                            <a href="{{ asset($message->content_url)}}" target="_blank" rel="noopener noreferrer">{{$message->title}}</a>
                                         @endif
                                     @else
                                         {{ $message->title }}
