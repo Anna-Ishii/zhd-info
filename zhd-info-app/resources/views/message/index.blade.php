@@ -105,7 +105,7 @@
                                 </div>
                                 <div class="list__file">
                                     @if ($message->file_count > 0)
-                                        有 ({{ $message->file_count }})
+                                    <button type="button" class="btnType3">有 ({{ $message->file_count }})</button>
                                     @endif
                                 </div>
                                 <div class="list__status">
@@ -154,9 +154,11 @@
                     <div class="modal-header">
                         <h4 class="modal-title">添付ファイル　全{{ $message->file_count }}件</h4>
                     </div>
-                    <div class="modal-body" style="padding: 10px; max-height: 200px;">
+                    <div class="modal-body" style="padding: 10px;">
                         @foreach ($message->content_files as $file)
-                            <p><a href="{{ asset($file['file_url']) }}" target="_blank">{{ $file['file_name'] }}</a></p>
+                            <button type="button" class="btnType3" style="margin-left: unset; display: block; margin-bottom: 10px;">
+                                <a href="{{ asset($file['file_url']) }}" target="_blank">{{ $file['file_name'] }}</a>
+                            </button>
                         @endforeach
                     </div>
                 </div>
