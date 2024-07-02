@@ -39,7 +39,7 @@
                     </div>
                     <p>{{ $manual->description}}</p>
                 </div>
-                                    <!-- 添付ファイル -->
+                    <!-- 添付ファイル -->
                     {{-- クエリパラメータにautoplayがあれば自動再生 --}}
                     <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
                     <div class="manualAttachment {{(request()->input('autoplay')) ? 'isActive' : ''}}">
@@ -102,7 +102,7 @@
                                         </div>
                                     </div>
                                 </div>
-						    </div>
+                            </div>
                         </div>
                     </div>
                 @elseif( in_array($manual->content_type, ['pdf'], true ))
@@ -111,12 +111,12 @@
                     <a href="{{ asset($manual->content_url)}}">
                         <!-- jsのクリックイベントを無効化、pdfはポップアップで表示しないため -->
                         <div class="main__thumb" style="pointer-events: none;">
-                            <img src="{{ asset($manual->thumbnails_url)}}" alt="">
+                            <img src="{{ asset($manual->content_url)}}" alt="">
                             <!-- 再生ボタンにしたい場合playクラスをつける -->
-                            <button type="button" class="main__thumb__icon"></button>
+                            {{-- <button type="button" class="main__thumb__icon"></button> --}}
                         </div>
                     </a>
-                    <p>{{ $manual->description }}</p>
+                    {{-- <p>{{ $manual->description }}</p> --}}
                 </div>
                 @else
                 {{-- 画像 --}}
@@ -124,11 +124,26 @@
                     <div class="main__thumb">
                         <img src="{{ asset($manual->content_url)}}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
-                        <button type="button" class="main__thumb__icon"></button>
+                        {{-- <button type="button" class="main__thumb__icon"></button> --}}
                     </div>
-                    <p>{{ $manual->description }}</p>
+                    {{-- <p>{{ $manual->description }}</p> --}}
                 </div>
                 @endif
+
+                {{-- @elseif( in_array($manual->content_type, ['pdf'], true )) --}}
+                {{-- PDF --}}
+                {{-- <div class="main__supplement__detail flex" id="pdf-container">
+                    <canvas id="pdf-canvas"></canvas>
+                    <p>{{ $manual->description }}</p>
+                </div>
+
+                @else --}}
+                {{-- 画像 --}}
+                {{-- <div class="main__supplement__detail flex">
+                    <img src="{{ asset($manual->content_url)}}" alt="" style="width: 100%;">
+                    <p>{{ $manual->description }}</p>
+                </div>
+                @endif --}}
 
             </div>
             @foreach( $contents as $content )
@@ -207,7 +222,7 @@
 						</div>
                     </div>
                 </div>
-                @elseif( in_array($content->content_type, ['pdf'], true ))
+                {{-- @elseif( in_array($content->content_type, ['pdf'], true ))
                 <div class="flex" >
                     <div class="main__thumb" onclick="location.href='{{ asset($content->content_url)}}'">
                         <img src="{{ asset($content->thumbnails_url)}}" alt="">
@@ -215,8 +230,8 @@
                         <button type="button" class="main__thumb__icon"></button>
                     </div>
                     <p>{{ $content->description }}</p>
-                </div>
-                @else
+                </div> --}}
+                {{-- @else
                 <div class="flex">
                     <div class="main__thumb">
                         <img src="{{ asset($content->content_url)}}" alt="">
@@ -233,7 +248,26 @@
                         <button type="button" class="manualAttachment__close"></button>
                     </div>
                 </div>
+                @endif --}}
+
+                @elseif( in_array($content->content_type, ['pdf'], true ))
+                <div class="flex">
+                    <div class="pdf-container" data-url="{{ asset($content->content_url) }}"></div>
+                </div>
+
+                @else
+                <div class="flex">
+                    <img src="{{ asset($content->content_url)}}" alt="" style="width: 100%;">
+                </div>
+                <!-- 添付ファイル -->
+                <div class="manualAttachmentBg"></div>
+                <div class="manualAttachment">
+                    <div class="manualAttachment__inner">
+                        <img src="{{ asset($content->content_url)}}" alt="">
+                    </div>
+                </div>
                 @endif
+
             </section>
             @endforeach
         </div>
@@ -241,5 +275,6 @@
 
     @include('common.footer')
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
     <script src="{{ asset('/js/detail.js') }}" defer></script>
     @endsection
