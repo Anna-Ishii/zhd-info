@@ -26,7 +26,7 @@
 
     <!-- Custom CSS -->
     <link href="{{ asset('/admin/css/sb-admin-2.css') }}?20240117" rel="stylesheet">
-    <link href="{{ asset('/admin/css/style.css') }}?20240117" rel="stylesheet">
+    <link href="{{ asset('/admin/css/style.css') }}?date=202407" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.css" integrity="sha512-bYPO5jmStZ9WI2602V2zaivdAnbAhtfzmxnEGh9RwtlI00I9s8ulGe4oBa5XxiC6tCITJH/QG70jswBhbLkxPw==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/css/theme.default.min.css">
 
@@ -108,7 +108,7 @@
         </div>
     </div>
 
-    <script src="{{ asset('/js/edit.js') }}?date=20240405" defer></script>
+    <script src="{{ asset('/js/edit.js') }}?date=202407" defer></script>
     @livewireScripts
 </body>
 

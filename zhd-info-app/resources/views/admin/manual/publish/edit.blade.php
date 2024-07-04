@@ -430,6 +430,6 @@
     </form>
 </div>
 @include('common.admin.manual-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $manual->organization1_id])
-<script src="{{ asset('/js/admin/manual/publish/edit.js') }}" defer></script>
-<script src="{{ asset('/js/admin/manual/publish/edit_store.js') }}" defer></script>
+<script src="{{ asset('/js/admin/manual/publish/edit.js') }}?date=202407" defer></script>
+<script src="{{ asset('/js/admin/manual/publish/edit_store.js') }}?date=202407" defer></script>
 @endsection
