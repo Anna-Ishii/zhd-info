@@ -925,11 +925,11 @@ class MessagePublishController extends Controller
                                         if ($this->isChangedFile($join_path_list[$i], isset($request->file_path[$i]) ? $request->file_path[$i] : null)) {
                                             $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
                                         } else {
-                                            $message_content->content_url = $request->file_path[$i];
+                                            $message_content->content_url = $request->file_path[$i] ?? null;
                                         }
 
                                         $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
-                                        $message_content->join_flg = $request->join_flg[$i];
+                                        $message_content->join_flg = $request->join_flg[$i] ?? null;
                                         $message_content_changed_flg = true;
 
                                         $message_content->save();
@@ -937,20 +937,20 @@ class MessagePublishController extends Controller
                                 // 手順の新規登録
                                 } else {
                                     if (isset($file_name)) {
-                                        $content_data[$i]['content_name'] = $file_name;
-                                        $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
-                                        $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                                        $content_data[$i]['join_flg'] = $request->join_flg[$i];
+                                        $content_data[$i]['content_name'] = $file_name ?? null;
+                                        $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i] ?? null);
+                                        $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url'] ?? null);
+                                        $content_data[$i]['join_flg'] = $request->join_flg[$i] ?? null;
                                     }
                                 }
 
                             // 手順の新規登録
                             } else {
                                 if (isset($file_name)) {
-                                    $content_data[$i]['content_name'] = $file_name;
-                                    $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
-                                    $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                                    $content_data[$i]['join_flg'] = $request->join_flg[$i];
+                                    $content_data[$i]['content_name'] = $file_name ?? null;
+                                    $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i] ?? null);
+                                    $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url'] ?? null);
+                                    $content_data[$i]['join_flg'] = $request->join_flg[$i] ?? null;
                                 }
                             }
                         }
@@ -963,17 +963,17 @@ class MessagePublishController extends Controller
                     if (isset($request->file_path[$i])) {
                         $message_content = new MessageContent();
                         $message_content->message_id = $message_id;
-                        $message_content->content_name = $file_name;
+                        $message_content->content_name = $file_name ?? null;
 
                         $existing_file_path = isset($message_path_list[$i]) ? $message_path_list[$i] : null;
                         if ($this->isChangedFile($existing_file_path, $request->file_path[$i] ?? null)) {
                             $message_content->content_url = $request->file_path[$i] ? $this->registerFile($request->file_path[$i]) : null;
                         } else {
-                            $message_content->content_url = $request->file_path[$i];
+                            $message_content->content_url = $request->file_path[$i] ?? null;
                         }
 
-                        $message_content->thumbnails_url = ImageConverter::convert2image($request->file_path[$i]);
-                        $message_content->join_flg = $request->join_flg[$i];
+                        $message_content->thumbnails_url = ImageConverter::convert2image($request->file_path[$i] ?? null);
+                        $message_content->join_flg = $request->join_flg[$i] ?? null;
                         $message_content->save();
                     }
                 }
@@ -1008,7 +1008,7 @@ class MessagePublishController extends Controller
                         $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
                         $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
                     }
-                        $msg_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($msg_params['content_url']) : null;
+                        $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
 
                         $message_changed_flg = true;
                 } else {

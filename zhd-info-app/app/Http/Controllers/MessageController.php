@@ -255,18 +255,26 @@ class MessageController extends Controller
         try {
             DB::beginTransaction();
             $message = Message::findOrFail($message_id);
-            $message_content = MessageContent::where('message_id', $message_id)->first();
+            $message_content = MessageContent::where('message_id', $message_id)->get()->toArray();
             $message->putCrewRead($reading_crews);
             $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message_id, [
                 'read_flg' => true,
                 'readed_datetime' => Carbon::now(),
             ]);
             DB::commit();
-            if ($message_content) {
-                if ($message->content_name !== $message_content->content_name) {
-                    $message->content_url = $message_content->content_url;
+
+            if (!empty($message_content)) {
+                if (count($message_content) > 1) {
+                    $first_content = $message_content[0];
+                    if ($message->content_name !== $first_content['content_name']) {
+                        $message->content_url = $first_content['content_url'];
+                    }
+                } else {
+                    $single_content = $message_content[0];
+                    $message->content_url = $single_content['content_url'];
                 }
             }
+
             // 既読が無事できたらpdfへ
             return redirect()->to($message->content_url)->withInput();
         } catch (\Throwable $th) {
