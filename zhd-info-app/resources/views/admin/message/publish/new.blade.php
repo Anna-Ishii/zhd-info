@@ -324,6 +324,6 @@
     </div>
     @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
     @include('common.admin.message-new-join-file-modal', [])
-    <script src="{{ asset('/js/admin/message/publish/new.js') }}" defer></script>
-    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new.js') }}?date=202407" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date=202407" defer></script>
 @endsection
