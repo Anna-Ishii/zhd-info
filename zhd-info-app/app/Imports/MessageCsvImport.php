@@ -40,15 +40,15 @@ class MessageCsvImport implements
         $this->organization1 = $organization1;
         $this->organization = $organization;
         $this->brand = array_merge(array_column($this->organization, 'brand_name'), ["全て"]);
-        $this->organization5 = array_merge(array_column($this->organization, 'organization5_name'), ["全て"]);
-        $this->organization4 = array_merge(array_column($this->organization, 'organization4_name'), ["全て"]);
-        $this->organization3 = array_merge(array_column($this->organization, 'organization3_name'), ["全て"]);
+        // $this->organization5 = array_merge(array_column($this->organization, 'organization5_name'), ["全て"]);
+        // $this->organization4 = array_merge(array_column($this->organization, 'organization4_name'), ["全て"]);
+        // $this->organization3 = array_merge(array_column($this->organization, 'organization3_name'), ["全て"]);
         $this->category_list = MessageCategory::pluck('name')->toArray();
     }
-    
+
     public function collection(Collection $rows)
     {
-       
+
     }
 
     public function headingRow(): int
@@ -69,10 +69,10 @@ class MessageCsvImport implements
         return [
             '0' => ['required'],
             '2' => ['nullable', Rule::in($this->category_list)],
-            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
-            '13' => ['nullable', new OrganizationRule(parameter: $this->organization5)],
-            '14' => ['nullable', new OrganizationRule(parameter: $this->organization4)],
-            '15' => ['nullable', new OrganizationRule(parameter: $this->organization3)],
+            // '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
+            // '13' => ['nullable', new OrganizationRule(parameter: $this->organization5)],
+            // '14' => ['nullable', new OrganizationRule(parameter: $this->organization4)],
+            // '15' => ['nullable', new OrganizationRule(parameter: $this->organization3)],
         ];
     }
 
