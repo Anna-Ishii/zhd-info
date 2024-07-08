@@ -55,8 +55,8 @@ class ImportImsCsvCommand extends Command
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
-        $organization_path = $directory.$organization_filename;
-        $crews_path = $directory.$crews_filename;
+        $organization_path = $directory . $organization_filename;
+        $crews_path = $directory . $crews_filename;
         $this->info($organization_path);
         $this->info($crews_path);
 
@@ -64,7 +64,6 @@ class ImportImsCsvCommand extends Command
             $this->error("{$organization_path}が存在しません");
             $this->info('end');
             exit();
-
         }
 
         if (!Storage::disk('s3')->exists($crews_path)) {
@@ -90,21 +89,24 @@ class ImportImsCsvCommand extends Command
                 $ims_log->import_department_error = true;
                 throw $th;
             }
-            // クルーの取り込み
-            try {
-                $this->info("{$crews_filename}ファイルを読み込みます");
-                $crews_data =  (new CrewsIMSImport)
-                    ->toCollection($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
-                $this->info("{$crews_filename}ファイル読み込み完了");
-                $this->import_crews($crews_data[0]);
-                unset($crews_data);
-                $ims_log->import_crew_at = new Carbon('now');
-                $ims_log->import_crew_error = false;
-            } catch (\Throwable $th) {
-                $ims_log->import_crew_message = $th->getMessage();
-                $ims_log->import_crew_error = true;
-                throw $th;
-            }
+        // クルーの取り込み
+        try {
+            $this->info("{$crews_filename}ファイルを読み込みます");
+            // $crews_data =  (new CrewsIMSImport)
+            //     ->toCollection($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
+
+            (new CrewsIMSImport($this))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
+
+            $this->info("{$crews_filename}ファイル読み込み完了");
+            // $this->import_crews($crews_data[0]);
+            // unset($crews_data);
+            $ims_log->import_crew_at = new Carbon('now');
+            $ims_log->import_crew_error = false;
+        } catch (\Throwable $th) {
+            $ims_log->import_crew_message = $th->getMessage();
+            $ims_log->import_crew_error = true;
+            throw $th;
+        }
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -134,7 +136,7 @@ class ImportImsCsvCommand extends Command
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
                 continue;
             }
-            // 営業部、DS、AR、BLの登録  
+            // 営業部、DS、AR、BLの登録
             $organization2_id = null; // 営業部
             $organization3_id = null; // DS
             $organization4_id = null; // AR
@@ -297,7 +299,6 @@ class ImportImsCsvCommand extends Command
         foreach ($diff_shop_user as $key => $user) {
             $user->message()->detach();
             $user->manual()->detach();
-
         }
         User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
         Shop::whereIn('id', $delete_shop)->delete();
@@ -372,7 +373,7 @@ class ImportImsCsvCommand extends Command
     }
 
 
-    private function import_crews($crews_data)
+    public function import_crews($crews_data)
     {
         $ROLL_ID = 4;
 
