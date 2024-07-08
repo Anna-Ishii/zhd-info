@@ -275,6 +275,7 @@
 
     @include('common.footer')
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.9.359/pdf.min.js"></script>
+    <script src="{{ asset('/js/pdfjs/build/pdf.js') }}" defer></script>
+    <script src="{{ asset('/js/pdfjs/build/pdf.worker.js') }}" defer></script>
     <script src="{{ asset('/js/detail.js') }}" defer></script>
     @endsection
