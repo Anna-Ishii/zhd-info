@@ -2544,8 +2544,21 @@ details[open] summary::after {
 .pdf-container {
     width: 100%;
     overflow-x: auto;
+    margin-bottom: 20px;
+    position: relative;
 }
+
 .pdf-container canvas {
     width: 100%;
     height: auto;
+}
+
+.page-number {
+    position: absolute;
+    top: 0px;
+    left: 10px;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
 }

@@ -365,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const url = container.dataset.url;
         if (url) {
             pdfjsLib.getDocument(url).promise.then(function(pdf) {
-                for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const renderPage = (pageNum) => {
                     pdf.getPage(pageNum).then(function(page) {
                         const viewport = page.getViewport({ scale: 1.5 });
                         const canvas = document.createElement('canvas');
@@ -373,14 +373,32 @@ document.addEventListener('DOMContentLoaded', function() {
                         canvas.height = viewport.height;
                         canvas.width = viewport.width;
 
-                        container.appendChild(canvas);
+                        // 各ページのコンテナを作成
+                        const pageContainer = document.createElement('div');
+                        pageContainer.style.position = 'relative';
+                        pageContainer.style.marginBottom = '20px';
+
+                        // ページ番号を追加
+                        const pageNumber = document.createElement('div');
+                        pageNumber.classList.add('page-number');
+                        pageNumber.textContent = `${pageNum} / ${pdf.numPages}`;
+                        pageContainer.appendChild(pageNumber);
+
+                        pageContainer.appendChild(canvas);
+                        container.appendChild(pageContainer);
 
                         page.render({
                             canvasContext: context,
                             viewport: viewport
+                        }).promise.then(function() {
+                            if (pageNum < pdf.numPages) {
+                                renderPage(pageNum + 1);
+                            }
                         });
                     });
-                }
+                };
+
+                renderPage(1);
             });
         }
     });
