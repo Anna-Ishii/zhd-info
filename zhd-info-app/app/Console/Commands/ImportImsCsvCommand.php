@@ -92,14 +92,11 @@ class ImportImsCsvCommand extends Command
         // クルーの取り込み
         try {
             $this->info("{$crews_filename}ファイルを読み込みます");
-            // $crews_data =  (new CrewsIMSImport)
-            //     ->toCollection($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
-
-            (new CrewsIMSImport($this))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
-
+            $crews_data = [];
+            (new CrewsIMSImport($crews_data))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
             $this->info("{$crews_filename}ファイル読み込み完了");
-            // $this->import_crews($crews_data[0]);
-            // unset($crews_data);
+            $this->import_crews($crews_data);
+            unset($crews_data);
             $ims_log->import_crew_at = new Carbon('now');
             $ims_log->import_crew_error = false;
         } catch (\Throwable $th) {
@@ -371,7 +368,6 @@ class ImportImsCsvCommand extends Command
 
         return $employee_code;
     }
-
 
     public function import_crews($crews_data)
     {

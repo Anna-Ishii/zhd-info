@@ -9,9 +9,6 @@ use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use Maatwebsite\Excel\Concerns\WithStartRow;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 
-use App\Console\Commands\ImportImsCsvCommand;
-
-
 class CrewsIMSImport implements
     ToCollection,
     WithCalculatedFormulas,
@@ -20,16 +17,18 @@ class CrewsIMSImport implements
 {
     use Importable;
 
-    protected $command;
+    protected $crews_data;
 
-    public function __construct(ImportImsCsvCommand $command)
+    public function __construct(&$crews_data)
     {
-        $this->command = $command;
+        $this->crews_data = &$crews_data;
     }
 
     public function collection(Collection $rows)
     {
-        $this->command->import_crews($rows);
+        foreach ($rows as $row) {
+            $this->crews_data[] = $row;
+        }
     }
 
     public function headingRow(): int
