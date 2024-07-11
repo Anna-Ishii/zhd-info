@@ -431,6 +431,7 @@ class ImportImsCsvCommand extends Command
 
             $register_crews[] = $part_code;
         }
+
         // クルーの削除
         $crew_list = Crew::query()
             ->pluck('part_code')
