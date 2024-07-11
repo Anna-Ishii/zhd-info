@@ -360,45 +360,107 @@ $(document).on(
 
 // PDFを前ページ表示されるようにする処理
 document.addEventListener('DOMContentLoaded', function() {
+    // .pdf-containerクラスを持つ全ての要素を取得
     const pdfContainers = document.querySelectorAll('.pdf-container');
+
+    // 各PDFコンテナに対して処理を実行
     pdfContainers.forEach(container => {
-        const url = container.dataset.url;
+        const url = container.dataset.url; // データ属性からURLを取得
+        let pdfDoc = null; // PDFドキュメントオブジェクト
+        let currentPage = 1; // 現在のページ番号
+        let isAllPages = false; // 全ページ表示フラグ
+
+        // URLが存在する場合、PDFを取得
         if (url) {
             pdfjsLib.getDocument(url).promise.then(function(pdf) {
-                const renderPage = (pageNum) => {
-                    pdf.getPage(pageNum).then(function(page) {
-                        const viewport = page.getViewport({ scale: 1.5 });
-                        const canvas = document.createElement('canvas');
-                        const context = canvas.getContext('2d');
-                        canvas.height = viewport.height;
-                        canvas.width = viewport.width;
+                pdfDoc = pdf; // 取得したPDFドキュメントを保存
 
-                        // 各ページのコンテナを作成
-                        const pageContainer = document.createElement('div');
-                        pageContainer.style.position = 'relative';
-                        pageContainer.style.marginBottom = '20px';
+                // ページ数が2以上の場合にボタンを追加
+                if (pdf.numPages > 1) {
+                    const modalBtnInner = document.createElement('div');
+                    modalBtnInner.classList.add('toggle-view');
 
-                        // ページ番号を追加
-                        const pageNumber = document.createElement('div');
-                        pageNumber.classList.add('page-number');
-                        pageNumber.textContent = `${pageNum} / ${pdf.numPages}`;
-                        pageContainer.appendChild(pageNumber);
+                    // 1ページ表示ボタンを作成
+                    const toggleSinglePageButton = document.createElement('button');
+                    toggleSinglePageButton.type = 'button';
+                    toggleSinglePageButton.classList.add('toggle-view-btn');
+                    toggleSinglePageButton.textContent = '1ページ表示';
+                    modalBtnInner.appendChild(toggleSinglePageButton);
 
-                        pageContainer.appendChild(canvas);
-                        container.appendChild(pageContainer);
+                    // 全ページ表示ボタンを作成
+                    const toggleAllPagesButton = document.createElement('button');
+                    toggleAllPagesButton.type = 'button';
+                    toggleAllPagesButton.classList.add('toggle-view-btn');
+                    toggleAllPagesButton.textContent = '全ページ表示';
+                    modalBtnInner.appendChild(toggleAllPagesButton);
 
-                        page.render({
-                            canvasContext: context,
-                            viewport: viewport
-                        }).promise.then(function() {
-                            if (pageNum < pdf.numPages) {
-                                renderPage(pageNum + 1);
-                            }
-                        });
+                    // ボタンをコンテナに追加
+                    container.appendChild(modalBtnInner);
+
+                    // 1ページ表示ボタンのクリックイベント
+                    toggleSinglePageButton.addEventListener('click', () => {
+                        isAllPages = false; // 全ページ表示フラグをfalseに設定
+                        toggleSinglePageButton.disabled = true; // 1ページ表示ボタンを無効化
+                        toggleAllPagesButton.disabled = false; // 全ページ表示ボタンを有効化
+                        currentPage = 1; // 現在のページを1に設定
+                        container.innerHTML = ''; // コンテナをクリア
+                        container.appendChild(modalBtnInner); // ボタンを再追加
+                        renderPage(currentPage); // 1ページ目をレンダリング
                     });
-                };
 
-                renderPage(1);
+                    // 全ページ表示ボタンのクリックイベント
+                    toggleAllPagesButton.addEventListener('click', () => {
+                        isAllPages = true; // 全ページ表示フラグをtrueに設定
+                        toggleAllPagesButton.disabled = true; // 全ページ表示ボタンを無効化
+                        toggleSinglePageButton.disabled = false; // 1ページ表示ボタンを有効化
+                        currentPage = 1; // 現在のページを1に設定
+                        container.innerHTML = ''; // コンテナをクリア
+                        container.appendChild(modalBtnInner); // ボタンを再追加
+                        renderPage(currentPage); // 全ページをレンダリング
+                    });
+
+                    // 初期状態で1ページ表示ボタンを無効化
+                    toggleSinglePageButton.disabled = true;
+                }
+
+                // 初期表示のページをレンダリング
+                renderPage(currentPage);
+            });
+        }
+
+        // 指定されたページをレンダリングする関数
+        function renderPage(pageNum) {
+            pdfDoc.getPage(pageNum).then(function(page) {
+                const viewport = page.getViewport({ scale: 1.5 }); // ページのビューポートを設定
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = viewport.height;
+                canvas.width = viewport.width;
+
+                const pageContainer = document.createElement('div');
+                pageContainer.style.position = 'relative';
+                pageContainer.style.marginBottom = '20px';
+
+                // ページ番号を表示する要素を作成
+                const pageNumber = document.createElement('div');
+                pageNumber.classList.add('page-number');
+                pageNumber.textContent = `${pageNum} / ${pdfDoc.numPages}`;
+                pageContainer.appendChild(pageNumber);
+
+                // キャンバスをページコンテナに追加
+                pageContainer.appendChild(canvas);
+                container.appendChild(pageContainer);
+
+                // ページをキャンバスにレンダリング
+                page.render({
+                    canvasContext: context,
+                    viewport: viewport
+                }).promise.then(function() {
+                    // 全ページ表示モードの場合、次のページをレンダリング
+                    if (isAllPages && pageNum < pdfDoc.numPages) {
+                        renderPage(pageNum + 1);
+                    }
+                });
             });
         }
     });

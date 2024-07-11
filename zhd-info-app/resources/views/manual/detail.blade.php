@@ -148,7 +148,7 @@
             </div>
             @foreach( $contents as $content )
             <section class="main__box thumb_parents">
-                <h2 class="mb10">手順{{$loop->iteration}}：{{$content->title}}</h2>
+                <h2 class="mb10" style="font-size: xx-large;">手順{{$loop->iteration}}：{{$content->title}}</h2>
                 @if( in_array($content->content_type, ['mp4', 'mov', 'MP4'], true ))
                 <div class=" flex">
                     <div class="main__thumb">
@@ -251,11 +251,14 @@
                 @endif --}}
 
                 @elseif( in_array($content->content_type, ['pdf'], true ))
+                <p class="text-content">{{ $content->description }}</p>
                 <div class="flex">
                     <div class="pdf-container" data-url="{{ asset($content->content_url) }}"></div>
                 </div>
 
+
                 @else
+                <p class="text-content">{{ $content->description }}</p>
                 <div class="flex">
                     <img src="{{ asset($content->content_url)}}" alt="" style="width: 100%;">
                 </div>
@@ -266,6 +269,7 @@
                         <img src="{{ asset($content->content_url)}}" alt="">
                     </div>
                 </div>
+
                 @endif
 
             </section>

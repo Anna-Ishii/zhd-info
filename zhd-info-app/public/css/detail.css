@@ -2541,6 +2541,31 @@ details[open] summary::after {
     font-size: 14px;
 }
 
+p.text-content {
+    padding: 20px 0px;
+    font-size: x-large;
+}
+
+div.toggle-view {
+    padding: 10px 0px 20px 0;
+}
+
+button.toggle-view-btn {
+    background-color: #eee;
+    color: #333;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    font-weight: bold;
+    margin: 10px 5px 10px 5px;
+    padding: 6px 12px;
+}
+
+button.toggle-view-btn:disabled {
+    background-color: #7e7e7e;
+    color: white;
+    border: 1px solid #7e7e7e;
+}
+
 .pdf-container {
     width: 100%;
     overflow-x: auto;
