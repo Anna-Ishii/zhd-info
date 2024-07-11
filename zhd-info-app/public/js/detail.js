@@ -366,9 +366,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // 各PDFコンテナに対して処理を実行
     pdfContainers.forEach(container => {
         const url = container.dataset.url; // データ属性からURLを取得
-        let pdfDoc = null; // PDFドキュメントオブジェクト
-        let currentPage = 1; // 現在のページ番号
-        let isAllPages = false; // 全ページ表示フラグ
+        let pdfDoc = null;                 // PDFドキュメントオブジェクト
+        let currentPage = 1;               // 現在のページ番号
+        let isAllPages = false;            // 全ページ表示フラグ
 
         // URLが存在する場合、PDFを取得
         if (url) {
@@ -399,24 +399,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // 1ページ表示ボタンのクリックイベント
                     toggleSinglePageButton.addEventListener('click', () => {
-                        isAllPages = false; // 全ページ表示フラグをfalseに設定
-                        toggleSinglePageButton.disabled = true; // 1ページ表示ボタンを無効化
-                        toggleAllPagesButton.disabled = false; // 全ページ表示ボタンを有効化
-                        currentPage = 1; // 現在のページを1に設定
-                        container.innerHTML = ''; // コンテナをクリア
-                        container.appendChild(modalBtnInner); // ボタンを再追加
-                        renderPage(currentPage); // 1ページ目をレンダリング
+                        isAllPages = false;                      // 全ページ表示フラグをfalseに設定
+                        toggleSinglePageButton.disabled = true;  // 1ページ表示ボタンを無効化
+                        toggleAllPagesButton.disabled = false;   // 全ページ表示ボタンを有効化
+                        currentPage = 1;                         // 現在のページを1に設定
+                        container.innerHTML = '';                // コンテナをクリア
+                        container.appendChild(modalBtnInner);    // ボタンを再追加
+                        renderPage(currentPage);                 // 1ページ目をレンダリング
                     });
 
                     // 全ページ表示ボタンのクリックイベント
                     toggleAllPagesButton.addEventListener('click', () => {
-                        isAllPages = true; // 全ページ表示フラグをtrueに設定
-                        toggleAllPagesButton.disabled = true; // 全ページ表示ボタンを無効化
+                        isAllPages = true;                       // 全ページ表示フラグをtrueに設定
+                        toggleAllPagesButton.disabled = true;    // 全ページ表示ボタンを無効化
                         toggleSinglePageButton.disabled = false; // 1ページ表示ボタンを有効化
-                        currentPage = 1; // 現在のページを1に設定
-                        container.innerHTML = ''; // コンテナをクリア
-                        container.appendChild(modalBtnInner); // ボタンを再追加
-                        renderPage(currentPage); // 全ページをレンダリング
+                        currentPage = 1;                         // 現在のページを1に設定
+                        container.innerHTML = '';                // コンテナをクリア
+                        container.appendChild(modalBtnInner);    // ボタンを再追加
+                        renderPage(currentPage);                 // 全ページをレンダリング
                     });
 
                     // 初期状態で1ページ表示ボタンを無効化
