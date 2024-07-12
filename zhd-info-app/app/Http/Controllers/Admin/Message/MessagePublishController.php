@@ -257,6 +257,55 @@ class MessagePublishController extends Controller
                 $message->shop_count = $shop_count;
             }
 
+
+
+            // APIのエンドポイントURL
+            $url = 'https://wow-talk.zensho.com/message';
+
+            // 送信するデータ
+            $data = array(
+                'message' => '本文',
+                'target' => array(
+                    ''
+                )
+            );
+
+            // JSON形式にエンコード
+            $json_data = json_encode($data);
+
+            // cURLセッションを初期化
+            $ch = curl_init($url);
+
+            // ヘッダーを設定
+            $headers = array(
+                'x-api-key: osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv',  // APIキーを設定
+                'Content-Type: application/json'
+            );
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+            // オプションを設定
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+
+            // リクエストを実行してレスポンスを取得
+            $response = curl_exec($ch);
+
+            // エラーが発生した場合の処理
+            if ($response === false) {
+                $error = curl_error($ch);
+                curl_close($ch);
+                die('cURLエラー: ' . $error);
+            }
+
+            // cURLセッションを終了
+            curl_close($ch);
+
+            // レスポンスを表示
+            echo 'APIレスポンス: ' . $response;
+
+
+
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
