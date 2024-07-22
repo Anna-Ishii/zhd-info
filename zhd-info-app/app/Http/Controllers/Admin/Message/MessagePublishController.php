@@ -163,146 +163,111 @@ class MessagePublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
-            // 添付ファイル
-            foreach ($message_list as &$message) {
-                $file_list = [];
-                $is_first_join = false;
+        // 添付ファイル
+        foreach ($message_list as &$message) {
+            $file_list = [];
+            $is_first_join = false;
 
-                $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
-                $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
+            $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
+            $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
-                // 最初の要素をチェックしてフラグを設定
-                if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
-                    $is_first_join = true;
-                }
+            // 最初の要素をチェックしてフラグを設定
+            if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
+                $is_first_join = true;
+            }
 
-                if ($is_first_join) {
-                    if ($all_message_join_file) {
-                        // PDFファイルのページ数を取得
-                        $pdf = new TcpdfFpdi();
-                        $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
-                        if (file_exists($file_path)) {
-                            $message->main_file = [
-                                "file_name" => $all_message_join_file[0]["content_name"],
-                                "file_url" => $all_message_join_file[0]["content_url"],
-                            ];
-
-                            try {
-                                $page_num = $pdf->setSourceFile($file_path);
-                                $message->main_file_count = $page_num;
-                            } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
-                                // 暗号化されたPDFの処理
-                                $message->main_file_count = '暗号化';
-                            }
-                        }
-                    }
-                    foreach ($all_message_content_single_files as $message_content_single_file) {
-                        if ($message_content_single_file["join_flg"] === "single") {
-                            $file_list[] = [
-                                "file_name" => $message_content_single_file["content_name"],
-                                "file_url" => $message_content_single_file["content_url"],
-                            ];
-                        }
-                    }
-
-                } else {
-                    if ($all_message_content_single_files) {
-                        $message->main_file_count = 1;
+            if ($is_first_join) {
+                if ($all_message_join_file) {
+                    // PDFファイルのページ数を取得
+                    $pdf = new TcpdfFpdi();
+                    $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
+                    if (file_exists($file_path)) {
                         $message->main_file = [
-                            "file_name" => $all_message_content_single_files[0]["content_name"],
-                            "file_url" => $all_message_content_single_files[0]["content_url"],
+                            "file_name" => $all_message_join_file[0]["content_name"],
+                            "file_url" => $all_message_join_file[0]["content_url"],
+                        ];
+
+                        try {
+                            $page_num = $pdf->setSourceFile($file_path);
+                            $message->main_file_count = $page_num;
+                        } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
+                            // 暗号化されたPDFの処理
+                            $message->main_file_count = '暗号化';
+                        }
+                    }
+                }
+                foreach ($all_message_content_single_files as $message_content_single_file) {
+                    if ($message_content_single_file["join_flg"] === "single") {
+                        $file_list[] = [
+                            "file_name" => $message_content_single_file["content_name"],
+                            "file_url" => $message_content_single_file["content_url"],
                         ];
                     }
-                    foreach ($all_message_content_single_files as $message_content_single_file) {
-                        if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
-                            $file_list[] = [
-                                "file_name" => $all_message_join_file[0]["content_name"],
-                                "file_url" => $all_message_join_file[0]["content_url"],
-                            ];
-                            continue;
-                        } else if ($message_content_single_file["join_flg"] === "single") {
-                            $file_list[] = [
-                                "file_name" => $message_content_single_file["content_name"],
-                                "file_url" => $message_content_single_file["content_url"],
-                            ];
-                        }
+                }
+            } else {
+                if ($all_message_content_single_files) {
+                    $message->main_file_count = 1;
+                    $message->main_file = [
+                        "file_name" => $all_message_content_single_files[0]["content_name"],
+                        "file_url" => $all_message_content_single_files[0]["content_url"],
+                    ];
+                }
+                foreach ($all_message_content_single_files as $message_content_single_file) {
+                    if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
+                        $file_list[] = [
+                            "file_name" => $all_message_join_file[0]["content_name"],
+                            "file_url" => $all_message_join_file[0]["content_url"],
+                        ];
+                        continue;
+                    } else if ($message_content_single_file["join_flg"] === "single") {
+                        $file_list[] = [
+                            "file_name" => $message_content_single_file["content_name"],
+                            "file_url" => $message_content_single_file["content_url"],
+                        ];
                     }
-                    // 最初の要素を削除(業態ファイル)
-                    if (!empty($file_list)) {
-                        array_shift($file_list);
-                    }
                 }
-
-                $message->content_files = $file_list;
-
-                // ファイルのカウント
-                $message->file_count = count($file_list);
+                // 最初の要素を削除(業態ファイル)
+                if (!empty($file_list)) {
+                    array_shift($file_list);
+                }
             }
 
-            // 店舗数をカウント
-            foreach ($message_list as &$message) {
-                $shop_count = 0;
+            $message->content_files = $file_list;
 
-                // すべての店舗数
-                $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-                // チェックされている店舗数
-                $shop_count = MessageShop::where('message_id', $message->id)->count();
-                if ($shop_count == 0) {
-                    $shop_count = MessageUser::where('message_id', $message->id)->count();
-                }
-                if ($all_shop_count ==  $shop_count) {
-                    $shop_count = "全店";
-                }
+            // ファイルのカウント
+            $message->file_count = count($file_list);
+        }
 
-                $message->shop_count = $shop_count;
+        // 店舗数をカウント
+        foreach ($message_list as &$message) {
+            $shop_count = 0;
+
+            // すべての店舗数
+            $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
+            // チェックされている店舗数
+            $shop_count = MessageShop::where('message_id', $message->id)->count();
+            if ($shop_count == 0) {
+                $shop_count = MessageUser::where('message_id', $message->id)->count();
+            }
+            if ($all_shop_count ==  $shop_count) {
+                $shop_count = "全店";
             }
 
+            $message->shop_count = $shop_count;
+        }
 
 
-            // APIのエンドポイントURL
-            $url = 'https://wow-talk.zensho.com/message';
 
-            // 送信するデータ
-            $data = array(
-                'message' => '本文',
-                'target' => array(
-                    ''
-                )
-            );
+        // 現在の東京時刻を取得
+        $currentDate = Carbon::now('Asia/Tokyo');
 
-            // JSON形式にエンコード
-            $json_data = json_encode($data);
+        // 現在掲載中のメッセージと掲載終了メッセージを取得
+        $allMessages = Message::where('editing_flg', false)->get();
 
-            // cURLセッションを初期化
-            $ch = curl_init($url);
-
-            // ヘッダーを設定
-            $headers = array(
-                'x-api-key: osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv',  // APIキーを設定
-                'Content-Type: application/json'
-            );
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-            // オプションを設定
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-
-            // リクエストを実行してレスポンスを取得
-            $response = curl_exec($ch);
-
-            // エラーが発生した場合の処理
-            if ($response === false) {
-                $error = curl_error($ch);
-                curl_close($ch);
-                die('cURLエラー: ' . $error);
-            }
-
-            // cURLセッションを終了
-            curl_close($ch);
-
-            // レスポンスを表示
-            echo 'APIレスポンス: ' . $response;
+        // 各メッセージを処理
+        foreach ($allMessages as $message) {
+            $this->processMessage($message, $currentDate);
+        }
 
 
 
@@ -313,6 +278,148 @@ class MessagePublishController extends Controller
             'organization1_list' => $organization1_list,
         ]);
     }
+
+
+
+    // メッセージを処理する関数
+    private function processMessage(Message $message, Carbon $currentDate)
+    {
+        // メッセージの開始日時、作成日時、および終了日時を取得
+        $startDatetime = $message->start_datetime;
+        $createdAt = $message->created_at;
+        $endDatetime = $message->end_datetime;
+
+        // 開始日時と作成日時のどちらかがnullの場合の処理
+        if (!$startDatetime || !$createdAt) {
+            return;
+        }
+
+        // 掲載開始日と作成日に基づくメッセージ送信日時を取得
+        if ($startDatetime->gte($createdAt)) {
+            $messageSendDate = $this->getNextWeekDate($startDatetime);
+        } else {
+            $messageSendDate = $this->getNextWeekDate($createdAt);
+        }
+
+        // 掲載終了日-7日の日時を取得
+        $sendMessage = true;
+        if ($endDatetime) {
+            $sevenDaysBeforeEnd = Carbon::parse($endDatetime)->subDays(7);
+            if ($currentDate->gt($sevenDaysBeforeEnd)) {
+                $sendMessage = false;
+            }
+        }
+
+        // 今日が翌週かどうか、かつ現在の日付が掲載終了日-7日を過ぎていない場合にメッセージを送信
+        if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
+            $this->sendWowTalkMessage($message);
+        }
+    }
+
+    // 翌週の日付を取得する関数
+    private function getNextWeekDate($date)
+    {
+        return (new Carbon($date))->addWeek();
+    }
+
+    // WowTalkメッセージ送信処理
+    private function sendWowTalkMessage($message)
+    {
+        // メッセージ内容を生成
+        $messageContent = $this->createMessageContent($message);
+
+        // メッセージ送信のロジック
+        // APIのエンドポイントURL
+        $url = 'https://wow-talk.zensho.com/message';
+
+        // 送信するデータ
+        $user_id = 'nssx020'; // ユーザーID
+
+        //
+        // 送信するデータ
+        $data = array(
+            'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
+            'target' => array($user_id) // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
+        );
+
+        // JSON形式にエンコード
+        $json_data = json_encode($data);
+
+        // cURLセッションを初期化
+        $ch = curl_init($url);
+
+        // ヘッダーを設定
+        $api_key = 'osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv';  // APIキー
+        $headers = array(
+            'x-api-key: ' . $api_key,
+            'Content-Type: application/json'
+        );
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        // オプションを設定
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+
+        // リクエストを実行してレスポンスを取得
+        $response = curl_exec($ch);
+
+        // エラーが発生した場合の処理
+        if ($response === false) {
+            $error = curl_error($ch);
+            curl_close($ch);
+            die('cURLエラー: ' . $error);
+        }
+
+        // cURLセッションを終了
+        curl_close($ch);
+
+        // レスポンスをデコード
+        $response_data = json_decode($response, true);
+
+        // レスポンスの存在と形式を確認
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            die('JSONデコードエラー: ' . json_last_error_msg());
+        }
+
+        // レスポンスを表示
+        if (isset($response_data['result']) && $response_data['result'] == 'success') {
+            echo 'メッセージ送信成功: ' . $response;
+        } elseif (isset($response_data['result'])) {
+            echo 'メッセージ送信失敗: ' . $response;
+        } else {
+            echo '予期しないレスポンス: ' . $response;
+        }
+    }
+
+    // メッセージ内容を生成する関数
+    private function createMessageContent($message)
+    {
+        // 未読者リストを取得
+        $unreadUsers = $message->user()->wherePivot('read_flg', false)->orderBy('name', 'asc')->take(10)->get();
+
+        // 未読者の名前を配列に格納
+        $unreadUserNames = $unreadUsers->pluck('name')->toArray();
+        $unreadUserNamesString = implode("\n　", $unreadUserNames);
+        $additionalUnreadCount = $message->user()->wherePivot('read_flg', false)->count() - 10;
+
+        // メッセージ内容をフォーマット
+        $messageContent = "テスト\n 配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
+            . "・業連名：{$message->title}\n"
+            . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
+            . "・カテゴリ：{$message->category->name}\n"
+            . "・URL：https://innerstreaming.zensho-i.net\n"
+            . "・未読者：\n　{$unreadUserNamesString}";
+
+        if ($additionalUnreadCount > 0) {
+            $messageContent .= "\n　他{$additionalUnreadCount}名";
+        }
+
+        // メッセージは最大800文字に制限
+        return mb_strimwidth($messageContent, 0, 800, "...");
+    }
+
+
 
     public function show(Request $request, $message_id)
     {
@@ -775,7 +882,7 @@ class MessagePublishController extends Controller
             $organization_list[$index]['organization2_shop_list'] = [];
 
             if (isset($organization['organization5_id'])) {
-                    foreach ($brand_list as $brand) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization5_id', $organization['organization5_id'])
                         ->where('brand_id', $brand->id)
                         ->get()
@@ -983,7 +1090,7 @@ class MessagePublishController extends Controller
 
                                         $message_content->save();
                                     }
-                                // 手順の新規登録
+                                    // 手順の新規登録
                                 } else {
                                     if (isset($file_name)) {
                                         $content_data[$i]['content_name'] = $file_name ?? null;
@@ -993,7 +1100,7 @@ class MessagePublishController extends Controller
                                     }
                                 }
 
-                            // 手順の新規登録
+                                // 手順の新規登録
                             } else {
                                 if (isset($file_name)) {
                                     $content_data[$i]['content_name'] = $file_name ?? null;
@@ -1005,7 +1112,6 @@ class MessagePublishController extends Controller
                         }
                     }
                 }
-
             } else {
                 $message_path_list = Message::where('id', $message_id)->pluck('content_url')->toArray();
                 foreach ($request->file_name as $i => $file_name) {
@@ -1057,9 +1163,9 @@ class MessagePublishController extends Controller
                         $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
                         $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
                     }
-                        $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
+                    $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
 
-                        $message_changed_flg = true;
+                    $message_changed_flg = true;
                 } else {
                     $message_params['content_name'] = $message->content_name;
                     $message_params['content_url'] = $message->content_url;
@@ -1766,15 +1872,14 @@ class MessagePublishController extends Controller
             });
 
             return response()
-            ->view('common.admin.message-csv-store-modal', [
-                'storesJson' => $storesJson,
-                'brand_list' => $brand_list,
-                'organization_list' => $organization_list,
-                'all_shop_list' => $all_shop_list,
-                'csvStoreIds' => $csvStoreIds,
-            ], 200)
-            ->header('Content-Type', 'text/plain');
-
+                ->view('common.admin.message-csv-store-modal', [
+                    'storesJson' => $storesJson,
+                    'brand_list' => $brand_list,
+                    'organization_list' => $organization_list,
+                    'all_shop_list' => $all_shop_list,
+                    'csvStoreIds' => $csvStoreIds,
+                ], 200)
+                ->header('Content-Type', 'text/plain');
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -1921,7 +2026,8 @@ class MessagePublishController extends Controller
         return $content_ids;
     }
 
-    private function targetUserParam($organizarions): Array {
+    private function targetUserParam($organizarions): array
+    {
         $shops_id = [];
         $target_user_data = [];
 
