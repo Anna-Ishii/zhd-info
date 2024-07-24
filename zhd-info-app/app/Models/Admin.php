@@ -46,11 +46,27 @@ class Admin extends Model
             ->get();
     }
 
+    public function getOrganization1()
+    {
+        $admin_id = $this->attributes['id'];
+        return Organization1::query()
+            ->join('admin_organization1', function ($join) use ($admin_id){
+                $join->on('admin_organization1.organization1_id', '=', 'organization1.id');
+                $join->where('admin_organization1.admin_id', '=', $admin_id);
+            })
+            ->orderBy('name', 'asc')
+            ->get();
+    }
+
     public function firstBrand()
     {
         $brands = $this->getBrand();
         return $brands[0];
     }
 
-
+    public function firstOrganization1()
+    {
+        $brands = $this->getOrganization1();
+        return $brands[0];
+    }
 }

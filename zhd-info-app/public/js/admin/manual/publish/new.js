@@ -28,7 +28,7 @@ function appendFormTagInput() {
     }).appendTo($('#form'));
 }
 
-$(document).on('change', 'input[type="file"]', function() {
+$(document).on('change', '.fileInputs input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();
     formData.append("file", $(this)[0].files[0]);

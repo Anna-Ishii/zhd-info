@@ -9,22 +9,25 @@ class PublishStoreRequest extends FormRequest
 {
     public function rules()
     {
-        // 一時保存の時は、バリデーショnしない
+        // 一時保存の時は、バリデーションしない
         if ($this->input('save')) return [
         ];
-        
+
         return [
             'title' => 'required',
             'tag_name' => ['nullable', new TagRule()],
-            'file_path' => 'required',
+            'file_path' => ['required', 'array', function($attribute, $value, $fail) {
+                if (empty(array_filter($value))) {
+                    $fail('ファイルを添付してください');
+                }
+            }],
             'category_id' => 'required',
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable|date_format:Y/m/d H:i',
             'end_datetime' => 'nullable|date_format:Y/m/d H:i',
             'target_roll' => 'required',
             'brand' => 'required',
-            'organization_type' => 'required',
-            'organization' => 'required',
+            'organization_shops' => 'required',
         ];
     }
 
@@ -39,19 +42,16 @@ class PublishStoreRequest extends FormRequest
             'end_datetime.date_format' => '日時の形式で入力してください',
             'target_roll' => '対象者を選択してください',
             'brand.required' => '対象業態を選択してください',
+            'organization_shops.required' => '対象店舗を選択してください',
         ];
 
-        if ($this->organization_type == '5') {
-            $messages = array_merge($messages, [
-                'organization.required' => '対象ブロックを選択してください',
-            ]);
-        }
-        if ($this->organization_type == '4') {
-            $messages = array_merge($messages, [
-                'organization.required' => '対象エリアを選択してください',
-            ]);
-        }
-
         return $messages;
+    }
+
+    protected function prepareForValidation()
+    {
+        $this->merge([
+            'file_path' => array_filter($this->input('file_path', [])),
+        ]);
     }
 }
