@@ -513,37 +513,47 @@ class ManualPublishController extends Controller
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                // チャンクごとに処理
-                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+                $insertData = []; // バルクインサート用のデータ配列
 
-                foreach ($organization_shops_chunks as $organization_shops_chunk) {
-                    foreach ($organization_shops_chunk as $_shop_id) {
-                        $selectedFlg = null;
-                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                            $selectedFlg = 'all';
-                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                            $selectedFlg = 'store';
-                        } else {
-                            $selectedFlg = 'store';
-                        }
-                        if ($selectedFlg) {
-                            foreach ($request->brand as $brand) {
-                                // 業態で絞込
-                                $shops = Shop::where('id', $_shop_id)
-                                    ->where('brand_id', $brand)
-                                    ->get(['id', 'brand_id']);
+                // shop_idでグループ化されたショップデータを取得
+                $shopsData = Shop::whereIn('id', $organization_shops)
+                    ->whereIn('brand_id', $request->brand)
+                    ->get(['id', 'brand_id'])
+                    ->groupBy('id');
 
-                                foreach ($shops as $shop) {
-                                    ManualShop::create([
-                                        'manual_id' => $manual->id,
-                                        'shop_id' => $shop->id,
-                                        'brand_id' => $shop->brand_id,
-                                        'selected_flg' => $selectedFlg
-                                    ]);
-                                }
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    } else {
+                        $selectedFlg = 'store';
+                    }
+
+                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                        foreach ($shopsData[$_shop_id] as $shop) {
+                            $insertData[] = [
+                                'manual_id' => $manual->id,
+                                'shop_id' => $shop->id,
+                                'brand_id' => $shop->brand_id,
+                                'selected_flg' => $selectedFlg,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+
+                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            if (count($insertData) >= $chunkSize) {
+                                ManualShop::insert($insertData);
+                                $insertData = []; // データ配列をリセット
                             }
                         }
                     }
+                }
+
+                // 最後に残ったデータをインサート
+                if (!empty($insertData)) {
+                    ManualShop::insert($insertData);
                 }
             }
 
@@ -952,42 +962,73 @@ class ManualPublishController extends Controller
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                // チャンクごとに処理
-                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+                $insertData = []; // バルクインサート用のデータ配列
 
-                foreach ($organization_shops_chunks as $organization_shops_chunk) {
-                    foreach ($organization_shops_chunk as $_shop_id) {
-                        $selectedFlg = null;
-                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                            $selectedFlg = 'all';
-                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                            $selectedFlg = 'store';
-                        } else {
-                            $selectedFlg = 'store';
-                        }
-                        if ($selectedFlg) {
-                            foreach ($request->brand as $brand) {
-                                // 業態で絞込
-                                $shops = Shop::where('id', $_shop_id)
-                                    ->where('brand_id', $brand)
-                                    ->get(['id', 'brand_id']);
+                // shop_idでグループ化されたショップデータを取得
+                $shopsData = Shop::whereIn('id', $organization_shops)
+                    ->whereIn('brand_id', $request->brand)
+                    ->get(['id', 'brand_id'])
+                    ->groupBy('id');
 
-                                foreach ($shops as $shop) {
-                                    ManualShop::create([
-                                        'manual_id' => $manual->id,
-                                        'shop_id' => $shop->id,
-                                        'brand_id' => $shop->brand_id,
-                                        'selected_flg' => $selectedFlg
-                                    ]);
-                                }
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    } else {
+                        $selectedFlg = 'store';
+                    }
+
+                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                        foreach ($shopsData[$_shop_id] as $shop) {
+                            $insertData[] = [
+                                'manual_id' => $manual->id,
+                                'shop_id' => $shop->id,
+                                'brand_id' => $shop->brand_id,
+                                'selected_flg' => $selectedFlg,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+
+                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            if (count($insertData) >= $chunkSize) {
+                                ManualShop::insert($insertData);
+                                $insertData = []; // データ配列をリセット
                             }
                         }
                     }
                 }
+
+                // 最後に残ったデータをインサート
+                if (!empty($insertData)) {
+                    ManualShop::insert($insertData);
+                }
             }
 
             $manual->brand()->sync($request->brand);
-            $manual->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+
+            // $manual->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+            $targetUsers = !isset($request->save) ? $this->getTargetUsersByShopId($request) : [];
+
+            // 既存の関連付けを一括削除
+            $manual->user()->detach();
+
+            // チャンクサイズを設定
+            $chunkSize = 100;
+
+            // チャンクに分割して処理
+            foreach (array_chunk($targetUsers, $chunkSize, true) as $chunk) {
+                // 各チャンクに対して関連付けを行う
+                $attachData = [];
+                foreach ($chunk as $userId => $shopData) {
+                    $attachData[$userId] = ['shop_id' => $shopData['shop_id']];
+                }
+
+                // ユーザーを関連付け
+                $manual->user()->attach($attachData);
+            }
+
             $manual->content()->createMany($content_data);
 
             $tag_ids = [];
@@ -1655,6 +1696,48 @@ class ManualPublishController extends Controller
 
         return $target_user_data;
     }
+
+    // private function getTargetUsersByShopId($organizations): array
+    // {
+    //     $target_user_data = [];
+    //     $chunkSize = 100; // チャンクサイズを設定
+
+    //     if (isset($organizations->organization_shops)) {
+    //         $organization_shops = explode(',', $organizations->organization_shops);
+
+    //         // 指定されたブランドのショップIDを取得
+    //         $shops = Shop::whereIn('id', $organization_shops)
+    //             ->whereIn('brand_id', $organizations->brand)
+    //             ->pluck('id')
+    //             ->toArray();
+
+    //         // ショップIDをチャンクに分割
+    //         $shop_chunks = array_chunk($shops, $chunkSize);
+
+    //         foreach ($shop_chunks as $shop_chunk) {
+    //             // ユーザーをチャンクごとに取得
+    //             $target_users = User::select('id', 'shop_id')
+    //                 ->whereIn('shop_id', $shop_chunk)
+    //                 ->whereIn('roll_id', $organizations->target_roll)
+    //                 ->get()
+    //                 ->filter(function ($user) {
+    //                     // ユーザーが存在するかを確認
+    //                     return User::find($user->id) !== null;
+    //                 })
+    //                 ->mapWithKeys(function ($user) {
+    //                     return [$user->id => ['shop_id' => $user->shop_id]];
+    //                 })
+    //                 ->toArray();
+
+    //             // チャンクごとに取得したユーザーを統合
+    //             foreach ($target_users as $key => $value) {
+    //                 $target_user_data[$key] = $value;
+    //             }
+    //         }
+    //     }
+
+    //     return $target_user_data;
+    // }
 
     // 「手順」を登録するために加工する
     private function manualContentsParam($request): array
