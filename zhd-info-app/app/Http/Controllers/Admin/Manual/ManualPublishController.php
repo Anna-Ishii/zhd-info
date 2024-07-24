@@ -266,6 +266,11 @@ class ManualPublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '512M');
+        // 300秒 (5分) に設定
+        set_time_limit(300);
+
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
                 'manual_category_level2s.id as id',
@@ -387,7 +392,7 @@ class ManualPublishController extends Controller
                 }
             }
             if (isset($organization['organization2_id'])) {
-                    foreach ($brand_list as $brand) {
+                foreach ($brand_list as $brand) {
                     $shops = Shop::where('organization2_id', $organization['organization2_id'])
                         ->where('brand_id', $brand->id)
                         ->whereNull('organization4_id')
@@ -427,6 +432,11 @@ class ManualPublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '512M');
+        // 300秒 (5分) に設定
+        set_time_limit(300);
+
         $validated = $request->validated();
 
         $admin = session('admin');
@@ -495,30 +505,42 @@ class ManualPublishController extends Controller
                 }
             }
 
+            // チャンクサイズを設定
+            $chunkSize = 100;
+
             // manual_shopにshop_idとmanual_idを格納
             if (isset($request->organization_shops)) {
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
-                foreach ($organization_shops as $_shop_id) {
-                    $selectedFlg = null;
-                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                        $selectedFlg = 'all';
-                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                        $selectedFlg = 'store';
-                    } else {
-                        $selectedFlg = 'store';
-                    }
-                    if ($selectedFlg) {
-                        foreach ($request->brand as $brand) {
-                            // 業態で絞込
-                            $shops = Shop::where('id', $_shop_id)->where('brand_id', $brand)->get(['id', 'brand_id']);
-                            foreach ($shops as $shop) {
-                                ManualShop::create([
-                                    'manual_id' => $manual->id,
-                                    'shop_id' => $shop->id,
-                                    'brand_id' => $shop->brand_id,
-                                    'selected_flg' => $selectedFlg
-                                ]);
+
+                // チャンクごとに処理
+                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+
+                foreach ($organization_shops_chunks as $organization_shops_chunk) {
+                    foreach ($organization_shops_chunk as $_shop_id) {
+                        $selectedFlg = null;
+                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                            $selectedFlg = 'all';
+                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                            $selectedFlg = 'store';
+                        } else {
+                            $selectedFlg = 'store';
+                        }
+                        if ($selectedFlg) {
+                            foreach ($request->brand as $brand) {
+                                // 業態で絞込
+                                $shops = Shop::where('id', $_shop_id)
+                                    ->where('brand_id', $brand)
+                                    ->get(['id', 'brand_id']);
+
+                                foreach ($shops as $shop) {
+                                    ManualShop::create([
+                                        'manual_id' => $manual->id,
+                                        'shop_id' => $shop->id,
+                                        'brand_id' => $shop->brand_id,
+                                        'selected_flg' => $selectedFlg
+                                    ]);
+                                }
                             }
                         }
                     }
@@ -556,6 +578,11 @@ class ManualPublishController extends Controller
 
     public function edit($manual_id)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '512M');
+        // 300秒 (5分) に設定
+        set_time_limit(300);
+
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
 
@@ -722,30 +749,50 @@ class ManualPublishController extends Controller
         $target_org['shops'] = [];
         $target_org['select'] = null;
 
-        foreach ($all_shop_list as $shop) {
-            $shop_ids = [];
-            $selectedFlg = null;
+        $selectedFlg = null;
+        $chunkSize = 100; // チャンクサイズを設定
+        $offset = 0;
 
-            foreach ($target_brand as $brand) {
-                $shop_ids = array_merge($shop_ids, ManualShop::where('manual_id', $manual_id)->where('brand_id', $brand)->pluck('shop_id')->toArray());
+        while (true) {
+            // ブランドごとに処理を分けることで効率的なデータ取得を行います
+            $shops = ManualShop::where('manual_id', $manual_id)
+                ->whereIn('brand_id', $target_brand)
+                ->offset($offset)
+                ->limit($chunkSize)
+                ->get(['shop_id', 'selected_flg']);
 
+            if ($shops->isEmpty()) {
+                break; // チャンク内にデータがない場合、ループを抜ける
+            }
+
+            foreach ($shops as $shop) {
+                $target_org['shops'][] = $shop->shop_id;
                 if (!$selectedFlg) {
-                    $selectedFlg = ManualShop::where('manual_id', $manual_id)->where('brand_id', $brand)->pluck('selected_flg')->first();
+                    $selectedFlg = $shop->selected_flg;
                 }
             }
 
-            // manualShopにshop_idが見つからない場合はmanualUserを確認
-            if (empty($shop_ids)) {
-                $shop_ids = ManualUser::where('manual_id', $manual_id)->pluck('shop_id')->toArray();
-                $target_org['select'] = 'oldStore';
-            }
+            $offset += $chunkSize; // 次のチャンクに進む
+        }
 
-            $target_org['shops'] = array_merge($target_org['shops'], $shop_ids);
+        // ManualShopにshop_idが見つからない場合はManualUserを確認
+        if (empty($target_org['shops'])) {
+            ManualUser::where('manual_id', $manual_id)
+                ->orderBy('manual_id')
+                ->chunk($chunkSize, function ($users) use (&$target_org) {
+                    foreach ($users as $user) {
+                        $target_org['shops'][] = $user->shop_id;
+                    }
+                });
+            $target_org['select'] = 'oldStore';
+        }
 
-            // selectedFlgが存在する場合は設定
-            if ($selectedFlg) {
-                $target_org['select'] = $selectedFlg;
-            }
+        // 重複を削除
+        $target_org['shops'] = array_unique($target_org['shops']);
+
+        // selectedFlgが存在する場合は設定
+        if ($selectedFlg) {
+            $target_org['select'] = $selectedFlg;
         }
 
         // shop_codeを基準にソートするためのカスタム比較関数を定義
@@ -767,6 +814,11 @@ class ManualPublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $manual_id)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '512M');
+        // 300秒 (5分) に設定
+        set_time_limit(300);
+
         $validated = $request->validated();
 
         // ファイルを移動したかフラグ
@@ -892,30 +944,42 @@ class ManualPublishController extends Controller
 
             ManualShop::where('manual_id', $manual_id)->delete();
 
+            // チャンクサイズを設定
+            $chunkSize = 100;
+
             // manual_shopにshop_idとmanual_idを格納
             if (isset($request->organization_shops)) {
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
-                foreach ($organization_shops as $_shop_id) {
-                    $selectedFlg = null;
-                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                        $selectedFlg = 'all';
-                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                        $selectedFlg = 'store';
-                    } else {
-                        $selectedFlg = 'store';
-                    }
-                    if ($selectedFlg) {
-                        foreach ($request->brand as $brand) {
-                            // 業態で絞込
-                            $shops = Shop::where('id', $_shop_id)->where('brand_id', $brand)->get(['id', 'brand_id']);
-                            foreach ($shops as $shop) {
-                                ManualShop::create([
-                                    'manual_id' => $manual->id,
-                                    'shop_id' => $shop->id,
-                                    'brand_id' => $shop->brand_id,
-                                    'selected_flg' => $selectedFlg
-                                ]);
+
+                // チャンクごとに処理
+                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+
+                foreach ($organization_shops_chunks as $organization_shops_chunk) {
+                    foreach ($organization_shops_chunk as $_shop_id) {
+                        $selectedFlg = null;
+                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                            $selectedFlg = 'all';
+                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                            $selectedFlg = 'store';
+                        } else {
+                            $selectedFlg = 'store';
+                        }
+                        if ($selectedFlg) {
+                            foreach ($request->brand as $brand) {
+                                // 業態で絞込
+                                $shops = Shop::where('id', $_shop_id)
+                                    ->where('brand_id', $brand)
+                                    ->get(['id', 'brand_id']);
+
+                                foreach ($shops as $shop) {
+                                    ManualShop::create([
+                                        'manual_id' => $manual->id,
+                                        'shop_id' => $shop->id,
+                                        'brand_id' => $shop->brand_id,
+                                        'selected_flg' => $selectedFlg
+                                    ]);
+                                }
                             }
                         }
                     }

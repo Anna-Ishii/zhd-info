@@ -4,6 +4,7 @@ namespace App\Exports;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
@@ -30,35 +31,38 @@ class MessageNewStoreListExport implements
 
     public function view(): View
     {
-        $admin = session('admin');
+        try {
+            $admin = session('admin');
 
-        $store_list =
-            DB::table('shops')
-            ->select([
-                'shops.*',
-                DB::raw("GROUP_CONCAT(brands.name SEPARATOR ',') as brand_name")
-            ])
-            ->join('brands', function ($join) {
-                $join->on('shops.organization1_id', '=', 'brands.organization1_id')
-                    ->on('shops.brand_id', '=', 'brands.id');
-            })
-            ->where('shops.organization1_id', $this->organization1_id)
-            ->groupBy('shops.id')
-            ->orderBy('shops.shop_code')
-            ->get()
-            ->toArray();
+            $store_list = DB::table('shops')
+                ->select([
+                    'shops.*',
+                    DB::raw("GROUP_CONCAT(brands.name SEPARATOR ',') as brand_name")
+                ])
+                ->join('brands', function ($join) {
+                    $join->on('shops.organization1_id', '=', 'brands.organization1_id')
+                        ->on('shops.brand_id', '=', 'brands.id');
+                })
+                ->where('shops.organization1_id', $this->organization1_id)
+                ->groupBy('shops.id')
+                ->orderBy('shops.shop_code')
+                ->get()
+                ->toArray();
 
-        foreach ($store_list as &$store) {
-            $store->checked_store = '先行';
+            foreach ($store_list as &$store) {
+                $store->checked_store = '先行';
+            }
+            unset($store); // 参照を解除
+
+            return view('exports.message-store-list-export', [
+                'store_list' => $store_list,
+                'admin' => $admin
+            ]);
+        } catch (\Exception $e) {
+            Log::error('CSVエクスポートエラー: ' . $e->getMessage());
+            throw new \Exception('内部サーバーエラーが発生しました。');
         }
-        unset($store); // 参照を解除
-
-        return view('exports.message-store-list-export', [
-            'store_list' => $store_list,
-            'admin' => $admin
-        ]);
     }
-
     public function chunkSize(): int
     {
         return 100;
