@@ -7,14 +7,14 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>業務連絡一覧 | 業連・動画配信システム</title>
     <link rel="stylesheet" href="{{ asset('/css/reset.css') }}?data=20240216">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?data=2024030714">
+    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?date=202407">
     @stack('css')
     <!-- jQuery UI -->
     <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
 
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui-touch-punch/0.2.3/jquery.ui.touch-punch.min.js"></script>
 
     @livewireStyles
 </head>
@@ -33,9 +33,9 @@
     @include('common.modal-continue')
 
     @include('common.footer')
-   
+
     <script src="{{ asset('/js/timer.js') }}" defer></script>
-    <script src="{{ asset('/js/common.js') }}?date=20240307" defer></script>
+    <script src="{{ asset('/js/common.js') }}?date=202407" defer></script>
     {{-- <script>
         const crew = @json($user->crew);
         console.log(crew);

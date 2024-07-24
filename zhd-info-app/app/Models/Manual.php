@@ -6,6 +6,7 @@ use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -84,6 +85,11 @@ class Manual extends Model
     public function organization1(): HasOne
     {
         return $this->hasOne(Organization1::class, 'id', 'organization1_id');
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(ManualOrganization::class, foreignKey: 'id', ownerKey: 'manual_id');
     }
 
     public function brand(): BelongsToMany
@@ -292,6 +298,13 @@ class Manual extends Model
                 ->orWhereNull('end_datetime');
             })
             ->where('editing_flg', false);
+    }
+
+    public function scopeOfUser($query, $userId)
+    {
+        return $query
+            ->join('manual_user', 'manuals.id', '=', 'manual_user.manual_id')
+            ->where('manual_user.user_id', $userId);
     }
 
     public static function getCurrentNumber($organization1_id): Int{

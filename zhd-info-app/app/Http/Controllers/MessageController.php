@@ -8,6 +8,7 @@ use App\Models\MessageCategory;
 use App\Models\MessageContent;
 use App\Models\Message;
 use Carbon\Carbon;
+use App\Utils\OutputContentPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use setasign\Fpdi\TcpdfFpdi;
@@ -110,6 +111,82 @@ class MessageController extends Controller
             ->limit(3)
             ->get();
 
+        // 添付ファイル
+        foreach ($messages as &$message) {
+            $file_list = [];
+            $is_first_join = false;
+
+            $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
+            $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
+
+            // 最初の要素をチェックしてフラグを設定
+            if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
+                $is_first_join = true;
+            }
+
+            if ($is_first_join) {
+                if ($all_message_join_file) {
+                    // PDFファイルのページ数を取得
+                    $pdf = new TcpdfFpdi();
+                    $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
+                    if (file_exists($file_path)) {
+                        $message->main_file = [
+                            "file_name" => $all_message_join_file[0]["content_name"],
+                            "file_url" => $all_message_join_file[0]["content_url"],
+                        ];
+
+                        try {
+                            $page_num = $pdf->setSourceFile($file_path);
+                            $message->main_file_count = $page_num;
+                        } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
+                            // 暗号化されたPDFの処理
+                            $message->main_file_count = '暗号化';
+                        }
+                    }
+                }
+                foreach ($all_message_content_single_files as $message_content_single_file) {
+                    if ($message_content_single_file["join_flg"] === "single") {
+                        $file_list[] = [
+                            "file_name" => $message_content_single_file["content_name"],
+                            "file_url" => $message_content_single_file["content_url"],
+                        ];
+                    }
+                }
+
+            } else {
+                if ($all_message_content_single_files) {
+                    $message->main_file_count = 1;
+                    $message->main_file = [
+                        "file_name" => $all_message_content_single_files[0]["content_name"],
+                        "file_url" => $all_message_content_single_files[0]["content_url"],
+                    ];
+                }
+                foreach ($all_message_content_single_files as $message_content_single_file) {
+                    if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
+                        $file_list[] = [
+                            "file_name" => $all_message_join_file[0]["content_name"],
+                            "file_url" => $all_message_join_file[0]["content_url"],
+                        ];
+                        continue;
+                    } else if ($message_content_single_file["join_flg"] === "single") {
+                        $file_list[] = [
+                            "file_name" => $message_content_single_file["content_name"],
+                            "file_url" => $message_content_single_file["content_url"],
+                        ];
+                    }
+                }
+                // 最初の要素を削除(業態ファイル)
+                if (!empty($file_list)) {
+                    array_shift($file_list);
+                }
+            }
+
+            $message->content_files = $file_list;
+
+            // ファイルのカウント
+            $message->file_count = count($file_list);
+        }
+
         return view('message.index', [
             'messages' => $messages,
             'categories' => $categories,
@@ -178,6 +255,7 @@ class MessageController extends Controller
         try {
             DB::beginTransaction();
             $message = Message::findOrFail($message_id);
+            $message_content = MessageContent::where('message_id', $message_id)->get()->toArray();
             $message->putCrewRead($reading_crews);
             $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message_id, [
                 'read_flg' => true,
@@ -185,8 +263,20 @@ class MessageController extends Controller
             ]);
             DB::commit();
 
+            if (!empty($message_content)) {
+                if (count($message_content) > 1) {
+                    $first_content = $message_content[0];
+                    if ($message->content_name !== $first_content['content_name']) {
+                        $message->content_url = $first_content['content_url'];
+                    }
+                } else {
+                    $single_content = $message_content[0];
+                    $message->content_url = $single_content['content_url'];
+                }
+            }
+
             // 既読が無事できたらpdfへ
-            return $this->outputContentsPdf($message_id);
+            return redirect()->to($message->content_url)->withInput();
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
@@ -296,50 +386,5 @@ class MessageController extends Controller
         return response()->json([
             'crews' => $crews,
         ], 200);
-    }
-
-    // PDFの表示処理
-    private function outputContentsPdf($message_id)
-    {
-        $message_contents = MessageContent::where('message_id', $message_id)->pluck('content_url')->toArray();
-
-        $files = [];
-
-        // 複数PDFがある場合の表示処理
-        if (!empty($message_contents)) {
-            foreach ($message_contents as $content_path) {
-                $files[] = public_path('uploads/' . basename($content_path));
-            }
-
-        // 単一PDFがある場合の表示処理
-        } else {
-            $message_content = Message::where('id', $message_id)->pluck('content_url')->first();
-            // $files[] = public_path('uploads/' . basename($message_content));
-
-            return redirect()->to(asset($message_content));
-        }
-
-        // PDF を生成するための初期化
-        $pdf = new TcpdfFpdi();
-        $pdf->setPrintHeader(false);
-        $pdf->setPrintFooter(false);
-
-        // 各 PDF を追加
-        foreach ($files as $file) {
-            $count = $pdf->setSourceFile($file);
-            for ($i = 1; $i <= $count; $i++) {
-                $pdf->addPage();
-                $pdf->useTemplate($pdf->importPage($i));
-            }
-        }
-
-        // PDFを出力して返す
-        $outputFileName = 'output_contents.pdf';
-        return response()->stream(function() use ($pdf, $outputFileName) {
-            $pdf->output($outputFileName, 'I');
-        }, 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename="'.$outputFileName.'"'
-        ]);
     }
 }

@@ -29,7 +29,7 @@ $(window).on('load' , function(){
 		 },
 		 defaultDate: d,
 		 defaultTime: '00:00',
-	});	
+	});
 	$('#dateTo').datetimepicker({
 		format:'Y/m/d H:i',
 		onShow:function( ct ){
@@ -42,7 +42,7 @@ $(window).on('load' , function(){
 		],
 		defaultDate: d,
 		defaultTime: '00:00',
-	});	
+	});
 });
 
 /* パスワード入力検知 */
@@ -79,7 +79,7 @@ function toggleInputDate(e){
 	if(!e.prop('checked')){
 		toggleTarget.prop('disabled' , false);
 	}else{
-		toggleTarget.val('').prop('disabled' , true);		
+		toggleTarget.val('').prop('disabled' , true);
 	}
 }
 $(document).on('change' , '.dateDisabled' , function(){
@@ -162,11 +162,11 @@ function removeVariableBox(e , callback){
 	if(removeTargetTitle != ''){
 		if(confirm('手順「'+removeTargetTitle+'」を削除します。\nよろしいですか？')){
 			e.parents('.manualVariableBox').remove();
-			callback();	
+			callback();
 		}
 	}else{
 		e.parents('.manualVariableBox').remove();
-		callback();	
+		callback();
 	}
 }
 $(document).on('click' , '.btnRemoveBox' , function(){
@@ -349,7 +349,7 @@ $('#messageImportModal input[type="button"]').click(function(e){
 		headers: {
 			'X-CSRF-TOKEN': csrfToken,
 		},
-		
+
 	}).done(function(response){
 		console.log(response);
 		overlay.style.display = 'none';
@@ -364,7 +364,7 @@ $('#messageImportModal input[type="button"]').click(function(e){
 			</div>
 		`);
 		// labelForm.parent().find('.text-danger').remove();
-		
+
 		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
 
 			errorMessage['errors'].forEach((error) => {
@@ -403,7 +403,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 	let progress_request = true;
 
 	$('#manualImportModal .modal-body .alert-danger').remove();
-	
+
     $.ajax({
         url: '/admin/manual/publish/csv/upload',
         type: 'post',
@@ -490,7 +490,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 	}
 
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
-	
+
 	var overlay = document.getElementById('overlay');
 	overlay.style.display = 'block';
 
@@ -518,7 +518,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 			</div>
 		`);
 		// labelForm.parent().find('.text-danger').remove();
-		
+
 		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
 
 			errorMessage['errors'].forEach((error) => {
@@ -564,8 +564,8 @@ $(document).on('keydown', '.tag-form-input', function(e) {
         $(this)[0].innerText = "";
         return false;
     }
-    
-    // 「,」の入力 
+
+    // 「,」の入力
     if(e.keyCode == 188) {
         $(this).before(createTag(tagLabelText));
         $(this)[0].innerText = "";
@@ -591,7 +591,10 @@ function createTag(tagLabelText) {
     )
 }
 
-$('.modal').on('hidden.bs.modal', function (e) {
+$('#messageImportModal').on('hidden.bs.modal', function (e) {
+	window.location.reload();
+})
+$('#manualImportModal').on('hidden.bs.modal', function (e) {
 	window.location.reload();
 })
 
