@@ -249,7 +249,7 @@ class MessagePublishController extends Controller
             if ($shop_count == 0) {
                 $shop_count = MessageUser::where('message_id', $message->id)->count();
             }
-            if ($all_shop_count ==  $shop_count) {
+            if ($all_shop_count == $shop_count) {
                 $shop_count = "全店";
             }
 
@@ -615,36 +615,47 @@ class MessagePublishController extends Controller
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                // チャンクごとに処理
-                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+                $insertData = []; // バルクインサート用のデータ配列
 
-                foreach ($organization_shops_chunks as $organization_shops_chunk) {
-                    foreach ($organization_shops_chunk as $_shop_id) {
-                        $selectedFlg = null;
-                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                            $selectedFlg = 'all';
-                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                            $selectedFlg = 'store';
-                        } else {
-                            $selectedFlg = 'store';
-                        }
-                        if ($selectedFlg) {
-                            foreach ($request->brand as $brand) {
-                                // 業態で絞込
-                                $shops = Shop::where('id', $_shop_id)
-                                    ->where('brand_id', $brand)
-                                    ->get(['id', 'brand_id']);
-                                foreach ($shops as $shop) {
-                                    MessageShop::create([
-                                        'message_id' => $message->id,
-                                        'shop_id' => $shop->id,
-                                        'brand_id' => $shop->brand_id,
-                                        'selected_flg' => $selectedFlg
-                                    ]);
-                                }
+                // shop_idでグループ化されたショップデータを取得
+                $shopsData = Shop::whereIn('id', $organization_shops)
+                    ->whereIn('brand_id', $request->brand)
+                    ->get(['id', 'brand_id'])
+                    ->groupBy('id');
+
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    } else {
+                        $selectedFlg = 'store';
+                    }
+
+                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                        foreach ($shopsData[$_shop_id] as $shop) {
+                            $insertData[] = [
+                                'message_id' => $message->id,
+                                'shop_id' => $shop->id,
+                                'brand_id' => $shop->brand_id,
+                                'selected_flg' => $selectedFlg,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
+
+                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            if (count($insertData) >= $chunkSize) {
+                                MessageShop::insert($insertData);
+                                $insertData = []; // データ配列をリセット
                             }
                         }
                     }
+                }
+
+                // 最後に残ったデータをインサート
+                if (!empty($insertData)) {
+                    MessageShop::insert($insertData);
                 }
             }
 
@@ -912,7 +923,6 @@ class MessagePublishController extends Controller
         ]);
     }
 
-
     public function update(PublishUpdateRequest $request, $message_id)
     {
         // メモリ制限を一時的に増加
@@ -1126,51 +1136,72 @@ class MessagePublishController extends Controller
                 // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                // チャンクごとに処理
-                $organization_shops_chunks = array_chunk($organization_shops, $chunkSize);
+                $insertData = []; // バルクインサート用のデータ配列
 
-                foreach ($organization_shops_chunks as $organization_shops_chunk) {
-                    $insertData = []; // バルクインサート用のデータ配列
+                // shop_idでグループ化されたショップデータを取得
+                $shopsData = Shop::whereIn('id', $organization_shops)
+                    ->whereIn('brand_id', $request->brand)
+                    ->get(['id', 'brand_id'])
+                    ->groupBy('id');
 
-                    foreach ($organization_shops_chunk as $_shop_id) {
-                        $selectedFlg = null;
-                        if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                            $selectedFlg = 'all';
-                        } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                            $selectedFlg = 'store';
-                        } else {
-                            $selectedFlg = 'store';
-                        }
+                foreach ($organization_shops as $_shop_id) {
+                    $selectedFlg = null;
+                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
+                        $selectedFlg = 'all';
+                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
+                        $selectedFlg = 'store';
+                    } else {
+                        $selectedFlg = 'store';
+                    }
 
-                        if ($selectedFlg) {
-                            // ブランドごとにデータを取得
-                            $brands = $request->brand;
-                            $shops = Shop::where('id', $_shop_id)
-                                ->whereIn('brand_id', $brands)
-                                ->get(['id', 'brand_id']);
+                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                        foreach ($shopsData[$_shop_id] as $shop) {
+                            $insertData[] = [
+                                'message_id' => $message->id,
+                                'shop_id' => $shop->id,
+                                'brand_id' => $shop->brand_id,
+                                'selected_flg' => $selectedFlg,
+                                'created_at' => now(),
+                                'updated_at' => now()
+                            ];
 
-                            foreach ($shops as $shop) {
-                                $insertData[] = [
-                                    'message_id' => $message->id,
-                                    'shop_id' => $shop->id,
-                                    'brand_id' => $shop->brand_id,
-                                    'selected_flg' => $selectedFlg,
-                                    'created_at' => now(), // 追加
-                                    'updated_at' => now()  // 追加
-                                ];
+                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            if (count($insertData) >= $chunkSize) {
+                                MessageShop::insert($insertData);
+                                $insertData = []; // データ配列をリセット
                             }
                         }
                     }
+                }
 
-                    if (!empty($insertData)) {
-                        // バルクインサートを実行
-                        MessageShop::insert($insertData);
-                    }
+                // 最後に残ったデータをインサート
+                if (!empty($insertData)) {
+                    MessageShop::insert($insertData);
                 }
             }
 
             $message->brand()->sync($request->brand);
-            $message->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+
+            // $message->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+            $targetUsers = !isset($request->save) ? $this->getTargetUsersByShopId($request) : [];
+
+            // 既存の関連付けを一括削除
+            $message->user()->detach();
+
+            // チャンクサイズを設定
+            $chunkSize = 100;
+
+            // チャンクに分割して処理
+            foreach (array_chunk($targetUsers, $chunkSize, true) as $chunk) {
+                // 各チャンクに対して関連付けを行う
+                $attachData = [];
+                foreach ($chunk as $userId => $shopData) {
+                    $attachData[$userId] = ['shop_id' => $shopData['shop_id']];
+                }
+
+                // ユーザーを関連付け
+                $message->user()->attach($attachData);
+            }
 
             $message->content()->createMany($content_data);
 
@@ -1999,32 +2030,73 @@ class MessagePublishController extends Controller
         return $target_user_data;
     }
 
+    // private function getTargetUsersByShopId($organizations): array
+    // {
+    //     $shops_id = [];
+    //     $target_user_data = [];
+
+    //     // shopを取得する
+    //     if (isset($organizations->organization_shops)) {
+    //         $organization_shops = explode(',', $organizations->organization_shops);
+    //         foreach ($organization_shops as $_shop_id) {
+    //             foreach ($organizations->brand as $brand) {
+    //                 $_shops_id = Shop::select('id')
+    //                     ->where('id', $_shop_id)
+    //                     ->where('brand_id', $brand)
+    //                     ->get()
+    //                     ->toArray();
+    //                 $shops_id = array_merge($shops_id, $_shops_id);
+    //             }
+    //         }
+    //     }
+
+    //     // 取得したshopのリストからユーザーを取得する
+    //     $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
+    //     // ユーザーに業務連絡の閲覧権限を与える
+    //     foreach ($target_users as $target_user) {
+    //         $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+    //     }
+
+    //     return $target_user_data;
+    // }
 
     private function getTargetUsersByShopId($organizations): array
     {
-        $shops_id = [];
         $target_user_data = [];
+        $chunkSize = 100; // チャンクサイズを設定
 
-        // shopを取得する
         if (isset($organizations->organization_shops)) {
             $organization_shops = explode(',', $organizations->organization_shops);
-            foreach ($organization_shops as $_shop_id) {
-                foreach ($organizations->brand as $brand) {
-                    $_shops_id = Shop::select('id')
-                        ->where('id', $_shop_id)
-                        ->where('brand_id', $brand)
-                        ->get()
-                        ->toArray();
-                    $shops_id = array_merge($shops_id, $_shops_id);
+
+            // 指定されたブランドのショップIDを取得
+            $shops = Shop::whereIn('id', $organization_shops)
+                ->whereIn('brand_id', $organizations->brand)
+                ->pluck('id')
+                ->toArray();
+
+            // ショップIDをチャンクに分割
+            $shop_chunks = array_chunk($shops, $chunkSize);
+
+            foreach ($shop_chunks as $shop_chunk) {
+                // ユーザーをチャンクごとに取得
+                $target_users = User::select('id', 'shop_id')
+                    ->whereIn('shop_id', $shop_chunk)
+                    ->whereIn('roll_id', $organizations->target_roll)
+                    ->get()
+                    ->filter(function ($user) {
+                        // ユーザーが存在するかを確認
+                        return User::find($user->id) !== null;
+                    })
+                    ->mapWithKeys(function ($user) {
+                        return [$user->id => ['shop_id' => $user->shop_id]];
+                    })
+                    ->toArray();
+
+                // チャンクごとに取得したユーザーを統合
+                foreach ($target_users as $key => $value) {
+                    $target_user_data[$key] = $value;
                 }
             }
-        }
-
-        // 取得したshopのリストからユーザーを取得する
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizations->target_roll)->get()->toArray();
-        // ユーザーに業務連絡の閲覧権限を与える
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
         }
 
         return $target_user_data;
