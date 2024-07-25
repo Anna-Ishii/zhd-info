@@ -1184,21 +1184,25 @@ class MessagePublishController extends Controller
 
             // $message->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
             $targetUsers = !isset($request->save) ? $this->getTargetUsersByShopId($request) : [];
-
-            // 既存の関連付けを一括削除
-            $message->user()->detach();
+            $currentUsers = $message->user()->pluck('user_id')->toArray();
 
             // チャンクサイズを設定
             $chunkSize = 100;
+            // 削除
+            $usersToDetach = array_diff($currentUsers, array_keys($targetUsers));
+            if (!empty($usersToDetach)) {
+                $message->user()->detach($usersToDetach);
+            }
 
+            // 追加または更新
+            $usersToAttach = array_diff_key($targetUsers, array_flip($currentUsers));
             // チャンクに分割して処理
-            foreach (array_chunk($targetUsers, $chunkSize, true) as $chunk) {
+            foreach (array_chunk($usersToAttach, $chunkSize, true) as $chunk) {
                 // 各チャンクに対して関連付けを行う
                 $attachData = [];
                 foreach ($chunk as $userId => $shopData) {
                     $attachData[$userId] = ['shop_id' => $shopData['shop_id']];
                 }
-
                 // ユーザーを関連付け
                 $message->user()->attach($attachData);
             }
