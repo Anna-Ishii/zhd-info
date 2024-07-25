@@ -446,9 +446,9 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 			percent = response;
 			progressBar.show();
 			progressBar.css('width', percent + '%');
-            setTimeout(() => {
-                progress.hide();
-            }, 1000);
+            // setTimeout(() => {
+            //     progress.hide();
+            // }, 1000);
 			console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");

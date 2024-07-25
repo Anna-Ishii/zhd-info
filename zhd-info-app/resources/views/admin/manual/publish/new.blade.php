@@ -353,6 +353,6 @@
         </form>
     </div>
     @include('common.admin.manual-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
-    <script src="{{ asset('/js/admin/manual/publish/new.js') }}" defer></script>
-    <script src="{{ asset('/js/admin/manual/publish/new_store.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/publish/new.js') }}?date=202407" defer></script>
+    <script src="{{ asset('/js/admin/manual/publish/new_store.js') }}?date=20240724" defer></script>
 @endsection
