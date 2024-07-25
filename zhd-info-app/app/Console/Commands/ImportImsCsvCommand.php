@@ -55,8 +55,8 @@ class ImportImsCsvCommand extends Command
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
-        $organization_path = $directory.$organization_filename;
-        $crews_path = $directory.$crews_filename;
+        $organization_path = $directory . $organization_filename;
+        $crews_path = $directory . $crews_filename;
         $this->info($organization_path);
         $this->info($crews_path);
 
@@ -64,7 +64,6 @@ class ImportImsCsvCommand extends Command
             $this->error("{$organization_path}が存在しません");
             $this->info('end');
             exit();
-
         }
 
         if (!Storage::disk('s3')->exists($crews_path)) {
@@ -93,10 +92,10 @@ class ImportImsCsvCommand extends Command
             // クルーの取り込み
             try {
                 $this->info("{$crews_filename}ファイルを読み込みます");
-                $crews_data =  (new CrewsIMSImport)
-                    ->toCollection($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
+                $crews_data = [];
+                (new CrewsIMSImport($crews_data))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("{$crews_filename}ファイル読み込み完了");
-                $this->import_crews($crews_data[0]);
+                $this->import_crews($crews_data);
                 unset($crews_data);
                 $ims_log->import_crew_at = new Carbon('now');
                 $ims_log->import_crew_error = false;
@@ -134,7 +133,7 @@ class ImportImsCsvCommand extends Command
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
                 continue;
             }
-            // 営業部、DS、AR、BLの登録  
+            // 営業部、DS、AR、BLの登録
             $organization2_id = null; // 営業部
             $organization3_id = null; // DS
             $organization4_id = null; // AR
@@ -297,7 +296,6 @@ class ImportImsCsvCommand extends Command
         foreach ($diff_shop_user as $key => $user) {
             $user->message()->detach();
             $user->manual()->detach();
-
         }
         User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
         Shop::whereIn('id', $delete_shop)->delete();
@@ -371,8 +369,7 @@ class ImportImsCsvCommand extends Command
         return $employee_code;
     }
 
-
-    private function import_crews($crews_data)
+    public function import_crews($crews_data)
     {
         $ROLL_ID = 4;
 
@@ -382,58 +379,64 @@ class ImportImsCsvCommand extends Command
         $change_crew = [];
         $new_crew = [];
 
-        foreach ($crews_data as $index => $crew) {
-            $org1 = Organization1::where('name', $crew[0])->first();
-            $org1_id = $org1->id;
-            // クルーの情報を更新
-            $shop = Shop::query()
-                ->where('organization1_id', $org1_id)
-                ->where('shop_code', $crew[16])
-                ->first();
-            if (empty($shop)) {
-                $undefind_shop[] = $crew;
-                continue;
-            }
-            $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
+        // 配列をコレクションに変換
+        $crews_data = collect($crews_data);
 
-            if (empty($user)) {
-                $undefind_user[] = $crew;
-                continue;
-            }
+        $crews_data->chunk(20000)->each(function ($chunk) use ($ROLL_ID, &$undefind_shop, &$undefind_user, &$register_crews, &$change_crew, &$new_crew) {
+            foreach ($chunk as $index => $crew) {
+                $org1 = Organization1::where('name', $crew[0])->first();
+                $org1_id = $org1->id;
+                // クルーの情報を更新
+                $shop = Shop::query()
+                    ->where('organization1_id', $org1_id)
+                    ->where('shop_code', $crew[16])
+                    ->first();
+                if (empty($shop)) {
+                    $undefind_shop[] = $crew;
+                    continue;
+                }
+                $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
 
-            $part_code = $crew[13];
-            $name = $crew[14];
-            $name_kana = $crew[15];
-            $my_number = $crew[12];
-            $birth_date = $this->parseDateTime($crew[18]);
-            $register_date = $this->parseDateTime($crew[19]);
-            $crew_id = Crew::query()
-                ->where('part_code', $part_code)
-                ->value('id');
-            $crew = Crew::updateOrCreate(
-                [
-                    'part_code' => $part_code,
-                ],
-                [
-                    'user_id' => $user->id,
-                    'name' => $name,
-                    'name_kana' => $name_kana,
-                    'my_number' => $my_number,
-                    'birth_date' =>  $birth_date,
-                    'register_date' => $register_date
-                ]
-            );
-            if ($crew->wasChanged()) {
-                // 店舗更新
-                $change_crew[] = $crew;
-            }
-            // 新規店舗の場合
-            if (is_null($crew_id)) {
-                $new_crew[] = $crew;
-            }
+                if (empty($user)) {
+                    $undefind_user[] = $crew;
+                    continue;
+                }
 
-            $register_crews[] = $part_code;
-        }
+                $part_code = $crew[13];
+                $name = $crew[14];
+                $name_kana = $crew[15];
+                $my_number = $crew[12];
+                $birth_date = $this->parseDateTime($crew[18]);
+                $register_date = $this->parseDateTime($crew[19]);
+                $crew_id = Crew::query()
+                    ->where('part_code', $part_code)
+                    ->value('id');
+                $crew = Crew::updateOrCreate(
+                    [
+                        'part_code' => $part_code,
+                    ],
+                    [
+                        'user_id' => $user->id,
+                        'name' => $name,
+                        'name_kana' => $name_kana,
+                        'my_number' => $my_number,
+                        'birth_date' =>  $birth_date,
+                        'register_date' => $register_date
+                    ]
+                );
+                if ($crew->wasChanged()) {
+                    // 店舗更新
+                    $change_crew[] = $crew;
+                }
+                // 新規店舗の場合
+                if (is_null($crew_id)) {
+                    $new_crew[] = $crew;
+                }
+
+                $register_crews[] = $part_code;
+            }
+        });
+
         // クルーの削除
         $crew_list = Crew::query()
             ->pluck('part_code')
