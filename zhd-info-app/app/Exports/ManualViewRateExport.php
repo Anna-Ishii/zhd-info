@@ -8,8 +8,8 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class ManualViewRateExport implements 
-    FromView, 
+class ManualViewRateExport implements
+    FromView,
     ShouldAutoSize,
     WithCustomCsvSettings
 {
@@ -91,8 +91,17 @@ class ManualViewRateExport implements
                     });
             })
             ->wherePivotIn('shop_id', $shop_list)
+            ->join('shops', 'users.shop_id', '=', 'shops.id')
+            ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+            ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+            ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+            ->orderBy('organization3.order_no')
+            ->orderBy('organization4.order_no')
+            ->orderBy('organization5.order_no')
+            ->orderBy('shops.shop_code')
             ->get();
-        $category_name = $manual->category_level1 ? $manual->category_level1?->name."|".$manual->category_level2->name : $manual->category_level2->name;
+
+        $category_name = $manual->category_level1 ? $manual->category_level1?->name . "|" . $manual->category_level2->name : $manual->category_level2->name;
         return view('exports.manual-viewrate-export', [
             'users' => $user_list,
             'brand' => $manual->brands_string($brands),
@@ -103,7 +112,7 @@ class ManualViewRateExport implements
             'status' => $manual->status->text(),
             'read_user' => $manual->readed_user->count(),
             'target_user' => $manual->user->count(),
-            'read_rate' =>  (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)
+            'read_rate' => (($manual->total_users != 0) ? round((($manual->read_users / $manual->total_users) * 100), 1) : 0)
         ]);
     }
 }
