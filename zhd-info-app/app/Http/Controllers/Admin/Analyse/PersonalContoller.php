@@ -13,7 +13,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class PersonalContoller extends Controller
 {
-    public function index(Request $request) {
+    public function index(Request $request)
+    {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
 
@@ -33,64 +34,64 @@ class PersonalContoller extends Controller
 
         // 業務連絡を9件取得
         $messages = Message::query()
-                        ->select('messages.*')
-                        ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
-                        ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
-                        ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
-                        ->where('start_datetime', '<=', now('Asia/Tokyo'))
-                        ->where('editing_flg', false)
-                        ->where('messages.organization1_id','=', $organization1->id)
-                        ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
-                            $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
-                                $query
-                                    ->whereDate('start_datetime', '>=', $publish_from_date);
-                            })
-                                ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
-                                    $query
-                                        ->where(function ($query) use ($publish_to_date) {
-                                            $query->whereDate('end_datetime', '<=', $publish_to_date)
-                                                ->orWhereNull('end_datetime');
-                                        });
-                                });
-                        })
-                        ->when(($publish_from_check && !$publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
-                            $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
-                                $query
-                                    ->whereDate('start_datetime', '>=', $publish_from_date);
-                            })
-                            ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
-                                $query
-                                    ->where(function ($query) use ($publish_to_date) {
-                                        $query->whereDate('start_datetime', '<=', $publish_to_date)
-                                            ->orWhereNull('start_datetime');
-                                    });
+            ->select('messages.*')
+            ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
+            ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
+            ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
+            ->where('start_datetime', '<=', now('Asia/Tokyo'))
+            ->where('editing_flg', false)
+            ->where('messages.organization1_id', '=', $organization1->id)
+            ->when(($publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
+                $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
+                    $query
+                        ->whereDate('start_datetime', '>=', $publish_from_date);
+                })
+                    ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
+                        $query
+                            ->where(function ($query) use ($publish_to_date) {
+                                $query->whereDate('end_datetime', '<=', $publish_to_date)
+                                    ->orWhereNull('end_datetime');
                             });
-                        })
-                        ->when((!$publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
-                            $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
-                                $query
-                                    ->whereDate('end_datetime', '>=', $publish_from_date);
-                            })
-                                ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
-                                    $query
-                                        ->where(function ($query) use ($publish_to_date) {
-                                            $query->whereDate('end_datetime', '<=', $publish_to_date)
-                                                ->orWhereNull('end_datetime');
-                                        });
-                                });
-                        })
-                        ->when(isset($message_freeword), function ($query) use ($message_freeword) {
-                            $query->where(function ($query) use ($message_freeword) {
-                                $query->whereLike('title', $message_freeword)
-                                    ->orWhereHas('tag', function ($query) use ($message_freeword) {
-                                        $query->where('name', $message_freeword);
-                                    });
+                    });
+            })
+            ->when(($publish_from_check && !$publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
+                $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
+                    $query
+                        ->whereDate('start_datetime', '>=', $publish_from_date);
+                })
+                    ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
+                        $query
+                            ->where(function ($query) use ($publish_to_date) {
+                                $query->whereDate('start_datetime', '<=', $publish_to_date)
+                                    ->orWhereNull('start_datetime');
                             });
-                        })
-                        ->orderBy('messages.id', 'desc')
-                        ->groupBy('messages.id')
-                        ->limit(10)
-                        ->get();
+                    });
+            })
+            ->when((!$publish_from_check && $publish_to_check), function ($query) use ($publish_from_date, $publish_to_date) {
+                $query->when((isset($publish_from_date)), function ($query) use ($publish_from_date) {
+                    $query
+                        ->whereDate('end_datetime', '>=', $publish_from_date);
+                })
+                    ->when((isset($publish_to_date)), function ($query) use ($publish_to_date) {
+                        $query
+                            ->where(function ($query) use ($publish_to_date) {
+                                $query->whereDate('end_datetime', '<=', $publish_to_date)
+                                    ->orWhereNull('end_datetime');
+                            });
+                    });
+            })
+            ->when(isset($message_freeword), function ($query) use ($message_freeword) {
+                $query->where(function ($query) use ($message_freeword) {
+                    $query->whereLike('title', $message_freeword)
+                        ->orWhereHas('tag', function ($query) use ($message_freeword) {
+                            $query->where('name', $message_freeword);
+                        });
+                });
+            })
+            ->orderBy('messages.id', 'desc')
+            ->groupBy('messages.id')
+            ->limit(10)
+            ->get();
         // 業務連絡の10件のidを取得
         $_messages = $messages->pluck('id')->toArray();
 
@@ -106,7 +107,7 @@ class PersonalContoller extends Controller
         if ($organization1->isExistOrg5()) {
             $orgazanizations[] = "BL";
             $organization_list["BL"] = $organization1->getOrganization5();
-        } 
+        }
 
         foreach ($_messages as $key => $ms) {
             // 業業 (計)
@@ -121,14 +122,14 @@ class PersonalContoller extends Controller
                 ->leftJoin('organization1', 'shops.organization1_id', '=', 'organization1.id')
                 ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
                 ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
-                ->leftJoin('crew_message_logs', function($join) use($ms) {
+                ->leftJoin('crew_message_logs', function ($join) use ($ms) {
                     $join->on('crew_message_logs.crew_id', '=', 'crews.id')
                         ->where('crew_message_logs.message_id', '=', $ms);
                 })
                 ->where('messages.id', '=', $ms)
                 ->groupBy('shops.organization1_id')
                 ->get();
-  
+
             $viewrates['org1'][] = $viewrate_org1;
             $viewrates['org1_sum'] = ($viewrates['org1_sum'] ?? 0) + ($viewrate_org1[0]->count ?? 0);
             $viewrates['org1_readed_sum'] = ($viewrates['org1_readed_sum'] ?? 0) +  ($viewrate_org1[0]->readed_count ?? 0);
@@ -173,7 +174,7 @@ class PersonalContoller extends Controller
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization3.order_no')
-                    ->get(); 
+                    ->get();
 
                 $viewrates['DS'][] = $viewrate;
                 $viewrates_array = $viewrate->toArray();
@@ -181,7 +182,6 @@ class PersonalContoller extends Controller
                     $viewrates['DS_sum'][$value->id] = ($viewrates['DS_sum'][$value->id] ?? 0) + $value->count;
                     $viewrates['DS_readed_sum'][$value->id] = ($viewrates['DS_readed_sum'][$value->id] ?? 0) + $value->readed_count;
                 }
-
             }
             if (in_array('AR', $orgazanizations)) {
                 $viewrates_org_sub =
@@ -222,7 +222,7 @@ class PersonalContoller extends Controller
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization4.order_no')
-                    ->get(); 
+                    ->get();
 
                 $viewrates['AR'][] = $viewrate;
                 $viewrates_array = $viewrate->toArray();
@@ -250,7 +250,7 @@ class PersonalContoller extends Controller
                     ->where('message_user.message_id', '=', $ms)
                     ->groupBy('shops.organization5_id');
 
-                $viewrate = 
+                $viewrate =
                     DB::table('shops')
                     ->select([
                         DB::raw('organization5.id as id'),
@@ -291,17 +291,17 @@ class PersonalContoller extends Controller
                 ])
                 ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
                 ->leftJoin('crews', 'crews.user_id', 'users.id')
-                ->leftJoin('crew_message_logs', function($join) use($ms) {
+                ->leftJoin('crew_message_logs', function ($join) use ($ms) {
                     $join->on('crew_message_logs.crew_id', '=', 'crews.id')
                         ->where('crew_message_logs.message_id', '=', $ms);
                 })
                 ->where('message_user.message_id', '=', $ms)
                 ->groupBy('message_user.shop_id');
-                
+
             $viewrate = DB::table('shops')
                 ->select([
                     DB::raw('organization5.name as o5_name'),
-                    DB::raw('organization4.name as o4_name'), 
+                    DB::raw('organization4.name as o4_name'),
                     DB::raw('organization3.name as o3_name'),
                     DB::raw('shops.name as shop_name'),
                     DB::raw('shops.shop_code as shop_code'),
@@ -310,11 +310,11 @@ class PersonalContoller extends Controller
                 ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
                 ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
                 ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
-                ->leftJoinSub($viewrate_sub, 'view_rate', function($join) {
+                ->leftJoinSub($viewrate_sub, 'view_rate', function ($join) {
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
                 ->where('shops.organization1_id', '=', $organization1->id)
-                ->when(isset($org['DS']), function($query) use ($org) {
+                ->when(isset($org['DS']), function ($query) use ($org) {
                     $query->where('shops.organization3_id', '=', $org['DS']);
                 })
                 ->when(isset($org['AR']), function ($query) use ($org) {
@@ -335,27 +335,26 @@ class PersonalContoller extends Controller
                 ->orderBy('shops.shop_code')
                 ->groupBy(
                     'shops.id',
-                    'shops.shop_code', 
+                    'shops.shop_code',
                     'shops.name',
                     'organization3.name',
-                    'organization3.order_no', 
-                    'organization4.name', 
-                    'organization4.order_no', 
-                    'organization5.name', 
-                    'organization4.order_no',)
+                    'organization3.order_no',
+                    'organization4.name',
+                    'organization4.order_no',
+                    'organization5.name',
+                    'organization4.order_no',
+                )
                 ->get();
-                
+
             $viewrates['shop'][] = $viewrate;
             $viewrates_array = $viewrate->toArray();
             foreach ($viewrates_array as $key => $value) {
                 $viewrates['shop_sum'][$value->shop_code] = ($viewrates['shop_sum'][$value->shop_code] ?? 0) + $value->count;
                 $viewrates['shop_readed_sum'][$value->shop_code] = ($viewrates['shop_readed_sum'][$value->shop_code] ?? 0) + $value->readed_count;
             }
-
-
         }
 
-        return view('admin.analyse.personal',[
+        return view('admin.analyse.personal', [
             'messages' => $messages,
             'viewrates' => $viewrates,
             'organizations' => $orgazanizations,
@@ -365,7 +364,7 @@ class PersonalContoller extends Controller
         ]);
     }
 
-    public function export(Request $request) 
+    public function export(Request $request)
     {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
@@ -391,28 +390,28 @@ class PersonalContoller extends Controller
         $message = $request["message"];
 
         $crews = DB::table('messages as m')
-        ->select([
-            DB::raw('
-                     c.part_code as part_code,
-                     c.name as name,
-                     c.name_kana as name_kana,
-                     c.id as c_id
+            ->select([
+                DB::raw('
+                    c.part_code as part_code,
+                    c.name as name,
+                    c.name_kana as name_kana,
+                    c.id as c_id
                     '),
-            DB::raw('m.start_datetime'),
-            DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
-            DB::raw('
-                            case 
+                DB::raw('m.start_datetime'),
+                DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
+                DB::raw('
+                            case
                                 when c.register_date > m.start_datetime then true else false
-                            end as new_face 
+                            end as new_face
                         '),
-            DB::raw('
-                            case 
+                DB::raw('
+                            case
                                 when c_m_l.id is null then false else true
                             end as readed
                         '),
-            DB::raw("
+                DB::raw("
                             case
-                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1
                                 when c.name_kana regexp '^[ｶ-ｺ]' then 2
                                 when c.name_kana regexp '^[ｻ-ｿ]' then 3
                                 when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
@@ -425,9 +424,9 @@ class PersonalContoller extends Controller
                                 else 0
                             end as name_sort
                         "),
-        ])
+            ])
             ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
-            ->join('users as u', function($join) use ($shop) {
+            ->join('users as u', function ($join) use ($shop) {
                 $join->on('m_u.user_id', '=', 'u.id')
                     ->where('u.shop_id', '=', $shop);
             })
@@ -443,7 +442,6 @@ class PersonalContoller extends Controller
         return response()->json([
             'crews' => $crews,
         ], 200);
-
     }
 
     public function getOrgMessageViewRate(Request $request)
@@ -454,28 +452,28 @@ class PersonalContoller extends Controller
 
 
         $crews = DB::table('messages as m')
-        ->select([
-            DB::raw('
-                     c.part_code as part_code,
-                     c.name as name,
-                     c.name_kana as name_kana,
-                     c.id as c_id
+            ->select([
+                DB::raw('
+                    c.part_code as part_code,
+                    c.name as name,
+                    c.name_kana as name_kana,
+                    c.id as c_id
                     '),
-            DB::raw('m.start_datetime'),
-            DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
-            DB::raw('
-                            case 
+                DB::raw('m.start_datetime'),
+                DB::raw('DATE_FORMAT(c_m_l.readed_at, "%m/%d %H:%i") as readed_at'),
+                DB::raw('
+                            case
                                 when c.register_date > m.start_datetime then true else false
-                            end as new_face 
+                            end as new_face
                         '),
-            DB::raw('
-                            case 
+                DB::raw('
+                            case
                                 when c_m_l.id is null then false else true
                             end as readed
                         '),
-            DB::raw("
+                DB::raw("
                             case
-                                when c.name_kana regexp '^[ｱ-ｵ]' then 1 
+                                when c.name_kana regexp '^[ｱ-ｵ]' then 1
                                 when c.name_kana regexp '^[ｶ-ｺ]' then 2
                                 when c.name_kana regexp '^[ｻ-ｿ]' then 3
                                 when c.name_kana regexp '^[ﾀ-ﾄ]' then 4
@@ -488,7 +486,7 @@ class PersonalContoller extends Controller
                                 else 0
                             end as name_sort
                         "),
-        ])
+            ])
             ->leftJoin('message_user as m_u', 'm.id', 'm_u.message_id')
             ->Join('users as u', 'm_u.user_id', 'u.id')
             ->Join('shops as s', function ($join) use ($org_id, $org_type) {
@@ -496,7 +494,7 @@ class PersonalContoller extends Controller
                     ->when($org_type == 'Org1', function ($join) use ($org_id) {
                         $join->where('s.organization1_id', '=', $org_id);
                     })
-                    ->when($org_type == 'DS', function($join) use ($org_id) {
+                    ->when($org_type == 'DS', function ($join) use ($org_id) {
                         $join->where('s.organization3_id', '=', $org_id);
                     })
                     ->when($org_type == 'AR', function ($join) use ($org_id) {
@@ -509,7 +507,7 @@ class PersonalContoller extends Controller
             ->Join('crews as c', 'u.id', 'c.user_id')
             ->leftJoin('crew_message_logs as c_m_l', function ($join) use ($message) {
                 $join->on('c_m_l.crew_id', '=', 'c.id')
-                ->where('c_m_l.message_id', '=', $message);
+                    ->where('c_m_l.message_id', '=', $message);
             })
             ->where('m.id', '=', $message)
             ->orderBy('c.name_kana', 'asc')
@@ -520,7 +518,8 @@ class PersonalContoller extends Controller
         ], 200);
     }
 
-    public function getOrganization(Request $request) {
+    public function getOrganization(Request $request)
+    {
         $organization1_id = $request->input("organization1");
         $organization1 = Organization1::findOrFail($organization1_id);
 
