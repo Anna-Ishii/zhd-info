@@ -313,7 +313,13 @@ class MessagePublishController extends Controller
 
         // 今日が翌週かどうか、かつ現在の日付が掲載終了日-7日を過ぎていない場合にメッセージを送信
         if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
-            $this->sendWowTalkMessage($message);
+            // wowtalk 配信版
+            // $this->sendWowTalkMessage($message);
+
+            // テスト
+            $messageContent = $this->createMessageContent($message);
+            
+            echo $messageContent;
         }
     }
 
@@ -330,11 +336,10 @@ class MessagePublishController extends Controller
         $messageContent = $this->createMessageContent($message);
 
         // メッセージ送信のロジック
-        // APIのエンドポイントURL
         $url = 'https://wow-talk.zensho.com/message';
 
         // 送信するデータ
-        $user_id = 'nssx020'; // ユーザーID
+        $user_id = 'nssx020';
 
         //
         // 送信するデータ
