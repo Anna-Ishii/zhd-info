@@ -295,7 +295,7 @@ class MessagePublishController extends Controller
             })
             ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                 $query->whereLike('name', $shop_freeword)
-                    ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
+                    ->orWhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
             })
             ->when(isset($org3), function ($query) use ($org3) {
                 $query->where('organization3_id', $org3);
@@ -328,6 +328,14 @@ class MessagePublishController extends Controller
                 });
             })
             ->wherePivotIn('shop_id', $shop_list)
+            ->join('shops', 'users.shop_id', '=', 'shops.id')
+            ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+            ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+            ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+            ->orderBy('organization3.order_no')
+            ->orderBy('organization4.order_no')
+            ->orderBy('organization5.order_no')
+            ->orderBy('shops.shop_code')
             ->paginate(50)
             ->appends(request()->query());
 
