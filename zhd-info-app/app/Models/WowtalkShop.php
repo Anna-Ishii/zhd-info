@@ -10,6 +10,7 @@ class WowtalkShop extends Model
 
     protected $fillable = [
         'id',
+        'shop_id',
         'shop_code',
         'shop_name',
         'wowtalk_id',
