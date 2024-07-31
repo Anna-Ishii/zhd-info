@@ -6,6 +6,7 @@ use Illuminate\Console\Command;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Message;
+use App\Models\WowtalkShop;
 use App\Models\User;
 
 class WowTalkUnreadNotificationSender extends Command
@@ -29,6 +30,8 @@ class WowTalkUnreadNotificationSender extends Command
      */
     public function handle()
     {
+        ini_set('memory_limit', '-1');
+
         $this->info('WowTalk未読通知送信開始');
 
         try {
@@ -43,8 +46,12 @@ class WowTalkUnreadNotificationSender extends Command
 
     public function sendMessageNotifications()
     {
-        // 現在の東京時刻を取得
-        $currentDate = Carbon::now('Asia/Tokyo');
+        // // 現在の東京時刻を取得
+        // $currentDate = Carbon::now('Asia/Tokyo');
+
+        // テスト
+        // 今日を月曜日に設定
+        $currentDate = Carbon::now('Asia/Tokyo')->startOfWeek()->setTime(10, 0);
 
         // 現在掲載中のメッセージと掲載終了メッセージを取得
         $allMessages = Message::where('editing_flg', false)->get();
@@ -86,34 +93,58 @@ class WowTalkUnreadNotificationSender extends Command
 
         // 今日が翌週かどうか、かつ現在の日付が掲載終了日-7日を過ぎていない場合にメッセージを送信
         if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
-            $this->sendWowTalkMessage($message);
+
+            // // wowtalk 配信版
+            // $this->sendWowTalkMessage($message);
+
+            // テスト
+            $messageContent = $this->createMessageContent($message);
+            echo $messageContent;
         }
     }
 
     // 翌週の日付を取得する関数
     private function getNextWeekDate($date)
     {
-        return (new Carbon($date))->addWeek();
+        // 翌週の日付
+        // return (new Carbon($date))->addWeek();
+
+        // 翌週月曜日の日付
+        return (new Carbon($date))->next(Carbon::MONDAY);
     }
 
     // WowTalkメッセージ送信処理
     private function sendWowTalkMessage($message)
     {
+
+        // wowtalk_id取得
+        // $shop_ids = MessageShop::where('message_id', $message->id)->pluck('shop_id')->toArray();
+        // テスト
+        $shop_ids = [0 => 111111, 1 => 111112, 2 => 111113, 3 => 111114];
+
+        // チャンクサイズを設定
+        $chunkSize = 100;
+        $chunked_shop_ids = array_chunk($shop_ids, $chunkSize);
+
+        $wowtalk_ids = [];
+        foreach ($chunked_shop_ids as $chunk) {
+            $ids = WowtalkShop::whereIn('shop_id', $chunk)
+                ->where('notification_target', true)
+                ->pluck('wowtalk_id')
+                ->toArray();
+            $wowtalk_ids = array_merge($wowtalk_ids, $ids);
+        }
+
         // メッセージ内容を生成
         $messageContent = $this->createMessageContent($message);
 
         // メッセージ送信のロジック
-        // APIのエンドポイントURL
         $url = 'https://wow-talk.zensho.com/message';
 
         // 送信するデータ
-        $user_id = 'nssx020'; // ユーザーID
-
-        //
-        // 送信するデータ
         $data = array(
             'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
-            'target' => array($user_id) // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
+            'target' => $wowtalk_ids // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
         );
 
         // JSON形式にエンコード
@@ -177,13 +208,16 @@ class WowTalkUnreadNotificationSender extends Command
         $unreadUserNamesString = implode("\n　", $unreadUserNames);
         $additionalUnreadCount = $message->user()->wherePivot('read_flg', false)->count() - 10;
 
+        // // メッセージ内容をフォーマット
+        // $messageContent = "配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
+        //     . "・業連名：{$message->title}\n"
+        //     . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
+        //     . "・カテゴリ：{$message->category->name}\n"
+        //     . "・URL：https://innerstreaming.zensho-i.net\n"
+        //     . "・未読者：\n　{$unreadUserNamesString}";
+
         // メッセージ内容をフォーマット
-        $messageContent = "テスト\n 配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
-            . "・業連名：{$message->title}\n"
-            . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
-            . "・カテゴリ：{$message->category->name}\n"
-            . "・URL：https://innerstreaming.zensho-i.net\n"
-            . "・未読者：\n　{$unreadUserNamesString}";
+        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$message->user()->wherePivot('read_flg', false)->count()}名います。確認してください。\n";
 
         if ($additionalUnreadCount > 0) {
             $messageContent .= "\n　他{$additionalUnreadCount}名";

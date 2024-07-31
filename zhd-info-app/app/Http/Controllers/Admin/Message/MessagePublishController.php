@@ -31,6 +31,7 @@ use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Rules\Import\OrganizationRule;
+use App\Models\WowtalkShop;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
@@ -259,8 +260,12 @@ class MessagePublishController extends Controller
 
 
 
-        // 現在の東京時刻を取得
-        $currentDate = Carbon::now('Asia/Tokyo');
+        // // 現在の東京時刻を取得
+        // $currentDate = Carbon::now('Asia/Tokyo');
+
+        // テスト
+        // 今日を月曜日に設定
+        $currentDate = Carbon::now('Asia/Tokyo')->startOfWeek()->setTime(10, 0);
 
         // 現在掲載中のメッセージと掲載終了メッセージを取得
         $allMessages = Message::where('editing_flg', false)->get();
@@ -313,12 +318,12 @@ class MessagePublishController extends Controller
 
         // 今日が翌週かどうか、かつ現在の日付が掲載終了日-7日を過ぎていない場合にメッセージを送信
         if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
-            // wowtalk 配信版
+
+            // // wowtalk 配信版
             // $this->sendWowTalkMessage($message);
 
             // テスト
             $messageContent = $this->createMessageContent($message);
-            
             echo $messageContent;
         }
     }
@@ -326,12 +331,35 @@ class MessagePublishController extends Controller
     // 翌週の日付を取得する関数
     private function getNextWeekDate($date)
     {
-        return (new Carbon($date))->addWeek();
+        // 翌週の日付
+        // return (new Carbon($date))->addWeek();
+
+        // 翌週月曜日の日付
+        return (new Carbon($date))->next(Carbon::MONDAY);
     }
 
     // WowTalkメッセージ送信処理
     private function sendWowTalkMessage($message)
     {
+
+        // wowtalk_id取得
+        // $shop_ids = MessageShop::where('message_id', $message->id)->pluck('shop_id')->toArray();
+        // テスト
+        $shop_ids = [0 => 111111, 1 => 111112, 2 => 111113, 3 => 111114];
+
+        // チャンクサイズを設定
+        $chunkSize = 100;
+        $chunked_shop_ids = array_chunk($shop_ids, $chunkSize);
+
+        $wowtalk_ids = [];
+        foreach ($chunked_shop_ids as $chunk) {
+            $ids = WowtalkShop::whereIn('shop_id', $chunk)
+                ->where('notification_target', true)
+                ->pluck('wowtalk_id')
+                ->toArray();
+            $wowtalk_ids = array_merge($wowtalk_ids, $ids);
+        }
+
         // メッセージ内容を生成
         $messageContent = $this->createMessageContent($message);
 
@@ -339,13 +367,9 @@ class MessagePublishController extends Controller
         $url = 'https://wow-talk.zensho.com/message';
 
         // 送信するデータ
-        $user_id = 'nssx020';
-
-        //
-        // 送信するデータ
         $data = array(
             'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
-            'target' => array($user_id) // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
+            'target' => $wowtalk_ids // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
         );
 
         // JSON形式にエンコード
@@ -409,13 +433,16 @@ class MessagePublishController extends Controller
         $unreadUserNamesString = implode("\n　", $unreadUserNames);
         $additionalUnreadCount = $message->user()->wherePivot('read_flg', false)->count() - 10;
 
+        // // メッセージ内容をフォーマット
+        // $messageContent = "配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
+        //     . "・業連名：{$message->title}\n"
+        //     . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
+        //     . "・カテゴリ：{$message->category->name}\n"
+        //     . "・URL：https://innerstreaming.zensho-i.net\n"
+        //     . "・未読者：\n　{$unreadUserNamesString}";
+
         // メッセージ内容をフォーマット
-        $messageContent = "テスト\n 配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
-            . "・業連名：{$message->title}\n"
-            . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
-            . "・カテゴリ：{$message->category->name}\n"
-            . "・URL：https://innerstreaming.zensho-i.net\n"
-            . "・未読者：\n　{$unreadUserNamesString}";
+        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$message->user()->wherePivot('read_flg', false)->count()}名います。確認してください。\n";
 
         if ($additionalUnreadCount > 0) {
             $messageContent .= "\n　他{$additionalUnreadCount}名";
@@ -680,6 +707,9 @@ class MessagePublishController extends Controller
 
         $validated = $request->validated();
 
+        // CPU使用率測定開始
+        $start_usage = getrusage();
+
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
 
@@ -859,7 +889,54 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // 処理の対象コードの後に以下の行を追加します。
+        $end_usage = getrusage();
+        $cpu_usage = $this->calculateCpuUsage($start_usage, $end_usage);
+        Log::info('CPU Usage for processing: ' . $cpu_usage . '%');
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+    }
+
+    private function calculateCpuUsage($start, $end)
+    {
+        $utime = ($end["ru_utime.tv_sec"] - $start["ru_utime.tv_sec"])
+            + ($end["ru_utime.tv_usec"] - $start["ru_utime.tv_usec"]) / 1e6;
+        $stime = ($end["ru_stime.tv_sec"] - $start["ru_stime.tv_sec"])
+            + ($end["ru_stime.tv_usec"] - $start["ru_stime.tv_usec"]) / 1e6;
+        $total_time = $utime + $stime;
+
+        // システムのCPUコア数を取得
+        $cpu_count = $this->getCpuCount();
+        if ($cpu_count <= 0) {
+            $cpu_count = 1; // デフォルト値を1に設定
+        }
+        return ($total_time / $cpu_count) * 100;
+    }
+
+    private function getCpuCount()
+    {
+        // 初期値として1を設定
+        $cpu_count = 1;
+
+        // Linuxの場合
+        if (PHP_OS_FAMILY === 'Linux') {
+            $cpu_info = shell_exec("grep -c ^processor /proc/cpuinfo");
+            if ($cpu_info !== false) {
+                $cpu_count = (int)trim($cpu_info);
+            }
+        }
+        // Windowsの場合
+        elseif (PHP_OS_FAMILY === 'Windows') {
+            $cpu_info = shell_exec("wmic cpu get NumberOfCores");
+            if ($cpu_info !== false) {
+                preg_match_all('/\d+/', $cpu_info, $matches);
+                if (isset($matches[0]) && count($matches[0]) > 0) {
+                    $cpu_count = array_sum($matches[0]);
+                }
+            }
+        }
+
+        return $cpu_count;
     }
 
     public function edit($message_id)

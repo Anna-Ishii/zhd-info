@@ -15,6 +15,7 @@ class CreateWowtalkShopsTable extends Migration
     {
         Schema::create('wowtalk_shops', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('shop_id');
             $table->integer('shop_code');
             $table->string('shop_name');
             $table->string('wowtalk_id');
