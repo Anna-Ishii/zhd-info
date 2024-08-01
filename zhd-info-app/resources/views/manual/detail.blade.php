@@ -113,10 +113,10 @@
                         <div class="main__thumb" style="pointer-events: none;">
                             <img src="{{ asset($manual->content_url)}}" alt="">
                             <!-- 再生ボタンにしたい場合playクラスをつける -->
-                            {{-- <button type="button" class="main__thumb__icon"></button> --}}
+                            <button type="button" class="main__thumb__icon"></button>
                         </div>
                     </a>
-                    {{-- <p>{{ $manual->description }}</p> --}}
+                    <p>{{ $manual->description }}</p>
                 </div>
                 @else
                 {{-- 画像 --}}
@@ -124,9 +124,9 @@
                     <div class="main__thumb">
                         <img src="{{ asset($manual->content_url)}}" alt="">
                         <!-- 再生ボタンにしたい場合playクラスをつける -->
-                        {{-- <button type="button" class="main__thumb__icon"></button> --}}
+                        <button type="button" class="main__thumb__icon"></button>
                     </div>
-                    {{-- <p>{{ $manual->description }}</p> --}}
+                    <p>{{ $manual->description }}</p>
                 </div>
                 @endif
 
