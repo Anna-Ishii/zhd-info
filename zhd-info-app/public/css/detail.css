@@ -967,7 +967,7 @@ li {
 .main__thumb {
     position: relative;
     width: 100%;
-    max-width: 50%;
+    max-width: 450px;
     margin-right: 17px;
     cursor: pointer;
 }
@@ -1000,6 +1000,10 @@ li {
 .main__box--single {
     /* 全編通し動画（説目部分）のみ */
 }
+
+/* .main__box--single .main__thumb {
+    max-width: 220px;
+} */
 
 /* 一覧画面のみ */
 .menu+.main {
@@ -2456,9 +2460,9 @@ details[open] summary::after {
         /* 全編通し動画（説明部分）のみ */
     }
 
-    .main__box--single .main__thumb {
+    /* .main__box--single .main__thumb {
         width: 60%;
-    }
+    } */
 
     .manualAttachment {
         width: calc(100% - 24px);
