@@ -32,16 +32,18 @@
             <input id="manual_id" value="{{$manual->id}}" hidden>
             <div class="main__inner">
                 <div class="main__supplement main__box--single thumb_parents flex">
+
                     @if( in_array($manual->content_type, ['mp4', 'mov', 'MP4'], true ))
                         {{-- 動画 --}}
                         <div class="main__supplement__detail flex">
                             <div class="main__thumb">
+                                <p class="text-content">{{ $manual->description }}</p>
                                 <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg')}}" alt="">
                                 <!-- 再生ボタンにしたい場合playクラスをつける -->
                                 <button type="button" class="main__thumb__icon play"></button>
                             </div>
-                            <p>{{ $manual->description}}</p>
                         </div>
+
                         <!-- 添付ファイル -->
                         {{-- クエリパラメータにautoplayがあれば自動再生 --}}
                         <div class="manualAttachmentBg {{(request()->input('autoplay')) ? 'isActive' : ''}}"></div>
@@ -110,14 +112,14 @@
                         </div>
 
                     @elseif( in_array($manual->content_type, ['pdf'], true ))
-                        <!-- PDF -->
+                        {{-- PDF --}}
                         <div class="main__supplement__detail">
                             <p class="text-content">{{ $manual->description }}</p>
                             <div class="pdf-container" data-url="{{ asset($manual->content_url) }}"></div>
                         </div>
 
                     @else
-                        <!-- 画像 -->
+                        {{-- 画像 --}}
                         <div class="main__supplement__detail">
                             <p class="text-content">{{ $manual->description }}</p>
                             <img src="{{ asset($manual->content_url)}}" alt="" style="width: 100%;">
@@ -128,15 +130,18 @@
                 @foreach( $contents as $content )
                     <section class="main__box thumb_parents">
                         <h2 class="mb10" style="font-size: xx-large;">手順{{$loop->iteration}}：{{$content->title}}</h2>
+
                         @if( in_array($content->content_type, ['mp4', 'mov', 'MP4'], true ))
+                            {{-- 動画 --}}
+                            <p class="text-content">{{ $content->description }}</p>
                             <div class=" flex">
                                 <div class="main__thumb">
                                     <img src="{{ ($content->thumbnails_url) ? asset($content->thumbnails_url) : asset('img/img_manual_dummy.jpg') }}" alt="">
                                     <!-- 再生ボタンにしたい場合playクラスをつける -->
                                     <button type="button" class="main__thumb__icon play"></button>
                                 </div>
-                                <p>{{ $content->description }}</p>
                             </div>
+
                             <!-- 添付ファイル -->
                             <div class="manualAttachmentBg"></div>
                             <div class="manualAttachment">
@@ -210,6 +215,7 @@
                             </div>
 
                         @else
+                            {{-- 画像 --}}
                             <p class="text-content">{{ $content->description }}</p>
                             <div class="flex">
                                 <img src="{{ asset($content->content_url)}}" alt="" style="width: 100%;">
