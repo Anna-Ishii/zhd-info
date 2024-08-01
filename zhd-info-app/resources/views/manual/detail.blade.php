@@ -1,6 +1,6 @@
 @extends('layouts.parent')
 @push('css')
-    <link href="{{ asset('/css/detail.css') }}" rel="stylesheet">
+    <link href="{{ asset('/css/detail.css') }}?date=20240801" rel="stylesheet">
 @endpush
 @section('title', 'マニュアル')
 @section('previous_page')
@@ -279,7 +279,7 @@
 
     @include('common.footer')
 
-    <script src="{{ asset('/js/pdfjs/build/pdf.js') }}" defer></script>
-    <script src="{{ asset('/js/pdfjs/build/pdf.worker.js') }}" defer></script>
-    <script src="{{ asset('/js/detail.js') }}" defer></script>
+    <script src="{{ asset('/js/pdfjs/build/pdf.js') }}?date=20240801" defer></script>
+    <script src="{{ asset('/js/pdfjs/build/pdf.worker.js') }}?date=20240801" defer></script>
+    <script src="{{ asset('/js/detail.js') }}?date=20240801" defer></script>
     @endsection
