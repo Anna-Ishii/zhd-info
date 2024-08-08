@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Exception;
@@ -264,8 +265,8 @@ class MessagePublishController extends Controller
         // $currentDate = Carbon::now('Asia/Tokyo');
 
         // テスト
-        // 今日を月曜日に設定
-        $currentDate = Carbon::now('Asia/Tokyo')->startOfWeek()->setTime(10, 0);
+        // 今日を月曜日に設定(2024-07-22 10:00)
+        $currentDate = Carbon::create(2024, 7, 22, 10, 0, 0, 'Asia/Tokyo');
 
         // 現在掲載中のメッセージと掲載終了メッセージを取得
         $allMessages = Message::where('editing_flg', false)->get();
@@ -320,7 +321,7 @@ class MessagePublishController extends Controller
         if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
 
             // // wowtalk 配信版
-            // $this->sendWowTalkMessage($message);
+            // $this->sendWowTalkMessageWithRetry($message);
 
             // テスト
             $messageContent = $this->createMessageContent($message);
@@ -339,11 +340,32 @@ class MessagePublishController extends Controller
     }
 
     // WowTalkメッセージ送信処理
+    private function sendWowTalkMessageWithRetry(Message $message)
+    {
+        $retryCount = 0;
+        $maxRetries = 3;
+
+        do {
+            $result = $this->sendWowTalkMessage($message);
+
+            if ($result === 'success') {
+                return;
+            }
+
+            $retryCount++;
+
+        } while ($retryCount < $maxRetries);
+
+        // 最大リトライ回数を超えた場合、システム管理者に通知
+        $this->notifySystemAdmin($result);
+    }
+
+    // WowTalkメッセージを送信する関数
     private function sendWowTalkMessage($message)
     {
-
         // wowtalk_id取得
         // $shop_ids = MessageShop::where('message_id', $message->id)->pluck('shop_id')->toArray();
+
         // テスト
         $shop_ids = [0 => 111111, 1 => 111112, 2 => 111113, 3 => 111114];
 
@@ -360,6 +382,10 @@ class MessagePublishController extends Controller
             $wowtalk_ids = array_merge($wowtalk_ids, $ids);
         }
 
+        if (empty($wowtalk_ids)) {
+            return 'no_target';
+        }
+
         // メッセージ内容を生成
         $messageContent = $this->createMessageContent($message);
 
@@ -369,7 +395,7 @@ class MessagePublishController extends Controller
         // 送信するデータ
         $data = array(
             'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
-            'target' => $wowtalk_ids // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
+            'target' => $wowtalk_ids      // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
         );
 
         // JSON形式にエンコード
@@ -398,7 +424,7 @@ class MessagePublishController extends Controller
         if ($response === false) {
             $error = curl_error($ch);
             curl_close($ch);
-            die('cURLエラー: ' . $error);
+            return 'curl_error: ' . $error;
         }
 
         // cURLセッションを終了
@@ -409,16 +435,16 @@ class MessagePublishController extends Controller
 
         // レスポンスの存在と形式を確認
         if (json_last_error() !== JSON_ERROR_NONE) {
-            die('JSONデコードエラー: ' . json_last_error_msg());
+            return 'json_decode_error: ' . json_last_error_msg();
         }
 
         // レスポンスを表示
         if (isset($response_data['result']) && $response_data['result'] == 'success') {
-            echo 'メッセージ送信成功: ' . $response;
+            return 'success';
         } elseif (isset($response_data['result'])) {
-            echo 'メッセージ送信失敗: ' . $response;
+            return 'api_error: ' . $response_data['result'];
         } else {
-            echo '予期しないレスポンス: ' . $response;
+            return 'unexpected_response: ' . $response;
         }
     }
 
@@ -450,6 +476,18 @@ class MessagePublishController extends Controller
 
         // メッセージは最大800文字に制限
         return mb_strimwidth($messageContent, 0, 800, "...");
+    }
+
+    // システム管理者に通知する関数
+    private function notifySystemAdmin($error)
+    {
+        $to = ['nss@example.com', 'saimizu@example.com', 'kitagawa@example.com'];
+        $subject = 'WowTalk API エラー通知';
+        $message = "WowTalk APIでエラーが発生しました。\nエラーメッセージ: $error";
+
+        Mail::raw($message, function ($msg) use ($to, $subject) {
+            $msg->to($to)->subject($subject);
+        });
     }
 
 
