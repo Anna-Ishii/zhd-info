@@ -445,6 +445,7 @@ class MessagePublishController extends Controller
             ];
         }, $all_shops);
 
+
         // shop_codeを基準にソートするためのカスタム比較関数を定義
         usort($all_shop_list, function ($a, $b) {
             return strcmp($a['shop_code'], $b['shop_code']);
@@ -659,6 +660,14 @@ class MessagePublishController extends Controller
         // 300秒 (5分) に設定
         set_time_limit(300);
 
+
+
+        // 開始時間をログに出力
+        $startTime = microtime(true);
+        Log::info('業連編集・開始時間: ' . date('Y-m-d H:i:s'));
+
+
+
         $message = Message::find($message_id);
         if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
 
@@ -708,104 +717,155 @@ class MessagePublishController extends Controller
             ->toArray();
 
 
-        // shopを取得する
-        $all_shop_list = [];
-        foreach ($organization_list as $index => $organization) {
+        // // shopを取得する
+        // $all_shop_list = [];
+        // foreach ($organization_list as $index => $organization) {
 
-            $organization_list[$index]['organization5_shop_list'] = [];
-            $organization_list[$index]['organization4_shop_list'] = [];
-            $organization_list[$index]['organization3_shop_list'] = [];
-            $organization_list[$index]['organization2_shop_list'] = [];
+        //     $organization_list[$index]['organization5_shop_list'] = [];
+        //     $organization_list[$index]['organization4_shop_list'] = [];
+        //     $organization_list[$index]['organization3_shop_list'] = [];
+        //     $organization_list[$index]['organization2_shop_list'] = [];
 
-            if (isset($organization['organization5_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
+        //     if (isset($organization['organization5_id'])) {
+        //         foreach ($brand_list as $brand) {
+        //             $shops = Shop::where('organization5_id', $organization['organization5_id'])
+        //                 ->where('brand_id', $brand->id)
+        //                 ->get()
+        //                 ->toArray();
 
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
+        //             // shop_codeとdisplay_nameを合体
+        //             foreach ($shops as $shop) {
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
+        //                 // すべてのshopリスト
+        //                 $all_shop_list[] = [
+        //                     'shop_id' => $shop['id'],
+        //                     'shop_code' => $shop['shop_code'],
+        //                     'display_name' => $shop['display_name'],
+        //                 ];
+        //             }
 
-                    $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization4_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
+        //             $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
+        //         }
+        //     }
+        //     if (isset($organization['organization4_id'])) {
+        //         foreach ($brand_list as $brand) {
+        //             $shops = Shop::where('organization4_id', $organization['organization4_id'])
+        //                 ->where('brand_id', $brand->id)
+        //                 ->get()
+        //                 ->toArray();
 
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
+        //             // shop_codeとdisplay_nameを合体
+        //             foreach ($shops as $shop) {
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
+        //                 // すべてのshopリスト
+        //                 $all_shop_list[] = [
+        //                     'shop_id' => $shop['id'],
+        //                     'shop_code' => $shop['shop_code'],
+        //                     'display_name' => $shop['display_name'],
+        //                 ];
+        //             }
 
-                    $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization3_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
+        //             $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
+        //         }
+        //     }
+        //     if (isset($organization['organization3_id'])) {
+        //         foreach ($brand_list as $brand) {
+        //             $shops = Shop::where('organization3_id', $organization['organization3_id'])
+        //                 ->where('brand_id', $brand->id)
+        //                 ->whereNull('organization4_id')
+        //                 ->whereNull('organization5_id')
+        //                 ->get()
+        //                 ->toArray();
 
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
+        //             // shop_codeとdisplay_nameを合体
+        //             foreach ($shops as $shop) {
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
+        //                 // すべてのshopリスト
+        //                 $all_shop_list[] = [
+        //                     'shop_id' => $shop['id'],
+        //                     'shop_code' => $shop['shop_code'],
+        //                     'display_name' => $shop['display_name'],
+        //                 ];
+        //             }
 
-                    $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization2_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
+        //             $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
+        //         }
+        //     }
+        //     if (isset($organization['organization2_id'])) {
+        //         foreach ($brand_list as $brand) {
+        //             $shops = Shop::where('organization2_id', $organization['organization2_id'])
+        //                 ->where('brand_id', $brand->id)
+        //                 ->whereNull('organization4_id')
+        //                 ->whereNull('organization5_id')
+        //                 ->get()
+        //                 ->toArray();
 
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
+        //             // shop_codeとdisplay_nameを合体
+        //             foreach ($shops as $shop) {
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
+        //                 // すべてのshopリスト
+        //                 $all_shop_list[] = [
+        //                     'shop_id' => $shop['id'],
+        //                     'shop_code' => $shop['shop_code'],
+        //                     'display_name' => $shop['display_name'],
+        //                 ];
+        //             }
 
-                    $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                }
-            }
-        }
+        //             $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
+        //         }
+        //     }
+        // }
+
+
+
+        // 事前に必要なデータをすべて一括取得
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $message->organization1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
+
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
+
 
         $target_org = [];
         $target_org['org5'] = MessageOrganization::where('message_id', $message_id)->pluck('organization5_id')->toArray();
@@ -865,10 +925,21 @@ class MessagePublishController extends Controller
             $target_org['select'] = $selectedFlg;
         }
 
+
         // shop_codeを基準にソートするためのカスタム比較関数を定義
         usort($all_shop_list, function ($a, $b) {
             return strcmp($a['shop_code'], $b['shop_code']);
         });
+
+
+
+        // 終了時間をログに出力し、所要時間を計算
+        $endTime = microtime(true);
+        $duration = $endTime - $startTime;
+        Log::info('業連編集・終了時間: ' . date('Y-m-d H:i:s'));
+        Log::info('業連編集・実行時間: ' . round($duration, 2) . ' 秒');
+
+
 
         return view('admin.message.publish.edit', [
             'message' => $message,
