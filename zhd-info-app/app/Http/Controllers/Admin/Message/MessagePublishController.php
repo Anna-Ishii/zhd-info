@@ -397,106 +397,59 @@ class MessagePublishController extends Controller
             ->toArray();
 
 
-        // shopを取得する
-        $all_shop_list = [];
+        // 事前に必要なデータをすべて一括取得
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $organization1->id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
 
-        $chunkSize = 100; // チャンクサイズを適切に設定
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
 
-        foreach ($organization_list as $index => $organization) {
-            $organization_list[$index]['organization5_shop_list'] = [];
-            $organization_list[$index]['organization4_shop_list'] = [];
-            $organization_list[$index]['organization3_shop_list'] = [];
-            $organization_list[$index]['organization2_shop_list'] = [];
-
-            // ブランドリストを配列に変換
-            $brand_array = $brand_list->toArray();
-            $brand_chunks = array_chunk($brand_array, $chunkSize);
-
-            if (isset($organization['organization5_id'])) {
-                foreach ($brand_chunks as $brand_chunk) {
-                    $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                        ->whereIn('brand_id', array_column($brand_chunk, 'id'))
-                        ->get()
-                        ->toArray();
-
-                    foreach ($shops as $shop) {
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                }
-            }
-
-            if (isset($organization['organization4_id'])) {
-                foreach ($brand_chunks as $brand_chunk) {
-                    $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                        ->whereIn('brand_id', array_column($brand_chunk, 'id'))
-                        ->get()
-                        ->toArray();
-
-                    foreach ($shops as $shop) {
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                }
-            }
-
-            if (isset($organization['organization3_id'])) {
-                foreach ($brand_chunks as $brand_chunk) {
-                    $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                        ->whereIn('brand_id', array_column($brand_chunk, 'id'))
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    foreach ($shops as $shop) {
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                }
-            }
-
-            if (isset($organization['organization2_id'])) {
-                foreach ($brand_chunks as $brand_chunk) {
-                    $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                        ->whereIn('brand_id', array_column($brand_chunk, 'id'))
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    foreach ($shops as $shop) {
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                }
-            }
-        }
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
 
         // shop_codeを基準にソートするためのカスタム比較関数を定義
         usort($all_shop_list, function ($a, $b) {
             return strcmp($a['shop_code'], $b['shop_code']);
         });
+
 
         return view('admin.message.publish.new', [
             'organization1' => $organization1,
@@ -1394,24 +1347,26 @@ class MessagePublishController extends Controller
                 ], 500);
             }
             $array = [];
-            foreach ($collection[0] as $key => [
-                $no,
-                $emergency_flg,
-                $category,
-                $title,
-                $tag1,
-                $tag2,
-                $tag3,
-                $tag4,
-                $tag5,
-                $start_datetime,
-                $end_datetime,
-                $status,
-                $brand
-                // $organization5,
-                // $organization4,
-                // $organization3
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $no,
+                    $emergency_flg,
+                    $category,
+                    $title,
+                    $tag1,
+                    $tag2,
+                    $tag3,
+                    $tag4,
+                    $tag5,
+                    $start_datetime,
+                    $end_datetime,
+                    $status,
+                    $brand
+                    // $organization5,
+                    // $organization4,
+                    // $organization3
+                ]
+            ) {
                 $message = Message::where('number', $no)
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
@@ -1611,12 +1566,14 @@ class MessagePublishController extends Controller
             $collection = Excel::toCollection(new MessageStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
-            foreach ($collection[0] as $key => [
-                $brand,
-                $store_code,
-                $store_name,
-                $checked_store
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $brand,
+                    $store_code,
+                    $store_name,
+                    $checked_store
+                ]
+            ) {
                 array_push($array, [
                     'brand' => $brand,
                     'store_code' => $store_code,
