@@ -236,7 +236,7 @@
 
         @include('common.footer')
 
-        <script src="{{ asset('/js/pdfjs/build/pdf.js') }}?date=20240801" defer></script>
-        <script src="{{ asset('/js/pdfjs/build/pdf.worker.js') }}?date=20240801" defer></script>
-        <script src="{{ asset('/js/detail.js') }}?date=20240801" defer></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js?version=20240813"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.js?version=20240813"></script>
+        <script src="{{ asset('/js/detail.js') }}?date=20240813" defer></script>
     @endsection
