@@ -1,7 +1,7 @@
 "use strict";
 
 /* マニュアルモーダル関係 */
-let modalVideoW, modalVideoH;
+var modalVideoW, modalVideoH;
 function changeMovieUIsize() {
     /* uiの幅をvideoに合わせる */
     modalVideoW = $(".manualAttachment.isActive").find("video").innerWidth();
@@ -18,13 +18,13 @@ $(document).on(
     "click",
     ".manualAttachmentBg , .manualAttachment__close",
     function (e) {
-        let thumbParents = $(this).parents(".main__box , .main__box--single");
+        var thumbParents = $(this).parents(".main__box , .main__box--single");
         if (
             $(this).hasClass("manualAttachmentBg") &&
-            !e.target.closest(".manualAttachment")
+            !$(e.target).closest(".manualAttachment").length
         ) {
             /* 動画を止める */
-            let targetMovie = $(".manualAttachment.isActive").find("video");
+            var targetMovie = $(".manualAttachment.isActive").find("video");
             if (targetMovie.length) {
                 targetMovie.get(0).pause();
             }
@@ -38,7 +38,7 @@ $(document).on(
                 .removeClass("isActive");
         } else if ($(this).hasClass("manualAttachment__close")) {
             /* 動画を止める */
-            let targetMovie = $(".manualAttachment.isActive").find("video");
+            var targetMovie = $(".manualAttachment.isActive").find("video");
             if (targetMovie.length) {
                 targetMovie.get(0).pause();
             }
@@ -60,8 +60,8 @@ $(document).on("click", ".btnPrint", function () {
 
 /* 移動先選択モーダル */
 $(document).on("click", ".btnMoveFolder", function () {
-    let chkTargetName = $(this).data("target-name");
-    let modalTarget = $(".modal[data-target-name=" + chkTargetName + "]");
+    var chkTargetName = $(this).data("target-name");
+    var modalTarget = $(".modal[data-target-name=" + chkTargetName + "]");
     console.log(modalTarget.length);
     if (!$(".modalBg").is(":visible")) {
         $(".modalBg").show();
@@ -69,7 +69,7 @@ $(document).on("click", ".btnMoveFolder", function () {
     }
 });
 $(document).on("click", ".modalBg", function (e) {
-    if (!e.target.closest(".modal")) {
+    if (!$(e.target).closest(".modal").length) {
         $(".modalBg , .modal").hide();
     }
 });
@@ -86,11 +86,11 @@ $(document).on("change", ".moveFolder", function () {
 
 /* 再生時間計測 */
 function setCurrentTime(e) {
-    let movieLength = $(e).get(0).duration;
-    let movieCurrentTime = $(e).get(0).currentTime;
-    let currentTime = Math.floor((movieCurrentTime / movieLength) * 100);
+    var movieLength = $(e).get(0).duration;
+    var movieCurrentTime = $(e).get(0).currentTime;
+    var currentTime = Math.floor((movieCurrentTime / movieLength) * 100);
 
-    let targetSeekBar = $(".manualAttachment.isActive").find(
+    var targetSeekBar = $(".manualAttachment.isActive").find(
         ".manualAttachment__ui__progress"
     );
     targetSeekBar.css("width", currentTime + "%");
@@ -98,18 +98,18 @@ function setCurrentTime(e) {
 /* 秒数の手動移動 */
 function moveCurrentTime(e) {
     /* 動画の総再生時間を取っておく */
-    let targetMovie = $(".manualAttachment.isActive").find("video");
-    let movieLength = targetMovie.get(0).duration;
+    var targetMovie = $(".manualAttachment.isActive").find("video");
+    var movieLength = targetMovie.get(0).duration;
 
     /* 総再生時間から移動先の秒数を計算 */
-    let targetTime = movieLength * (e / 100);
+    var targetTime = movieLength * (e / 100);
     targetMovie.get(0).currentTime = targetTime;
 
     /* 点を正しい位置に戻す */
-    let targetSeekBarDot = $(".manualAttachment.isActive").find(
+    var targetSeekBarDot = $(".manualAttachment.isActive").find(
         ".manualAttachment__ui__progressDot"
     );
-    let resetCss = {
+    var resetCss = {
         right: "0",
         left: "auto",
     };
@@ -126,7 +126,7 @@ function changeClassExitFullScreen() {
 }
 
 $(window).on("load", function () {
-    let targetMovie = $(".manualAttachment").find("video");
+    var targetMovie = $(".manualAttachment").find("video");
     targetMovie.each(function () {
         /* 再生されたときに再生ボタンを消す */
         $(this)
@@ -156,7 +156,7 @@ $(window).on("load", function () {
         $(this)
             .get(0)
             .addEventListener("timeupdate", function () {
-                let target = $(this);
+                var target = $(this);
                 setCurrentTime(target);
             });
     });
@@ -171,7 +171,7 @@ $(window).on("load", function () {
         changeClassExitFullScreen();
     });
     /* jquery UI */
-    let targetSeekBar = $(".manualAttachment").find(
+    var targetSeekBar = $(".manualAttachment").find(
         ".manualAttachment__ui__progressDot"
     );
     targetSeekBar.each(function () {
@@ -180,19 +180,19 @@ $(window).on("load", function () {
             containment: ".manualAttachment__ui__seekbar",
             scroll: false,
             stop: function (e) {
-                let targetSeekBar = $(".manualAttachment.isActive").find(
+                var targetSeekBar = $(".manualAttachment.isActive").find(
                     ".manualAttachment__ui__seekbar"
                 );
                 /* ドラッグ位置とシークバーの表示位置取得 */
-                let dragPos = e.pageX;
-                let clientRect = targetSeekBar.get(0).getBoundingClientRect();
+                var dragPos = e.pageX;
+                var clientRect = targetSeekBar.get(0).getBoundingClientRect();
                 /* 相対位置 */
-                let posX = clientRect.left + window.pageXOffset;
+                var posX = clientRect.left + window.pageXOffset;
                 posX = dragPos - posX;
 
                 /* 割合取得 */
-                let seekBarW = targetSeekBar.innerWidth();
-                let clickPosPer = Math.floor((posX / seekBarW) * 100);
+                var seekBarW = targetSeekBar.innerWidth();
+                var clickPosPer = Math.floor((posX / seekBarW) * 100);
 
                 moveCurrentTime(clickPosPer);
             },
@@ -204,13 +204,13 @@ $(window).on("load", function () {
     $(".manualAttachment__ui__progressDot").sortable();
 
     $(document).on("click", ".main__thumb", function () {
-        let thumbParents = $(this).parents(".main__box , .main__box--single");
+        var thumbParents = $(this).parents(".main__box , .main__box--single");
         thumbParents
             .find(".manualAttachmentBg , .manualAttachment")
             .toggleClass("isActive");
 
         /* 動画を自動再生する */
-        let targetMovie = $(".manualAttachment.isActive").find("video");
+        var targetMovie = $(".manualAttachment.isActive").find("video");
         if (targetMovie.length) {
             targetMovie
                 .get(0)
@@ -231,7 +231,7 @@ $(window).on("resize", function () {
 
 /* 動画UIの操作関係 */
 $(document).on("click", ".manualAttachment__ui__btnPlay", function () {
-    let targetMovie = $(".manualAttachment.isActive").find("video");
+    var targetMovie = $(".manualAttachment.isActive").find("video");
     if (!targetMovie.hasClass("isPaused")) {
         targetMovie.get(0).pause();
     } else {
@@ -239,7 +239,7 @@ $(document).on("click", ".manualAttachment__ui__btnPlay", function () {
     }
 });
 $(document).on("click", ".manualAttachment__ui__btnPlaySpeed", function () {
-    let target = $(this).find(".listPlaySpeed");
+    var target = $(this).find(".listPlaySpeed");
     if (!target.is(":visible")) {
         target.show();
     } else {
@@ -247,15 +247,14 @@ $(document).on("click", ".manualAttachment__ui__btnPlaySpeed", function () {
     }
 });
 $(document).on("click", ".listPlaySpeed li", function () {
-    let playSpeed = $(this).data("play-speed");
-    let targetMovie = $(".manualAttachment.isActive").find("video");
+    var playSpeed = $(this).data("play-speed");
+    var targetMovie = $(".manualAttachment.isActive").find("video");
     targetMovie.get(0).playbackRate = playSpeed;
     $(this).parents(".listPlaySpeed").hide();
 });
 /* フルスクリーンモードの設定・解除 */
 $(document).on("click", ".manualAttachment__ui__btnFull", function () {
-    let target = $(".manualAttachment.isActive .manualAttachment__inner");
-    // if(!target.requestFullscreen && !target.webkitRequestFullScreen && !target.mozRequestFullScreen){
+    var target = $(".manualAttachment.isActive .manualAttachment__inner");
     if (
         !document.fullscreenElement &&
         !document.webkitFullscreenElement &&
@@ -298,7 +297,7 @@ $(document).on("click", ".manualAttachment__ui__btnFull", function () {
 });
 /* PiP */
 $(document).on("click", ".manualAttachment__ui__btnPiP", function () {
-    let targetMovie = $(".manualAttachment.isActive").find("video");
+    var targetMovie = $(".manualAttachment.isActive").find("video");
     if (
         targetMovie.webkitSupportsPresentationMode &&
         typeof targetMovie.webkitSetPresentationMode === "function"
@@ -311,15 +310,15 @@ $(document).on("click", ".manualAttachment__ui__btnPiP", function () {
 /* シークバークリック時 */
 $(document).on("click", ".manualAttachment__ui__seekbar", function (e) {
     /* クリック位置とシークバーの表示位置取得 */
-    let clickPos = e.pageX;
-    let clientRect = this.getBoundingClientRect();
+    var clickPos = e.pageX;
+    var clientRect = this.getBoundingClientRect();
     /* 相対位置 */
-    let posX = clientRect.left + window.pageXOffset;
+    var posX = clientRect.left + window.pageXOffset;
     posX = clickPos - posX;
 
     /* 割合取得 */
-    let seekBarW = $(this).innerWidth();
-    let clickPosPer = Math.floor((posX / seekBarW) * 100);
+    var seekBarW = $(this).innerWidth();
+    var clickPosPer = Math.floor((posX / seekBarW) * 100);
 
     moveCurrentTime(clickPosPer);
 });
@@ -328,10 +327,10 @@ $(document).on(
     "click",
     ".manualAttachment__ui__btnForward , .manualAttachment__ui__btnReplay",
     function () {
-        let targetMovie = $(".manualAttachment.isActive").find("video");
-        let movieCurrentTime = targetMovie.get(0).currentTime;
+        var targetMovie = $(".manualAttachment.isActive").find("video");
+        var movieCurrentTime = targetMovie.get(0).currentTime;
 
-        let targetTime;
+        var targetTime;
         if ($(this).hasClass("manualAttachment__ui__btnForward")) {
             targetTime = movieCurrentTime + 10;
         } else if ($(this).hasClass("manualAttachment__ui__btnReplay")) {
@@ -347,7 +346,7 @@ $(document).on(
     "click",
     ".manualAttachment.isActive .manualAttachment__videoCover, .manualAttachment__btnPlay",
     function () {
-        let chkTarget;
+        var chkTarget;
         chkTarget = $(this).siblings("video");
 
         if (!chkTarget.fullscreenEnabled && !chkTarget.get(0).paused) {
@@ -361,14 +360,14 @@ $(document).on(
 // PDFを前ページ表示されるようにする処理
 document.addEventListener('DOMContentLoaded', function() {
     // .pdf-containerクラスを持つ全ての要素を取得
-    const pdfContainers = document.querySelectorAll('.pdf-container');
+    var pdfContainers = document.querySelectorAll('.pdf-container');
 
     // 各PDFコンテナに対して処理を実行
-    pdfContainers.forEach(container => {
-        const url = container.dataset.url; // データ属性からURLを取得
-        let pdfDoc = null;                 // PDFドキュメントオブジェクト
-        let currentPage = 1;               // 現在のページ番号
-        let isAllPages = false;            // 全ページ表示フラグ
+    pdfContainers.forEach(function(container) {
+        var url = container.dataset.url; // データ属性からURLを取得
+        var pdfDoc = null;               // PDFドキュメントオブジェクト
+        var currentPage = 1;             // 現在のページ番号
+        var isAllPages = false;          // 全ページ表示フラグ
 
         // URLが存在する場合、PDFを取得
         if (url) {
@@ -377,18 +376,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 // ページ数が2以上の場合にボタンを追加
                 if (pdf.numPages > 1) {
-                    const modalBtnInner = document.createElement('div');
+                    var modalBtnInner = document.createElement('div');
                     modalBtnInner.classList.add('toggle-view');
 
                     // 1ページ表示ボタンを作成
-                    const toggleSinglePageButton = document.createElement('button');
+                    var toggleSinglePageButton = document.createElement('button');
                     toggleSinglePageButton.type = 'button';
                     toggleSinglePageButton.classList.add('toggle-view-btn');
                     toggleSinglePageButton.textContent = '1ページ表示';
                     modalBtnInner.appendChild(toggleSinglePageButton);
 
                     // 全ページ表示ボタンを作成
-                    const toggleAllPagesButton = document.createElement('button');
+                    var toggleAllPagesButton = document.createElement('button');
                     toggleAllPagesButton.type = 'button';
                     toggleAllPagesButton.classList.add('toggle-view-btn');
                     toggleAllPagesButton.textContent = '全ページ表示';
@@ -398,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     container.appendChild(modalBtnInner);
 
                     // 1ページ表示ボタンのクリックイベント
-                    toggleSinglePageButton.addEventListener('click', () => {
+                    toggleSinglePageButton.addEventListener('click', function() {
                         isAllPages = false;                      // 全ページ表示フラグをfalseに設定
                         toggleSinglePageButton.disabled = true;  // 1ページ表示ボタンを無効化
                         toggleAllPagesButton.disabled = false;   // 全ページ表示ボタンを有効化
@@ -409,7 +408,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
 
                     // 全ページ表示ボタンのクリックイベント
-                    toggleAllPagesButton.addEventListener('click', () => {
+                    toggleAllPagesButton.addEventListener('click', function() {
                         isAllPages = true;                       // 全ページ表示フラグをtrueに設定
                         toggleAllPagesButton.disabled = true;    // 全ページ表示ボタンを無効化
                         toggleSinglePageButton.disabled = false; // 1ページ表示ボタンを有効化
@@ -431,20 +430,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // 指定されたページをレンダリングする関数
         function renderPage(pageNum) {
             pdfDoc.getPage(pageNum).then(function(page) {
-                const viewport = page.getViewport({ scale: 1.5 }); // ページのビューポートを設定
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
+                var viewport = page.getViewport({ scale: 1.5 }); // ページのビューポートを設定
+                var canvas = document.createElement('canvas');
+                var context = canvas.getContext('2d');
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
-                const pageContainer = document.createElement('div');
+                var pageContainer = document.createElement('div');
                 pageContainer.style.position = 'relative';
                 pageContainer.style.marginBottom = '20px';
 
                 // ページ番号を表示する要素を作成
-                const pageNumber = document.createElement('div');
+                var pageNumber = document.createElement('div');
                 pageNumber.classList.add('page-number');
-                pageNumber.textContent = `${pageNum} / ${pdfDoc.numPages}`;
+                pageNumber.textContent = pageNum + ' / ' + pdfDoc.numPages;
                 pageContainer.appendChild(pageNumber);
 
                 // キャンバスをページコンテナに追加
