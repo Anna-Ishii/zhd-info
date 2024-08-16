@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TOP | 業連・動画配信システム</title>
-    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?date=202407">
+    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}?date=20240808">
+    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?date=20240809">
 
     <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
 </head>
