@@ -1,3 +1,4 @@
+/* 全要素のリセット */
 *,
 *::before,
 *::after {
@@ -6,101 +7,118 @@
 	box-sizing: border-box;
 }
 
-:where([hidden]:not([hidden='until-found'])) {
+/* hidden属性を持つ要素を非表示に */
+[hidden] {
 	display: none !important;
 }
 
-:where(html) {
-	-webkit-text-size-adjust: none;
-	color-scheme: dark light;
+/* text-size-adjust の代替設定 */
+html {
+	-webkit-text-size-adjust: none; /* モバイルブラウザ対応 */
+	-ms-text-size-adjust: none;     /* 古いIE対応 */
+	text-size-adjust: none;         /* 標準対応 */
+	color-scheme: light dark;       /* カラースキームを指定 */
 }
 
-@supports not (min-block-size: 100dvb) {
-	:where(html) {
-		block-size: 100%;
-	}
+/* 古いブラウザ用のフォールバック */
+html {
+	height: 100%; /* 100dvbが使えないブラウザ向けの設定 */
 }
 
-@media (prefers-reduced-motion: no-preference) {
-	:where(html:focus-within) {
-		scroll-behavior: smooth;
-	}
+/* スムーズスクロールの設定 */
+html:focus-within {
+	scroll-behavior: smooth;
 }
 
-:where(body) {
-	block-size: 100%;
-	block-size: 100dvb;
+/* body の標準スタイル設定 */
+body {
+	height: 100%; /* 100dvb が使えないブラウザ向けに設定 */
 	line-height: 1.5;
 	font-family: system-ui, sans-serif;
 	-webkit-font-smoothing: antialiased;
 }
 
-:where(input, button, textarea, select) {
+/* フォーム要素の継承設定 */
+input, button, textarea, select {
 	font: inherit;
 	color: inherit;
 }
 
-:where(textarea) {
-	resize: vertical;
-	resize: block;
+/* textarea のリサイズ設定 */
+textarea {
+	resize: vertical; /* 縦方向のリサイズを許可 */
 }
 
-:where(button, label, select, summary, [role='button'], [role='option']) {
+/* クリック可能な要素のスタイル */
+button, label, select, summary, [role='button'], [role='option'] {
 	cursor: pointer;
 }
 
-:where(:disabled) {
+/* 無効化された要素のスタイル */
+:disabled {
 	cursor: not-allowed;
 }
 
-:where(label:has(> input:disabled), label:has(+ input:disabled)) {
+/* 無効化された input を含むラベルのスタイル */
+label:has(> input:disabled),
+label:has(+ input:disabled) {
 	cursor: not-allowed;
 }
 
-:where(button) {
-	border-style: solid;
+/* リストスタイルのリセット */
+ul, ol {
+	list-style-type: none; /* リストスタイルを無効化 */
+	padding-left: 0;
+	margin-left: 0;
 }
 
-:where(a) {
-	text-underline-offset: 0.2ex;
+/* リストアイテムのスタイルリセット */
+ul li, ol li {
+	list-style-type: none;
 }
 
-:where(ul, ol) {
-	display: list-item;
-	list-style: none;
+/* 擬似要素の無効化 */
+ul li::before, ol li::before {
+	content: none;
+	display: none; /* 擬似要素を非表示に設定 */
 }
 
-:where(img, svg, video, canvas, audio, iframe, embed, object) {
+/* メディア要素のスタイル設定 */
+img, svg, video, canvas, audio, iframe, embed, object {
 	display: block;
 }
 
-:where(img, picture, svg) {
-	max-inline-size: 100%;
-	block-size: auto;
+img, picture, svg {
+	max-width: 100%;
+	height: auto;
 }
 
-:where(p, h1, h2, h3, h4, h5, h6) {
+/* テキスト要素のスタイル設定 */
+p, h1, h2, h3, h4, h5, h6 {
 	overflow-wrap: break-word;
 }
 
-:where(h1, h2, h3) {
+h1, h2, h3 {
 	line-height: calc(1em + 0.5rem);
 }
 
-:where(hr) {
+/* 水平線のスタイル設定 */
+hr {
 	border: none;
-	border-block-start: 1px solid;
+	border-top: 1px solid;
 	color: inherit;
-	block-size: 0;
+	height: 0;
 	overflow: visible;
 }
 
-:where(:focus-visible) {
+/* フォーカス可視性のスタイル設定 */
+:focus-visible {
 	outline: 2px solid var(--focus-color, Highlight);
 	outline-offset: 2px;
 }
 
-:where(.visually-hidden:not(:focus, :active, :focus-within, .not-visually-hidden)) {
+/* 視覚的に隠された要素のスタイル設定 */
+.visually-hidden:not(:focus, :active, :focus-within, .not-visually-hidden) {
 	clip-path: inset(50%) !important;
 	height: 1px !important;
 	width: 1px !important;

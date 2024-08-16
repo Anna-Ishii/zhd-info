@@ -85,7 +85,8 @@ class TopController extends Controller
             'recent_message_start_datetime' => $recent_message_start_datetime,
             'recent_manuals' => $recent_manuals,
             'recent_manual_start_datetime' => $recent_manual_start_datetime,
-            'keywords' => $keywords
+            'keywords' => $keywords,
+            'organization1_id' => $organization1_id
         ]);
     }
 
