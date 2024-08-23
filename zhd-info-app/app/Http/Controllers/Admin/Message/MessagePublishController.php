@@ -249,7 +249,6 @@ class MessagePublishController extends Controller
             if ($shop_count == 0) {
                 $shop_count = MessageUser::where('message_id', $message->id)->count();
             }
-
             if ($all_shop_count == $shop_count) {
                 $shop_count = "全店";
             }
@@ -518,9 +517,6 @@ class MessagePublishController extends Controller
 
         $validated = $request->validated();
 
-        // CPU使用率測定開始
-        $start_usage = getrusage();
-
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
 
@@ -700,54 +696,7 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
-        // 処理の対象コードの後に以下の行を追加します。
-        $end_usage = getrusage();
-        $cpu_usage = $this->calculateCpuUsage($start_usage, $end_usage);
-        Log::info('CPU Usage for processing: ' . $cpu_usage . '%');
-
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
-    }
-
-    private function calculateCpuUsage($start, $end)
-    {
-        $utime = ($end["ru_utime.tv_sec"] - $start["ru_utime.tv_sec"])
-            + ($end["ru_utime.tv_usec"] - $start["ru_utime.tv_usec"]) / 1e6;
-        $stime = ($end["ru_stime.tv_sec"] - $start["ru_stime.tv_sec"])
-            + ($end["ru_stime.tv_usec"] - $start["ru_stime.tv_usec"]) / 1e6;
-        $total_time = $utime + $stime;
-
-        // システムのCPUコア数を取得
-        $cpu_count = $this->getCpuCount();
-        if ($cpu_count <= 0) {
-            $cpu_count = 1; // デフォルト値を1に設定
-        }
-        return ($total_time / $cpu_count) * 100;
-    }
-
-    private function getCpuCount()
-    {
-        // 初期値として1を設定
-        $cpu_count = 1;
-
-        // Linuxの場合
-        if (PHP_OS_FAMILY === 'Linux') {
-            $cpu_info = shell_exec("grep -c ^processor /proc/cpuinfo");
-            if ($cpu_info !== false) {
-                $cpu_count = (int)trim($cpu_info);
-            }
-        }
-        // Windowsの場合
-        elseif (PHP_OS_FAMILY === 'Windows') {
-            $cpu_info = shell_exec("wmic cpu get NumberOfCores");
-            if ($cpu_info !== false) {
-                preg_match_all('/\d+/', $cpu_info, $matches);
-                if (isset($matches[0]) && count($matches[0]) > 0) {
-                    $cpu_count = array_sum($matches[0]);
-                }
-            }
-        }
-
-        return $cpu_count;
     }
 
     public function edit($message_id)
@@ -1445,26 +1394,24 @@ class MessagePublishController extends Controller
                 ], 500);
             }
             $array = [];
-            foreach (
-                $collection[0] as $key => [
-                    $no,
-                    $emergency_flg,
-                    $category,
-                    $title,
-                    $tag1,
-                    $tag2,
-                    $tag3,
-                    $tag4,
-                    $tag5,
-                    $start_datetime,
-                    $end_datetime,
-                    $status,
-                    $brand
-                    // $organization5,
-                    // $organization4,
-                    // $organization3
-                ]
-            ) {
+            foreach ($collection[0] as $key => [
+                $no,
+                $emergency_flg,
+                $category,
+                $title,
+                $tag1,
+                $tag2,
+                $tag3,
+                $tag4,
+                $tag5,
+                $start_datetime,
+                $end_datetime,
+                $status,
+                $brand
+                // $organization5,
+                // $organization4,
+                // $organization3
+            ]) {
                 $message = Message::where('number', $no)
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
@@ -1664,14 +1611,12 @@ class MessagePublishController extends Controller
             $collection = Excel::toCollection(new MessageStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
-            foreach (
-                $collection[0] as $key => [
-                    $brand,
-                    $store_code,
-                    $store_name,
-                    $checked_store
-                ]
-            ) {
+            foreach ($collection[0] as $key => [
+                $brand,
+                $store_code,
+                $store_name,
+                $checked_store
+            ]) {
                 array_push($array, [
                     'brand' => $brand,
                     'store_code' => $store_code,
