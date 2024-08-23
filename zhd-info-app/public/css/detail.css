@@ -1882,9 +1882,9 @@ details[open] summary::after {
 
     .main__supplement.main__box--single.thumb_parents.flex {
         padding-top: 0mm !important; /* 1ページ目は余白なし */
-        width: 80%;
+        width: 75%;
         margin: auto;
-        page-break-after: always;
+        page-break-before: always;
     }
 
     section.main__box.thumb_parents {
