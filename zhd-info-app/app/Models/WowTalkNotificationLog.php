@@ -13,13 +13,13 @@ class WowTalkNotificationLog extends Model
 
     protected $fillable =
     [
-        'log_type',                // ログの種類（message か manual）
-        'command_name',            // コマンド名
-        'started_at',              // 開始時刻
-        'finished_at',             // 終了時刻
-        'status',                  // ステータス（成功か失敗か）
-        'error_message',           // エラーメッセージ
-        'attempts',                // 試行回数
+        'log_type',
+        'command_name',
+        'started_at',
+        'finished_at',
+        'status',
+        'error_message',
+        'attempts',
     ];
 
     protected $casts = [
