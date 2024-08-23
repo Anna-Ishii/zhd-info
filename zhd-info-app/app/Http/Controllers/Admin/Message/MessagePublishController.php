@@ -31,7 +31,6 @@ use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Rules\Import\OrganizationRule;
-use App\Models\WowtalkShop;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
@@ -42,7 +41,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use Maatwebsite\Excel\Validators\ValidationException;
 use Exception;
@@ -259,25 +257,6 @@ class MessagePublishController extends Controller
             $message->shop_count = $shop_count;
         }
 
-
-
-        // // 現在の東京時刻を取得
-        // $currentDate = Carbon::now('Asia/Tokyo');
-
-        // テスト
-        // 今日を月曜日に設定(2024-07-22 10:00)
-        $currentDate = Carbon::create(2024, 7, 22, 10, 0, 0, 'Asia/Tokyo');
-
-        // 現在掲載中のメッセージと掲載終了メッセージを取得
-        $allMessages = Message::where('editing_flg', false)->get();
-
-        // 各メッセージを処理
-        foreach ($allMessages as $message) {
-            $this->processMessage($message, $currentDate);
-        }
-
-
-
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
@@ -285,212 +264,6 @@ class MessagePublishController extends Controller
             'organization1_list' => $organization1_list,
         ]);
     }
-
-
-
-    // メッセージを処理する関数
-    private function processMessage(Message $message, Carbon $currentDate)
-    {
-        // メッセージの開始日時、作成日時、および終了日時を取得
-        $startDatetime = $message->start_datetime;
-        $createdAt = $message->created_at;
-        $endDatetime = $message->end_datetime;
-
-        // 開始日時と作成日時のどちらかがnullの場合の処理
-        if (!$startDatetime || !$createdAt) {
-            return;
-        }
-
-        // 掲載開始日と作成日に基づくメッセージ送信日時を取得
-        if ($startDatetime->gte($createdAt)) {
-            $messageSendDate = $this->getNextWeekDate($startDatetime);
-        } else {
-            $messageSendDate = $this->getNextWeekDate($createdAt);
-        }
-
-        // 掲載終了日-7日の日時を取得
-        $sendMessage = true;
-        if ($endDatetime) {
-            $sevenDaysBeforeEnd = Carbon::parse($endDatetime)->subDays(7);
-            if ($currentDate->gt($sevenDaysBeforeEnd)) {
-                $sendMessage = false;
-            }
-        }
-
-        // 今日が翌週かどうか、かつ現在の日付が掲載終了日-7日を過ぎていない場合にメッセージを送信
-        if ($currentDate->isSameDay($messageSendDate) && $sendMessage) {
-
-            // // wowtalk 配信版
-            // $this->sendWowTalkMessageWithRetry($message);
-
-            // テスト
-            $messageContent = $this->createMessageContent($message);
-            echo $messageContent;
-        }
-    }
-
-    // 翌週の日付を取得する関数
-    private function getNextWeekDate($date)
-    {
-        // 翌週の日付
-        // return (new Carbon($date))->addWeek();
-
-        // 翌週月曜日の日付
-        return (new Carbon($date))->next(Carbon::MONDAY);
-    }
-
-    // WowTalkメッセージ送信処理
-    private function sendWowTalkMessageWithRetry(Message $message)
-    {
-        $retryCount = 0;
-        $maxRetries = 3;
-
-        do {
-            $result = $this->sendWowTalkMessage($message);
-
-            if ($result === 'success') {
-                return;
-            }
-
-            $retryCount++;
-
-        } while ($retryCount < $maxRetries);
-
-        // 最大リトライ回数を超えた場合、システム管理者に通知
-        $this->notifySystemAdmin($result);
-    }
-
-    // WowTalkメッセージを送信する関数
-    private function sendWowTalkMessage($message)
-    {
-        // wowtalk_id取得
-        // $shop_ids = MessageShop::where('message_id', $message->id)->pluck('shop_id')->toArray();
-
-        // テスト
-        $shop_ids = [0 => 111111, 1 => 111112, 2 => 111113, 3 => 111114];
-
-        // チャンクサイズを設定
-        $chunkSize = 100;
-        $chunked_shop_ids = array_chunk($shop_ids, $chunkSize);
-
-        $wowtalk_ids = [];
-        foreach ($chunked_shop_ids as $chunk) {
-            $ids = WowtalkShop::whereIn('shop_id', $chunk)
-                ->where('notification_target', true)
-                ->pluck('wowtalk_id')
-                ->toArray();
-            $wowtalk_ids = array_merge($wowtalk_ids, $ids);
-        }
-
-        if (empty($wowtalk_ids)) {
-            return 'no_target';
-        }
-
-        // メッセージ内容を生成
-        $messageContent = $this->createMessageContent($message);
-
-        // メッセージ送信のロジック
-        $url = 'https://wow-talk.zensho.com/message';
-
-        // 送信するデータ
-        $data = array(
-            'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
-            'target' => $wowtalk_ids      // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
-        );
-
-        // JSON形式にエンコード
-        $json_data = json_encode($data);
-
-        // cURLセッションを初期化
-        $ch = curl_init($url);
-
-        // ヘッダーを設定
-        $api_key = 'osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv';  // APIキー
-        $headers = array(
-            'x-api-key: ' . $api_key,
-            'Content-Type: application/json'
-        );
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-        // オプションを設定
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
-
-        // リクエストを実行してレスポンスを取得
-        $response = curl_exec($ch);
-
-        // エラーが発生した場合の処理
-        if ($response === false) {
-            $error = curl_error($ch);
-            curl_close($ch);
-            return 'curl_error: ' . $error;
-        }
-
-        // cURLセッションを終了
-        curl_close($ch);
-
-        // レスポンスをデコード
-        $response_data = json_decode($response, true);
-
-        // レスポンスの存在と形式を確認
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            return 'json_decode_error: ' . json_last_error_msg();
-        }
-
-        // レスポンスを表示
-        if (isset($response_data['result']) && $response_data['result'] == 'success') {
-            return 'success';
-        } elseif (isset($response_data['result'])) {
-            return 'api_error: ' . $response_data['result'];
-        } else {
-            return 'unexpected_response: ' . $response;
-        }
-    }
-
-    // メッセージ内容を生成する関数
-    private function createMessageContent($message)
-    {
-        // 未読者リストを取得
-        $unreadUsers = $message->user()->wherePivot('read_flg', false)->orderBy('name', 'asc')->take(10)->get();
-
-        // 未読者の名前を配列に格納
-        $unreadUserNames = $unreadUsers->pluck('name')->toArray();
-        $unreadUserNamesString = implode("\n　", $unreadUserNames);
-        $additionalUnreadCount = $message->user()->wherePivot('read_flg', false)->count() - 10;
-
-        // // メッセージ内容をフォーマット
-        // $messageContent = "配信した業連で{$message->user()->wherePivot('read_flg', false)->count()}名の未読者がいます。\n"
-        //     . "・業連名：{$message->title}\n"
-        //     . "・配信日：" . $message->start_datetime->format('Y/m/d H:i') . "\n"
-        //     . "・カテゴリ：{$message->category->name}\n"
-        //     . "・URL：https://innerstreaming.zensho-i.net\n"
-        //     . "・未読者：\n　{$unreadUserNamesString}";
-
-        // メッセージ内容をフォーマット
-        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$message->user()->wherePivot('read_flg', false)->count()}名います。確認してください。\n";
-
-        if ($additionalUnreadCount > 0) {
-            $messageContent .= "\n　他{$additionalUnreadCount}名";
-        }
-
-        // メッセージは最大800文字に制限
-        return mb_strimwidth($messageContent, 0, 800, "...");
-    }
-
-    // システム管理者に通知する関数
-    private function notifySystemAdmin($error)
-    {
-        $to = ['nss@example.com', 'saimizu@example.com', 'kitagawa@example.com'];
-        $subject = 'WowTalk API エラー通知';
-        $message = "WowTalk APIでエラーが発生しました。\nエラーメッセージ: $error";
-
-        Mail::raw($message, function ($msg) use ($to, $subject) {
-            $msg->to($to)->subject($subject);
-        });
-    }
-
-
 
     public function show(Request $request, $message_id)
     {
@@ -1672,24 +1445,26 @@ class MessagePublishController extends Controller
                 ], 500);
             }
             $array = [];
-            foreach ($collection[0] as $key => [
-                $no,
-                $emergency_flg,
-                $category,
-                $title,
-                $tag1,
-                $tag2,
-                $tag3,
-                $tag4,
-                $tag5,
-                $start_datetime,
-                $end_datetime,
-                $status,
-                $brand
-                // $organization5,
-                // $organization4,
-                // $organization3
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $no,
+                    $emergency_flg,
+                    $category,
+                    $title,
+                    $tag1,
+                    $tag2,
+                    $tag3,
+                    $tag4,
+                    $tag5,
+                    $start_datetime,
+                    $end_datetime,
+                    $status,
+                    $brand
+                    // $organization5,
+                    // $organization4,
+                    // $organization3
+                ]
+            ) {
                 $message = Message::where('number', $no)
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
@@ -1889,12 +1664,14 @@ class MessagePublishController extends Controller
             $collection = Excel::toCollection(new MessageStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
-            foreach ($collection[0] as $key => [
-                $brand,
-                $store_code,
-                $store_name,
-                $checked_store
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $brand,
+                    $store_code,
+                    $store_name,
+                    $checked_store
+                ]
+            ) {
                 array_push($array, [
                     'brand' => $brand,
                     'store_code' => $store_code,
