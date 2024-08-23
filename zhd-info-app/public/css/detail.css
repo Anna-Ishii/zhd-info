@@ -1872,12 +1872,31 @@ details[open] summary::after {
 
 /* 印刷用 */
 @media print {
-    .header__prev {
+    .header__prev, .header__menu, .toggle-view, .page-number {
         display: none !important;
     }
 
-    .header__menu {
-        display: none;
+    section.main__box.thumb_parents h2, p {
+        font-size: 15px !important; /* h2タグとpタグのフォントサイズを50%に縮小 */
+    }
+
+    .main__supplement.main__box--single.thumb_parents.flex {
+        padding-top: 0mm !important; /* 1ページ目は余白なし */
+        width: 80%;
+        margin: auto;
+        page-break-after: always;
+    }
+
+    section.main__box.thumb_parents {
+        padding-top: 25mm !important; /* 2ページ目以降に20mmの内側余白を確保 */
+        width: 75%;
+        margin: auto;
+        page-break-before: always;
+    }
+
+    canvas.additional-padding {
+        padding-top: 20mm !important; /* 2ページ目以降に20mmの内側余白を確保 */
+        margin: auto;
     }
 }
 
