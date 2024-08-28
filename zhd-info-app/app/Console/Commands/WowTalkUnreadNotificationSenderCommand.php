@@ -375,7 +375,6 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             }
 
             // レスポンスの内容に基づいて処理を分岐
-            // if ($httpCode === 200 && $response_data['result'] == 'success') {
             if ($httpCode === 200) {
                 // 成功レスポンス
                 return 'success';
