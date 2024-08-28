@@ -334,38 +334,38 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         $maxRetries = 3;
         $retryInterval = 60;
         do {
-                // cURLセッションを初期化
-                $ch = curl_init($url);
+            // cURLセッションを初期化
+            $ch = curl_init($url);
 
-                // ヘッダーを設定
-                $api_key = 'osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv';  // APIキー
-                $headers = array(
-                    'x-api-key: ' . $api_key,
-                    'Content-Type: application/json'
-                );
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            // ヘッダーを設定
+            $api_key = 'osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv';  // APIキー
+            $headers = array(
+                'x-api-key: ' . $api_key,
+                'Content-Type: application/json'
+            );
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
-                // オプションを設定
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt($ch, CURLOPT_POST, true);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+            // オプションを設定
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
 
-                // リクエストを実行してレスポンスを取得
-                $response = curl_exec($ch);
+            // リクエストを実行してレスポンスを取得
+            $response = curl_exec($ch);
 
-                // リクエストが失敗した場合のエラーハンドリング
-                if ($response === false) {
-                    $error = curl_error($ch);
-                    curl_close($ch);
-                    return 'curl_error: ' . $error;
-                }
-                $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-                // cURLセッションを終了
+            // リクエストが失敗した場合のエラーハンドリング
+            if ($response === false) {
+                $error = curl_error($ch);
                 curl_close($ch);
+                return 'curl_error: ' . $error;
+            }
+            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-                // レスポンスをデコード
-                $response_data = json_decode($response, true);
+            // cURLセッションを終了
+            curl_close($ch);
+
+            // レスポンスをデコード
+            $response_data = json_decode($response, true);
 
             // レスポンスの存在と形式を確認
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -375,7 +375,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             }
 
             // レスポンスの内容に基づいて処理を分岐
-            if ($httpCode === 200 && $response_data['result'] == 'success') {
+            // if ($httpCode === 200 && $response_data['result'] == 'success') {
+            if ($httpCode === 200) {
                 // 成功レスポンス
                 return 'success';
             } elseif (in_array($httpCode, [400, 403])) {
@@ -437,12 +438,20 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         }
 
         try {
-            Mail::raw($message, function ($msg) use ($to, $subject) {
-                $msg->to($to)->subject($subject);
+            // 直接エンコードした送信者名とメールアドレスを設定
+            $fromAddress = 'yhonda@nssx.co.jp';
+            $fromName = '=?UTF-8?B?' . base64_encode('システム管理者（NSS様、IT担当（佐溝様、北川様））') . '?=';
+
+            Mail::raw($message, function ($msg) use ($to, $subject, $fromAddress, $fromName) {
+                $msg->to($to)
+                    ->subject($subject)
+                    ->from($fromAddress, $fromName);
             });
 
+            // メール送信成功時のログ
             $this->info("システム管理者にエラーメールを送信しました。");
         } catch (\Exception $e) {
+            // メール送信失敗時のログ
             $this->error("メール送信中にエラーが発生しました: " . $e->getMessage());
             $this->error("メール送信エラー: " . $e->getMessage());
         }
