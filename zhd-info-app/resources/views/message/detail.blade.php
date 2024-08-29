@@ -1,45 +1,34 @@
-<!DOCTYPE html>
-<html lang="ja">
+@extends('layouts.parent')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TOP | 業連・動画配信システム</title>
-    <link rel="stylesheet" href="{{ asset('/css/reset.css') }}?date=20240808">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?date=20240809">
+@push('css')
+    <link href="{{ asset('/css/detail.css') }}?date=20240824" rel="stylesheet">
+@endpush
 
-    <script src='https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js'></script>
-</head>
+@section('title', '業務連絡')
+    @section('previous_page')
+        <a href="{{{ session('current_url', route('message.index')) }}}">業務連絡</a>
+    @endsection
 
-<body>
-    <header class="header header--detail">
-        <section class="header__inner flex">
-            <div class="header__titleBox flex">
-                <a href="{{ url()->previous() }}" class="header__prev txtCenter">
-                    <img src=" asset('/img/icon_prev.svg') " alt="" class="mr10 spmr4">
-                    <p class="txtBold">戻る</p>
-                </a>
-                <section class="header__title">
-                    <h1 class="txtBold txtBlue">{{ $message->title }}</h1>
-                    <time datetime="{{ $message->start_datetime }}" class="mr8 txtBold">{{ $message->start_datetime }}</time>
-                </section>
-            </div>
-            <ul class="header__menu flex">
-                <li>
-                    <a href="{{ asset($message->content_url)}}" download="test.pdf">
-                        <img src="{{ asset('img/icon_folder_open.svg')}}" alt="">
-                    </a>
-                </li>
-                <li>
-                    <button type="button" class="btnPrint">
-                        <img src="{{ asset('img/icon_print.svg')}}" alt="印刷する">
-                    </button>
-                </li>
-            </ul>
-        </section>
-    </header>
+    @section('content')
+        <header class="header header--detail">
+            <section class="header__inner flex">
+                <div class="header__titleBox flex">
+                    <section class="header__title">
+                        <h1 class="txtBold txtBlue">{{ $message->title }}</h1>
+                        <time datetime="{{ $message->formatted_start_datetime }}" class="mr8 txtBold">{{ $message->formatted_start_datetime }}</time>
+                    </section>
+                </div>
+                <ul class="header__menu flex">
+                    <li>
+                        <button type="button" class="btnPrint">
+                            <img src="{{ asset('img/icon_print.svg') }}" alt="印刷する">
+                        </button>
+                    </li>
+                </ul>
+            </section>
+        </header>
 
-    <main class="main message">
+    {{-- <main class="main message">
         <div class="main__supplement mb26">
             <p>{{ $message->detail }}</p>
             <p class="test"></p>
@@ -50,7 +39,29 @@
                 <iframe src="/js/pdfjs/web/viewer.html?file={{ asset($message->content_url) }}"></iframe>
             </div>
         </div>
+    </main> --}}
+
+    <main class="main manual">
+        <input id="manual_id" value="{{$message->id}}" hidden>
+        <div class="main__inner">
+            <div class="main__supplement main__box--single thumb_parents flex">
+                {{-- PDF --}}
+                <div class="main__supplement__detail">
+
+                    @if(isset($message->main_file))
+                        <div class="pdf-container all" data-url="{{ asset($message->main_file['file_url']) }}"></div>
+                    @else
+                        <div class="pdf-container all" data-url="{{ asset($message->content_url) }}"></div>
+                    @endif
+
+                </div>
+            </div>
+        </div>
     </main>
 
     @include('common.footer')
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js?version=20240813"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.js?version=20240813"></script>
+    <script src="{{ asset('/js/detail.js') }}?date=20240824" defer></script>
+@endsection

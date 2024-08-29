@@ -20,6 +20,7 @@ class MessageController extends Controller
 {
     public function index(Request $request)
     {
+        session()->put('current_url', $request->fullUrl());
         $keyword = $request->input('keyword');
         $not_read_check = $request->input('not_read_check');
         $check_crew = session("check_crew", null);
@@ -112,79 +113,8 @@ class MessageController extends Controller
             ->get();
 
         // 添付ファイル
-        foreach ($messages as &$message) {
-            $file_list = [];
-            $is_first_join = false;
-
-            $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
-            $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
-
-            // 最初の要素をチェックしてフラグを設定
-            if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
-                $is_first_join = true;
-            }
-
-            if ($is_first_join) {
-                if ($all_message_join_file) {
-                    // PDFファイルのページ数を取得
-                    $pdf = new TcpdfFpdi();
-                    $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
-                    if (file_exists($file_path)) {
-                        $message->main_file = [
-                            "file_name" => $all_message_join_file[0]["content_name"],
-                            "file_url" => $all_message_join_file[0]["content_url"],
-                        ];
-
-                        try {
-                            $page_num = $pdf->setSourceFile($file_path);
-                            $message->main_file_count = $page_num;
-                        } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
-                            // 暗号化されたPDFの処理
-                            $message->main_file_count = '暗号化';
-                        }
-                    }
-                }
-                foreach ($all_message_content_single_files as $message_content_single_file) {
-                    if ($message_content_single_file["join_flg"] === "single") {
-                        $file_list[] = [
-                            "file_name" => $message_content_single_file["content_name"],
-                            "file_url" => $message_content_single_file["content_url"],
-                        ];
-                    }
-                }
-
-            } else {
-                if ($all_message_content_single_files) {
-                    $message->main_file_count = 1;
-                    $message->main_file = [
-                        "file_name" => $all_message_content_single_files[0]["content_name"],
-                        "file_url" => $all_message_content_single_files[0]["content_url"],
-                    ];
-                }
-                foreach ($all_message_content_single_files as $message_content_single_file) {
-                    if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
-                        $file_list[] = [
-                            "file_name" => $all_message_join_file[0]["content_name"],
-                            "file_url" => $all_message_join_file[0]["content_url"],
-                        ];
-                        continue;
-                    } else if ($message_content_single_file["join_flg"] === "single") {
-                        $file_list[] = [
-                            "file_name" => $message_content_single_file["content_name"],
-                            "file_url" => $message_content_single_file["content_url"],
-                        ];
-                    }
-                }
-                // 最初の要素を削除(業態ファイル)
-                if (!empty($file_list)) {
-                    array_shift($file_list);
-                }
-            }
-
-            $message->content_files = $file_list;
-
-            // ファイルのカウント
-            $message->file_count = count($file_list);
+        foreach ($messages as $message) {
+            $this->attachFilesToMessage($message);
         }
 
         return view('message.index', [
@@ -195,19 +125,44 @@ class MessageController extends Controller
         ]);
     }
 
+    // public function detail($message_id)
+    // {
+    //     $user = session('member');
+    //     $crews = session('crews');
+    //     $message = Message::findOrFail($message_id);
+
+    //     $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
+    //         'read_flg' => true,
+    //         'readed_datetime' => Carbon::now(),
+    //     ]);
+
+    //     $message->putCrewRead($crews);
+    //     return redirect()->to($message->content_url)->withInput();
+    // }
+
     public function detail($message_id)
     {
-        $user = session('member');
-        $crews = session('crews');
         $message = Message::findOrFail($message_id);
 
-        $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
-            'read_flg' => true,
-            'readed_datetime' => Carbon::now(),
-        ]);
+        // URLから message_content_url を取得
+        $message_content_url = request()->query('message_content_url');
 
-        $message->putCrewRead($crews);
-        return redirect()->to($message->content_url)->withInput();
+        // メッセージに添付ファイルを追加
+        $this->attachFilesToMessage($message);
+
+        // URLの message_content_url と一致するファイルがある場合、そのファイルをメインファイルとして設定
+        if ($message_content_url && isset($message->content_files)) {
+            foreach ($message->content_files as $file) {
+                if ($file['file_url'] === $message_content_url) {
+                    $message->main_file = $file;
+                    break;
+                }
+            }
+        }
+
+        return view('message.detail', [
+            'message' => $message,
+        ]);
     }
 
     public function search(Request $request)
@@ -255,7 +210,7 @@ class MessageController extends Controller
         try {
             DB::beginTransaction();
             $message = Message::findOrFail($message_id);
-            $message_content = MessageContent::where('message_id', $message_id)->get()->toArray();
+            // $message_content = MessageContent::where('message_id', $message_id)->get()->toArray();
             $message->putCrewRead($reading_crews);
             $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message_id, [
                 'read_flg' => true,
@@ -263,20 +218,24 @@ class MessageController extends Controller
             ]);
             DB::commit();
 
-            if (!empty($message_content)) {
-                if (count($message_content) > 1) {
-                    $first_content = $message_content[0];
-                    if ($message->content_name !== $first_content['content_name']) {
-                        $message->content_url = $first_content['content_url'];
-                    }
-                } else {
-                    $single_content = $message_content[0];
-                    $message->content_url = $single_content['content_url'];
-                }
-            }
+            // if (!empty($message_content)) {
+            //     if (count($message_content) > 1) {
+            //         $first_content = $message_content[0];
+            //         if ($message->content_name !== $first_content['content_name']) {
+            //             $message->content_url = $first_content['content_url'];
+            //         }
+            //     } else {
+            //         $single_content = $message_content[0];
+            //         $message->content_url = $single_content['content_url'];
+            //     }
+            // }
 
-            // 既読が無事できたらpdfへ
-            return redirect()->to($message->content_url)->withInput();
+            // // 既読が無事できたらpdfへ
+            // return redirect()->to($message->content_url)->withInput();
+
+            // detailメソッドにリダイレクト
+            $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
+            return redirect()->to($url)->withInput();
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
@@ -386,5 +345,80 @@ class MessageController extends Controller
         return response()->json([
             'crews' => $crews,
         ], 200);
+    }
+
+    private function attachFilesToMessage(&$message)
+    {
+        $file_list = [];
+        $is_first_join = false;
+
+        $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
+        $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
+
+        // 最初の要素をチェックしてフラグを設定
+        if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
+            $is_first_join = true;
+        }
+
+        if ($is_first_join) {
+            if ($all_message_join_file) {
+                // PDFファイルのページ数を取得
+                $pdf = new TcpdfFpdi();
+                $file_path = $all_message_join_file[0]["content_url"]; // PDFファイルのパス
+                if (file_exists($file_path)) {
+                    $message->main_file = [
+                        "file_name" => $all_message_join_file[0]["content_name"],
+                        "file_url" => $all_message_join_file[0]["content_url"],
+                    ];
+
+                    try {
+                        $page_num = $pdf->setSourceFile($file_path);
+                        $message->main_file_count = $page_num;
+                    } catch (\setasign\Fpdi\PdfParser\CrossReference\CrossReferenceException $e) {
+                        // 暗号化されたPDFの処理
+                        $message->main_file_count = '暗号化';
+                    }
+                }
+            }
+            foreach ($all_message_content_single_files as $message_content_single_file) {
+                if ($message_content_single_file["join_flg"] === "single") {
+                    $file_list[] = [
+                        "file_name" => $message_content_single_file["content_name"],
+                        "file_url" => $message_content_single_file["content_url"],
+                    ];
+                }
+            }
+        } else {
+            if ($all_message_content_single_files) {
+                $message->main_file_count = 1;
+                $message->main_file = [
+                    "file_name" => $all_message_content_single_files[0]["content_name"],
+                    "file_url" => $all_message_content_single_files[0]["content_url"],
+                ];
+            }
+            foreach ($all_message_content_single_files as $message_content_single_file) {
+                if ($message_content_single_file["content_name"] === $all_message_join_file[0]["content_name"]) {
+                    $file_list[] = [
+                        "file_name" => $all_message_join_file[0]["content_name"],
+                        "file_url" => $all_message_join_file[0]["content_url"],
+                    ];
+                    continue;
+                } else if ($message_content_single_file["join_flg"] === "single") {
+                    $file_list[] = [
+                        "file_name" => $message_content_single_file["content_name"],
+                        "file_url" => $message_content_single_file["content_url"],
+                    ];
+                }
+            }
+            // 最初の要素を削除(業態ファイル)
+            if (!empty($file_list)) {
+                array_shift($file_list);
+            }
+        }
+
+        $message->content_files = $file_list;
+
+        // ファイルのカウント
+        $message->file_count = count($file_list);
     }
 }
