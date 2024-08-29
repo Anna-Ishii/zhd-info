@@ -155,7 +155,6 @@
                     <div class="modal-body" style="padding: 10px;">
                         @foreach ($message->content_files as $file)
                             <button type="button" class="btnType3" style="margin-left: unset; display: block; margin-bottom: 10px;">
-                                {{-- <a href="{{ asset($file['file_url']) }}" target="_blank" style="display: block; line-height: 35px;">{{ $file['file_name'] }}</a> --}}
                                 <a href="{{ route('message.detail', ['message_id' => $message->id, 'message_content_url' => $file['file_url']]) }}" style="display: block; line-height: 35px;">{{ $file['file_name'] }}</a>
                             </button>
                         @endforeach
