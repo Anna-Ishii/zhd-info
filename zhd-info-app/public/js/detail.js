@@ -357,17 +357,19 @@ $(document).on(
     }
 );
 
-// PDFを前ページ表示されるようにする処理
+// PDFを全ページ表示されるようにする処理
 document.addEventListener("DOMContentLoaded", function () {
     // .pdf-containerクラスを持つ全ての要素を取得
     var pdfContainers = document.querySelectorAll(".pdf-container");
+    var pdfContainersAll = document.querySelectorAll(".pdf-container.all");
 
     // 各PDFコンテナに対して処理を実行
     pdfContainers.forEach(function (container) {
         var url = container.dataset.url; // データ属性からURLを取得
         var pdfDoc = null; // PDFドキュメントオブジェクト
         var currentPage = 1; // 現在のページ番号
-        var isAllPages = false; // 全ページ表示フラグ
+        // 全ページ表示フラグ
+        var isAllPages = pdfContainersAll.length > 0;
 
         // URLが存在する場合、PDFを取得
         if (url) {
@@ -380,8 +382,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     modalBtnInner.classList.add("toggle-view");
 
                     // 1ページ表示ボタンを作成
-                    var toggleSinglePageButton =
-                        document.createElement("button");
+                    var toggleSinglePageButton = document.createElement("button");
                     toggleSinglePageButton.type = "button";
                     toggleSinglePageButton.classList.add("toggle-view-btn");
                     toggleSinglePageButton.textContent = "1ページ表示";
@@ -398,9 +399,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     container.appendChild(modalBtnInner);
 
                     // 1ページ表示ボタンのクリックイベント
-                    toggleSinglePageButton.addEventListener(
-                        "click",
-                        function () {
+                    toggleSinglePageButton.addEventListener("click", function () {
                             isAllPages = false; // 全ページ表示フラグをfalseに設定
                             toggleSinglePageButton.disabled = true; // 1ページ表示ボタンを無効化
                             toggleAllPagesButton.disabled = false; // 全ページ表示ボタンを有効化
@@ -422,8 +421,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         renderPage(currentPage); // 全ページをレンダリング
                     });
 
-                    // 初期状態で1ページ表示ボタンを無効化
-                    toggleSinglePageButton.disabled = true;
+                    // 初期状態でボタンを無効化
+                    toggleAllPagesButton.disabled = isAllPages;
+                    toggleSinglePageButton.disabled = !isAllPages;
                 }
 
                 // 初期表示のページをレンダリング
