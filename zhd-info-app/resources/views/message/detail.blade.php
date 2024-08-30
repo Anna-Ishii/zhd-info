@@ -1,7 +1,7 @@
 @extends('layouts.parent')
 
 @push('css')
-    <link href="{{ asset('/css/detail.css') }}?date=20240824" rel="stylesheet">
+    <link href="{{ asset('/css/detail.css') }}?date=20240830" rel="stylesheet">
 @endpush
 
 @section('title', '業務連絡')
@@ -61,7 +61,7 @@
 
     @include('common.footer')
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js?version=20240813"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.js?version=20240813"></script>
-    <script src="{{ asset('/js/detail.js') }}?date=20240824" defer></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js?version=20240830"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.js?version=20240830"></script>
+    <script src="{{ asset('/js/detail.js') }}?date=20240830" defer></script>
 @endsection
