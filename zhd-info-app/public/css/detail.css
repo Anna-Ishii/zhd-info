@@ -1872,6 +1872,11 @@ details[open] summary::after {
 
 /* 印刷用 */
 @media print {
+    * {
+        -webkit-print-color-adjust: exact !important; /* Safariの印刷時にスタイルを強制適用 */
+        color-adjust: exact !important;
+    }
+
     .header__prev, .header__menu, .toggle-view, .page-number {
         display: none !important;
     }

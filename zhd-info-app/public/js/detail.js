@@ -377,53 +377,54 @@ document.addEventListener("DOMContentLoaded", function () {
                 pdfDoc = pdf; // 取得したPDFドキュメントを保存
 
                 // ページ数が2以上の場合にボタンを追加
-                if (pdf.numPages > 1) {
-                    var modalBtnInner = document.createElement("div");
-                    modalBtnInner.classList.add("toggle-view");
+                if (isAllPages == false) {
+                    if (pdf.numPages > 1) {
+                        var modalBtnInner = document.createElement("div");
+                        modalBtnInner.classList.add("toggle-view");
 
-                    // 1ページ表示ボタンを作成
-                    var toggleSinglePageButton = document.createElement("button");
-                    toggleSinglePageButton.type = "button";
-                    toggleSinglePageButton.classList.add("toggle-view-btn");
-                    toggleSinglePageButton.textContent = "1ページ表示";
-                    modalBtnInner.appendChild(toggleSinglePageButton);
+                        // 1ページ表示ボタンを作成
+                        var toggleSinglePageButton = document.createElement("button");
+                        toggleSinglePageButton.type = "button";
+                        toggleSinglePageButton.classList.add("toggle-view-btn");
+                        toggleSinglePageButton.textContent = "1ページ表示";
+                        modalBtnInner.appendChild(toggleSinglePageButton);
 
-                    // 全ページ表示ボタンを作成
-                    var toggleAllPagesButton = document.createElement("button");
-                    toggleAllPagesButton.type = "button";
-                    toggleAllPagesButton.classList.add("toggle-view-btn");
-                    toggleAllPagesButton.textContent = "全ページ表示";
-                    modalBtnInner.appendChild(toggleAllPagesButton);
+                        // 全ページ表示ボタンを作成
+                        var toggleAllPagesButton = document.createElement("button");
+                        toggleAllPagesButton.type = "button";
+                        toggleAllPagesButton.classList.add("toggle-view-btn");
+                        toggleAllPagesButton.textContent = "全ページ表示";
+                        modalBtnInner.appendChild(toggleAllPagesButton);
 
-                    // ボタンをコンテナに追加
-                    container.appendChild(modalBtnInner);
+                        // ボタンをコンテナに追加
+                        container.appendChild(modalBtnInner);
 
-                    // 1ページ表示ボタンのクリックイベント
-                    toggleSinglePageButton.addEventListener("click", function () {
-                            isAllPages = false; // 全ページ表示フラグをfalseに設定
-                            toggleSinglePageButton.disabled = true; // 1ページ表示ボタンを無効化
-                            toggleAllPagesButton.disabled = false; // 全ページ表示ボタンを有効化
+                        // 1ページ表示ボタンのクリックイベント
+                        toggleSinglePageButton.addEventListener("click", function () {
+                                isAllPages = false; // 全ページ表示フラグをfalseに設定
+                                toggleSinglePageButton.disabled = true; // 1ページ表示ボタンを無効化
+                                toggleAllPagesButton.disabled = false; // 全ページ表示ボタンを有効化
+                                currentPage = 1; // 現在のページを1に設定
+                                container.innerHTML = ""; // コンテナをクリア
+                                container.appendChild(modalBtnInner); // ボタンを再追加
+                                renderPage(currentPage); // 1ページ目をレンダリング
+                            }
+                        );
+
+                        // 全ページ表示ボタンのクリックイベント
+                        toggleAllPagesButton.addEventListener("click", function () {
+                            isAllPages = true; // 全ページ表示フラグをtrueに設定
+                            toggleAllPagesButton.disabled = true; // 全ページ表示ボタンを無効化
+                            toggleSinglePageButton.disabled = false; // 1ページ表示ボタンを有効化
                             currentPage = 1; // 現在のページを1に設定
                             container.innerHTML = ""; // コンテナをクリア
                             container.appendChild(modalBtnInner); // ボタンを再追加
-                            renderPage(currentPage); // 1ページ目をレンダリング
-                        }
-                    );
+                            renderPage(currentPage); // 全ページをレンダリング
+                        });
 
-                    // 全ページ表示ボタンのクリックイベント
-                    toggleAllPagesButton.addEventListener("click", function () {
-                        isAllPages = true; // 全ページ表示フラグをtrueに設定
-                        toggleAllPagesButton.disabled = true; // 全ページ表示ボタンを無効化
-                        toggleSinglePageButton.disabled = false; // 1ページ表示ボタンを有効化
-                        currentPage = 1; // 現在のページを1に設定
-                        container.innerHTML = ""; // コンテナをクリア
-                        container.appendChild(modalBtnInner); // ボタンを再追加
-                        renderPage(currentPage); // 全ページをレンダリング
-                    });
-
-                    // 初期状態でボタンを無効化
-                    toggleAllPagesButton.disabled = isAllPages;
-                    toggleSinglePageButton.disabled = !isAllPages;
+                        // 初期状態で1ページ表示ボタンを無効化
+                        toggleSinglePageButton.disabled = true;
+                    }
                 }
 
                 // 初期表示のページをレンダリング
