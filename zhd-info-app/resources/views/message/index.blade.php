@@ -75,6 +75,7 @@
                             <input type="button" data-crew-id="{{$crew->id}}" value="選択">
                         </div>
                     @endforeach --}}
+
                     @foreach ($messages as $message)
                         <a href="" class="btnModal" data-modal-target="read">
                             <div
@@ -118,10 +119,10 @@
                             </div>
                         </a>
                     @endforeach
+
                 </div>
             </div>
         </div>
-
     </div>
 
     <div class="modal" data-modal-target="read">
