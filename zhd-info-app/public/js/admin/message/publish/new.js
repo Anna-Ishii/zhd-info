@@ -292,7 +292,7 @@ function addFileInputAdd() {
 function renumberSendLabels() {
     $(".file-input-container .control-label:contains('添付'), .file-input-container .control-label:contains('業連')").each(function(index) {
         if (index === 0) {
-            $(this).html('業連');
+            $(this).html('業連<span class="text-danger required">*</span>');
         } else {
             $(this).text(`添付${index}`);
         }
