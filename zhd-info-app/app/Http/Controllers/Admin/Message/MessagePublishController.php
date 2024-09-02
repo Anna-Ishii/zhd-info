@@ -519,7 +519,7 @@ class MessagePublishController extends Controller
 
         // ファイルを移動したかフラグ
         $message_changed_flg = false;
-
+        // メッセージの内容を取得し、手順を登録するために加工する
         $message_contents = $this->messageContentsParam($request);
 
         // 結合処理
@@ -532,16 +532,14 @@ class MessagePublishController extends Controller
                 ];
             }
         }
-        if (!empty($join_files)) {
-            $join_file_list = $this->pdfFileJoin($join_files);
-        } else {
-            $join_file_list = [];
-        }
+
+        $join_file_list = !empty($join_files) ? $this->pdfFileJoin($join_files) : [];
 
         $admin = session('admin');
+
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on');
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
 
@@ -551,17 +549,17 @@ class MessagePublishController extends Controller
                 $msg_params['content_name'] = $join_file_list[0]['content_name'];
                 $msg_params['content_url'] = $join_file_list[0]['content_url'];
             } else {
-                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
-                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
+                $msg_params['content_name'] = $request->file_name[0] ?? $message_contents[0]['content_name'];
+                $msg_params['content_url'] = $request->file_path[0] ?? $message_contents[0]['content_url'];
             }
         }
 
-        $msg_params['thumbnails_url'] = $request->file_path[0] ? ImageConverter::convert2image($msg_params['content_url']) : null;
+        $msg_params['thumbnails_url'] = !empty($msg_params['content_url']) ? ImageConverter::convert2image($msg_params['content_url']) : null;
         $msg_params['create_admin_id'] = $admin->id;
         $msg_params['organization1_id'] = $organization1->id;
         $number = Message::where('organization1_id', $organization1->id)->max('number');
-        $msg_params['number'] = (is_null($number)) ? 1 : $number + 1;
-        $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['number'] = is_null($number) ? 1 : $number + 1;
+        $msg_params['editing_flg'] = isset($request->save);
 
         try {
             DB::beginTransaction();
@@ -2108,16 +2106,27 @@ class MessagePublishController extends Controller
     // 「手順」を登録するために加工する
     private function messageContentsParam($request): array
     {
-        if (!(isset($request->file_name))) return [];
+        // ファイル名がセットされていない場合、空の配列を返す
+        if (!isset($request->file_name)) return [];
+
         $content_data = [];
+
+        // 各ファイル名に対して処理を行う
         foreach ($request->file_name as $i => $file_name) {
-            if (isset($file_name)) {
-                $content_data[$i]['content_name'] = $file_name;
-                $content_data[$i]['content_url'] = $this->registerFile($request->file_path[$i]);
-                $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
-                $content_data[$i]['join_flg'] = $request->join_flg[$i];
+            if (!empty($file_name)) {
+                $file_path = $request->file_path[$i] ?? null;
+                $join_flg = $request->join_flg[$i] ?? null;
+
+                // ファイルパスが存在する場合のみ処理を行う
+                if ($file_path) {
+                    $content_data[$i]['content_name'] = $file_name;
+                    $content_data[$i]['content_url'] = $this->registerFile($file_path);
+                    $content_data[$i]['thumbnails_url'] = ImageConverter::convert2image($content_data[$i]['content_url']);
+                    $content_data[$i]['join_flg'] = $join_flg;
+                }
             }
         }
+
         return $content_data;
     }
 
