@@ -984,7 +984,16 @@ class MessagePublishController extends Controller
                             if ($message_content) {
                                 if ($this->isChangedJoinFlg($join_path_list, $request->file_path ?? null) || $this->isChangedJoinFlg($join_flg_list, array_filter($request->join_flg ?? []))) {
                                     $message_content->content_name = $file_name;
-                                    $message_content->content_url = $file_path;
+
+                                    // ファイルが存在するか確認
+                                    $shouldRegisterFile = file_exists(storage_path('app/' . $file_path));
+
+                                    if ($this->isChangedFile($join_path_list[$i], $file_path) && $shouldRegisterFile) {
+                                        $message_content->content_url = $this->registerFile($file_path);
+                                    } else {
+                                        $message_content->content_url = $file_path;
+                                    }
+
                                     $message_content->thumbnails_url = ImageConverter::convert2image($message_content->content_url);
                                     $message_content->join_flg = $join_flg;
                                     $message_content_changed_flg = true;
