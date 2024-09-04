@@ -13,42 +13,43 @@ class User extends Model
 {
     use WhereLike;
     use SoftDeletes;
-    
-    protected $fillable = 
-        ['name',
-         'belong_label',
-         'email',
-         'password',
-         'employee_code',
-         'shop_id',
-         'roll_id',
-        ];
+
+    protected $fillable =
+    [
+        'name',
+        'belong_label',
+        'email',
+        'password',
+        'employee_code',
+        'shop_id',
+        'roll_id',
+    ];
 
     public function message(): BelongsToMany
     {
-        return $this->belongsToMany(Message::class,'message_user','user_id', 'message_id')
-                    ->withPivot('read_flg', 'shop_id');
+        return $this->belongsToMany(Message::class, 'message_user', 'user_id', 'message_id')
+            ->withPivot('read_flg', 'shop_id');
     }
 
     public function unreadMessages(): BelongsToMany
     {
         return $this->belongsToMany(Message::class, 'message_user', 'user_id', 'message_id')
-                    ->withPivot('shop_id')
-                    ->wherePivot('read_flg', false);
+            ->withPivot('shop_id')
+            ->wherePivot('read_flg', false);
     }
 
     public function manual(): BelongsToMany
     {
-        return $this->belongsToMany(Manual::class, 'manual_user','user_id', 'manual_id')
-                    ->withPivot('read_flg', 'shop_id');
+        return $this->belongsToMany(Manual::class, 'manual_user', 'user_id', 'manual_id')
+            ->withPivot('read_flg', 'shop_id');
     }
 
     public function unreadManuals(): BelongsToMany
     {
         return $this->belongsToMany(Manual::class, 'manual_user', 'user_id', 'manual_id')
-                    ->withPivot('shop_id')
-                    ->wherePivot('read_flg', false);
-    }    
+            ->withPivot('shop_id')
+            ->wherePivot('read_flg', false);
+    }
 
     public function roll(): BelongsTo
     {
