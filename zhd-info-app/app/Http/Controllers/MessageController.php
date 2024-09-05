@@ -121,7 +121,8 @@ class MessageController extends Controller
             'messages' => $messages,
             'categories' => $categories,
             'keywords' => $keywords,
-            'user' => $user
+            'user' => $user,
+            'organization1_id' => $organization1_id
         ]);
     }
 
@@ -217,9 +218,26 @@ class MessageController extends Controller
             ]);
             DB::commit();
 
-            // detailメソッドにリダイレクト
-            $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
-            return redirect()->to($url)->withInput();
+            // SKの場合、PDFを別ページで表示
+            if ($message->organization1_id === 8) {
+                // detailメソッドにリダイレクト
+                $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
+                return redirect()->to($url)->withInput();
+            } else {
+                if (!empty($message_content)) {
+                    if (count($message_content) > 1) {
+                        $first_content = $message_content[0];
+                        if ($message->content_name !== $first_content['content_name']) {
+                            $message->content_url = $first_content['content_url'];
+                        }
+                    } else {
+                        $single_content = $message_content[0];
+                        $message->content_url = $single_content['content_url'];
+                    }
+                }
+                // 既読が無事できたらpdfへ
+                return redirect()->to($message->content_url)->withInput();
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
