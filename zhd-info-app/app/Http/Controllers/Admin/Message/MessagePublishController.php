@@ -539,7 +539,7 @@ class MessagePublishController extends Controller
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on');
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
 
@@ -549,8 +549,8 @@ class MessagePublishController extends Controller
                 $msg_params['content_name'] = $join_file_list[0]['content_name'];
                 $msg_params['content_url'] = $join_file_list[0]['content_url'];
             } else {
-                $msg_params['content_name'] = $request->file_name[0] ?? $message_contents[0]['content_name'];
-                $msg_params['content_url'] = $request->file_path[0] ?? $message_contents[0]['content_url'];
+                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
             }
         }
 
@@ -559,7 +559,7 @@ class MessagePublishController extends Controller
         $msg_params['organization1_id'] = $organization1->id;
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = is_null($number) ? 1 : $number + 1;
-        $msg_params['editing_flg'] = isset($request->save);
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         try {
             DB::beginTransaction();
