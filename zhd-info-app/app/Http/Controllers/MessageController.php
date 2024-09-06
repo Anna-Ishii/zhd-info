@@ -287,10 +287,8 @@ class MessageController extends Controller
 
     public function getCrewsMessage(Request $request)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $message = $request->input('message');
         $text = $request->input('text');
@@ -348,6 +346,10 @@ class MessageController extends Controller
             })
             ->orderBy('c.name_kana', 'asc')
             ->get();
+
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return response()->json([
             'crews' => $crews,
