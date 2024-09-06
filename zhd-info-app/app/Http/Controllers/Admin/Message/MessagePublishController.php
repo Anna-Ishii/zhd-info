@@ -352,10 +352,8 @@ class MessagePublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $category_list = MessageCategory::all();
 
@@ -498,6 +496,10 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.message.publish.new', [
             'organization1' => $organization1,
             'category_list' => $category_list,
@@ -510,10 +512,8 @@ class MessagePublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -694,15 +694,17 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function edit($message_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $message = Message::find($message_id);
         if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
@@ -915,6 +917,10 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.message.publish.edit', [
             'message' => $message,
             'message_contents' => $message_contents,
@@ -931,10 +937,8 @@ class MessagePublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $message_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -1233,6 +1237,10 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
@@ -1283,10 +1291,8 @@ class MessagePublishController extends Controller
     // 業務連絡店舗のエクスポート（新規登録）
     public function newCsvStoreExport(Request $request)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $organization1_id = (int) $request->input('organization1_id');
         $organization1 = Organization1::find($organization1_id);
@@ -1297,6 +1303,10 @@ class MessagePublishController extends Controller
 
         $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return Excel::download(
             new MessageNewStoreListExport($organization1_id),
             $file_name
@@ -1306,10 +1316,8 @@ class MessagePublishController extends Controller
     // 業務連絡店舗のエクスポート（編集）
     public function editCsvStoreExport(Request $request)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $message_id = (int) $request->input('message_id');
         $message = Message::find($message_id);
@@ -1320,6 +1328,10 @@ class MessagePublishController extends Controller
         }
 
         $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return Excel::download(
             new MessageEditStoreListExport($message_id),
@@ -1852,8 +1864,7 @@ class MessagePublishController extends Controller
     // PDFの結合処理
     private function pdfFileJoin($join_files): array
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '2048M');
+        ini_set('memory_limit', '2048M'); // メモリ制限を一時的に増加
 
         $tempFiles = [];
 
