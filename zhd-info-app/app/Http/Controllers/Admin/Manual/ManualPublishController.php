@@ -274,10 +274,8 @@ class ManualPublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
@@ -429,6 +427,10 @@ class ManualPublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.manual.publish.new', [
             'organization1' => $organization1,
             'new_category_list' => $new_category_list,
@@ -440,10 +442,8 @@ class ManualPublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -591,15 +591,17 @@ class ManualPublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function edit($manual_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
@@ -818,6 +820,10 @@ class ManualPublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'brand_list' => $brand_list,
@@ -832,10 +838,8 @@ class ManualPublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $manual_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -1061,6 +1065,10 @@ class ManualPublishController extends Controller
                 ->withInput()
                 ->with('error', '入力エラーがあります');
         }
+
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
