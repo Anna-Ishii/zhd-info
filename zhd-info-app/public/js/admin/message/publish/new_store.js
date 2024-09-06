@@ -84,6 +84,17 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
         this.checked = checked;
         syncCheckboxes($(this).attr('data-store-id'), checked);
     });
+
+        // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
+    if ($('#selectOrganization').is(':checked')) {
+        $('#storeModal #byOrganization li').show();
+        $('#selectOrganization').prop('checked', false);
+    }
+    if ($('#selectStoreCode').is(':checked')) {
+        $('#storeModal #byStoreCode li').show();
+        $('#selectStoreCode').prop('checked', false);
+    }
+
     updateSelectedStores();
     updateSelectAllCheckboxes();
 });
@@ -173,6 +184,16 @@ $(document).on("change", "#selectAllOrganization", function () {
     if ($('#selectStoreCode').is(':checked')) {
         $('#storeModal #byStoreCode li').show();
         $('#selectStoreCode').prop('checked', false);
+    }
+
+    // 親チェックボックスがチェックされている場合、該当のプルダウンを閉じる
+    if (!checked) {
+        $('#storeModal input[name^="organization[org"]').each(function () {
+            const parentListItem = $(this).closest("li");
+            parentListItem.show();
+            const collapseElement = parentListItem.find('.collapse');
+            collapseElement.collapse('hide');
+        });
     }
 
     updateSelectedStores();
