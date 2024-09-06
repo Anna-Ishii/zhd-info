@@ -1,23 +1,22 @@
 "use strict";
 
-/* マニュアルモーダル関係 */
-var modalVideoW, modalVideoH;
-function changeMovieUIsize() {
-    /* uiの幅をvideoに合わせる */
-    modalVideoW = $(".manualAttachment.isActive").find("video").innerWidth();
-    $(".manualAttachment.isActive")
-        .find(".manualAttachment__ui , .manualAttachment__videoCover")
-        .css("maxWidth", modalVideoW);
+$(window).on("load", function () {
 
-    /* 外枠を高さをvideoに合わせる（modalVideoHはフルスクリーン解除時にも使用する） */
-    modalVideoH = $(".manualAttachment.isActive").find("video").innerHeight();
-    $(".manualAttachment.isActive").css("height", modalVideoH);
-}
+    /* マニュアルモーダル関係 */
+    var modalVideoW, modalVideoH;
+    function changeMovieUIsize() {
+        /* uiの幅をvideoに合わせる */
+        modalVideoW = $(".manualAttachment.isActive").find("video").innerWidth();
+        $(".manualAttachment.isActive")
+            .find(".manualAttachment__ui , .manualAttachment__videoCover")
+            .css("maxWidth", modalVideoW);
 
-$(document).on(
-    "click",
-    ".manualAttachmentBg , .manualAttachment__close",
-    function (e) {
+        /* 外枠を高さをvideoに合わせる（modalVideoHはフルスクリーン解除時にも使用する） */
+        modalVideoH = $(".manualAttachment.isActive").find("video").innerHeight();
+        $(".manualAttachment.isActive").css("height", modalVideoH);
+    }
+
+    $(document).on( "click", ".manualAttachmentBg , .manualAttachment__close", function (e) {
         var thumbParents = $(this).parents(".main__box , .main__box--single");
         if (
             $(this).hasClass("manualAttachmentBg") &&
@@ -51,81 +50,79 @@ $(document).on(
                 .find(".manualAttachmentBg , .manualAttachment")
                 .removeClass("isActive");
         }
+    });
+
+    $(document).on("click", ".btnPrint", function () {
+        window.print();
+    });
+
+    /* 移動先選択モーダル */
+    $(document).on("click", ".btnMoveFolder", function () {
+        var chkTargetName = $(this).data("target-name");
+        var modalTarget = $(".modal[data-target-name=" + chkTargetName + "]");
+        console.log(modalTarget.length);
+        if (!$(".modalBg").is(":visible")) {
+            $(".modalBg").show();
+            modalTarget.show();
+        }
+    });
+    $(document).on("click", ".modalBg", function (e) {
+        if (!$(e.target).closest(".modal").length) {
+            $(".modalBg , .modal").hide();
+        }
+    });
+    /* 移動先フォルダ選択時の背景色切り替え */
+    $(document).on("change", ".moveFolder", function () {
+        $(".modal__list__item").find("label").removeClass("isSelected");
+        if ($(this).prop("checked", true)) {
+            console.log("test");
+            $(this).parents("label").addClass("isSelected");
+        }
+    });
+
+    /* 動画関係 */
+
+    /* 再生時間計測 */
+    function setCurrentTime(e) {
+        var movieLength = $(e).get(0).duration;
+        var movieCurrentTime = $(e).get(0).currentTime;
+        var currentTime = Math.floor((movieCurrentTime / movieLength) * 100);
+
+        var targetSeekBar = $(".manualAttachment.isActive").find(
+            ".manualAttachment__ui__progress"
+        );
+        targetSeekBar.css("width", currentTime + "%");
     }
-);
+    /* 秒数の手動移動 */
+    function moveCurrentTime(e) {
+        /* 動画の総再生時間を取っておく */
+        var targetMovie = $(".manualAttachment.isActive").find("video");
+        var movieLength = targetMovie.get(0).duration;
 
-$(document).on("click", ".btnPrint", function () {
-    window.print();
-});
+        /* 総再生時間から移動先の秒数を計算 */
+        var targetTime = movieLength * (e / 100);
+        targetMovie.get(0).currentTime = targetTime;
 
-/* 移動先選択モーダル */
-$(document).on("click", ".btnMoveFolder", function () {
-    var chkTargetName = $(this).data("target-name");
-    var modalTarget = $(".modal[data-target-name=" + chkTargetName + "]");
-    console.log(modalTarget.length);
-    if (!$(".modalBg").is(":visible")) {
-        $(".modalBg").show();
-        modalTarget.show();
+        /* 点を正しい位置に戻す */
+        var targetSeekBarDot = $(".manualAttachment.isActive").find(
+            ".manualAttachment__ui__progressDot"
+        );
+        var resetCss = {
+            right: "0",
+            left: "auto",
+        };
+        targetSeekBarDot.css(resetCss);
     }
-});
-$(document).on("click", ".modalBg", function (e) {
-    if (!$(e.target).closest(".modal").length) {
-        $(".modalBg , .modal").hide();
+    function changeClassExitFullScreen() {
+        if (
+            !document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement
+        ) {
+            $(".manualAttachment__inner").removeClass("isFullScreen");
+        }
     }
-});
-/* 移動先フォルダ選択時の背景色切り替え */
-$(document).on("change", ".moveFolder", function () {
-    $(".modal__list__item").find("label").removeClass("isSelected");
-    if ($(this).prop("checked", true)) {
-        console.log("test");
-        $(this).parents("label").addClass("isSelected");
-    }
-});
 
-/* 動画関係 */
-
-/* 再生時間計測 */
-function setCurrentTime(e) {
-    var movieLength = $(e).get(0).duration;
-    var movieCurrentTime = $(e).get(0).currentTime;
-    var currentTime = Math.floor((movieCurrentTime / movieLength) * 100);
-
-    var targetSeekBar = $(".manualAttachment.isActive").find(
-        ".manualAttachment__ui__progress"
-    );
-    targetSeekBar.css("width", currentTime + "%");
-}
-/* 秒数の手動移動 */
-function moveCurrentTime(e) {
-    /* 動画の総再生時間を取っておく */
-    var targetMovie = $(".manualAttachment.isActive").find("video");
-    var movieLength = targetMovie.get(0).duration;
-
-    /* 総再生時間から移動先の秒数を計算 */
-    var targetTime = movieLength * (e / 100);
-    targetMovie.get(0).currentTime = targetTime;
-
-    /* 点を正しい位置に戻す */
-    var targetSeekBarDot = $(".manualAttachment.isActive").find(
-        ".manualAttachment__ui__progressDot"
-    );
-    var resetCss = {
-        right: "0",
-        left: "auto",
-    };
-    targetSeekBarDot.css(resetCss);
-}
-function changeClassExitFullScreen() {
-    if (
-        !document.fullscreenElement &&
-        !document.webkitFullscreenElement &&
-        !document.mozFullScreenElement
-    ) {
-        $(".manualAttachment__inner").removeClass("isFullScreen");
-    }
-}
-
-$(window).on("load", function () {
     var targetMovie = $(".manualAttachment").find("video");
     targetMovie.each(function () {
         /* 再生されたときに再生ボタンを消す */
@@ -221,112 +218,109 @@ $(window).on("load", function () {
                 });
         }
     });
-});
-/* ウィンドウ幅変更時、videoの表示調整を行うようにする */
-$(window).on("resize", function () {
-    if ($(".manualAttachment.isActive").find("video").length) {
-        changeMovieUIsize();
-    }
-});
 
-/* 動画UIの操作関係 */
-$(document).on("click", ".manualAttachment__ui__btnPlay", function () {
-    var targetMovie = $(".manualAttachment.isActive").find("video");
-    if (!targetMovie.hasClass("isPaused")) {
-        targetMovie.get(0).pause();
-    } else {
-        targetMovie.get(0).play();
-    }
-});
-$(document).on("click", ".manualAttachment__ui__btnPlaySpeed", function () {
-    var target = $(this).find(".listPlaySpeed");
-    if (!target.is(":visible")) {
-        target.show();
-    } else {
-        target.hide();
-    }
-});
-$(document).on("click", ".listPlaySpeed li", function () {
-    var playSpeed = $(this).data("play-speed");
-    var targetMovie = $(".manualAttachment.isActive").find("video");
-    targetMovie.get(0).playbackRate = playSpeed;
-    $(this).parents(".listPlaySpeed").hide();
-});
-/* フルスクリーンモードの設定・解除 */
-$(document).on("click", ".manualAttachment__ui__btnFull", function () {
-    var target = $(".manualAttachment.isActive .manualAttachment__inner");
-    if (
-        !document.fullscreenElement &&
-        !document.webkitFullscreenElement &&
-        !document.mozFullScreenElement
-    ) {
-        /* 念のためフルスクリーン判定 */
-        if (!target.webkitRequestFullScreen) {
-            target.get(0).webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
-            target.addClass("isFullScreen");
-        } else if (!target.mozRequestFullScreen) {
-            target.get(0).mozRequestFullScreen();
-            target.addClass("isFullScreen");
-        } else if (!target.requestFullscreen) {
-            target.get(0).requestFullscreen();
-            target.addClass("isFullScreen");
+    /* ウィンドウ幅変更時、videoの表示調整を行うようにする */
+    $(window).on("resize", function () {
+        if ($(".manualAttachment.isActive").find("video").length) {
+            changeMovieUIsize();
         }
-    } else {
-        /* 念のためフルスクリーン判定 */
-        console.log(modalVideoH);
-        if (document.webkitFullscreenElement) {
-            document.webkitExitFullscreen();
-            target.removeClass("isFullScreen");
-            if (modalVideoH != "") {
-                $(".manualAttachment.isActive").css("height", modalVideoH);
+    });
+
+    /* 動画UIの操作関係 */
+    $(document).on("click", ".manualAttachment__ui__btnPlay", function () {
+        var targetMovie = $(".manualAttachment.isActive").find("video");
+        if (!targetMovie.hasClass("isPaused")) {
+            targetMovie.get(0).pause();
+        } else {
+            targetMovie.get(0).play();
+        }
+    });
+    $(document).on("click", ".manualAttachment__ui__btnPlaySpeed", function () {
+        var target = $(this).find(".listPlaySpeed");
+        if (!target.is(":visible")) {
+            target.show();
+        } else {
+            target.hide();
+        }
+    });
+    $(document).on("click", ".listPlaySpeed li", function () {
+        var playSpeed = $(this).data("play-speed");
+        var targetMovie = $(".manualAttachment.isActive").find("video");
+        targetMovie.get(0).playbackRate = playSpeed;
+        $(this).parents(".listPlaySpeed").hide();
+    });
+    /* フルスクリーンモードの設定・解除 */
+    $(document).on("click", ".manualAttachment__ui__btnFull", function () {
+        var target = $(".manualAttachment.isActive .manualAttachment__inner");
+        if (
+            !document.fullscreenElement &&
+            !document.webkitFullscreenElement &&
+            !document.mozFullScreenElement
+        ) {
+            /* 念のためフルスクリーン判定 */
+            if (!target.webkitRequestFullScreen) {
+                target.get(0).webkitRequestFullScreen(Element.ALLOW_KEYBOARD_INPUT);
+                target.addClass("isFullScreen");
+            } else if (!target.mozRequestFullScreen) {
+                target.get(0).mozRequestFullScreen();
+                target.addClass("isFullScreen");
+            } else if (!target.requestFullscreen) {
+                target.get(0).requestFullscreen();
+                target.addClass("isFullScreen");
             }
-        } else if (document.mozFullScreenElement) {
-            document.mozCancelFullScreen();
-            target.removeClass("isFullScreen");
-            if (modalVideoH != "") {
-                $(".manualAttachment.isActive").css("height", modalVideoH);
-            }
-        } else if (document.exitFullscreen) {
-            document.exitFullscreen();
-            target.removeClass("isFullScreen");
-            if (modalVideoH != "") {
-                $(".manualAttachment.isActive").css("height", modalVideoH);
+        } else {
+            /* 念のためフルスクリーン判定 */
+            console.log(modalVideoH);
+            if (document.webkitFullscreenElement) {
+                document.webkitExitFullscreen();
+                target.removeClass("isFullScreen");
+                if (modalVideoH != "") {
+                    $(".manualAttachment.isActive").css("height", modalVideoH);
+                }
+            } else if (document.mozFullScreenElement) {
+                document.mozCancelFullScreen();
+                target.removeClass("isFullScreen");
+                if (modalVideoH != "") {
+                    $(".manualAttachment.isActive").css("height", modalVideoH);
+                }
+            } else if (document.exitFullscreen) {
+                document.exitFullscreen();
+                target.removeClass("isFullScreen");
+                if (modalVideoH != "") {
+                    $(".manualAttachment.isActive").css("height", modalVideoH);
+                }
             }
         }
-    }
-});
-/* PiP */
-$(document).on("click", ".manualAttachment__ui__btnPiP", function () {
-    var targetMovie = $(".manualAttachment.isActive").find("video");
-    if (
-        targetMovie.webkitSupportsPresentationMode &&
-        typeof targetMovie.webkitSetPresentationMode === "function"
-    ) {
-        targetMovie.get(0).webkitSetPresentationMode("picture-in-picture");
-    } else {
-        targetMovie.get(0).requestPictureInPicture();
-    }
-});
-/* シークバークリック時 */
-$(document).on("click", ".manualAttachment__ui__seekbar", function (e) {
-    /* クリック位置とシークバーの表示位置取得 */
-    var clickPos = e.pageX;
-    var clientRect = this.getBoundingClientRect();
-    /* 相対位置 */
-    var posX = clientRect.left + window.pageXOffset;
-    posX = clickPos - posX;
+    });
+    /* PiP */
+    $(document).on("click", ".manualAttachment__ui__btnPiP", function () {
+        var targetMovie = $(".manualAttachment.isActive").find("video");
+        if (
+            targetMovie.webkitSupportsPresentationMode &&
+            typeof targetMovie.webkitSetPresentationMode === "function"
+        ) {
+            targetMovie.get(0).webkitSetPresentationMode("picture-in-picture");
+        } else {
+            targetMovie.get(0).requestPictureInPicture();
+        }
+    });
+    /* シークバークリック時 */
+    $(document).on("click", ".manualAttachment__ui__seekbar", function (e) {
+        /* クリック位置とシークバーの表示位置取得 */
+        var clickPos = e.pageX;
+        var clientRect = this.getBoundingClientRect();
+        /* 相対位置 */
+        var posX = clientRect.left + window.pageXOffset;
+        posX = clickPos - posX;
 
-    /* 割合取得 */
-    var seekBarW = $(this).innerWidth();
-    var clickPosPer = Math.floor((posX / seekBarW) * 100);
+        /* 割合取得 */
+        var seekBarW = $(this).innerWidth();
+        var clickPosPer = Math.floor((posX / seekBarW) * 100);
 
-    moveCurrentTime(clickPosPer);
-});
-/* 10秒進む・戻るボタン */
-$(document).on(
-    "click",
-    ".manualAttachment__ui__btnForward , .manualAttachment__ui__btnReplay",
-    function () {
+        moveCurrentTime(clickPosPer);
+    });
+    /* 10秒進む・戻るボタン */
+    $(document).on( "click", ".manualAttachment__ui__btnForward , .manualAttachment__ui__btnReplay", function () {
         var targetMovie = $(".manualAttachment.isActive").find("video");
         var movieCurrentTime = targetMovie.get(0).currentTime;
 
@@ -338,14 +332,10 @@ $(document).on(
         }
 
         targetMovie.get(0).currentTime = targetTime;
-    }
-);
+    });
 
-/* 要素全体を押したときに停止/再生する */
-$(document).on(
-    "click",
-    ".manualAttachment.isActive .manualAttachment__videoCover, .manualAttachment__btnPlay",
-    function () {
+    /* 要素全体を押したときに停止/再生する */
+    $(document).on( "click", ".manualAttachment.isActive .manualAttachment__videoCover, .manualAttachment__btnPlay", function () {
         var chkTarget;
         chkTarget = $(this).siblings("video");
 
@@ -354,11 +344,9 @@ $(document).on(
         } else {
             chkTarget.get(0).play();
         }
-    }
-);
+    });
 
-// PDFを全ページ表示されるようにする処理
-document.addEventListener("DOMContentLoaded", function () {
+    // PDFを全ページ表示されるようにする処理
     // .pdf-containerクラスを持つ全ての要素を取得
     var pdfContainers = document.querySelectorAll(".pdf-container");
     var pdfContainersAll = document.querySelectorAll(".pdf-container.all");

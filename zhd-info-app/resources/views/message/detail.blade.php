@@ -61,7 +61,7 @@
 
     @include('common.footer')
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js?version=20240830"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.js?version=20240830"></script>
-    <script src="{{ asset('/js/detail.js') }}?date=20240830" defer></script>
+    <!-- pdfjs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js"></script>
+    <script src="{{ asset('/js/detail.js') }}?date=20240906" defer></script>
 @endsection
