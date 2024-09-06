@@ -287,6 +287,11 @@ class MessageController extends Controller
 
     public function getCrewsMessage(Request $request)
     {
+        // メモリ制限を一時的に増加
+        ini_set('memory_limit', '512M');
+        // 300秒 (5分) に設定
+        set_time_limit(300);
+
         $message = $request->input('message');
         $text = $request->input('text');
         $user = session('member');
