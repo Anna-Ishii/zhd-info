@@ -85,7 +85,7 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
         syncCheckboxes($(this).attr('data-store-id'), checked);
     });
 
-        // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
+    // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
     if ($('#selectOrganization').is(':checked')) {
         $('#storeModal #byOrganization li').show();
         $('#selectOrganization').prop('checked', false);
@@ -100,7 +100,7 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
 });
 
 // 組織単位タブの選択中のみ表示
-$("#selectOrganization").on("change", function () {
+$(document).on("change", "#selectOrganization", function () {
     if (this.checked) {
         // 子要素（店舗）の表示/非表示
         $('#storeModal input[name="organization_shops[]"]').each(function () {
@@ -144,7 +144,7 @@ $("#selectOrganization").on("change", function () {
 });
 
 // 店舗コード順タブの選択中のみ表示
-$("#selectStoreCode").on("change", function () {
+$(document).on("change", "#selectStoreCode", function () {
     if (this.checked) {
         // チェックされている項目のみ表示
         $('#storeModal input[name="shops_code[]"]').each(function () {

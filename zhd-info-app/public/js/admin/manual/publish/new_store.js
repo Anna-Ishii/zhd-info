@@ -48,9 +48,7 @@ function updateParentCheckbox(organizationId) {
 // 全ての親チェックボックスの状態を更新
 function updateAllParentCheckboxes() {
     const parentCheckboxes = document.querySelectorAll('#storeModal input.org-checkbox');
-    parentCheckboxes.forEach(function(parentCheckbox) {
-        updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id'));
-    });
+    parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id')));
 }
 
 // 全選択/選択解除のチェックボックスの状態を更新
@@ -86,32 +84,145 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
         this.checked = checked;
         syncCheckboxes($(this).attr('data-store-id'), checked);
     });
+
+    // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
+    if ($('#selectOrganization').is(':checked')) {
+        $('#storeModal #byOrganization li').show();
+        $('#selectOrganization').prop('checked', false);
+    }
+    if ($('#selectStoreCode').is(':checked')) {
+        $('#storeModal #byStoreCode li').show();
+        $('#selectStoreCode').prop('checked', false);
+    }
+
     updateSelectedStores();
     updateSelectAllCheckboxes();
 });
 
+// 組織単位タブの選択中のみ表示
+$(document).on("change", "#selectOrganization", function () {
+    if (this.checked) {
+        // 子要素（店舗）の表示/非表示
+        $('#storeModal input[name="organization_shops[]"]').each(function () {
+            const listItem = $(this).closest("li");
+            if (this.checked) {
+                listItem.show();
+            } else {
+                listItem.hide();
+            }
+        });
+
+        // 親要素（org5, org4, org3, org2）の表示/非表示とプルダウンの開閉
+        $('#storeModal input[name^="organization[org"]').each(function () {
+            const parentListItem = $(this).closest('li');
+            const hasCheckedChild = parentListItem.find('input[name="organization_shops[]"]:checked').length > 0;
+
+            // 子要素がチェックされていれば親要素のプルダウンを開く
+            if (hasCheckedChild) {
+                parentListItem.show();
+                // 親要素のプルダウンを開く
+                const collapseElement = parentListItem.find('.collapse');
+                collapseElement.collapse('show');
+            } else {
+                parentListItem.hide();
+            }
+        });
+    } else {
+        // すべての子要素と親要素を表示し、親要素のプルダウンを閉じる
+        $('#storeModal input[name="organization_shops[]"]').each(function () {
+            $(this).closest("li").show();
+        });
+
+        // すべての親要素を表示し、プルダウンを閉じる
+        $('#storeModal input[name^="organization[org"]').each(function () {
+            const parentListItem = $(this).closest("li");
+            parentListItem.show();
+            const collapseElement = parentListItem.find('.collapse');
+            collapseElement.collapse('hide');
+        });
+    }
+});
+
+// 店舗コード順タブの選択中のみ表示
+$(document).on("change", "#selectStoreCode", function () {
+    if (this.checked) {
+        // チェックされている項目のみ表示
+        $('#storeModal input[name="shops_code[]"]').each(function () {
+            const listItem = $(this).closest("li");
+            if (this.checked) {
+                listItem.show();
+            } else {
+                listItem.hide();
+            }
+        });
+    } else {
+        // すべての項目を表示
+        $('#storeModal input[name="shops_code[]"]').each(function () {
+            $(this).closest("li").show();
+        });
+    }
+});
+
 // 組織単位タブの全選択/選択解除
-$(document).on('change', '#selectAllOrganization', function() {
+$(document).on("change", "#selectAllOrganization", function () {
     const checked = this.checked;
-    $('#storeModal #byOrganization input[type="checkbox"]').each(function() {
-        this.checked = checked;
-        if ($(this).hasClass('shop-checkbox')) {
-            syncCheckboxes($(this).attr('data-store-id'), checked);
+    // すべてのチェックボックスの状態を更新
+    $('#storeModal #byOrganization input[type="checkbox"]').each(function () {
+        if ($(this).attr("id") !== "selectOrganization") {
+            this.checked = checked;
+        }
+        if ($(this).hasClass("shop-checkbox")) {
+            syncCheckboxes($(this).attr("data-store-id"), checked);
         }
     });
+
+    // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
+    if ($('#selectOrganization').is(':checked')) {
+        $('#storeModal #byOrganization li').show();
+        $('#selectOrganization').prop('checked', false);
+    }
+    if ($('#selectStoreCode').is(':checked')) {
+        $('#storeModal #byStoreCode li').show();
+        $('#selectStoreCode').prop('checked', false);
+    }
+
+    // 親チェックボックスがチェックされている場合、該当のプルダウンを閉じる
+    if (!checked) {
+        $('#storeModal input[name^="organization[org"]').each(function () {
+            const parentListItem = $(this).closest("li");
+            parentListItem.show();
+            const collapseElement = parentListItem.find('.collapse');
+            collapseElement.collapse('hide');
+        });
+    }
+
     updateSelectedStores();
     updateSelectAllCheckboxes();
 });
 
 // 店舗コード順タブの全選択/選択解除
-$(document).on('change', '#selectAllStoreCode', function() {
+$(document).on("change", "#selectAllStoreCode", function () {
     const checked = this.checked;
-    $('#storeModal #byStoreCode input[type="checkbox"]').each(function() {
-        this.checked = checked;
-        if ($(this).hasClass('shop-checkbox')) {
-            syncCheckboxes($(this).attr('data-store-id'), checked);
+    // すべてのチェックボックスの状態を更新
+    $('#storeModal #byStoreCode input[type="checkbox"]').each(function () {
+        if ($(this).attr("id") !== "selectStoreCode") {
+            this.checked = checked;
+        }
+        if ($(this).hasClass("shop-checkbox")) {
+            syncCheckboxes($(this).attr("data-store-id"), checked);
         }
     });
+
+    // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
+    if ($('#selectOrganization').is(':checked')) {
+        $('#storeModal #byOrganization li').show();
+        $('#selectOrganization').prop('checked', false);
+    }
+    if ($('#selectStoreCode').is(':checked')) {
+        $('#storeModal #byStoreCode li').show();
+        $('#selectStoreCode').prop('checked', false);
+    }
+
     updateSelectedStores();
     updateSelectAllCheckboxes();
 });
@@ -221,34 +332,42 @@ $(document).on('click', 'input[id="checkStore"]', function() {
     let allOrg_flg = true;
     let allStore_flg = true;
     // チェックボックスを更新
-    $('input[name="organization[org5][]"]').each(function() {
-        if (org5Values.includes($(this).val())) {
-            $(this).prop('checked', true);
-        } else {
-            $(this).prop('checked', false);
-        }
-    });
-    $('input[name="organization[org4][]"]').each(function() {
-        if (org4Values.includes($(this).val())) {
-            $(this).prop('checked', true);
-        } else {
-            $(this).prop('checked', false);
-        }
-    });
-    $('input[name="organization[org3][]"]').each(function() {
-        if (org3Values.includes($(this).val())) {
-            $(this).prop('checked', true);
-        } else {
-            $(this).prop('checked', false);
-        }
-    });
-    $('input[name="organization[org2][]"]').each(function() {
-        if (org2Values.includes($(this).val())) {
-            $(this).prop('checked', true);
-        } else {
-            $(this).prop('checked', false);
-        }
-    });
+    if ($('input[name="organization[org5][]"]').length > 0) {
+        $('input[name="organization[org5][]"]').each(function() {
+            if (org5Values.includes($(this).val())) {
+                $(this).prop('checked', true);
+            } else {
+                $(this).prop('checked', false);
+            }
+        });
+    }
+    if ($('input[name="organization[org4][]"]').length > 0) {
+        $('input[name="organization[org4][]"]').each(function() {
+            if (org4Values.includes($(this).val())) {
+                $(this).prop('checked', true);
+            } else {
+                $(this).prop('checked', false);
+            }
+        });
+    }
+    if ($('input[name="organization[org3][]"]').length > 0) {
+        $('input[name="organization[org3][]"]').each(function() {
+            if (org3Values.includes($(this).val())) {
+                $(this).prop('checked', true);
+            } else {
+                $(this).prop('checked', false);
+            }
+        });
+    }
+    if ($('input[name="organization[org2][]"]').length > 0) {
+        $('input[name="organization[org2][]"]').each(function() {
+            if (org2Values.includes($(this).val())) {
+                $(this).prop('checked', true);
+            } else {
+                $(this).prop('checked', false);
+            }
+        });
+    }
     $('input[name="organization_shops[]"]').each(function() {
         if (shopValues.includes($(this).val())) {
             $(this).prop('checked', true);
@@ -412,10 +531,10 @@ $(document).on('change', '#manualStoreImportModal input[type="file"]', function(
 		const errorUl =  $('#manualStoreImportModal .modal-body .alert ul');
 		progress_request = false;
 		if (jqXHR.status === 422) {
-			jqXHR.responseJSON.manual?.forEach((errormanual)=>{
-				errormanual['errors'].forEach((error) => {
+			jqXHR.responseJSON.manual?.forEach((errorManual)=>{
+				errorManual['errors'].forEach((error) => {
 					errorUl.append(
-						`<li>${errormanual['row']}行目：${error}</li>`
+						`<li>${errorManual['row']}行目：${error}</li>`
 					);
 				})
 			})
@@ -530,11 +649,11 @@ $('#manualStoreImportModal input[type="button"]').click(function(e){
 		`);
 		// labelForm.parent().find('.text-danger').remove();
 
-		jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
+		jqXHR.responseJSON.error_message?.forEach((errorManual)=>{
 
-			errorMessage['errors'].forEach((error) => {
+			errorManual['errors'].forEach((error) => {
 				$('#manualStoreImportModal .modal-body .alert ul').append(
-					`<li>${errorMessage['row']}行目：${error}</li>`
+					`<li>${errorManual['row']}行目：${error}</li>`
 				);
 			})
 		})
@@ -603,17 +722,17 @@ $(document).on('click', '#exportCsv', function() {
         document.body.removeChild(a); // 一時的に生成したリンクを削除
 
     }).fail(function(jqXHR, textStatus, errorThrown){
-        var errorMessage = 'An error occurred. Please try again later.';
+        var errorManual = 'An error occurred. Please try again later.';
 
         if (jqXHR.status === 422) {
-            errorMessage = 'Validation error. Please check your input and try again.';
+            errorManual = 'Validation error. Please check your input and try again.';
         } else if (jqXHR.status === 504) {
-            errorMessage = 'Server timeout. Please try again later.';
+            errorManual = 'Server timeout. Please try again later.';
         } else if (jqXHR.status === 500) {
-            errorMessage = 'Internal server error. Please try again later.';
+            errorManual = 'Internal server error. Please try again later.';
         }
 
         console.log('Error: ' + jqXHR.status + ' - ' + textStatus);
-        alert(errorMessage);
+        alert(errorManual);
     });
 });
