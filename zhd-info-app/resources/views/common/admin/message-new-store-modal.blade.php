@@ -196,8 +196,7 @@
                                                     data-target="#storeCollapse{{ $index }}"
                                                     style="float: right; cursor: pointer;"></div>
                                             </div>
-                                            <ul id="storeCollapse{{ $index }}"
-                                                class="list-group mt-2 collapse">
+                                            <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization3_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
@@ -244,8 +243,7 @@
                                                     data-target="#storeCollapse{{ $index }}"
                                                     style="float: right; cursor: pointer;"></div>
                                             </div>
-                                            <ul id="storeCollapse{{ $index }}"
-                                                class="list-group mt-2 collapse">
+                                            <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization2_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
