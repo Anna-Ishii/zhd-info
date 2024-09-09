@@ -9,7 +9,7 @@ use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
 
-class ManualNewStoreListExport implements
+class MessageStoreCsvExport implements
     FromView,
     ShouldAutoSize,
     WithCustomCsvSettings
@@ -46,17 +46,11 @@ class ManualNewStoreListExport implements
                 ->where('shops.organization1_id', $this->organization1_id)
                 ->groupBy('shops.id')
                 ->orderBy('shops.shop_code')
-                ->get();
+                ->get()
+                ->toArray();
 
-            $all_store_list = $store_list->toArray();
-
-            foreach ($all_store_list as &$store) {
-                $store->checked_store = '先行';
-            }
-            unset($store); // 参照を解除
-
-            return view('exports.manual-store-list-export', [
-                'store_list' => $all_store_list,
+            return view('exports.store-list-export', [
+                'store_list' => $store_list,
                 'admin' => $admin
             ]);
         } catch (\Exception $e) {
@@ -64,7 +58,6 @@ class ManualNewStoreListExport implements
             throw new \Exception('内部サーバーエラーが発生しました。');
         }
     }
-
     public function chunkSize(): int
     {
         return 100;
