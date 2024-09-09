@@ -28,7 +28,6 @@ class MessageStoreCsvImport implements
 
     private $organization1;
     private $shop_list = [];
-    private $brand = [];
     private $store_code = [];
     private $store_name = [];
     // private $category_list = [];
@@ -37,10 +36,8 @@ class MessageStoreCsvImport implements
     {
         $this->organization1 = $organization1;
         $this->shop_list = $shop_list;
-        $this->brand = array_merge(array_column($this->shop_list, 'brand_name'));
         $this->store_code = array_merge(array_column($this->shop_list, 'shop_code'));
         $this->store_name = array_merge(array_column($this->shop_list, 'display_name'));
-        // $this->category_list = MessageCategory::pluck('name')->toArray();
     }
 
     public function collection(Collection $rows)
@@ -64,8 +61,6 @@ class MessageStoreCsvImport implements
     {
         return [
             '0' => ['required'],
-            // '2' => ['nullable', Rule::in($this->category_list)],
-            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
             '13' => ['nullable', new OrganizationRule(parameter: $this->store_code)],
             '14' => ['nullable', new OrganizationRule(parameter: $this->store_name)],
         ];
