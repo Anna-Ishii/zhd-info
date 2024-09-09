@@ -477,7 +477,7 @@ function changeFileName(e){
 	}
 }
 
-// ファイルインポート
+// 動画マニュアルCSV アップロード
 $(document).on('change' , '#manualStoreImportModal input[type=file]' , function(){
 	let changeTarget = $(this);
 	changeFileName(changeTarget);
@@ -578,6 +578,7 @@ $(document).on('change', '#manualStoreImportModal input[type="file"]', function(
 	}, 500);
 });
 
+// 動画マニュアルCSV インポート
 $('#manualStoreImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
@@ -598,9 +599,12 @@ $('#manualStoreImportModal input[type="button"]').click(function(e){
 
 	$('#manualStoreImportModal .modal-body .alert-danger').remove();
 	$.ajax({
-		url: '/admin/manual/publish/store/import',
+		url: '/admin/manual/publish/csv/store/import',
 		type: 'post',
-		data: JSON.stringify(newManualJson),
+        data: JSON.stringify({
+            file_json: newManualJson,
+            organization1_id: $('#manualStoreImportModal input[name="organization1"]').val()
+        }),
 		processData: false,
 		contentType: "application/json; charset=utf-8",
 		headers: {
@@ -687,14 +691,14 @@ function getNumericDateTime() {
 
 
 
-// ファイルエクスポート
+// 動画マニュアルCSV エクスポート
 $(document).on('click', '#exportCsv', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();
     formData.append("organization1_id", $('.check-store-list input[name="organization1_id"]').val());
 
     $.ajax({
-        url: '/admin/manual/publish/csv/store/new-export',
+        url: '/admin/manual/publish/csv/store/export',
         type: 'post',
         data: formData,
         processData: false,

@@ -478,7 +478,7 @@ function changeFileName(e){
 	}
 }
 
-// ファイルインポート
+// 業務連絡店舗CSV アップロード
 $(document).on('change' , '#messageStoreImportModal input[type=file]' , function(){
 	let changeTarget = $(this);
 	changeFileName(changeTarget);
@@ -579,6 +579,7 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 	}, 500);
 });
 
+// 業務連絡店舗CSV インポート
 $('#messageStoreImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
@@ -599,9 +600,12 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 
 	$('#messageStoreImportModal .modal-body .alert-danger').remove();
 	$.ajax({
-		url: '/admin/message/publish/store/import',
+		url: '/admin/message/publish/csv/store/import',
 		type: 'post',
-		data: JSON.stringify(newMessageJson),
+        data: JSON.stringify({
+            file_json: newMessageJson,
+            organization1_id: $('#messageStoreImportModal input[name="organization1"]').val()
+        }),
 		processData: false,
 		contentType: "application/json; charset=utf-8",
 		headers: {
@@ -688,14 +692,14 @@ function getNumericDateTime() {
 
 
 
-// ファイルエクスポート
+// 業務連絡店舗CSV エクスポート
 $(document).on('click', '#exportCsv', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();
     formData.append("message_id", $('.check-store-list input[name="message_id"]').val());
 
     $.ajax({
-        url: '/admin/message/publish/csv/store/edit-export',
+        url: '/admin/message/publish/csv/store/export',
         type: 'post',
         data: formData,
         processData: false,
