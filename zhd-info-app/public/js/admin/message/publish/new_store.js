@@ -80,8 +80,6 @@ $(document).on('change', '#storeModal input[name="organization_shops[]"], #store
 $(document).on('change', '#storeModal input.org-checkbox', function() {
     const organizationId = $(this).attr('data-organization-id');
     const checked = this.checked;
-
-    // requestAnimationFrame(() => {
         $(`#storeModal input[data-organization-id="${organizationId}"].shop-checkbox`).each(function() {
             this.checked = checked;
             syncCheckboxes($(this).attr('data-store-id'), checked);
@@ -99,7 +97,6 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
 
         updateSelectedStores();
         updateSelectAllCheckboxes();
-    // });
 });
 
 // 組織単位タブの選択中のみ表示
@@ -166,165 +163,11 @@ $(document).on("change", "#selectStoreCode", function () {
     }
 });
 
-
-
-// // 組織単位タブの選択中のみ表示
-// $(document).on("change", "#selectOrganization", function () {
-//     const isChecked = this.checked;
-//     const items = $('#storeModal input[name="organization_shops[]"]').toArray(); // 店舗のチェックボックス
-//     const parentItems = $('#storeModal input[name^="organization[org"]').toArray(); // 親要素のチェックボックス
-//     let index = 0;
-
-//     // 子要素の表示/非表示処理
-//     function processNextBatch(deadline) {
-//         while (index < items.length && deadline.timeRemaining() > 0) {
-//             const item = items[index];
-//             const listItem = $(item).closest("li");
-//             if (isChecked && !item.checked) {
-//                 listItem.hide();
-//             } else {
-//                 listItem.show();
-//             }
-//             index++;
-//         }
-
-//         // まだ残りの項目がある場合は次のアイドル時間で処理を続行
-//         if (index < items.length) {
-//             requestIdleCallback(processNextBatch);
-//         } else {
-//             processParents(); // 子要素の処理が終わったら親要素の処理へ
-//         }
-//     }
-
-//     // 親要素の表示/非表示処理
-//     function processParents() {
-//         let parentIndex = 0;
-//         function processParentBatch(deadline) {
-//             while (parentIndex < parentItems.length && deadline.timeRemaining() > 0) {
-//                 const parentItem = parentItems[parentIndex];
-//                 const parentListItem = $(parentItem).closest('li');
-//                 const hasCheckedChild = parentListItem.find('input[name="organization_shops[]"]:checked').length > 0;
-
-//                 if (isChecked && hasCheckedChild) {
-//                     parentListItem.show();
-//                     const collapseElement = parentListItem.find('.collapse');
-//                     collapseElement.collapse('show');
-//                 } else {
-//                     parentListItem.hide();
-//                 }
-//                 parentIndex++;
-//             }
-
-//             // まだ残りの親要素がある場合は次のアイドル時間で処理を続行
-//             if (parentIndex < parentItems.length) {
-//                 requestIdleCallback(processParentBatch);
-//             }
-//         }
-
-//         requestIdleCallback(processParentBatch);
-//     }
-
-//     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
-// });
-
-// // 店舗コード順タブの選択中のみ表示
-// $(document).on("change", "#selectStoreCode", function () {
-//     const isChecked = this.checked;
-//     const items = $('#storeModal input[name="shops_code[]"]').toArray(); // 店舗コードのチェックボックス
-//     let index = 0;
-
-//     // 子要素の表示/非表示処理
-//     function processNextBatch(deadline) {
-//         while (index < items.length && deadline.timeRemaining() > 0) {
-//             const item = items[index];
-//             const listItem = $(item).closest("li");
-//             if (isChecked && !item.checked) {
-//                 listItem.hide();
-//             } else {
-//                 listItem.show();
-//             }
-//             index++;
-//         }
-
-//         // 残りがあれば次のアイドル時間で処理を続行
-//         if (index < items.length) {
-//             requestIdleCallback(processNextBatch);
-//         }
-//     }
-
-//     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
-// });
-
-
-
-// // 組織単位タブの全選択/選択解除
-// $(document).on("change", "#selectAllOrganization", function () {
-//     const checked = this.checked;
-//     // すべてのチェックボックスの状態を更新
-//     $('#storeModal #byOrganization input[type="checkbox"]').each(function () {
-//         if ($(this).attr("id") !== "selectOrganization") {
-//             this.checked = checked;
-//         }
-//         if ($(this).hasClass("shop-checkbox")) {
-//             syncCheckboxes($(this).attr("data-store-id"), checked);
-//         }
-//     });
-
-//     // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
-//     if ($('#selectOrganization').is(':checked')) {
-//         $('#storeModal #byOrganization li').show();
-//         $('#selectOrganization').prop('checked', false);
-//     }
-//     if ($('#selectStoreCode').is(':checked')) {
-//         $('#storeModal #byStoreCode li').show();
-//         $('#selectStoreCode').prop('checked', false);
-//     }
-
-//     // 親チェックボックスがチェックされている場合、該当のプルダウンを閉じる
-//     if (!checked) {
-//         $('#storeModal input[name^="organization[org"]').each(function () {
-//             const parentListItem = $(this).closest("li");
-//             parentListItem.show();
-//             const collapseElement = parentListItem.find('.collapse');
-//             collapseElement.collapse('hide');
-//         });
-//     }
-
-//     updateSelectedStores();
-//     updateSelectAllCheckboxes();
-// });
-
-// // 店舗コード順タブの全選択/選択解除
-// $(document).on("change", "#selectAllStoreCode", function () {
-//     const checked = this.checked;
-//     // すべてのチェックボックスの状態を更新
-//     $('#storeModal #byStoreCode input[type="checkbox"]').each(function () {
-//         if ($(this).attr("id") !== "selectStoreCode") {
-//             this.checked = checked;
-//         }
-//         if ($(this).hasClass("shop-checkbox")) {
-//             syncCheckboxes($(this).attr("data-store-id"), checked);
-//         }
-//     });
-
-//     // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
-//     if ($('#selectOrganization').is(':checked')) {
-//         $('#storeModal #byOrganization li').show();
-//         $('#selectOrganization').prop('checked', false);
-//     }
-//     if ($('#selectStoreCode').is(':checked')) {
-//         $('#storeModal #byStoreCode li').show();
-//         $('#selectStoreCode').prop('checked', false);
-//     }
-
-//     updateSelectedStores();
-//     updateSelectAllCheckboxes();
-// });
-
-
-
 // 組織単位タブの全選択/選択解除
 $(document).on("change", "#selectAllOrganization", function () {
+    var overlay = document.getElementById('overlay');
+    overlay.style.display = 'block';  // オーバーレイを表示
+
     const checked = this.checked;
     const items = $('#storeModal #byOrganization input[type="checkbox"]').toArray(); // 組織のチェックボックス
     let index = 0;
@@ -372,6 +215,9 @@ $(document).on("change", "#selectAllOrganization", function () {
 
         updateSelectedStores();
         updateSelectAllCheckboxes();
+
+        // オーバーレイを非表示にする
+        overlay.style.display = 'none';
     }
 
     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
@@ -379,6 +225,9 @@ $(document).on("change", "#selectAllOrganization", function () {
 
 // 店舗コード順タブの全選択/選択解除
 $(document).on("change", "#selectAllStoreCode", function () {
+    var overlay = document.getElementById('overlay');
+    overlay.style.display = 'block';  // オーバーレイを表示
+
     const checked = this.checked;
     const items = $('#storeModal #byStoreCode input[type="checkbox"]').toArray(); // 店舗コードのチェックボックス
     let index = 0;
@@ -416,12 +265,13 @@ $(document).on("change", "#selectAllStoreCode", function () {
 
         updateSelectedStores();
         updateSelectAllCheckboxes();
+
+        // オーバーレイを非表示にする
+        overlay.style.display = 'none';
     }
 
     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
 });
-
-
 
 // check-selected クラスを削除と隠し入力フィールドの値を空にする
 function removeSelectedClass() {

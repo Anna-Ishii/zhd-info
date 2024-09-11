@@ -1426,10 +1426,12 @@ class ManualPublishController extends Controller
             $collection = Excel::toCollection(new ManualStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
-            foreach ($collection[0] as $key => [
-                $store_code,
-                $store_name
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $store_code,
+                    $store_name
+                ]
+            ) {
                 array_push($array, [
                     'store_code' => $store_code,
                     'store_name' => $store_name
