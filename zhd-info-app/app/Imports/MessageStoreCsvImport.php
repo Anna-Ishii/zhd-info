@@ -58,7 +58,7 @@ class MessageStoreCsvImport implements
     {
         return [
             '0' => ['required', new OrganizationRule(parameter: $this->store_code)], // 店舗コードは必須、かつリスト内に存在するかチェック
-            '1' => ['nullable', new OrganizationRule(parameter: $this->store_name)], // 店舗名はNULL許容、リスト内に存在するかチェック
+            '1' => ['nullable'], // 店舗名はNULL許容、リスト内に存在するかチェックしない
         ];
     }
 
@@ -67,7 +67,6 @@ class MessageStoreCsvImport implements
         return [
             '0.required' => '店舗コードは必須です', // 店舗コード必須のカスタムエラーメッセージ
             '0.OrganizationRule' => '店舗コードが正しくありません', // OrganizationRuleのエラーメッセージ
-            '1.OrganizationRule' => '店舗名が正しくありません', // OrganizationRuleのエラーメッセージ
         ];
     }
 
