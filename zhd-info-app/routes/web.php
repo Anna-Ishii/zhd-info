@@ -73,11 +73,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [MessagePublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [MessagePublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [MessagePublishController::class, 'progress'])->name('progress');
-            Route::post('/csv/store/new-export', [MessagePublishController::class, 'newCsvStoreExport'])->name('newCsvStoreExport');
-            Route::post('/csv/store/edit-export', [MessagePublishController::class, 'editCsvStoreExport'])->name('editCsvStoreExport');
-            Route::post('/store/import', [MessagePublishController::class, 'storeImport'])->name('storeImport');
+            Route::post('/csv/store/export', [MessagePublishController::class, 'csvStoreExport'])->name('csvStoreExport');
             Route::post('/csv/store/upload', [MessagePublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [MessagePublishController::class, 'storeProgress'])->name('storeProgress');
+            Route::post('/csv/store/import', [MessagePublishController::class, 'csvStoreImport'])->name('csvStoreImport');
         });
     });
     // 管理画面-動画マニュアル
@@ -96,12 +95,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('import', [ManualPublishController::class, 'Import'])->name('import');
             Route::post('/csv/upload', [ManualPublishController::class, 'csvUpload'])->name('csvUpload');
             Route::get('/csv/progress', [ManualPublishController::class, 'progress'])->name('progress');
-            Route::post('/csv/store/new-export', [ManualPublishController::class, 'newCsvStoreExport'])->name('newCsvStoreExport');
-            Route::post('/csv/store/edit-export', [ManualPublishController::class, 'editCsvStoreExport'])->name('editCsvStoreExport');
-            Route::post('/store/import', [ManualPublishController::class, 'storeImport'])->name('storeImport');
+            Route::post('/csv/store/export', [ManualPublishController::class, 'csvStoreExport'])->name('csvStoreExport');
             Route::post('/csv/store/upload', [ManualPublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [ManualPublishController::class, 'storeProgress'])->name('storeProgress');
-
+            Route::post('/csv/store/import', [ManualPublishController::class, 'csvStoreImport'])->name('csvStoreImport');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
