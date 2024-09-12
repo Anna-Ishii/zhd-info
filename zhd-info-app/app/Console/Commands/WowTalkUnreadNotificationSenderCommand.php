@@ -60,6 +60,9 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         } catch (\Throwable $th) {
             // エラー発生時にログを更新し、エラーメッセージを記録
             $this->finalizeLog($messageLog, false, $th->getMessage());
+        } finally {
+            // 処理後にメモリ制限を元に戻す
+            ini_restore('memory_limit');
         }
     }
 

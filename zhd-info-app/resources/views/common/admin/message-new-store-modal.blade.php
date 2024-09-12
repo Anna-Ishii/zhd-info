@@ -65,7 +65,14 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div>
-                                    <label style="font-weight: 500 !important;">
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
+                                        <input type="checkbox" id="selectOrganization"> 選択中のみ表示
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div>
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
                                         <input type="checkbox" id="selectAllOrganization"> 全て選択/選択解除
                                     </label>
                                 </div>
@@ -78,7 +85,7 @@
                                     <li class="list-group-item">
                                         <div>
                                             <div>
-                                                <label style="font-weight: 500 !important;">
+                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                     <input type="checkbox" name="organization[org5][]"
                                                         data-organization-id="{{ $organization['organization5_id'] }}"
                                                         value="{{ $organization['organization5_id'] }}"
@@ -93,14 +100,14 @@
                                                 </label>
                                                 <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
                                                     data-target="#storeCollapse{{ $index }}"
-                                                    style=" float: right;"></div>
+                                                    style="float: right; cursor: pointer;"></div>
                                             </div>
                                             <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization5_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label style="font-weight: 500 !important;">
+                                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization5_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -125,7 +132,7 @@
                                     <li class="list-group-item">
                                         <div>
                                             <div>
-                                                <label style="font-weight: 500 !important;">
+                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                     <input type="checkbox" name="organization[org4][]"
                                                         data-organization-id="{{ $organization['organization4_id'] }}"
                                                         value="{{ $organization['organization4_id'] }}"
@@ -140,14 +147,14 @@
                                                 </label>
                                                 <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
                                                     data-target="#storeCollapse{{ $index }}"
-                                                    style=" float: right;"></div>
+                                                    style="float: right; cursor: pointer;"></div>
                                             </div>
                                             <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization4_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label style="font-weight: 500 !important;">
+                                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization4_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -172,7 +179,7 @@
                                     <li class="list-group-item">
                                         <div>
                                             <div>
-                                                <label style="font-weight: 500 !important;">
+                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                     <input type="checkbox" name="organization[org3][]"
                                                         data-organization-id="{{ $organization['organization3_id'] }}"
                                                         value="{{ $organization['organization3_id'] }}"
@@ -187,15 +194,14 @@
                                                 </label>
                                                 <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
                                                     data-target="#storeCollapse{{ $index }}"
-                                                    style=" float: right;"></div>
+                                                    style="float: right; cursor: pointer;"></div>
                                             </div>
-                                            <ul id="storeCollapse{{ $index }}"
-                                                class="list-group mt-2 collapse">
+                                            <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization3_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label style="font-weight: 500 !important;">
+                                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization3_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -220,7 +226,7 @@
                                     <li class="list-group-item">
                                         <div>
                                             <div>
-                                                <label style="font-weight: 500 !important;">
+                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                     <input type="checkbox" name="organization[org2][]"
                                                         data-organization-id="{{ $organization['organization2_id'] }}"
                                                         value="{{ $organization['organization2_id'] }}"
@@ -235,15 +241,14 @@
                                                 </label>
                                                 <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
                                                     data-target="#storeCollapse{{ $index }}"
-                                                    style=" float: right;"></div>
+                                                    style="float: right; cursor: pointer;"></div>
                                             </div>
-                                            <ul id="storeCollapse{{ $index }}"
-                                                class="list-group mt-2 collapse">
+                                            <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
                                                 @foreach ($organization['organization2_shop_list'] as $index => $shop)
                                                     @if (isset($shop['display_name']))
                                                         <li class="list-group-item">
                                                             <div>
-                                                                <label style="font-weight: 500 !important;">
+                                                                <label style="font-weight: 500 !important; cursor: pointer;">
                                                                     <input type="checkbox" name="organization_shops[]"
                                                                         data-organization-id="{{ $organization['organization2_id'] }}"
                                                                         data-store-id="{{ $shop['id'] }}"
@@ -272,7 +277,14 @@
                         <ul class="list-group">
                             <li class="list-group-item">
                                 <div>
-                                    <label style="font-weight: 500 !important;">
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
+                                        <input type="checkbox" id="selectStoreCode"> 選択中のみ表示
+                                    </label>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <div>
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
                                         <input type="checkbox" id="selectAllStoreCode"> 全て選択/選択解除
                                     </label>
                                 </div>
@@ -281,7 +293,7 @@
                                 @if (isset($shop_list['shop_code']))
                                     <li class="list-group-item">
                                         <div>
-                                            <label style="font-weight: 500 !important;">
+                                            <label style="font-weight: 500 !important; cursor: pointer;">
                                                 <input type="checkbox"name="shops_code[]"
                                                     data-store-id="{{ $shop_list['shop_id'] }}"
                                                     value="{{ $shop_list['shop_id'] }}"
