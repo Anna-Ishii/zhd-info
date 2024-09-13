@@ -5,8 +5,7 @@ namespace App\Http\Controllers\Admin\Message;
 use Carbon\Carbon;
 use App\Enums\PublishStatus;
 use App\Exports\MessageListExport;
-use App\Exports\MessageNewStoreListExport;
-use App\Exports\MessageEditStoreListExport;
+use App\Exports\MessageStoreCsvExport;
 use App\Exports\MessageViewRateExport;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\Message\PublishStoreRequest;
@@ -352,10 +351,8 @@ class MessagePublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $category_list = MessageCategory::all();
 
@@ -498,6 +495,10 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.message.publish.new', [
             'organization1' => $organization1,
             'category_list' => $category_list,
@@ -510,10 +511,8 @@ class MessagePublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -539,7 +538,7 @@ class MessagePublishController extends Controller
 
         $msg_params['title'] = $request->title;
         $msg_params['category_id'] = $request->category_id;
-        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on');
+        $msg_params['emergency_flg'] = ($request->emergency_flg == 'on' ? true : false);
         $msg_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
         $msg_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
 
@@ -549,8 +548,8 @@ class MessagePublishController extends Controller
                 $msg_params['content_name'] = $join_file_list[0]['content_name'];
                 $msg_params['content_url'] = $join_file_list[0]['content_url'];
             } else {
-                $msg_params['content_name'] = $request->file_name[0] ?? $message_contents[0]['content_name'];
-                $msg_params['content_url'] = $request->file_path[0] ?? $message_contents[0]['content_url'];
+                $msg_params['content_name'] = $request->file_name[0] ? $message_contents[0]['content_name'] : null;
+                $msg_params['content_url'] = $request->file_path[0] ? $message_contents[0]['content_url'] : null;
             }
         }
 
@@ -559,7 +558,7 @@ class MessagePublishController extends Controller
         $msg_params['organization1_id'] = $organization1->id;
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = is_null($number) ? 1 : $number + 1;
-        $msg_params['editing_flg'] = isset($request->save);
+        $msg_params['editing_flg'] = isset($request->save) ? true : false;
 
         try {
             DB::beginTransaction();
@@ -694,15 +693,17 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function edit($message_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $message = Message::find($message_id);
         if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
@@ -915,6 +916,10 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.message.publish.edit', [
             'message' => $message,
             'message_contents' => $message_contents,
@@ -931,10 +936,8 @@ class MessagePublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $message_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -1233,6 +1236,10 @@ class MessagePublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
@@ -1280,49 +1287,42 @@ class MessagePublishController extends Controller
         );
     }
 
-    // 業務連絡店舗のエクスポート（新規登録）
-    public function newCsvStoreExport(Request $request)
+    // 業務連絡店舗CSV エクスポート（新規登録/編集）
+    public function csvStoreExport(Request $request)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
-        $organization1_id = (int) $request->input('organization1_id');
+        // 新規登録か編集かを判定
+        $isEdit = $request->has('message_id');
+        $organization1_id = null;
+
+        if ($isEdit) {
+            // 編集時の処理
+            $message_id = (int) $request->input('message_id');
+            $message = Message::find($message_id);
+            if (!$message) {
+                return response()->json(['error' => 'Message not found'], 404);
+            }
+            $organization1_id = $message->organization1_id;
+        } else {
+            // 新規登録時の処理
+            $organization1_id = (int) $request->input('organization1_id');
+        }
+
         $organization1 = Organization1::find($organization1_id);
-
         if (!$organization1) {
             return response()->json(['error' => 'Organization not found'], 404);
         }
 
         $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
 
-        return Excel::download(
-            new MessageNewStoreListExport($organization1_id),
-            $file_name
-        );
-    }
-
-    // 業務連絡店舗のエクスポート（編集）
-    public function editCsvStoreExport(Request $request)
-    {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
-
-        $message_id = (int) $request->input('message_id');
-        $message = Message::find($message_id);
-        $organization1 = Organization1::find($message->organization1_id);
-
-        if (!$organization1) {
-            return response()->json(['error' => 'Organization not found'], 404);
-        }
-
-        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return Excel::download(
-            new MessageEditStoreListExport($message_id),
+            new MessageStoreCsvExport($organization1_id),
             $file_name
         );
     }
@@ -1576,7 +1576,7 @@ class MessagePublishController extends Controller
         }
     }
 
-    // 店舗CSV インポート
+    // 業務連絡店舗CSV アップロード（新規登録/編集）
     public function csvStoreUpload(Request $request)
     {
         $log_file_name = $request->input('log_file_name');
@@ -1595,7 +1595,6 @@ class MessagePublishController extends Controller
         }
 
         $shop_list = $this->getShopForm($organization1);
-
         $csv_path = Storage::putFile('csv', $csv);
         Log::info("業連CSVインポート", [
             'csv_path' => $csv_path,
@@ -1603,25 +1602,19 @@ class MessagePublishController extends Controller
         ]);
         try {
             Excel::import(new MessageStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
-
             $collection = Excel::toCollection(new MessageStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
             foreach (
                 $collection[0] as $key => [
-                    $brand,
                     $store_code,
-                    $store_name,
-                    $checked_store
+                    $store_name
                 ]
             ) {
                 array_push($array, [
-                    'brand' => $brand,
                     'store_code' => $store_code,
-                    'store_name' => $store_name,
-                    'checked_store' => $checked_store
+                    'store_name' => $store_name
                 ]);
-
                 file_put_contents($file_path, ceil((($key + 1)) * 100));
             }
 
@@ -1663,7 +1656,6 @@ class MessagePublishController extends Controller
             ], 500);
         }
 
-
         $log = File::get($file_path);
         if ($log == 100) {
             File::delete($file_path);
@@ -1671,28 +1663,29 @@ class MessagePublishController extends Controller
         return $log;
     }
 
-    public function storeImport(Request $request)
+    // 業務連絡店舗CSV インポート（新規登録/編集）
+    public function csvStoreImport(Request $request)
     {
         $admin = session('admin');
 
-        // インポートされたCSVの値
-        $storesJson = $request->json();
+        // JSONデータの取得
+        $storesJson = $request->json('file_json');
+        $organization1_id = $request->json('organization1_id');
+
         $csvStoreIds = [];
+        $brand_id = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
 
-        foreach ($storesJson->all() as $store) {
-            // checked_storeが"先行"であるかどうかを確認
-            if (isset($store['checked_store']) && $store['checked_store'] === '先行') {
-                $brand_id = Brand::where('name', $store['brand'])->pluck('id');
-                $shopId = Shop::where('shop_code', $store['store_code'])->where('display_name', $store['store_name'])->where('brand_id', $brand_id)->pluck('id')->toArray();
-
-                // 取得したidを$shopIds配列にマージ
-                $csvStoreIds = array_merge($csvStoreIds, $shopId);
-            }
-        }
+        // ショップIDを取得
+        $csvStoreIds = DB::table('shops')
+            ->join('brands', 'shops.brand_id', '=', 'brands.id')
+            ->whereIn('brands.id', $brand_id)
+            ->whereIn('shops.shop_code', array_column($storesJson, 'store_code'))
+            ->pluck('shops.id')
+            ->toArray();
 
         try {
             // 業態一覧を取得する
-            $brand_list = Brand::where('organization1_id', session('brand_id'))->get();
+            $brand_list = Brand::where('organization1_id', $organization1_id)->get();
 
             $organization_list = [];
             $organization_list = Shop::query()
@@ -1716,7 +1709,7 @@ class MessagePublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no',
                 )
-                ->where('organization1_id', session('brand_id'))
+                ->where('organization1_id', $organization1_id)
                 ->orderByRaw('organization2_id is null asc')
                 ->orderByRaw('organization3_id is null asc')
                 ->orderByRaw('organization4_id is null asc')
@@ -1728,104 +1721,56 @@ class MessagePublishController extends Controller
                 ->get()
                 ->toArray();
 
-            // shopを取得する
-            $all_shop_list = [];
-            foreach ($organization_list as $index => $organization) {
 
-                $organization_list[$index]['organization5_shop_list'] = [];
-                $organization_list[$index]['organization4_shop_list'] = [];
-                $organization_list[$index]['organization3_shop_list'] = [];
-                $organization_list[$index]['organization2_shop_list'] = [];
+            // 事前に必要なデータをすべて一括取得
+            $brand_ids = $brand_list->pluck('id')->toArray();
+            $all_shops = Shop::query()
+                ->select(
+                    'shops.id as id',
+                    'shops.shop_code',
+                    'shops.display_name',
+                    'shops.organization5_id',
+                    'shops.organization4_id',
+                    'shops.organization3_id',
+                    'shops.organization2_id'
+                )
+                ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+                ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+                ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+                ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+                ->where('shops.organization1_id', $organization1_id)
+                ->whereIn('shops.brand_id', $brand_ids)
+                ->orderBy('shops.shop_code', 'asc')
+                ->get()
+                ->toArray();
 
-                if (isset($organization['organization5_id'])) {
-                    foreach ($brand_list as $brand) {
-                        $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                            ->where('brand_id', $brand->id)
-                            ->get()
-                            ->toArray();
 
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
+            // 組織別にデータを整理する
+            $organization_list = array_map(function ($org) use ($all_shops) {
+                $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization5_id'] == $org['organization5_id'];
+                });
+                $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+                });
+                $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+                });
+                $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+                });
+                return $org;
+            }, $organization_list);
 
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
+            // shop_code でソート済みの $all_shops をそのまま利用
+            $all_shop_list = array_map(function ($shop) {
+                return [
+                    'shop_id' => $shop['id'],
+                    'shop_code' => $shop['shop_code'],
+                    'display_name' => $shop['display_name'],
+                ];
+            }, $all_shops);
 
-                        $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                    }
-                }
-                if (isset($organization['organization4_id'])) {
-                    foreach ($brand_list as $brand) {
-                        $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                            ->where('brand_id', $brand->id)
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                    }
-                }
-                if (isset($organization['organization3_id'])) {
-                    foreach ($brand_list as $brand) {
-                        $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                            ->where('brand_id', $brand->id)
-                            ->whereNull('organization4_id')
-                            ->whereNull('organization5_id')
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                    }
-                }
-                if (isset($organization['organization2_id'])) {
-                    foreach ($brand_list as $brand) {
-                        $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                            ->where('brand_id', $brand->id)
-                            ->whereNull('organization4_id')
-                            ->whereNull('organization5_id')
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                    }
-                }
-            }
 
             // shop_codeを基準にソートするためのカスタム比較関数を定義
             usort($all_shop_list, function ($a, $b) {
@@ -1852,8 +1797,7 @@ class MessagePublishController extends Controller
     // PDFの結合処理
     private function pdfFileJoin($join_files): array
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '2048M');
+        ini_set('memory_limit', '2048M'); // メモリ制限を一時的に増加
 
         $tempFiles = [];
 

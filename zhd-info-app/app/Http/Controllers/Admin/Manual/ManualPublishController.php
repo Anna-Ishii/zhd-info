@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Admin\Manual;
 
 use App\Enums\PublishStatus;
 use App\Exports\ManualListExport;
-use App\Exports\ManualNewStoreListExport;
-use App\Exports\ManualEditStoreListExport;
+use App\Exports\ManualStoreCsvExport;
 use App\Exports\ManualViewRateExport;
 use Carbon\Carbon;
 use App\Http\Controllers\Controller;
@@ -274,10 +273,8 @@ class ManualPublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $new_category_list = ManualCategoryLevel2::query()
             ->select([
@@ -429,6 +426,10 @@ class ManualPublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.manual.publish.new', [
             'organization1' => $organization1,
             'new_category_list' => $new_category_list,
@@ -440,10 +441,8 @@ class ManualPublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -591,15 +590,17 @@ class ManualPublishController extends Controller
                 ->with('error', 'データベースエラーです');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
 
     public function edit($manual_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $manual = Manual::find($manual_id);
         if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
@@ -818,6 +819,10 @@ class ManualPublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return view('admin.manual.publish.edit', [
             'manual' => $manual,
             'brand_list' => $brand_list,
@@ -832,10 +837,8 @@ class ManualPublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $manual_id)
     {
-        // メモリ制限を一時的に増加
-        ini_set('memory_limit', '512M');
-        // 300秒 (5分) に設定
-        set_time_limit(300);
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
 
         $validated = $request->validated();
 
@@ -1062,6 +1065,10 @@ class ManualPublishController extends Controller
                 ->with('error', '入力エラーがあります');
         }
 
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
+
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
 
@@ -1126,39 +1133,42 @@ class ManualPublishController extends Controller
         );
     }
 
-    // 動画マニュアル店舗のエクスポート（新規登録）
-    public function newCsvStoreExport(Request $request)
+    // 動画マニュアルCSV エクスポート（新規登録/編集）
+    public function csvStoreExport(Request $request)
     {
-        $organization1_id = (int) $request->input('organization1_id');
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
+
+        // 新規登録か編集かを判定
+        $isEdit = $request->has('manual_id');
+        $organization1_id = null;
+
+        if ($isEdit) {
+            // 編集時の処理
+            $manual_id = (int) $request->input('manual_id');
+            $manual = Manual::find($manual_id);
+            if (!$manual) {
+                return response()->json(['error' => 'Manual not found'], 404);
+            }
+            $organization1_id = $manual->organization1_id;
+        } else {
+            // 新規登録時の処理
+            $organization1_id = (int) $request->input('organization1_id');
+        }
+
         $organization1 = Organization1::find($organization1_id);
-
         if (!$organization1) {
             return response()->json(['error' => 'Organization not found'], 404);
         }
 
         $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
 
-        return Excel::download(
-            new ManualNewStoreListExport($organization1_id),
-            $file_name
-        );
-    }
-
-    // 動画マニュアル店舗のエクスポート（編集）
-    public function editCsvStoreExport(Request $request)
-    {
-        $manual_id = (int) $request->input('manual_id');
-        $manual = Manual::find($manual_id);
-        $organization1 = Organization1::find($manual->organization1_id);
-
-        if (!$organization1) {
-            return response()->json(['error' => 'Organization not found'], 404);
-        }
-
-        $file_name = $organization1->name . now()->format('_Y_m_d') . '.csv';
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return Excel::download(
-            new ManualEditStoreListExport($manual_id),
+            new ManualStoreCsvExport($organization1_id),
             $file_name
         );
     }
@@ -1387,7 +1397,7 @@ class ManualPublishController extends Controller
         }
     }
 
-    // 店舗CSV インポート
+    // 動画マニュアルCSV アップロード（新規登録/編集）
     public function csvStoreUpload(Request $request)
     {
         $log_file_name = $request->input('log_file_name');
@@ -1406,7 +1416,6 @@ class ManualPublishController extends Controller
         }
 
         $shop_list = $this->getShopForm($organization1);
-
         $csv_path = Storage::putFile('csv', $csv);
         Log::info("マニュアルCSVインポート", [
             'csv_path' => $csv_path,
@@ -1414,23 +1423,19 @@ class ManualPublishController extends Controller
         ]);
         try {
             Excel::import(new ManualStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
-
             $collection = Excel::toCollection(new ManualStoreCsvImport($organization1, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
             $array = [];
-            foreach ($collection[0] as $key => [
-                $brand,
-                $store_code,
-                $store_name,
-                $checked_store
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $store_code,
+                    $store_name
+                ]
+            ) {
                 array_push($array, [
-                    'brand' => $brand,
                     'store_code' => $store_code,
-                    'store_name' => $store_name,
-                    'checked_store' => $checked_store
+                    'store_name' => $store_name
                 ]);
-
                 file_put_contents($file_path, ceil((($key + 1)) * 100));
             }
 
@@ -1472,7 +1477,6 @@ class ManualPublishController extends Controller
             ], 500);
         }
 
-
         $log = File::get($file_path);
         if ($log == 100) {
             File::delete($file_path);
@@ -1480,28 +1484,29 @@ class ManualPublishController extends Controller
         return $log;
     }
 
-    public function storeImport(Request $request)
+    // 動画マニュアルCSV インポート（新規登録/編集）
+    public function csvStoreImport(Request $request)
     {
         $admin = session('admin');
 
-        // インポートされたCSVの値
-        $storesJson = $request->json();
+        // JSONデータの取得
+        $storesJson = $request->json('file_json');
+        $organization1_id = $request->json('organization1_id');
+
         $csvStoreIds = [];
+        $brand_id = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
 
-        foreach ($storesJson->all() as $store) {
-            // checked_storeが"先行"であるかどうかを確認
-            if (isset($store['checked_store']) && $store['checked_store'] === '先行') {
-                $brand_id = Brand::where('name', $store['brand'])->pluck('id');
-                $shopId = Shop::where('shop_code', $store['store_code'])->where('display_name', $store['store_name'])->where('brand_id', $brand_id)->pluck('id')->toArray();
-
-                // 取得したidを$shopIds配列にマージ
-                $csvStoreIds = array_merge($csvStoreIds, $shopId);
-            }
-        }
+        // ショップIDを取得
+        $csvStoreIds = DB::table('shops')
+            ->join('brands', 'shops.brand_id', '=', 'brands.id')
+            ->whereIn('brands.id', $brand_id)
+            ->whereIn('shops.shop_code', array_column($storesJson, 'store_code'))
+            ->pluck('shops.id')
+            ->toArray();
 
         try {
             // 業態一覧を取得する
-            $brand_list = Brand::where('organization1_id', session('brand_id'))->get();
+            $brand_list = Brand::where('organization1_id', $organization1_id)->get();
 
             $organization_list = [];
             $organization_list = Shop::query()
@@ -1525,7 +1530,7 @@ class ManualPublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no',
                 )
-                ->where('organization1_id', session('brand_id'))
+                ->where('organization1_id', $organization1_id)
                 ->orderByRaw('organization2_id is null asc')
                 ->orderByRaw('organization3_id is null asc')
                 ->orderByRaw('organization4_id is null asc')
@@ -1537,98 +1542,56 @@ class ManualPublishController extends Controller
                 ->get()
                 ->toArray();
 
-            // shopを取得する
-            $all_shop_list = [];
-            foreach ($organization_list as $index => $organization) {
 
-                $organization_list[$index]['organization5_shop_list'] = [];
-                $organization_list[$index]['organization4_shop_list'] = [];
-                $organization_list[$index]['organization3_shop_list'] = [];
-                $organization_list[$index]['organization2_shop_list'] = [];
+            // 事前に必要なデータをすべて一括取得
+            $brand_ids = $brand_list->pluck('id')->toArray();
+            $all_shops = Shop::query()
+                ->select(
+                    'shops.id as id',
+                    'shops.shop_code',
+                    'shops.display_name',
+                    'shops.organization5_id',
+                    'shops.organization4_id',
+                    'shops.organization3_id',
+                    'shops.organization2_id'
+                )
+                ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+                ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+                ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+                ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+                ->where('shops.organization1_id', $organization1_id)
+                ->whereIn('shops.brand_id', $brand_ids)
+                ->orderBy('shops.shop_code', 'asc')
+                ->get()
+                ->toArray();
 
-                foreach ($brand_list as $brand) {
-                    if (isset($organization['organization5_id'])) {
-                        $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                            ->where('brand_id', $brand->id)
-                            ->get()
-                            ->toArray();
 
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
+            // 組織別にデータを整理する
+            $organization_list = array_map(function ($org) use ($all_shops) {
+                $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization5_id'] == $org['organization5_id'];
+                });
+                $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+                });
+                $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+                });
+                $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                    return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+                });
+                return $org;
+            }, $organization_list);
 
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
+            // shop_code でソート済みの $all_shops をそのまま利用
+            $all_shop_list = array_map(function ($shop) {
+                return [
+                    'shop_id' => $shop['id'],
+                    'shop_code' => $shop['shop_code'],
+                    'display_name' => $shop['display_name'],
+                ];
+            }, $all_shops);
 
-                        $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                    }
-                    if (isset($organization['organization4_id'])) {
-                        $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                            ->where('brand_id', $brand->id)
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                    }
-                    if (isset($organization['organization3_id'])) {
-                        $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                            ->where('brand_id', $brand->id)
-                            ->whereNull('organization4_id')
-                            ->whereNull('organization5_id')
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                    }
-                    if (isset($organization['organization2_id'])) {
-                        $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                            ->where('brand_id', $brand->id)
-                            ->whereNull('organization4_id')
-                            ->whereNull('organization5_id')
-                            ->get()
-                            ->toArray();
-
-                        // shop_codeとdisplay_nameを合体
-                        foreach ($shops as $shop) {
-
-                            // すべてのshopリスト
-                            $all_shop_list[] = [
-                                'shop_id' => $shop['id'],
-                                'shop_code' => $shop['shop_code'],
-                                'display_name' => $shop['display_name'],
-                            ];
-                        }
-
-                        $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                    }
-                }
-            }
 
             // shop_codeを基準にソートするためのカスタム比較関数を定義
             usort($all_shop_list, function ($a, $b) {
