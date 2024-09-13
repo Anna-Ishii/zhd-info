@@ -27,20 +27,14 @@ class MessageStoreCsvImport implements
     use Importable;
 
     private $organization1;
-    private $shop_list = [];
-    private $brand = [];
     private $store_code = [];
     private $store_name = [];
-    // private $category_list = [];
 
     public function __construct($organization1, $shop_list)
     {
         $this->organization1 = $organization1;
-        $this->shop_list = $shop_list;
-        $this->brand = array_merge(array_column($this->shop_list, 'brand_name'));
-        $this->store_code = array_merge(array_column($this->shop_list, 'shop_code'));
-        $this->store_name = array_merge(array_column($this->shop_list, 'display_name'));
-        // $this->category_list = MessageCategory::pluck('name')->toArray();
+        $this->store_code = array_column($shop_list, 'shop_code'); // 'shop_code' のみを取得
+        $this->store_name = array_column($shop_list, 'display_name'); // 'display_name' のみを取得
     }
 
     public function collection(Collection $rows)
@@ -63,20 +57,16 @@ class MessageStoreCsvImport implements
     public function rules(): array
     {
         return [
-            '0' => ['required'],
-            // '2' => ['nullable', Rule::in($this->category_list)],
-            '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
-            '13' => ['nullable', new OrganizationRule(parameter: $this->store_code)],
-            '14' => ['nullable', new OrganizationRule(parameter: $this->store_name)],
+            '0' => ['required', new OrganizationRule(parameter: $this->store_code)], // 店舗コードは必須、かつリスト内に存在するかチェック
+            '1' => ['nullable'], // 店舗名はNULL許容、リスト内に存在するかチェックしない
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-            // '0.required' => 'Noは必須です',
-            // '0.int' => 'Noは数値である必要があります',
-            '12.in' => '対象業態の項目が間違っています'
+            '0.required' => '店舗コードは必須です', // 店舗コード必須のカスタムエラーメッセージ
+            '0.OrganizationRule' => '店舗コードが正しくありません', // OrganizationRuleのエラーメッセージ
         ];
     }
 

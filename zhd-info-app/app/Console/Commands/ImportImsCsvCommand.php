@@ -43,7 +43,6 @@ class ImportImsCsvCommand extends Command
      */
     public function handle()
     {
-        //
         ini_set('memory_limit', '-1');
         $this->info('start');
         $ims_log = new ImsSyncLog();
@@ -114,6 +113,7 @@ class ImportImsCsvCommand extends Command
         }
         $ims_log->save();
         $this->info('end');
+        ini_restore('memory_limit');
     }
 
     private function import_shops($shops_data)

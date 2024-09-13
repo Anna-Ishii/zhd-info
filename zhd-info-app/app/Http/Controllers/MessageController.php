@@ -121,7 +121,8 @@ class MessageController extends Controller
             'messages' => $messages,
             'categories' => $categories,
             'keywords' => $keywords,
-            'user' => $user
+            'user' => $user,
+            'organization1_id' => $organization1_id
         ]);
     }
 
@@ -217,9 +218,26 @@ class MessageController extends Controller
             ]);
             DB::commit();
 
-            // detailメソッドにリダイレクト
-            $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
-            return redirect()->to($url)->withInput();
+            // SKの場合、PDFを別ページで表示
+            if ($message->organization1_id === 8) {
+                // detailメソッドにリダイレクト
+                $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
+                return redirect()->to($url)->withInput();
+            } else {
+                if (!empty($message_content)) {
+                    if (count($message_content) > 1) {
+                        $first_content = $message_content[0];
+                        if ($message->content_name !== $first_content['content_name']) {
+                            $message->content_url = $first_content['content_url'];
+                        }
+                    } else {
+                        $single_content = $message_content[0];
+                        $message->content_url = $single_content['content_url'];
+                    }
+                }
+                // 既読が無事できたらpdfへ
+                return redirect()->to($message->content_url)->withInput();
+            }
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
@@ -269,6 +287,9 @@ class MessageController extends Controller
 
     public function getCrewsMessage(Request $request)
     {
+        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('max_execution_time', 300); // 実行時間を一時的に300秒に設定
+
         $message = $request->input('message');
         $text = $request->input('text');
         $user = session('member');
@@ -325,6 +346,10 @@ class MessageController extends Controller
             })
             ->orderBy('c.name_kana', 'asc')
             ->get();
+
+        // メモリ制限と実行時間をデフォルトの設定に戻す
+        ini_restore('memory_limit');
+        ini_restore('max_execution_time');
 
         return response()->json([
             'crews' => $crews,
