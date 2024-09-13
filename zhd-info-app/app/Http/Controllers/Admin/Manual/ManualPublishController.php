@@ -321,107 +321,56 @@ class ManualPublishController extends Controller
             ->toArray();
 
 
-        // shopを取得する
-        $all_shop_list = [];
-        foreach ($organization_list as $index => $organization) {
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $organization1->id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
 
-            $organization_list[$index]['organization5_shop_list'] = [];
-            $organization_list[$index]['organization4_shop_list'] = [];
-            $organization_list[$index]['organization3_shop_list'] = [];
-            $organization_list[$index]['organization2_shop_list'] = [];
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
 
-            if (isset($organization['organization5_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization4_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
 
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization3_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization2_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                }
-            }
-        }
-
-        // shop_codeを基準にソートするためのカスタム比較関数を定義
+        // 店舗コードでshopsをソート
         usort($all_shop_list, function ($a, $b) {
             return strcmp($a['shop_code'], $b['shop_code']);
         });
@@ -467,78 +416,64 @@ class ManualPublishController extends Controller
             $manual->updated_at = null;
             $manual->save();
 
-            if (isset($request->organization['org5'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org5_ids = explode(',', $request->organization['org5'][0]);
-                foreach ($org5_ids as $org5_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $organization1->id,
-                        'organization5_id' => $org5_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org4'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org4_ids = explode(',', $request->organization['org4'][0]);
-                foreach ($org4_ids as $org4_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $organization1->id,
-                        'organization4_id' => $org4_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org3'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org3_ids = explode(',', $request->organization['org3'][0]);
-                foreach ($org3_ids as $org3_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $organization1->id,
-                        'organization3_id' => $org3_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org2'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org2_ids = explode(',', $request->organization['org2'][0]);
-                foreach ($org2_ids as $org2_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $organization1->id,
-                        'organization2_id' => $org2_id
-                    ]);
+            foreach (['org5', 'org4', 'org3', 'org2'] as $level) {
+                if (isset($request->organization[$level][0])) {
+                    // 事前にIDの配列を取得
+                    $ids = explode(',', $request->organization[$level][0]);
+
+                    $bulkData = [];
+                    foreach ($ids as $id) {
+                        $orgData = [
+                            'manual_id' => $manual->id,
+                            'organization1_id' => $organization1->id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+
+                        // レベルごとにフィールドを設定
+                        switch ($level) {
+                            case 'org5':
+                                $orgData['organization5_id'] = $id;
+                                break;
+                            case 'org4':
+                                $orgData['organization4_id'] = $id;
+                                break;
+                            case 'org3':
+                                $orgData['organization3_id'] = $id;
+                                break;
+                            case 'org2':
+                                $orgData['organization2_id'] = $id;
+                                break;
+                        }
+
+                        // まとめてデータを追加
+                        $bulkData[] = $orgData;
+                    }
+
+                    // バルクインサート
+                    DB::table('manual_organization')->insert($bulkData);
                 }
             }
 
             // チャンクサイズを設定
-            $chunkSize = 100;
+            $chunkSize = 200;
 
-            // manual_shopにshop_idとmanual_idを格納
+            // manual_shopにshop_idとmanual_idをバルクインサート
             if (isset($request->organization_shops)) {
-                // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                $insertData = []; // バルクインサート用のデータ配列
-
-                // shop_idでグループ化されたショップデータを取得
+                // ショップデータの事前取得とグループ化
                 $shopsData = Shop::whereIn('id', $organization_shops)
                     ->whereIn('brand_id', $request->brand)
                     ->get(['id', 'brand_id'])
                     ->groupBy('id');
 
-                foreach ($organization_shops as $_shop_id) {
-                    $selectedFlg = null;
-                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                        $selectedFlg = 'all';
-                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                        $selectedFlg = 'store';
-                    } else {
-                        $selectedFlg = 'store';
-                    }
+                $insertData = [];
+                // 事前に選択フラグを決定
+                $selectedFlg = (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') ? 'all' : 'store';
 
-                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                foreach ($organization_shops as $_shop_id) {
+                    if (isset($shopsData[$_shop_id])) {
                         foreach ($shopsData[$_shop_id] as $shop) {
                             $insertData[] = [
                                 'manual_id' => $manual->id,
@@ -549,10 +484,10 @@ class ManualPublishController extends Controller
                                 'updated_at' => now()
                             ];
 
-                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            // チャンクサイズに達したらバルクインサート
                             if (count($insertData) >= $chunkSize) {
                                 ManualShop::insert($insertData);
-                                $insertData = []; // データ配列をリセット
+                                $insertData = [];
                             }
                         }
                     }
@@ -565,7 +500,10 @@ class ManualPublishController extends Controller
             }
 
             $manual->brand()->attach($request->brand);
-            $manual->user()->attach(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+
+            if (!isset($request->save)) {
+                $manual->user()->attach($this->getTargetUsersByShopId($request));
+            }
 
             $manual->content()->createMany($this->manualContentsParam($request));
 
@@ -645,105 +583,56 @@ class ManualPublishController extends Controller
             ->toArray();
 
 
-        // shopを取得する
-        $all_shop_list = [];
-        foreach ($organization_list as $index => $organization) {
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $manual->organization1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
 
-            $organization_list[$index]['organization5_shop_list'] = [];
-            $organization_list[$index]['organization4_shop_list'] = [];
-            $organization_list[$index]['organization3_shop_list'] = [];
-            $organization_list[$index]['organization2_shop_list'] = [];
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
 
-            if (isset($organization['organization5_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization5_id', $organization['organization5_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
 
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
 
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization5_shop_list'] = array_merge($organization_list[$index]['organization5_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization4_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization4_id', $organization['organization4_id'])
-                        ->where('brand_id', $brand->id)
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization4_shop_list'] = array_merge($organization_list[$index]['organization4_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization3_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization3_id', $organization['organization3_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization3_shop_list'] = array_merge($organization_list[$index]['organization3_shop_list'], $shops);
-                }
-            }
-            if (isset($organization['organization2_id'])) {
-                foreach ($brand_list as $brand) {
-                    $shops = Shop::where('organization2_id', $organization['organization2_id'])
-                        ->where('brand_id', $brand->id)
-                        ->whereNull('organization4_id')
-                        ->whereNull('organization5_id')
-                        ->get()
-                        ->toArray();
-
-                    // shop_codeとdisplay_nameを合体
-                    foreach ($shops as $shop) {
-
-                        // すべてのshopリスト
-                        $all_shop_list[] = [
-                            'shop_id' => $shop['id'],
-                            'shop_code' => $shop['shop_code'],
-                            'display_name' => $shop['display_name'],
-                        ];
-                    }
-
-                    $organization_list[$index]['organization2_shop_list'] = array_merge($organization_list[$index]['organization2_shop_list'], $shops);
-                }
-            }
-        }
-
+        // ManualOrganizationテーブルから各組織IDを取得し、配列に格納
         $target_org = [];
         $target_org['org5'] = ManualOrganization::where('manual_id', $manual_id)->pluck('organization5_id')->toArray();
         $target_org['org4'] = ManualOrganization::where('manual_id', $manual_id)->pluck('organization4_id')->toArray();
@@ -751,9 +640,7 @@ class ManualPublishController extends Controller
         $target_org['org2'] = ManualOrganization::where('manual_id', $manual_id)->pluck('organization2_id')->toArray();
 
         $target_brand = $manual->brand()->pluck('brands.id')->toArray();
-        $contents = $manual->content()
-            ->orderBy("order_no")
-            ->get();
+        $contents = $manual->content()->orderBy("order_no")->get();
 
         $new_category_list =
             ManualCategoryLevel2::query()
@@ -764,37 +651,37 @@ class ManualPublishController extends Controller
             ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
             ->get();
 
-        // shopが閲覧可能か確認
         $target_org['shops'] = [];
         $target_org['select'] = null;
 
         $selectedFlg = null;
-        $chunkSize = 100; // チャンクサイズを設定
+        $chunkSize = 200; // チャンクサイズを設定
         $offset = 0;
 
+        // ManualShopテーブルからメッセージに関連する店舗情報を取得
         while (true) {
-            // ブランドごとに処理を分けることで効率的なデータ取得を行います
             $shops = ManualShop::where('manual_id', $manual_id)
                 ->whereIn('brand_id', $target_brand)
                 ->offset($offset)
                 ->limit($chunkSize)
                 ->get(['shop_id', 'selected_flg']);
 
+            // 取得したデータが空ならループを終了
             if ($shops->isEmpty()) {
-                break; // チャンク内にデータがない場合、ループを抜ける
+                break;
             }
 
+            // 取得した店舗データをtarget_org['shops']配列に格納し、selected_flgを設定
             foreach ($shops as $shop) {
                 $target_org['shops'][] = $shop->shop_id;
                 if (!$selectedFlg) {
                     $selectedFlg = $shop->selected_flg;
                 }
             }
-
-            $offset += $chunkSize; // 次のチャンクに進む
+            $offset += $chunkSize;
         }
 
-        // ManualShopにshop_idが見つからない場合はManualUserを確認
+        // ManualShopテーブルにshop_idが存在しない場合はManualUserテーブルを確認
         if (empty($target_org['shops'])) {
             ManualUser::where('manual_id', $manual_id)
                 ->orderBy('manual_id')
@@ -806,15 +693,16 @@ class ManualPublishController extends Controller
             $target_org['select'] = 'oldStore';
         }
 
-        // 重複を削除
+        // target_org['shops']の配列内の重複する店舗IDを削除
         $target_org['shops'] = array_unique($target_org['shops']);
 
-        // selectedFlgが存在する場合は設定
+        // selectedFlgが設定されている場合はtarget_org['select']にその値を設定
         if ($selectedFlg) {
             $target_org['select'] = $selectedFlg;
         }
 
-        // shop_codeを基準にソートするためのカスタム比較関数を定義
+
+        // 店舗コードでshopsをソート
         usort($all_shop_list, function ($a, $b) {
             return strcmp($a['shop_code'], $b['shop_code']);
         });
@@ -871,7 +759,6 @@ class ManualPublishController extends Controller
 
         // 手順を登録する
         $content_data = [];
-        $count_order_no = 0;
 
         try {
             DB::beginTransaction();
@@ -916,82 +803,70 @@ class ManualPublishController extends Controller
 
             $manual->update($manual_params);
 
+            // メッセージに関連する組織データを削除
             ManualOrganization::where('manual_id', $manual_id)->delete();
 
-            if (isset($request->organization['org5'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org5_ids = explode(',', $request->organization['org5'][0]);
-                foreach ($org5_ids as $org5_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $admin->organization1_id,
-                        'organization5_id' => $org5_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org4'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org4_ids = explode(',', $request->organization['org4'][0]);
-                foreach ($org4_ids as $org4_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $admin->organization1_id,
-                        'organization4_id' => $org4_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org3'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org3_ids = explode(',', $request->organization['org3'][0]);
-                foreach ($org3_ids as $org3_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $admin->organization1_id,
-                        'organization3_id' => $org3_id
-                    ]);
-                }
-            }
-            if (isset($request->organization['org2'][0])) {
-                // カンマ区切りの文字列を配列に変換
-                $org2_ids = explode(',', $request->organization['org2'][0]);
-                foreach ($org2_ids as $org2_id) {
-                    $manual->organization()->create([
-                        'manual_id' => $manual->id,
-                        'organization1_id' => $admin->organization1_id,
-                        'organization2_id' => $org2_id
-                    ]);
+            foreach (['org5', 'org4', 'org3', 'org2'] as $level) {
+                if (isset($request->organization[$level][0])) {
+                    // 事前にIDの配列を取得
+                    $ids = explode(',', $request->organization[$level][0]);
+
+                    $bulkData = [];
+                    foreach ($ids as $id) {
+                        $orgData = [
+                            'manual_id' => $manual->id,
+                            'organization1_id' => $admin->organization1_id,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+
+                        // レベルごとにフィールドを設定
+                        switch ($level) {
+                            case 'org5':
+                                $orgData['organization5_id'] = $id;
+                                break;
+                            case 'org4':
+                                $orgData['organization4_id'] = $id;
+                                break;
+                            case 'org3':
+                                $orgData['organization3_id'] = $id;
+                                break;
+                            case 'org2':
+                                $orgData['organization2_id'] = $id;
+                                break;
+                        }
+
+                        // まとめてデータを追加
+                        $bulkData[] = $orgData;
+                    }
+
+                    // バルクインサート
+                    DB::table('manual_organization')->insert($bulkData);
                 }
             }
 
+            // メッセージに関連するショップデータを削除
             ManualShop::where('manual_id', $manual_id)->delete();
 
             // チャンクサイズを設定
-            $chunkSize = 100;
+            $chunkSize = 200;
 
-            // manual_shopにshop_idとmanual_idを格納
+            // manual_shopにshop_idとmanual_idをバルクインサート
             if (isset($request->organization_shops)) {
-                // カンマ区切りの文字列を配列に変換
                 $organization_shops = explode(',', $request->organization_shops);
 
-                $insertData = []; // バルクインサート用のデータ配列
-
-                // shop_idでグループ化されたショップデータを取得
+                // ショップデータの事前取得とグループ化
                 $shopsData = Shop::whereIn('id', $organization_shops)
                     ->whereIn('brand_id', $request->brand)
                     ->get(['id', 'brand_id'])
                     ->groupBy('id');
 
-                foreach ($organization_shops as $_shop_id) {
-                    $selectedFlg = null;
-                    if (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') {
-                        $selectedFlg = 'all';
-                    } elseif (isset($request->select_organization['store']) && $request->select_organization['store'] === 'selected') {
-                        $selectedFlg = 'store';
-                    } else {
-                        $selectedFlg = 'store';
-                    }
+                $insertData = [];
+                // 事前に選択フラグを決定
+                $selectedFlg = (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') ? 'all' : 'store';
 
-                    if ($selectedFlg && isset($shopsData[$_shop_id])) {
+                foreach ($organization_shops as $_shop_id) {
+                    if (isset($shopsData[$_shop_id])) {
                         foreach ($shopsData[$_shop_id] as $shop) {
                             $insertData[] = [
                                 'manual_id' => $manual->id,
@@ -1002,10 +877,10 @@ class ManualPublishController extends Controller
                                 'updated_at' => now()
                             ];
 
-                            // インサートデータがチャンクサイズに達したらバルクインサートを実行
+                            // チャンクサイズに達したらバルクインサート
                             if (count($insertData) >= $chunkSize) {
                                 ManualShop::insert($insertData);
-                                $insertData = []; // データ配列をリセット
+                                $insertData = [];
                             }
                         }
                     }
@@ -1019,29 +894,34 @@ class ManualPublishController extends Controller
 
             $manual->brand()->sync($request->brand);
 
-            // $manual->user()->sync(!isset($request->save) ? $this->getTargetUsersByShopId($request) : []);
+            // 既存ユーザーとターゲットユーザーの比較
             $targetUsers = !isset($request->save) ? $this->getTargetUsersByShopId($request) : [];
             $currentUsers = $manual->user()->pluck('user_id')->toArray();
 
             // チャンクサイズを設定
-            $chunkSize = 100;
-            // 削除
+            $chunkSize = 200;
+
+            // 削除処理
             $usersToDetach = array_diff($currentUsers, array_keys($targetUsers));
             if (!empty($usersToDetach)) {
-                $manual->user()->detach($usersToDetach);
+                foreach (array_chunk($usersToDetach, $chunkSize) as $chunk) {
+                    // チャンクごとにユーザーをデタッチ
+                    $manual->user()->detach($chunk);
+                }
             }
 
-            // 追加または更新
+            // 追加または更新処理
             $usersToAttach = array_diff_key($targetUsers, array_flip($currentUsers));
-            // チャンクに分割して処理
-            foreach (array_chunk($usersToAttach, $chunkSize, true) as $chunk) {
-                // 各チャンクに対して関連付けを行う
-                $attachData = [];
-                foreach ($chunk as $userId => $shopData) {
-                    $attachData[$userId] = ['shop_id' => $shopData['shop_id']];
+            if (!empty($usersToAttach)) {
+                // チャンクに分割して処理
+                foreach (array_chunk($usersToAttach, $chunkSize, true) as $chunk) {
+                    $attachData = [];
+                    foreach ($chunk as $userId => $shopData) {
+                        $attachData[$userId] = ['shop_id' => $shopData['shop_id']];
+                    }
+                    // ユーザーを関連付け
+                    $manual->user()->attach($attachData);
                 }
-                // ユーザーを関連付け
-                $manual->user()->attach($attachData);
             }
 
             $manual->content()->createMany($content_data);
@@ -1642,77 +1522,44 @@ class ManualPublishController extends Controller
         return $target_user_data;
     }
 
-    private function getTargetUsersByShopId($organizations): array
+        private function getTargetUsersByShopId($organizations): array
     {
-        $shops_id = [];
         $target_user_data = [];
+        $chunkSize = 200; // チャンクサイズを設定
 
-        // shopを取得する
         if (isset($organizations->organization_shops)) {
             $organization_shops = explode(',', $organizations->organization_shops);
-            foreach ($organization_shops as $_shop_id) {
-                foreach ($organizations->brand as $brand) {
-                    $_shops_id = Shop::select('id')
-                        ->where('id', $_shop_id)
-                        ->where('brand_id', $brand)
-                        ->get()
-                        ->toArray();
-                    $shops_id = array_merge($shops_id, $_shops_id);
+
+            // ユーザーとショップのデータを一度に取得
+            $all_users = User::query()
+                ->select(
+                    'users.id as user_id',
+                    'users.shop_id',
+                    'shops.brand_id',
+                    'shops.organization5_id',
+                    'shops.organization4_id',
+                    'shops.organization3_id',
+                    'shops.organization2_id'
+                )
+                ->leftJoin('shops', 'users.shop_id', '=', 'shops.id')
+                ->whereIn('shops.id', $organization_shops)
+                ->whereIn('shops.brand_id', $organizations->brand)
+                ->orderBy('users.shop_id', 'asc')
+                ->get()
+                ->toArray();
+
+            // データをチャンクで処理
+            $user_chunks = array_chunk($all_users, $chunkSize);
+
+            foreach ($user_chunks as $chunk) {
+                foreach ($chunk as $user) {
+                    $target_user_data[$user['user_id']] = ['shop_id' => $user['shop_id']];
                 }
             }
         }
 
-        // 取得したshopのリストからユーザーを取得する
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-        // ユーザーに業務連絡の閲覧権限を与える
-        foreach ($target_users as $target_user) {
-            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
-        }
-
         return $target_user_data;
     }
-
-    // private function getTargetUsersByShopId($organizations): array
-    // {
-    //     $target_user_data = [];
-    //     $chunkSize = 100; // チャンクサイズを設定
-
-    //     if (isset($organizations->organization_shops)) {
-    //         $organization_shops = explode(',', $organizations->organization_shops);
-
-    //         // 指定されたブランドのショップIDを取得
-    //         $shops = Shop::whereIn('id', $organization_shops)
-    //             ->whereIn('brand_id', $organizations->brand)
-    //             ->pluck('id')
-    //             ->toArray();
-
-    //         // ショップIDをチャンクに分割
-    //         $shop_chunks = array_chunk($shops, $chunkSize);
-
-    //         foreach ($shop_chunks as $shop_chunk) {
-    //             // ユーザーをチャンクごとに取得
-    //             $target_users = User::select('id', 'shop_id')
-    //                 ->whereIn('shop_id', $shop_chunk)
-    //                 ->whereIn('roll_id', $organizations->target_roll)
-    //                 ->get()
-    //                 ->filter(function ($user) {
-    //                     // ユーザーが存在するかを確認
-    //                     return User::find($user->id) !== null;
-    //                 })
-    //                 ->mapWithKeys(function ($user) {
-    //                     return [$user->id => ['shop_id' => $user->shop_id]];
-    //                 })
-    //                 ->toArray();
-
-    //             // チャンクごとに取得したユーザーを統合
-    //             foreach ($target_users as $key => $value) {
-    //                 $target_user_data[$key] = $value;
-    //             }
-    //         }
-    //     }
-
-    //     return $target_user_data;
-    // }
 
     // 「手順」を登録するために加工する
     private function manualContentsParam($request): array
