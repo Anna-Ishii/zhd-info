@@ -375,5 +375,5 @@
         </div>
     </div>
     <script></script>
-    <script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
+    <script src="{{ asset('/js/admin/analyse/personal.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
