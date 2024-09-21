@@ -102,3 +102,16 @@ $(window).on("load", function () {
         defaultDate: d,
     });
 });
+
+// 更新ボタンのクリックイベントにオーバーレイ表示
+$(document).ready(function () {
+    $('#updateViewRatesBtn').on('click', function() {
+        var overlay = document.getElementById('overlay');
+        overlay.style.display = 'block';
+
+        // ページが読み込まれたらオーバーレイを非表示にする
+        $(window).on('load', function() {
+            overlay.style.display = 'none';
+        });
+    });
+});
