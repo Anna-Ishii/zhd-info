@@ -128,9 +128,28 @@
                 @include('common.admin.pagenation', ['objects' => $manual_list])
                 <div>
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                        <!-- 更新ボタン -->
                         <div>
-                            <input type="button" class="btn btn-admin" data-toggle="modal" data-target="#manualImportModal"
-                                value="インポート">
+                            <a href="{{ route('admin.manual.publish.update-view-rates') }}?{{ http_build_query(request()->query()) }}"
+                                class=" btn btn-admin">閲覧率更新</a>
+                        </div>
+
+                        <!-- 更新日時の表示 -->
+                        <div>
+                            <span>最終更新日時:
+                                @if ($manual_list->isNotEmpty() && $manual_list->last()->last_updated)
+                                    {{ \Carbon\Carbon::parse($manual_list->last()->last_updated)->format('Y-m-d H:i:s') }}
+                                @else
+                                    更新なし
+                                @endif
+                            </span>
+                        </div>
+                    @endif
+
+                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                        <div>
+                            <input type="button" class="btn btn-admin" data-toggle="modal"
+                                data-target="#manualImportModal" value="インポート">
                         </div>
                     @endif
                     <div>
@@ -228,13 +247,16 @@
                                     <td></td>
                                     <td nowrap>詳細</td>
                                 @else
+                                    <!-- 閲覧率を表示 -->
                                     <td
                                         class="view-rate {{ ($manual->total_users != 0 ? $manual->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
-                                        <div>{{ $manual->total_users != 0 ? $manual->view_rate : 0 }}% </div>
+                                        <div>{{ $manual->total_users != 0 ? $manual->view_rate : '0.0' }}% </div>
                                     </td>
+                                    <!-- ユーザー数を表示 -->
                                     <td>
                                         {{ $manual->read_users }}/{{ $manual->total_users }}
                                     </td>
+
                                     <td class="detailBtn">
                                         <a href="/admin/manual/publish/{{ $manual->id }}">詳細</a>
                                     </td>
@@ -269,6 +291,6 @@
 
     </div>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
-    <script src="{{ asset('/js/admin/manual/publish/index.js') }}" defer></script>
-    <script src="{{ asset('/js/index.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection

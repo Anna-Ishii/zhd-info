@@ -1,95 +1,104 @@
-$(".editBtn").on('click', function (e) {
+$(".editBtn").on("click", function (e) {
     e.preventDefault();
     var targetElement = $(this).parents("tr");
-    var message_id= targetElement.attr("data-message_id");
+    var message_id = targetElement.attr("data-message_id");
 
     let uri = new URL(window.location.href);
-    let targetUrl = uri.origin + "/admin/message/publish/edit/" +  message_id;
+    let targetUrl = uri.origin + "/admin/message/publish/edit/" + message_id;
 
     window.location.href = targetUrl;
 });
 
-$(".StopBtn").on('click', function (e) {
+$(".StopBtn").on("click", function (e) {
     e.preventDefault();
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
     var targetElement = $(this).parents("tr");
-    var message_id= targetElement.attr("data-message_id");
-    
+    var message_id = targetElement.attr("data-message_id");
+
     let messages = [];
     messages.push(message_id);
 
     fetch("/admin/message/publish/stop", {
-        method: 'POST',
+        method: "POST",
         headers: {
             "Content-Type": "application/json",
-            "X-CSRF-TOKEN": csrfToken
+            "X-CSRF-TOKEN": csrfToken,
         },
         body: JSON.stringify({
-            'message_id': messages
-        })
+            message_id: messages,
+        }),
     })
-    .then(response => {
-        if (response.ok) {
-            return response.json();
-        } else {
-            return response.json().then(data => {
-                throw new Error(data.message); // エラーメッセージをスロー
-            });
-        }})
-        .then(data => {
+        .then((response) => {
+            if (response.ok) {
+                return response.json();
+            } else {
+                return response.json().then((data) => {
+                    throw new Error(data.message); // エラーメッセージをスロー
+                });
+            }
+        })
+        .then((data) => {
             const message = data.message;
             // メッセージの表示や処理を行う
             alert(message);
             window.location.reload();
         })
-        .catch(error => {
+        .catch((error) => {
             const message = error.message;
             alert(message);
-        })    
+        });
 });
 
-$(window).on('load' , function(){
-	let d = new Date();
-	/* datetimepicker */
-	$.datetimepicker.setLocale('ja');
+$(window).on("load", function () {
+    let d = new Date();
+    /* datetimepicker */
+    $.datetimepicker.setLocale("ja");
 
-	$('#publishDateFrom').datetimepicker({
-		format:'Y/m/d(D)',
-		timepicker:false,
-		onShow:function( ct ){
-			this.setOptions({
-				maxDate:jQuery('#publishDateTo').val()?jQuery('#publishDateTo').val():false
-			})
-		 },
-		 defaultDate: d,
-	});	
-	$('#publishDateTo').datetimepicker({
-		format:'Y/m/d(D)',
-		timepicker:false,
-		onShow:function( ct ){
-			this.setOptions({
-				minDate:jQuery('#publishDateFrom').val()?jQuery('#publishDateFrom').val():false
-			})
-		 },
-		 defaultDate: d,
-	});	
-    $('#readedDateFrom').datetimepicker({
-		format:'Y/m/d (D) H:i',
-		onShow:function( ct ){
-			this.setOptions({
-				maxDate:jQuery('#readedDateTo').val()?jQuery('#readedDateTo').val():false
-			})
-		 },
-		 defaultDate: d,
-	});	
-	$('#readedDateTo').datetimepicker({
-		format:'Y/m/d (D) H:i',
-		onShow:function( ct ){
-			this.setOptions({
-				minDate:jQuery('#readedDateFrom').val()?jQuery('#readedDateFrom').val():false
-			})
-		 },
-		 defaultDate: d,
-	});	
+    $("#publishDateFrom").datetimepicker({
+        format: "Y/m/d(D)",
+        timepicker: false,
+        onShow: function (ct) {
+            this.setOptions({
+                maxDate: jQuery("#publishDateTo").val()
+                    ? jQuery("#publishDateTo").val()
+                    : false,
+            });
+        },
+        defaultDate: d,
+    });
+    $("#publishDateTo").datetimepicker({
+        format: "Y/m/d(D)",
+        timepicker: false,
+        onShow: function (ct) {
+            this.setOptions({
+                minDate: jQuery("#publishDateFrom").val()
+                    ? jQuery("#publishDateFrom").val()
+                    : false,
+            });
+        },
+        defaultDate: d,
+    });
+    $("#readedDateFrom").datetimepicker({
+        format: "Y/m/d (D) H:i",
+        onShow: function (ct) {
+            this.setOptions({
+                maxDate: jQuery("#readedDateTo").val()
+                    ? jQuery("#readedDateTo").val()
+                    : false,
+            });
+        },
+        defaultDate: d,
+    });
+    $("#readedDateTo").datetimepicker({
+        format: "Y/m/d (D) H:i",
+        onShow: function (ct) {
+            this.setOptions({
+                minDate: jQuery("#readedDateFrom").val()
+                    ? jQuery("#readedDateFrom").val()
+                    : false,
+            });
+        },
+        defaultDate: d,
+    });
 });

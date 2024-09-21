@@ -25,6 +25,7 @@ use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\MessageShop;
 use App\Models\MessageUser;
+use App\Models\MessageViewRate;
 use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
@@ -60,7 +61,6 @@ class MessagePublishController extends Controller
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
-        $rate = $request->input('rate');
         $organization1_id = $request->input('brand', $organization1_list[0]->id);
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
@@ -84,30 +84,35 @@ class MessagePublishController extends Controller
             ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
             ->groupBy('m.id');
 
-        $readUsersSub = DB::table('message_user')
+        // 閲覧率のデータを集計
+        $viewRatesSub = DB::table('message_view_rates')
             ->select([
-                'message_user.message_id',
-                DB::raw('sum(message_user.read_flg) as read_users')
+                'message_id',
+                DB::raw('MAX(view_rate) as view_rate'),
+                DB::raw('MAX(read_users) as read_users'),
+                DB::raw('MAX(total_users) as total_users'),
+                DB::raw('MAX(updated_at) as last_updated')
             ])
-            ->groupBy('message_user.message_id');
+            ->groupBy('message_id');
 
         $message_list = Message::query()
             ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
             ->leftjoin('message_user', 'messages.id', '=', 'message_id')
             ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
             ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
+            ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
+                $join->on('messages.id', '=', 'view_rates.message_id');
+            })
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'messages.id');
             })
-            ->leftJoinSub($readUsersSub, 'read_users_sub', function ($join) {
-                $join->on('read_users_sub.message_id', '=', 'messages.id');
-            })
             ->select([
                 'messages.*',
-                DB::raw('ifnull(read_users_sub.read_users, 0) as read_users'),
-                DB::raw('count(distinct message_user.user_id) as total_users'),
-                DB::raw('round((ifnull(read_users_sub.read_users, 0) / count(distinct message_user.user_id)) * 100, 1) as view_rate'),
-                DB::raw('sub.b_name as brand_name'),
+                'view_rates.view_rate',
+                'view_rates.read_users',
+                'view_rates.total_users',
+                'view_rates.last_updated',
+                'sub.b_name as brand_name',
             ])
             ->where('messages.organization1_id', $organization1_id)
             ->groupBy(DB::raw('messages.id'))
@@ -142,11 +147,6 @@ class MessagePublishController extends Controller
             })
             ->when(isset($label), function ($query) use ($label) {
                 $query->where('emergency_flg', true);
-            })
-            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
-                $min = isset($rate[0]) ? $rate[0] : 0;
-                $max = isset($rate[1]) ? $rate[1] : 100;
-                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
             })
             ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                 $query->where('start_datetime', '>=', $publish_date[0]);
@@ -238,20 +238,32 @@ class MessagePublishController extends Controller
         }
 
         // 店舗数をカウント
-        foreach ($message_list as &$message) {
-            $shop_count = 0;
+        // すべてのメッセージIDを取得
+        $message_ids = $message_list->pluck('id')->toArray();
+        // すべての店舗数を取得
+        $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
+        // 各メッセージに関連する店舗数を取得
+        $message_shop_counts = MessageShop::select('message_id', DB::raw('COUNT(*) as shop_count'))
+            ->whereIn('message_id', $message_ids)
+            ->groupBy('message_id')
+            ->pluck('shop_count', 'message_id');
+        // 各メッセージに関連するユーザー数を取得（店舗数が0の場合に使用）
+        $message_user_counts = MessageUser::select('message_id', DB::raw('COUNT(*) as user_count'))
+            ->whereIn('message_id', $message_ids)
+            ->groupBy('message_id')
+            ->pluck('user_count', 'message_id');
 
-            // すべての店舗数
-            $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-            // チェックされている店舗数
-            $shop_count = MessageShop::where('message_id', $message->id)->count();
+        // メッセージリストをループして、店舗数を割り当て
+        foreach ($message_list as &$message) {
+            $shop_count = $message_shop_counts[$message->id] ?? 0;
+            // 店舗数が0の場合は、ユーザー数を使用
             if ($shop_count == 0) {
-                $shop_count = MessageUser::where('message_id', $message->id)->count();
+                $shop_count = $message_user_counts[$message->id] ?? 0;
             }
-            if ($all_shop_count == $shop_count) {
+            // 全店舗数と同じ場合は「全店」と表示
+            if ($shop_count == $all_shop_count) {
                 $shop_count = "全店";
             }
-
             $message->shop_count = $shop_count;
         }
 
@@ -262,6 +274,107 @@ class MessagePublishController extends Controller
             'organization1_list' => $organization1_list,
         ]);
     }
+
+    // 閲覧率の更新処理
+    public function updateViewRates(Request $request)
+    {
+        $admin = session('admin');
+        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $rate = $request->input('rate');
+        $message_id = $request->input('message_id'); // message_idを取得
+
+        // メッセージの既読・総ユーザー数を一度に集計
+        $messageRates = DB::table('message_user')
+            ->select([
+                'message_user.message_id',
+                DB::raw('sum(message_user.read_flg) as read_users'),
+                DB::raw('count(distinct message_user.user_id) as total_users'),
+                DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
+            ])
+            ->join('messages', 'message_user.message_id', '=', 'messages.id')
+            ->where('messages.organization1_id', $organization1_id)
+            ->when($message_id, function ($query) use ($message_id) {
+                $query->where('message_user.message_id', $message_id); // message_idでフィルタリング
+            })
+            ->groupBy('message_user.message_id')
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->get();
+
+        // バルクアップデート用のデータ準備
+        $updateData = [];
+        foreach ($messageRates as $message) {
+            $updateData[] = [
+                'message_id' => $message->message_id,
+                'view_rate' => $message->view_rate,     // 閲覧率の計算
+                'read_users' => $message->read_users,   // 既読ユーザー数
+                'total_users' => $message->total_users, // 全体ユーザー数
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // バルクアップデートを実行
+        DB::table('message_view_rates')->upsert(
+            $updateData,
+            ['message_id'],
+            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+        );
+
+        // 処理完了後にページをリダイレクトして結果を表示
+        return redirect()->back()->with('success', '閲覧率が更新されました。');
+    }
+
+    // public function updateViewRates(Request $request)
+    // {
+    //     $admin = session('admin');
+    //     $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+    //     $rate = $request->input('rate');
+
+    //     // メッセージの既読・総ユーザー数を一度に集計
+    //     $messageRates = DB::table('message_user')
+    //         ->select([
+    //             'message_user.message_id',
+    //             DB::raw('sum(message_user.read_flg) as read_users'),
+    //             DB::raw('count(distinct message_user.user_id) as total_users'),
+    //             DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
+    //         ])
+    //         ->join('messages', 'message_user.message_id', '=', 'messages.id')
+    //         ->where('messages.organization1_id', $organization1_id)
+    //         ->groupBy('message_user.message_id')
+    //         ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+    //             $min = isset($rate[0]) ? $rate[0] : 0;
+    //             $max = isset($rate[1]) ? $rate[1] : 100;
+    //             $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+    //         })
+    //         ->get();
+
+    //     // バルクアップデート用のデータ準備
+    //     $updateData = [];
+    //     foreach ($messageRates as $message) {
+    //         $updateData[] = [
+    //             'message_id' => $message->message_id,
+    //             'view_rate' => $message->view_rate,     // 閲覧率の計算
+    //             'read_users' => $message->read_users,   // 既読ユーザー数
+    //             'total_users' => $message->total_users, // 全体ユーザー数
+    //             'created_at' => now(),
+    //             'updated_at' => now(),
+    //         ];
+    //     }
+
+    //     // バルクアップデートを実行
+    //     DB::table('message_view_rates')->upsert(
+    //         $updateData,
+    //         ['message_id'],
+    //         ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+    //     );
+
+    //     // 処理完了後にページをリダイレクトして結果を表示
+    //     return redirect()->back()->with('success', '閲覧率が更新されました。');
+    // }
 
     public function show(Request $request, $message_id)
     {
@@ -622,6 +735,10 @@ class MessagePublishController extends Controller
             }
 
             DB::commit();
+
+            // 閲覧率の更新処理
+            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $organization1->id]));
+
         } catch (\Throwable $th) {
             DB::rollBack();
             Log::error($th->getMessage());
@@ -1109,6 +1226,10 @@ class MessagePublishController extends Controller
             }
             $message->tag()->sync($tag_ids);
             DB::commit();
+
+            // 閲覧率の更新処理
+            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $admin->organization1_id]));
+
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($message_changed_flg) {
