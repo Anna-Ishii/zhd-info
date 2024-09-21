@@ -131,7 +131,7 @@
                         <!-- 更新ボタン -->
                         <div>
                             <a href="{{ route('admin.manual.publish.update-view-rates') }}?{{ http_build_query(request()->query()) }}"
-                                class=" btn btn-admin">閲覧率更新</a>
+                                class=" btn btn-admin" id="updateViewRatesBtn">閲覧率更新</a>
                         </div>
 
                         <!-- 更新日時の表示 -->
