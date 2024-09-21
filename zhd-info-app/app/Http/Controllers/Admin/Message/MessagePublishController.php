@@ -328,54 +328,6 @@ class MessagePublishController extends Controller
         return redirect()->back()->with('success', '閲覧率が更新されました。');
     }
 
-    // public function updateViewRates(Request $request)
-    // {
-    //     $admin = session('admin');
-    //     $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
-    //     $rate = $request->input('rate');
-
-    //     // メッセージの既読・総ユーザー数を一度に集計
-    //     $messageRates = DB::table('message_user')
-    //         ->select([
-    //             'message_user.message_id',
-    //             DB::raw('sum(message_user.read_flg) as read_users'),
-    //             DB::raw('count(distinct message_user.user_id) as total_users'),
-    //             DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
-    //         ])
-    //         ->join('messages', 'message_user.message_id', '=', 'messages.id')
-    //         ->where('messages.organization1_id', $organization1_id)
-    //         ->groupBy('message_user.message_id')
-    //         ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
-    //             $min = isset($rate[0]) ? $rate[0] : 0;
-    //             $max = isset($rate[1]) ? $rate[1] : 100;
-    //             $query->havingRaw('view_rate between ? and ?', [$min, $max]);
-    //         })
-    //         ->get();
-
-    //     // バルクアップデート用のデータ準備
-    //     $updateData = [];
-    //     foreach ($messageRates as $message) {
-    //         $updateData[] = [
-    //             'message_id' => $message->message_id,
-    //             'view_rate' => $message->view_rate,     // 閲覧率の計算
-    //             'read_users' => $message->read_users,   // 既読ユーザー数
-    //             'total_users' => $message->total_users, // 全体ユーザー数
-    //             'created_at' => now(),
-    //             'updated_at' => now(),
-    //         ];
-    //     }
-
-    //     // バルクアップデートを実行
-    //     DB::table('message_view_rates')->upsert(
-    //         $updateData,
-    //         ['message_id'],
-    //         ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
-    //     );
-
-    //     // 処理完了後にページをリダイレクトして結果を表示
-    //     return redirect()->back()->with('success', '閲覧率が更新されました。');
-    // }
-
     public function show(Request $request, $message_id)
     {
         $message = Message::where('id', $message_id)
