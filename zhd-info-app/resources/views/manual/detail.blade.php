@@ -1,7 +1,7 @@
 @extends('layouts.parent')
 
 @push('css')
-    <link href="{{ asset('/css/detail.css') }}?date=20240824" rel="stylesheet">
+    <link href="{{ asset('/css/detail.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 @endpush
 
 @section('title', 'マニュアル')
@@ -237,6 +237,6 @@
         @include('common.footer')
 
         <!-- pdfjs -->
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.js"></script>
-        <script src="{{ asset('/js/detail.js') }}?date=20240906" defer></script>
+        <script src="{{ asset('/js/oldjslibrary/pdfjs-2.10.377-dist/build/pdf.js') }}"></script>
+        <script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
     @endsection

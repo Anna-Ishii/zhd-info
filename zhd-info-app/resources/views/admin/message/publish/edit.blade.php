@@ -408,6 +408,6 @@
     </div>
     @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
     @include('common.admin.message-new-join-file-modal', [])
-    <script src="{{ asset('/js/admin/message/publish/edit.js') }}?date=20240902" defer></script>
-    <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}?date=20240911" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/edit.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
