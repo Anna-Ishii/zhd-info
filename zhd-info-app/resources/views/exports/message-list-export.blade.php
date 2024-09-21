@@ -14,9 +14,9 @@
             <th>掲載終了日時</th>
             <th>状態</th>
             <th>対象業態</th>
-            <th>対象BL</th>
+            {{-- <th>対象BL</th>
             <th>対象AR</th>
-            <th>対象DS</th>
+            <th>対象DS</th> --}}
         </tr>
     </thead>
     <tbody>
@@ -35,9 +35,9 @@
                 <td>{{$message->formatted_end_datetime_for_export}}</td>
                 <td>{{$message->status->text()}}</td>
                 <td>{{$message->brand_name}}</td>
-                <td>{{$message->o5_name}}</td>
+                {{-- <td>{{$message->o5_name}}</td>
                 <td>{{$message->o4_name}}</td>
-                <td>{{$message->o3_name}}</td>
+                <td>{{$message->o3_name}}</td> --}}
             </tr>
         @endforeach
     </tbody>
