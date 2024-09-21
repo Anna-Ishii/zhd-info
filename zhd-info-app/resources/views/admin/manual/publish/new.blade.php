@@ -247,15 +247,27 @@
                 <div class="col-lg-10 checkArea">
                     <div class="mb8">
                         <label class="mr16">
-                            <input type="checkbox" id="checkAll" class="mr8">
-                            全業態
+                            <input type="checkbox" id="checkAll" name="brandAll" class="mr8"
+                                @if (request()->old())
+                                    {{ old('brandAll') ? 'checked' : '' }}
+                                @else
+                                    {{ 'checked' }}
+                                @endif
+                                >
+                                全業態
                         </label>
                     </div>
                     @foreach ($brand_list as $brand)
                         <label class="mr16">
                             <input type="checkbox" name="brand[]" value="{{ $brand->id }}" class="checkCommon mr8"
-                                {{ in_array((string) $brand->id, old('brand', []), true) ? 'checked' : '' }}>
-                            {{ $brand->name }}
+                                @if (old('brand'))
+                                    {{ in_array((string) $brand->id, old('brand', []), true) ? 'checked' : '' }}
+                                @elseif (!request()->old())
+                                    {{ 'checked' }}
+                                @else
+                                @endif
+                                >
+                                {{ $brand->name }}
                         </label>
                     @endforeach
                 </div>
@@ -353,6 +365,6 @@
         </form>
     </div>
     @include('common.admin.manual-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
-    <script src="{{ asset('/js/admin/manual/publish/new.js') }}?date=202407" defer></script>
-    <script src="{{ asset('/js/admin/manual/publish/new_store.js') }}?date=20240911" defer></script>
+    <script src="{{ asset('/js/admin/manual/publish/new.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection

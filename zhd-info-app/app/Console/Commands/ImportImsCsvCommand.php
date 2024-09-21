@@ -113,7 +113,6 @@ class ImportImsCsvCommand extends Command
         }
         $ims_log->save();
         $this->info('end');
-        ini_restore('memory_limit');
     }
 
     private function import_shops($shops_data)
