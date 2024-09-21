@@ -23,6 +23,7 @@ use App\Models\ManualOrganization;
 use App\Models\ManualTagMaster;
 use App\Models\ManualShop;
 use App\Models\ManualUser;
+use App\Models\ManualViewRate;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
@@ -68,41 +69,45 @@ class ManualPublishController extends Controller
             ->select([
                 'm.id as m_id',
                 DB::raw('
-                            case
-                                when (count(distinct b.name)) = 0 then ""
-                                else group_concat(distinct b.name order by b.name)
-                            end as b_name
-                        ')
+                    case
+                        when (count(distinct b.name)) = 0 then ""
+                        else group_concat(distinct b.name order by b.name)
+                    end as b_name
+                ')
             ])
             ->leftjoin('manual_brand as m_b', 'm.id', 'm_b.manual_id')
             ->leftjoin('brands as b', 'b.id', 'm_b.brand_id')
             ->groupBy('m.id');
 
-        $readUsersSub = DB::table('manual_user')
-            ->select([
-                'manual_user.manual_id',
-                DB::raw('sum(manual_user.read_flg) as read_users')
+        // 閲覧率のデータを集計
+        $viewRatesSub = DB::table('manual_view_rates')
+        ->select([
+                'manual_id',
+                DB::raw('MAX(view_rate) as view_rate'),
+                DB::raw('MAX(read_users) as read_users'),
+                DB::raw('MAX(total_users) as total_users'),
+                DB::raw('MAX(updated_at) as last_updated')
             ])
-            ->groupBy('manual_user.manual_id');
+            ->groupBy('manual_id');
 
-        $manual_list =
-            Manual::query()
+        $manual_list = Manual::query()
             ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
             ->leftjoin('brands', 'brands.id', '=', 'manual_brand.brand_id')
+            ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
+                $join->on('manuals.id', '=', 'view_rates.manual_id');
+            })
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'manuals.id');
             })
-            ->leftJoinSub($readUsersSub, 'read_users_sub', function ($join) {
-                $join->on('read_users_sub.manual_id', '=', 'manuals.id');
-            })
             ->select([
                 'manuals.*',
-                DB::raw('ifnull(read_users_sub.read_users, 0) as read_users'),
-                DB::raw('count(distinct manual_user.user_id) as total_users'),
-                DB::raw('round((ifnull(read_users_sub.read_users, 0) / count(distinct manual_user.user_id)) * 100, 1) as view_rate'),
-                DB::raw('sub.b_name as brand_name'),
+                'view_rates.view_rate',
+                'view_rates.read_users',
+                'view_rates.total_users',
+                'view_rates.last_updated',
+                'sub.b_name as brand_name',
             ])
             ->where('manuals.organization1_id', $organization1_id)
             ->groupBy(DB::raw('manuals.id'))
@@ -160,20 +165,32 @@ class ManualPublishController extends Controller
             ->appends(request()->query());
 
         // 店舗数をカウント
-        foreach ($manual_list as &$manual) {
-            $shop_count = 0;
+        // すべてのメッセージIDを取得
+        $manual_ids = $manual_list->pluck('id')->toArray();
+        // すべての店舗数を取得
+        $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
+        // 各メッセージに関連する店舗数を取得
+        $manual_shop_counts = ManualShop::select('manual_id', DB::raw('COUNT(*) as shop_count'))
+            ->whereIn('manual_id', $manual_ids)
+            ->groupBy('manual_id')
+            ->pluck('shop_count', 'manual_id');
+        // 各メッセージに関連するユーザー数を取得（店舗数が0の場合に使用）
+        $manual_user_counts = ManualUser::select('manual_id', DB::raw('COUNT(*) as user_count'))
+            ->whereIn('manual_id', $manual_ids)
+            ->groupBy('manual_id')
+            ->pluck('user_count', 'manual_id');
 
-            // すべての店舗数
-            $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-            // チェックされている店舗数
-            $shop_count = ManualShop::where('manual_id', $manual->id)->count();
+        // メッセージリストをループして、店舗数を割り当て
+        foreach ($manual_list as &$manual) {
+            $shop_count = $manual_shop_counts[$manual->id] ?? 0;
+            // 店舗数が0の場合は、ユーザー数を使用
             if ($shop_count == 0) {
-                $shop_count = ManualUser::where('manual_id', $manual->id)->count();
+                $shop_count = $manual_user_counts[$manual->id] ?? 0;
             }
-            if ($all_shop_count ==  $shop_count) {
+            // 全店舗数と同じ場合は「全店」と表示
+            if ($shop_count == $all_shop_count) {
                 $shop_count = "全店";
             }
-
             $manual->shop_count = $shop_count;
         }
 
@@ -183,6 +200,59 @@ class ManualPublishController extends Controller
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
         ]);
+    }
+
+    // 閲覧率の更新処理
+    public function updateViewRates(Request $request)
+    {
+        $admin = session('admin');
+        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $rate = $request->input('rate');
+        $manual_id = $request->input('manual_id'); // manual_idを取得
+
+        // メッセージの既読・総ユーザー数を一度に集計
+        $manualRates = DB::table('manual_user')
+            ->select([
+                'manual_user.manual_id',
+                DB::raw('sum(manual_user.read_flg) as read_users'),
+                DB::raw('count(distinct manual_user.user_id) as total_users'),
+                DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
+            ])
+            ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
+            ->where('manuals.organization1_id', $organization1_id)
+            ->when($manual_id, function ($query) use ($manual_id) {
+                $query->where('manual_user.manual_id', $manual_id); // manual_idでフィルタリング
+            })
+            ->groupBy('manual_user.manual_id')
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->get();
+
+        // バルクアップデート用のデータ準備
+        $updateData = [];
+        foreach ($manualRates as $manual) {
+            $updateData[] = [
+                'manual_id' => $manual->manual_id,
+                'view_rate' => $manual->view_rate,     // 閲覧率の計算
+                'read_users' => $manual->read_users,   // 既読ユーザー数
+                'total_users' => $manual->total_users, // 全体ユーザー数
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // バルクアップデートを実行
+        DB::table('manual_view_rates')->upsert(
+            $updateData,
+            ['manual_id'],
+            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+        );
+
+        // 処理完了後にページをリダイレクトして結果を表示
+        return redirect()->back()->with('success', '閲覧率が更新されました。');
     }
 
     public function show(Request $request, $manual_id)
@@ -517,6 +587,10 @@ class ManualPublishController extends Controller
             }
 
             DB::commit();
+
+            // 閲覧率の更新処理
+            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
+
         } catch (\Throwable $th) {
             DB::rollBack();
             $this->rollbackRegisterFile($request->file_path);
@@ -934,6 +1008,10 @@ class ManualPublishController extends Controller
             $manual->tag()->sync($tag_ids);
 
             DB::commit();
+
+            // 閲覧率の更新処理
+            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $admin->organization1_id]));
+
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($manual_changed_flg) $this->rollbackRegisterFile($request->file_path);
@@ -1105,21 +1183,23 @@ class ManualPublishController extends Controller
                 ], 500);
             }
             $array = [];
-            foreach ($collection[0] as $key => [
-                $no,
-                $category,
-                $title,
-                $tag1,
-                $tag2,
-                $tag3,
-                $tag4,
-                $tag5,
-                $start_datetime,
-                $end_datetime,
-                $status,
-                $brand,
-                $description
-            ]) {
+            foreach (
+                $collection[0] as $key => [
+                    $no,
+                    $category,
+                    $title,
+                    $tag1,
+                    $tag2,
+                    $tag3,
+                    $tag4,
+                    $tag5,
+                    $start_datetime,
+                    $end_datetime,
+                    $status,
+                    $brand,
+                    $description
+                ]
+            ) {
                 $manual = Manual::where('number', $no)
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
@@ -1522,7 +1602,7 @@ class ManualPublishController extends Controller
         return $target_user_data;
     }
 
-        private function getTargetUsersByShopId($organizations): array
+    private function getTargetUsersByShopId($organizations): array
     {
         $target_user_data = [];
         $chunkSize = 200; // チャンクサイズを設定
