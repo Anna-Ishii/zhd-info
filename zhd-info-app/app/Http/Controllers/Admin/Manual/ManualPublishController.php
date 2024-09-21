@@ -1010,7 +1010,7 @@ class ManualPublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $admin->organization1_id]));
+            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));
 
         } catch (\Throwable $th) {
             DB::rollBack();

@@ -1228,7 +1228,7 @@ class MessagePublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $admin->organization1_id]));
+            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $message->organization1_id]));
 
         } catch (\Throwable $th) {
             DB::rollBack();
