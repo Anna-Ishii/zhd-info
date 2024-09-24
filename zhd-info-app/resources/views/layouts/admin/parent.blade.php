@@ -25,8 +25,8 @@
     <link href="{{ asset('/admin/css/font-awesome.min.css') }}" rel="stylesheet" type="text/css">
 
     <!-- Custom CSS -->
-    <link href="{{ asset('/admin/css/sb-admin-2.css') }}" rel="stylesheet">
-    <link href="{{ asset('/admin/css/style.css') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/sb-admin-2.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/style.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.css" integrity="sha512-bYPO5jmStZ9WI2602V2zaivdAnbAhtfzmxnEGh9RwtlI00I9s8ulGe4oBa5XxiC6tCITJH/QG70jswBhbLkxPw==" crossorigin="anonymous" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/css/theme.default.min.css">
 
