@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -35,7 +35,7 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+
                     </ul>
                 </li>
                 @endif
@@ -69,7 +69,7 @@
         <div class="pagenation-top">
             @include('common.admin.pagenation', ['objects' => $users])
         </div>
-        
+
         <div class="tableInner" style="height: 70vh;">
             <table id="list" class="table-list table table-bordered table-hover table-condensed text-center">
                 <thead>
@@ -106,5 +106,5 @@
     </form>
 
 </div>
-<script src="{{ asset('/js/admin/account/index.js') }}" defer></script>
+<script src="{{ asset('/js/admin/account/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection

@@ -310,10 +310,12 @@
             </div>
             <div class="form-group text-center">
                 <div class="col-lg-2 col-lg-offset-2">
-                    <input class="btn btn-admin" type="submit" name="register" value="登　録" onclick="window.onbeforeunload=null" />
+                    <input class="btn btn-admin" type="submit" name="register" value="登　録"
+                        onclick="window.onbeforeunload=null" />
                 </div>
                 <div class="col-lg-2">
-                    <input class="btn btn-admin" type="submit" name="save" value="保　存" onclick="window.onbeforeunload=null" />
+                    <input class="btn btn-admin" type="submit" name="save" value="保　存"
+                        onclick="window.onbeforeunload=null" />
                 </div>
                 <div class="col-lg-2">
                     <a href="{{ route('admin.message.publish.index', ['brand' => session('brand_id')]) }}" class="btn btn-admin">一覧に戻る</a>
@@ -324,6 +326,6 @@
     </div>
     @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
     @include('common.admin.message-new-join-file-modal', [])
-    <script src="{{ asset('/js/admin/message/publish/new.js') }}?date=20240902" defer></script>
-    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date=20240911" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
