@@ -217,5 +217,5 @@
         </a>
 
     </div>
-    <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
