@@ -56,7 +56,6 @@ class ManualPublishController extends Controller
         $new_category_id = $request->input('new_category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
-        $rate = $request->input('rate');
         $organization1_id = $request->input('brand', $organization1_list[0]->id);
         $publish_date = $request->input('publish-date');
 
@@ -142,11 +141,6 @@ class ManualPublishController extends Controller
             // 検索機能 カテゴリ
             ->when(isset($new_category_id), function ($query) use ($new_category_id) {
                 $query->where('category_level2_id', $new_category_id);
-            })
-            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
-                $min = isset($rate[0]) ? $rate[0] : 0;
-                $max = isset($rate[1]) ? $rate[1] : 100;
-                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
             })
             ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                 $query
