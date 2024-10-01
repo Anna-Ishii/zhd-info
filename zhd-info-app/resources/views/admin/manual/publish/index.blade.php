@@ -127,24 +127,22 @@
             <div class="pagenation-top">
                 @include('common.admin.pagenation', ['objects' => $manual_list])
                 <div>
-                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                        <!-- 更新ボタン -->
-                        <div>
-                            <a href="{{ route('admin.manual.publish.update-view-rates') }}?{{ http_build_query(request()->query()) }}"
-                                class=" btn btn-admin" id="updateViewRatesBtn">閲覧率更新</a>
-                        </div>
+                    <!-- 更新ボタン -->
+                    <div>
+                        <a href="{{ route('admin.manual.publish.update-view-rates') }}?{{ http_build_query(request()->query()) }}"
+                            class=" btn btn-admin" id="updateViewRatesBtn">閲覧率更新</a>
+                    </div>
 
-                        <!-- 更新日時の表示 -->
-                        <div>
-                            <span>最終更新日時:
-                                @if ($manual_list->isNotEmpty() && $manual_list->last()->last_updated)
-                                    {{ \Carbon\Carbon::parse($manual_list->last()->last_updated)->format('Y-m-d H:i:s') }}
-                                @else
-                                    更新なし
-                                @endif
-                            </span>
-                        </div>
-                    @endif
+                    <!-- 更新日時の表示 -->
+                    <div>
+                        <span>最終更新日時:
+                            @if ($manual_list->isNotEmpty() && $manual_list->last()->last_updated)
+                                {{ \Carbon\Carbon::parse($manual_list->last()->last_updated)->format('Y-m-d H:i:s') }}
+                            @else
+                                更新なし
+                            @endif
+                        </span>
+                    </div>
 
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
