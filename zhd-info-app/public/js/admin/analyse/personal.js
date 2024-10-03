@@ -63,7 +63,7 @@ $(document).ready(function () {
 
     let th0Width = th0.length ? Math.round(th0.outerWidth()) : 0;
     let th1Width = th1.length ? Math.round(th1.outerWidth()) : 0;
-    let th2Width = th2.length ? Math.round(th2.outerWidth()) : 0;
+    let th2Width = th2.length ? Math.floor(th2.outerWidth()) : 0;
 
     let DSWidth = th0Width;
     let BLWidth = DSWidth + th1Width;
@@ -72,7 +72,7 @@ $(document).ready(function () {
     // 店舗名の幅を取得
     let tableOffset = Math.round($('.personal.table.table-bordered').offset().left);
     let shopName = $('table.personal tbody tr td.shop_name');
-    let shopNameLeft = shopName.length ? Math.round(shopName.offset().left - tableOffset) : 25;
+    let shopNameLeft = shopName.length ? Math.round(shopName.offset().left - tableOffset) : 0;
 
     // 幅をCSSに適用
     document.documentElement.style.setProperty('--left-2', `${DSWidth}px`);
