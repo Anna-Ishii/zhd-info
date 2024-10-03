@@ -826,6 +826,10 @@ table.ims>tbody>tr>td.error {
     padding-bottom: 10px;
 }
 
+table.personal {
+    border-collapse: separate;
+}
+
 /* 縦スクロール */
 table.personal thead {
     position: sticky;

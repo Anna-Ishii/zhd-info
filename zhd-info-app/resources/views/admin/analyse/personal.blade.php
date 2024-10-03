@@ -139,7 +139,7 @@
         </form>
 
         <div class="message-tableInner table-responsive-xxl">
-            <table id="table" class="personal table table-bordered {sorter:'metadata'}">
+            <table id="table" class="personal table table-bordered {sorter:'metadata'}" style="border: none;">
                 <thead>
                     <tr>
                         @foreach (['DS', 'BL', 'AR'] as $organization)
