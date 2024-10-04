@@ -53,15 +53,6 @@ class MessagePublishController extends Controller
 {
     public function index(Request $request)
     {
-
-
-
-        // 開始時間をログに出力
-        $startTime = microtime(true);
-        Log::info('業連ホーム画面・開始時間: ' . date('Y-m-d H:i:s'));
-
-
-
         $admin = session('admin');
         $category_list = MessageCategory::all();
         $organization1_list = $admin->getOrganization1();
@@ -172,15 +163,6 @@ class MessagePublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
-
-
-        // SQLクエリの終了時間を記録
-        $sqlEndTime = microtime(true);
-        $sqlDuration = $sqlEndTime - $startTime;
-        Log::info('SQLクエリ実行時間: ' . round($sqlDuration, 2) . ' 秒');
-
-
-
         // 添付ファイル
         foreach ($message_list as &$message) {
             $file_list = [];
@@ -285,16 +267,6 @@ class MessagePublishController extends Controller
             }
             $message->shop_count = $shop_count;
         }
-
-
-
-        // 終了時間をログに出力し、所要時間を計算
-        $endTime = microtime(true);
-        $duration = $endTime - $startTime;
-        Log::info('業連ホーム画面・終了時間: ' . date('Y-m-d H:i:s'));
-        Log::info('業連ホーム画面・実行時間: ' . round($duration, 2) . ' 秒');
-
-
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
