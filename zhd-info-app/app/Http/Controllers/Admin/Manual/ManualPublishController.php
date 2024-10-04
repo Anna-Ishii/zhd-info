@@ -92,8 +92,8 @@ class ManualPublishController extends Controller
         $manual_list = Manual::query()
             ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
-            ->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
-            ->leftjoin('brands', 'brands.id', '=', 'manual_brand.brand_id')
+            // ->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
+            // ->leftjoin('brands', 'brands.id', '=', 'manual_brand.brand_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('manuals.id', '=', 'view_rates.manual_id');
             })
@@ -154,7 +154,8 @@ class ManualPublishController extends Controller
                     });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
-            ->orderBy('manuals.number', 'desc')
+            // ->orderBy('manuals.number', 'desc')
+            ->orderBy('manuals.id', 'desc')
             ->paginate(50)
             ->appends(request()->query());
 

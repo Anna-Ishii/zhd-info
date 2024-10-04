@@ -53,6 +53,15 @@ class MessagePublishController extends Controller
 {
     public function index(Request $request)
     {
+
+
+
+        // 開始時間をログに出力
+        $startTime = microtime(true);
+        Log::info('業連ホーム画面・開始時間: ' . date('Y-m-d H:i:s'));
+
+
+
         $admin = session('admin');
         $category_list = MessageCategory::all();
         $organization1_list = $admin->getOrganization1();
@@ -96,10 +105,10 @@ class MessagePublishController extends Controller
             ->groupBy('message_id');
 
         $message_list = Message::query()
-            ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
+            ->with('create_user', 'updated_user', 'category', 'brand', 'tag')
             ->leftjoin('message_user', 'messages.id', '=', 'message_id')
-            ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-            ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
+            // ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+            // ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('messages.id', '=', 'view_rates.message_id');
             })
@@ -108,11 +117,11 @@ class MessagePublishController extends Controller
             })
             ->select([
                 'messages.*',
-                'view_rates.view_rate',
-                'view_rates.read_users',
-                'view_rates.total_users',
-                'view_rates.last_updated',
-                'sub.b_name as brand_name',
+                DB::raw('view_rates.view_rate'),
+                DB::raw('view_rates.read_users'),
+                DB::raw('view_rates.total_users'),
+                DB::raw('view_rates.last_updated'),
+                DB::raw('sub.b_name as brand_name'),
             ])
             ->where('messages.organization1_id', $organization1_id)
             ->groupBy(DB::raw('messages.id'))
@@ -158,9 +167,19 @@ class MessagePublishController extends Controller
                 });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
-            ->orderBy('messages.number', 'desc')
+            // ->orderBy('messages.number', 'desc')
+            ->orderBy('messages.id', 'desc')
             ->paginate(50)
             ->appends(request()->query());
+
+
+
+        // SQLクエリの終了時間を記録
+        $sqlEndTime = microtime(true);
+        $sqlDuration = $sqlEndTime - $startTime;
+        Log::info('SQLクエリ実行時間: ' . round($sqlDuration, 2) . ' 秒');
+
+
 
         // 添付ファイル
         foreach ($message_list as &$message) {
@@ -266,6 +285,16 @@ class MessagePublishController extends Controller
             }
             $message->shop_count = $shop_count;
         }
+
+
+
+        // 終了時間をログに出力し、所要時間を計算
+        $endTime = microtime(true);
+        $duration = $endTime - $startTime;
+        Log::info('業連ホーム画面・終了時間: ' . date('Y-m-d H:i:s'));
+        Log::info('業連ホーム画面・実行時間: ' . round($duration, 2) . ' 秒');
+
+
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
