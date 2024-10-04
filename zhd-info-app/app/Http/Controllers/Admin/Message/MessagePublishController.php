@@ -96,10 +96,10 @@ class MessagePublishController extends Controller
             ->groupBy('message_id');
 
         $message_list = Message::query()
-            ->with('create_user', 'updated_user', 'category', 'create_user', 'updated_user', 'brand', 'tag')
+            ->with('create_user', 'updated_user', 'category', 'brand', 'tag')
             ->leftjoin('message_user', 'messages.id', '=', 'message_id')
-            ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-            ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
+            // ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
+            // ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('messages.id', '=', 'view_rates.message_id');
             })
@@ -158,7 +158,8 @@ class MessagePublishController extends Controller
                 });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
-            ->orderBy('messages.number', 'desc')
+            // ->orderBy('messages.number', 'desc')
+            ->orderBy('messages.id', 'desc')
             ->paginate(50)
             ->appends(request()->query());
 
