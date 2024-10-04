@@ -117,6 +117,7 @@ class Message extends Model
         // カンマ区切りの文字列として返す
         return implode(',', $brandNames);
     }
+
     public function getBrandsStringAttribute()
     {
         // リレーションからnameプロパティを取得して配列に変換
