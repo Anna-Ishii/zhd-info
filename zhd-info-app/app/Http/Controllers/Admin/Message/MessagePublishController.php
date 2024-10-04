@@ -117,11 +117,11 @@ class MessagePublishController extends Controller
             })
             ->select([
                 'messages.*',
-                DB::raw('view_rates.view_rate'),
-                DB::raw('view_rates.read_users'),
-                DB::raw('view_rates.total_users'),
-                DB::raw('view_rates.last_updated'),
-                DB::raw('sub.b_name as brand_name'),
+                'view_rates.view_rate',
+                'view_rates.read_users',
+                'view_rates.total_users',
+                'view_rates.last_updated',
+                'sub.b_name as brand_name',
             ])
             ->where('messages.organization1_id', $organization1_id)
             ->groupBy(DB::raw('messages.id'))
