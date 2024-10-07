@@ -11,6 +11,7 @@ class MessageViewRate extends Model
     protected $fillable = [
         'id',
         'message_id',
+        'organization1_id',
         'view_rate',
         'read_users',
         'total_users',

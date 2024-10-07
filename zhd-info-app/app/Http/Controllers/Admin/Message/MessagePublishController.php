@@ -88,20 +88,20 @@ class MessagePublishController extends Controller
         $viewRatesSub = DB::table('message_view_rates')
             ->select([
                 'message_id',
+                'organization1_id',
                 DB::raw('MAX(view_rate) as view_rate'),
                 DB::raw('MAX(read_users) as read_users'),
                 DB::raw('MAX(total_users) as total_users'),
                 DB::raw('MAX(updated_at) as last_updated')
             ])
-            ->groupBy('message_id');
+            ->groupBy('message_id', 'organization1_id');
 
         $message_list = Message::query()
             ->with('create_user', 'updated_user', 'category', 'brand', 'tag')
             ->leftjoin('message_user', 'messages.id', '=', 'message_id')
-            // ->leftjoin('message_brand', 'messages.id', '=', 'message_brand.message_id')
-            // ->leftjoin('brands', 'brands.id', '=', 'message_brand.brand_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('messages.id', '=', 'view_rates.message_id');
+                $join->on('messages.organization1_id', '=', 'view_rates.organization1_id');
             })
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'messages.id');
@@ -158,7 +158,6 @@ class MessagePublishController extends Controller
                 });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
-            // ->orderBy('messages.number', 'desc')
             ->orderBy('messages.id', 'desc')
             ->paginate(50)
             ->appends(request()->query());
@@ -310,6 +309,7 @@ class MessagePublishController extends Controller
         foreach ($messageRates as $message) {
             $updateData[] = [
                 'message_id' => $message->message_id,
+                'organization1_id' => $organization1_id,
                 'view_rate' => $message->view_rate,     // 閲覧率の計算
                 'read_users' => $message->read_users,   // 既読ユーザー数
                 'total_users' => $message->total_users, // 全体ユーザー数
@@ -321,7 +321,7 @@ class MessagePublishController extends Controller
         // バルクアップデートを実行
         DB::table('message_view_rates')->upsert(
             $updateData,
-            ['message_id'],
+            ['message_id', 'organization1_id'],
             ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
         );
 
