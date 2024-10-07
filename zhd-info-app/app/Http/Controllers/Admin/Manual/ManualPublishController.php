@@ -82,20 +82,20 @@ class ManualPublishController extends Controller
         $viewRatesSub = DB::table('manual_view_rates')
         ->select([
                 'manual_id',
+                'organization1_id',
                 DB::raw('MAX(view_rate) as view_rate'),
                 DB::raw('MAX(read_users) as read_users'),
                 DB::raw('MAX(total_users) as total_users'),
                 DB::raw('MAX(updated_at) as last_updated')
             ])
-            ->groupBy('manual_id');
+            ->groupBy('manual_id', 'organization1_id');
 
         $manual_list = Manual::query()
             ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
             ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
-            // ->leftjoin('manual_brand', 'manuals.id', '=', 'manual_brand.manual_id')
-            // ->leftjoin('brands', 'brands.id', '=', 'manual_brand.brand_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('manuals.id', '=', 'view_rates.manual_id');
+                $join->on('manuals.organization1_id', '=', 'view_rates.organization1_id');
             })
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'manuals.id');
@@ -154,7 +154,6 @@ class ManualPublishController extends Controller
                     });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
-            // ->orderBy('manuals.number', 'desc')
             ->orderBy('manuals.id', 'desc')
             ->paginate(50)
             ->appends(request()->query());
@@ -231,6 +230,7 @@ class ManualPublishController extends Controller
         foreach ($manualRates as $manual) {
             $updateData[] = [
                 'manual_id' => $manual->manual_id,
+                'organization1_id' => $organization1_id,
                 'view_rate' => $manual->view_rate,     // 閲覧率の計算
                 'read_users' => $manual->read_users,   // 既読ユーザー数
                 'total_users' => $manual->total_users, // 全体ユーザー数
@@ -242,7 +242,7 @@ class ManualPublishController extends Controller
         // バルクアップデートを実行
         DB::table('manual_view_rates')->upsert(
             $updateData,
-            ['manual_id'],
+            ['manual_id', 'organization1_id'],
             ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
         );
 
