@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\Shop;
 use App\Models\Organization1;
 use App\Models\WowTalkNotificationLog;
+use App\Models\WowtalkRecipient;
 use Illuminate\Support\Facades\Mail;
 
 class WowTalkUnreadNotificationSenderCommand extends Command
@@ -313,8 +314,12 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         // 未読メッセージ数を計算
         $unreadMessageCounts = $crewMessageCounts - $crewMessageReadCounts;
 
+        // 環境に応じたベースURLを取得
+        $baseUrl = config('app.url');
         // メッセージ内容を生成
         $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
+        $messageContent .= "{$baseUrl}/message?search_period=all\n";
+
         return $messageContent;
     }
 
@@ -407,7 +412,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
      */
     private function notifySystemAdmin($errorType, $requestData, $responseData)
     {
-        $to = ['yhonda@nssx.co.jp'];
+        // DBから通知対象のメールアドレスを取得
+        $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】WowTalk連携エラー';
 
         $message = "WowTalk連携でエラーが発生しました。ご確認ください。\n\n";
@@ -441,7 +447,7 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
         try {
             // 直接エンコードした送信者名とメールアドレスを設定
-            $fromAddress = 'yhonda@nssx.co.jp';
+            $fromAddress = 'zhd-gyoren-system@zensho.com';
             $fromName = '=?UTF-8?B?' . base64_encode('システム管理者（NSS様、IT担当（佐溝様、北川様））') . '?=';
 
             Mail::raw($message, function ($msg) use ($to, $subject, $fromAddress, $fromName) {
