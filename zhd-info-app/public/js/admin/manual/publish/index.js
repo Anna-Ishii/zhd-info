@@ -11,8 +11,13 @@ $(".editBtn").on("click", function (e) {
 
 $(".StopBtn").on("click", function (e) {
     e.preventDefault();
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
+    // 確認アラートを表示
+    if (!confirm("実行しますがよろしいでしょうか？")) {
+        return; // キャンセルされた場合、処理を中断
+    }
+
+    var csrfToken = $('meta[name="csrf-token"]').attr("content");
     var targetElement = $(this).parents("tr");
     var manual_id = targetElement.attr("data-manual_id");
 
