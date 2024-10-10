@@ -40,7 +40,7 @@ class ManualListExport implements
         $new_category_id = $this->request->input('new_category');
         $status = PublishStatus::tryFrom($this->request->input('status'));
         $q = $this->request->input('q');
-        $rate = $this->request->input('rate');
+        // $rate = $this->request->input('rate');
         $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('manuals')
@@ -60,7 +60,7 @@ class ManualListExport implements
             Manual::query()
             ->select([
                 'manuals.*',
-                DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
+                // DB::raw('round((sum(manual_user.read_flg) / count(manual_user.user_id)) * 100, 1) as view_rate'),
                 DB::raw('count(distinct manualcontents.id) as content_counts'),
                 'org.*'
             ])
@@ -106,11 +106,11 @@ class ManualListExport implements
             ->when(isset($new_category_id), function ($query) use ($new_category_id) {
                 $query->where('category_level2_id', $new_category_id);
             })
-            ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
-                $min = isset($rate[0]) ? $rate[0] : 0;
-                $max = isset($rate[1]) ? $rate[1] : 100;
-                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
-            })
+            // ->when((isset($rate[0])|| isset($rate[1])), function ($query) use ($rate) {
+            //     $min = isset($rate[0]) ? $rate[0] : 0;
+            //     $max = isset($rate[1]) ? $rate[1] : 100;
+            //     $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            // })
             ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
                 $query
                     ->where('start_datetime', '>=', $publish_date[0]);

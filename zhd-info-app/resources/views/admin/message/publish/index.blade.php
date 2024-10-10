@@ -132,16 +132,35 @@
             <div class="pagenation-top">
                 @include('common.admin.pagenation', ['objects' => $message_list])
                 <div>
+                    <!-- 更新ボタン -->
+                    <div>
+                        <a href="{{ route('admin.message.publish.update-view-rates') }}?{{ http_build_query(request()->query()) }}"
+                            class="btn btn-admin" id="updateViewRatesBtn">閲覧率更新</a>
+                    </div>
+
+                    <!-- 更新日時の表示 -->
+                    <div>
+                        <span>最終更新日時:
+                            @if ($message_list->isNotEmpty() && $message_list->last()->last_updated)
+                                {{ \Carbon\Carbon::parse($message_list->last()->last_updated)->format('Y-m-d H:i:s') }}
+                            @else
+                                更新なし
+                            @endif
+                        </span>
+                    </div>
+
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
                             <input type="button" class="btn btn-admin" data-toggle="modal"
                                 data-target="#messageImportModal" value="インポート">
                         </div>
                     @endif
-                    <div>
-                        <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
-                            class="btn btn-admin">エクスポート</a>
-                    </div>
+                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                        <div>
+                            <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
+                                class="btn btn-admin">エクスポート</a>
+                        </div>
+                    @endif
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
                             <a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"
@@ -149,7 +168,6 @@
                         </div>
                     @endif
                 </div>
-
             </div>
 
             <div class="message-tableInner table-responsive-xxl">
@@ -194,23 +212,29 @@
                                 @endif
                                 <td>{{ $message->category?->name }}</td>
                                 <td class="label-title">
-                                    @if(isset($message->content_url))
-                                        @if(isset($message->main_file))
-                                            @if($message->main_file_count < 2)
-                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }}</a>
+                                    @if (isset($message->content_url))
+                                        @if (isset($message->main_file))
+                                            @if ($message->main_file_count < 2)
+                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                    rel="noopener noreferrer">{{ $message->title }}</a>
                                             @else
-                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank" rel="noopener noreferrer">{{ $message->title }} ({{ $message->main_file_count }}ページ)</a>
+                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                    rel="noopener noreferrer">{{ $message->title }}
+                                                    ({{ $message->main_file_count }}ページ)
+                                                </a>
                                             @endif
                                         @else
-                                            <a href="{{ asset($message->content_url)}}" target="_blank" rel="noopener noreferrer">{{$message->title}}</a>
+                                            <a href="{{ asset($message->content_url) }}" target="_blank"
+                                                rel="noopener noreferrer">{{ $message->title }}</a>
                                         @endif
                                     @else
                                         {{ $message->title }}
                                     @endif
                                 </td>
                                 <td class="label-file">
-                                    @if($message->file_count > 0)
-                                        <a href="#" data-toggle="modal" data-target="#singleFileModal{{ $message->id }}">
+                                    @if ($message->file_count > 0)
+                                        <a href="#" data-toggle="modal"
+                                            data-target="#singleFileModal{{ $message->id }}">
                                             有 ({{ $message->file_count }})
                                         </a>
                                     @endif
@@ -241,13 +265,14 @@
                                     <td></td>
                                     <td nowrap>詳細</td>
                                 @else
+                                    <!-- 閲覧率を表示 -->
                                     <td
                                         class="view-rate {{ ($message->total_users != 0 ? $message->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
                                         <div>{{ $message->total_users != 0 ? $message->view_rate : '0.0' }}% </div>
                                     </td>
-                                    <td>
-                                        {{ $message->read_users }}/{{ $message->total_users }}
-                                    </td>
+                                    <!-- ユーザー数を表示 -->
+                                    <td>{{ $message->read_users }}/{{ $message->total_users }}</td>
+
                                     <td class="detailBtn">
                                         <a href="/admin/message/publish/{{ $message->id }}">詳細</a>
                                     </td>
@@ -283,5 +308,5 @@
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
-    <script src="{{ asset('/js/admin/message/publish/index.js') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection

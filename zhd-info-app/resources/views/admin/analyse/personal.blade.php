@@ -139,7 +139,7 @@
         </form>
 
         <div class="message-tableInner table-responsive-xxl">
-            <table id="table" class="personal table table-bordered {sorter:'metadata'}">
+            <table id="table" class="personal table table-bordered {sorter:'metadata'}" style="border: none;">
                 <thead>
                     <tr>
                         @foreach (['DS', 'BL', 'AR'] as $organization)
@@ -167,7 +167,7 @@
                 @if (!request('shop_freeword'))
                     <tbody>
                         <tr>
-                            <td colspan=5>{{ $organization1->name }}計</td>
+                            <td colspan="5">{{ $organization1->name }}計</td>
                             <td nowrap>
                                 <div class="view_rate_container">
                                     <div>
@@ -302,16 +302,22 @@
                         @foreach ($viewrates['shop'][0] as $v_key => $m_c)
                             <tr>
                                 @isset($m_c->o3_name)
-                                <td class="orgDS" nowrap>{{ $m_c->o3_name }}</td>@else<td></td>
+                                    <td class="orgDS" nowrap>{{ $m_c->o3_name }}</td>
+                                @else
+                                    <td></td>
                                 @endisset
                                 @isset($m_c->o5_name)
-                                <td class="orgBL" nowrap>{{ $m_c->o5_name }}</td>@else<td></td>
+                                    <td class="orgBL" nowrap>{{ $m_c->o5_name }}</td>
+                                @else
+                                    <td></td>
                                 @endisset
                                 @isset($m_c->o4_name)
-                                <td class="orgAR" nowrap>{{ $m_c->o4_name }}</td>@else<td></td>
+                                    <td class="orgAR" nowrap>{{ $m_c->o4_name }}</td>
+                                @else
+                                    <td></td>
                                 @endisset
-                                <td nowrap>{{ $m_c->shop_code }}</td>
-                                <td nowrap>{{ $m_c->shop_name }}</td>
+                                <td class="shop_code" nowrap>{{ $m_c->shop_code }}</td>
+                                <td class="shop_name" nowrap>{{ $m_c->shop_name }}</td>
                                 <td nowrap>
                                     <div class="view_rate_container">
                                         <div>
@@ -375,5 +381,5 @@
         </div>
     </div>
     <script></script>
-    <script src="{{ asset('/js/admin/analyse/personal.js') }}?20240301" defer></script>
+    <script src="{{ asset('/js/admin/analyse/personal.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
