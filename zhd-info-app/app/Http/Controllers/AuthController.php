@@ -41,8 +41,8 @@ class AuthController extends Controller
         return redirect()
             ->back()
             ->with('error', 'ログインに失敗しました');
- 
     }
+
     public function logout(Request $request)
     {
         $request->session()->forget('member');

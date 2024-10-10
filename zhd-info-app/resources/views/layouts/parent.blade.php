@@ -31,6 +31,7 @@
     @include('common.modal-check')
     @include('common.modal-edit')
     @include('common.modal-continue')
+    @include('common.modal-logout')
 
     @include('common.footer')
 
