@@ -9,8 +9,8 @@
             </div>
 
             <div class="readEdit__btnInner">
-                <button type="button" class="modal__close">キャンセル</button>
-                <button type="submit" class="btn btn-primary">ログアウト</button>
+                <button type="button" class="modal__close">いいえ</button>
+                <button type="submit" class="btn btn-primary">はい</button>
             </div>
         </form>
     </div>
