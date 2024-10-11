@@ -416,6 +416,29 @@ $(window).on("load", function () {
         });
     })
 
+    $(document).ready(function() {
+        const $dropdownToggle = $('.member-menu-dropdown-toggle');
+        const $dropdownMenu = $('.member-menu-dropdown-menu');
+
+        $dropdownToggle.on('click', function(event) {
+            event.preventDefault();
+            $dropdownMenu.toggleClass('show');
+        });
+
+        $(document).on('click', function(event) {
+            if (!$dropdownToggle.is(event.target) && !$dropdownMenu.is(event.target) && $dropdownMenu.has(event.target).length === 0) {
+                $dropdownMenu.removeClass('show');
+            }
+        });
+    });
+
+    $(document).on('click', '.btnModal[data-modal-target="logout"]', function(e) {
+        e.preventDefault();
+
+        var target = "logout";
+        modalAnim(target);
+    })
+
     var clickMessage;
     var getCrewsData;
     $(document).on('click', '.btnModal[data-modal-target="read"]', function(e) {

@@ -1035,6 +1035,60 @@ label[for="not_read_check"]::before {
     margin-right: -20px !important;
 }
 
+.member-menu-dropdown {
+    position: relative;
+    display: inline-block;
+    margin-right: 0 !important;
+}
+
+.member-menu-dropdown-menu {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: -50%;
+    margin-top: 10px;
+    background-color: white;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+.member-menu-dropdown-menu.show {
+    display: block;
+}
+
+.member-menu-dropdown-toggle {
+    width: 25px;
+    height: 25px;
+    -webkit-appearance: none; /* ChromeやSafari用のプレフィックス */
+    -moz-appearance: none;    /* Firefox用のプレフィックス */
+    appearance: none;         /* 標準的なappearance設定 */
+    background: url(../img/icon-caret-down.svg) center right 8px no-repeat;
+    background-size: cover;
+    background-position: center;
+    cursor: pointer;
+}
+
+.member-menu-logout-btn a {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.member-menu-logout-btn .logout-icon {
+    width: 15px;
+    height: 15px;
+}
+
+.member-menu-dropdown-menu li {
+    padding: 8px 16px;
+    cursor: pointer;
+}
+
+.member-menu-dropdown-menu li:hover {
+    background-color: #f1f1f1;
+}
+
 @media screen and (max-width: 768px) {
     .list {
         overflow-x: scroll;
