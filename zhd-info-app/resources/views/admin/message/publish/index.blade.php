@@ -84,9 +84,12 @@
                     <select name="category" class="form-control">
                         <option value="">指定なし</option>
                         @foreach ($category_list as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request()->input('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}
-                            </option>
+                            {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
+                            @if ($organization1->id === 8 || $category->id !== 7)
+                                <option value="{{ $category->id }}"
+                                    {{ request()->input('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
