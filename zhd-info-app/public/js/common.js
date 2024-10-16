@@ -142,19 +142,19 @@ $(window).on("load", function () {
         var editUserListTargetForm = $('.modal[data-modal-target="edit"] form');
 
         // 初期化
-        $(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
+        $('.modal[data-modal-target="edit"] .readEdit__list__accordion li').remove();
         $('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
         crewsData.fetchReadCrews(message).then(function() {
-            editUserListTargetForm.append('<input type="hidden" name="message" value="'+message+'">');
+            editUserListTargetForm.append('<input type="hidden" name="message" value="' + message + '">');
 
             crewsData.crews.forEach(function(value) {
                 if (value.readed == 0) {
-                    $(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append(
-                        '<li> '+value.part_code+' '+value.name+'<input type="checkbox" name="read_edit_radio[]" id="user_'+value.part_code+'_check" data-code="'+value.part_code+'" value="'+value.c_id+'"><label for="user_'+value.part_code+'_check" class="readEdit__list__check">未選択</label></li>'
-                    )
+                    $('.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="' + value.name_sort + '"] ul').append(
+                        '<li> ' + value.part_code + ' ' + value.name + '<input type="checkbox" name="read_edit_radio[]" id="user_' + value.part_code + '_check" data-code="' + value.part_code + '" value="' + value.c_id + '"><label for="user_' + value.part_code + '_check" class="readEdit__list__check">未選択</label></li>'
+                    );
                 }
-            })
+            });
 
             crewsData.sortCode();
             var sortCodeHeader = "";
@@ -169,7 +169,7 @@ $(window).on("load", function () {
 
                     if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
                         var head = '<div class="readEdit__list__head">'+headFrom_part_code+' ~ '+value.part_code+'</div><div class="readEdit__list__accordion"><ul>'+sortCodeHeader+'</ul></div>';
-                        $(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+                        $('.modal[data-modal-target="edit"] .sort_code').append(head);
                         sortCodeHeader = "";
                         headFrom_part_code = crewsData.crews[index+1]?.part_code;
                     }
@@ -376,8 +376,8 @@ $(window).on("load", function () {
 
         crewsData.fetchCheckCrews().then(function() {
             // 初期化
-            $(`.modal[data-modal-target="check"] .readEdit__list__accordion li`).remove();
-            $(`.modal[data-modal-target="check"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
+            $('.modal[data-modal-target="check"] .readEdit__list__accordion li').remove();
+            $('.modal[data-modal-target="check"] .readEdit__list.sort_code').find('.readEdit__list__head, .readEdit__list__accordion').remove();
             $('.modal[data-modal-target="check"] form input[name="current_url"]').remove();
 
             $('.modal[data-modal-target="check"] form').append('<input type="hidden" name="current_url" value="'+window.location.href+'">');
@@ -385,8 +385,10 @@ $(window).on("load", function () {
 
             crewsData.crews.forEach(function(value, index) {
                 // 名前
-                $(`.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append('<li>'+value.part_code+' '+value.name+'<input type="radio" name="read_edit_radio[]" id="user_'+value.part_code+'_radio" data-code="'+value.part_code+'" value="'+value.id+'"><label for="user_'+value.part_code+'_radio" class="readEdit__list__check">未選択</label></li>')
-            })
+                $('.modal[data-modal-target="check"] .readEdit__list__accordion[data-sort-num="' + value.name_sort + '"] ul').append(
+                    '<li>' + value.part_code + ' ' + value.name + '<input type="radio" name="read_edit_radio[]" id="user_' + value.part_code + '_radio" data-code="' + value.part_code + '" value="' + value.id + '"><label for="user_' + value.part_code + '_radio" class="readEdit__list__check">未選択</label></li>'
+                );
+            });
 
             crewsData.sortCode();
 
@@ -402,7 +404,7 @@ $(window).on("load", function () {
 
                 if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
                     var head = '<div class="readEdit__list__head">'+headFrom_part_code+' ~ '+value.part_code+'</div><div class="readEdit__list__accordion"><ul>'+sortCodeHeader+'</ul></div>';
-                    $(`.modal[data-modal-target="check"] .sort_code`).append(head);
+                    $('.modal[data-modal-target="check"] .sort_code').append(head);
                     sortCodeHeader = "";
                     headFrom_part_code = crewsData.crews[index+1]?.part_code;
                 }
@@ -458,8 +460,8 @@ $(window).on("load", function () {
 
         crewsData.fetchReadCrews(message).then(function() {
             // 初期化
-            $(`.modal[data-modal-target="edit"] .readEdit__list__accordion li`).remove();
-            $(`.modal[data-modal-target="edit"] .readEdit__list.sort_code`).find(`.readEdit__list__head, .readEdit__list__accordion`).remove();
+            $('.modal[data-modal-target="edit"] .readEdit__list__accordion li').remove();
+            $('.modal[data-modal-target="edit"] .readEdit__list.sort_code').find('.readEdit__list__head, .readEdit__list__accordion').remove();
             $('.modal[data-modal-target="edit"] form input[name="message"]').remove();
 
 
@@ -470,13 +472,15 @@ $(window).on("load", function () {
                 return;
             }
 
-            editUserListTargetForm.append('<input type="hidden" name="message" value="'+message+'">');
+            editUserListTargetForm.append('<input type="hidden" name="message" value="' + message + '">');
 
             crewsData.crews.forEach(function(value) {
                 if (value.readed == 0) {
-                    $(`.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="${value.name_sort}"] ul`).append('<li> '+value.part_code+' '+value.name+'<input type="checkbox" name="read_edit_radio[]" id="user_'+value.part_code+'_check" data-code="'+value.part_code+'" value="'+value.c_id+'"><label for="user_'+value.part_code+'_check" class="readEdit__list__check">未選択</label></li>')
+                    $('.modal[data-modal-target="edit"] .sort_name .readEdit__list__accordion[data-sort-num="' + value.name_sort + '"] ul').append(
+                        '<li> ' + value.part_code + ' ' + value.name + '<input type="checkbox" name="read_edit_radio[]" id="user_' + value.part_code + '_check" data-code="' + value.part_code + '" value="' + value.c_id + '"><label for="user_' + value.part_code + '_check" class="readEdit__list__check">未選択</label></li>'
+                    );
                 }
-            })
+            });
 
             crewsData.sortCode();
             var sortCodeHeader = "";
@@ -491,7 +495,7 @@ $(window).on("load", function () {
 
                     if((count + 1) % maxRow == 0 || index + 1 == crewsData.crews.length ) {
                         var head = '<div class="readEdit__list__head">'+headFrom_part_code+' ~ '+value.part_code+'</div><div class="readEdit__list__accordion"><ul>'+sortCodeHeader+'</ul></div>';
-                        $(`.modal[data-modal-target="edit"] .sort_code`).append(head);
+                        $('.modal[data-modal-target="edit"] .sort_code').append(head);
                         sortCodeHeader = "";
                         headFrom_part_code = crewsData.crews[index+1]?.part_code;
                     }
@@ -528,9 +532,9 @@ $(window).on("load", function () {
     $(document).on('change' , '.readEdit__list__accordion input[type=checkbox]' , function(){
         var id = $(this).attr('id');
         if($(this).prop('checked')){
-            $(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
+            $(this).parents('.readEdit').find('.readEdit__list__check[for="${id}"]').text('選択');
         }else{
-            $(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
+            $(this).parents('.readEdit').find('.readEdit__list__check[for="${id}"]').text('未選択');
         }
         var chkTarget = $(this).parents('.readEdit__list').find('input[type=checkbox]:checked');
         var txtReplaceTarget = $(this).parents('.modal__inner').find('button[type=submit]');
@@ -551,9 +555,9 @@ $(window).on("load", function () {
         txtResetTarget.text('未選択');
         var id = $(this).attr('id');
         if($(this).prop('checked')){
-            $(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('選択');
+            $(this).parents('.readEdit').find('.readEdit__list__check[for="${id}"]').text('選択');
         }else{
-            $(this).parents('.readEdit').find(`.readEdit__list__check[for="${id}"]`).text('未選択');
+            $(this).parents('.readEdit').find('.readEdit__list__check[for="${id}"]').text('未選択');
         }
 
         var chkRadioEnable = $(this).parents('.readEdit__list').find('input[type=radio]:checked');
@@ -619,7 +623,7 @@ $(window).on("load", function () {
         var readEdit_sortCode = $(this).parents('.readEdit').find('.readEdit__list.sort_code');
         var readEdit_filterWord = $(this).parents('.readEdit').find('.readEdit__list.filter_word');
         readEdit_filterWord.find('ul').empty()
-        var li_crew_dom = ``;
+        var li_crew_dom = '';
         if(searchText.length == 0){
             if(currnt_sort_value == 1 || currnt_sort_value == 3){
                 readEdit_sortName.show()
@@ -639,12 +643,11 @@ $(window).on("load", function () {
             if (modal_target == "check") {
                 crewsData.crews.filter(function(item) {
                     return Object.values(item).some(function(value, index) {
-                            if(value?.toString().includes(kanaFullToHalf(searchText_formatted))){
-                                var isChecked = $(`#user_${item.part_code}_radio`).prop('checked');
-                                li_crew_dom +=
-                                    '<li>'+item.part_code+' '+item.name+'<input type="radio"  value="'+item.c_id+'" data-code="'+item.part_code+'" '+(isChecked ? "checked" : "")+'><label for="user_'+item.part_code+'_radio" class="readEdit__list__check">'+(isChecked ? "選択" : "未選択")+'</label></li>';
-
-                            }
+                        if(value?.toString().includes(kanaFullToHalf(searchText_formatted))){
+                            var isChecked = $('#user_' + item.part_code + '_radio').prop('checked');
+                            li_crew_dom +=
+                                '<li>' + item.part_code + ' ' + item.name + '<input type="radio"  value="' + item.c_id + '" data-code="' + item.part_code + '" ' + (isChecked ? "checked" : "") + '><label for="user_' + item.part_code + '_radio" class="readEdit__list__check">' + (isChecked ? "選択" : "未選択") + '</label></li>';
+                        }
                     })
                 });
             }else if(modal_target == "edit") {
@@ -652,18 +655,15 @@ $(window).on("load", function () {
                     return Object.values(item).some(function(value, index) {
                         if(index == PARTCODE_INDEX || index == NAME_INDEX){
                             if(value?.toString().includes(searchText_formatted) && item.readed == 0){
-                                var isChecked = $(`#user_${item.part_code}_check`).prop('checked');
+                                var isChecked = $('#user_' + item.part_code + '_check').prop('checked');
                                 li_crew_dom +=
-                                    '<li>'+item.part_code+' '+item.name+'<input type="checkbox" value="'+item.c_id+'" data-code="'+item.part_code+'" '+(isChecked ? "checked" : "")+'><label for="user_'+item.part_code+'_check" class="readEdit__list__check">'+(isChecked ? "選択" : "未選択")+'</label></li>';
-
+                                    '<li>' + item.part_code + ' ' + item.name + '<input type="checkbox" value="' + item.c_id + '" data-code="' + item.part_code + '" ' + (isChecked ? "checked" : "") + '><label for="user_' + item.part_code + '_check" class="readEdit__list__check">' + (isChecked ? "選択" : "未選択") + '</label></li>';
                             }
-
                         }else if(index == NAMEKANA_INDEX){
                             if(value.includes(kanaFullToHalf(searchText_formatted)) && item.readed == 0){
-                                var isChecked = $(`#user_'+item.part_code+'_check`).prop('checked');
+                                var isChecked = $('#user_' + item.part_code + '_check').prop('checked');
                                 li_crew_dom +=
-                                    '<li>'+item.part_code+' '+item.name+'<input type="checkbox" value="'+item.c_id+'" data-code="'+item.part_code+'" '+(isChecked ? "checked" : "")+'><label for="user_'+item.part_code+'_check" class="readEdit__list__check">'+(isChecked ? "選択" : "未選択")+'</label></li>';
-
+                                    '<li>' + item.part_code + ' ' + item.name + '<input type="checkbox" value="' + item.c_id + '" data-code="' + item.part_code + '" ' + (isChecked ? "checked" : "") + '><label for="user_' + item.part_code + '_check" class="readEdit__list__check">' + (isChecked ? "選択" : "未選択") + '</label></li>';
                             }
                         }
                     })
