@@ -18,6 +18,7 @@ use App\Models\User;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
+use App\Imports\MessageBBCsvImport;
 use App\Imports\MessageStoreCsvImport;
 use App\Models\Brand;
 use App\Models\MessageContent;
@@ -238,11 +239,11 @@ class MessagePublishController extends Controller
         }
 
         // 店舗数をカウント
-        // すべてのメッセージIDを取得
+        // すべてのメッセージIDを取��
         $message_ids = $message_list->pluck('id')->toArray();
         // すべての店舗数を取得
         $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-        // 各メッセージに関連する店舗数を取得
+        // 各メッセージに関連する店舗���を取得
         $message_shop_counts = MessageShop::select('message_id', DB::raw('COUNT(*) as shop_count'))
             ->whereIn('message_id', $message_ids)
             ->groupBy('message_id')
@@ -1328,93 +1329,201 @@ class MessagePublishController extends Controller
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
-        try {
-            Excel::import(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
 
-            $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
-            $count = $collection[0]->count();
-            if ($count >= 100) {
+
+        if ($organization1 === 2) {
+            // BBの場合
+            try {
+                Excel::import(new MessageBBCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+
+                $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+                $count = $collection[0]->count();
+                if ($count >= 100) {
+                    File::delete($file_path);
+                    return response()->json([
+                        'message' => "100行以内にしてください"
+                    ], 500);
+                }
+                $array = [];
+                foreach (
+                    $collection[0] as $key => [
+                        $no,
+                        $emergency_flg,
+                        $category,
+                        $title,
+                        $tag1,
+                        $tag2,
+                        $tag3,
+                        $tag4,
+                        $tag5,
+                        $start_datetime,
+                        $end_datetime,
+                        $status,
+                        $brand
+                        // $organization5,
+                        // $organization4,
+                        // $organization3
+                    ]
+                ) {
+                    // noがない場合は最新のnumberを取得
+                    if (empty($no)) {
+                        $message = Message::where('organization1_id', $organization1)->max('number') + 1;
+                    } else {
+                        $message = Message::where('number', $no)
+                        ->where('organization1_id', $organization1)
+                        ->firstOrFail();
+                    }
+
+
+
+                    $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                    // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
+                    // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
+                    // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+
+                    $target_roll = $message->roll()->pluck('id')->toArray();
+
+                    array_push($array, [
+                        'id' => $message->id,
+                        'number' => $no,
+                        'emergency_flg' => isset($emergency_flg),
+                        'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                        'title' => $title,
+                        'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                        'start_datetime' => $start_datetime,
+                        'end_datetime' => $end_datetime,
+                        'brand' => $brand_param,
+                        // 'organization3' => $org3_param,
+                        // 'organization4' => $org4_param,
+                        // 'organization5' => $org5_param,
+                        'roll' => $target_roll
+                    ]);
+
+                    file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
+                }
+
+                return response()->json([
+                    'json' => $array
+                ], 200);
+            } catch (ValidationException $e) {
+                $failures = $e->failures();
+
+                $errorMessage = [];
+                foreach ($failures as $index => $failure) {
+                    $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                    $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                    $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
+                    $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+                }
+
                 File::delete($file_path);
                 return response()->json([
-                    'message' => "100行以内にしてください"
+                    'message' => $errorMessage
+                ], 422);
+            } catch (\Throwable $th) {
+                Log::error($th->getMessage());
+
+                File::delete($file_path);
+                return response()->json([
+                    'message' => "エラーが発生しました"
                 ], 500);
             }
-            $array = [];
-            foreach (
-                $collection[0] as $key => [
-                    $no,
-                    $emergency_flg,
-                    $category,
-                    $title,
-                    $tag1,
-                    $tag2,
-                    $tag3,
-                    $tag4,
-                    $tag5,
-                    $start_datetime,
-                    $end_datetime,
-                    $status,
-                    $brand
-                    // $organization5,
-                    // $organization4,
-                    // $organization3
-                ]
-            ) {
-                $message = Message::where('number', $no)
-                    ->where('organization1_id', $organization1)
-                    ->firstOrFail();
+        } else {
+            try {
+                Excel::import(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
 
-                $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-                // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
-                // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
-                // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+                $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+                $count = $collection[0]->count();
+                if ($count >= 100) {
+                    File::delete($file_path);
+                    return response()->json([
+                        'message' => "100行以内にしてください"
+                    ], 500);
+                }
+                $array = [];
+                foreach (
+                    $collection[0] as $key => [
+                        $no,
+                        $emergency_flg,
+                        $category,
+                        $title,
+                        $tag1,
+                        $tag2,
+                        $tag3,
+                        $tag4,
+                        $tag5,
+                        $start_datetime,
+                        $end_datetime,
+                        $status,
+                        $brand
+                        // $organization5,
+                        // $organization4,
+                        // $organization3
+                    ]
+                ) {
+                    $message = Message::firstOrCreate(
+                        ['number' => $no, 'organization1_id' => $organization1],
+                        [
+                            'title' => $title,
+                            'category_id' => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : null,
+                            'emergency_flg' => isset($emergency_flg),
+                            'start_datetime' => $start_datetime,
+                            'end_datetime' => $end_datetime,
+                        ]
+                    );
 
-                $target_roll = $message->roll()->pluck('id')->toArray();
+                    $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                    // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
+                    // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
+                    // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
 
-                array_push($array, [
-                    'id' => $message->id,
-                    'number' => $no,
-                    'emergency_flg' => isset($emergency_flg),
-                    'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
-                    'title' => $title,
-                    'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
-                    'start_datetime' => $start_datetime,
-                    'end_datetime' => $end_datetime,
-                    'brand' => $brand_param,
-                    // 'organization3' => $org3_param,
-                    // 'organization4' => $org4_param,
-                    // 'organization5' => $org5_param,
-                    'roll' => $target_roll
-                ]);
+                    $target_roll = $message->roll()->pluck('id')->toArray();
 
-                file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
+                    array_push($array, [
+                        'id' => $message->id,
+                        'number' => $no,
+                        'emergency_flg' => isset($emergency_flg),
+                        'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                        'title' => $title,
+                        'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                        'start_datetime' => $start_datetime,
+                        'end_datetime' => $end_datetime,
+                        'brand' => $brand_param,
+                        // 'organization3' => $org3_param,
+                        // 'organization4' => $org4_param,
+                        // 'organization5' => $org5_param,
+                        'roll' => $target_roll
+                    ]);
+
+                    file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
+                }
+
+                return response()->json([
+                    'json' => $array
+                ], 200);
+            } catch (ValidationException $e) {
+                $failures = $e->failures();
+
+                $errorMessage = [];
+                foreach ($failures as $index => $failure) {
+                    $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                    $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                    $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
+                    $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+                }
+
+                File::delete($file_path);
+                return response()->json([
+                    'message' => $errorMessage
+                ], 422);
+            } catch (\Throwable $th) {
+                Log::error($th->getMessage());
+
+                File::delete($file_path);
+                return response()->json([
+                    'message' => "エラーが発生しました"
+                ], 500);
             }
-
-            return response()->json([
-                'json' => $array
-            ], 200);
-        } catch (ValidationException $e) {
-            $failures = $e->failures();
-
-            $errorMessage = [];
-            foreach ($failures as $index => $failure) {
-                $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
-                $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
-                $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
-                $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
-            }
-
-            File::delete($file_path);
-            return response()->json([
-                'message' => $errorMessage
-            ], 422);
-        } catch (\Throwable $th) {
-            Log::error($th->getMessage());
-
-            File::delete($file_path);
-            return response()->json([
-                'message' => "エラーが発生しました"
-            ], 500);
         }
     }
 
