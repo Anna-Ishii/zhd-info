@@ -11,6 +11,7 @@
                         {{-- SKの場合、業務連絡、マニュアルラジオボタン非表示 --}}
                         @if ($organization1_id === 8)
                             <input type="hidden" name="type" value="1" id="topRadio1">
+                            <input type="hidden" name="org1_id" value="{{ $organization1_id }}">
                         @else
                             <div>
                                 <input type="radio" name="type" value="1" id="topRadio1"
