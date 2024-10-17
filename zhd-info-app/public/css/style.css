@@ -2,6 +2,8 @@
 
 * {
     box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
 }
 
 html {
@@ -1059,11 +1061,11 @@ label[for="not_read_check"]::before {
 }
 
 .member-menu-dropdown-toggle {
-    width: 25px;
-    height: 25px;
     -webkit-appearance: none; /* ChromeやSafari用のプレフィックス */
     -moz-appearance: none;    /* Firefox用のプレフィックス */
     appearance: none;         /* 標準的なappearance設定 */
+    width: 25px;
+    height: 25px;
     background: url(../img/icon-caret-down.svg) center right 8px no-repeat;
     background-size: cover;
     background-position: center;
@@ -1093,6 +1095,7 @@ label[for="not_read_check"]::before {
 @media screen and (max-width: 768px) {
     .list {
         overflow-x: scroll;
+        -webkit-overflow-scrolling: touch;
     }
 
     .list__inner {
