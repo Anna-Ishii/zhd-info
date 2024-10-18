@@ -352,7 +352,8 @@ $(window).on("load", function () {
     var pdfContainersAll = document.querySelectorAll(".pdf-container.all");
 
     // 各PDFコンテナに対して処理を実行
-    pdfContainers.forEach(function (container) {
+    for (var i = 0; i < pdfContainers.length; i++) {
+        var container = pdfContainers[i];
         var url = container.dataset.url; // データ属性からURLを取得
         var pdfDoc = null; // PDFドキュメントオブジェクト
         var currentPage = 1; // 現在のページ番号
@@ -462,5 +463,5 @@ $(window).on("load", function () {
                 });
             });
         }
-    });
+    }
 });
