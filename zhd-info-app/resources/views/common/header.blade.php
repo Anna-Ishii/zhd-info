@@ -14,6 +14,8 @@
             @else
                 <button type="button" class="btnType3 btnModal" data-modal-target="check">自分の閲覧状況の確認</button>
             @endif
+        @else
+            <div></div>
         @endif
         <div class="member-menu-dropdown">
             <p class="member-menu-dropdown-toggle"></p>

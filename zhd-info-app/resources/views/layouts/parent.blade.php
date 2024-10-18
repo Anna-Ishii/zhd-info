@@ -7,7 +7,27 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>業務連絡一覧 | 業連・動画配信システム</title>
     <link rel="stylesheet" href="{{ asset('/css/reset.css') }}?date={{ date('Ymd') }}">
-    <link rel="stylesheet" href="{{ asset('/css/style.css') }}?date={{ date('Ymd') }}">
+
+    <!-- style.css -->
+    <script>
+        // IEの判定
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        if (!isIE) {
+            // IEでない場合
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = "{{ asset('/css/style.css') }}?date={{ date('Ymd') }}";
+            document.head.appendChild(link);
+        } else {
+            // IEの場合
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = "{{ asset('/css/iecsslibrary/style.css') }}?date={{ date('Ymd') }}";
+            document.head.appendChild(link);
+        }
+    </script>
+
     @stack('css')
     <!-- jQuery UI -->
     <link rel="stylesheet" href="{{ asset('/js/oldjslibrary/jquery-ui.css') }}">
@@ -41,7 +61,19 @@
         const crew = @json($user->crew);
         console.log(crew);
     </script> --}}
-    @livewireScripts
-</body>
 
+    <!-- Livewire -->
+    <script>
+        // IEの判定
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        if (!isIE) {
+            // IEでない場合
+            var script = document.createElement('script');
+            script.src = "{{ asset('livewire/livewire.js') }}";
+            document.body.appendChild(script);
+        }
+    </script>
+
+</body>
 </html>

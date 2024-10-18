@@ -966,8 +966,8 @@ $(window).on("load", function () {
             var modal_target = $(this).parents(".modal").data("modal-target");
             if (modal_target == "check") {
                 crewsData.crews.filter(function (item) {
-                    return Object.values(item).some(function (value, index) {
-                        if (value && value.toString().includes(kanaFullToHalf(searchText_formatted))) {
+                    return Object.keys(item).map(function(key) { return item[key]; }).some(function (value, index) {
+                        if (value && value.toString().indexOf(kanaFullToHalf(searchText_formatted)) !== -1) {
                             var isChecked = $("#user_" + item.part_code + "_radio").prop("checked");
                             li_crew_dom +=
                                 "<li>" +
@@ -990,8 +990,8 @@ $(window).on("load", function () {
                 });
             } else if (modal_target == "edit") {
                 crewsData.crews.filter(function (item) {
-                    return Object.values(item).some(function (value, index) {
-                        if ((index == PARTCODE_INDEX || index == NAME_INDEX) && value && value.toString().includes(searchText_formatted) && item.readed == 0) {
+                    return Object.keys(item).map(function(key) { return item[key]; }).some(function (value, index) {
+                        if ((index == PARTCODE_INDEX || index == NAME_INDEX) && value && value.toString().indexOf(searchText_formatted) !== -1 && item.readed == 0) {
                             var isChecked = $("#user_" + item.part_code + "_check").prop("checked");
                             li_crew_dom +=
                                 "<li>" +
@@ -1009,7 +1009,7 @@ $(window).on("load", function () {
                                 '_check" class="readEdit__list__check">' +
                                 (isChecked ? "選択" : "未選択") +
                                 "</label></li>";
-                        } else if (index == NAMEKANA_INDEX && value && value.includes(kanaFullToHalf(searchText_formatted)) && item.readed == 0) {
+                        } else if (index == NAMEKANA_INDEX && value && value.indexOf(kanaFullToHalf(searchText_formatted)) !== -1 && item.readed == 0) {
                             var isChecked = $("#user_" + item.part_code + "_check").prop("checked");
                             li_crew_dom +=
                                 "<li>" +
@@ -1082,21 +1082,19 @@ $(window).on("load", function () {
 
     function fetchData(url, options) {
         // デフォルトの設定を指定
-        var defaultOptions = {
-            method: "GET",
-            dataType: "json", // 応答のデータタイプ
+        var defaultOptions = $.extend({
+            method: 'GET',
+            dataType: 'json', // 応答のデータタイプ
             headers: {
-                "X-CSRF-TOKEN": csrfToken,
+                'X-CSRF-TOKEN': csrfToken,
             },
             // 他のオプションをここに追加できます
-            ...options,
-        };
+        }, options);
 
         // jQueryの$.ajax()を使用してAjaxリクエストを実行
-        return $.ajax({
-            url: url,
-            ...defaultOptions,
-        }).fail(function (jqXHR, textStatus, errorThrown) {
+        return $.ajax($.extend({}, defaultOptions, {
+            url: url
+        })).fail(function (jqXHR, textStatus, errorThrown) {
             console.error("Ajax error:", textStatus, errorThrown);
             throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
         });
