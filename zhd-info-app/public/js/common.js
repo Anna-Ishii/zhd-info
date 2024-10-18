@@ -805,12 +805,12 @@ $(window).on("load", function () {
             if ($(this).prop("checked")) {
                 $(this)
                     .parents(".readEdit")
-                    .find('.readEdit__list__check[for="${id}"]')
+                    .find('.readEdit__list__check[for="' + id + '"]')
                     .text("選択");
             } else {
                 $(this)
                     .parents(".readEdit")
-                    .find('.readEdit__list__check[for="${id}"]')
+                    .find('.readEdit__list__check[for="' + id + '"]')
                     .text("未選択");
             }
             var chkTarget = $(this)
