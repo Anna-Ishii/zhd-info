@@ -1,0 +1,42 @@
+<table>
+    <thead>
+        <tr>
+            <th>No</th>
+            <th>ラベル(重要)</th>
+            <th>カテゴリ</th>
+            <th>タイトル</th>
+            <th>業連ファイル変更</th>
+            <th>タグ(1)</th>
+            <th>タグ(2)</th>
+            <th>タグ(3)</th>
+            <th>タグ(4)</th>
+            <th>タグ(5)</th>
+            <th>掲載開始日時</th>
+            <th>掲載終了日時</th>
+            <th>状態</th>
+            <th>対象業態</th>
+            <th>配信店舗</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach ($message_list as $message)
+            <tr>
+                <td>{{$message->number}}</td>
+                <td>{{$message->emergency_flg ? "重要" : ""}}</td>
+                <td>{{$message->category?->name}}</td>
+                <td>{{$message->title}}</td>
+                <td></td>
+                <td>{{$message->tag->get(0)?->name}}</td>
+                <td>{{$message->tag->get(1)?->name}}</td>
+                <td>{{$message->tag->get(2)?->name}}</td>
+                <td>{{$message->tag->get(3)?->name}}</td>
+                <td>{{$message->tag->get(4)?->name}}</td>
+                <td>{{$message->formatted_start_datetime_for_export}}</td>
+                <td>{{$message->formatted_end_datetime_for_export}}</td>
+                <td>{{$message->status->text()}}</td>
+                <td>{{$message->brand_name}}</td>
+                <td>{{$message->shop_names}}</td>
+            </tr>
+        @endforeach
+    </tbody>
+</table>
