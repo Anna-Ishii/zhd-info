@@ -1,7 +1,25 @@
 @extends('layouts.parent')
 
 @push('css')
-    <link href="{{ asset('/css/detail.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+    <!-- detail.css -->
+    <script>
+        // IEの判定
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        if (!isIE) {
+            // IEでない場合
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = "{{ asset('/css/detail.css') }}?date={{ date('Ymd') }}";
+            document.head.appendChild(link);
+        } else {
+            // IEの場合
+            var link = document.createElement('link');
+            link.rel = 'stylesheet';
+            link.href = "{{ asset('/css/iecsslibrary/detail.css') }}?date={{ date('Ymd') }}";
+            document.head.appendChild(link);
+        }
+    </script>
 @endpush
 
 @section('title', '業務連絡')
@@ -62,6 +80,24 @@
     @include('common.footer')
 
     <!-- pdfjs -->
-    <script src="{{ asset('/js/oldjslibrary/pdfjs-2.10.377-dist/build/pdf.js') }}"></script>
+    <script>
+        // IEの判定
+        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+
+        if (!isIE) {
+            // IEでない場合
+            var script = document.createElement('script');
+            script.src = "{{ asset('/js/oldjslibrary/pdfjs-2.10.377-dist/build/pdf.js') }}";
+            document.body.appendChild(script);
+        } else {
+            // IEの場合
+            var script = document.createElement('script');
+            script.src = "{{ asset('/js/iejslibrary/pdfjs-2.3.200-dist/build/pdf.js') }}";
+            script.onload = function() {
+                pdfjsLib.GlobalWorkerOptions.workerSrc = "{{ asset('/js/iejslibrary/pdfjs-2.3.200-dist/build/pdf.worker.js') }}";
+            };
+            document.body.appendChild(script);
+        }
+    </script>
     <script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
