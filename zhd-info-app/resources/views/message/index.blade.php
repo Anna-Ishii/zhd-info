@@ -147,7 +147,7 @@
     </div>
 
     @foreach ($messages as $message)
-        <div class="modal" data-modal-target="singleFileModal{{ $message->id }}" style="height: 50%;">
+        <div class="modal singleFileModal" data-modal-target="singleFileModal{{ $message->id }}" style="height: 50%;">
             <div class="modal__inner">
                 <div class="readUser">
                     <div class="modal-header">
