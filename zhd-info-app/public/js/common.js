@@ -325,6 +325,7 @@ $(window).on("load", function () {
         var org1_id = $("input[name='org1_id']").val();
         var type = $("input[name='type']:checked").val();
         var search_period = $('select[name="search_period"]').val();
+        var baseUrl = window.location.origin;
 
         // SKの場合
         if (org1_id === "8") {
@@ -332,17 +333,9 @@ $(window).on("load", function () {
         }
 
         if (type == "1") {
-            location.href =
-                "message?keyword=" +
-                e.target.innerText +
-                "&search_period=" +
-                search_period;
+            location.href = baseUrl + "/message?keyword=" + e.target.innerText + "&search_period=" + search_period;
         } else if (type == "2") {
-            location.href =
-                "manual?keyword=" +
-                e.target.innerText +
-                "&search_period=" +
-                search_period;
+            location.href = baseUrl + "/manual?keyword=" + e.target.innerText + "&search_period=" + search_period;
         }
     });
 

@@ -750,6 +750,10 @@ select {
     height: 95%;
 }
 
+.logoutModal .readEdit {
+    height: 120px;
+}
+
 .readUser__switch {
     display: flex;
     justify-content: space-between;
