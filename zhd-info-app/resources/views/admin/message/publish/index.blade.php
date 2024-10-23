@@ -84,9 +84,12 @@
                     <select name="category" class="form-control">
                         <option value="">指定なし</option>
                         @foreach ($category_list as $category)
-                            <option value="{{ $category->id }}"
-                                {{ request()->input('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}
-                            </option>
+                            {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
+                            @if ($organization1->id === 8 || $category->id !== 7)
+                                <option value="{{ $category->id }}"
+                                    {{ request()->input('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}
+                                </option>
+                            @endif
                         @endforeach
                     </select>
                 </div>
@@ -142,7 +145,7 @@
                     <div>
                         <span>最終更新日時:
                             @if ($message_list->isNotEmpty() && $message_list->last()->last_updated)
-                                {{ \Carbon\Carbon::parse($message_list->last()->last_updated)->format('Y-m-d H:i:s') }}
+                                {{ \Carbon\Carbon::parse($message_list->last()->last_updated)->format('Y/m/d H:i:s') }}
                             @else
                                 更新なし
                             @endif
