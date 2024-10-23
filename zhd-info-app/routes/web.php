@@ -30,6 +30,7 @@ use Symfony\Component\Mime\MessageConverter;
 Route::get('/member/auth', [MemberAuthController::class, 'index'])->name('auth');
 Route::post('/member/auth', [MemberAuthController::class, 'login']);
 Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
+Route::post('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
