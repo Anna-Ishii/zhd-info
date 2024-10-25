@@ -23,7 +23,7 @@ class SESMailer
             // 送信者名とメールアドレスを設定
             $fromAddress = 'zhd-gyoren-system@zensho.com';
             $fromName = 'システム管理者（NSS様、IT担当（馬場様、北川様））';
-            // $from = '=?UTF-8?B?' . base64_encode($fromName) . '?= <' . $fromAddress . '>';
+            $from = '=?UTF-8?B?' . base64_encode($fromName) . '?= <' . $fromAddress . '>';
 
             $this->sesClient->sendEmail([
                 'Destination' => [
@@ -41,9 +41,8 @@ class SESMailer
                         'Data' => $subject,
                     ],
                 ],
-                'Source' => $fromAddress,
+                'Source' => $from,
                 'SourceArn' => 'arn:aws:ses:us-west-2:016712135282:identity/zhd-gyoren-system@zensho.com',
-                // 'FromArn' => 'arn:aws:ses:us-west-2:016712135282:identity/zhd-gyoren-system@zensho.com',
             ]);
 
             return true;
