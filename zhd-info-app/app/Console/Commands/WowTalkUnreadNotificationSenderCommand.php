@@ -315,11 +315,10 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         // 未読メッセージ数を計算
         $unreadMessageCounts = $crewMessageCounts - $crewMessageReadCounts;
 
-        // 環境に応じたベースURLを取得
-        $baseUrl = config('app.url');
         // メッセージ内容を生成
-        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
-        $messageContent .= "{$baseUrl}/message?search_period=all\n";
+        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n\n";
+        $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+        // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
 
         return $messageContent;
     }
