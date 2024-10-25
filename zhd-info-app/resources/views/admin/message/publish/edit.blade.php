@@ -69,13 +69,16 @@
                         <select name="category_id" class="form-control">
                             <option value="" hidden>カテゴリを選択</option>
                             @foreach ($category_list as $category)
-                                <option value="{{ $category->id }}"
-                                    @if (request()->old('category_id') == $category->id || $message->category_id == $category->id)
-                                        selected
-                                    @endif
-                                    >
-                                    {{ $category->name }}
-                                </option>
+                                {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
+                                @if ($message->organization1_id === 8 || $category->id !== 7)
+                                    <option value="{{ $category->id }}"
+                                        @if (request()->old('category_id') == $category->id || $message->category_id == $category->id)
+                                            selected
+                                        @endif
+                                        >
+                                        {{ $category->name }}
+                                    </option>
+                                @endif
                             @endforeach
                         </select>
                     </label>

@@ -62,12 +62,26 @@ $(document).ready(function () {
     let th2 = $('table.personal thead th[data-column="2"]');
 
     let th0Width = th0.length ? Math.round(th0.outerWidth()) : 0;
-    let th1Width = th1.length ? Math.round(th1.outerWidth()) : 0;
+    let th1Width = th1.length ? Math.floor(th1.outerWidth()) : 0;
     let th2Width = th2.length ? Math.floor(th2.outerWidth()) : 0;
 
     let DSWidth = th0Width;
     let BLWidth = DSWidth + th1Width;
     let ARWidth = BLWidth + th2Width;
+
+    // テーブルの横スクロールの位置取得
+    let org1Array = {
+        1: 'JP',
+        2: 'BB',
+        3: 'TAG',
+        4: 'HY',
+        8: 'SK',
+    }
+    let org1 = $('select[name="organization1"]').val();
+    // 業態がJP以外の場合、ARWidthを調整
+    if (org1Array[org1] !== 'JP') {
+        ARWidth = BLWidth + th2Width + 1;
+    }
 
     // 店舗名の幅を取得
     let tableOffset = Math.round($('.personal.table.table-bordered').offset().left);
