@@ -317,8 +317,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
         // メッセージ内容を生成
         $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n\n";
-        $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-        // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+        // $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+        $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
 
         return $messageContent;
     }
