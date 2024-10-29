@@ -22,7 +22,7 @@ class SESMailer
         try {
             // 送信者名とメールアドレスを設定
             $fromAddress = 'zhd-gyoren-system@zensho.com';
-            $fromName = 'システム管理者（NSS様、IT担当（馬場様、北川様））';
+            $fromName = 'システム管理者';
             $from = '=?UTF-8?B?' . base64_encode($fromName) . '?= <' . $fromAddress . '>';
 
             $this->sesClient->sendEmail([
