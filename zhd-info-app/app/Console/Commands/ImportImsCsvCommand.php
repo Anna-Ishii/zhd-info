@@ -11,6 +11,7 @@ use App\Models\ImsSyncLog;
 use App\Models\Manual;
 use App\Models\MessageOrganization;
 use App\Models\MessageShop;
+use App\Models\ManualShop;
 use App\Models\Organization1;
 use App\Models\Organization2;
 use App\Models\Organization3;
@@ -51,8 +52,7 @@ class ImportImsCsvCommand extends Command
         $ims_log->save();
 
         $now = new Carbon('now');
-        // $now_str = $now->format("Ymd");
-        $now_str = "20241022";
+        $now_str = $now->format("Ymd");
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
@@ -116,6 +116,7 @@ class ImportImsCsvCommand extends Command
         $ims_log->save();
         $this->info('end');
     }
+
     private function import_shops($shops_data)
     {
         $new_shop = []; // 新店舗を格納する配列
@@ -298,6 +299,8 @@ class ImportImsCsvCommand extends Command
             MessageShop::where('shop_id', $user->shop_id)->delete();
 
             $user->manual()->detach();
+            // manual_shopのshop_idを削除
+            ManualShop::where('shop_id', $user->shop_id)->delete();
         }
         User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
         Shop::whereIn('id', $delete_shop)->delete();
@@ -340,15 +343,37 @@ class ImportImsCsvCommand extends Command
             'roll_id' => $ROLL_ID,
         ]);
         $user->distributeMessages();
-        $manual_data = [];
-        $_brand_id = $shop->brand_id;
+
         // 該当のマニュアルを登録
-        $manuals = Manual::whereHas('brand', function ($query) use ($_brand_id) {
-            $query->where('brand_id', '=', $_brand_id);
-        })->get('id')->toArray();
+        $manual_data = [];
+        $shop = Shop::find($user->shop_id);
+
+        $manuals = [];
+        if (isset($shop->brand_id)) {
+            $manuals = ManualShop::query()
+                ->select('manual_shop.manual_id as id')
+                ->where('manual_shop.selected_flg', 'all')
+                ->where('manual_shop.brand_id', $shop->brand_id)
+                ->cursor();
+        }
+
+        $manual_data = [];
         foreach ($manuals as $manual) {
             $manual_data[$manual['id']] = ['shop_id' => $shop->id];
         }
+
+        // manual_shopテーブルにデータをインサート
+        foreach ($manual_data as $manual_id => $data) {
+            ManualShop::insert([
+                'manual_id' => $manual_id,
+                'shop_id' => $data['shop_id'],
+                'selected_flg' => 'all',
+                'created_at' => now(),
+                'updated_at' => now(),
+                'brand_id' => $shop->brand_id,
+            ]);
+        }
+
         $user->manual()->sync($manual_data);
     }
 
