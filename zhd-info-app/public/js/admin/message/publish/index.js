@@ -115,3 +115,47 @@ $(document).ready(function () {
         });
     });
 });
+
+// CSVエクスポートボタンのクリックイベントにオーバーレイ表示
+$(document).ready(function () {
+    $('.exportBtn').on('click', function(e) {
+        e.preventDefault(); // デフォルトのリンク動作を防ぐ
+        var overlay = document.getElementById('overlay');
+        overlay.style.display = 'block';
+
+        // エクスポート処理を実行
+        var exportUrl = $(this).attr('href');
+        var fileName = $(this).data('filename');
+        fetch(exportUrl)
+            .then(response => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error('エクスポートに失敗しました');
+                }
+            })
+            .then(blob => {
+                // エクスポートが成功した場合、モーダルを閉じる
+                $('#messageExportModal').modal('hide');
+                overlay.style.display = 'none';
+
+                // ダウンロードを開始
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                alert(error.message);
+                overlay.style.display = 'none';
+            });
+
+        // ページがリロードされる前にオーバーレイを非表示にする
+        window.onbeforeunload = function() {
+            overlay.style.display = 'none';
+        };
+    });
+});
