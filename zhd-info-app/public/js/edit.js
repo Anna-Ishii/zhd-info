@@ -26,9 +26,9 @@ $(window).on('load' , function(){
 			this.setOptions({
 				maxDate:jQuery('#dateTo').val()?jQuery('#dateTo').val():false
 			})
-		 },
-		 defaultDate: d,
-		 defaultTime: '00:00',
+        },
+        defaultDate: d,
+        defaultTime: '00:00',
 	});
 	$('#dateTo').datetimepicker({
 		format:'Y/m/d H:i',
@@ -215,6 +215,8 @@ $(document).on('submit' , '#form' , function(event){
 //     $(this).parent().siblings('div.counter').text(counterText);
 // })
 
+
+// 成功テンプレート
 const successTamplate = `
 	<div class="modal-body">
 		<div class="text-center">
@@ -228,8 +230,10 @@ const successTamplate = `
 	</div>
 `;
 
+
+// 業務連絡 CSV アップロード
 let messageJson;
-$(document).on('change', '#messageImportModal input[type="file"]', function() {
+$(document).on('change', '#messageImportModal .fileImport input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
 	let log_file_name = getNumericDateTime();
     let formData = new FormData();
@@ -265,6 +269,18 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
 		messageJson = response.json;
+
+        if (messageJson && messageJson.length > 0) {
+            // すべてのcheck_fileがfalseの場合の処理
+            const hasTrueCheckFile = messageJson.some(item => item.check_file);
+
+            if (!hasTrueCheckFile) {
+                $('#messageImportModal input[type="button"]').addClass("importBtn").val("インポート");
+            } else {
+                $('#messageImportModal input[type="button"]').addClass("importFileBtn").val("開く");
+                $('#messageImportModal .fileImport').removeClass("fileImport").addClass("fileInputs");
+            }
+        }
     }).fail(function(jqXHR, textStatus, errorThrown){
 		$('#messageImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
@@ -292,7 +308,6 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
 				`<li>${jqXHR.responseJSON.message}</li>`
 			);
 		}
-
     });
 
 	let persent;
@@ -317,12 +332,141 @@ $(document).on('change', '#messageImportModal input[type="file"]', function() {
 			console.log("終了");
 		}
 	}, 500);
-
 });
 
 
-$('#messageImportModal input[type="button"]').click(function(e){
-	e.preventDefault();
+// 業務連絡 CSV PDFファイルアップロード
+$(document).on('click', '#messageImportModal input[type="button"].importFileBtn', function(){
+    if (messageJson && messageJson.length > 0) {
+        // 既存の内容をクリア
+        $('#messageImportModal .fileInputs').empty();
+        $('#messageImportModal .modal-text').empty();
+
+        // check_fileがtrueのnumberとtitleを表示
+        messageJson.forEach(item => {
+            if (item.check_file) {
+                $("#messageImportModal .fileInputs").append(`
+                    <label class="col-sm-4 control-label">No.${item.number}<span style="padding-left: 10px;">${item.title} : </span></label>
+                    <div class="col-sm-7">
+                        <label class="inputFile form-control">
+                            <span class="fileName">ファイルを選択またはドロップ</span>
+                            <input type="file" name="file" accept=".pdf">
+                            <input type="hidden" name="number" value="${item.number}">
+                            <input type="hidden" name="file_name" value="{{ old('file_name') }}">
+                            <input type="hidden" name="file_path" value="{{ old('file_path') }}">
+                            <input type="hidden" name="join_flg" value="{{ old('join_flg') }}">
+                        </label>
+                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                            <div class="progress-bar" style="width: 0%"></div>
+                        </div>
+                    </div>
+                `);
+            }
+        });
+
+        $('#messageImportModal input[type="button"].importFileBtn').removeClass("importFileBtn").addClass("importBtn").val("インポート");
+    }
+});
+
+
+// 業務連絡 PDFファイル処理
+$(document).on("change", '#messageImportModal .fileInputs input[type="file"]', function () {
+    let _this = $(this);
+    let csrfToken = $('meta[name="csrf-token"]').attr("content");
+    let fileList = _this[0].files;
+    let formData = new FormData();
+    let labelForm = _this.parent();
+    let progress = labelForm.parent().find(".progress");
+    let progressBar = progress.children(".progress-bar");
+
+    labelForm.parent().find(".text-danger").remove();
+
+    // ファイルをformDataに追加
+    for (let i = 0; i < fileList.length; i++) {
+        formData.append("file" + i, fileList[i]);
+    }
+
+    progressBar.hide();
+    progressBar.css("width", "0%");
+    progress.show();
+
+    let number = _this.siblings('input[name="number"]').val();
+    let fileName = _this.siblings('input[name="file_name"]');
+    let filePath = _this.siblings('input[name="file_path"]');
+    let joinFile = _this.siblings('input[name="join_flg"]');
+
+    $.ajax({
+        url: "/admin/message/publish/upload",
+        type: "post",
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            "X-CSRF-TOKEN": csrfToken,
+        },
+        xhr: function () {
+            let XHR = $.ajaxSettings.xhr();
+            if (XHR.upload) {
+                XHR.upload.addEventListener("progress", function (e) {
+                    let progVal = parseInt((e.loaded / e.total) * 10000) / 100;
+                    progressBar.show();
+                    progressBar.css("width", progVal + "%");
+                    // console.log(progVal);
+                    if (progVal === 100) {
+                        setTimeout(() => {
+                            progress.hide();
+                        }, 1000);
+                    }
+                }, false);
+            }
+            return XHR;
+        },
+    })
+    .done(function (response) {
+        labelForm.parent().find(".text-danger").remove();
+        handleResponse(response,number, fileName, filePath, joinFile);
+        _this.attr('data-cache', 'active');
+    })
+    .fail(function (jqXHR, textStatus, errorThrown) {
+        labelForm.parent().find(".text-danger").remove();
+        jqXHR.responseJSON?.errorMessages?.forEach((errorMessage) => {
+            labelForm.parent().append(`<div class="text-danger">${errorMessage}</div>`);
+        });
+        if (errorThrown) {
+            labelForm.parent().append(`<div class="text-danger">アップロードできませんでした</div>`);
+        }
+        fileName.val("");
+        filePath.val("");
+        joinFile.val("single");
+    });
+});
+
+
+// アップロード完了後の処理
+function handleResponse(response, number, fileName, filePath, joinFile) {
+    // responseが複数ファイルに対応している場合
+    response.content_names.forEach((content_name, i) => {
+        let content_url = response.content_urls[i];
+        if (i === 0) {
+            fileName.val(content_name);
+            filePath.val(content_url);
+            joinFile.val("single");
+        }
+        // check_fileがtrueのものにfile_nameとfile_pathを追加
+        messageJson.forEach(item => {
+            if (item.check_file && parseInt(item.number) === parseInt(number)) {
+                item.file_name = content_name;
+                item.file_path = content_url;
+                item.join_flg = "single";
+            }
+        });
+    });
+}
+
+
+// 業務連絡 CSV インポート
+$(document).on('click', '#messageImportModal input[type="button"].importBtn', function(e){
+    e.preventDefault();
 
 	if(!messageJson) {
 		$('#messageImportModal .modal-body').prepend(`
@@ -381,6 +525,8 @@ $('#messageImportModal input[type="button"]').click(function(e){
 	});
 })
 
+
+// マニュアル CSV アップロード
 let manualJson;
 $(document).on('change', '#manualImportModal input[type="file"]', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
@@ -446,9 +592,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 				`<li>${jqXHR.responseJSON.message}</li>`
 			);
 		}
-
     });
-
 
 	let persent;
 	let id = setInterval(() => {
@@ -472,9 +616,10 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 			console.log("終了");
 		}
 	}, 500);
-
 });
 
+
+// マニュアル CSV インポート
 $('#manualImportModal input[type="button"]').click(function(e){
 	e.preventDefault();
 
@@ -591,6 +736,7 @@ function createTag(tagLabelText) {
     )
 }
 
+// モーダルを閉じた時にリロード
 $('#messageImportModal').on('hidden.bs.modal', function (e) {
 	window.location.reload();
 })

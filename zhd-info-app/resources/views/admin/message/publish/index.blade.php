@@ -159,10 +159,18 @@
                         </div>
                     @endif
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                        <div>
-                            <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
-                                class="btn btn-admin">エクスポート</a>
-                        </div>
+                        {{-- BBの場合 --}}
+                        @if ($organization1->id === 2)
+                            <div>
+                                <input type="button" class="btn btn-admin" data-toggle="modal"
+                                    data-target="#messageExportModal" value="エクスポート">
+                            </div>
+                        @else
+                            <div>
+                                <a href="{{ route('admin.message.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
+                                    class="btn btn-admin exportBtn" data-filename="{{ '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv' }}">エクスポート</a>
+                            </div>
+                        @endif
                     @endif
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
@@ -310,6 +318,7 @@
 
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
+    @include('common.admin.message-export-modal', ['organization1' => $organization1])
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
