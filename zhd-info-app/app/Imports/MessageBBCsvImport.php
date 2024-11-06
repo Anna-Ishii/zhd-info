@@ -30,9 +30,6 @@ class MessageBBCsvImport implements
     private $organization1;
     private $organization = [];
     private $brand = [];
-    private $organization5 = [];
-    private $organization4 = [];
-    private $organization3 = [];
     private $category_list = [];
 
     public function __construct($organization1, $organization)
@@ -40,9 +37,6 @@ class MessageBBCsvImport implements
         $this->organization1 = $organization1;
         $this->organization = $organization;
         $this->brand = array_merge(array_column($this->organization, 'brand_name'), ["全て"]);
-        // $this->organization5 = array_merge(array_column($this->organization, 'organization5_name'), ["全て"]);
-        // $this->organization4 = array_merge(array_column($this->organization, 'organization4_name'), ["全て"]);
-        // $this->organization3 = array_merge(array_column($this->organization, 'organization3_name'), ["全て"]);
         $this->category_list = MessageCategory::pluck('name')->toArray();
     }
 
@@ -67,21 +61,17 @@ class MessageBBCsvImport implements
     public function rules(): array
     {
         return [
-            // '0' => ['required'],
             '2' => ['nullable', Rule::in($this->category_list)],
-            // '12' => ['nullable', new OrganizationRule(parameter: $this->brand)],
-            // '13' => ['nullable', new OrganizationRule(parameter: $this->organization5)],
-            // '14' => ['nullable', new OrganizationRule(parameter: $this->organization4)],
-            // '15' => ['nullable', new OrganizationRule(parameter: $this->organization3)],
+            '14' => [],
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-            // '0.required' => 'Noは必須です',
             '0.int' => 'Noは数値である必要があります',
-            '2.in' => 'カテゴリの項目が間違っています'
+            '2.in' => 'カテゴリの項目が間違っています',
+            '14.in' => '店舗の項目が間違っています',
         ];
     }
 
