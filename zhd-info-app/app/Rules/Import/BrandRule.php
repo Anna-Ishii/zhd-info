@@ -5,7 +5,7 @@ namespace App\Rules\Import;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class OrganizationRule implements ValidationRule
+class BrandRule implements ValidationRule
 {
 
     public function __construct($parameter)
@@ -23,8 +23,7 @@ class OrganizationRule implements ValidationRule
         $noMatches = $this->hasNonMatchingValues($this->strToArray($value), $this->parameter);
 
         if (!empty($noMatches)) {
-            $noMatchesStr = implode(',', $noMatches);
-            $fail("選択フォーム以外の値が含まれています({$noMatchesStr})");
+            $fail("対象業態の項目が間違っています");
         }
     }
 
