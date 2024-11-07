@@ -8,6 +8,8 @@
             <div class="modal-body">
                 <div>
                     csvデータをエクスポートします
+                    <br>
+                    出力対象を選択してください
                 </div>
                 <form class="form-horizontal">
                     <input type="hidden" name="organization1" value="{{$organization1->id}}">
@@ -18,7 +20,7 @@
                         </div>
                         <div class="col-sm-2 col-sm-offset-6 control-label">
                             <a href="{{ route('admin.message.publish.export-list', ['all' => false]) }}&{{ http_build_query(request()->query()) }}"
-                                class="btn btn-admin exportBtn" data-filename="{{ '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv' }}">一部ページ</a>
+                                class="btn btn-admin exportBtn" data-filename="{{ '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv' }}">表示中ページ</a>
                         </div>
                     </div>
                 </form>
