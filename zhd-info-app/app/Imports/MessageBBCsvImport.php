@@ -7,7 +7,8 @@ use App\Models\MessageCategory;
 use App\Models\MessageTagMaster;
 use App\Models\Shop;
 use App\Models\User;
-use App\Rules\Import\OrganizationRule;
+use App\Rules\Import\BrandRule;
+use App\Rules\Import\ShopRule;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
@@ -30,13 +31,15 @@ class MessageBBCsvImport implements
     private $organization1;
     private $organization = [];
     private $brand = [];
+    private $shop = [];
     private $category_list = [];
 
-    public function __construct($organization1, $organization)
+    public function __construct($organization1, $organization, $shop_list)
     {
         $this->organization1 = $organization1;
         $this->organization = $organization;
         $this->brand = array_merge(array_column($this->organization, 'brand_name'), ["全て"]);
+        $this->shop = array_merge(array_column($shop_list, 'display_name'), ["全店"]);
         $this->category_list = MessageCategory::pluck('name')->toArray();
     }
 
@@ -61,8 +64,10 @@ class MessageBBCsvImport implements
     public function rules(): array
     {
         return [
-            '2' => ['nullable', Rule::in($this->category_list)],
-            '14' => [],
+            '2' => ['required', Rule::in($this->category_list)],
+            '3' => ['required'],
+            '13' => ['required', new BrandRule(parameter: $this->brand)],
+            '14' => ['required', new ShopRule(parameter: $this->shop)],
         ];
     }
 
@@ -70,8 +75,11 @@ class MessageBBCsvImport implements
     {
         return [
             '0.int' => 'Noは数値である必要があります',
+            '2.required' => 'カテゴリは必須項目です',
             '2.in' => 'カテゴリの項目が間違っています',
-            '14.in' => '店舗の項目が間違っています',
+            '3.required' => 'タイトルは必須項目です',
+            '13.required' => '対象業態は必須項目です',
+            '14.required' => '配信店舗は必須項目です',
         ];
     }
 
@@ -79,6 +87,13 @@ class MessageBBCsvImport implements
     {
         $validator->after(function ($validator) {
             $failedRows = $validator->failed();
+
+            // Noがない場合に業連ファイルが必須であることを確認
+            foreach ($validator->getData() as $rowIndex => $row) {
+                if (!isset($row[0]) && empty($row['4'])) {
+                    $validator->errors()->add($rowIndex, '業連ファイルは必須項目です');
+                }
+            }
 
             // バリデーションエラーが発生した行番号をキューに追加
             $this->failed($failedRows);
@@ -129,6 +144,23 @@ class MessageBBCsvImport implements
             ->toArray();
     }
 
+    private function getShopForm($organization1_id)
+    {
+        return Shop::query()
+            ->select([
+                'shops.*',
+                DB::raw("GROUP_CONCAT(brands.name SEPARATOR ',') as brand_names")
+            ])
+            ->join('brands', function ($join) {
+                $join->on('shops.organization1_id', '=', 'brands.organization1_id')
+                    ->on('shops.brand_id', '=', 'brands.id');
+            })
+            ->where('shops.organization1_id', $organization1_id)
+            ->groupBy('shops.id')
+            ->get()
+            ->toArray();
+    }
+
     private function tagImportParam(?array $tags): array
     {
         if (!isset($tags)) return [];
@@ -164,81 +196,28 @@ class MessageBBCsvImport implements
             ->toArray();
     }
 
-    private function getOrg3All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization3.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-            ->pluck('organization3.id')
-            ->toArray();
-    }
-
-    private function getOrg4All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization4.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-            ->pluck('organization4.id')
-            ->toArray();
-    }
-
-    private function getOrg5All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization5.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-            ->pluck('organization5.id')
-            ->toArray();
-    }
-
-    private function targetUserParam($organizarions): array
+    private function targetUserParam($organizations): array
     {
         $shops_id = [];
         $target_user_data = [];
 
-        // organizationごとにshopを取得する
-        if (isset($organizarions->organization['org5'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization5_id', $organizarions->organization['org5'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org4'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization4_id', $organizarions->organization['org4'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org3'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization3_id', $organizarions->organization['org3'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->whereNull('organization4_id')
-                ->whereNull('organization5_id')
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
-        }
-        if (isset($organizarions->organization['org2'])) {
-            $_shops_id = Shop::select('id')
-                ->whereIn('organization2_id', $organizarions->organization['org2'])
-                ->whereIn('brand_id', $organizarions->brand)
-                ->whereNull('organization4_id')
-                ->whereNull('organization5_id')
-                ->get()
-                ->toArray();
-            $shops_id = array_merge($shops_id, $_shops_id);
+        // shopを取得する
+        if (isset($organizations->organization_shops)) {
+            $organization_shops = explode(',', $organizations->organization_shops);
+            foreach ($organization_shops as $_shop_id) {
+                foreach ($organizations->brand as $brand) {
+                    $_shops_id = Shop::select('id')
+                        ->where('id', $_shop_id)
+                        ->where('brand_id', $brand)
+                        ->get()
+                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+            }
         }
 
         // 取得したshopのリストからユーザーを取得する
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizarions->target_roll)->get()->toArray();
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizations->target_roll)->get()->toArray();
         // ユーザーに業務連絡の閲覧権限を与える
         foreach ($target_users as $target_user) {
             $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];

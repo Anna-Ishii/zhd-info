@@ -33,8 +33,8 @@ class MessageStoreCsvImport implements
     public function __construct($organization1, $shop_list)
     {
         $this->organization1 = $organization1;
-        $this->store_code = array_column($shop_list, 'shop_code'); // 'shop_code' のみを取得
-        $this->store_name = array_column($shop_list, 'display_name'); // 'display_name' のみを取得
+        $this->store_code = array_column($shop_list, 'shop_code');
+        $this->store_name = array_column($shop_list, 'display_name');
     }
 
     public function collection(Collection $rows)
@@ -57,16 +57,16 @@ class MessageStoreCsvImport implements
     public function rules(): array
     {
         return [
-            '0' => ['required', new OrganizationRule(parameter: $this->store_code)], // 店舗コードは必須、かつリスト内に存在するかチェック
-            '1' => ['nullable'], // 店舗名はNULL許容、リスト内に存在するかチェックしない
+            '0' => ['required', new OrganizationRule(parameter: $this->store_code)],
+            '1' => ['nullable'],
         ];
     }
 
     public function customValidationMessages()
     {
         return [
-            '0.required' => '店舗コードは必須です', // 店舗コード必須のカスタムエラーメッセージ
-            '0.OrganizationRule' => '店舗コードが正しくありません', // OrganizationRuleのエラーメッセージ
+            '0.required' => '店舗コードは必須です',
+            '0.OrganizationRule' => '店舗コードが正しくありません',
         ];
     }
 

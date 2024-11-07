@@ -352,9 +352,9 @@ $(document).on('click', '#messageImportModal input[type="button"].importFileBtn'
                             <span class="fileName">ファイルを選択またはドロップ</span>
                             <input type="file" name="file" accept=".pdf">
                             <input type="hidden" name="number" value="${item.number}">
-                            <input type="hidden" name="file_name" value="{{ old('file_name') }}">
-                            <input type="hidden" name="file_path" value="{{ old('file_path') }}">
-                            <input type="hidden" name="join_flg" value="{{ old('join_flg') }}">
+                            <input type="hidden" name="file_name" value="">
+                            <input type="hidden" name="file_path" value="">
+                            <input type="hidden" name="join_flg" value="">
                         </label>
                         <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                             <div class="progress-bar" style="width: 0%"></div>
@@ -364,7 +364,11 @@ $(document).on('click', '#messageImportModal input[type="button"].importFileBtn'
             }
         });
 
-        $('#messageImportModal input[type="button"].importFileBtn').removeClass("importFileBtn").addClass("importBtn").val("インポート");
+        $('#messageImportModal input[type="button"].importFileBtn')
+            .removeClass("importFileBtn")
+            .addClass("importBtn")
+            .val("インポート")
+            .prop("disabled", true);
     }
 });
 
@@ -380,6 +384,7 @@ $(document).on("change", '#messageImportModal .fileInputs input[type="file"]', f
     let progressBar = progress.children(".progress-bar");
 
     labelForm.parent().find(".text-danger").remove();
+	$('#messageImportModal .modal-body .alert-danger').remove();
 
     // ファイルをformDataに追加
     for (let i = 0; i < fileList.length; i++) {
@@ -389,6 +394,8 @@ $(document).on("change", '#messageImportModal .fileInputs input[type="file"]', f
     progressBar.hide();
     progressBar.css("width", "0%");
     progress.show();
+
+	let button = $('#messageImportModal input[type="button"]');
 
     let number = _this.siblings('input[name="number"]').val();
     let fileName = _this.siblings('input[name="file_name"]');
@@ -423,9 +430,24 @@ $(document).on("change", '#messageImportModal .fileInputs input[type="file"]', f
         },
     })
     .done(function (response) {
+        button.prop("disabled", false);
         labelForm.parent().find(".text-danger").remove();
-        handleResponse(response,number, fileName, filePath, joinFile);
+        modalHandleResponse(response,number, fileName, filePath, joinFile);
         _this.attr('data-cache', 'active');
+
+        // すべてのfile_nameが入力されたかを確認
+        let allFilesNamed = true;
+        $('#messageImportModal .fileInputs input[name="file_name"]').each(function() {
+            if (!$(this).val()) {
+                allFilesNamed = false;
+            }
+        });
+
+        if (allFilesNamed) {
+            button.prop("disabled", false);
+        } else {
+            button.prop("disabled", true);
+        }
     })
     .fail(function (jqXHR, textStatus, errorThrown) {
         labelForm.parent().find(".text-danger").remove();
@@ -443,7 +465,7 @@ $(document).on("change", '#messageImportModal .fileInputs input[type="file"]', f
 
 
 // アップロード完了後の処理
-function handleResponse(response, number, fileName, filePath, joinFile) {
+function modalHandleResponse(response, number, fileName, filePath, joinFile) {
     // responseが複数ファイルに対応している場合
     response.content_names.forEach((content_name, i) => {
         let content_url = response.content_urls[i];
@@ -468,7 +490,7 @@ function handleResponse(response, number, fileName, filePath, joinFile) {
 $(document).on('click', '#messageImportModal input[type="button"].importBtn', function(e){
     e.preventDefault();
 
-	if(!messageJson) {
+	if (!messageJson) {
 		$('#messageImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
 				<ul>
@@ -478,6 +500,21 @@ $(document).on('click', '#messageImportModal input[type="button"].importBtn', fu
 		`);
 		return;
 	}
+
+    // // BBの場合 ファイルアップロード
+    // if (file_upload_flg) {
+    //     if (!messageJson.content_name) {
+    //         $('#messageImportModal .modal-body').prepend(`
+    //             <div class="alert alert-danger">
+    //                 <ul>
+    //                     <li>ファイルを添付してください</l>
+    //                 </ul>
+    //             </div>
+    //         `);
+    //         return;
+    //     }
+    // }
+
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 	var overlay = document.getElementById('overlay');

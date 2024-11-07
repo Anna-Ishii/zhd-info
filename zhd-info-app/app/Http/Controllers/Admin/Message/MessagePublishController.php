@@ -1334,7 +1334,7 @@ class MessagePublishController extends Controller
         $organization = $this->getOrganizationForm($organization1);
 
         if ($organization1 === 2) {
-            $all_shops = $this->getShopForm($organization1);
+            $shop_list = $this->getShopForm($organization1);
         }
 
         $csv_path = Storage::putFile('csv', $csv);
@@ -1348,9 +1348,9 @@ class MessagePublishController extends Controller
         try {
             if ($organization1 === 2) {
                 // BBの場合
-                Excel::import(new MessageBBCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+                Excel::import(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
-                $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+                $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
                 $count = $collection[0]->count();
                 if ($count >= 100) {
                     File::delete($file_path);
@@ -1386,7 +1386,7 @@ class MessagePublishController extends Controller
 
                         $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
                         $shop_param = ($shop == "全店")
-                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($all_shops, 'id')]
+                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($shop_list, 'id')]
                             : ['all_shops_flag' => false, 'shop_ids' => Shop::whereIn('display_name', $this->strToArray($shop))->pluck('id')->toArray()];
 
                         $target_roll = $message->roll()->pluck('id')->toArray();
@@ -1414,7 +1414,7 @@ class MessagePublishController extends Controller
 
                         $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
                         $shop_param = ($shop == "全店")
-                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($all_shops, 'id')]
+                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($shop_list, 'id')]
                             : ['all_shops_flag' => false, 'shop_ids' => Shop::whereIn('display_name', $this->strToArray($shop))->pluck('id')->toArray()];
 
                         $target_roll = $message->roll()->pluck('id')->toArray();
