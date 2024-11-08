@@ -5,7 +5,7 @@
                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                 <h4 class="modal-title">業務連絡csvインポート</h4>
             </div>
-            <div class="modal-body">
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
                 <div class="modal-text">
                     csvデータを業務連絡に上書きします
                 </div>
