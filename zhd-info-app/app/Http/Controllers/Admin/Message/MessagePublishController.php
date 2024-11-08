@@ -1324,11 +1324,17 @@ class MessagePublishController extends Controller
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
 
-        $csv_content = file_get_contents($csv);
-        $encoding = mb_detect_encoding($csv_content);
-        if ($encoding == "UTF-8") {
-            $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
-            file_put_contents($csv, $shift_jis_content);
+        try {
+            $csv_content = file_get_contents($csv);
+            $encoding = mb_detect_encoding($csv_content);
+            if ($encoding == "UTF-8") {
+                $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
+                file_put_contents($csv, $shift_jis_content);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'ファイルをアップロードしてください'
+            ], 500);
         }
 
         $organization = $this->getOrganizationForm($organization1);
@@ -1525,6 +1531,11 @@ class MessagePublishController extends Controller
                 $errorMessage[$index]["errors"]      = $failure->errors(); // Actual error messages from Laravel validator
                 $errorMessage[$index]["value"]       = $failure->values(); // The values of the row that has failed.
             }
+
+            // 行でソート
+            usort($errorMessage, function ($a, $b) {
+                return $a['row'] <=> $b['row'];
+            });
 
             File::delete($file_path);
             return response()->json([
