@@ -501,20 +501,6 @@ $(document).on('click', '#messageImportModal input[type="button"].importBtn', fu
 		return;
 	}
 
-    // // BBの場合 ファイルアップロード
-    // if (file_upload_flg) {
-    //     if (!messageJson.content_name) {
-    //         $('#messageImportModal .modal-body').prepend(`
-    //             <div class="alert alert-danger">
-    //                 <ul>
-    //                     <li>ファイルを添付してください</l>
-    //                 </ul>
-    //             </div>
-    //         `);
-    //         return;
-    //     }
-    // }
-
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
 	var overlay = document.getElementById('overlay');
