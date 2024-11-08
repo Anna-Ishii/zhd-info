@@ -94,6 +94,15 @@ class MessageBBCsvImport implements
                 if (!isset($row[0]) && empty($row['4'])) {
                     $validator->errors()->add($rowIndex, '新規登録の場合、業連ファイルは必須項目です');
                 }
+
+                // 掲載開始日時が掲載終了日時よりも後の場合のエラーチェック
+                if (isset($row[10]) && isset($row[11])) {
+                    $startDate = Carbon::parse($row[10]);
+                    $endDate = Carbon::parse($row[11]);
+                    if ($startDate->gt($endDate)) {
+                        $validator->errors()->add($rowIndex, '掲載開始日時 ＞ 掲載終了日時の入力はできません');
+                    }
+                }
             }
 
             // バリデーションエラーが発生した行番号をキューに追加
