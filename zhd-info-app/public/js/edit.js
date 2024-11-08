@@ -346,7 +346,7 @@ $(document).on('click', '#messageImportModal input[type="button"].importFileBtn'
         messageJson.forEach(item => {
             if (item.check_file) {
                 $("#messageImportModal .fileInputs").append(`
-                    <label class="col-sm-4 control-label">No.${item.number}<span style="padding-left: 10px;">${item.title} : </span></label>
+                    <label class="col-sm-4 control-label">No.${item.number}<span style="padding-left: 10px;">${item.title} : <span class="text-danger required">*<span></span></label>
                     <div class="col-sm-7">
                         <label class="inputFile form-control">
                             <span class="fileName">ファイルを選択またはドロップ</span>
