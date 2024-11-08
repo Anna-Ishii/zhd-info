@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Rules\Import\BrandRule;
 use App\Rules\Import\ShopRule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Concerns\Importable;
@@ -91,7 +92,7 @@ class MessageBBCsvImport implements
             // Noがない場合に業連ファイルが必須であることを確認
             foreach ($validator->getData() as $rowIndex => $row) {
                 if (!isset($row[0]) && empty($row['4'])) {
-                    $validator->errors()->add($rowIndex, '業連ファイルは必須項目です');
+                    $validator->errors()->add($rowIndex, '新規登録の場合、業連ファイルは必須項目です');
                 }
             }
 
