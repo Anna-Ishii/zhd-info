@@ -1676,21 +1676,12 @@ class MessagePublishController extends Controller
                                 'message_id' => $message->id,
                                 'organization1_id' => $message->organization1_id,
                                 'created_at' => now(),
-                                'updated_at' => now()
+                                'updated_at' => now(),
+                                'organization5_id' => $shop->organization5_id ?? null,
+                                'organization4_id' => $shop->organization4_id ?? null,
+                                'organization3_id' => $shop->organization3_id ?? null,
+                                'organization2_id' => $shop->organization2_id ?? null,
                             ];
-
-                            if ($shop->organization5_id !== null) {
-                                $orgData['organization5_id'] = $shop->organization5_id;
-                            }
-                            if ($shop->organization4_id !== null) {
-                                $orgData['organization4_id'] = $shop->organization4_id;
-                            }
-                            if ($shop->organization3_id !== null) {
-                                $orgData['organization3_id'] = $shop->organization3_id;
-                            }
-                            if ($shop->organization2_id !== null) {
-                                $orgData['organization2_id'] = $shop->organization2_id;
-                            }
 
                             // 組織IDが設定されている場合のみデータを追加
                             if (!empty(array_intersect_key($orgData, array_flip(['organization5_id', 'organization4_id', 'organization3_id', 'organization2_id'])))) {
@@ -1821,21 +1812,12 @@ class MessagePublishController extends Controller
                                 'message_id' => $message->id,
                                 'organization1_id' => $message->organization1_id,
                                 'created_at' => now(),
-                                'updated_at' => now()
+                                'updated_at' => now(),
+                                'organization5_id' => $shop->organization5_id ?? null,
+                                'organization4_id' => $shop->organization4_id ?? null,
+                                'organization3_id' => $shop->organization3_id ?? null,
+                                'organization2_id' => $shop->organization2_id ?? null,
                             ];
-
-                            if ($shop->organization5_id !== null) {
-                                $orgData['organization5_id'] = $shop->organization5_id;
-                            }
-                            if ($shop->organization4_id !== null) {
-                                $orgData['organization4_id'] = $shop->organization4_id;
-                            }
-                            if ($shop->organization3_id !== null) {
-                                $orgData['organization3_id'] = $shop->organization3_id;
-                            }
-                            if ($shop->organization2_id !== null) {
-                                $orgData['organization2_id'] = $shop->organization2_id;
-                            }
 
                             // 組織IDが設定されている場合のみデータを追加
                             if (!empty(array_intersect_key($orgData, array_flip(['organization5_id', 'organization4_id', 'organization3_id', 'organization2_id'])))) {
