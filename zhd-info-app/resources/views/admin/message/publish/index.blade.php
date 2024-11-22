@@ -158,6 +158,7 @@
                                 data-target="#messageImportModal" value="インポート">
                         </div>
                     @endif
+
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         {{-- BBの場合 --}}
                         @if ($organization1->id === 2)
@@ -178,6 +179,7 @@
                                 class=" btn btn-admin">新規登録</a>
                         </div>
                     @endif
+
                 </div>
             </div>
 
@@ -185,6 +187,16 @@
                 <table id="list" class="message-table table-list table-hover table-condensed text-center">
                     <thead>
                         <tr>
+                            {{-- BBの場合 --}}
+                            @if ($organization1->id === 2)
+                                @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                                    <th class="text-center" nowrap>
+                                        <p class="btn btn-admin messageAddBtn" style="position: relative; z-index: 10;">追加</p>
+                                        <p class="btn btn-admin" id="messageAllSaveBtn" style="position: relative; z-index: 10;">一括登録</p>
+                                    </th>
+                                @endif
+                            @endif
+
                             <th class="text-center" nowrap>No</th>
                             <th class="text-center" nowrap>対象業態</th>
                             <th class="text-center" nowrap>ラベル</th>
@@ -207,96 +219,318 @@
 
                     <tbody>
                         @foreach ($message_list as $message)
-                            <tr data-message_id={{ $message->id }}
+                            <tr data-message_id="{{ $message->id }}"
+                                data-content_files_list="{{ json_encode($message->content_files_list) }}"
+                                data-main_file_list="{{ json_encode($message->main_file_list) }}"
+                                data-organization1_id="{{ $organization1->id }}"
+                                data-organization_list="{{ json_encode($organization_list) }}"
+                                data-all_shop_list="{{ json_encode($all_shop_list) }}"
+                                data-target_org="{{ json_encode($message->target_org) }}"
                                 class="@if ($message->status == App\Enums\PublishStatus::Publishing) publishing
-								@elseif($message->status == App\Enums\PublishStatus::Published) published
-								@elseif($message->status == App\Enums\PublishStatus::Wait) wait
-								@elseif($message->status == App\Enums\PublishStatus::Editing) editing @endif">
-                                <td class="shop-id">{{ $message->number }}</td>
-                                <td>{{ $message->brand_name }}</td>
-                                @if ($message->emergency_flg)
-                                    <td class="label-colum-danger">
-                                        <div>重要</div>
-                                    </td>
-                                @else
-                                    <td></td>
+                                @elseif($message->status == App\Enums\PublishStatus::Published) published
+                                @elseif($message->status == App\Enums\PublishStatus::Wait) wait
+                                @elseif($message->status == App\Enums\PublishStatus::Editing) editing @endif">
+
+                                {{-- BBの場合 --}}
+                                @if ($organization1->id === 2)
+                                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                                        <td nowrap>
+                                            <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}">編集</p>
+                                            <p class="messageEditDeleteBtn btn btn-admin" data-message-id="{{ $message->id }}" style="display:none;">削除</p>
+                                        </td>
+                                    @endif
                                 @endif
-                                <td>{{ $message->category?->name }}</td>
-                                <td class="label-title">
-                                    @if (isset($message->content_url))
-                                        @if (isset($message->main_file))
-                                            @if ($message->main_file_count < 2)
-                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
-                                                    rel="noopener noreferrer">{{ $message->title }}</a>
+
+                                {{-- BBの場合 --}}
+                                @if ($organization1->id === 2)
+                                    <!-- No -->
+                                    <td class="shop-id">{{ $message->number }}</td>
+                                    <!-- 対象業態 -->
+                                    <td class="label-brand">
+                                        <span class="brand-text">{{ $message->brand_name }}</span>
+                                        <div class="brand-input-group" style="display:none;">
+                                            <select class="form-control" name="brand_name">
+                                                @php
+                                                    $brandNames = explode(',', $message->brand_name);
+                                                    $allBrandsSelected = count($brandNames) === count($brand_list);
+                                                @endphp
+                                                <option value="all" {{ $allBrandsSelected ? 'selected' : '' }}>全業態</option>
+                                                    @foreach ($brand_list as $brand)
+                                                        <option value="{{ $brand->name }}"
+                                                            @if (in_array($brand->name, $brandNames) && !$allBrandsSelected)
+                                                                selected
+                                                            @endif
+                                                                >{{ $brand->name }}</option>
+                                                    @endforeach
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <!-- ラベル -->
+                                    <td class="label-colum-danger">
+                                        @if ($message->emergency_flg)
+                                            <div class="emergency-flg-text">重要</div>
+                                        @endif
+                                        <div class="emergency-flg-input-group" style="display:none;">
+                                            <input type="checkbox" name="emergency_flg" class="checkCommon mr8"
+                                                {{ $message->emergency_flg ? 'checked' : '' }}
+                                                    ><span>重要</span>
+                                        </div>
+                                    </td>
+                                    <!-- カテゴリ -->
+                                    <td class="label-category">
+                                        <span class="category-text">{{ $message->category?->name }}</span>
+                                        <div class="category-input-group" style="display:none;">
+                                            <select class="form-control" name="category_id">
+                                                @foreach ($category_list as $category)
+                                                    {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
+                                                    @if ($organization1->id === 8 || $category->id !== 7)
+                                                        <option value="{{ $category->id }}"
+                                                            @if ($message->category_id == $category->id)
+                                                                selected
+                                                            @endif
+                                                                >{{ $category->name }}</option>
+                                                    @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </td>
+                                    <!-- タイトル -->
+                                    <td class="label-title">
+                                        @if (isset($message->content_url))
+                                            @if (isset($message->main_file))
+                                                @if ($message->main_file_count < 2)
+                                                    <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                        rel="noopener noreferrer" class="title-text">{{ $message->title }}</a>
+                                                @else
+                                                    <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                        rel="noopener noreferrer" class="title-text">{{ $message->title }}
+                                                        ({{ $message->main_file_count }}ページ)
+                                                    </a>
+                                                @endif
                                             @else
-                                                <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
-                                                    rel="noopener noreferrer">{{ $message->title }}
-                                                    ({{ $message->main_file_count }}ページ)
-                                                </a>
+                                                <a href="{{ asset($message->content_url) }}" target="_blank"
+                                                    rel="noopener noreferrer" class="title-text">{{ $message->title }}</a>
                                             @endif
                                         @else
-                                            <a href="{{ asset($message->content_url) }}" target="_blank"
-                                                rel="noopener noreferrer">{{ $message->title }}</a>
+                                            {{ $message->title }}
                                         @endif
-                                    @else
-                                        {{ $message->title }}
-                                    @endif
-                                </td>
-                                <td class="label-file">
-                                    @if ($message->file_count > 0)
-                                        <a href="#" data-toggle="modal"
-                                            data-target="#singleFileModal{{ $message->id }}">
-                                            有 ({{ $message->file_count }})
-                                        </a>
-                                    @endif
-                                </td>
-                                <td class="label-tags">
-                                    <div>
-                                        @foreach ($message->tag as $tag)
-                                            <div class="label-tags-mark">
-                                                {{ $tag->name }}
-                                            </div>
-                                        @endforeach
-                                    </div>
-
-                                </td>
-                                <td>
-                                    <div>{{ $message->content_file_size }}</div>
-                                </td>
-                                <td class="date-time">
-                                    <div>{{ $message->formatted_start_datetime }}</div>
-                                </td>
-                                <td class="date-time">
-                                    <div>{{ $message->formatted_end_datetime }}</div>
-                                </td>
-                                <td>{{ $message->status->text() }}</td>
-                                <td style="text-align: right">{{ $message->shop_count }}</td>
-                                @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
-                                    <td></td>
-                                    <td></td>
-                                    <td nowrap>詳細</td>
-                                @else
-                                    <!-- 閲覧率を表示 -->
-                                    <td
-                                        class="view-rate {{ ($message->total_users != 0 ? $message->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
-                                        <div>{{ $message->total_users != 0 ? $message->view_rate : '0.0' }}% </div>
+                                        <div class="title-input-group" style="display: none;">
+                                            <input type="text" class="form-control" name="title"
+                                                value="{{ $message->title }}">
+                                            <input type="button" class="btn btn-admin" id="titleFileEditBtn-{{ $message->id }}"
+                                                data-toggle="modal" data-target="#editTitleFileModal-{{ $message->id }}" value="編集">
+                                        </div>
                                     </td>
-                                    <!-- ユーザー数を表示 -->
-                                    <td>{{ $message->read_users }}/{{ $message->total_users }}</td>
+                                    <!-- 添付ファイル -->
+                                    <td class="label-file">
+                                        @if ($message->file_count > 0)
+                                            <a href="#" data-toggle="modal"
+                                                data-target="#singleFileModal{{ $message->id }}">
+                                                有 ({{ $message->file_count }})
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <!-- 検索タグ -->
+                                    <td class="label-tags">
+                                        <div>
+                                            @foreach ($message->tag as $tag)
+                                                <div class="tags-text label-tags-mark">{{ $tag->name }}</div>
+                                            @endforeach
+                                            @if ($message->tag->isEmpty())
+                                                <div class="tags-input-group form-group tag-form" style="display:none;">
+                                                    <div class="form-control">
+                                                        <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
+                                                    </div>
+                                                </div>
+                                            @else
+                                                @foreach ($message->tag as $index => $tag)
+                                                    <div class="tags-input-group form-group tag-form" style="display:none;">
+                                                        <div class="form-control">
+                                                            <span class="focus:outline-none tag-form-label">
+                                                                {{ $tag->name }}<span class="tag-form-delete">×</span>
+                                                                <input type="hidden" name="tag_name[]" value='{{ $tag->name }}'>
+                                                            </span>
+                                                            <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            @endif
+                                        </div>
+                                        <div class="tags-input-mark" style="display:none;">複数入力する場合は「,」で区切る</div>
+                                    </td>
+                                    <!-- 添付ファイルサイズ -->
+                                    <td><div>{{ $message->content_file_size }}</div></td>
+                                    <!-- 掲載期間 -->
+                                    <td class="date-time">
+                                        <div>
+                                            <span class="start-datetime-text">{{ $message->formatted_start_datetime }}</span>
+                                            <div class="start-datetime-input-group" style="display:none;">
+                                                <input id="dateFrom" class="form-control datepicker"
+                                                    value="{{ $message->formatted_start_datetime }}"
+                                                    name="start_datetime" autocomplete="off">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="date-time">
+                                        <div>
+                                            <span class="end-datetime-text">{{ $message->formatted_end_datetime }}</span>
+                                            <div class="end-datetime-input-group" style="display:none;">
+                                                <input id="dateTo" class="form-control datepicker"
+                                                    value="{{ $message->formatted_end_datetime }}"
+                                                    name="end_datetime" autocomplete="off">
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <!-- 状態 -->
+                                    <td>{{ $message->status->text() }}</td>
+                                    <!-- 配信店舗数 -->
+                                    <td style="text-align: right">{{ $message->shop_count }}
+                                        <div class="shop-edit-group" style="display:none;">
+                                            @if ($message->target_org['select'] === 'all')
+                                                <input type="button" class="btn btn-admin check-selected" id="checkAll-{{ $message->id }}" name="organizationAll" value="全店">
+                                                <input type="hidden" id="selectOrganizationAll-{{ $message->id }}" name="select_organization[all]" value="selected">
+                                            @else
+                                                <input type="button" class="btn btn-admin" id="checkAll-{{ $message->id }}" name="organizationAll" value="全店">
+                                                <input type="hidden" id="selectOrganizationAll-{{ $message->id }}" name="select_organization[all]" value="">
+                                            @endif
 
-                                    <td class="detailBtn">
-                                        <a href="/admin/message/publish/{{ $message->id }}">詳細</a>
+                                            @if ($message->target_org['select'] === 'store')
+                                                <input type="button" class="btn btn-admin check-selected" id="shopEditBtn-{{ $message->id }}"
+                                                    data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
+                                                {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value="selected"> --}}
+                                            @else
+                                                @if ($message->target_org['select'] === 'oldStore')
+                                                    <input type="button" class="btn btn-admin check-selected" id="shopEditBtn-{{ $message->id }}"
+                                                        data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
+                                                    {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value="selected"> --}}
+                                                @else
+                                                    <input type="button" class="btn btn-admin" id="shopEditBtn-{{ $message->id }}"
+                                                        data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
+                                                    {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value=""> --}}
+                                                @endif
+                                            @endif
+                                        </div>
+                                    </td>
+                                    <!-- 閲覧率 -->
+                                    @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
+                                        <td></td>
+                                        <td></td>
+                                        <td nowrap>詳細</td>
+                                    @else
+                                        <!-- 閲覧率を表示 -->
+                                        <td
+                                            class="view-rate {{ ($message->total_users != 0 ? $message->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
+                                            <div>{{ $message->total_users != 0 ? $message->view_rate : '0.0' }}% </div>
+                                        </td>
+                                        <!-- ユーザー数を表示 -->
+                                        <td>{{ $message->read_users }}/{{ $message->total_users }}</td>
+
+                                        <td class="detailBtn">
+                                            <a href="/admin/message/publish/{{ $message->id }}">詳細</a>
+                                        </td>
+                                    @endif
+                                    <!-- 登録者 -->
+                                    <td>{{ $message->create_user->name }}</td>
+                                    <!-- 登録日時 -->
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_created_at }}</div>
+                                    </td>
+                                    <!-- 更新者 -->
+                                    <td>{{ isset($message->updated_user->name) ? $message->updated_user->name : '' }}</td>
+                                    <!-- 更新日時 -->
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_updated_at }}</div>
+                                    </td>
+
+                                {{-- BB以外 --}}
+                                @else
+                                    <td class="shop-id">{{ $message->number }}</td>
+                                    <td>{{ $message->brand_name }}</td>
+                                    @if ($message->emergency_flg)
+                                        <td class="label-colum-danger">
+                                            <div>重要</div>
+                                        </td>
+                                    @else
+                                        <td></td>
+                                    @endif
+                                    <td>{{ $message->category?->name }}</td>
+                                    <td class="label-title">
+                                        @if (isset($message->content_url))
+                                            @if (isset($message->main_file))
+                                                @if ($message->main_file_count < 2)
+                                                    <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                        rel="noopener noreferrer">{{ $message->title }}</a>
+                                                @else
+                                                    <a href="{{ asset($message->main_file['file_url']) }}" target="_blank"
+                                                        rel="noopener noreferrer">{{ $message->title }}
+                                                        ({{ $message->main_file_count }}ページ)
+                                                    </a>
+                                                @endif
+                                            @else
+                                                <a href="{{ asset($message->content_url) }}" target="_blank"
+                                                    rel="noopener noreferrer">{{ $message->title }}</a>
+                                            @endif
+                                        @else
+                                            {{ $message->title }}
+                                        @endif
+                                    </td>
+                                    <td class="label-file">
+                                        @if ($message->file_count > 0)
+                                            <a href="#" data-toggle="modal"
+                                                data-target="#singleFileModal{{ $message->id }}">
+                                                有 ({{ $message->file_count }})
+                                            </a>
+                                        @endif
+                                    </td>
+                                    <td class="label-tags">
+                                        <div>
+                                            @foreach ($message->tag as $tag)
+                                                <div class="label-tags-mark">
+                                                    {{ $tag->name }}
+                                                </div>
+                                            @endforeach
+                                        </div>
+
+                                    </td>
+                                    <td>
+                                        <div>{{ $message->content_file_size }}</div>
+                                    </td>
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_start_datetime }}</div>
+                                    </td>
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_end_datetime }}</div>
+                                    </td>
+                                    <td>{{ $message->status->text() }}</td>
+                                    <td style="text-align: right">{{ $message->shop_count }}</td>
+                                    @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
+                                        <td></td>
+                                        <td></td>
+                                        <td nowrap>詳細</td>
+                                    @else
+                                        <!-- 閲覧率を表示 -->
+                                        <td
+                                            class="view-rate {{ ($message->total_users != 0 ? $message->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
+                                            <div>{{ $message->total_users != 0 ? $message->view_rate : '0.0' }}% </div>
+                                        </td>
+                                        <!-- ユーザー数を表示 -->
+                                        <td>{{ $message->read_users }}/{{ $message->total_users }}</td>
+
+                                        <td class="detailBtn">
+                                            <a href="/admin/message/publish/{{ $message->id }}">詳細</a>
+                                        </td>
+                                    @endif
+                                    <td>{{ $message->create_user->name }}</td>
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_created_at }}</div>
+                                    </td>
+                                    <td>{{ isset($message->updated_user->name) ? $message->updated_user->name : '' }}</td>
+                                    <td class="date-time">
+                                        <div>{{ $message->formatted_updated_at }}</div>
                                     </td>
                                 @endif
-                                <td>{{ $message->create_user->name }}</td>
-                                <td class="date-time">
-                                    <div>{{ $message->formatted_created_at }}</div>
-                                </td>
-                                <td>{{ isset($message->updated_user->name) ? $message->updated_user->name : '' }}</td>
-                                <td class="date-time">
-                                    <div>{{ $message->formatted_updated_at }}</div>
-                                </td>
 
+                                <!-- 操作 -->
                                 @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                     <td nowrap>
                                         <div class="button-group">
@@ -319,6 +553,21 @@
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
     @include('common.admin.message-export-modal', ['organization1' => $organization1])
+    {{-- @include('common.admin.message-edit-title-file-modal', ['message_list' => $message_list, 'organization1' => $organization1]) --}}
+    {{-- @include('common.admin.message-join-file-modal') --}}
+    {{-- @include('common.admin.message-edit-shop-modal', ['message_list' => $message_list])
+    @include('common.admin.message-edit-shop-list-modal', ['message_list' => $message_list, 'organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1_id' => $organization1->id]) --}}
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new_list.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/edit_list.js') }}?date={{ date('Ymd') }}" defer></script>
+
+
+
+
+
+
+
+
+
 @endsection
