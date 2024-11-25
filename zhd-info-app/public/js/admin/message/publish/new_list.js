@@ -38,10 +38,10 @@ $(document).ready(function() {
                     <td class="shop-id">738</td>
                     <td class="label-brand">
                         <div class="brand-input-group" style="width: max-content;">
-                            <select class="form-control" name="brand_name">
+                            <select class="form-control" name="brand[]">
                                 <option value="all" selected>全業態</option>
-                                <option value="VS">VS</option>
-                                <option value="BB">BB</option>
+                                <option value="3">VS</option>
+                                <option value="4">BB</option>
                             </select>
                         </div>
                     </td>
