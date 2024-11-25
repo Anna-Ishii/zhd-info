@@ -220,12 +220,17 @@
                     <tbody>
                         @foreach ($message_list as $message)
                             <tr data-message_id="{{ $message->id }}"
-                                data-content_files_list="{{ json_encode($message->content_files_list) }}"
-                                data-main_file_list="{{ json_encode($message->main_file_list) }}"
-                                data-organization1_id="{{ $organization1->id }}"
-                                data-organization_list="{{ json_encode($organization_list) }}"
-                                data-all_shop_list="{{ json_encode($all_shop_list) }}"
-                                data-target_org="{{ json_encode($message->target_org) }}"
+
+                                {{-- BBの場合 --}}
+                                @if ($organization1->id === 2)
+                                    {{-- 編集ボタンを押すとPHPから取得に変更した方がいい --}}
+                                    data-content_files_list="{{ json_encode($message->content_files_list) }}"
+                                    data-main_file_list="{{ json_encode($message->main_file_list) }}"
+                                    data-organization1_id="{{ $organization1->id }}"
+                                    data-organization_list="{{ json_encode($organization_list) }}"
+                                    data-all_shop_list="{{ json_encode($all_shop_list) }}"
+                                    data-target_org="{{ json_encode($message->target_org) }}"
+                                @endif
                                 class="@if ($message->status == App\Enums\PublishStatus::Publishing) publishing
                                 @elseif($message->status == App\Enums\PublishStatus::Published) published
                                 @elseif($message->status == App\Enums\PublishStatus::Wait) wait
@@ -244,19 +249,23 @@
                                 {{-- BBの場合 --}}
                                 @if ($organization1->id === 2)
                                     <!-- No -->
-                                    <td class="shop-id">{{ $message->number }}</td>
+                                    <td class="shop-id">{{ $message->number }}
+                                        @foreach ($target_roll_list as $target_roll)
+                                            <input type="hidden" name="target_roll[]" value="{{ $target_roll->id }}">
+                                        @endforeach
+                                    </td>
                                     <!-- 対象業態 -->
                                     <td class="label-brand">
                                         <span class="brand-text">{{ $message->brand_name }}</span>
                                         <div class="brand-input-group" style="display:none;">
-                                            <select class="form-control" name="brand_name">
+                                            <select class="form-control" name="brand[]">
                                                 @php
                                                     $brandNames = explode(',', $message->brand_name);
                                                     $allBrandsSelected = count($brandNames) === count($brand_list);
                                                 @endphp
                                                 <option value="all" {{ $allBrandsSelected ? 'selected' : '' }}>全業態</option>
                                                     @foreach ($brand_list as $brand)
-                                                        <option value="{{ $brand->name }}"
+                                                        <option value="{{ $brand->id }}"
                                                             @if (in_array($brand->name, $brandNames) && !$allBrandsSelected)
                                                                 selected
                                                             @endif
@@ -553,10 +562,7 @@
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
     @include('common.admin.message-export-modal', ['organization1' => $organization1])
-    {{-- @include('common.admin.message-edit-title-file-modal', ['message_list' => $message_list, 'organization1' => $organization1]) --}}
-    {{-- @include('common.admin.message-join-file-modal') --}}
-    {{-- @include('common.admin.message-edit-shop-modal', ['message_list' => $message_list])
-    @include('common.admin.message-edit-shop-list-modal', ['message_list' => $message_list, 'organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1_id' => $organization1->id]) --}}
+
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/new_list.js') }}?date={{ date('Ymd') }}" defer></script>

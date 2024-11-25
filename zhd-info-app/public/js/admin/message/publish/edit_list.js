@@ -123,35 +123,62 @@ $(document).ready(function() {
                     const messageId = this.getAttribute('data-message-id');
                     const row = document.querySelector(`tr[data-message_id="${messageId}"]`);
 
-                    const brandName = row.querySelector('select[name="brand_name"]').value;
-                    const emergencyFlg = row.querySelector('input[name="emergency_flg"]').checked ? 1 : 0;
-                    const categoryId = row.querySelector('select[name="category_id"]').value;
-                    const title = row.querySelector('input[name="title"]').value;
-                    const tags = row.querySelector('input[name="tag_name[]"]')?.value || null;
-                    const startDatetime = row.querySelector('input[name="start_datetime"]').value;
+                    const categoryId = row.querySelector('select[name="category_id"]')?.value || null;
+                    const emergencyFlg = row.querySelector('input[name="emergency_flg"]')?.checked ? 'on' : 'off';
+                    const title = row.querySelector('input[name="title"]')?.value || null;
+                    const startDatetime = row.querySelector('input[name="start_datetime"]')?.value || null;
                     const endDatetime = row.querySelector('input[name="end_datetime"]')?.value || null;
-
-                    // ファイル
-                    // console.log(fileDataByMessageId[messageId]);
+                    const tags = Array.from(row.querySelectorAll('input[name="tag_name[]"]')).map(input => input.value) || null;
+                    const contentId = (fileDataByMessageId[messageId]?.contentIds || []).map(id => id || null);
+                    const fileName = (fileDataByMessageId[messageId]?.fileNames || []).map(name => name || null);
+                    const filePath = (fileDataByMessageId[messageId]?.filePaths || []).map(path => path || null);
+                    const joinFlg = (fileDataByMessageId[messageId]?.joinFlags || []).map(flg => flg || null);
+                    const targetRoll = Array.from(row.querySelectorAll('input[name="target_roll[]"]')).map(input => input.value) || null;
+                    const brand = row.querySelector('select[name="brand[]"]')?.value === 'all'
+                        ? ['3', '4']
+                        : Array.from(row.querySelectorAll('select[name="brand[]"]')).map(input => input.value) || null;
 
                     // 店舗
+                    const organization = [
+                        selectedValuesByMessageId[messageId]?.org5 || null,
+                        selectedValuesByMessageId[messageId]?.org4 || null,
+                        selectedValuesByMessageId[messageId]?.org3 || null,
+                        selectedValuesByMessageId[messageId]?.org2 || null
+                    ].map(org => org || null);
+                    const organizationShops = (selectedValuesByMessageId[messageId]?.shops || []).map(shop => shop || null);
+
                     const selectOrganizationAll = row.querySelector('input[name="select_organization[all]"]')?.value || null;
-                    // console.log(selectedValuesByMessageId[messageId]);
+                    const selectOrganization = {
+                        all: selectOrganizationAll === 'selected' ? 'selected' : null,
+                        store: selectOrganizationAll !== 'selected' ? 'selected' : null,
+                        csv: null
+                    };
 
 
-                    let _this = $(this);
                     let csrfToken = $('meta[name="csrf-token"]').attr("content");
                     let formData = new FormData();
 
                     // message_idをキーにしてデータを追加
                     formData.append('message_id', messageId);
-                    formData.append('brand_name', brandName);
                     formData.append('emergency_flg', emergencyFlg);
                     formData.append('category_id', categoryId);
                     formData.append('title', title);
-                    formData.append('tags', tags);
                     formData.append('start_datetime', startDatetime);
                     formData.append('end_datetime', endDatetime);
+
+                    tags.forEach(tag => formData.append('tag_name[]', tag));
+                    contentId.forEach(id => formData.append('content_id[]', id));
+                    fileName.forEach(name => formData.append('file_name[]', name));
+                    filePath.forEach(path => formData.append('file_path[]', path));
+                    joinFlg.forEach(flg => formData.append('join_flg[]', flg));
+                    targetRoll.forEach(roll => formData.append('target_roll[]', roll));
+                    brand.forEach(b => formData.append('brand[]', b));
+                    organization.forEach(org => formData.append('organization[]', org));
+                    formData.append('organization_shops', organizationShops);
+                    Object.keys(selectOrganization).forEach(key => {
+                        formData.append(`select_organization[${key}]`, selectOrganization[key]);
+                    });
+
 
                     $.ajax({
                         url: `/admin/message/publish/messageEditData`,
@@ -171,7 +198,6 @@ $(document).ready(function() {
                     });
                 });
             }
-
 
 
 
@@ -587,6 +613,8 @@ $(document).ready(function() {
             updateJoinFileCount(messageId);
             // "join" フラグがあるか
             updateJoinFileLabel(messageId);
+            // 業連ファイルを保存
+            saveFileData(messageId);
 
             $(document).on("change", `${editTitleFileInputsSelector} input[type="file"]`, function () {
                 let _this = $(this);
@@ -822,29 +850,7 @@ $(document).ready(function() {
 
             // 業連ファイル設定ボタンのクリックイベント
             $(document).on('click', `#fileImportBtn-${messageId}`, function() {
-                const fileNames = [];
-                const filePaths = [];
-                const joinFlags = [];
-
-                // 各ファイルの情報を取得して配列に保存
-                $(`${editTitleFileInputsSelector} [name='file_name[]']`).each(function() {
-                    fileNames.push($(this).val());
-                });
-
-                $(`${editTitleFileInputsSelector} [name='file_path[]']`).each(function() {
-                    filePaths.push($(this).val());
-                });
-
-                $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
-                    joinFlags.push($(this).val());
-                });
-
-                // message_idをキーとしてファイル情報を保存
-                fileDataByMessageId[messageId] = {
-                    fileNames: fileNames,
-                    filePaths: filePaths,
-                    joinFlags: joinFlags
-                };
+                saveFileData(messageId);
 
                 // モーダルを閉じる
                 $(`#editTitleFileModal-${messageId}`).modal("hide");
@@ -1754,6 +1760,39 @@ $(document).ready(function() {
         if (hasJoinFlag) {
             $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .inputFile #joinFileId-${messageId}`).val("結合の修正");
         }
+    }
+
+    // 業連ファイルを保存
+    function saveFileData(messageId) {
+        const contentIds = [];
+        const fileNames = [];
+        const filePaths = [];
+        const joinFlags = [];
+
+        // 各ファイルの情報を取得して配列に保存
+        $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='content_id[]']`).each(function() {
+            contentIds.push($(this).val());
+        });
+
+        $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='file_name[]']`).each(function() {
+            fileNames.push($(this).val());
+        });
+
+        $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='file_path[]']`).each(function() {
+            filePaths.push($(this).val());
+        });
+
+        $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).each(function() {
+            joinFlags.push($(this).val());
+        });
+
+        // message_idをキーとしてファイル情報を保存
+        fileDataByMessageId[messageId] = {
+            contentIds: contentIds,
+            fileNames: fileNames,
+            filePaths: filePaths,
+            joinFlags: joinFlags
+        };
     }
 
 
