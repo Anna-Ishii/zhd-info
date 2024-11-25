@@ -59,6 +59,8 @@ class MessagePublishController extends Controller
         $category_list = MessageCategory::all();
         $organization1_list = $admin->getOrganization1();
 
+        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
+
         // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
@@ -387,7 +389,6 @@ class MessagePublishController extends Controller
                 $target_org['org3'] = MessageOrganization::where('message_id', $message->id)->pluck('organization3_id')->toArray();
                 $target_org['org2'] = MessageOrganization::where('message_id', $message->id)->pluck('organization2_id')->toArray();
 
-                $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
                 $target_brand = $message->brand()->pluck('brands.id')->toArray();
 
                 $target_org['shops'] = [];
@@ -453,6 +454,7 @@ class MessagePublishController extends Controller
             'category_list' => $category_list,
             'brand_list' => $brand_list,
             'message_list' => $message_list,
+            'target_roll_list' => $target_roll_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
             'organization_list' => $organization_list,
@@ -1079,28 +1081,77 @@ class MessagePublishController extends Controller
     }
 
     // 一覧画面のファイル登録、編集で使う予定
-    public function messageEditData(Request $request)
+    public function messageEditData(PublishUpdateRequest $request)
     {
         $message_id = $request->input('message_id');
 
-        // PublishUpdateRequestをインスタンス化
-        $updateRequest = new PublishUpdateRequest([
-            'title' => $request->input('title') ?? null,
-            'category_id' => $request->input('category_id') ?? null,
-            'emergency_flg' => $request->input('emergency_flg') ?? null,
-            'start_datetime' => $request->input('start_datetime') ?? null,
-            'end_datetime' => $request->input('end_datetime') ?? null,
-            'content_name' => null,
-            'content_url' => null,
-            'thumbnails_url' => null,
-            'join_flg' => null,
-        ]);
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
 
-        // updateメソッドを呼び出し
-        // return $this->update($updateRequest, $message_id);
-        return response()->json(['status' => 'success']);
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+
+        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->update($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $message_id);
     }
-
 
     public function update(PublishUpdateRequest $request, $message_id)
     {
@@ -2847,5 +2898,11 @@ class MessagePublishController extends Controller
             ->groupBy('shops.id')
             ->get()
             ->toArray();
+    }
+
+    private function cleanDateString($dateString)
+    {
+        // 正規表現で日付文字列から曜日を削除
+        return preg_replace('/\(.+\)/', '', $dateString);
     }
 }
