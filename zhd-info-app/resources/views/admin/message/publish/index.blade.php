@@ -193,6 +193,7 @@
                                     <th class="text-center" nowrap>
                                         <p class="btn btn-admin messageAddBtn" style="position: relative; z-index: 10;">追加</p>
                                         <p class="btn btn-admin" id="messageAllSaveBtn" style="position: relative; z-index: 10;">一括登録</p>
+                                        <input type="hidden" name="organization1_id" value="{{ $organization1->id }}">
                                     </th>
                                 @endif
                             @endif
@@ -220,17 +221,7 @@
                     <tbody>
                         @foreach ($message_list as $message)
                             <tr data-message_id="{{ $message->id }}"
-
-                                {{-- BBの場合 --}}
-                                @if ($organization1->id === 2)
-                                    {{-- 編集ボタンを押すとPHPから取得に変更した方がいい --}}
-                                    data-content_files_list="{{ json_encode($message->content_files_list) }}"
-                                    data-main_file_list="{{ json_encode($message->main_file_list) }}"
-                                    data-organization1_id="{{ $organization1->id }}"
-                                    data-organization_list="{{ json_encode($organization_list) }}"
-                                    data-all_shop_list="{{ json_encode($all_shop_list) }}"
-                                    data-target_org="{{ json_encode($message->target_org) }}"
-                                @endif
+                                data-organization1_id="{{ $organization1->id }}"
                                 class="@if ($message->status == App\Enums\PublishStatus::Publishing) publishing
                                 @elseif($message->status == App\Enums\PublishStatus::Published) published
                                 @elseif($message->status == App\Enums\PublishStatus::Wait) wait
@@ -239,9 +230,8 @@
                                 {{-- BBの場合 --}}
                                 @if ($organization1->id === 2)
                                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                        <td nowrap>
+                                        <td class="message-edit-btn-group" nowrap>
                                             <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}">編集</p>
-                                            <p class="messageEditDeleteBtn btn btn-admin" data-message-id="{{ $message->id }}" style="display:none;">削除</p>
                                         </td>
                                     @endif
                                 @endif
@@ -249,59 +239,20 @@
                                 {{-- BBの場合 --}}
                                 @if ($organization1->id === 2)
                                     <!-- No -->
-                                    <td class="shop-id">{{ $message->number }}
-                                        @foreach ($target_roll_list as $target_roll)
-                                            <input type="hidden" name="target_roll[]" value="{{ $target_roll->id }}">
-                                        @endforeach
-                                    </td>
+                                    <td class="shop-id">{{ $message->number }}</td>
                                     <!-- 対象業態 -->
                                     <td class="label-brand">
                                         <span class="brand-text">{{ $message->brand_name }}</span>
-                                        <div class="brand-input-group" style="display:none;">
-                                            <select class="form-control" name="brand[]">
-                                                @php
-                                                    $brandNames = explode(',', $message->brand_name);
-                                                    $allBrandsSelected = count($brandNames) === count($brand_list);
-                                                @endphp
-                                                <option value="all" {{ $allBrandsSelected ? 'selected' : '' }}>全業態</option>
-                                                    @foreach ($brand_list as $brand)
-                                                        <option value="{{ $brand->id }}"
-                                                            @if (in_array($brand->name, $brandNames) && !$allBrandsSelected)
-                                                                selected
-                                                            @endif
-                                                                >{{ $brand->name }}</option>
-                                                    @endforeach
-                                            </select>
-                                        </div>
                                     </td>
                                     <!-- ラベル -->
                                     <td class="label-colum-danger">
                                         @if ($message->emergency_flg)
                                             <div class="emergency-flg-text">重要</div>
                                         @endif
-                                        <div class="emergency-flg-input-group" style="display:none;">
-                                            <input type="checkbox" name="emergency_flg" class="checkCommon mr8"
-                                                {{ $message->emergency_flg ? 'checked' : '' }}
-                                                    ><span>重要</span>
-                                        </div>
                                     </td>
                                     <!-- カテゴリ -->
                                     <td class="label-category">
                                         <span class="category-text">{{ $message->category?->name }}</span>
-                                        <div class="category-input-group" style="display:none;">
-                                            <select class="form-control" name="category_id">
-                                                @foreach ($category_list as $category)
-                                                    {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
-                                                    @if ($organization1->id === 8 || $category->id !== 7)
-                                                        <option value="{{ $category->id }}"
-                                                            @if ($message->category_id == $category->id)
-                                                                selected
-                                                            @endif
-                                                                >{{ $category->name }}</option>
-                                                    @endif
-                                                @endforeach
-                                            </select>
-                                        </div>
                                     </td>
                                     <!-- タイトル -->
                                     <td class="label-title">
@@ -323,12 +274,6 @@
                                         @else
                                             {{ $message->title }}
                                         @endif
-                                        <div class="title-input-group" style="display: none;">
-                                            <input type="text" class="form-control" name="title"
-                                                value="{{ $message->title }}">
-                                            <input type="button" class="btn btn-admin" id="titleFileEditBtn-{{ $message->id }}"
-                                                data-toggle="modal" data-target="#editTitleFileModal-{{ $message->id }}" value="編集">
-                                        </div>
                                     </td>
                                     <!-- 添付ファイル -->
                                     <td class="label-file">
@@ -341,29 +286,10 @@
                                     </td>
                                     <!-- 検索タグ -->
                                     <td class="label-tags">
-                                        <div>
+                                        <div class="tags-text-group">
                                             @foreach ($message->tag as $tag)
                                                 <div class="tags-text label-tags-mark">{{ $tag->name }}</div>
                                             @endforeach
-                                            @if ($message->tag->isEmpty())
-                                                <div class="tags-input-group form-group tag-form" style="display:none;">
-                                                    <div class="form-control">
-                                                        <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
-                                                    </div>
-                                                </div>
-                                            @else
-                                                @foreach ($message->tag as $index => $tag)
-                                                    <div class="tags-input-group form-group tag-form" style="display:none;">
-                                                        <div class="form-control">
-                                                            <span class="focus:outline-none tag-form-label">
-                                                                {{ $tag->name }}<span class="tag-form-delete">×</span>
-                                                                <input type="hidden" name="tag_name[]" value='{{ $tag->name }}'>
-                                                            </span>
-                                                            <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
-                                                        </div>
-                                                    </div>
-                                                @endforeach
-                                            @endif
                                         </div>
                                         <div class="tags-input-mark" style="display:none;">複数入力する場合は「,」で区切る</div>
                                     </td>
@@ -371,53 +297,21 @@
                                     <td><div>{{ $message->content_file_size }}</div></td>
                                     <!-- 掲載期間 -->
                                     <td class="date-time">
-                                        <div>
+                                        <div class="start-datetime-group">
                                             <span class="start-datetime-text">{{ $message->formatted_start_datetime }}</span>
-                                            <div class="start-datetime-input-group" style="display:none;">
-                                                <input id="dateFrom" class="form-control datepicker"
-                                                    value="{{ $message->formatted_start_datetime }}"
-                                                    name="start_datetime" autocomplete="off">
-                                            </div>
                                         </div>
                                     </td>
                                     <td class="date-time">
-                                        <div>
+                                        <div class="end-datetime-group">
                                             <span class="end-datetime-text">{{ $message->formatted_end_datetime }}</span>
-                                            <div class="end-datetime-input-group" style="display:none;">
-                                                <input id="dateTo" class="form-control datepicker"
-                                                    value="{{ $message->formatted_end_datetime }}"
-                                                    name="end_datetime" autocomplete="off">
-                                            </div>
                                         </div>
                                     </td>
                                     <!-- 状態 -->
                                     <td>{{ $message->status->text() }}</td>
                                     <!-- 配信店舗数 -->
-                                    <td style="text-align: right">{{ $message->shop_count }}
-                                        <div class="shop-edit-group" style="display:none;">
-                                            @if ($message->target_org['select'] === 'all')
-                                                <input type="button" class="btn btn-admin check-selected" id="checkAll-{{ $message->id }}" name="organizationAll" value="全店">
-                                                <input type="hidden" id="selectOrganizationAll-{{ $message->id }}" name="select_organization[all]" value="selected">
-                                            @else
-                                                <input type="button" class="btn btn-admin" id="checkAll-{{ $message->id }}" name="organizationAll" value="全店">
-                                                <input type="hidden" id="selectOrganizationAll-{{ $message->id }}" name="select_organization[all]" value="">
-                                            @endif
-
-                                            @if ($message->target_org['select'] === 'store')
-                                                <input type="button" class="btn btn-admin check-selected" id="shopEditBtn-{{ $message->id }}"
-                                                    data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
-                                                {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value="selected"> --}}
-                                            @else
-                                                @if ($message->target_org['select'] === 'oldStore')
-                                                    <input type="button" class="btn btn-admin check-selected" id="shopEditBtn-{{ $message->id }}"
-                                                        data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
-                                                    {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value="selected"> --}}
-                                                @else
-                                                    <input type="button" class="btn btn-admin" id="shopEditBtn-{{ $message->id }}"
-                                                        data-toggle="modal" data-target="#editShopModal-{{ $message->id }}" value="一部">
-                                                    {{-- <input type="hidden" id="selectStore{{ $message->id }}" name="select_organization[store]" value=""> --}}
-                                                @endif
-                                            @endif
+                                    <td style="text-align: right">
+                                        <div class="shop-edit-group">
+                                            <span class="shop-count">{{ $message->shop_count }}</span>
                                         </div>
                                     </td>
                                     <!-- 閲覧率 -->
@@ -565,7 +459,6 @@
 
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
-    <script src="{{ asset('/js/admin/message/publish/new_list.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/edit_list.js') }}?date={{ date('Ymd') }}" defer></script>
 
 
