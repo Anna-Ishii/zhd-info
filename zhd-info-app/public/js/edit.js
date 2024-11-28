@@ -748,6 +748,15 @@ $(document).on('keydown', '.tag-form-input', function(e) {
     }
 })
 
+// カーソルを離したときにタグを追加
+$(document).on('focusout', '.tag-form-input', function() {
+    let tagLabelText = $(this)[0].innerText;
+    if(tagLabelText != "") {
+        $(this).before(createTag(tagLabelText));
+        $(this)[0].innerText = "";
+    }
+});
+
 function createTag(tagLabelText) {
     return (
         `
