@@ -175,26 +175,6 @@ class MessagePublishController extends Controller
             $all_message_join_file = Message::where('id', $message->id)->get()->toArray();
             $all_message_content_single_files = MessageContent::where('message_id', $message->id)->get()->toArray();
 
-            // 一覧画面の登録、編集用
-            $message->main_file_list = [
-                "main_id" => $all_message_join_file[0]["id"],
-                "main_file_name" => $all_message_join_file[0]["content_name"],
-                "main_file_url" => $all_message_join_file[0]["content_url"],
-            ];
-
-            if (!empty($all_message_content_single_files)) {
-                $contentFilesList = [];
-                foreach ($all_message_content_single_files as $file) {
-                    $contentFilesList[] = [
-                        "content_id" => $file["id"],
-                        "content_name" => $file["content_name"],
-                        "content_url" => $file["content_url"],
-                        "content_join_flg" => $file["join_flg"],
-                    ];
-                }
-                $message->setAttribute('content_files_list', $contentFilesList);
-            }
-
             // 最初の要素をチェックしてフラグを設定
             if (isset($all_message_content_single_files[0]) && $all_message_content_single_files[0]["join_flg"] === "join") {
                 $is_first_join = true;
@@ -280,97 +260,6 @@ class MessagePublishController extends Controller
                 ->groupBy('message_id')
                 ->pluck('shop_count', 'message_id');
 
-
-
-            $organization_list = [];
-            $organization_list = Shop::query()
-                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
-                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-                ->distinct('organization4_id')
-                ->distinct('organization5_id')
-                ->select(
-                    'organization2_id',
-                    'organization2.name as organization2_name',
-                    'organization2.order_no as organization2_order_no',
-                    'organization3_id',
-                    'organization3.name as organization3_name',
-                    'organization3.order_no as organization3_order_no',
-                    'organization4_id',
-                    'organization4.name as organization4_name',
-                    'organization4.order_no as organization4_order_no',
-                    'organization5_id',
-                    'organization5.name as organization5_name',
-                    'organization5.order_no as organization5_order_no',
-                )
-                ->where('organization1_id', $message->organization1_id)
-                ->orderByRaw('organization2_id is null asc')
-                ->orderByRaw('organization3_id is null asc')
-                ->orderByRaw('organization4_id is null asc')
-                ->orderByRaw('organization5_id is null asc')
-                ->orderBy("organization2_order_no", "asc")
-                ->orderBy("organization3_order_no", "asc")
-                ->orderBy("organization4_order_no", "asc")
-                ->orderBy("organization5_order_no", "asc")
-                ->get()
-                ->toArray();
-
-
-            // 店舗情報を取得する
-            $brand_ids = $brand_list->pluck('id')->toArray();
-            $all_shops = Shop::query()
-                ->select(
-                    'shops.id as id',
-                    'shops.shop_code',
-                    'shops.display_name',
-                    'shops.organization5_id',
-                    'shops.organization4_id',
-                    'shops.organization3_id',
-                    'shops.organization2_id'
-                )
-                ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
-                ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
-                ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
-                ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
-                ->where('shops.organization1_id', $message->organization1_id)
-                ->whereIn('shops.brand_id', $brand_ids)
-                ->orderBy('shops.shop_code', 'asc')
-                ->get()
-                ->toArray();
-
-            // 組織別にデータを整理する
-            $organization_list = array_map(function ($org) use ($all_shops) {
-                $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization5_id'] == $org['organization5_id'];
-                });
-                $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
-                });
-                $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
-                $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
-                return $org;
-            }, $organization_list);
-
-            // shop_code でソート済みの $all_shops をそのまま利用
-            $all_shop_list = array_map(function ($shop) {
-                return [
-                    'shop_id' => $shop['id'],
-                    'shop_code' => $shop['shop_code'],
-                    'display_name' => $shop['display_name'],
-                ];
-            }, $all_shops);
-
-
-
-
-
-
-
             // メッセージリストをループして、店舗数を割り当て
             foreach ($message_list as &$message) {
                 $shop_count = $message_shop_counts[$message->id] ?? 0;
@@ -379,75 +268,7 @@ class MessagePublishController extends Controller
                     $shop_count = "全店";
                 }
                 $message->shop_count = $shop_count;
-
-
-
-                // MessageOrganizationテーブルから各組織IDを取得し、配列に格納
-                $target_org = [];
-                $target_org['org5'] = MessageOrganization::where('message_id', $message->id)->pluck('organization5_id')->toArray();
-                $target_org['org4'] = MessageOrganization::where('message_id', $message->id)->pluck('organization4_id')->toArray();
-                $target_org['org3'] = MessageOrganization::where('message_id', $message->id)->pluck('organization3_id')->toArray();
-                $target_org['org2'] = MessageOrganization::where('message_id', $message->id)->pluck('organization2_id')->toArray();
-
-                $target_brand = $message->brand()->pluck('brands.id')->toArray();
-
-                $target_org['shops'] = [];
-                $target_org['select'] = null;
-
-                $selectedFlg = null;
-                $chunkSize = 200; // チャンクサイズを設定
-                $offset = 0;
-
-                // MessageShopテーブルからメッセージに関連する店舗情報を取得
-                while (true) {
-                    $shops = MessageShop::where('message_id', $message->id)
-                        ->whereIn('brand_id', $target_brand)
-                        ->offset($offset)
-                        ->limit($chunkSize)
-                        ->get(['shop_id', 'selected_flg']);
-
-                    // 取得したデータが空ならループを終了
-                    if ($shops->isEmpty()) {
-                        break;
-                    }
-
-                    // 取得した店舗データをtarget_org['shops']配列に格納し、selected_flgを設定
-                    foreach ($shops as $shop) {
-                        $target_org['shops'][] = $shop->shop_id;
-                        if (!$selectedFlg) {
-                            $selectedFlg = $shop->selected_flg;
-                        }
-                    }
-                    $offset += $chunkSize;
-                }
-
-                // MessageShopテーブルにshop_idが存在しない場合はMessageUserテーブルを確認
-                if (empty($target_org['shops'])) {
-                    MessageUser::where('message_id', $message->id)
-                        ->orderBy('message_id')
-                        ->chunk($chunkSize, function ($users) use (&$target_org) {
-                            foreach ($users as $user) {
-                                $target_org['shops'][] = $user->shop_id;
-                            }
-                        });
-                    $target_org['select'] = 'oldStore';
-                }
-                // target_org['shops']の配列内の重複する店舗IDを削除
-                $target_org['shops'] = array_unique($target_org['shops']);
-
-                // selectedFlgが設定されている場合はtarget_org['select']にその値を設定
-                if ($selectedFlg) {
-                    $target_org['select'] = $selectedFlg;
-                }
-
-                // メッセージに組織情報と店舗情報を設定
-                $message->target_org = $target_org;
             }
-
-            // 店舗コードでshopsをソート
-            usort($all_shop_list, function ($a, $b) {
-                return strcmp($a['shop_code'], $b['shop_code']);
-            });
         }
 
         return view('admin.message.publish.index', [
@@ -457,8 +278,6 @@ class MessagePublishController extends Controller
             'target_roll_list' => $target_roll_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
-            'organization_list' => $organization_list,
-            'all_shop_list' => $all_shop_list,
         ]);
     }
 
@@ -711,6 +530,188 @@ class MessagePublishController extends Controller
             'organization_list' => $organization_list,
             'all_shop_list' => $all_shop_list,
         ]);
+    }
+
+    // 一覧画面追加の組織一覧を取得する
+    public function messageNewData($organization1_id = null)
+    {
+        if ($organization1_id === null) {
+            return response()->json(['error' => 'Organization ID is required'], 400);
+        }
+
+        $message_number = Message::where('organization1_id', $organization1_id)->max('number');
+
+        $category_list = MessageCategory::all();
+
+        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
+
+        // ブランド一覧を取得する
+        $brand_list = Brand::where('organization1_id', $organization1_id)->get();
+
+        $organization_list = [];
+        $organization_list = Shop::query()
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $organization1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
+
+
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $organization1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
+
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
+
+        return response()->json([
+            'message_number' => $message_number,
+            'category_list' => $category_list,
+            'target_roll_list' => $target_roll_list,
+            'brand_list' => $brand_list,
+            'organization_list' => $organization_list,
+            'all_shop_list' => $all_shop_list,
+        ]);
+    }
+
+    // 一覧画面の登録
+    public function messageStoreData(PublishStoreRequest $request)
+    {
+        $organization1 = Organization1::find($request->input('org1Id'));
+
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+
+        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->store($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $organization1);
     }
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
@@ -1080,8 +1081,194 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    // 一覧画面のファイル登録、編集で使う予定
-    public function messageEditData(PublishUpdateRequest $request)
+    // 一覧画面編集の業連ファイルと組織一覧を取得する
+    public function messageEditData($message_id, $org1_id)
+    {
+        $message = Message::find($message_id);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+
+        // 複数ファイルの場合の処理
+        $message_contents = MessageContent::where('message_id', $message_id)->get();
+
+        $message_number = Message::where('organization1_id', $org1_id)->max('number');
+
+        $category_list = MessageCategory::all();
+
+        $message_tag_ids = DB::table('message_tags')->where('message_id', $message_id)->pluck('tag_id')->toArray();
+        $target_tag = MessageTagMaster::whereIn('id', $message_tag_ids)->get();
+
+        $target_roll_list = Roll::get();
+
+        // 業態一覧を取得する
+        $brand_list = Brand::where('organization1_id', $org1_id)->get();
+
+        $organization_list = [];
+        $organization_list = Shop::query()
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $org1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
+
+
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $org1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
+
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
+
+
+        // MessageOrganizationテーブルから各組織IDを取得し、配列に格納
+        $target_org = [];
+        $target_org['org5'] = MessageOrganization::where('message_id', $message_id)->pluck('organization5_id')->toArray();
+        $target_org['org4'] = MessageOrganization::where('message_id', $message_id)->pluck('organization4_id')->toArray();
+        $target_org['org3'] = MessageOrganization::where('message_id', $message_id)->pluck('organization3_id')->toArray();
+        $target_org['org2'] = MessageOrganization::where('message_id', $message_id)->pluck('organization2_id')->toArray();
+
+        $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
+        $target_brand = $message->brand()->pluck('brands.id')->toArray();
+
+        $target_org['shops'] = [];
+        $target_org['select'] = null;
+
+        $selectedFlg = null;
+        $chunkSize = 200; // チャンクサイズを設定
+        $offset = 0;
+
+        // MessageShopテーブルからメッセージに関連する店舗情報を取得
+        while (true) {
+            $shops = MessageShop::where('message_id', $message_id)
+                ->whereIn('brand_id', $target_brand)
+                ->offset($offset)
+                ->limit($chunkSize)
+                ->get(['shop_id', 'selected_flg']);
+
+            // 取得したデータが空ならループを終了
+            if ($shops->isEmpty()) {
+                break;
+            }
+
+            // 取得した店舗データをtarget_org['shops']配列に格納し、selected_flgを設定
+            foreach ($shops as $shop) {
+                $target_org['shops'][] = $shop->shop_id;
+                if (!$selectedFlg) {
+                    $selectedFlg = $shop->selected_flg;
+                }
+            }
+            $offset += $chunkSize;
+        }
+
+        // MessageShopテーブルにshop_idが存在しない場合はMessageUserテーブルを確認
+        if (empty($target_org['shops'])) {
+            MessageUser::where('message_id', $message_id)
+                ->orderBy('message_id')
+                ->chunk($chunkSize, function ($users) use (&$target_org) {
+                    foreach ($users as $user) {
+                        $target_org['shops'][] = $user->shop_id;
+                    }
+                });
+            $target_org['select'] = 'oldStore';
+        }
+        // target_org['shops']の配列内の重複する店舗IDを削除
+        $target_org['shops'] = array_unique($target_org['shops']);
+
+        // selectedFlgが設定されている場合はtarget_org['select']にその値を設定
+        if ($selectedFlg) {
+            $target_org['select'] = $selectedFlg;
+        }
+
+
+        // 店舗コードでshopsをソート
+        usort($all_shop_list, function ($a, $b) {
+            return strcmp($a['shop_code'], $b['shop_code']);
+        });
+
+        return response()->json([
+            'message' => $message,
+            'message_contents' => $message_contents,
+            'category_list' => $category_list,
+            'message_number' => $message_number,
+            'target_tag' => $target_tag,
+            'target_roll_list' => $target_roll_list,
+            'brand_list' => $brand_list,
+            'organization_list' => $organization_list,
+            'all_shop_list' => $all_shop_list,
+            'message_target_roll' => $message_target_roll,
+            'target_brand' => $target_brand,
+            'target_org' => $target_org,
+        ]);
+    }
+
+    // 一覧画面の編集
+    public function messageUpdateData(PublishUpdateRequest $request)
     {
         $message_id = $request->input('message_id');
 
