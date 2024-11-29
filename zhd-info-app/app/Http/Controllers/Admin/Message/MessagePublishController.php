@@ -1340,6 +1340,53 @@ class MessagePublishController extends Controller
         ]), $message_id);
     }
 
+    // 一覧画面の一括登録
+    public function messageAllSaveData(Request $request)
+    {
+        $messagesData = $request->input('messagesData', []);
+        $errors = [];
+
+        foreach ($messagesData as $index => $messageData) {
+            $operation = $messageData['operation'] ?? null;
+
+            try {
+                if ($operation === 'new') {
+                    $request = Request::create('', 'POST', $messageData);
+                    $storeRequest = PublishStoreRequest::createFromBase($request);
+                    $storeRequest->setContainer(app());
+                    $storeRequest->setRedirector(app('redirect'));
+                    $storeRequest->validateResolved();
+                    $this->messageStoreData($storeRequest);
+                } else {
+                    $request = Request::create('', 'POST', $messageData);
+                    $updateRequest = PublishUpdateRequest::createFromBase($request);
+                    $updateRequest->setContainer(app());
+                    $updateRequest->setRedirector(app('redirect'));
+                    $updateRequest->validateResolved();
+                    $this->messageUpdateData($updateRequest);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $errors[$index] = [
+                    'type' => 'validation',
+                    'messages' => $e->errors(),
+                    'data' => $messageData
+                ];
+            } catch (\Exception $e) {
+                $errors[$index] = [
+                    'type' => 'general',
+                    'messages' => [$e->getMessage()],
+                    'data' => $messageData
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return response()->json(['status' => 'error', 'errors' => $errors], 422);
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
     public function update(PublishUpdateRequest $request, $message_id)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
