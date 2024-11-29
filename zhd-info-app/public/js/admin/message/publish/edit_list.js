@@ -186,9 +186,9 @@ $(document).ready(function() {
 
         $(document).on("change", `${editTitleFileInputsSelector} input[type="file"]`, function () {
             let _this = $(this);
-            let csrfToken = $('meta[name="csrf-token"]').attr("content");
+            const csrfToken = $('meta[name="csrf-token"]').attr("content");
             let fileList = _this[0].files;
-            let formData = new FormData();
+            const formData = new FormData();
             let labelForm = _this.parent();
             let progress = labelForm.parent().find(".progress");
             let progressBar = progress.children(".progress-bar");
@@ -665,10 +665,17 @@ $(document).ready(function() {
 
         // 業連ファイルを保存
         function saveFileData(messageId) {
+            // フォームクリア（ファイル設定ボタン）
+            $(`#titleFileEditBtn-${messageId}`).addClass("check-selected");
+
             const contentIds = [];
             const fileNames = [];
             const filePaths = [];
             const joinFlags = [];
+
+            if (!fileDataByMessageId[mode]) {
+                fileDataByMessageId[mode] = {};
+            }
 
             // 各ファイルの情報を取得して配列に保存
             $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='content_id[]']`).each(function() {
@@ -688,7 +695,7 @@ $(document).ready(function() {
             });
 
             // message_idをキーとしてファイル情報を保存
-            fileDataByMessageId[messageId] = {
+            fileDataByMessageId[mode][messageId] = {
                 contentIds: contentIds,
                 fileNames: fileNames,
                 filePaths: filePaths,
@@ -979,7 +986,10 @@ $(document).ready(function() {
 
 
         //店舗選択処理
-        selectedValuesByMessageId[messageId] = {
+        if (!selectedValuesByMessageId[mode]) {
+            selectedValuesByMessageId[mode] = {};
+        }
+        selectedValuesByMessageId[mode][messageId] = {
             org5: [],
             org4: [],
             org3: [],
@@ -1111,8 +1121,8 @@ $(document).ready(function() {
 
         // 組織単位タブの全選択/選択解除
         $(document).on("change", `${shopSelectInputsSelector} #selectAllOrganization-${messageId}`, function () {
-            var overlay = document.getElementById('overlay');
-            overlay.style.display = 'block';  // オーバーレイを表示
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
 
             const checked = this.checked;
             const items = $(`${shopSelectInputsSelector} #byOrganization-${messageId} input[type="checkbox"]`).toArray(); // 組織のチェックボックス
@@ -1163,7 +1173,7 @@ $(document).ready(function() {
                 updateSelectAllCheckboxes(messageId);
 
                 // オーバーレイを非表示にする
-                overlay.style.display = 'none';
+                overlay.hide();
             }
 
             requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
@@ -1171,8 +1181,8 @@ $(document).ready(function() {
 
         // 店舗コード順タブの全選択/選択解除
         $(document).on("change", `${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`, function () {
-            var overlay = document.getElementById('overlay');
-            overlay.style.display = 'block';  // オーバーレイを表示
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
 
             const checked = this.checked;
             const items = $(`${shopSelectInputsSelector} #byStoreCode-${messageId} input[type="checkbox"]`).toArray(); // 店舗コードのチェックボックス
@@ -1213,7 +1223,7 @@ $(document).ready(function() {
                 updateSelectAllCheckboxes(messageId);
 
                 // オーバーレイを非表示にする
-                overlay.style.display = 'none';
+                overlay.hide();
             }
 
             requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
@@ -1223,6 +1233,8 @@ $(document).ready(function() {
         // 全店ボタン処理
         $(document).on('click', `input[id="checkAll-${messageId}"][name="organizationAll"]`, function() {
             removeSelectedClass(messageId);
+            $(`#shopEditBtn-${messageId}`).removeClass("check-selected");
+            $(`#selectStore-${messageId}`).val("");
             // 全ての organization_shops[] チェックボックスをチェックする
             $(`${shopSelectInputsSelector} input[name="organization_shops[]"]`).each(function() {
                 $(this).prop('checked', true);
@@ -1277,11 +1289,11 @@ $(document).ready(function() {
 
             // キャンセルボタン処理
             // 変数から選択された値を取得
-            const org5Values = selectedValuesByMessageId[messageId].org5;
-            const org4Values = selectedValuesByMessageId[messageId].org4;
-            const org3Values = selectedValuesByMessageId[messageId].org3;
-            const org2Values = selectedValuesByMessageId[messageId].org2;
-            const shopValues = selectedValuesByMessageId[messageId].shops;
+            const org5Values = selectedValuesByMessageId[mode][messageId].org5;
+            const org4Values = selectedValuesByMessageId[mode][messageId].org4;
+            const org3Values = selectedValuesByMessageId[mode][messageId].org3;
+            const org2Values = selectedValuesByMessageId[mode][messageId].org2;
+            const shopValues = selectedValuesByMessageId[mode][messageId].shops;
 
             let allOrg_flg = true;
             let allStore_flg = true;
@@ -1371,11 +1383,11 @@ $(document).ready(function() {
 
         // 選択された値を変数に格納
         function changeValues(messageId) {
-            selectedValuesByMessageId[messageId].org5 = $(`${shopSelectInputsSelector} input[name="organization[org5][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[messageId].org4 = $(`${shopSelectInputsSelector} input[name="organization[org4][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[messageId].org3 = $(`${shopSelectInputsSelector} input[name="organization[org3][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[messageId].org2 = $(`${shopSelectInputsSelector} input[name="organization[org2][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[messageId].shops = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org5 = $(`${shopSelectInputsSelector} input[name="organization[org5][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org4 = $(`${shopSelectInputsSelector} input[name="organization[org4][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org3 = $(`${shopSelectInputsSelector} input[name="organization[org3][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org2 = $(`${shopSelectInputsSelector} input[name="organization[org2][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].shops = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).map(function() { return this.value; }).get();
         }
 
 
@@ -1435,9 +1447,9 @@ $(document).ready(function() {
 
         let newMessageJson;
         $(document).on('change', `${editShopImportSelector} input[type="file"]`, function() {
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
             let log_file_name = getNumericDateTime();
-            let formData = new FormData();
+            const formData = new FormData();
             formData.append("file", $(this)[0].files[0]);
             formData.append("organization1", $(`${editShopImportSelector} input[name="organization1"]`).val())
             formData.append("log_file_name", log_file_name)
@@ -1542,9 +1554,9 @@ $(document).ready(function() {
                 `);
                 return;
             }
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-            var overlay = document.getElementById('overlay');
+            const overlay = $('#overlay');
             overlay.style.display = 'block';
 
             $(`${editShopImportSelector} .modal-body .alert-danger`).remove();
@@ -1622,8 +1634,8 @@ $(document).ready(function() {
 
         // 業務連絡店舗CSV エクスポート
         $(document).on('click', `${editShopInputsSelector} #exportCsv-${messageId}`, function() {
-            var csrfToken = $('meta[name="csrf-token"]').attr('content');
-            let formData = new FormData();
+            const csrfToken = $('meta[name="csrf-token"]').attr('content');
+            const formData = new FormData();
             formData.append("message_id", $(`${editShopInputsSelector} .check-store-list input[name="message_id"]`).val());
 
             $.ajax({
@@ -1672,13 +1684,14 @@ $(document).ready(function() {
 
 
         // 店舗選択設定ボタンのクリックイベント
-        $(document).on('click', `#shopImportBtn-${messageId}`, function() {
-            changeValues(messageId);
+        $(document).on('click', `.editShopModal #shopImportBtn-${messageId}`, function() {
+            // 選択された値をクリア
+            $(`#checkAll-${messageId}`).removeClass("check-selected");
+            $(`#selectOrganizationAll-${messageId}`).val("");
 
-            // フォームクリア（店舗選択ボタン）
+            // フォームクリア（一部ボタン）
+            $(`#shopEditBtn-${messageId}`).addClass("check-selected");
             $(`#selectStore-${messageId}`).val("selected");
-            // check-selected クラスを追加
-            $(`#checkStore-${messageId}`).addClass("check-selected");
 
             // モーダルを閉じる
             $(`#editShopModal-${messageId}`).modal("hide");
@@ -1741,7 +1754,10 @@ $(document).ready(function() {
             $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] .check-store-list .btn`).removeClass("check-selected");
 
             // 選択された値をクリア
-            selectedValuesByMessageId[messageId] = {
+            if (!selectedValuesByMessageId[mode]) {
+                selectedValuesByMessageId[mode] = {};
+            }
+            selectedValuesByMessageId[mode][messageId] = {
                 org5: [],
                 org4: [],
                 org3: [],
@@ -1815,6 +1831,43 @@ $(document).ready(function() {
         });
     }
 
+    // 日付のフォーマット
+    function cleanAndFormatDate(dateString) {
+        // dateStringがnullまたはundefinedの場合はnullを返す
+        if (!dateString) {
+            return null;
+        }
+        // 曜日部分を削除
+        const cleanedDateString = dateString.replace(/\s*\(.*?\)\s*/, ' ');
+        // 日付文字列をパース
+        const date = new Date(cleanedDateString);
+        // 日付が無効な場合はnullを返す
+        if (isNaN(date.getTime())) {
+            return null;
+        }
+        // 年、月、日、時、分を取得
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+        const hours = ('0' + date.getHours()).slice(-2);
+        const minutes = ('0' + date.getMinutes()).slice(-2);
+        // フォーマットされた日付を返す
+        return `${year}/${month}/${day} ${hours}:${minutes}`;
+    }
+
+    // 日付をフォーマット
+    function formatDateWithDay(dateString) {
+        const date = new Date(dateString);
+        const days = ["日", "月", "火", "水", "木", "金", "土"];
+        const year = date.getFullYear();
+        const month = ('0' + (date.getMonth() + 1)).slice(-2);
+        const day = ('0' + date.getDate()).slice(-2);
+        const dayOfWeek = days[date.getDay()];
+        const hours = ('0' + date.getHours()).slice(-2);
+        const minutes = ('0' + date.getMinutes()).slice(-2);
+        return `${year}/${month}/${day} (${dayOfWeek}) ${hours}:${minutes}`;
+    }
+
 
 
     // 追加モード
@@ -1823,7 +1876,7 @@ $(document).ready(function() {
         var newRow = `
             <tr data-message_id="${newMessageId}"
                 data-organization1_id="${org1Id}"
-                class="editing">
+                class="publish new-modified">
 
                 <td nowrap>
                     <p class="messageNewSaveBtn btn btn-admin" data-message-id="${newMessageId}">保存</p>
@@ -1867,7 +1920,7 @@ $(document).ready(function() {
                     <div class="title-input-group" style="display: flex;">
                         <input type="text" class="form-control" name="title" style="border-radius: 4px 0 0 4px;">
                         <input type="button" class="btn btn-admin" id="titleFileEditBtn-${newMessageId}"
-                            data-toggle="modal" data-target="#editTitleFileModal-${newMessageId}" value="編集"
+                            data-toggle="modal" data-target="#editTitleFileModal-${newMessageId}" value="ファイル設定"
                             style="border-radius: 0 4px 4px 0;">
                     </div>
                 </td>
@@ -1927,288 +1980,647 @@ $(document).ready(function() {
         initializeShopModal(newMessageId, org1Id, organizationList, allShopList, {}, 'new');
     }
 
-    // 日付のフォーマット
-    function cleanAndFormatDate(dateString) {
-        // dateStringがnullまたはundefinedの場合はnullを返す
-        if (!dateString) {
-            return null;
-        }
-        // 曜日部分を削除
-        const cleanedDateString = dateString.replace(/\s*\(.*?\)\s*/, ' ');
-        // 日付文字列をパース
-        const date = new Date(cleanedDateString);
-        // 日付が無効な場合はnullを返す
-        if (isNaN(date.getTime())) {
-            return null;
-        }
-        // 年、月、日、時、分を取得
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        const hours = ('0' + date.getHours()).slice(-2);
-        const minutes = ('0' + date.getMinutes()).slice(-2);
-        // フォーマットされた日付を返す
-        return `${year}/${month}/${day} ${hours}:${minutes}`;
-    }
 
-    // 追加ボタン
-    $('.messageAddBtn').each(function() {
-        $(this).on('click', function() {
 
-            // 現在の最大メッセージIDを取得
-            var maxId = 0;
-            $('#list tbody tr').each(function() {
-                var currentId = parseInt($(this).data('message_id'), 10);
-                if (currentId > maxId) {
-                    maxId = currentId;
+    // 追加ボタン処理
+    $('#messageAddBtn').on('click', function() {
+        // 一括登録ボタンを活性化
+        $('#messageAllSaveBtn').removeClass('disabled');
+
+        const csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        // 現在の最大メッセージIDを取得
+        let maxId = 0;
+        $('#list tbody tr').each(function() {
+            const currentId = parseInt($(this).data('message_id'), 10);
+            if (currentId > maxId) {
+                maxId = currentId;
+            }
+        });
+
+        // 新しいメッセージIDを設定
+        let newMessageId = maxId + 1;
+
+
+        // 削除ボタン処理
+        function initializeNewDeleteBtn(newMessageId) {
+            $(`.messageNewDeleteBtn[data-message-id="${newMessageId}"]`).on('click', function() {
+                // ボタンが属する行を削除
+                $(this).closest('tr').remove();
+
+                messageNumber--;
+
+                // new-modifiedまたはedit-modifiedが1つもない場合は、一括登録ボタンを非活性
+                if ($('tr.new-modified').length === 0 && $('tr.edit-modified').length === 0) {
+                    $('#messageAllSaveBtn').addClass('disabled');
                 }
             });
-            // 新しいメッセージIDを設定
-            var newMessageId = maxId + 1;
+        }
 
 
-            // 削除ボタン処理
-            function initializeNewDeleteBtn(newMessageId) {
-                $(`.messageNewDeleteBtn[data-message-id="${newMessageId}"]`).on('click', function() {
-                    // ボタンが属する行を削除
-                    $(this).closest('tr').remove();
+        // 保存ボタン処理
+        function initializeNewSaveBtn(newMessageId, brandList, messageNumber) {
+            $(`.messageNewSaveBtn[data-message-id="${newMessageId}"]`).on('click', function() {
+                const overlay = $('#overlay');
+                overlay.show(); // オーバーレイを表示
 
-                    messageNumber--;
-                });
-            }
+                const csrfToken = $('meta[name="csrf-token"]').attr("content");
+                const formData = new FormData();
+                const row = $(`tr[data-message_id="${newMessageId}"]`);
 
+                // 各データを収集
+                let categoryId = row.find('select[name="category_id"]').val() || null;
+                let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+                let title = row.find('input[name="title"]').val() || null;
+                let startDatetime = row.find('input[name="start_datetime"]').val() || null;
+                let endDatetime = row.find('input[name="end_datetime"]').val() || null;
+                startDatetime = cleanAndFormatDate(startDatetime);
+                endDatetime = cleanAndFormatDate(endDatetime);
+                let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
+                let fileName = (fileDataByMessageId['new'][newMessageId]?.fileNames || []).map(name => name || null);
+                let filePath = (fileDataByMessageId['new'][newMessageId]?.filePaths || []).map(path => path || null);
+                let joinFlg = (fileDataByMessageId['new'][newMessageId]?.joinFlags || []).map(flg => flg || null);
+                let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
+                let brand = row.find('select[name="brand[]"]').val() === 'all'
+                    ? brandList.map(brand => brand.id)
+                    : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
+                let organization = [
+                    selectedValuesByMessageId['new'][newMessageId]?.org5 || null,
+                    selectedValuesByMessageId['new'][newMessageId]?.org4 || null,
+                    selectedValuesByMessageId['new'][newMessageId]?.org3 || null,
+                    selectedValuesByMessageId['new'][newMessageId]?.org2 || null
+                ].map(org => org || null);
+                let organizationShops = (selectedValuesByMessageId['new'][newMessageId]?.shops || []).map(shop => shop || null);
+                let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
+                let selectOrganization = {
+                    all: selectOrganizationAll === 'selected' ? 'selected' : null,
+                    store: selectOrganizationAll !== 'selected' ? 'selected' : null,
+                    csv: null
+                };
 
-            // 保存ボタン処理
-            function initializeNewSaveBtn(newMessageId, brandList) {
-                $(`.messageNewSaveBtn[data-message-id="${newMessageId}"]`).on('click', function() {
-                    var overlay = document.getElementById('overlay');
-                    overlay.style.display = 'block';  // オーバーレイを表示
-
-                    const row = document.querySelector(`tr[data-message_id="${newMessageId}"]`);
-
-                    // カテゴリ
-                    const categoryId = row.querySelector('select[name="category_id"]')?.value || null;
-                    // ラベル
-                    const emergencyFlg = row.querySelector('input[name="emergency_flg"]')?.checked ? 'on' : 'off';
-                    // タイトル
-                    const title = row.querySelector('input[name="title"]')?.value || null;
-                    // 掲載期間
-                    let startDatetime = row.querySelector('input[name="start_datetime"]')?.value || null;
-                    let endDatetime = row.querySelector('input[name="end_datetime"]')?.value || null;
-                    startDatetime = cleanAndFormatDate(startDatetime);
-                    endDatetime = cleanAndFormatDate(endDatetime);
-                    // 検索タグ
-                    const tags = Array.from(row.querySelectorAll('input[name="tag_name[]"]')).map(input => input.value) || null;
-                    // 業連ファイル
-                    // const contentId = (fileDataByMessageId[newMessageId]?.contentIds || []).map(id => id || null);
-                    const fileName = (fileDataByMessageId[newMessageId]?.fileNames || []).map(name => name || null);
-                    const filePath = (fileDataByMessageId[newMessageId]?.filePaths || []).map(path => path || null);
-                    const joinFlg = (fileDataByMessageId[newMessageId]?.joinFlags || []).map(flg => flg || null);
-                    // 対象者
-                    const targetRoll = Array.from(row.querySelectorAll('input[name="target_roll[]"]')).map(input => input.value) || null;
-                    // 対象業態
-                    const brand = row.querySelector('select[name="brand[]"]')?.value === 'all'
-                        ? brandList.map(brand => brand.id)
-                        : Array.from(row.querySelectorAll('select[name="brand[]"]')).map(input => input.value) || null;
-                    const organization = [
-                        selectedValuesByMessageId[newMessageId]?.org5 || null,
-                        selectedValuesByMessageId[newMessageId]?.org4 || null,
-                        selectedValuesByMessageId[newMessageId]?.org3 || null,
-                        selectedValuesByMessageId[newMessageId]?.org2 || null
-                    ].map(org => org || null);
-                    // 対象店舗
-                    const organizationShops = (selectedValuesByMessageId[newMessageId]?.shops || []).map(shop => shop || null);
-                    const selectOrganizationAll = row.querySelector('input[name="select_organization[all]"]')?.value || null;
-                    const selectOrganization = {
-                        all: selectOrganizationAll === 'selected' ? 'selected' : null,
-                        store: selectOrganizationAll !== 'selected' ? 'selected' : null,
-                        csv: null
-                    };
-
-                    // バリデーション
-                    let errors = [];
-                    if (!title) errors.push("タイトルは必須項目です");
-                    if (errors.length > 0) {
-                        overlay.style.display = 'none';
-                        // エラーメッセージを表示するコンテナを取得または作成
-                        let errorContainer = $('#error-messages');
-                        if (!errorContainer || errorContainer.length === 0) {
-                            errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-                            $('.pagenation-top').after(errorContainer);
-                        }
-                        // エラーメッセージをクリアして新しいメッセージを追加
-                        errorContainer.empty();
-                        errors.forEach(error => {
-                            errorContainer.append(`<div class="text-danger">${error}</div>`);
-                        });
-                        return;
+                // バリデーション
+                let errors = [];
+                if (!title) errors.push("タイトルは必須項目です");
+                if (errors.length > 0) {
+                    overlay.hide();
+                    let errorContainer = $('#error-messages');
+                    if (!errorContainer.length) {
+                        errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                        $('.pagenation-top').after(errorContainer);
                     }
-
-                    let csrfToken = $('meta[name="csrf-token"]').attr("content");
-                    let formData = new FormData();
-                    // 業態ID
-                    formData.append('org1Id', org1Id);
-                    // ラベル
-                    formData.append('emergency_flg', emergencyFlg);
-                    // カテゴリ
-                    formData.append('category_id', categoryId);
-                    // タイトル
-                    formData.append('title', title);
-                    // 掲載期間
-                    formData.append('start_datetime', startDatetime);
-                    formData.append('end_datetime', endDatetime);
-                    // 検索タグ
-                    tags.forEach(tag => formData.append('tag_name[]', tag));
-                    // 業連ファイル
-                    // contentId.forEach(id => formData.append('content_id[]', id));
-                    fileName.forEach(name => formData.append('file_name[]', name));
-                    filePath.forEach(path => formData.append('file_path[]', path));
-                    joinFlg.forEach(flg => formData.append('join_flg[]', flg));
-                    // 対象者
-                    targetRoll.forEach(roll => formData.append('target_roll[]', roll));
-                    // 対象業態
-                    brand.forEach(b => formData.append('brand[]', b));
-                    organization.forEach(org => formData.append('organization[]', org));
-                    formData.append('organization_shops', organizationShops);
-                    // 対象店舗
-                    Object.keys(selectOrganization).forEach(key => {
-                        formData.append(`select_organization[${key}]`, selectOrganization[key]);
+                    errorContainer.empty();
+                    errors.forEach(error => {
+                        errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
                     });
+                    return;
+                }
 
-                    $.ajax({
-                        url: `/admin/message/publish/messageStoreData`,
-                        type: "post",
-                        data: formData,
-                        processData: false,
-                        contentType: false,
-                        headers: {
-                            "X-CSRF-TOKEN": csrfToken,
-                        },
-                        success: function(response) {
-                            window.location.href = "/admin/message/publish/";
-                        },
-                        error: function(jqXHR, textStatus, errorThrown) {
-                            // オーバーレイを非表示にする
-                            overlay.style.display = 'none';
-
-                            try {
-                                const response = JSON.parse(jqXHR.responseText);
-                                const errors = response.errors;
-
-                                let errorContainer = $('#error-messages');
-                                if (errorContainer.length === 0) {
-                                    errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-                                    $('.pagenation-top').after(errorContainer);
-                                }
-
-                                errorContainer.empty();
-
-                                for (const field in errors) {
-                                    if (errors.hasOwnProperty(field)) {
-                                        errors[field].forEach(message => {
-                                            errorContainer.append(`<div class="text-danger">${message}</div>`);
-                                        });
-                                    }
-                                }
-                            } catch (e) {
-                                console.error("Failed to parse response:", e);
-                            }
-                        }
-                    });
+                // 各データをformDataに追加
+                formData.append('org1Id', org1Id);
+                formData.append('emergency_flg', emergencyFlg);
+                formData.append('category_id', categoryId);
+                formData.append('title', title);
+                formData.append('start_datetime', startDatetime);
+                formData.append('end_datetime', endDatetime);
+                tags.forEach(tag => formData.append('tag_name[]', tag));
+                fileName.forEach(name => formData.append('file_name[]', name));
+                filePath.forEach(path => formData.append('file_path[]', path));
+                joinFlg.forEach(flg => formData.append('join_flg[]', flg));
+                targetRoll.forEach(roll => formData.append('target_roll[]', roll));
+                brand.forEach(b => formData.append('brand[]', b));
+                organization.forEach(org => formData.append('organization[]', org));
+                formData.append('organization_shops', organizationShops);
+                Object.keys(selectOrganization).forEach(key => {
+                    formData.append(`select_organization[${key}]`, selectOrganization[key]);
                 });
-            }
 
-            let csrfToken = $('meta[name="csrf-token"]').attr("content");
-            if (!shopDataFetched) {
+                // 保存のリクエストを送信
                 $.ajax({
-                    url: `/admin/message/publish/messageNewData/${org1Id}`,
+                    url: `/admin/message/publish/messageStoreData`,
                     type: "post",
-                    data: {
-                        organization1_id: org1Id
-                    },
+                    data: formData,
                     processData: false,
                     contentType: false,
                     headers: {
                         "X-CSRF-TOKEN": csrfToken,
                     },
                     success: function(response) {
-                        messageNumber = response.message_number;
-                        categoryList = response.category_list;
-                        targetRollList = response.target_roll_list;
-                        brandList = response.brand_list;
-                        allShopList = response.all_shop_list;
-                        organizationList = response.organization_list;
-                        shopDataFetched = true;
-
-                        // 新しい行を作成する関数を呼び出す
-                        messageNumber++;
-                        createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
-                        // 保存ボタン処理
-                        initializeNewSaveBtn(newMessageId, brandList);
-                        // 削除ボタン処理
-                        initializeNewDeleteBtn(newMessageId);
+                        window.location.href = "/admin/message/publish/";
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        console.error("Error:", errorThrown);
-                        console.error("Response Text:", jqXHR.responseText);
+                        overlay.hide(); // オーバーレイを非表示にする
+
+                        try {
+                            const response = JSON.parse(jqXHR.responseText);
+                            const errors = response.errors;
+
+                            let errorContainer = $('#error-messages');
+                            if (!errorContainer.length) {
+                                errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                                $('.pagenation-top').after(errorContainer);
+                            }
+
+                            errorContainer.empty();
+
+                            for (const field in errors) {
+                                if (errors.hasOwnProperty(field)) {
+                                    errors[field].forEach(message => {
+                                        errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
+                                    });
+                                }
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse response:", e);
+                        }
                     }
                 });
+            });
+        }
+
+        // 追加のリクエストを送信
+        if (!shopDataFetched) {
+            $.ajax({
+                url: `/admin/message/publish/messageNewData/${org1Id}`,
+                type: "post",
+                data: {
+                    organization1_id: org1Id
+                },
+                processData: false,
+                contentType: false,
+                headers: {
+                    "X-CSRF-TOKEN": csrfToken,
+                },
+                success: function(response) {
+                    messageNumber = response.message_number;
+                    categoryList = response.category_list;
+                    targetRollList = response.target_roll_list;
+                    brandList = response.brand_list;
+                    allShopList = response.all_shop_list;
+                    organizationList = response.organization_list;
+                    shopDataFetched = true;
+
+                    // 新しい行を作成する関数を呼び出す
+                    messageNumber++;
+                    createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
+                    // 保存ボタン処理
+                    initializeNewSaveBtn(newMessageId, brandList, messageNumber);
+                    // 削除ボタン処理
+                    initializeNewDeleteBtn(newMessageId);
+                },
+                error: function(jqXHR, textStatus, errorThrown) {
+                    console.error("Error:", errorThrown);
+                    console.error("Response Text:", jqXHR.responseText);
+                }
+            });
+        } else {
+            messageNumber++;
+            createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
+            // 保存ボタン処理
+            initializeNewSaveBtn(newMessageId, brandList, messageNumber);
+            // 削除ボタン処理
+            initializeNewDeleteBtn(newMessageId);
+        }
+    });
+
+
+
+    // 一括登録ボタン処理
+    $('#messageAllSaveBtn').on('click', function() {
+        const overlay = $('#overlay');
+        overlay.show(); // オーバーレイを表示
+
+        const csrfToken = $('meta[name="csrf-token"]').attr("content");
+        const messagesData = [];
+
+        // 編集または追加された行をループ
+        $('tr.new-modified, tr.edit-modified').each(function() {
+            const row = $(this);
+            let messageId = row.attr('data-message_id');
+
+            // 各データを収集
+            let categoryId = row.find('select[name="category_id"]').val() || null;
+            let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+            let title = row.find('input[name="title"]').val() || null;
+            let startDatetime = row.find('input[name="start_datetime"]').val() || null;
+            let endDatetime = row.find('input[name="end_datetime"]').val() || null;
+            startDatetime = cleanAndFormatDate(startDatetime);
+            endDatetime = cleanAndFormatDate(endDatetime);
+            let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
+            let contentId = [];
+            if (row.hasClass('edit-modified')) {
+                contentId = (fileDataByMessageId['edit'][messageId]?.contentIds || []).map(id => id || null);
+            }
+            let fileName = (fileDataByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.fileNames || []).map(name => name || null);
+            let filePath = (fileDataByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.filePaths || []).map(path => path || null);
+            let joinFlg = (fileDataByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.joinFlags || []).map(flg => flg || null);
+            let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
+            let brand = row.find('select[name="brand[]"]').val() === 'all'
+                ? brandList.map(brand => brand.id)
+                : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
+            let organization = [
+                selectedValuesByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.org5 || null,
+                selectedValuesByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.org4 || null,
+                selectedValuesByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.org3 || null,
+                selectedValuesByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.org2 || null
+            ].map(org => org || null);
+            let organizationShops = (selectedValuesByMessageId[row.hasClass('new-modified') ? 'new' : 'edit'][messageId]?.shops || [])
+                .map(shop => shop || null)
+                .filter(Boolean)
+                .join(',');
+            let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
+            let selectOrganization = {
+                all: selectOrganizationAll === 'selected' ? 'selected' : null,
+                store: selectOrganizationAll !== 'selected' ? 'selected' : null,
+                csv: null
+            };
+
+            // バリデーション
+            let errors = [];
+            if (!title) errors.push(`メッセージID ${messageId} のタイトルは必須項目です`);
+            if (errors.length > 0) {
+                overlay.hide();
+                let errorContainer = $('#error-messages');
+                if (!errorContainer.length) {
+                    errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                    $('.pagenation-top').after(errorContainer);
+                }
+                errorContainer.empty();
+                errors.forEach(error => {
+                    errorContainer.append(`<div class="text-danger">${error}</div>`);
+                });
+                return;
+            }
+
+            // メッセージデータを配列に追加
+            if (row.hasClass('new-modified')) {
+                messagesData.push({
+                    operation: 'new',
+                    org1Id: org1Id,
+                    emergency_flg: emergencyFlg,
+                    category_id: categoryId,
+                    title: title,
+                    start_datetime: startDatetime,
+                    end_datetime: endDatetime,
+                    tag_name: tags,
+                    file_name: fileName,
+                    file_path: filePath,
+                    join_flg: joinFlg,
+                    target_roll: targetRoll,
+                    brand: brand,
+                    organization: organization,
+                    organization_shops: organizationShops,
+                    select_organization: selectOrganization
+                });
             } else {
-                messageNumber++;
-                createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
-                // 保存ボタン処理
-                initializeNewSaveBtn(newMessageId, brandList);
-                // 削除ボタン処理
-                initializeNewDeleteBtn(newMessageId);
+                messagesData.push({
+                    operation: 'edit',
+                    message_id: messageId,
+                    emergency_flg: emergencyFlg,
+                    category_id: categoryId,
+                    title: title,
+                    start_datetime: startDatetime,
+                    end_datetime: endDatetime,
+                    tag_name: tags,
+                    content_id: contentId,
+                    file_name: fileName,
+                    file_path: filePath,
+                    join_flg: joinFlg,
+                    target_roll: targetRoll,
+                    brand: brand,
+                    organization: organization,
+                    organization_shops: organizationShops,
+                    select_organization: selectOrganization
+                });
+            }
+        });
+
+        // 一括登録のリクエストを送信
+        $.ajax({
+            url: `/admin/message/publish/messageAllSaveData`,
+            type: "post",
+            data: JSON.stringify({ messagesData: messagesData }),
+            processData: false,
+            contentType: "application/json",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            success: function(response) {
+                window.location.href = "/admin/message/publish/";
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.error("Error:", errorThrown);
+                console.log("Response Text:", jqXHR.responseText);
+
+                overlay.hide(); // オーバーレイを非表示
+
+                try {
+                    const response = JSON.parse(jqXHR.responseText);
+                    const errors = response.errors;
+
+                    let errorContainer = $('#error-messages');
+                    if (errorContainer.length === 0) {
+                        errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                        $('.pagenation-top').after(errorContainer);
+                    }
+
+                    errorContainer.empty();
+
+                    errors.forEach(error => {
+                        error.messages.forEach(message => {
+                            errorContainer.append(`<div class="text-danger">${message}</div>`);
+                        });
+                    });
+                } catch (e) {
+                    console.error("Failed to parse response:", e);
+                }
             }
         });
     });
 
 
 
-    // 日付をフォーマット
-    function formatDateWithDay(dateString) {
-        const date = new Date(dateString);
-        const days = ["日", "月", "火", "水", "木", "金", "土"];
-        const year = date.getFullYear();
-        const month = ('0' + (date.getMonth() + 1)).slice(-2);
-        const day = ('0' + date.getDate()).slice(-2);
-        const dayOfWeek = days[date.getDay()];
-        const hours = ('0' + date.getHours()).slice(-2);
-        const minutes = ('0' + date.getMinutes()).slice(-2);
-        return `${year}/${month}/${day} (${dayOfWeek}) ${hours}:${minutes}`;
-    }
+    // // 一括登録ボタン処理 すべて登録できるようなったら登録するようにしないといけないな～
+    // $('#messageAllSaveBtn').on('click', function() {
+    //     const overlay = $('#overlay');
+    //     overlay.show(); // オーバーレイを表示
+
+    //     const csrfToken = $('meta[name="csrf-token"]').attr("content");
+    //     const formData = new FormData();
+
+
+    //     // 追加された行をループ
+    //     if ($('tr.new-modified').length > 0) {
+    //         $('tr.new-modified').each(function() {
+    //             const row = $(this);
+    //             let newMessageId = row.attr('data-message_id');
+
+    //             // 各データを収集
+    //             let categoryId = row.find('select[name="category_id"]').val() || null;
+    //             let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+    //             let title = row.find('input[name="title"]').val() || null;
+    //             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
+    //             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
+    //             startDatetime = cleanAndFormatDate(startDatetime);
+    //             endDatetime = cleanAndFormatDate(endDatetime);
+    //             let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let fileName = (fileDataByMessageId['new'][newMessageId]?.fileNames || []).map(name => name || null);
+    //             let filePath = (fileDataByMessageId['new'][newMessageId]?.filePaths || []).map(path => path || null);
+    //             let joinFlg = (fileDataByMessageId['new'][newMessageId]?.joinFlags || []).map(flg => flg || null);
+    //             let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let brand = row.find('select[name="brand[]"]').val() === 'all'
+    //                 ? brandList.map(brand => brand.id)
+    //                 : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let organization = [
+    //                 selectedValuesByMessageId['new'][newMessageId]?.org5 || null,
+    //                 selectedValuesByMessageId['new'][newMessageId]?.org4 || null,
+    //                 selectedValuesByMessageId['new'][newMessageId]?.org3 || null,
+    //                 selectedValuesByMessageId['new'][newMessageId]?.org2 || null
+    //             ].map(org => org || null);
+    //             let organizationShops = (selectedValuesByMessageId['new'][newMessageId]?.shops || []).map(shop => shop || null);
+    //             let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
+    //             let selectOrganization = {
+    //                 all: selectOrganizationAll === 'selected' ? 'selected' : null,
+    //                 store: selectOrganizationAll !== 'selected' ? 'selected' : null,
+    //                 csv: null
+    //             };
+
+    //             // バリデーション
+    //             let errors = [];
+    //             if (!title) errors.push("タイトルは必須項目です");
+    //             if (errors.length > 0) {
+    //                 overlay.hide();
+    //                 let errorContainer = $('#error-messages');
+    //                 if (!errorContainer.length) {
+    //                     errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+    //                     $('.pagenation-top').after(errorContainer);
+    //                 }
+    //                 errorContainer.empty();
+    //                 errors.forEach(error => {
+    //                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
+    //                 });
+    //                 return;
+    //             }
+
+    //             // 各データをformDataに追加
+    //             formData.append('org1Id', org1Id);
+    //             formData.append('emergency_flg', emergencyFlg);
+    //             formData.append('category_id', categoryId);
+    //             formData.append('title', title);
+    //             formData.append('start_datetime', startDatetime);
+    //             formData.append('end_datetime', endDatetime);
+    //             tags.forEach(tag => formData.append('tag_name[]', tag));
+    //             fileName.forEach(name => formData.append('file_name[]', name));
+    //             filePath.forEach(path => formData.append('file_path[]', path));
+    //             joinFlg.forEach(flg => formData.append('join_flg[]', flg));
+    //             targetRoll.forEach(roll => formData.append('target_roll[]', roll));
+    //             brand.forEach(b => formData.append('brand[]', b));
+    //             organization.forEach(org => formData.append('organization[]', org));
+    //             formData.append('organization_shops', organizationShops);
+    //             Object.keys(selectOrganization).forEach(key => {
+    //                 formData.append(`select_organization[${key}]`, selectOrganization[key]);
+    //             });
+
+    //             // 保存のリクエストを送信
+    //             $.ajax({
+    //                 url: `/admin/message/publish/messageStoreData`,
+    //                 type: "post",
+    //                 data: formData,
+    //                 processData: false,
+    //                 contentType: false,
+    //                 headers: {
+    //                     "X-CSRF-TOKEN": csrfToken,
+    //                 },
+    //                 success: function(response) {
+    //                     window.location.href = "/admin/message/publish/";
+    //                 },
+    //                 error: function(jqXHR, textStatus, errorThrown) {
+    //                     overlay.hide(); // オーバーレイを非表示にする
+
+    //                     try {
+    //                         const response = JSON.parse(jqXHR.responseText);
+    //                         const errors = response.errors;
+
+    //                         let errorContainer = $('#error-messages');
+    //                         if (!errorContainer.length) {
+    //                             errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+    //                             $('.pagenation-top').after(errorContainer);
+    //                         }
+
+    //                         errorContainer.empty();
+
+    //                         for (const field in errors) {
+    //                             if (errors.hasOwnProperty(field)) {
+    //                                 errors[field].forEach(message => {
+    //                                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
+    //                                 });
+    //                             }
+    //                         }
+    //                     } catch (e) {
+    //                         console.error("Failed to parse response:", e);
+    //                     }
+    //                 }
+    //             });
+    //         });
+
+
+    //     // 編集された行をループ
+    //     } else if ($('tr.edit-modified').length > 0) {
+    //         $('tr.edit-modified').each(function() {
+    //             const row = $(this);
+    //             let messageId = row.attr('data-message_id');
+
+    //             // 各データを収集
+    //             let messageNumber = row.find('.shop-id').text() || null;
+    //             let categoryId = row.find('select[name="category_id"]').val() || null;
+    //             let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+    //             let title = row.find('input[name="title"]').val() || null;
+    //             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
+    //             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
+    //             let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let contentId = (fileDataByMessageId['edit'][messageId]?.contentIds || []).map(id => id || null);
+    //             let fileName = (fileDataByMessageId['edit'][messageId]?.fileNames || []).map(name => name || null);
+    //             let filePath = (fileDataByMessageId['edit'][messageId]?.filePaths || []).map(path => path || null);
+    //             let joinFlg = (fileDataByMessageId['edit'][messageId]?.joinFlags || []).map(flg => flg || null);
+    //             let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let brand = row.find('select[name="brand[]"]').val() === 'all'
+    //                 ? brandList.map(brand => brand.id)
+    //                 : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
+    //             let organization = [
+    //                 selectedValuesByMessageId['edit'][messageId]?.org5 || null,
+    //                 selectedValuesByMessageId['edit'][messageId]?.org4 || null,
+    //                 selectedValuesByMessageId['edit'][messageId]?.org3 || null,
+    //                 selectedValuesByMessageId['edit'][messageId]?.org2 || null
+    //             ].map(org => org || null);
+    //             let organizationShops = (selectedValuesByMessageId['edit'][messageId]?.shops || []).map(shop => shop || null);
+    //             let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
+    //             let selectOrganization = {
+    //                 all: selectOrganizationAll === 'selected' ? 'selected' : null,
+    //                 store: selectOrganizationAll !== 'selected' ? 'selected' : null,
+    //                 csv: null
+    //             };
+
+    //             // バリデーション
+    //             let errors = [];
+    //             if (!title) errors.push("タイトルは必須項目です");
+    //             if (errors.length > 0) {
+    //                 overlay.hide();
+    //                 let errorContainer = $('#error-messages');
+    //                 if (!errorContainer.length) {
+    //                     errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+    //                     $('.pagenation-top').after(errorContainer);
+    //                 }
+    //                 errorContainer.empty();
+    //                 errors.forEach(error => {
+    //                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
+    //                 });
+    //                 return;
+    //             }
+
+    //             // 各データをformDataに追加
+    //             formData.append('message_id', messageId);
+    //             formData.append('emergency_flg', emergencyFlg);
+    //             formData.append('category_id', categoryId);
+    //             formData.append('title', title);
+    //             formData.append('start_datetime', startDatetime);
+    //             formData.append('end_datetime', endDatetime);
+    //             tags.forEach(tag => formData.append('tag_name[]', tag));
+    //             contentId.forEach(id => formData.append('content_id[]', id));
+    //             fileName.forEach(name => formData.append('file_name[]', name));
+    //             filePath.forEach(path => formData.append('file_path[]', path));
+    //             joinFlg.forEach(flg => formData.append('join_flg[]', flg));
+    //             targetRoll.forEach(roll => formData.append('target_roll[]', roll));
+    //             brand.forEach(b => formData.append('brand[]', b));
+    //             organization.forEach(org => formData.append('organization[]', org));
+    //             formData.append('organization_shops', organizationShops);
+    //             Object.keys(selectOrganization).forEach(key => {
+    //                 formData.append(`select_organization[${key}]`, selectOrganization[key]);
+    //             });
+
+    //             // 保存のリクエストを送信
+    //             $.ajax({
+    //                 url: `/admin/message/publish/messageUpdateData`,
+    //                 type: "post",
+    //                 data: formData,
+    //                 processData: false,
+    //                 contentType: false,
+    //                 headers: {
+    //                     "X-CSRF-TOKEN": csrfToken,
+    //                 },
+    //                 success: function(response) {
+    //                     window.location.href = "/admin/message/publish/";
+    //                 },
+    //                 error: function(jqXHR, textStatus, errorThrown) {
+    //                     console.error("Error:", errorThrown);
+    //                     console.log("Response Text:", jqXHR.responseText);
+
+    //                     overlay.hide(); // オーバーレイを非表示にする
+
+    //                     try {
+    //                         const response = JSON.parse(jqXHR.responseText);
+    //                         const errors = response.errors;
+
+    //                         let errorContainer = $('#error-messages');
+    //                         if (!errorContainer.length) {
+    //                             errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+    //                             $('.pagenation-top').after(errorContainer);
+    //                         }
+
+    //                         errorContainer.empty();
+
+    //                         for (const field in errors) {
+    //                             if (errors.hasOwnProperty(field)) {
+    //                                 errors[field].forEach(message => {
+    //                                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
+    //                                 });
+    //                             }
+    //                         }
+    //                     } catch (e) {
+    //                         console.error("Failed to parse response:", e);
+    //                     }
+    //                 }
+    //             });
+    //         });
+    //     }
+    // });
+
+
 
     // 編集モード
     $('.messageEditBtn').each(function() {
         $(this).on('click', function() {
-            const row = this.closest('tr');
-            const messageId = row.getAttribute('data-message_id');
+            const row = $(this).closest('tr');
+            row.addClass('edit-modified');
 
+            // 一括登録ボタンを活性化
+            $('#messageAllSaveBtn').removeClass('disabled');
+
+            const csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+            const messageId = row.attr('data-message_id');
             // No
-            const shopId = row.querySelector('.shop-id');
+            const shopId = row.find('.shop-id').get(0);
             // 対象業態
-            const brandText = row.querySelector('.brand-text');
+            const brandText = row.find('.brand-text').get(0);
             // ラベル
-            const emergencyFlgText = row.querySelector('.emergency-flg-text');
+            const emergencyFlgText = row.find('.emergency-flg-text').get(0);
             // カテゴリ
-            const categoryText = row.querySelector('.category-text');
+            const categoryText = row.find('.category-text').get(0);
             // タイトル
-            const titleText = row.querySelector('.title-text');
+            const titleText = row.find('.title-text').get(0);
             // 検索タグ
-            const tagsTexts = row.querySelectorAll('.tags-text');
-            const tagsInputMark = row.querySelector('.tags-input-mark');
+            const tagsTexts = row.find('.tags-text').get();
+            const tagsInputMark = row.find('.tags-input-mark').get(0);
             // 掲載期間
-            const startDatetimeGroup = row.querySelector('.start-datetime-group');
-            const startDatetimeText = row.querySelector('.start-datetime-text');
-            const endDatetimeGroup = row.querySelector('.end-datetime-group');
-            const endDatetimeText = row.querySelector('.end-datetime-text');
+            const startDatetimeGroup = row.find('.start-datetime-group').get(0);
+            const startDatetimeText = row.find('.start-datetime-text').get(0);
+            const endDatetimeGroup = row.find('.end-datetime-group').get(0);
+            const endDatetimeText = row.find('.end-datetime-text').get(0);
             // 配信店舗数
-            const shopCount = row.querySelector('.shop-count');
+            const shopCount = row.find('.shop-count').get(0);
             // 編集ボタングループ
-            const messageEditBtnGroup = row.querySelector('.message-edit-btn-group');
+            const messageEditBtnGroup = row.find('.message-edit-btn-group').get(0);
             // 編集ボタン
-            const messageEditBtn = row.querySelector('.messageEditBtn');
+            const messageEditBtn = row.find('.messageEditBtn').get(0);
 
             // 編集画面処理
             function initializeEditRow(messageId, org1Id, categoryList, targetRollList, brandList, organizationList, allShopList, targetTag, message, messageContents, targetBrand, targetOrg) {
@@ -2216,11 +2628,11 @@ $(document).ready(function() {
                 const targetRollHtml = targetRollList.map(targetRoll => `
                     <input type="hidden" name="target_roll[]" value="${targetRoll.id}">
                 `).join('');
-                if (shopId) shopId.insertAdjacentHTML('afterend', targetRollHtml);
+                if (shopId) $(shopId).after(targetRollHtml);
 
                 // 対象業態
                 if (brandText) {
-                    brandText.style.display = 'none';
+                    $(brandText).hide();
                     const allBrandsSelected = targetBrand.length === brandList.length;
                     const brandInputGroupHtml = `
                         <div class="brand-input-group" style="width: max-content;">
@@ -2235,7 +2647,7 @@ $(document).ready(function() {
                             </select>
                         </div>
                     `;
-                    brandText.insertAdjacentHTML('afterend', brandInputGroupHtml);
+                    $(brandText).after(brandInputGroupHtml);
                 }
 
                 // ラベル
@@ -2248,11 +2660,11 @@ $(document).ready(function() {
                     </div>
                 `;
                 if (emergencyFlgText) {
-                    emergencyFlgText.style.display = 'none';
-                    emergencyFlgText.insertAdjacentHTML('afterend', emergencyFlgInputGroupHtml);
+                    $(emergencyFlgText).hide();
+                    $(emergencyFlgText).after(emergencyFlgInputGroupHtml);
                 } else {
-                    const emergencyFlgColumn = row.querySelector('.label-colum-danger');
-                    emergencyFlgColumn.insertAdjacentHTML('beforeend', emergencyFlgInputGroupHtml);
+                    const emergencyFlgColumn = row.find('.label-colum-danger').get(0);
+                    $(emergencyFlgColumn).append(emergencyFlgInputGroupHtml);
                 }
 
                 // カテゴリ
@@ -2271,8 +2683,8 @@ $(document).ready(function() {
                     </div>
                 `;
                 if (categoryText) {
-                    categoryText.style.display = 'none';
-                    categoryText.insertAdjacentHTML('afterend', categoryInputGroupHtml);
+                    $(categoryText).hide();
+                    $(categoryText).after(categoryInputGroupHtml);
                 }
 
                 // タイトル
@@ -2281,13 +2693,13 @@ $(document).ready(function() {
                         <input type="text" class="form-control" name="title"
                             value="${message.title}" style="border-radius:4px 0 0 4px;">
                         <input type="button" class="btn btn-admin" id="titleFileEditBtn-${messageId}"
-                            data-toggle="modal" data-target="#editTitleFileModal-${messageId}" value="編集"
+                            data-toggle="modal" data-target="#editTitleFileModal-${messageId}" value="ファイル設定"
                             style="border-radius:0 4px 4px 0;">
                     </div>
                 `;
                 if (titleText) {
-                    titleText.style.display = 'none';
-                    titleText.insertAdjacentHTML('afterend', titleInputGroupHtml);
+                    $(titleText).hide();
+                    $(titleText).after(titleInputGroupHtml);
                 }
 
                 // 検索タグ
@@ -2305,16 +2717,16 @@ $(document).ready(function() {
                     </div>
                 `;
                 if (tagsTexts.length > 0) {
-                    tagsTexts.forEach(tagsText => {
-                        tagsText.style.display = 'none';
+                    $(tagsTexts).each(function() {
+                        $(this).hide();
                     });
-                    tagsInputMark.style.display = 'block';
-                    tagsTexts[0].insertAdjacentHTML('afterend', tagsInputGroupHtml);
+                    $(tagsInputMark).show();
+                    $(tagsTexts[0]).after(tagsInputGroupHtml);
                 } else {
-                    tagsInputMark.style.display = 'block';
-                    const tagsColumn = row.querySelector('.tags-text-group');
+                    $(tagsInputMark).show();
+                    const tagsColumn = row.find('.tags-text-group').get(0);
                     if (tagsColumn) {
-                        tagsColumn.insertAdjacentHTML('beforeend', tagsInputGroupHtml);
+                        $(tagsColumn).append(tagsInputGroupHtml);
                     }
                 }
 
@@ -2325,9 +2737,9 @@ $(document).ready(function() {
                         name="start_datetime" autocomplete="off">
                 `;
                 if (startDatetimeText){
-                    startDatetimeText.style.display = 'none';
-                    startDatetimeText.insertAdjacentHTML('afterend', startDatetimeInputGroupHtml);
-                    startDatetimeGroup.style.width = 'max-content';
+                    $(startDatetimeText).hide();
+                    $(startDatetimeText).after(startDatetimeInputGroupHtml);
+                    $(startDatetimeGroup).css('width', 'max-content');
                 }
 
                 const endDatetimeInputGroupHtml = `
@@ -2336,9 +2748,9 @@ $(document).ready(function() {
                         name="end_datetime" autocomplete="off">
                 `;
                 if (endDatetimeText) {
-                    endDatetimeText.style.display = 'none';
-                    endDatetimeText.insertAdjacentHTML('afterend', endDatetimeInputGroupHtml);
-                    endDatetimeGroup.style.width = 'max-content';
+                    $(endDatetimeText).hide();
+                    $(endDatetimeText).after(endDatetimeInputGroupHtml);
+                    $(endDatetimeGroup).css('width', 'max-content');
                 }
 
                 // 配信店舗数
@@ -2367,17 +2779,17 @@ $(document).ready(function() {
                     </div>
                 `;
                 if (shopCount) {
-                    shopCount.style.display = 'none';
-                    shopCount.insertAdjacentHTML('afterend', shopEditGroupHtml);
+                    $(shopCount).hide();
+                    $(shopCount).after(shopEditGroupHtml);
                 }
 
                 // 編集ボタン
                 if (messageEditBtn) {
-                    messageEditBtn.style.display = 'none';
+                    $(messageEditBtn).hide();
                     const saveButtonHtml = `<p class="messageEditSaveBtn btn btn-admin" data-message-id="${messageId}" style="margin-right: 5px;">保存</p>`;
-                    messageEditBtnGroup.insertAdjacentHTML('beforeend', saveButtonHtml);
+                    $(messageEditBtnGroup).append(saveButtonHtml);
                     const deleteButtonHtml = `<p class="messageEditDeleteBtn btn btn-admin" data-message-id="${messageId}">取消</p>`;
-                    messageEditBtnGroup.insertAdjacentHTML('beforeend', deleteButtonHtml);
+                    $(messageEditBtnGroup).append(deleteButtonHtml);
                 }
 
                 // 掲載期間
@@ -2392,125 +2804,130 @@ $(document).ready(function() {
             // 削除ボタン処理
             function initializeEditDeleteBtn(messageId) {
                 $(`.messageEditDeleteBtn[data-message-id="${messageId}"]`).on('click', function() {
+                    const row = $(this).closest('tr');
+                    // modifiedクラスを削除
+                    row.removeClass('edit-modified');
+
+                    // new-modifiedまたはedit-modifiedが1つもない場合は、一括登録ボタンを非活性
+                    if ($('tr.new-modified').length === 0 && $('tr.edit-modified').length === 0) {
+                        $('#messageAllSaveBtn').addClass('disabled');
+                    }
+
                     // 対象業態
                     if (brandText) {
-                        brandText.style.display = '';
-                        const brandInputGroup = brandText.nextElementSibling;
+                        $(brandText).show();
+                        const brandInputGroup = $(brandText).next();
                         if (brandInputGroup) brandInputGroup.remove();
                     }
 
                     // ラベル
                     if (emergencyFlgText) {
-                        emergencyFlgText.style.display = '';
-                        const emergencyFlgInputGroup = emergencyFlgText.nextElementSibling;
+                        $(emergencyFlgText).show();
+                        const emergencyFlgInputGroup = $(emergencyFlgText).next();
                         if (emergencyFlgInputGroup) emergencyFlgInputGroup.remove();
                     } else {
-                        const emergencyFlgColumn = row.querySelector('.label-colum-danger');
-                        const emergencyFlgInputGroup = emergencyFlgColumn.querySelector('.emergency-flg-input-group');
+                        const emergencyFlgColumn = row.find('.label-colum-danger');
+                        const emergencyFlgInputGroup = emergencyFlgColumn.find('.emergency-flg-input-group');
                         if (emergencyFlgInputGroup) emergencyFlgInputGroup.remove();
                     }
 
                     // カテゴリ
                     if (categoryText) {
-                        categoryText.style.display = '';
-                        const categoryInputGroup = categoryText.nextElementSibling;
+                        $(categoryText).show();
+                        const categoryInputGroup = $(categoryText).next();
                         if (categoryInputGroup) categoryInputGroup.remove();
                     }
 
                     // タイトル
                     if (titleText) {
-                        titleText.style.display = '';
-                        const titleInputGroup = titleText.nextElementSibling;
+                        $(titleText).show();
+                        const titleInputGroup = $(titleText).next();
                         if (titleInputGroup) titleInputGroup.remove();
                     }
 
                     // 検索タグ
                     if (tagsTexts.length > 0) {
-                        tagsTexts.forEach(tagsText => {
-                            tagsText.style.display = '';
+                        $(tagsTexts).each(function() {
+                            $(this).show();
                         });
-                        const tagsInputGroup = tagsTexts[0].nextElementSibling;
+                        const tagsInputGroup = $(tagsTexts[0]).next();
                         if (tagsInputGroup) tagsInputGroup.remove();
-                        tagsInputMark.style.display = 'none';
+                        $(tagsInputMark).hide();
                     } else {
-                        const tagsColumn = row.querySelector('.tags-text-group');
-                        const tagsInputGroup = tagsColumn.querySelector('.tags-input-group');
+                        const tagsColumn = row.find('.tags-text-group');
+                        const tagsInputGroup = tagsColumn.find('.tags-input-group');
                         if (tagsInputGroup) tagsInputGroup.remove();
-                        tagsInputMark.style.display = 'none';
+                        $(tagsInputMark).hide();
                     }
 
                     // 掲載期間
                     if (startDatetimeText) {
-                        startDatetimeText.style.display = '';
-                        startDatetimeGroup.style.width = '';
-                        const startDatetimeInputGroup = startDatetimeText.nextElementSibling;
+                        $(startDatetimeText).show();
+                        $(startDatetimeGroup).css('width', '');
+                        const startDatetimeInputGroup = $(startDatetimeText).next();
                         if (startDatetimeInputGroup) startDatetimeInputGroup.remove();
                     }
                     if (endDatetimeText) {
-                        endDatetimeText.style.display = '';
-                        endDatetimeGroup.style.width = '';
-                        const endDatetimeInputGroup = endDatetimeText.nextElementSibling;
+                        $(endDatetimeText).show();
+                        $(endDatetimeGroup).css('width', '');
+                        const endDatetimeInputGroup = $(endDatetimeText).next();
                         if (endDatetimeInputGroup) endDatetimeInputGroup.remove();
                     }
 
                     // 配信店舗数
                     if (shopCount) {
-                        shopCount.style.display = '';
-                        const shopEditGroup = shopCount.nextElementSibling;
+                        $(shopCount).show();
+                        const shopEditGroup = $(shopCount).next();
                         if (shopEditGroup) shopEditGroup.remove();
                     }
 
                     // 編集ボタン
-                    const messageEditSaveBtn = row.querySelector('.messageEditSaveBtn');
-                    const messageEditDeleteBtn = row.querySelector('.messageEditDeleteBtn');
-                    if (messageEditSaveBtn && messageEditDeleteBtn) {
+                    const messageEditSaveBtn = row.find('.messageEditSaveBtn');
+                    const messageEditDeleteBtn = row.find('.messageEditDeleteBtn');
+                    if (messageEditSaveBtn.length && messageEditDeleteBtn.length) {
                         messageEditSaveBtn.remove();
                         messageEditDeleteBtn.remove();
-                        messageEditBtn.style.display = 'inline-block';
+                        $(messageEditBtn).show();
                     }
                 });
             }
 
+
             // 保存ボタン処理
             function initializeEditSaveBtn(messageId, brandList) {
                 $(`.messageEditSaveBtn[data-message-id="${messageId}"]`).on('click', function() {
-                    var overlay = document.getElementById('overlay');
-                    overlay.style.display = 'block';  // オーバーレイを表示
+                    const overlay = $('#overlay');
+                    overlay.show(); // オーバーレイを表示
 
-                    const row = document.querySelector(`tr[data-message_id="${messageId}"]`);
+                    const csrfToken = $('meta[name="csrf-token"]').attr("content");
+                    const formData = new FormData();
+                    const row = $(`tr[data-message_id="${messageId}"]`);
 
-                    // カテゴリ
-                    const categoryId = row.querySelector('select[name="category_id"]')?.value || null;
-                    // ラベル
-                    const emergencyFlg = row.querySelector('input[name="emergency_flg"]')?.checked ? 'on' : 'off';
-                    // タイトル
-                    const title = row.querySelector('input[name="title"]')?.value || null;
-                    // 掲載期間
-                    const startDatetime = row.querySelector('input[name="start_datetime"]')?.value || null;
-                    const endDatetime = row.querySelector('input[name="end_datetime"]')?.value || null;
-                    // 検索タグ
-                    const tags = Array.from(row.querySelectorAll('input[name="tag_name[]"]')).map(input => input.value) || null;
-                    // 業連ファイル
-                    const contentId = (fileDataByMessageId[messageId]?.contentIds || []).map(id => id || null);
-                    const fileName = (fileDataByMessageId[messageId]?.fileNames || []).map(name => name || null);
-                    const filePath = (fileDataByMessageId[messageId]?.filePaths || []).map(path => path || null);
-                    const joinFlg = (fileDataByMessageId[messageId]?.joinFlags || []).map(flg => flg || null);
-                    // 対象者
-                    const targetRoll = Array.from(row.querySelectorAll('input[name="target_roll[]"]')).map(input => input.value) || null;
-                    // 対象業態
-                    const brand = row.querySelector('select[name="brand[]"]')?.value === 'all'
+                    // 各データを収集
+                    let messageNumber = row.find('.shop-id').text() || null;
+                    let categoryId = row.find('select[name="category_id"]').val() || null;
+                    let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+                    let title = row.find('input[name="title"]').val() || null;
+                    let startDatetime = row.find('input[name="start_datetime"]').val() || null;
+                    let endDatetime = row.find('input[name="end_datetime"]').val() || null;
+                    let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
+                    let contentId = (fileDataByMessageId['edit'][messageId]?.contentIds || []).map(id => id || null);
+                    let fileName = (fileDataByMessageId['edit'][messageId]?.fileNames || []).map(name => name || null);
+                    let filePath = (fileDataByMessageId['edit'][messageId]?.filePaths || []).map(path => path || null);
+                    let joinFlg = (fileDataByMessageId['edit'][messageId]?.joinFlags || []).map(flg => flg || null);
+                    let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
+                    let brand = row.find('select[name="brand[]"]').val() === 'all'
                         ? brandList.map(brand => brand.id)
-                        : Array.from(row.querySelectorAll('select[name="brand[]"]')).map(input => input.value) || null;
-                    const organization = [
-                        selectedValuesByMessageId[messageId]?.org5 || null,
-                        selectedValuesByMessageId[messageId]?.org4 || null,
-                        selectedValuesByMessageId[messageId]?.org3 || null,
-                        selectedValuesByMessageId[messageId]?.org2 || null
+                        : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
+                    let organization = [
+                        selectedValuesByMessageId['edit'][messageId]?.org5 || null,
+                        selectedValuesByMessageId['edit'][messageId]?.org4 || null,
+                        selectedValuesByMessageId['edit'][messageId]?.org3 || null,
+                        selectedValuesByMessageId['edit'][messageId]?.org2 || null
                     ].map(org => org || null);
-                    // 対象店舗
-                    const organizationShops = (selectedValuesByMessageId[messageId]?.shops || []).map(shop => shop || null);
-                    const selectOrganizationAll = row.querySelector('input[name="select_organization[all]"]')?.value || null;
-                    const selectOrganization = {
+                    let organizationShops = (selectedValuesByMessageId['edit'][messageId]?.shops || []).map(shop => shop || null);
+                    let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
+                    let selectOrganization = {
                         all: selectOrganizationAll === 'selected' ? 'selected' : null,
                         store: selectOrganizationAll !== 'selected' ? 'selected' : null,
                         csv: null
@@ -2520,52 +2937,40 @@ $(document).ready(function() {
                     let errors = [];
                     if (!title) errors.push("タイトルは必須項目です");
                     if (errors.length > 0) {
-                        overlay.style.display = 'none';
-                        // エラーメッセージを表示するコンテナを取得または作成
+                        overlay.hide();
                         let errorContainer = $('#error-messages');
-                        if (!errorContainer || errorContainer.length === 0) {
+                        if (!errorContainer.length) {
                             errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
                             $('.pagenation-top').after(errorContainer);
                         }
-                        // エラーメッセージをクリアして新しいメッセージを追加
                         errorContainer.empty();
                         errors.forEach(error => {
-                            errorContainer.append(`<div class="text-danger">${error}</div>`);
+                            errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
                         });
                         return;
                     }
 
-                    let csrfToken = $('meta[name="csrf-token"]').attr("content");
-                    let formData = new FormData();
-                    // id
+                    // 各データをformDataに追加
                     formData.append('message_id', messageId);
-                    // ラベル
                     formData.append('emergency_flg', emergencyFlg);
-                    // カテゴリ
                     formData.append('category_id', categoryId);
-                    // タイトル
                     formData.append('title', title);
-                    // 掲載期間
                     formData.append('start_datetime', startDatetime);
                     formData.append('end_datetime', endDatetime);
-                    // 検索タグ
                     tags.forEach(tag => formData.append('tag_name[]', tag));
-                    // 業連ファイル
                     contentId.forEach(id => formData.append('content_id[]', id));
                     fileName.forEach(name => formData.append('file_name[]', name));
                     filePath.forEach(path => formData.append('file_path[]', path));
                     joinFlg.forEach(flg => formData.append('join_flg[]', flg));
-                    // 対象者
                     targetRoll.forEach(roll => formData.append('target_roll[]', roll));
-                    // 対象業態
                     brand.forEach(b => formData.append('brand[]', b));
                     organization.forEach(org => formData.append('organization[]', org));
-                    // 対象店舗
                     formData.append('organization_shops', organizationShops);
                     Object.keys(selectOrganization).forEach(key => {
                         formData.append(`select_organization[${key}]`, selectOrganization[key]);
                     });
 
+                    // 保存のリクエストを送信
                     $.ajax({
                         url: `/admin/message/publish/messageUpdateData`,
                         type: "post",
@@ -2582,15 +2987,14 @@ $(document).ready(function() {
                             console.error("Error:", errorThrown);
                             console.log("Response Text:", jqXHR.responseText);
 
-                            // オーバーレイを非表示にする
-                            overlay.style.display = 'none';
+                            overlay.hide(); // オーバーレイを非表示にする
 
                             try {
                                 const response = JSON.parse(jqXHR.responseText);
                                 const errors = response.errors;
 
                                 let errorContainer = $('#error-messages');
-                                if (errorContainer.length === 0) {
+                                if (!errorContainer.length) {
                                     errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
                                     $('.pagenation-top').after(errorContainer);
                                 }
@@ -2600,7 +3004,7 @@ $(document).ready(function() {
                                 for (const field in errors) {
                                     if (errors.hasOwnProperty(field)) {
                                         errors[field].forEach(message => {
-                                            errorContainer.append(`<div class="text-danger">${message}</div>`);
+                                            errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
                                         });
                                     }
                                 }
@@ -2613,8 +3017,7 @@ $(document).ready(function() {
             }
 
 
-            // 業連ファイルと店舗データ取得
-            let csrfToken = $('meta[name="csrf-token"]').attr("content");
+            // 編集のリクエストを送信
             $.ajax({
                 url: `/admin/message/publish/messageEditData/${messageId}/${org1Id}`,
                 type: "post",

@@ -71,6 +71,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
             Route::post('messageEditData/{message_id}/{organization1_id}', [MessagePublishController::class, 'messageEditData'])->name('messageEditData')->where('message_id', '^\d+$');
             Route::post('messageUpdateData', [MessagePublishController::class, 'messageUpdateData'])->name('messageUpdateData');
+            Route::post('messageAllSaveData', [MessagePublishController::class, 'messageAllSaveData'])->name('messageAllSaveData');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');

@@ -191,8 +191,8 @@
                             @if ($organization1->id === 2)
                                 @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                     <th class="text-center" nowrap>
-                                        <p class="btn btn-admin messageAddBtn" style="position: relative; z-index: 10;">追加</p>
-                                        <p class="btn btn-admin" id="messageAllSaveBtn" style="position: relative; z-index: 10;">一括登録</p>
+                                        <p class="btn btn-admin" id="messageAddBtn" style="position: relative; z-index: 10;">追加</p>
+                                        <p class="btn btn-admin disabled" id="messageAllSaveBtn" style="position: relative; z-index: 10;">一括登録</p>
                                         <input type="hidden" name="organization1_id" value="{{ $organization1->id }}">
                                     </th>
                                 @endif
