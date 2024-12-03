@@ -12,6 +12,7 @@ class PublishStoreRequest extends FormRequest
         // 一時保存の時は、バリデーションしない
         if ($this->input('save')) return [
         ];
+        $this->all();
 
         return [
             'title' => 'required',
@@ -52,6 +53,8 @@ class PublishStoreRequest extends FormRequest
     {
         $this->merge([
             'file_path' => array_filter($this->input('file_path', [])),
+            'start_datetime' => $this->input('start_datetime') === 'null' ? null : $this->input('start_datetime'),
+            'end_datetime' => $this->input('end_datetime') === 'null' ? null : $this->input('end_datetime'),
         ]);
     }
 }
