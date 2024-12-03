@@ -243,11 +243,10 @@ class MessagePublishController extends Controller
         }
 
         // BBの場合
-        if ($organization1_id === 2) {
+        if ($organization1_id == 2) {
             // セッションにデータを保存
             session()->put('message_list', $message_list);
         }
-
         // 店舗数をカウント
         if ($message_list) {
             // すべてのメッセージIDを取得
@@ -641,79 +640,6 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    // 一覧画面の登録
-    public function messageStoreData(PublishStoreRequest $request)
-    {
-        $organization1 = Organization1::find($request->input('org1Id'));
-
-        // 各リクエストデータを取得し、'null'文字列をnullに変換
-        $title = $request->input('title') === 'null' ? null : $request->input('title');
-        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
-        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
-
-        $start_datetime_input = $request->input('start_datetime');
-        $end_datetime_input = $request->input('end_datetime');
-
-        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
-        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
-
-        $tag_name = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('tag_name', []));
-
-        $content_id = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('content_id', []));
-
-        $file_name = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('file_name', []));
-
-        $file_path = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('file_path', []));
-
-        $join_flg = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('join_flg', []));
-
-        $target_roll = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('target_roll', []));
-
-        $brand = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('brand', []));
-
-        $organization = array_map(function($org) {
-            return $org === 'null' ? null : $org;
-        }, $request->input('organization', []));
-
-        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
-
-        $select_organization = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('select_organization', []));
-
-        return $this->store($request->merge([
-            'title' => $title,
-            'category_id' => $category_id,
-            'emergency_flg' => $emergency_flg,
-            'tag_name' => $tag_name,
-            'start_datetime' => $start_datetime,
-            'end_datetime' => $end_datetime,
-            'content_id' => $content_id,
-            'file_name' => $file_name,
-            'file_path' => $file_path,
-            'join_flg' => $join_flg,
-            'target_roll' => $target_roll,
-            'brand' => $brand,
-            'organization' => $organization,
-            'organization_shops' => $organization_shops,
-            'select_organization' => $select_organization,
-        ]), $organization1);
-    }
-
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
@@ -895,6 +821,78 @@ class MessagePublishController extends Controller
         ini_restore('memory_limit');
 
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+    }
+
+    // 一覧画面の登録
+    public function messageStoreData(PublishStoreRequest $request)
+    {
+        $organization1 = Organization1::find($request->input('org1Id'));
+
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+        $start_datetime = $start_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->store($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $organization1);
     }
 
     public function edit($message_id)
@@ -1267,126 +1265,6 @@ class MessagePublishController extends Controller
         ]);
     }
 
-    // 一覧画面の編集
-    public function messageUpdateData(PublishUpdateRequest $request)
-    {
-        $message_id = $request->input('message_id');
-
-        // 各リクエストデータを取得し、'null'文字列をnullに変換
-        $title = $request->input('title') === 'null' ? null : $request->input('title');
-        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
-        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
-
-        $start_datetime_input = $request->input('start_datetime');
-        $end_datetime_input = $request->input('end_datetime');
-
-        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
-        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
-
-        $tag_name = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('tag_name', []));
-
-        $content_id = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('content_id', []));
-
-        $file_name = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('file_name', []));
-
-        $file_path = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('file_path', []));
-
-        $join_flg = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('join_flg', []));
-
-        $target_roll = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('target_roll', []));
-
-        $brand = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('brand', []));
-
-        $organization = array_map(function($org) {
-            return $org === 'null' ? null : $org;
-        }, $request->input('organization', []));
-
-        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
-
-        $select_organization = array_map(function($item) {
-            return $item === 'null' ? null : $item;
-        }, $request->input('select_organization', []));
-
-        return $this->update($request->merge([
-            'title' => $title,
-            'category_id' => $category_id,
-            'emergency_flg' => $emergency_flg,
-            'tag_name' => $tag_name,
-            'start_datetime' => $start_datetime,
-            'end_datetime' => $end_datetime,
-            'content_id' => $content_id,
-            'file_name' => $file_name,
-            'file_path' => $file_path,
-            'join_flg' => $join_flg,
-            'target_roll' => $target_roll,
-            'brand' => $brand,
-            'organization' => $organization,
-            'organization_shops' => $organization_shops,
-            'select_organization' => $select_organization,
-        ]), $message_id);
-    }
-
-    // 一覧画面の一括登録
-    public function messageAllSaveData(Request $request)
-    {
-        $messagesData = $request->input('messagesData', []);
-        $errors = [];
-
-        foreach ($messagesData as $index => $messageData) {
-            $operation = $messageData['operation'] ?? null;
-
-            try {
-                if ($operation === 'new') {
-                    $request = Request::create('', 'POST', $messageData);
-                    $storeRequest = PublishStoreRequest::createFromBase($request);
-                    $storeRequest->setContainer(app());
-                    $storeRequest->setRedirector(app('redirect'));
-                    $storeRequest->validateResolved();
-                    $this->messageStoreData($storeRequest);
-                } else {
-                    $request = Request::create('', 'POST', $messageData);
-                    $updateRequest = PublishUpdateRequest::createFromBase($request);
-                    $updateRequest->setContainer(app());
-                    $updateRequest->setRedirector(app('redirect'));
-                    $updateRequest->validateResolved();
-                    $this->messageUpdateData($updateRequest);
-                }
-            } catch (\Illuminate\Validation\ValidationException $e) {
-                $errors[$index] = [
-                    'type' => 'validation',
-                    'messages' => $e->errors(),
-                    'data' => $messageData
-                ];
-            } catch (\Exception $e) {
-                $errors[$index] = [
-                    'type' => 'general',
-                    'messages' => [$e->getMessage()],
-                    'data' => $messageData
-                ];
-            }
-        }
-
-        if (!empty($errors)) {
-            return response()->json(['status' => 'error', 'errors' => $errors], 422);
-        }
-
-        return response()->json(['status' => 'success']);
-    }
-
     public function update(PublishUpdateRequest $request, $message_id)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
@@ -1691,6 +1569,126 @@ class MessagePublishController extends Controller
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
+    // 一覧画面の編集
+    public function messageUpdateData(PublishUpdateRequest $request)
+    {
+        $message_id = $request->input('message_id');
+
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+
+        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->update($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $message_id);
+    }
+
+    // 一覧画面の一括登録
+    public function messageAllSaveData(Request $request)
+    {
+        $messagesData = $request->input('messagesData', []);
+        $errors = [];
+
+        foreach ($messagesData as $index => $messageData) {
+            $operation = $messageData['operation'] ?? null;
+
+            try {
+                if ($operation === 'new') {
+                    $request = Request::create('', 'POST', $messageData);
+                    $storeRequest = PublishStoreRequest::createFromBase($request);
+                    $storeRequest->setContainer(app());
+                    $storeRequest->setRedirector(app('redirect'));
+                    $storeRequest->validateResolved();
+                    $this->messageStoreData($storeRequest);
+                } else {
+                    $request = Request::create('', 'POST', $messageData);
+                    $updateRequest = PublishUpdateRequest::createFromBase($request);
+                    $updateRequest->setContainer(app());
+                    $updateRequest->setRedirector(app('redirect'));
+                    $updateRequest->validateResolved();
+                    $this->messageUpdateData($updateRequest);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $errors[$index] = [
+                    'type' => 'validation',
+                    'messages' => $e->errors(),
+                    'data' => $messageData
+                ];
+            } catch (\Exception $e) {
+                $errors[$index] = [
+                    'type' => 'general',
+                    'messages' => [$e->getMessage()],
+                    'data' => $messageData
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return response()->json(['status' => 'error', 'errors' => $errors], 422);
+        }
+
+        return response()->json(['status' => 'success']);
+    }
+
     public function stop(Request $request)
     {
         $data = $request->json()->all();
@@ -1731,7 +1729,7 @@ class MessagePublishController extends Controller
         $file_name = '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
 
         // BBの場合
-        if ($organization1->id === 2) {
+        if ($organization1->id == 2) {
             return Excel::download(
                 new MessageListBBExport($request),
                 $file_name
@@ -1845,10 +1843,8 @@ class MessagePublishController extends Controller
 
 
         try {
-            if ($organization1 === 2) {
+            if ($organization1 == 2) {
                 // BBの場合
-                Excel::import(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
-
                 $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
                 $count = $collection[0]->count();
                 if ($count >= 100) {
@@ -1857,6 +1853,9 @@ class MessagePublishController extends Controller
                         'message' => "100行以内にしてください"
                     ], 500);
                 }
+
+                Excel::import(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
+
                 $array = [];
                 foreach (
                     $collection[0] as $key => [
@@ -2080,7 +2079,7 @@ class MessagePublishController extends Controller
             DB::beginTransaction();
 
             // BBの場合
-            if ($org1_id === 2) {
+            if ($org1_id == 2) {
                 foreach ($messages as $key => $ms) {
                     $organization1_id = Brand::where('id', $ms["brand"])->pluck('organization1_id')->first();
 
@@ -2699,6 +2698,17 @@ class MessagePublishController extends Controller
             usort($all_shop_list, function ($a, $b) {
                 return strcmp($a['shop_code'], $b['shop_code']);
             });
+
+            // BBの場合
+            if ($organization1_id == 2) {
+                return response()->json([
+                    'storesJson' => $storesJson,
+                    // 'brand_list' => $brand_list,
+                    'organization_list' => $organization_list,
+                    'all_shop_list' => $all_shop_list,
+                    'csvStoreIds' => $csvStoreIds,
+                ], 200);
+            }
 
             return response()
                 ->view('common.admin.message-csv-store-modal', [
