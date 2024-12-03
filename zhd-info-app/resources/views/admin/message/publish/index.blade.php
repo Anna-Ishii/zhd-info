@@ -231,7 +231,7 @@
                                 @if ($organization1->id === 2)
                                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                         <td class="message-edit-btn-group" nowrap>
-                                            <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}">編集</p>
+                                            <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}" onclick="this.style.pointerEvents = 'none';">編集</p>
                                         </td>
                                     @endif
                                 @endif
@@ -239,7 +239,7 @@
                                 {{-- BBの場合 --}}
                                 @if ($organization1->id === 2)
                                     <!-- No -->
-                                    <td class="shop-id">{{ $message->number }}</td>
+                                    <td class="shop-id" data-message-number="{{ $message->number }}">{{ $message->number }}</td>
                                     <!-- 対象業態 -->
                                     <td class="label-brand">
                                         <span class="brand-text">{{ $message->brand_name }}</span>
@@ -460,13 +460,4 @@
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/edit_list.js') }}?date={{ date('Ymd') }}" defer></script>
-
-
-
-
-
-
-
-
-
 @endsection

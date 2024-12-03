@@ -32,7 +32,6 @@ $(document).ready(function() {
                 fileInputsHtml = `
                     <div class="file-input-container">
                         <div class="row">
-                            <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="" required>
                             <label class="col-sm-2 control-label">業連<span class="text-danger required">*</span></label>
                             <div class="col-sm-8">
                                 <label class="inputFile form-control">
@@ -43,7 +42,6 @@ $(document).ready(function() {
                                     <input type="hidden" name="file_name[]" value="">
                                     <input type="hidden" name="file_path[]" value="">
                                     <input type="hidden" name="join_flg[]" value="">
-                                    <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                                 </label>
                                 <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
                                     <div class="progress-bar" style="width: 0%"></div>
@@ -51,6 +49,12 @@ $(document).ready(function() {
                             </div>
                             <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
                         </div>
+                    </div>
+                    <div class="col-sm-11 join-file-btn">
+                        <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
+                            <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
+                            <input type="button" class="btn btn-admin joinFile" id="joinFileId-${messageId}" data-toggle="modal" data-target="#editJoinFileModal-${messageId}" value="ファイルの結合">
+                        </label>
                     </div>
                 `;
             } else {
@@ -169,9 +173,26 @@ $(document).ready(function() {
         // 業連ファイル編集処理
         const editTitleFileInputsSelector = `.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`;
 
+        // 新規モードの場合は業連ファイルの初期化
+        if(mode === 'new'){
+            const contentIds = [];
+            const fileNames = [];
+            const filePaths = [];
+            const joinFlags = [];
+
+            if (!fileDataByMessageId[mode]) {
+                fileDataByMessageId[mode] = {};
+            }
+
+            fileDataByMessageId[mode][messageId] = {
+                contentIds: contentIds,
+                fileNames: fileNames,
+                filePaths: filePaths,
+                joinFlags: joinFlags
+            };
+
         // 編集モードの場合はボタンの有効/無効を設定し、メッセージを表示
-        if(mode === 'edit'){
-            // 初期状態でボタンの有効/無効を設定し、メッセージを表示
+        } else if(mode === 'edit'){
             addFileInputAdd(messageId);
             addJoinFileBtn(messageId);
             // 「結合中」メッセージを更新する関数の呼び出し
@@ -705,6 +726,7 @@ $(document).ready(function() {
     }
 
 
+
     // 店舗編集モーダル
     function initializeShopModal(messageId, org1Id, organizationList, allShopList, targetOrg, mode) {
         if (!document.getElementById(`editShopModal-${messageId}`)) {
@@ -926,6 +948,7 @@ $(document).ready(function() {
                                 </div>
                             </div>
                             <div class="modal-footer">
+                                <input type="button" class="btn btn-admin pull-left" id="editShopCsvImportBtn-${messageId}" data-toggle="modal" data-target="#editShopImportModal-${messageId}" style="display: none;" value="再インポート">
                                 <button type="button" class="btn btn-admin pull-left" id="editShopCancelBtn-${messageId}" data-dismiss="modal">キャンセル</button>
                                 <button type="button" class="btn btn-admin pull-right" id="editShopSelectBtn-${messageId}">選択</button>
                             </div>
@@ -972,7 +995,7 @@ $(document).ready(function() {
                                         </div>
                                         <div class="col-sm-2 col-sm-offset-6 control-label">
                                             <input type="button" id="importButton-${messageId}" class="btn btn-admin" data-toggle="modal"
-                                                data-target="#editShopImportSelector-${messageId}" value="インポート" disabled>
+                                                data-target="#editShopImport-${messageId}" value="インポート" disabled>
                                         </div>
                                     </div>
                                 </form>
@@ -997,13 +1020,13 @@ $(document).ready(function() {
             shops: []
         };
 
-        const editShopInputsSelector = `.editShopModal .editShopInputs[data-message-id="${messageId}"]`;
+        const shopInputsSelector = `.editShopModal .editShopInputs[data-message-id="${messageId}"]`;
         const shopSelectInputsSelector = `.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"]`;
-        const editShopImportSelector = `.editShopImportModal .editShopImport[data-message-id="${messageId}"]`;
+        const shopImportSelector = `.editShopImportModal .editShopImport[data-message-id="${messageId}"]`;
 
         // 初期表示の更新
-        updateSelectedStores(messageId);
-        updateAllParentCheckboxes(messageId);
+        updateSelectedStores();
+        updateAllParentCheckboxes();
         updateSelectAllCheckboxes(messageId);
 
         // 編集モードの場合は値を更新
@@ -1011,21 +1034,21 @@ $(document).ready(function() {
             changeValues(messageId);
         }
 
-        if ($(`${editShopInputsSelector} #selectStore-${messageId}`).val() === "selected") {
+        if ($(`${shopInputsSelector} #selectStore-${messageId}`).val() === "selected") {
             // 店舗選択中の処理
             const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
-            $(`${editShopInputsSelector} #checkStore-${messageId}`).val(`店舗選択(${selectedCountStore}店舗)`);
+            $(`${shopInputsSelector} #checkStore-${messageId}`).val(`店舗選択(${selectedCountStore}店舗)`);
         }
-        if ($(`${editShopInputsSelector} #selectCsv-${messageId}`).val() === "selected") {
+        if ($(`${shopInputsSelector} #selectCsv-${messageId}`).val() === "selected") {
             // インポート選択中の処理
             const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
-            $(`${editShopInputsSelector} #importCsv-${messageId}`).val(`インポート(${selectedCountStore}店舗)`);
+            $(`${shopInputsSelector} #importCsv-${messageId}`).val(`インポート(${selectedCountStore}店舗)`);
         }
 
         // チェックボックスの変更イベントリスナーを追加
         $(document).on('change', `${shopSelectInputsSelector} input[name="organization_shops[]"], ${shopSelectInputsSelector} input[name="shops_code[]"]`, function() {
-            syncCheckboxes($(this).attr('data-store-id'), this.checked, messageId);
-            updateSelectedStores(messageId);
+            syncCheckboxes($(this).attr('data-store-id'), this.checked);
+            updateSelectedStores();
             if ($(this).hasClass('shop-checkbox')) {
                 updateParentCheckbox($(this).attr('data-organization-id'));
             }
@@ -1038,7 +1061,7 @@ $(document).ready(function() {
             const checked = this.checked;
             $(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"].shop-checkbox`).each(function() {
                 this.checked = checked;
-                syncCheckboxes($(this).attr('data-store-id'), checked, messageId);
+                syncCheckboxes($(this).attr('data-store-id'), checked);
             });
 
             // "選択中のみ表示"がチェックされている場合、すべての項目を表示し、チェックを外す
@@ -1051,7 +1074,7 @@ $(document).ready(function() {
                 $(`${shopSelectInputsSelector} #selectStoreCode-${messageId}`).prop('checked', false);
             }
 
-            updateSelectedStores(messageId);
+            updateSelectedStores();
             updateSelectAllCheckboxes(messageId);
         });
 
@@ -1136,17 +1159,17 @@ $(document).ready(function() {
                         item.checked = checked;
                     }
                     if ($(item).hasClass("shop-checkbox")) {
-                        syncCheckboxes($(item).attr("data-store-id"), checked, messageId);
+                        syncCheckboxes($(item).attr('data-store-id'), checked);
                     }
                     index++;
                 }
 
-            if (index < items.length) {
-                requestIdleCallback(processNextBatch);
-            } else {
-                finishProcess(messageId); // 全選択/解除処理の後処理
+                if (index < items.length) {
+                    requestIdleCallback(processNextBatch);
+                } else {
+                    finishProcess(messageId); // 全選択/解除処理の後処理
+                }
             }
-        }
 
             // 処理の後、状態を更新
             function finishProcess(messageId) {
@@ -1169,7 +1192,7 @@ $(document).ready(function() {
                     });
                 }
 
-                updateSelectedStores(messageId);
+                updateSelectedStores();
                 updateSelectAllCheckboxes(messageId);
 
                 // オーバーレイを非表示にする
@@ -1196,7 +1219,7 @@ $(document).ready(function() {
                         item.checked = checked;
                     }
                     if ($(item).hasClass("shop-checkbox")) {
-                        syncCheckboxes($(item).attr("data-store-id"), checked, messageId);
+                        syncCheckboxes($(item).attr('data-store-id'), checked);
                     }
                     index++;
                 }
@@ -1219,7 +1242,7 @@ $(document).ready(function() {
                     $(`${shopSelectInputsSelector} #selectStoreCode-${messageId}`).prop('checked', false);
                 }
 
-                updateSelectedStores(messageId);
+                updateSelectedStores();
                 updateSelectAllCheckboxes(messageId);
 
                 // オーバーレイを非表示にする
@@ -1238,7 +1261,7 @@ $(document).ready(function() {
             // 全ての organization_shops[] チェックボックスをチェックする
             $(`${shopSelectInputsSelector} input[name="organization_shops[]"]`).each(function() {
                 $(this).prop('checked', true);
-                syncCheckboxes($(this).attr("data-store-id"), true, messageId);
+                syncCheckboxes($(this).attr('data-store-id'), true);
             });
             // 全ての親チェックボックスをチェックする
             $(`${shopSelectInputsSelector} input.org-checkbox`).each(function() {
@@ -1256,35 +1279,38 @@ $(document).ready(function() {
             // フォームクリア（全店ボタン）
             $(`#selectOrganizationAll-${messageId}`).val("selected");
             // 店舗選択、インポートボタンをもとに戻す
-            $(`${editShopInputsSelector} #checkStore-${messageId}`).val('店舗選択');
-            $(`${editShopInputsSelector} #importCsv-${messageId}`).val('インポート');
+            $(`${shopInputsSelector} #checkStore-${messageId}`).val('店舗選択');
+            $(`${shopInputsSelector} #importCsv-${messageId}`).val('インポート');
             // 選択中の店舗数を更新する
-            updateSelectedStores(messageId);
+            updateSelectedStores();
             // ボタンの見た目を変更する
             $(this).addClass("check-selected");
             // csvインポートボタン変更
-            $(`${editShopInputsSelector} #importCsv-${messageId}`).attr('data-target', `#editShopImportModal-${messageId}`);
+            $(`${shopInputsSelector} #importCsv-${messageId}`).attr('data-target', `#editShopImportModal-${messageId}`);
         });
 
 
         // 店舗選択モーダル 選択処理
-        $(document).on('click', `${editShopInputsSelector} input[id="checkStore-${messageId}"]`, function() {
+        $(document).on('click', `${shopInputsSelector} input[id="checkStore-${messageId}"]`, function() {
             // モーダルタイトル変更
-            var storeModalTitle = $(`${shopSelectInputsSelector} h4.modal-title`);
+            var storeModalTitle = $(`#editShopSelectModal-${messageId} h4.modal-title`);
             if (storeModalTitle.length) {
                 storeModalTitle.html('店舗を選択してください。');
             }
 
-            // 元のボタンのセレクターを取得して、新しいボタンのセレクターに変更
-            var selectCsvButton = $(`${shopSelectInputsSelector} #editCsvSelectBtn-${messageId}`);
-            if (selectCsvButton.length) {
-                selectCsvButton.attr("id", `${shopSelectInputsSelector} #editShopSelectBtn-${messageId}`);
+            // キャンセルボタン変更
+            $(`#editShopSelectModal-${messageId} #editShopCancelBtn-${messageId}`).show();
+            // 再インポートボタン変更
+            var csvImportButton = $(`#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`);
+            if (csvImportButton.length) {
+                csvImportButton.hide();
             }
-            // キャンセルボタン表示
-            $(`.editShopImportModal [data-message-id="${messageId}"] .editShopCancelBtn`).show();
-            // csv再インポートボタン削除
-            if ($(`${shopSelectInputsSelector} .editShopCsvImportBtn`).length) {
-                $(`${shopSelectInputsSelector} .modal-footer .editShopCsvImportBtn`).remove();
+
+            // 元のボタンのセレクターを取得
+            var selectCsvButton = $(`#editShopSelectModal-${messageId} #editCsvSelectBtn-${messageId}`);
+            // 選択ボタンのセレクターに変更
+            if (selectCsvButton) {
+                selectCsvButton.attr("id", `editShopSelectBtn-${messageId}`);
             }
 
             // キャンセルボタン処理
@@ -1354,7 +1380,7 @@ $(document).ready(function() {
             $(`${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`).prop('checked', allStore_flg);
 
             // 店舗選択中の処理
-            updateSelectedStores(messageId);
+            updateSelectedStores();
         });
 
         $(document).on('click', `.editShopSelectModal #editShopSelectBtn-${messageId}`, function() {
@@ -1362,24 +1388,17 @@ $(document).ready(function() {
             // チェックされているチェックボックスの値を変数に格納
             changeValues(messageId);
             // フォームクリア（店舗選択ボタン）
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] #selectStore-${messageId}`).val("selected");
+            $(`${shopInputsSelector} #selectStore-${messageId}`).val("selected");
             // インポートボタンをもとに戻す
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] #importCsv-${messageId}`).val('インポート');
+            $(`${shopInputsSelector} #importCsv-${messageId}`).val('インポート');
             // モーダルを閉じる
             $(`#editShopSelectModal-${messageId}`).modal("hide");
             // check-selected クラスを追加
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] #checkStore-${messageId}`).addClass("check-selected");
-            // csvインポートボタン変更
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] #importCsv-${messageId}`).attr('data-target', `#editShopSelectModal-${messageId}`);
+            $(`${shopInputsSelector} #checkStore-${messageId}`).addClass("check-selected");
             // 店舗選択中の処理
-            const selectedCountStore = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[name="organization_shops[]"]:checked`).length;
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] .check-store-list input[id="checkStore-${messageId}"]`).val(`店舗選択(${selectedCountStore}店舗)`);
+            const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
+            $(`${shopInputsSelector} .check-store-list input[id="checkStore-${messageId}"]`).val(`店舗選択(${selectedCountStore}店舗)`);
         });
-
-        // // モーダルが閉じられる際にchangeValuesを実行
-        // $(`#editShopSelectModal-${messageId}`).on('hidden.bs.modal', function () {
-        //     changeValues(messageId);
-        // });
 
         // 選択された値を変数に格納
         function changeValues(messageId) {
@@ -1391,70 +1410,74 @@ $(document).ready(function() {
         }
 
 
-        // インポート後のモーダルがまだ！！！
         // CSVインポートモーダル 選択処理
-        $(document).on('click', `${editShopImportSelector} input[id="importCsv-${messageId}"]`, function() {
-            // 元のボタンのセレクターを取得
-            var selectStoreButton = $(`${shopSelectInputsSelector} #editShopSelectBtn-${messageId}`);
-            // 新しいボタンのセレクターに変更
-            if (selectStoreButton) {
-                selectStoreButton.attr("id", `${shopSelectInputsSelector} #editCsvSelectBtn-${messageId}`);
+        $(document).on('click', `${shopInputsSelector} input[id="importCsv-${messageId}"]`, function() {
+            // モーダルタイトル変更
+            var storeModalTitle = $(`#editShopSelectModal-${messageId} h4.modal-title`);
+            if (storeModalTitle.length) {
+                storeModalTitle.html('以下店舗で取り込みました。<br /><small class="text-muted">変更がある場合は、「再取込」もしくは下記で選択しなおしてください</small>');
             }
-            // キャンセルボタン非表示
-            $(`${shopSelectInputsSelector} #editShopCancelBtn-${messageId}`).hide();
-            // csv再インポートボタン追加
-            if (!$(`${shopSelectInputsSelector} #editShopCsvImportBtn-${messageId}`).length) {
-                $(`${shopSelectInputsSelector} .modal-footer`).append(`<input type="button" class="btn btn-admin pull-left" id="editShopCsvImportBtn-${messageId}" data-toggle="modal" data-target="#editShopImportModal-${messageId}" value="再インポート">`);
+
+            // キャンセルボタン変更
+            $(`#editShopSelectModal-${messageId} #editShopCancelBtn-${messageId}`).hide();
+            // 再インポートボタン変更
+            $(`#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`).show();
+
+            // 元のボタンのセレクターを取得
+            var selectStoreButton = $(`#editShopSelectModal-${messageId} #editShopSelectBtn-${messageId}`);
+            // 選択ボタンのセレクターに変更
+            if (selectStoreButton) {
+                selectStoreButton.attr("id", `editCsvSelectBtn-${messageId}`);
             }
         });
 
         // インポートボタンのクリックイベント
-        $(document).on('click', `${shopSelectInputsSelector} #editShopCsvImportBtn-${messageId}`, function() {
+        $(document).on('click', `#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`, function() {
             // モーダルを閉じる
-            $(`#editShopImportModal-${messageId}`).modal("hide");
+            $(`#editShopSelectModal-${messageId}`).modal("hide");
         });
 
-        $(document).on('click', `${shopSelectInputsSelector} #editCsvSelectBtn-${messageId}`, function() {
+        $(document).on('click', `#editShopSelectModal-${messageId} #editCsvSelectBtn-${messageId}`, function() {
             removeSelectedClass(messageId);
             // チェックされているチェックボックスの値を変数に格納
             changeValues(messageId);
             // フォームクリア（CSVインポートボタン）
-            $(`${editShopInputsSelector} #selectCsv-${messageId}`).val("selected");
+            $(`${shopInputsSelector} #selectCsv-${messageId}`).val("selected");
             // モーダルを閉じる
-            $(`$editShopSelectModal-${messageId}`).modal("hide");
+            $(`#editShopSelectModal-${messageId}`).modal("hide");
             // 店舗選択ボタンをもとに戻す
-            $(`${editShopInputsSelector} #checkStore-${messageId}`).val('店舗選択');
+            $(`${shopInputsSelector} #checkStore-${messageId}`).val('店舗選択');
             // check-selected クラスを追加
-            $(`${editShopInputsSelector} #importCsv-${messageId}`).addClass("check-selected");
+            $(`${shopInputsSelector} #importCsv-${messageId}`).addClass("check-selected");
             // 店舗選択中の処理
             const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
-            $(`${editShopInputsSelector} .check-store-list input[id="importCsv-${messageId}"]`).val(`インポート(${selectedCountStore}店舗)`);
+            $(`${shopInputsSelector} .check-store-list input[id="importCsv-${messageId}"]`).val(`インポート(${selectedCountStore}店舗)`);
         });
 
-        $(document).on('click', `${editShopImportSelector} #editShopImportSelector-${messageId}`, function() {
+        $(document).on('click', `${shopInputsSelector} #editShopImportSelector-${messageId}`, function() {
             // モーダルを閉じる
             $(`#editShopSelectModal-${messageId}`).modal("hide");
 
             // ファイルを削除
-            $(`${editShopImportSelector} input[type="file"]`).val('');
+            $(`${shopImportSelector} input[type="file"]`).val('');
         });
 
         // 業務連絡店舗CSV アップロード
-        $(document).on('change' , `${editShopImportSelector} input[type=file]` , function(){
+        $(document).on('change' , `${shopImportSelector} input[type=file]` , function(){
             let changeTarget = $(this);
             changeFileName(changeTarget);
         });
 
         let newMessageJson;
-        $(document).on('change', `${editShopImportSelector} input[type="file"]`, function() {
+        $(document).on('change', `${shopImportSelector} input[type="file"]`, function() {
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
             let log_file_name = getNumericDateTime();
             const formData = new FormData();
             formData.append("file", $(this)[0].files[0]);
-            formData.append("organization1", $(`${editShopImportSelector} input[name="organization1"]`).val())
+            formData.append("organization1", $(`${shopImportSelector} input[name="organization1"]`).val())
             formData.append("log_file_name", log_file_name)
 
-            let button = $(`${editShopImportSelector} input[type="button"]`);
+            let button = $(`${shopImportSelector} input[type="button"]`);
 
             var labelForm = $(this).parent();
             var progress = labelForm.parent().find('.progress');
@@ -1466,7 +1489,7 @@ $(document).ready(function() {
 
             let progress_request = true;
 
-            $(`${editShopImportSelector} .modal-body .alert-danger`).remove();
+            $(`#editShopImportModal-${messageId} .modal-body .alert-danger`).remove();
 
             $.ajax({
                 url: '/admin/message/publish/csv/store/upload',
@@ -1485,12 +1508,12 @@ $(document).ready(function() {
                 newMessageJson = response.json;
 
             }).fail(function(jqXHR, textStatus, errorThrown){
-                $(`${editShopImportSelector} .modal-body`).prepend(`
+                $(`#editShopImportModal-${messageId} .modal-body`).prepend(`
                     <div class="alert alert-danger">
                         <ul></ul>
                     </div>
                 `);
-                const errorUl =  $(`${editShopImportSelector} .modal-body .alert ul`);
+                const errorUl =  $(`#editShopImportModal-${messageId} .modal-body .alert ul`);
                 progress_request = false;
                 if (jqXHR.status === 422) {
                     jqXHR.responseJSON.message?.forEach((errorMessage)=>{
@@ -1541,11 +1564,11 @@ $(document).ready(function() {
         });
 
         // 業務連絡店舗CSV インポート
-        $(document).on('click', `${editShopImportSelector} input[type="button"]`, function(e){
+        $(document).on('click', `${shopImportSelector} input[type="button"]`, function(e){
             e.preventDefault();
 
             if(!newMessageJson) {
-                $(`${editShopImportSelector} .modal-body`).prepend(`
+                $(`#editShopImportModal-${messageId} .modal-body`).prepend(`
                     <div class="alert alert-danger">
                         <ul>
                             <li>ファイルを添付してください</l>
@@ -1557,15 +1580,15 @@ $(document).ready(function() {
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
 
             const overlay = $('#overlay');
-            overlay.style.display = 'block';
+            overlay.show();
 
-            $(`${editShopImportSelector} .modal-body .alert-danger`).remove();
+            $(`#editShopImportModal-${messageId} .modal-body .alert-danger`).remove();
             $.ajax({
                 url: '/admin/message/publish/csv/store/import',
                 type: 'post',
                 data: JSON.stringify({
                     file_json: newMessageJson,
-                    organization1_id: $(`${editShopImportSelector} input[name="organization1"]`).val()
+                    organization1_id: $(`${shopImportSelector} input[name="organization1"]`).val()
                 }),
                 processData: false,
                 contentType: "application/json; charset=utf-8",
@@ -1575,12 +1598,113 @@ $(document).ready(function() {
 
             }).done(function(response){
                 // console.log(response);
-                overlay.style.display = 'none';
+                overlay.hide();
 
-                $(`#editShopSelectModal-${messageId}`).html(response);
+                $(`#editShopImportModal-${messageId}`).modal("hide");
+                $(`#editShopSelectModal-${messageId}`).modal("show");
 
                 var allOrg_flg = true;
                 var allStore_flg = true;
+
+                // CSVから返ってきたIDを取得
+                const csvStoreIds = response.csvStoreIds;
+
+                // organizationItemsの生成
+                let organizationItems = '';
+                response.organization_list.forEach((organization, index) => {
+                    let orgId, orgName, shopList;
+
+                    if (organization['organization5_name']) {
+                        org = 'org5';
+                        orgId = organization['organization5_id'];
+                        orgName = organization['organization5_name'];
+                        shopList = organization['organization5_shop_list'] || {};
+                    } else if (organization['organization4_name']) {
+                        org = 'org4';
+                        orgId = organization['organization4_id'];
+                        orgName = organization['organization4_name'];
+                        shopList = organization['organization4_shop_list'] || {};
+                    } else if (organization['organization3_name']) {
+                        org = 'org3';
+                        orgId = organization['organization3_id'];
+                        orgName = organization['organization3_name'];
+                        shopList = organization['organization3_shop_list'] || {};
+                    } else if (organization['organization2_name']) {
+                        org = 'org2';
+                        orgId = organization['organization2_id'];
+                        orgName = organization['organization2_name'];
+                        shopList = organization['organization2_shop_list'] || {};
+                    }
+
+                    if (orgId && orgName) {
+                        shopsHtml = Object.values(shopList).map(shop => `
+                            <li class="list-group-item">
+                                <div>
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
+                                        <input type="checkbox" name="organization_shops[]"
+                                            data-organization-id="${orgId}"
+                                            data-store-id="${shop.id}"
+                                            value="${shop.id}"
+                                            class="checkCommon mr8 shop-checkbox"
+                                            ${csvStoreIds.includes(shop.id) ? 'checked' : ''}
+                                            >
+                                            ${shop.shop_code} ${shop.display_name}
+                                    </label>
+                                </div>
+                            </li>
+                        `).join('');
+
+                        organizationItems += `
+                            <li class="list-group-item">
+                                <div>
+                                    <div>
+                                        <label style="font-weight: 500 !important; cursor: pointer;">
+                                            <input type="checkbox" name="organization[${org}][]"
+                                                data-organization-id="${orgId}"
+                                                value="${orgId}"
+                                                class="checkCommon mr8 org-checkbox"
+                                                ${csvStoreIds.includes(orgId) ? 'checked' : ''}
+                                                >
+                                            ${orgName}
+                                        </label>
+                                        <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
+                                            data-target="#storeCollapse${index}-${messageId}"
+                                            style="float: right; cursor: pointer;"></div>
+                                    </div>
+                                    <ul id="storeCollapse${index}-${messageId}" class="list-group mt-2 collapse">
+                                        ${shopsHtml}
+                                    </ul>
+                                </div>
+                            </li>
+                        `;
+                    }
+                });
+
+                // list-group-itemの3つ目以降の要素をすべて書き換え
+                $(`#editShopSelectModal-${messageId} #byOrganization-${messageId} .list-group-item`).slice(2).remove();
+                $(`#editShopSelectModal-${messageId} #byOrganization-${messageId} .list-group`).append(organizationItems);
+
+
+                // shopItemsの生成
+                shopItems = Array.isArray(response.all_shop_list) ? response.all_shop_list.map(shop => `
+                    <li class="list-group-item">
+                        <div>
+                            <label style="font-weight: 500 !important; cursor: pointer;">
+                                <input type="checkbox" name="shops_code[]"
+                                    data-store-id="${shop.shop_id}"
+                                    value="${shop.shop_id}"
+                                    class="checkCommon mr8 shop-checkbox"
+                                    ${csvStoreIds.includes(shop.shop_id) ? 'checked' : ''}
+                                    >
+                                    ${shop.shop_code} ${shop.display_name}
+                            </label>
+                        </div>
+                    </li>
+                `).join('') : '';
+
+                // list-group-itemの3つ目以降の要素をすべて書き換え
+                $(`#editShopSelectModal-${messageId} #byStoreCode-${messageId} .list-group-item`).slice(2).remove();
+                $(`#editShopSelectModal-${messageId} #byStoreCode-${messageId} .list-group`).append(shopItems);
 
                 // organization_shops のチェック状態を確認
                 $(`${shopSelectInputsSelector} input[name="organization_shops[]"]`).each(function() {
@@ -1599,16 +1723,28 @@ $(document).ready(function() {
                 $(`${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`).prop('checked', allStore_flg);
 
                 // 初期表示の更新
-                updateSelectedStores(messageId);
-                updateAllParentCheckboxes(messageId);
+                updateSelectedStores();
+                updateAllParentCheckboxes();
 
+                // モーダルタイトル変更
+                var storeModalTitle = $(`#editShopSelectModal-${messageId} h4.modal-title`);
+                if (storeModalTitle.length) {
+                    storeModalTitle.html('以下店舗で取り込みました。<br /><small class="text-muted">変更がある場合は、「再取込」もしくは下記で選択しなおしてください</small>');
+                }
+
+                // キャンセルボタン変更
+                $(`#editShopSelectModal-${messageId} #editShopCancelBtn-${messageId}`).hide();
+                // 再インポートボタン変更
+                $(`#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`).show();
+                // 選択ボタン変更
+                $(`#editShopSelectModal-${messageId} #editShopSelectBtn-${messageId}`).attr("id", `editCsvSelectBtn-${messageId}`);
                 // csvインポートボタン変更
-                $(`${editShopInputsSelector} #importCsv-${messageId}`).attr('data-target', `#editShopSelectModal-${messageId}`);
+                $(`${shopInputsSelector} #importCsv-${messageId}`).attr('data-target', `#editShopSelectModal-${messageId}`);
 
             }).fail(function(jqXHR, textStatus, errorThrown){
-                overlay.style.display = 'none';
+                overlay.hide();
 
-                $(`${editShopImportSelector} .modal-body`).prepend(`
+                $(`#editShopImportModal-${messageId} .modal-body`).prepend(`
                     <div class="alert alert-danger">
                         <ul></ul>
                     </div>
@@ -1618,13 +1754,13 @@ $(document).ready(function() {
                 jqXHR.responseJSON.error_message?.forEach((errorMessage)=>{
 
                     errorMessage['errors'].forEach((error) => {
-                        $(`${editShopImportSelector} .modal-body .alert ul`).append(
+                        $(`#editShopImportModal-${messageId} .modal-body .alert ul`).append(
                             `<li>${errorMessage['row']}行目：${error}</li>`
                         );
                     })
                 })
                 if(errorThrown) {
-                    $(`${editShopImportSelector} .modal-body .alert ul`).append(
+                    $(`#editShopImportModal-${messageId} .modal-body .alert ul`).append(
                         `<li>エラーが発生しました</li>`
                     );
                 }
@@ -1633,10 +1769,10 @@ $(document).ready(function() {
 
 
         // 業務連絡店舗CSV エクスポート
-        $(document).on('click', `${editShopInputsSelector} #exportCsv-${messageId}`, function() {
+        $(document).on('click', `${shopInputsSelector} #exportCsv-${messageId}`, function() {
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
             const formData = new FormData();
-            formData.append("message_id", $(`${editShopInputsSelector} .check-store-list input[name="message_id"]`).val());
+            formData.append("message_id", $(`${shopInputsSelector} .check-store-list input[name="message_id"]`).val());
 
             $.ajax({
                 url: '/admin/message/publish/csv/store/export',
@@ -1699,59 +1835,59 @@ $(document).ready(function() {
 
 
         // 店舗選択中の処理
-        function updateSelectedStores(messageId) {
-            const selectedCount = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[name="organization_shops[]"]:checked`).length;
-            $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] .storeSelected`).text(`${selectedCount}店舗選択中`);
+        function updateSelectedStores() {
+            const selectedCount = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
+            $(`${shopSelectInputsSelector} .storeSelected`).text(`${selectedCount}店舗選択中`);
         }
 
         // チェックボックスの連携を設定
-        function syncCheckboxes(storeId, checked, messageId) {
-            document.querySelectorAll(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[data-store-id="${storeId}"]`).forEach(function(checkbox) {
+        function syncCheckboxes(storeId, checked) {
+            document.querySelectorAll(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).forEach(function(checkbox) {
                 checkbox.checked = checked;
             });
 
             // 各親組織のチェックボックスを更新
-            const organizationId = document.querySelector(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[data-store-id="${storeId}"]`).getAttribute('data-organization-id');
+            const organizationId = document.querySelector(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).getAttribute('data-organization-id');
             if (organizationId) {
-                updateParentCheckbox(messageId, organizationId);
+                updateParentCheckbox(organizationId);
             }
         }
 
         // 親チェックボックスの状態を更新
-        function updateParentCheckbox(messageId, organizationId) {
-            const parentCheckbox = document.querySelector(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[data-organization-id="${organizationId}"]`);
+        function updateParentCheckbox(organizationId) {
+            const parentCheckbox = document.querySelector(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"]`);
             if (parentCheckbox) {
-                const childCheckboxes = document.querySelectorAll(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input[data-organization-id="${organizationId}"].shop-checkbox`);
+                const childCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"].shop-checkbox`);
                 const allChecked = Array.from(childCheckboxes).every(checkbox => checkbox.checked);
                 parentCheckbox.checked = allChecked;
             }
         }
 
         // 全ての親チェックボックスの状態を更新
-        function updateAllParentCheckboxes(messageId) {
-            const parentCheckboxes = document.querySelectorAll(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] input.org-checkbox`);
-            parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(messageId, parentCheckbox.getAttribute('data-organization-id')));
+        function updateAllParentCheckboxes() {
+            const parentCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input.org-checkbox`);
+            parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id')));
         }
 
         // 全選択/選択解除のチェックボックスの状態を更新
         function updateSelectAllCheckboxes(messageId) {
             // 組織タブのチェックボックスの状態を更新
-            const organizationCheckboxes = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] #byOrganization-${messageId} input.shop-checkbox`);
-            const selectAllOrganizationCheckbox = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] #selectAllOrganization-${messageId}`);
+            const organizationCheckboxes = $(`${shopSelectInputsSelector} #byOrganization-${messageId} input.shop-checkbox`);
+            const selectAllOrganizationCheckbox = $(`${shopSelectInputsSelector} #selectAllOrganization-${messageId}`);
             const allCheckedOrganization = Array.from(organizationCheckboxes).every(checkbox => checkbox.checked);
-            selectAllOrganizationCheckbox.checked = allCheckedOrganization;
+            selectAllOrganizationCheckbox[0].checked = allCheckedOrganization;
 
             // 店舗コード順タブのチェックボックスの状態を更新
-            const storeCodeCheckboxes = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] #byStoreCode-${messageId} input.shop-checkbox`);
-            const selectAllStoreCodeCheckbox = $(`.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"] #selectAllStoreCode-${messageId}`);
+            const storeCodeCheckboxes = $(`${shopSelectInputsSelector} #byStoreCode-${messageId} input.shop-checkbox`);
+            const selectAllStoreCodeCheckbox = $(`${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`);
             const allCheckedStoreCode = Array.from(storeCodeCheckboxes).every(checkbox => checkbox.checked);
-            selectAllStoreCodeCheckbox.checked = allCheckedStoreCode;
+            selectAllStoreCodeCheckbox[0].checked = allCheckedStoreCode;
         }
 
         // check-selected クラスを削除と選択された値をクリア
         function removeSelectedClass(messageId) {
             // すべてのボタンから check-selected クラスを削除
-            $(`.editShopModal .editShopInputs[data-message-id="${messageId}"] .check-store-list .btn`).removeClass("check-selected");
+            $(`${shopInputsSelector} .check-store-list .btn`).removeClass("check-selected");
 
             // 選択された値をクリア
             if (!selectedValuesByMessageId[mode]) {
@@ -1764,6 +1900,11 @@ $(document).ready(function() {
                 org2: [],
                 shops: []
             };
+
+            // フォームクリア（全店ボタン）
+            $(`#selectOrganizationAll-${messageId}`).val("");
+            $(`${shopInputsSelector} #selectStore-${messageId}`).val("");
+            $(`${shopInputsSelector} #selectCsv-${messageId}`).val("");
         }
 
         // ファイル名を変更
@@ -1857,6 +1998,10 @@ $(document).ready(function() {
 
     // 日付をフォーマット
     function formatDateWithDay(dateString) {
+        // dateStringがnullまたはundefinedの場合はnullを返す
+        if (!dateString) {
+            return '';
+        }
         const date = new Date(dateString);
         const days = ["日", "月", "火", "水", "木", "金", "土"];
         const year = date.getFullYear();
@@ -1882,7 +2027,7 @@ $(document).ready(function() {
                     <p class="messageNewSaveBtn btn btn-admin" data-message-id="${newMessageId}">保存</p>
                     <p class="messageNewDeleteBtn btn btn-admin" data-message-id="${newMessageId}">取消</p>
                 </td>
-                <td class="shop-id">
+                <td class="shop-id" data-message-number="${messageNumber}">
                     ${messageNumber}
                     ${targetRollList.map(targetRoll => `
                         <input type="hidden" name="target_roll[]" value="${targetRoll.id}">
@@ -2060,7 +2205,13 @@ $(document).ready(function() {
 
                 // バリデーション
                 let errors = [];
-                if (!title) errors.push("タイトルは必須項目です");
+                if (!title) {
+                    errors.push("タイトルは必須項目です");
+                } else if (title.length > 20) {
+                    errors.push("タイトルは20文字以内で入力してください");
+                }
+                if (fileName.length === 0) errors.push("ファイルを添付してください");
+                if (organizationShops.length === 0) errors.push("対象店舗を選択してください");
                 if (errors.length > 0) {
                     overlay.hide();
                     let errorContainer = $('#error-messages');
@@ -2069,9 +2220,10 @@ $(document).ready(function() {
                         $('.pagenation-top').after(errorContainer);
                     }
                     errorContainer.empty();
-                    errors.forEach(error => {
-                        errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
-                    });
+                    // エラーメッセージをまとめて追加
+                    const errorList = errors.map(error => `<div class="text-danger">No.${messageNumber} : ${error}</div>`).join('');
+                    errorContainer.append(errorList);
+
                     return;
                 }
 
@@ -2191,11 +2343,13 @@ $(document).ready(function() {
 
         const csrfToken = $('meta[name="csrf-token"]').attr("content");
         const messagesData = [];
+        let errors = [];
 
         // 編集または追加された行をループ
         $('tr.new-modified, tr.edit-modified').each(function() {
             const row = $(this);
             let messageId = row.attr('data-message_id');
+            let messageNumber = row.attr('data-message_number');
 
             // 各データを収集
             let categoryId = row.find('select[name="category_id"]').val() || null;
@@ -2235,21 +2389,13 @@ $(document).ready(function() {
             };
 
             // バリデーション
-            let errors = [];
-            if (!title) errors.push(`メッセージID ${messageId} のタイトルは必須項目です`);
-            if (errors.length > 0) {
-                overlay.hide();
-                let errorContainer = $('#error-messages');
-                if (!errorContainer.length) {
-                    errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-                    $('.pagenation-top').after(errorContainer);
-                }
-                errorContainer.empty();
-                errors.forEach(error => {
-                    errorContainer.append(`<div class="text-danger">${error}</div>`);
-                });
-                return;
+            if (!title) {
+                errors.push(`No.${messageId} : タイトルは必須項目です`);
+            } else if (title.length > 20) {
+                errors.push(`No.${messageId} : タイトルは20文字以内で入力してください`);
             }
+            if (fileName.length === 0) errors.push(`No.${messageId} : ファイルを添付してください`);
+            if (organizationShops.length === 0) errors.push(`No.${messageId} : 対象店舗を選択してください`);
 
             // メッセージデータを配列に追加
             if (row.hasClass('new-modified')) {
@@ -2294,6 +2440,27 @@ $(document).ready(function() {
             }
         });
 
+        // メッセージが20件以上の場合、送信を防ぐ
+        if (messagesData.length > 20) {
+            errors.push("メッセージは20件以内で送信してください");
+        }
+
+        // エラーがある場合、表示して処理を中止
+        if (errors.length > 0) {
+            overlay.hide();
+            let errorContainer = $('#error-messages');
+            if (!errorContainer.length) {
+                errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                $('.pagenation-top').after(errorContainer);
+            }
+            errorContainer.empty();
+            // エラーメッセージをまとめて追加
+            const errorList = errors.map(error => `<div class="text-danger">${error}</div>`).join('');
+            errorContainer.append(errorList);
+
+            return;
+        }
+
         // 一括登録のリクエストを送信
         $.ajax({
             url: `/admin/message/publish/messageAllSaveData`,
@@ -2336,252 +2503,6 @@ $(document).ready(function() {
             }
         });
     });
-
-
-
-    // // 一括登録ボタン処理 すべて登録できるようなったら登録するようにしないといけないな～
-    // $('#messageAllSaveBtn').on('click', function() {
-    //     const overlay = $('#overlay');
-    //     overlay.show(); // オーバーレイを表示
-
-    //     const csrfToken = $('meta[name="csrf-token"]').attr("content");
-    //     const formData = new FormData();
-
-
-    //     // 追加された行をループ
-    //     if ($('tr.new-modified').length > 0) {
-    //         $('tr.new-modified').each(function() {
-    //             const row = $(this);
-    //             let newMessageId = row.attr('data-message_id');
-
-    //             // 各データを収集
-    //             let categoryId = row.find('select[name="category_id"]').val() || null;
-    //             let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
-    //             let title = row.find('input[name="title"]').val() || null;
-    //             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
-    //             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
-    //             startDatetime = cleanAndFormatDate(startDatetime);
-    //             endDatetime = cleanAndFormatDate(endDatetime);
-    //             let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let fileName = (fileDataByMessageId['new'][newMessageId]?.fileNames || []).map(name => name || null);
-    //             let filePath = (fileDataByMessageId['new'][newMessageId]?.filePaths || []).map(path => path || null);
-    //             let joinFlg = (fileDataByMessageId['new'][newMessageId]?.joinFlags || []).map(flg => flg || null);
-    //             let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let brand = row.find('select[name="brand[]"]').val() === 'all'
-    //                 ? brandList.map(brand => brand.id)
-    //                 : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let organization = [
-    //                 selectedValuesByMessageId['new'][newMessageId]?.org5 || null,
-    //                 selectedValuesByMessageId['new'][newMessageId]?.org4 || null,
-    //                 selectedValuesByMessageId['new'][newMessageId]?.org3 || null,
-    //                 selectedValuesByMessageId['new'][newMessageId]?.org2 || null
-    //             ].map(org => org || null);
-    //             let organizationShops = (selectedValuesByMessageId['new'][newMessageId]?.shops || []).map(shop => shop || null);
-    //             let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
-    //             let selectOrganization = {
-    //                 all: selectOrganizationAll === 'selected' ? 'selected' : null,
-    //                 store: selectOrganizationAll !== 'selected' ? 'selected' : null,
-    //                 csv: null
-    //             };
-
-    //             // バリデーション
-    //             let errors = [];
-    //             if (!title) errors.push("タイトルは必須項目です");
-    //             if (errors.length > 0) {
-    //                 overlay.hide();
-    //                 let errorContainer = $('#error-messages');
-    //                 if (!errorContainer.length) {
-    //                     errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-    //                     $('.pagenation-top').after(errorContainer);
-    //                 }
-    //                 errorContainer.empty();
-    //                 errors.forEach(error => {
-    //                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
-    //                 });
-    //                 return;
-    //             }
-
-    //             // 各データをformDataに追加
-    //             formData.append('org1Id', org1Id);
-    //             formData.append('emergency_flg', emergencyFlg);
-    //             formData.append('category_id', categoryId);
-    //             formData.append('title', title);
-    //             formData.append('start_datetime', startDatetime);
-    //             formData.append('end_datetime', endDatetime);
-    //             tags.forEach(tag => formData.append('tag_name[]', tag));
-    //             fileName.forEach(name => formData.append('file_name[]', name));
-    //             filePath.forEach(path => formData.append('file_path[]', path));
-    //             joinFlg.forEach(flg => formData.append('join_flg[]', flg));
-    //             targetRoll.forEach(roll => formData.append('target_roll[]', roll));
-    //             brand.forEach(b => formData.append('brand[]', b));
-    //             organization.forEach(org => formData.append('organization[]', org));
-    //             formData.append('organization_shops', organizationShops);
-    //             Object.keys(selectOrganization).forEach(key => {
-    //                 formData.append(`select_organization[${key}]`, selectOrganization[key]);
-    //             });
-
-    //             // 保存のリクエストを送信
-    //             $.ajax({
-    //                 url: `/admin/message/publish/messageStoreData`,
-    //                 type: "post",
-    //                 data: formData,
-    //                 processData: false,
-    //                 contentType: false,
-    //                 headers: {
-    //                     "X-CSRF-TOKEN": csrfToken,
-    //                 },
-    //                 success: function(response) {
-    //                     window.location.href = "/admin/message/publish/";
-    //                 },
-    //                 error: function(jqXHR, textStatus, errorThrown) {
-    //                     overlay.hide(); // オーバーレイを非表示にする
-
-    //                     try {
-    //                         const response = JSON.parse(jqXHR.responseText);
-    //                         const errors = response.errors;
-
-    //                         let errorContainer = $('#error-messages');
-    //                         if (!errorContainer.length) {
-    //                             errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-    //                             $('.pagenation-top').after(errorContainer);
-    //                         }
-
-    //                         errorContainer.empty();
-
-    //                         for (const field in errors) {
-    //                             if (errors.hasOwnProperty(field)) {
-    //                                 errors[field].forEach(message => {
-    //                                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
-    //                                 });
-    //                             }
-    //                         }
-    //                     } catch (e) {
-    //                         console.error("Failed to parse response:", e);
-    //                     }
-    //                 }
-    //             });
-    //         });
-
-
-    //     // 編集された行をループ
-    //     } else if ($('tr.edit-modified').length > 0) {
-    //         $('tr.edit-modified').each(function() {
-    //             const row = $(this);
-    //             let messageId = row.attr('data-message_id');
-
-    //             // 各データを収集
-    //             let messageNumber = row.find('.shop-id').text() || null;
-    //             let categoryId = row.find('select[name="category_id"]').val() || null;
-    //             let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
-    //             let title = row.find('input[name="title"]').val() || null;
-    //             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
-    //             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
-    //             let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let contentId = (fileDataByMessageId['edit'][messageId]?.contentIds || []).map(id => id || null);
-    //             let fileName = (fileDataByMessageId['edit'][messageId]?.fileNames || []).map(name => name || null);
-    //             let filePath = (fileDataByMessageId['edit'][messageId]?.filePaths || []).map(path => path || null);
-    //             let joinFlg = (fileDataByMessageId['edit'][messageId]?.joinFlags || []).map(flg => flg || null);
-    //             let targetRoll = row.find('input[name="target_roll[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let brand = row.find('select[name="brand[]"]').val() === 'all'
-    //                 ? brandList.map(brand => brand.id)
-    //                 : row.find('select[name="brand[]"]').map(function() { return $(this).val(); }).get() || null;
-    //             let organization = [
-    //                 selectedValuesByMessageId['edit'][messageId]?.org5 || null,
-    //                 selectedValuesByMessageId['edit'][messageId]?.org4 || null,
-    //                 selectedValuesByMessageId['edit'][messageId]?.org3 || null,
-    //                 selectedValuesByMessageId['edit'][messageId]?.org2 || null
-    //             ].map(org => org || null);
-    //             let organizationShops = (selectedValuesByMessageId['edit'][messageId]?.shops || []).map(shop => shop || null);
-    //             let selectOrganizationAll = row.find('input[name="select_organization[all]"]').val() || null;
-    //             let selectOrganization = {
-    //                 all: selectOrganizationAll === 'selected' ? 'selected' : null,
-    //                 store: selectOrganizationAll !== 'selected' ? 'selected' : null,
-    //                 csv: null
-    //             };
-
-    //             // バリデーション
-    //             let errors = [];
-    //             if (!title) errors.push("タイトルは必須項目です");
-    //             if (errors.length > 0) {
-    //                 overlay.hide();
-    //                 let errorContainer = $('#error-messages');
-    //                 if (!errorContainer.length) {
-    //                     errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-    //                     $('.pagenation-top').after(errorContainer);
-    //                 }
-    //                 errorContainer.empty();
-    //                 errors.forEach(error => {
-    //                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
-    //                 });
-    //                 return;
-    //             }
-
-    //             // 各データをformDataに追加
-    //             formData.append('message_id', messageId);
-    //             formData.append('emergency_flg', emergencyFlg);
-    //             formData.append('category_id', categoryId);
-    //             formData.append('title', title);
-    //             formData.append('start_datetime', startDatetime);
-    //             formData.append('end_datetime', endDatetime);
-    //             tags.forEach(tag => formData.append('tag_name[]', tag));
-    //             contentId.forEach(id => formData.append('content_id[]', id));
-    //             fileName.forEach(name => formData.append('file_name[]', name));
-    //             filePath.forEach(path => formData.append('file_path[]', path));
-    //             joinFlg.forEach(flg => formData.append('join_flg[]', flg));
-    //             targetRoll.forEach(roll => formData.append('target_roll[]', roll));
-    //             brand.forEach(b => formData.append('brand[]', b));
-    //             organization.forEach(org => formData.append('organization[]', org));
-    //             formData.append('organization_shops', organizationShops);
-    //             Object.keys(selectOrganization).forEach(key => {
-    //                 formData.append(`select_organization[${key}]`, selectOrganization[key]);
-    //             });
-
-    //             // 保存のリクエストを送信
-    //             $.ajax({
-    //                 url: `/admin/message/publish/messageUpdateData`,
-    //                 type: "post",
-    //                 data: formData,
-    //                 processData: false,
-    //                 contentType: false,
-    //                 headers: {
-    //                     "X-CSRF-TOKEN": csrfToken,
-    //                 },
-    //                 success: function(response) {
-    //                     window.location.href = "/admin/message/publish/";
-    //                 },
-    //                 error: function(jqXHR, textStatus, errorThrown) {
-    //                     console.error("Error:", errorThrown);
-    //                     console.log("Response Text:", jqXHR.responseText);
-
-    //                     overlay.hide(); // オーバーレイを非表示にする
-
-    //                     try {
-    //                         const response = JSON.parse(jqXHR.responseText);
-    //                         const errors = response.errors;
-
-    //                         let errorContainer = $('#error-messages');
-    //                         if (!errorContainer.length) {
-    //                             errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
-    //                             $('.pagenation-top').after(errorContainer);
-    //                         }
-
-    //                         errorContainer.empty();
-
-    //                         for (const field in errors) {
-    //                             if (errors.hasOwnProperty(field)) {
-    //                                 errors[field].forEach(message => {
-    //                                     errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
-    //                                 });
-    //                             }
-    //                         }
-    //                     } catch (e) {
-    //                         console.error("Failed to parse response:", e);
-    //                     }
-    //                 }
-    //             });
-    //         });
-    //     }
-    // });
 
 
 
@@ -2888,6 +2809,7 @@ $(document).ready(function() {
                         messageEditSaveBtn.remove();
                         messageEditDeleteBtn.remove();
                         $(messageEditBtn).show();
+                        $(messageEditBtn).css('pointer-events', '');
                     }
                 });
             }
@@ -2904,7 +2826,7 @@ $(document).ready(function() {
                     const row = $(`tr[data-message_id="${messageId}"]`);
 
                     // 各データを収集
-                    let messageNumber = row.find('.shop-id').text() || null;
+                    let messageNumber = row.attr('data-message-number') || null;
                     let categoryId = row.find('select[name="category_id"]').val() || null;
                     let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
                     let title = row.find('input[name="title"]').val() || null;
@@ -2935,7 +2857,13 @@ $(document).ready(function() {
 
                     // バリデーション
                     let errors = [];
-                    if (!title) errors.push("タイトルは必須項目です");
+                    if (!title) {
+                        errors.push("タイトルは必須項目です");
+                    } else if (title.length > 20) {
+                        errors.push("タイトルは20文字以内で入力してください");
+                    }
+                    if (fileName.length === 0) errors.push("ファイルを添付してください");
+                    if (organizationShops.length === 0) errors.push("対象店舗を選択してください");
                     if (errors.length > 0) {
                         overlay.hide();
                         let errorContainer = $('#error-messages');
@@ -2944,9 +2872,10 @@ $(document).ready(function() {
                             $('.pagenation-top').after(errorContainer);
                         }
                         errorContainer.empty();
-                        errors.forEach(error => {
-                            errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${error}</div>`);
-                        });
+                        // エラーメッセージをまとめて追加
+                        const errorList = errors.map(error => `<div class="text-danger">No.${messageNumber} : ${error}</div>`).join('');
+                        errorContainer.append(errorList);
+
                         return;
                     }
 
