@@ -144,7 +144,7 @@
                     <!-- 更新日時の表示 -->
                     <div>
                         <span>最終更新日時:
-                            @if ($message_list->isNotEmpty() && $message_list->last()->last_updated)
+                            @if ($message_list->isNotEmpty())
                                 {{ \Carbon\Carbon::parse($message_list->last()->last_updated)->format('Y/m/d H:i:s') }}
                             @else
                                 更新なし
