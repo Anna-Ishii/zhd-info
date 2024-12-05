@@ -2108,7 +2108,10 @@ $(document).ready(function() {
                 </td>
                 <td class="label-colum-danger">
                     <div class="emergency-flg-input-group" style="background-color: #ffffff00; color: black;">
-                        <input type="checkbox" name="emergency_flg" class="checkCommon mr8" style="cursor: pointer;"><span>重要</span>
+                        <label style="cursor: pointer;">
+                            <input type="checkbox" name="emergency_flg" class="checkCommon mr8" style="cursor: pointer;">
+                            <span>重要</span>
+                        </label>
                     </div>
                 </td>
                 <td class="label-category">
@@ -2685,9 +2688,11 @@ $(document).ready(function() {
                 const emergencyFlgChecked = message.emergency_flg;
                 const emergencyFlgInputGroupHtml = `
                     <div class="emergency-flg-input-group" style="background-color: #ffffff00; color: black;">
-                        <input type="checkbox" name="emergency_flg" class="checkCommon mr8" style="cursor: pointer;"
-                            ${emergencyFlgChecked ? 'checked' : ''}
-                            ><span>重要</span>
+                        <label style="cursor: pointer;">
+                            <input type="checkbox" name="emergency_flg" class="checkCommon mr8" style="cursor: pointer;"
+                                ${emergencyFlgChecked ? 'checked' : ''}
+                                ><span>重要</span>
+                        </label>
                     </div>
                 `;
                 if (emergencyFlgText) {

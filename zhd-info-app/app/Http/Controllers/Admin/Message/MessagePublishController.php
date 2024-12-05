@@ -529,7 +529,7 @@ class MessagePublishController extends Controller
     // 一覧画面追加の組織一覧を取得する
     public function messageNewData($organization1_id = null)
     {
-        if ($organization1_id === null) {
+        if ($organization1_id == null) {
             return response()->json(['error' => 'Organization ID is required'], 400);
         }
 
@@ -1819,7 +1819,7 @@ class MessagePublishController extends Controller
 
         $organization = $this->getOrganizationForm($organization1);
 
-        if ($organization1 === 2) {
+        if ($organization1 == 2) {
             $shop_list = $this->getShopForm($organization1);
         }
 
