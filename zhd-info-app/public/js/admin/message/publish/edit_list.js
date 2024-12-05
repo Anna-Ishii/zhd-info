@@ -2743,6 +2743,7 @@ $(document).ready(function() {
                     $(titleText).after(titleInputGroupHtml);
                 } else {
                     const titleColumn = row.find('.label-title').get(0);
+                    $(titleColumn).empty();
                     $(titleColumn).append(titleInputGroupHtml);
                 }
 
