@@ -2302,8 +2302,8 @@ $(document).ready(function() {
                 let errors = [];
                 if (!title) {
                     errors.push("タイトルは必須項目です");
-                } else if (title.length > 20) {
-                    errors.push("タイトルは20文字以内で入力してください");
+                } else if (title.length > 255) {
+                    errors.push("タイトルは255文字以内で入力してください");
                 }
                 if (!fileName.length) errors.push("ファイルを添付してください");
                 if (!organizationShops.length) errors.push("対象店舗を選択してください");
@@ -2485,8 +2485,8 @@ $(document).ready(function() {
             // バリデーション
             if (!title) {
                 errors.push(`No.${allMessageNumber} : タイトルは必須項目です`);
-            } else if (title.length > 20) {
-                errors.push(`No.${allMessageNumber} : タイトルは20文字以内で入力してください`);
+            } else if (title.length > 255) {
+                errors.push(`No.${allMessageNumber} : タイトルは255文字以内で入力してください`);
             }
             if (!fileName.length) errors.push(`No.${allMessageNumber} : ファイルを添付してください`);
             if (!organizationShops.length) errors.push(`No.${allMessageNumber} : 対象店舗を選択してください`);
@@ -3001,8 +3001,8 @@ $(document).ready(function() {
                     let errors = [];
                     if (!title) {
                         errors.push("タイトルは必須項目です");
-                    } else if (title.length > 20) {
-                        errors.push("タイトルは20文字以内で入力してください");
+                    } else if (title.length > 255) {
+                        errors.push("タイトルは255文字以内で入力してください");
                     }
                     if (!fileName.length) errors.push("ファイルを添付してください");
                     if (!organizationShops.length) errors.push("対象店舗を選択してください");
