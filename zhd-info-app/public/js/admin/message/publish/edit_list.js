@@ -2612,13 +2612,7 @@ $(document).ready(function() {
     $('.messageEditBtn').each(function() {
         $(this).on('click', function() {
             const overlay = $('#overlay');
-            if (overlay.length) {
-                console.log('Overlay element found');
-                overlay.show(); // オーバーレイを表示
-                console.log('Overlay should be visible now');
-            } else {
-                console.error('Overlay element not found');
-            }
+            overlay.show(); // オーバーレイを表示
 
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
