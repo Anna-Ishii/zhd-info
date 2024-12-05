@@ -623,6 +623,14 @@ table.dataTable thead .sorting:after {
     background-color: #f4a300;
 }
 
+.new-modified {
+    background-color: #f4a300;
+}
+
+.edit-modified {
+    background-color: #f4a300;
+}
+
 .admin-header {
     font-size: 13px;
 }
