@@ -59,14 +59,11 @@ class MessagePublishController extends Controller
         $category_list = MessageCategory::all();
         $organization1_list = $admin->getOrganization1();
 
-        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
-
         // request
         $category_id = $request->input('category');
         $status = PublishStatus::tryFrom($request->input('status'));
         $q = $request->input('q');
         $organization1_id = $request->input('brand', $organization1_list[0]->id);
-        $brand_list = Brand::where('organization1_id', $organization1_id)->get();
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
 
@@ -272,9 +269,7 @@ class MessagePublishController extends Controller
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
-            'brand_list' => $brand_list,
             'message_list' => $message_list,
-            'target_roll_list' => $target_roll_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
         ]);
@@ -538,8 +533,6 @@ class MessagePublishController extends Controller
             return response()->json(['error' => 'Organization ID is required'], 400);
         }
 
-        $message_number = Message::where('organization1_id', $organization1_id)->max('number');
-
         $category_list = MessageCategory::all();
 
         $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
@@ -631,7 +624,6 @@ class MessagePublishController extends Controller
         }, $all_shops);
 
         return response()->json([
-            'message_number' => $message_number,
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
@@ -1088,8 +1080,6 @@ class MessagePublishController extends Controller
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
 
-        $message_number = Message::where('organization1_id', $org1_id)->max('number');
-
         $category_list = MessageCategory::all();
 
         $message_tag_ids = DB::table('message_tags')->where('message_id', $message_id)->pluck('tag_id')->toArray();
@@ -1253,7 +1243,6 @@ class MessagePublishController extends Controller
             'message' => $message,
             'message_contents' => $message_contents,
             'category_list' => $category_list,
-            'message_number' => $message_number,
             'target_tag' => $target_tag,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
@@ -1582,8 +1571,8 @@ class MessagePublishController extends Controller
         $start_datetime_input = $request->input('start_datetime');
         $end_datetime_input = $request->input('end_datetime');
 
-        $start_datetime = $start_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
-        $end_datetime = $end_datetime_input === 'null' ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+        $start_datetime = $start_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
 
         $tag_name = array_map(function($item) {
             return $item === 'null' ? null : $item;
@@ -1652,7 +1641,7 @@ class MessagePublishController extends Controller
             $operation = $messageData['operation'] ?? null;
 
             try {
-                if ($operation === 'new') {
+                if ($operation == 'new') {
                     $request = Request::create('', 'POST', $messageData);
                     $storeRequest = PublishStoreRequest::createFromBase($request);
                     $storeRequest->setContainer(app());

@@ -6,8 +6,6 @@ $(document).ready(function() {
     // 店舗選択された値を管理
     const selectedValuesByMessageId = {};
 
-    // No
-    let messageNumber = 0;
     // カテゴリー
     let categoryList = [];
     // 対象者
@@ -22,10 +20,11 @@ $(document).ready(function() {
     let shopDataFetched = false;
 
 
+
     // 業連ファイル編集モーダル
     function initializeFileModal(messageId, message, messageContents, mode) {
         // モーダルが既に存在するか確認し、存在しない場合は生成
-        if (!document.getElementById(`editTitleFileModal-${messageId}`)) {
+        if (!$(`#editTitleFileModal-${messageId}`).length) {
             let fileInputsHtml = '';
 
             if (mode === 'new'){
@@ -38,7 +37,7 @@ $(document).ready(function() {
                                     <span class="fileName" style="text-align: center;">
                                         ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能
                                     </span>
-                                    <input type="file" name="file[]" accept=".pdf" multiple="multiple" data-cache="active">
+                                    <input type="file" name="file[]" accept=".pdf" multiple="multiple">
                                     <input type="hidden" name="file_name[]" value="">
                                     <input type="hidden" name="file_path[]" value="">
                                     <input type="hidden" name="join_flg[]" value="">
@@ -116,6 +115,7 @@ $(document).ready(function() {
             }
 
             const modalHtml = `
+                <!-- モーダル：業連ファイル編集 -->
                 <div id="editTitleFileModal-${messageId}" class="modal fade editTitleFileModal" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -126,7 +126,7 @@ $(document).ready(function() {
                                 <form id="editForm-${messageId}" class="form-horizontal">
                                     <input type="hidden" name="id" value="${messageId}">
                                     <div class="form-group" style="max-height: 400px; overflow-y: auto; overflow-x: hidden; margin-left: 0; margin-right: 0;">
-                                        <div class="fileInputs" data-message-id="${messageId}">
+                                        <div class="fileInputs">
                                             ${fileInputsHtml}
                                         </div>
                                     </div>
@@ -135,7 +135,7 @@ $(document).ready(function() {
                                             <span class="text-danger required">*</span>：必須項目
                                         </div>
                                         <div class="col-sm-2 col-sm-offset-6 control-label">
-                                            <input type="button" id="fileImportBtn-${messageId}" class="btn btn-admin" value="設定">
+                                            <input type="button" id="fileImportBtn-${messageId}" class="btn btn-admin" value="設定" disabled>
                                         </div>
                                     </div>
                                 </form>
@@ -144,12 +144,14 @@ $(document).ready(function() {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            $('body').append(modalHtml);
         }
 
+
         // 結合PDFファイルモーダル
-        if (!document.getElementById(`editJoinFileModal-${messageId}`)) {
+        if (!$(`#editJoinFileModal-${messageId}`).length) {
             const modalHtml = `
+                <!-- モーダル：結合PDFファイル -->
                 <div class="modal fade" id="editJoinFileModal-${messageId}" tabindex="-1">
                     <div class="modal-dialog">
                         <div class="modal-content">
@@ -166,12 +168,179 @@ $(document).ready(function() {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            $('body').append(modalHtml);
         }
 
 
         // 業連ファイル編集処理
-        const editTitleFileInputsSelector = `.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`;
+        const editTitleFileInputsSelector = `#editTitleFileModal-${messageId} .fileInputs`;
+        const editJoinFileModalSelector = `#editJoinFileModal-${messageId}`;
+
+
+        // 追加ファイル欄の追加
+        function addFileInputAdd() {
+            // 変数を初期化
+            let file_name = "";
+            let file_path = "";
+            let join_flg = "";
+
+            // 既存の添付ラベルの数を取得
+            let currentLabelCount = $(`${editTitleFileInputsSelector} .file-input-container .control-label:contains('添付')`).length + 1;
+
+            $(`${editTitleFileInputsSelector}`).append(`
+                <div class="file-input-container">
+                    <div class="row">
+                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="" required>
+                        <label class="col-sm-2 control-label">添付${currentLabelCount}</label>
+                        <div class="col-sm-8">
+                            <label class="inputFile form-control">
+                                <span class="fileName" style="text-align: center;">${file_name ? file_name : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能"}</span>
+                                <input type="file" name="file[]" accept=".pdf" multiple="multiple">
+                                <input type="hidden" name="file_name[]" value="${file_name}">
+                                <input type="hidden" name="file_path[]" value="${file_path}">
+                                <input type="hidden" name="join_flg[]" value="${join_flg}">
+                            </label>
+                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
+                    </div>
+                </div>
+            `);
+        }
+
+        // 結合ボタンを追加
+        function addJoinFileBtn(messageId) {
+            $(`${editTitleFileInputsSelector}`).append(`
+                <div class="col-sm-11 join-file-btn">
+                    <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
+                        <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
+                        <input type="button" class="btn btn-admin joinFile" id="joinFileId-${messageId}" data-toggle="modal" data-target="#editJoinFileModal-${messageId}" value="ファイルの結合">
+                    </label>
+                </div>
+            `);
+        }
+
+        // 「結合中」メッセージを更新する関数の呼び出し
+        function updateModalFooterMessage() {
+            var selectedJoinFiles = [];
+
+            $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
+                var value = $(this).val();
+                selectedJoinFiles.push(value);
+            });
+
+            var checkedCount = selectedJoinFiles.filter(value => value === "join").length;
+
+            var modalFooterMessage = $(`${editTitleFileInputsSelector} .join-file-btn .inputFile p`);
+            if (modalFooterMessage.length) {
+                if (checkedCount >= 2) {
+                    modalFooterMessage.text(`${checkedCount}ファイルを結合します。`).show();
+                } else {
+                    modalFooterMessage.text("").hide();
+                }
+            }
+        }
+
+
+        // 選択されたファイルのカウントを更新する関数
+        function updateJoinFileCount(messageId) {
+            var checkedCount = $(`${editJoinFileModalSelector} #fileCheckboxes-${messageId} input[type="checkbox"]:checked`).length;
+
+            // 既存のメッセージを削除
+            $(`${editJoinFileModalSelector} .modal-footer p`).remove();
+
+            // メッセージを追加
+            if (checkedCount >= 2) {
+                $(`${editJoinFileModalSelector} .modal-footer`).append(`<p style="float: left;">${checkedCount}ファイルを結合します。よろしいでしょうか？</p>`);
+            } else if (checkedCount == 0) {
+                $(`${editJoinFileModalSelector} .modal-footer`).append(`<p style="float: left;">結合するファイルが選択されていません。</p>`);
+            }
+
+            // ボタンの有効/無効を設定
+            var modalFooterJoinFileBtn = $(`${editJoinFileModalSelector} .modal-footer #joinFileBtn-${messageId}`);
+            if (modalFooterJoinFileBtn.length) {
+                if (checkedCount === 1) {
+                    modalFooterJoinFileBtn.prop('disabled', true);
+                } else {
+                    modalFooterJoinFileBtn.prop('disabled', false);
+                }
+            }
+        }
+
+
+        // "join" フラグがあるか
+        function updateJoinFileLabel(messageId) {
+            // "join" フラグが1つ以下の場合に文言を変更
+            var joinFlagCount = $(`${editTitleFileInputsSelector} [name='join_flg[]']`).filter(function() {
+                return $(this).val() === "join";
+            }).length;
+
+            if (joinFlagCount <= 1) {
+                // "join" フラグが1つの場合に他の "join_flg" を "single" に変更
+                if (joinFlagCount === 1) {
+                    $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
+                        if ($(this).val() === "join") {
+                            $(this).val("single");
+                            // 結合ラベルを非表示
+                            $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
+                        }
+                    });
+                }
+
+                $(`${editTitleFileInputsSelector} .inputFile #joinFileId-${messageId}`).val("ファイルの結合");
+            }
+
+            // "join" フラグが一つでもあるかチェックして文言を変更
+            var hasJoinFlag = joinFlagCount > 1;
+
+            if (hasJoinFlag) {
+                $(`${editTitleFileInputsSelector} .inputFile #joinFileId-${messageId}`).val("結合の修正");
+            }
+        }
+
+
+        // 業連ファイルを保存
+        function saveFileData(messageId) {
+            // フォームクリア（ファイル設定ボタン）
+            $(`#titleFileEditBtn-${messageId}`).addClass("check-selected");
+
+            const contentIds = [];
+            const fileNames = [];
+            const filePaths = [];
+            const joinFlags = [];
+
+            if (!fileDataByMessageId[mode]) {
+                fileDataByMessageId[mode] = {};
+            }
+
+            // 各ファイルの情報を取得して配列に保存
+            $(`${editTitleFileInputsSelector} [name='content_id[]']`).each(function() {
+                contentIds.push($(this).val());
+            });
+
+            $(`${editTitleFileInputsSelector} [name='file_name[]']`).each(function() {
+                fileNames.push($(this).val());
+            });
+
+            $(`${editTitleFileInputsSelector} [name='file_path[]']`).each(function() {
+                filePaths.push($(this).val());
+            });
+
+            $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
+                joinFlags.push($(this).val());
+            });
+
+            // message_idをキーとしてファイル情報を保存
+            fileDataByMessageId[mode][messageId] = {
+                contentIds: contentIds,
+                fileNames: fileNames,
+                filePaths: filePaths,
+                joinFlags: joinFlags
+            };
+        }
+
 
         // 新規モードの場合は業連ファイルの初期化
         if(mode === 'new'){
@@ -191,21 +360,136 @@ $(document).ready(function() {
                 joinFlags: joinFlags
             };
 
+            // 結合モーダルの初期状態で結合ボタンを無効化
+            $(`${editJoinFileModalSelector} .modal-footer #joinFileBtn-${messageId}`).prop('disabled', true);
+
         // 編集モードの場合はボタンの有効/無効を設定し、メッセージを表示
         } else if(mode === 'edit'){
-            addFileInputAdd(messageId);
+            addFileInputAdd();
             addJoinFileBtn(messageId);
             // 「結合中」メッセージを更新する関数の呼び出し
-            updateModalFooterMessage(messageId);
+            updateModalFooterMessage();
             // 初期状態でメッセージを表示
             updateJoinFileCount(messageId);
             // "join" フラグがあるか
             updateJoinFileLabel(messageId);
             // 業連ファイルを保存
             saveFileData(messageId);
+
+            // ファイル設定ボタンを有効化
+            $(`#editTitleFileModal-${messageId} #fileImportBtn-${messageId}`).prop('disabled', false);
         }
 
-        $(document).on("change", `${editTitleFileInputsSelector} input[type="file"]`, function () {
+
+        // 新しいファイル入力欄を追加
+        function addNewFileInput(content_name, content_url, join_flg) {
+            // 既存の添付ラベルの数を取得
+            let currentLabelCount = $(`${editTitleFileInputsSelector} .file-input-container .control-label:contains('添付')`).length + 1;
+
+            $(`${editTitleFileInputsSelector}`).append(`
+                <div class="file-input-container">
+                    <div class="row">
+                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="" required>
+                        <label class="col-sm-2 control-label">添付${currentLabelCount}</label>
+                        <div class="col-sm-8">
+                            <label class="inputFile form-control">
+                                <span class="fileName">${content_name}</span>
+                                <input type="file" name="file" accept=".pdf" data-cache="active">
+                                <input type="hidden" name="file_name[]" value="${content_name}">
+                                <input type="hidden" name="file_path[]" value="${content_url}">
+                                <input type="hidden" name="join_flg[]" value="${join_flg}">
+                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
+                            </label>
+                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+                        <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
+                    </div>
+                </div>
+            `);
+        }
+
+
+        // 削除ボタン追加
+        function addDeleteButton(fileInput) {
+            let deleteButton = document.createElement("button");
+            deleteButton.type = "button";
+            deleteButton.className = "btn btn-sm delete-btn";
+            deleteButton.style.backgroundColor = "#eee";
+            deleteButton.style.color = "#000";
+            deleteButton.style.position = "absolute";
+            deleteButton.style.top = "0";
+            deleteButton.style.right = "0";
+            deleteButton.textContent = "削除";
+            fileInput.parentNode.appendChild(deleteButton);
+        }
+
+
+        // アップロード完了後の処理
+        function handleResponse(response, fileName, filePath, joinFile, dataCache, messageId) {
+            // responseが複数ファイルに対応している場合
+            response.content_names.forEach((content_name, i) => {
+                let content_url = response.content_urls[i];
+                if (i === 0) {
+                    fileName.val(content_name);
+                    filePath.val(content_url);
+                    joinFile.val("single");
+                } else {
+                    addNewFileInput(content_name, content_url, join_flg = "single");
+                }
+            });
+
+            if (!dataCache) {
+                let fileInputs = document.querySelector(`${editTitleFileInputsSelector}`);
+                let fileInput = fileInputs.querySelector('input[name="file[]"]');
+
+                // 単一ファイル欄に加工
+                if (fileInput) {
+                    fileInput.removeAttribute("multiple");
+                    fileInput.name = "file";
+                    // 削除ボタン追加
+                    addDeleteButton(fileInput);
+                }
+
+                // 上限を超えていない場合、かつファイル数が上限に達していない場合のみファイル入力欄を追加
+                let existingFilesCount = $(`${editTitleFileInputsSelector} .file-input-container`).length;
+                let joinFileBtnAdd = $(`${editTitleFileInputsSelector} .join-file-btn`);
+
+                let maxFiles = 20; // 上限数を設定（20）
+                if (existingFilesCount < maxFiles) {
+                    if (joinFileBtnAdd) {
+                        joinFileBtnAdd.remove();
+                    }
+                    addFileInputAdd();
+                    addJoinFileBtn(messageId);
+
+                } else {
+                    if (joinFileBtnAdd) {
+                        joinFileBtnAdd.remove();
+                    }
+                    addJoinFileBtn(messageId);
+                }
+
+            // PDFファイルの上書き
+            } else {
+                $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
+                    if ($(this).val() === "single") {
+                        // 結合ラベルを非表示
+                        $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
+                    }
+                });
+
+                // "join" フラグがあるか
+                updateJoinFileLabel(messageId);
+            }
+
+            // 「結合中」メッセージを更新する関数の呼び出し
+            updateModalFooterMessage();
+        }
+
+        // PDFファイル処理
+        $(document).on(`change.editTitleFileModal-${messageId}`, `${editTitleFileInputsSelector} input[type="file"]`, function () {
             let _this = $(this);
             const csrfToken = $('meta[name="csrf-token"]').attr("content");
             let fileList = _this[0].files;
@@ -271,9 +555,12 @@ $(document).ready(function() {
                 },
             })
             .done(function (response) {
+                // console.log(response);
                 labelForm.parent().find(".text-danger").remove();
                 handleResponse(response, fileName, filePath, joinFile, dataCache, messageId);
                 _this.attr('data-cache', 'active');
+                // ファイル設定ボタンを有効化
+                $(`#editTitleFileModal-${messageId} #fileImportBtn-${messageId}`).prop('disabled', false);
             })
             .fail(function (jqXHR, textStatus, errorThrown) {
                 labelForm.parent().find(".text-danger").remove();
@@ -290,8 +577,19 @@ $(document).ready(function() {
         });
 
 
+        // 添付ラベルの番号を振り直す処理
+        function renumberSendLabels() {
+            $(`${editTitleFileInputsSelector} .file-input-container .control-label:contains('添付'), ${editTitleFileInputsSelector} .file-input-container .control-label:contains('業連')`).each(function(index) {
+                if (index === 0) {
+                    $(this).html('業連<span class="text-danger required">*</span>');
+                } else {
+                    $(this).text(`添付${index}`);
+                }
+            });
+        }
+
         // 削除ボタンのクリックイベント
-        $(document).on("click", `${editTitleFileInputsSelector} .delete-btn`, function () {
+        $(document).on(`click.editTitleFileModal-${messageId}`, `${editTitleFileInputsSelector} .delete-btn`, function () {
             let joinFileBtnAdd = $(`${editTitleFileInputsSelector} .join-file-btn`);
             let dataCacheCount = $(`${editTitleFileInputsSelector} [data-cache]`).length;
             let maxFiles = 20; // 上限数を設定（20）
@@ -301,13 +599,13 @@ $(document).ready(function() {
                 $(this).closest('.file-input-container').remove();
 
                 // 添付ラベルの番号を振り直す
-                renumberSendLabels(messageId);
+                renumberSendLabels();
 
             } else {
                 if (dataCacheCount === maxFiles) {
                     $(this).closest('.file-input-container').remove();
                     // 添付ラベルの番号を振り直す
-                    renumberSendLabels(messageId);
+                    renumberSendLabels();
 
                     if (joinFileBtnAdd.length) {
                         joinFileBtnAdd.remove();
@@ -316,23 +614,29 @@ $(document).ready(function() {
                     addJoinFileBtn(messageId);
                 }
             }
+            if(dataCacheCount === 1) {
+                // ファイル設定ボタンを無効化
+                $(`#editTitleFileModal-${messageId} #fileImportBtn-${messageId}`).prop('disabled', true);
+            }
             if (dataCacheCount === 0) {
                 if (joinFileBtnAdd.length) {
                     joinFileBtnAdd.remove();
                 }
-                addFileInputAdd(messageId);
+                addFileInputAdd();
                 addJoinFileBtn(messageId);
             }
 
+
             // 「結合中」メッセージを更新する関数の呼び出し
-            updateModalFooterMessage(messageId);
+            updateModalFooterMessage();
 
             // "join" フラグがあるか
             updateJoinFileLabel(messageId);
         });
 
+
         // ファイルの結合ボタン処理
-        $(document).on("click", `${editTitleFileInputsSelector} #joinFileId-${messageId}`, function () {
+        $(document).on(`click.editTitleFileModal-${messageId}`, `${editTitleFileInputsSelector} #joinFileId-${messageId}`, function () {
             var selectedFiles = [];
             var selectedFilePaths = [];
             var selectedJoinFiles = [];
@@ -355,8 +659,8 @@ $(document).ready(function() {
                 selectedJoinFiles.push(value);
             });
 
-            var $modalBody = $(`#editJoinFileModal-${messageId} #fileCheckboxes-${messageId}`);
-            var $modalFooter = $(`#editJoinFileModal-${messageId} .modal-footer`);
+            var $modalBody = $(`${editJoinFileModalSelector} #fileCheckboxes-${messageId}`);
+            var $modalFooter = $(`${editJoinFileModalSelector} .modal-footer`);
             $modalBody.empty();
             $modalFooter.find('p').remove();
 
@@ -381,12 +685,11 @@ $(document).ready(function() {
             }
         });
 
-
         // 結合ボタン処理
-        $(document).on('click', `#editJoinFileModal-${messageId} #joinFileBtn-${messageId}`, function() {
+        $(document).on(`click.editJoinFileModal-${messageId}`, `${editJoinFileModalSelector} #joinFileBtn-${messageId}`, function() {
             // 結合モーダルのチェックされたファイルパスを取得
             var checkedFileValues = [];
-            $(`#editJoinFileModal-${messageId} #fileCheckboxes-${messageId} input[type="checkbox"]:checked`).each(function() {
+            $(`${editJoinFileModalSelector} #fileCheckboxes-${messageId} input[type="checkbox"]:checked`).each(function() {
                 checkedFileValues.push($(this).val());
             });
 
@@ -427,309 +730,30 @@ $(document).ready(function() {
             // "join" フラグがあるか
             updateJoinFileLabel(messageId);
 
-            $(`#editJoinFileModal-${messageId}`).modal("hide");
+            $(`${editJoinFileModalSelector}`).modal("hide");
         });
 
         // 結合モーダルのチェックボックス変更イベント処理
-        $(document).on('change', `#editJoinFileModal-${messageId} #fileCheckboxes-${messageId} input[type="checkbox"]`, function() {
+        $(document).on(`change.editJoinFileModal-${messageId}`, `${editJoinFileModalSelector} #fileCheckboxes-${messageId} input[type="checkbox"]`, function() {
             // 選択されたファイルのカウントを更新する関数
             updateJoinFileCount(messageId);
         });
 
 
         // 業連ファイル設定ボタンのクリックイベント
-        $(document).on('click', `#fileImportBtn-${messageId}`, function() {
+        $(document).on(`click.editTitleFileModal-${messageId}`, `.editTitleFileModal #fileImportBtn-${messageId}`, function() {
             saveFileData(messageId);
 
             // モーダルを閉じる
             $(`#editTitleFileModal-${messageId}`).modal("hide");
         });
-
-
-        // アップロード完了後の処理
-        function handleResponse(response, fileName, filePath, joinFile, dataCache, messageId) {
-            // responseが複数ファイルに対応している場合
-            response.content_names.forEach((content_name, i) => {
-                let content_url = response.content_urls[i];
-                if (i === 0) {
-                    fileName.val(content_name);
-                    filePath.val(content_url);
-                    joinFile.val("single");
-                } else {
-                    addNewFileInput(content_name, content_url, join_flg = "single", messageId);
-                }
-            });
-
-            if (!dataCache) {
-                let fileInputs = document.querySelector(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`);
-                let fileInput = fileInputs.querySelector('input[name="file[]"]');
-
-                // 単一ファイル欄に加工
-                if (fileInput) {
-                    fileInput.removeAttribute("multiple");
-                    fileInput.name = "file";
-                    // 削除ボタン追加
-                    addDeleteButton(fileInput);
-                }
-
-                // 上限を超えていない場合、かつファイル数が上限に達していない場合のみファイル入力欄を追加
-                let existingFilesCount = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .file-input-container`).length;
-                let joinFileBtnAdd = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .join-file-btn`);
-
-                let maxFiles = 20; // 上限数を設定（20）
-                if (existingFilesCount < maxFiles) {
-                    if (joinFileBtnAdd) {
-                        joinFileBtnAdd.remove();
-                    }
-                    addFileInputAdd(messageId);
-                    addJoinFileBtn(messageId);
-
-                } else {
-                    if (joinFileBtnAdd) {
-                        joinFileBtnAdd.remove();
-                    }
-                    addJoinFileBtn(messageId);
-                }
-
-            // PDFファイルの上書き
-            } else {
-                $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).each(function() {
-                    if ($(this).val() === "single") {
-                        // 結合ラベルを非表示
-                        $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
-                    }
-                });
-
-                // "join" フラグがあるか
-                updateJoinFileLabel(messageId);
-            }
-
-            // 「結合中」メッセージを更新する関数の呼び出し
-            updateModalFooterMessage(messageId);
-        }
-
-        // 削除ボタン追加
-        function addDeleteButton(fileInput) {
-            let deleteButton = document.createElement("button");
-            deleteButton.type = "button";
-            deleteButton.className = "btn btn-sm delete-btn";
-            deleteButton.style.backgroundColor = "#eee";
-            deleteButton.style.color = "#000";
-            deleteButton.style.position = "absolute";
-            deleteButton.style.top = "0";
-            deleteButton.style.right = "0";
-            deleteButton.textContent = "削除";
-            fileInput.parentNode.appendChild(deleteButton);
-        }
-
-        // 新しいファイル入力欄を追加
-        function addNewFileInput(content_name, content_url, join_flg, messageId) {
-            // 既存の添付ラベルの数を取得
-            let currentLabelCount = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .file-input-container .control-label:contains('添付')`).length + 1;
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`).append(`
-                <div class="file-input-container">
-                    <div class="row">
-                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="" required>
-                        <label class="col-sm-2 control-label">添付${currentLabelCount}</label>
-                        <div class="col-sm-8">
-                            <label class="inputFile form-control">
-                                <span class="fileName">${content_name}</span>
-                                <input type="file" name="file" accept=".pdf" data-cache="active">
-                                <input type="hidden" name="file_name[]" value="${content_name}">
-                                <input type="hidden" name="file_path[]" value="${content_url}">
-                                <input type="hidden" name="join_flg[]" value="${join_flg}">
-                                <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
-                            </label>
-                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
-                    </div>
-                </div>
-            `);
-        }
-
-        // 結合ボタンを追加
-        function addJoinFileBtn(messageId) {
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`).append(`
-                <div class="col-sm-11 join-file-btn">
-                    <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
-                        <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
-                        <input type="button" class="btn btn-admin joinFile" id="joinFileId-${messageId}" data-toggle="modal" data-target="#editJoinFileModal-${messageId}" value="ファイルの結合">
-                    </label>
-                </div>
-            `);
-        }
-
-        // 追加ファイル欄の追加
-        function addFileInputAdd(messageId) {
-            // 変数を初期化
-            let file_name = "";
-            let file_path = "";
-            let join_flg = "";
-
-            // 既存の添付ラベルの数を取得
-            let currentLabelCount = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .file-input-container .control-label:contains('添付')`).length + 1;
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"]`).append(`
-                <div class="file-input-container">
-                    <div class="row">
-                        <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="" required>
-                        <label class="col-sm-2 control-label">添付${currentLabelCount}</label>
-                        <div class="col-sm-8">
-                            <label class="inputFile form-control">
-                                <span class="fileName" style="text-align: center;">${file_name ? file_name : "ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能"}</span>
-                                <input type="file" name="file[]" accept=".pdf" multiple="multiple">
-                                <input type="hidden" name="file_name[]" value="${file_name}">
-                                <input type="hidden" name="file_path[]" value="${file_path}">
-                                <input type="hidden" name="join_flg[]" value="${join_flg}">
-                            </label>
-                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: 0%"></div>
-                            </div>
-                        </div>
-                        <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
-                    </div>
-                </div>
-            `);
-        }
-
-        // 添付ラベルの番号を振り直す処理
-        function renumberSendLabels(messageId) {
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .file-input-container .control-label:contains('添付'), .editTitleFileModal .fileInputs[data-message-id="${messageId}"] .file-input-container .control-label:contains('業連')`).each(function(index) {
-                if (index === 0) {
-                    $(this).html('業連<span class="text-danger required">*</span>');
-                } else {
-                    $(this).text(`添付${index}`);
-                }
-            });
-        }
-
-
-        // 選択されたファイルのカウントを更新する関数
-        function updateJoinFileCount(messageId) {
-            var checkedCount = $(`#editJoinFileModal-${messageId} #fileCheckboxes-${messageId} input[type="checkbox"]:checked`).length;
-
-            // 既存のメッセージを削除
-            $(`#editJoinFileModal-${messageId} .modal-footer p`).remove();
-
-            // メッセージを追加
-            if (checkedCount >= 2) {
-                $(`#editJoinFileModal-${messageId} .modal-footer`).append(`<p style="float: left;">${checkedCount}ファイルを結合します。よろしいでしょうか？</p>`);
-            } else if (checkedCount == 0) {
-                $(`#editJoinFileModal-${messageId} .modal-footer`).append(`<p style="float: left;">結合するファイルが選択されていません。</p>`);
-            }
-
-            // ボタンの有効/無効を設定
-            var modalFooterJoinFileBtn = $(`#editJoinFileModal-${messageId} .modal-footer #joinFileBtn-${messageId}`);
-            if (modalFooterJoinFileBtn.length) {
-                if (checkedCount === 1) {
-                    modalFooterJoinFileBtn.prop('disabled', true);
-                } else {
-                    modalFooterJoinFileBtn.prop('disabled', false);
-                }
-            }
-        }
-
-        // 「結合中」メッセージを更新する関数の呼び出し
-        function updateModalFooterMessage(messageId) {
-            var selectedJoinFiles = [];
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).each(function() {
-                var value = $(this).val();
-                selectedJoinFiles.push(value);
-            });
-
-            var checkedCount = selectedJoinFiles.filter(value => value === "join").length;
-
-            var modalFooterMessage = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .join-file-btn .inputFile p`);
-            if (modalFooterMessage.length) {
-                if (checkedCount >= 2) {
-                    modalFooterMessage.text(`${checkedCount}ファイルを結合します。`).show();
-                } else {
-                    modalFooterMessage.text("").hide();
-                }
-            }
-        }
-
-        // "join" フラグがあるか
-        function updateJoinFileLabel(messageId) {
-            // "join" フラグが1つ以下の場合に文言を変更
-            var joinFlagCount = $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).filter(function() {
-                return $(this).val() === "join";
-            }).length;
-
-            if (joinFlagCount <= 1) {
-                // "join" フラグが1つの場合に他の "join_flg" を "single" に変更
-                if (joinFlagCount === 1) {
-                    $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).each(function() {
-                        if ($(this).val() === "join") {
-                            $(this).val("single");
-                            // 結合ラベルを非表示
-                            $(this).closest('.row').find("label[style*='padding-top: 10px']").hide();
-                        }
-                    });
-                }
-
-                $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .inputFile #joinFileId-${messageId}`).val("ファイルの結合");
-            }
-
-            // "join" フラグが一つでもあるかチェックして文言を変更
-            var hasJoinFlag = joinFlagCount > 1;
-
-            if (hasJoinFlag) {
-                $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] .inputFile #joinFileId-${messageId}`).val("結合の修正");
-            }
-        }
-
-        // 業連ファイルを保存
-        function saveFileData(messageId) {
-            // フォームクリア（ファイル設定ボタン）
-            $(`#titleFileEditBtn-${messageId}`).addClass("check-selected");
-
-            const contentIds = [];
-            const fileNames = [];
-            const filePaths = [];
-            const joinFlags = [];
-
-            if (!fileDataByMessageId[mode]) {
-                fileDataByMessageId[mode] = {};
-            }
-
-            // 各ファイルの情報を取得して配列に保存
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='content_id[]']`).each(function() {
-                contentIds.push($(this).val());
-            });
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='file_name[]']`).each(function() {
-                fileNames.push($(this).val());
-            });
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='file_path[]']`).each(function() {
-                filePaths.push($(this).val());
-            });
-
-            $(`.editTitleFileModal .fileInputs[data-message-id="${messageId}"] [name='join_flg[]']`).each(function() {
-                joinFlags.push($(this).val());
-            });
-
-            // message_idをキーとしてファイル情報を保存
-            fileDataByMessageId[mode][messageId] = {
-                contentIds: contentIds,
-                fileNames: fileNames,
-                filePaths: filePaths,
-                joinFlags: joinFlags
-            };
-        }
     }
 
 
 
     // 店舗編集モーダル
     function initializeShopModal(messageId, org1Id, organizationList, allShopList, targetOrg, mode) {
-        if (!document.getElementById(`editShopModal-${messageId}`)) {
+        if (!$(`#editShopModal-${messageId}`).length) {
             let checkSelectedClass = '';
             let selectStoreValue = '';
 
@@ -752,7 +776,7 @@ $(document).ready(function() {
                                     <input type="hidden" name="id" id="messageId-${messageId}">
 
                                     <div class="form-group">
-                                        <div class="editShopInputs" data-message-id="${messageId}">
+                                        <div class="editShopInputs">
                                             <label class="col-sm-2 control-label">対象店舗<span class="text-danger required">*</span></label>
                                             <div class="col-sm-10 checkArea">
                                                 <div class="check-store-list mb8 text-left">
@@ -770,6 +794,7 @@ $(document).ready(function() {
 
                                                     <label class="mr16">
                                                         <input type="button" class="btn btn-admin" id="exportCsv-${messageId}" value="エクスポート">
+                                                        <input type="hidden" name="organization1_id" value="${org1Id}">
                                                         <input type="hidden" name="message_id" value="${messageId}">
                                                     </label>
                                                 </div>
@@ -792,11 +817,11 @@ $(document).ready(function() {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            $('body').append(modalHtml);
         }
 
         // 店舗選択モーダル
-        if (!document.getElementById(`editShopSelectModal-${messageId}`)) {
+        if (!$(`#editShopSelectModal-${messageId}`).length) {
             let organizationItems = '';
 
             organizationList.forEach((organization, index) => {
@@ -892,7 +917,7 @@ $(document).ready(function() {
                             <div class="modal-header">
                                 <h4 class="modal-title">店舗を選択してください。</h4>
                             </div>
-                            <div class="modal-body shopSelectInputs" data-message-id="${messageId}">
+                            <div class="modal-body shopSelectInputs">
                                 <div class="storeSelected mb-1">0店舗選択中</div>
                                 <ul class="nav nav-tabs" id="myTab-${messageId}" role="tablist" style="margin-left: 30px; margin-right: 30px;">
                                     <li class="nav-item active" role="presentation">
@@ -956,11 +981,11 @@ $(document).ready(function() {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            $('body').append(modalHtml);
         }
 
         // 業務連絡csvインポート
-        if (!document.getElementById(`editShopImportModal-${messageId}`)) {
+        if (!$(`#editShopImportModal-${messageId}`).length) {
             const modalHtml = `
                 <div id="editShopImportModal-${messageId}" class="modal fade editShopImportModal" tabindex="-1">
                     <div class="modal-dialog">
@@ -969,7 +994,7 @@ $(document).ready(function() {
                                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                                 <h4 class="modal-title">店舗選択csvインポート</h4>
                             </div>
-                            <div class="modal-body editShopImport" data-message-id="${messageId}">
+                            <div class="modal-body editShopImport">
                                 <div>
                                     csvデータを店舗選択モーダルに表示します
                                 </div>
@@ -1004,7 +1029,7 @@ $(document).ready(function() {
                     </div>
                 </div>
             `;
-            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            $('body').append(modalHtml);
         }
 
 
@@ -1020,9 +1045,57 @@ $(document).ready(function() {
             shops: []
         };
 
-        const shopInputsSelector = `.editShopModal .editShopInputs[data-message-id="${messageId}"]`;
-        const shopSelectInputsSelector = `.editShopSelectModal .shopSelectInputs[data-message-id="${messageId}"]`;
-        const shopImportSelector = `.editShopImportModal .editShopImport[data-message-id="${messageId}"]`;
+        const shopInputsSelector = `#editShopModal-${messageId} .editShopInputs`;
+        const shopSelectInputsSelector = `#editShopSelectModal-${messageId} .shopSelectInputs`;
+        const shopImportSelector = `#editShopImportModal-${messageId} .editShopImport`;
+
+
+        // 店舗選択中の処理
+        function updateSelectedStores() {
+            const selectedCount = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
+            $(`${shopSelectInputsSelector} .storeSelected`).text(`${selectedCount}店舗選択中`);
+        }
+
+        // 親チェックボックスの状態を更新
+        function updateParentCheckbox(organizationId) {
+            const parentCheckbox = document.querySelector(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"]`);
+            if (parentCheckbox) {
+                const childCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"].shop-checkbox`);
+                const allChecked = Array.from(childCheckboxes).every(checkbox => checkbox.checked);
+                parentCheckbox.checked = allChecked;
+            }
+        }
+
+        // 全ての親チェックボックスの状態を更新
+        function updateAllParentCheckboxes() {
+            const parentCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input.org-checkbox`);
+            parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id')));
+        }
+
+        // 全選択/選択解除のチェックボックスの状態を更新
+        function updateSelectAllCheckboxes(messageId) {
+            // 組織タブのチェックボックスの状態を更新
+            const organizationCheckboxes = $(`${shopSelectInputsSelector} #byOrganization-${messageId} input.shop-checkbox`);
+            const selectAllOrganizationCheckbox = $(`${shopSelectInputsSelector} #selectAllOrganization-${messageId}`);
+            const allCheckedOrganization = Array.from(organizationCheckboxes).every(checkbox => checkbox.checked);
+            selectAllOrganizationCheckbox[0].checked = allCheckedOrganization;
+
+            // 店舗コード順タブのチェックボックスの状態を更新
+            const storeCodeCheckboxes = $(`${shopSelectInputsSelector} #byStoreCode-${messageId} input.shop-checkbox`);
+            const selectAllStoreCodeCheckbox = $(`${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`);
+            const allCheckedStoreCode = Array.from(storeCodeCheckboxes).every(checkbox => checkbox.checked);
+            selectAllStoreCodeCheckbox[0].checked = allCheckedStoreCode;
+        }
+
+        // 選択された値を変数に格納
+        function changeValues(messageId) {
+            selectedValuesByMessageId[mode][messageId].org5 = $(`${shopSelectInputsSelector} input[name="organization[org5][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org4 = $(`${shopSelectInputsSelector} input[name="organization[org4][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org3 = $(`${shopSelectInputsSelector} input[name="organization[org3][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].org2 = $(`${shopSelectInputsSelector} input[name="organization[org2][]"]:checked`).map(function() { return this.value; }).get();
+            selectedValuesByMessageId[mode][messageId].shops = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).map(function() { return this.value; }).get();
+        }
+
 
         // 初期表示の更新
         updateSelectedStores();
@@ -1034,19 +1107,34 @@ $(document).ready(function() {
             changeValues(messageId);
         }
 
+
+        // 店舗選択中の処理
         if ($(`${shopInputsSelector} #selectStore-${messageId}`).val() === "selected") {
-            // 店舗選択中の処理
             const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
             $(`${shopInputsSelector} #checkStore-${messageId}`).val(`店舗選択(${selectedCountStore}店舗)`);
         }
+        // インポート選択中の処理
         if ($(`${shopInputsSelector} #selectCsv-${messageId}`).val() === "selected") {
-            // インポート選択中の処理
             const selectedCountStore = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
             $(`${shopInputsSelector} #importCsv-${messageId}`).val(`インポート(${selectedCountStore}店舗)`);
         }
 
+
+        // チェックボックスの連携を設定
+        function syncCheckboxes(storeId, checked) {
+            document.querySelectorAll(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).forEach(function(checkbox) {
+                checkbox.checked = checked;
+            });
+
+            // 各親組織のチェックボックスを更新
+            const organizationId = document.querySelector(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).getAttribute('data-organization-id');
+            if (organizationId) {
+                updateParentCheckbox(organizationId);
+            }
+        }
+
         // チェックボックスの変更イベントリスナーを追加
-        $(document).on('change', `${shopSelectInputsSelector} input[name="organization_shops[]"], ${shopSelectInputsSelector} input[name="shops_code[]"]`, function() {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} input[name="organization_shops[]"], ${shopSelectInputsSelector} input[name="shops_code[]"]`, function() {
             syncCheckboxes($(this).attr('data-store-id'), this.checked);
             updateSelectedStores();
             if ($(this).hasClass('shop-checkbox')) {
@@ -1056,7 +1144,7 @@ $(document).ready(function() {
         });
 
         // 親チェックボックスの変更イベントリスナーを追加
-        $(document).on('change', `${shopSelectInputsSelector} input.org-checkbox`, function() {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} input.org-checkbox`, function() {
             const organizationId = $(this).attr('data-organization-id');
             const checked = this.checked;
             $(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"].shop-checkbox`).each(function() {
@@ -1078,8 +1166,9 @@ $(document).ready(function() {
             updateSelectAllCheckboxes(messageId);
         });
 
+
         // 組織単位タブの選択中のみ表示
-        $(document).on("change", `${shopSelectInputsSelector} #selectOrganization-${messageId}`, function () {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} #selectOrganization-${messageId}`, function () {
             if (this.checked) {
                 // 子要素（店舗）の表示/非表示
                 $(`${shopSelectInputsSelector} input[name="organization_shops[]"]`).each(function () {
@@ -1123,7 +1212,7 @@ $(document).ready(function() {
         });
 
         // 店舗コード順タブの選択中のみ表示
-        $(document).on("change", `${shopSelectInputsSelector} #selectStoreCode-${messageId}`, function () {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} #selectStoreCode-${messageId}`, function () {
             if (this.checked) {
                 // チェックされている項目のみ表示
                 $(`${shopSelectInputsSelector} input[name="shops_code[]"]`).each(function () {
@@ -1142,8 +1231,9 @@ $(document).ready(function() {
             }
         });
 
+
         // 組織単位タブの全選択/選択解除
-        $(document).on("change", `${shopSelectInputsSelector} #selectAllOrganization-${messageId}`, function () {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} #selectAllOrganization-${messageId}`, function () {
             const overlay = $('#overlay');
             overlay.show(); // オーバーレイを表示
 
@@ -1203,7 +1293,7 @@ $(document).ready(function() {
         });
 
         // 店舗コード順タブの全選択/選択解除
-        $(document).on("change", `${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`, function () {
+        $(document).on(`change.editShopSelectModal-${messageId}`, `${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`, function () {
             const overlay = $('#overlay');
             overlay.show(); // オーバーレイを表示
 
@@ -1252,9 +1342,35 @@ $(document).ready(function() {
             requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
         });
 
+        // check-selected クラスを削除と選択された値をクリア
+        function removeSelectedClass(messageId) {
+            // すべてのボタンから check-selected クラスを削除
+            $(`${shopInputsSelector} .check-store-list .btn`).removeClass("check-selected");
+
+            // 選択された値をクリア
+            if (!selectedValuesByMessageId[mode]) {
+                selectedValuesByMessageId[mode] = {};
+            }
+            selectedValuesByMessageId[mode][messageId] = {
+                org5: [],
+                org4: [],
+                org3: [],
+                org2: [],
+                shops: []
+            };
+
+            // フォームクリア（全店ボタン）
+            $(`#selectOrganizationAll-${messageId}`).val("");
+            $(`${shopInputsSelector} #selectStore-${messageId}`).val("");
+            $(`${shopInputsSelector} #selectCsv-${messageId}`).val("");
+        }
+
 
         // 全店ボタン処理
-        $(document).on('click', `input[id="checkAll-${messageId}"][name="organizationAll"]`, function() {
+        $(document).on(`click.allBtn-${messageId}`, `input[id="checkAll-${messageId}"][name="organizationAll"]`, function() {
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
+
             removeSelectedClass(messageId);
             $(`#shopEditBtn-${messageId}`).removeClass("check-selected");
             $(`#selectStore-${messageId}`).val("");
@@ -1287,11 +1403,14 @@ $(document).ready(function() {
             $(this).addClass("check-selected");
             // csvインポートボタン変更
             $(`${shopInputsSelector} #importCsv-${messageId}`).attr('data-target', `#editShopImportModal-${messageId}`);
+
+            // オーバーレイを非表示にする
+            overlay.hide();
         });
 
 
         // 店舗選択モーダル 選択処理
-        $(document).on('click', `${shopInputsSelector} input[id="checkStore-${messageId}"]`, function() {
+        $(document).on(`click.editShopModal-${messageId}`, `${shopInputsSelector} input[id="checkStore-${messageId}"]`, function() {
             // モーダルタイトル変更
             var storeModalTitle = $(`#editShopSelectModal-${messageId} h4.modal-title`);
             if (storeModalTitle.length) {
@@ -1383,7 +1502,7 @@ $(document).ready(function() {
             updateSelectedStores();
         });
 
-        $(document).on('click', `.editShopSelectModal #editShopSelectBtn-${messageId}`, function() {
+        $(document).on(`click.editShopSelectModal-${messageId}`, `.editShopSelectModal #editShopSelectBtn-${messageId}`, function() {
             removeSelectedClass(messageId);
             // チェックされているチェックボックスの値を変数に格納
             changeValues(messageId);
@@ -1400,18 +1519,9 @@ $(document).ready(function() {
             $(`${shopInputsSelector} .check-store-list input[id="checkStore-${messageId}"]`).val(`店舗選択(${selectedCountStore}店舗)`);
         });
 
-        // 選択された値を変数に格納
-        function changeValues(messageId) {
-            selectedValuesByMessageId[mode][messageId].org5 = $(`${shopSelectInputsSelector} input[name="organization[org5][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[mode][messageId].org4 = $(`${shopSelectInputsSelector} input[name="organization[org4][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[mode][messageId].org3 = $(`${shopSelectInputsSelector} input[name="organization[org3][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[mode][messageId].org2 = $(`${shopSelectInputsSelector} input[name="organization[org2][]"]:checked`).map(function() { return this.value; }).get();
-            selectedValuesByMessageId[mode][messageId].shops = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).map(function() { return this.value; }).get();
-        }
-
 
         // CSVインポートモーダル 選択処理
-        $(document).on('click', `${shopInputsSelector} input[id="importCsv-${messageId}"]`, function() {
+        $(document).on(`click.editShopModal-${messageId}`, `${shopInputsSelector} input[id="importCsv-${messageId}"]`, function() {
             // モーダルタイトル変更
             var storeModalTitle = $(`#editShopSelectModal-${messageId} h4.modal-title`);
             if (storeModalTitle.length) {
@@ -1431,13 +1541,14 @@ $(document).ready(function() {
             }
         });
 
+
         // インポートボタンのクリックイベント
-        $(document).on('click', `#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`, function() {
+        $(document).on(`click.editShopSelectModal-${messageId}`, `#editShopSelectModal-${messageId} #editShopCsvImportBtn-${messageId}`, function() {
             // モーダルを閉じる
             $(`#editShopSelectModal-${messageId}`).modal("hide");
         });
 
-        $(document).on('click', `#editShopSelectModal-${messageId} #editCsvSelectBtn-${messageId}`, function() {
+        $(document).on(`click.editShopSelectModal-${messageId}`, `#editShopSelectModal-${messageId} #editCsvSelectBtn-${messageId}`, function() {
             removeSelectedClass(messageId);
             // チェックされているチェックボックスの値を変数に格納
             changeValues(messageId);
@@ -1454,7 +1565,7 @@ $(document).ready(function() {
             $(`${shopInputsSelector} .check-store-list input[id="importCsv-${messageId}"]`).val(`インポート(${selectedCountStore}店舗)`);
         });
 
-        $(document).on('click', `${shopInputsSelector} #editShopImportSelector-${messageId}`, function() {
+        $(document).on(`click.editShopModal-${messageId}`, `${shopInputsSelector} #editShopImportSelector-${messageId}`, function() {
             // モーダルを閉じる
             $(`#editShopSelectModal-${messageId}`).modal("hide");
 
@@ -1462,14 +1573,45 @@ $(document).ready(function() {
             $(`${shopImportSelector} input[type="file"]`).val('');
         });
 
+        // ファイル名を変更
+        function changeFileName(e){
+            let fileNameTarget = e.siblings('.fileName');
+            if(e.val() == ''){
+                fileNameTarget.empty().text('ファイルを選択またはドロップ');
+            }else{
+                let chkFileName = e.prop('files')[0].name;
+                fileNameTarget.empty().text(chkFileName);
+            }
+        }
+
+        function getNumericDateTime() {
+            // 今日の日時を取得
+            var today = new Date();
+
+            // 年、月、日、時、分、秒を取得
+            var year = today.getFullYear();
+            var month = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるので+1する
+            var day = ('0' + today.getDate()).slice(-2);
+            var hours = ('0' + today.getHours()).slice(-2);
+            var minutes = ('0' + today.getMinutes()).slice(-2);
+            var seconds = ('0' + today.getSeconds()).slice(-2);
+
+            // 数字のみの形式で表示して返す
+            return `${year}${month}${day}${hours}${minutes}${seconds}`;
+        }
+
+
         // 業務連絡店舗CSV アップロード
-        $(document).on('change' , `${shopImportSelector} input[type=file]` , function(){
+        $(document).on(`change.editShopImportModal-${messageId}`, `${shopImportSelector} input[type=file]` , function(){
             let changeTarget = $(this);
             changeFileName(changeTarget);
         });
 
         let newMessageJson;
-        $(document).on('change', `${shopImportSelector} input[type="file"]`, function() {
+        $(document).on(`change.editShopImportModal-${messageId}`, `${shopImportSelector} input[type="file"]`, function() {
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
+
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
             let log_file_name = getNumericDateTime();
             const formData = new FormData();
@@ -1507,9 +1649,12 @@ $(document).ready(function() {
                 labelForm.parent().find('.text-danger').remove();
                 newMessageJson = response.json;
 
+                // オーバーレイを非表示にする
+                overlay.hide();
+
             }).fail(function(jqXHR, textStatus, errorThrown){
                 $(`#editShopImportModal-${messageId} .modal-body`).prepend(`
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger" style="max-height: 200px; overflow-y: auto;">
                         <ul></ul>
                     </div>
                 `);
@@ -1534,6 +1679,8 @@ $(document).ready(function() {
                         `<li>${jqXHR.responseJSON.message}</li>`
                     );
                 }
+                // オーバーレイを非表示にする
+                overlay.hide();
             });
 
             let percent;
@@ -1563,8 +1710,9 @@ $(document).ready(function() {
             }, 500);
         });
 
+
         // 業務連絡店舗CSV インポート
-        $(document).on('click', `${shopImportSelector} input[type="button"]`, function(e){
+        $(document).on(`click.editShopImportModal-${messageId}`, `${shopImportSelector} input[type="button"]`, function(e){
             e.preventDefault();
 
             if(!newMessageJson) {
@@ -1745,7 +1893,7 @@ $(document).ready(function() {
                 overlay.hide();
 
                 $(`#editShopImportModal-${messageId} .modal-body`).prepend(`
-                    <div class="alert alert-danger">
+                    <div class="alert alert-danger" style="max-height: 200px; overflow-y: auto;">
                         <ul></ul>
                     </div>
                 `);
@@ -1769,10 +1917,18 @@ $(document).ready(function() {
 
 
         // 業務連絡店舗CSV エクスポート
-        $(document).on('click', `${shopInputsSelector} #exportCsv-${messageId}`, function() {
+        $(document).on(`click.editShopModal-${messageId}`, `${shopInputsSelector} #exportCsv-${messageId}`, function() {
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
+
             const csrfToken = $('meta[name="csrf-token"]').attr('content');
             const formData = new FormData();
-            formData.append("message_id", $(`${shopInputsSelector} .check-store-list input[name="message_id"]`).val());
+
+            if (mode === 'new') {
+                formData.append("organization1_id", $(`${shopInputsSelector} .check-store-list input[name="organization1_id"]`).val());
+            } else {
+                formData.append("message_id", $(`${shopInputsSelector} .check-store-list input[name="message_id"]`).val());
+            }
 
             $.ajax({
                 url: '/admin/message/publish/csv/store/export',
@@ -1802,6 +1958,9 @@ $(document).ready(function() {
                 window.URL.revokeObjectURL(url); // オブジェクトURLを解放
                 document.body.removeChild(a); // 一時的に生成したリンクを削除
 
+                // オーバーレイを非表示にする
+                overlay.hide();
+
             }).fail(function(jqXHR, textStatus, errorThrown){
                 var errorMessage = 'An error occurred. Please try again later.';
 
@@ -1815,12 +1974,15 @@ $(document).ready(function() {
 
                 console.log('Error: ' + jqXHR.status + ' - ' + textStatus);
                 alert(errorMessage);
+
+                // オーバーレイを非表示にする
+                overlay.hide();
             });
         });
 
 
         // 店舗選択設定ボタンのクリックイベント
-        $(document).on('click', `.editShopModal #shopImportBtn-${messageId}`, function() {
+        $(document).on(`click.editShopModal-${messageId}`, `.editShopModal #shopImportBtn-${messageId}`, function() {
             // 選択された値をクリア
             $(`#checkAll-${messageId}`).removeClass("check-selected");
             $(`#selectOrganizationAll-${messageId}`).val("");
@@ -1834,110 +1996,11 @@ $(document).ready(function() {
         });
 
 
-        // 店舗選択中の処理
-        function updateSelectedStores() {
-            const selectedCount = $(`${shopSelectInputsSelector} input[name="organization_shops[]"]:checked`).length;
-            $(`${shopSelectInputsSelector} .storeSelected`).text(`${selectedCount}店舗選択中`);
-        }
-
-        // チェックボックスの連携を設定
-        function syncCheckboxes(storeId, checked) {
-            document.querySelectorAll(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).forEach(function(checkbox) {
-                checkbox.checked = checked;
-            });
-
-            // 各親組織のチェックボックスを更新
-            const organizationId = document.querySelector(`${shopSelectInputsSelector} input[data-store-id="${storeId}"]`).getAttribute('data-organization-id');
-            if (organizationId) {
-                updateParentCheckbox(organizationId);
-            }
-        }
-
-        // 親チェックボックスの状態を更新
-        function updateParentCheckbox(organizationId) {
-            const parentCheckbox = document.querySelector(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"]`);
-            if (parentCheckbox) {
-                const childCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input[data-organization-id="${organizationId}"].shop-checkbox`);
-                const allChecked = Array.from(childCheckboxes).every(checkbox => checkbox.checked);
-                parentCheckbox.checked = allChecked;
-            }
-        }
-
-        // 全ての親チェックボックスの状態を更新
-        function updateAllParentCheckboxes() {
-            const parentCheckboxes = document.querySelectorAll(`${shopSelectInputsSelector} input.org-checkbox`);
-            parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id')));
-        }
-
-        // 全選択/選択解除のチェックボックスの状態を更新
-        function updateSelectAllCheckboxes(messageId) {
-            // 組織タブのチェックボックスの状態を更新
-            const organizationCheckboxes = $(`${shopSelectInputsSelector} #byOrganization-${messageId} input.shop-checkbox`);
-            const selectAllOrganizationCheckbox = $(`${shopSelectInputsSelector} #selectAllOrganization-${messageId}`);
-            const allCheckedOrganization = Array.from(organizationCheckboxes).every(checkbox => checkbox.checked);
-            selectAllOrganizationCheckbox[0].checked = allCheckedOrganization;
-
-            // 店舗コード順タブのチェックボックスの状態を更新
-            const storeCodeCheckboxes = $(`${shopSelectInputsSelector} #byStoreCode-${messageId} input.shop-checkbox`);
-            const selectAllStoreCodeCheckbox = $(`${shopSelectInputsSelector} #selectAllStoreCode-${messageId}`);
-            const allCheckedStoreCode = Array.from(storeCodeCheckboxes).every(checkbox => checkbox.checked);
-            selectAllStoreCodeCheckbox[0].checked = allCheckedStoreCode;
-        }
-
-        // check-selected クラスを削除と選択された値をクリア
-        function removeSelectedClass(messageId) {
-            // すべてのボタンから check-selected クラスを削除
-            $(`${shopInputsSelector} .check-store-list .btn`).removeClass("check-selected");
-
-            // 選択された値をクリア
-            if (!selectedValuesByMessageId[mode]) {
-                selectedValuesByMessageId[mode] = {};
-            }
-            selectedValuesByMessageId[mode][messageId] = {
-                org5: [],
-                org4: [],
-                org3: [],
-                org2: [],
-                shops: []
-            };
-
-            // フォームクリア（全店ボタン）
-            $(`#selectOrganizationAll-${messageId}`).val("");
-            $(`${shopInputsSelector} #selectStore-${messageId}`).val("");
-            $(`${shopInputsSelector} #selectCsv-${messageId}`).val("");
-        }
-
-        // ファイル名を変更
-        function changeFileName(e){
-            let fileNameTarget = e.siblings('.fileName');
-            if(e.val() == ''){
-                fileNameTarget.empty().text('ファイルを選択またはドロップ');
-            }else{
-                let chkFileName = e.prop('files')[0].name;
-                fileNameTarget.empty().text(chkFileName);
-            }
-        }
-
         function isEmptyImportFile(modal) {
             return !$(modal).find('input[type="file"]')[0].value
         }
-
-        function getNumericDateTime() {
-            // 今日の日時を取得
-            var today = new Date();
-
-            // 年、月、日、時、分、秒を取得
-            var year = today.getFullYear();
-            var month = ('0' + (today.getMonth() + 1)).slice(-2); // 月は0から始まるので+1する
-            var day = ('0' + today.getDate()).slice(-2);
-            var hours = ('0' + today.getHours()).slice(-2);
-            var minutes = ('0' + today.getMinutes()).slice(-2);
-            var seconds = ('0' + today.getSeconds()).slice(-2);
-
-            // 数字のみの形式で表示して返す
-            return `${year}${month}${day}${hours}${minutes}${seconds}`;
-        }
     }
+
 
     // 掲載期間
     function initDatetimepicker(messageId) {
@@ -2017,7 +2080,7 @@ $(document).ready(function() {
 
     // 追加モード
     // 新しい行のHTMLを作成する関数
-    function createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList) {
+    function createNewRow(newMessageId, org1Id, newMessageNumber, categoryList, targetRollList, brandList, organizationList, allShopList) {
         var newRow = `
             <tr data-message_id="${newMessageId}"
                 data-organization1_id="${org1Id}"
@@ -2027,8 +2090,8 @@ $(document).ready(function() {
                     <p class="messageNewSaveBtn btn btn-admin" data-message-id="${newMessageId}">保存</p>
                     <p class="messageNewDeleteBtn btn btn-admin" data-message-id="${newMessageId}">取消</p>
                 </td>
-                <td class="shop-id" data-message-number="${messageNumber}">
-                    ${messageNumber}
+                <td class="shop-id" data-message-number="${newMessageNumber}">
+                    ${newMessageNumber}
                     ${targetRollList.map(targetRoll => `
                         <input type="hidden" name="target_roll[]" value="${targetRoll.id}">
                     `).join('')}
@@ -2111,6 +2174,9 @@ $(document).ready(function() {
                 <td class="date-time"></td>
                 <td></td>
                 <td class="date-time"></td>
+                <td nowrap>
+                    <div class="button-group"></div>
+                </td>
             </tr>
         `;
 
@@ -2134,26 +2200,52 @@ $(document).ready(function() {
 
         const csrfToken = $('meta[name="csrf-token"]').attr("content");
 
-        // 現在の最大メッセージIDを取得
-        let maxId = 0;
+        // 新しいmessage_id
+        let maxMessageId = 0;
         $('#list tbody tr').each(function() {
             const currentId = parseInt($(this).data('message_id'), 10);
-            if (currentId > maxId) {
-                maxId = currentId;
+            if (currentId > maxMessageId) {
+                maxMessageId = currentId;
             }
         });
+        let newMessageId = maxMessageId + 1;
 
-        // 新しいメッセージIDを設定
-        let newMessageId = maxId + 1;
+        // 新しいメッセージNo
+        let maxMessageNumber = 0;
+        $('#list tbody tr').each(function() {
+            const currentMessageNumber = parseInt($(this).find('[data-message-number]').text(), 10);
+            if (currentMessageNumber > maxMessageNumber) {
+                maxMessageNumber = currentMessageNumber;
+            }
+        });
+        let newMessageNumber = maxMessageNumber + 1;
 
 
         // 削除ボタン処理
-        function initializeNewDeleteBtn(newMessageId) {
+        function initializeNewDeleteBtn(newMessageId, newMessageNumber) {
             $(`.messageNewDeleteBtn[data-message-id="${newMessageId}"]`).on('click', function() {
                 // ボタンが属する行を削除
                 $(this).closest('tr').remove();
 
-                messageNumber--;
+                // メッセージ番号を振り直す
+                newMessageNumber--;
+
+                // 業連ファイル、店舗を初期化
+                delete fileDataByMessageId['new'][newMessageId];
+                delete selectedValuesByMessageId['new'][newMessageId];
+                // 既存のイベントリスナーを解除
+                $(document).off(`.editTitleFileModal-${newMessageId}`);
+                $(document).off(`.editJoinFileModal-${newMessageId}`);
+                $(document).off(`.editShopModal-${newMessageId}`);
+                $(document).off(`.editShopSelectModal-${newMessageId}`);
+                $(document).off(`.editShopImportModal-${newMessageId}`);
+                $(document).off(`.allBtn-${newMessageId}`);
+                // モーダルを削除
+                $(`#editTitleFileModal-${newMessageId}`).remove();
+                $(`#editJoinFileModal-${newMessageId}`).remove();
+                $(`#editShopModal-${newMessageId}`).remove();
+                $(`#editShopSelectModal-${newMessageId}`).remove();
+                $(`#editShopImportModal-${newMessageId}`).remove();
 
                 // new-modifiedまたはedit-modifiedが1つもない場合は、一括登録ボタンを非活性
                 if ($('tr.new-modified').length === 0 && $('tr.edit-modified').length === 0) {
@@ -2164,7 +2256,7 @@ $(document).ready(function() {
 
 
         // 保存ボタン処理
-        function initializeNewSaveBtn(newMessageId, brandList, messageNumber) {
+        function initializeNewSaveBtn(newMessageId, brandList, newMessageNumber) {
             $(`.messageNewSaveBtn[data-message-id="${newMessageId}"]`).on('click', function() {
                 const overlay = $('#overlay');
                 overlay.show(); // オーバーレイを表示
@@ -2210,18 +2302,18 @@ $(document).ready(function() {
                 } else if (title.length > 20) {
                     errors.push("タイトルは20文字以内で入力してください");
                 }
-                if (fileName.length === 0) errors.push("ファイルを添付してください");
-                if (organizationShops.length === 0) errors.push("対象店舗を選択してください");
+                if (!fileName.length) errors.push("ファイルを添付してください");
+                if (!organizationShops.length) errors.push("対象店舗を選択してください");
                 if (errors.length > 0) {
                     overlay.hide();
                     let errorContainer = $('#error-messages');
                     if (!errorContainer.length) {
-                        errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                        errorContainer = $('<div id="error-messages" class="alert alert-danger"><ul></ul></div>');
                         $('.pagenation-top').after(errorContainer);
                     }
                     errorContainer.empty();
                     // エラーメッセージをまとめて追加
-                    const errorList = errors.map(error => `<div class="text-danger">No.${messageNumber} : ${error}</div>`).join('');
+                    const errorList = errors.reverse().map(error => `<li class="text-danger">No.${newMessageNumber} : ${error}</li>`).join('');
                     errorContainer.append(errorList);
 
                     return;
@@ -2268,7 +2360,7 @@ $(document).ready(function() {
 
                             let errorContainer = $('#error-messages');
                             if (!errorContainer.length) {
-                                errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                                errorContainer = $('<div id="error-messages" class="alert alert-danger"><ul></ul></div>');
                                 $('.pagenation-top').after(errorContainer);
                             }
 
@@ -2277,7 +2369,7 @@ $(document).ready(function() {
                             for (const field in errors) {
                                 if (errors.hasOwnProperty(field)) {
                                     errors[field].forEach(message => {
-                                        errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
+                                        errorContainer.append(`<li class="text-danger">No.${newMessageNumber} : ${message}</li>`);
                                     });
                                 }
                             }
@@ -2303,7 +2395,6 @@ $(document).ready(function() {
                     "X-CSRF-TOKEN": csrfToken,
                 },
                 success: function(response) {
-                    messageNumber = response.message_number;
                     categoryList = response.category_list;
                     targetRollList = response.target_roll_list;
                     brandList = response.brand_list;
@@ -2312,10 +2403,9 @@ $(document).ready(function() {
                     shopDataFetched = true;
 
                     // 新しい行を作成する関数を呼び出す
-                    messageNumber++;
-                    createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
+                    createNewRow(newMessageId, org1Id, newMessageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
                     // 保存ボタン処理
-                    initializeNewSaveBtn(newMessageId, brandList, messageNumber);
+                    initializeNewSaveBtn(newMessageId, brandList, newMessageNumber);
                     // 削除ボタン処理
                     initializeNewDeleteBtn(newMessageId);
                 },
@@ -2325,10 +2415,9 @@ $(document).ready(function() {
                 }
             });
         } else {
-            messageNumber++;
-            createNewRow(newMessageId, org1Id, messageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
+            createNewRow(newMessageId, org1Id, newMessageNumber, categoryList, targetRollList, brandList, organizationList, allShopList);
             // 保存ボタン処理
-            initializeNewSaveBtn(newMessageId, brandList, messageNumber);
+            initializeNewSaveBtn(newMessageId, brandList, newMessageNumber);
             // 削除ボタン処理
             initializeNewDeleteBtn(newMessageId);
         }
@@ -2346,10 +2435,10 @@ $(document).ready(function() {
         let errors = [];
 
         // 編集または追加された行をループ
-        $('tr.new-modified, tr.edit-modified').each(function() {
+        $($('tr.new-modified, tr.edit-modified').get().reverse()).each(function() {
             const row = $(this);
             let messageId = row.attr('data-message_id');
-            let messageNumber = row.attr('data-message_number');
+            let allMessageNumber = parseInt(row.find('[data-message-number]').text(), 10);
 
             // 各データを収集
             let categoryId = row.find('select[name="category_id"]').val() || null;
@@ -2357,8 +2446,10 @@ $(document).ready(function() {
             let title = row.find('input[name="title"]').val() || null;
             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
-            startDatetime = cleanAndFormatDate(startDatetime);
-            endDatetime = cleanAndFormatDate(endDatetime);
+            if (row.hasClass('new-modified')) {
+                startDatetime = cleanAndFormatDate(startDatetime);
+                endDatetime = cleanAndFormatDate(endDatetime);
+            }
             let tags = row.find('input[name="tag_name[]"]').map(function() { return $(this).val(); }).get() || null;
             let contentId = [];
             if (row.hasClass('edit-modified')) {
@@ -2390,12 +2481,12 @@ $(document).ready(function() {
 
             // バリデーション
             if (!title) {
-                errors.push(`No.${messageId} : タイトルは必須項目です`);
+                errors.push(`No.${allMessageNumber} : タイトルは必須項目です`);
             } else if (title.length > 20) {
-                errors.push(`No.${messageId} : タイトルは20文字以内で入力してください`);
+                errors.push(`No.${allMessageNumber} : タイトルは20文字以内で入力してください`);
             }
-            if (fileName.length === 0) errors.push(`No.${messageId} : ファイルを添付してください`);
-            if (organizationShops.length === 0) errors.push(`No.${messageId} : 対象店舗を選択してください`);
+            if (!fileName.length) errors.push(`No.${allMessageNumber} : ファイルを添付してください`);
+            if (!organizationShops.length) errors.push(`No.${allMessageNumber} : 対象店舗を選択してください`);
 
             // メッセージデータを配列に追加
             if (row.hasClass('new-modified')) {
@@ -2440,9 +2531,9 @@ $(document).ready(function() {
             }
         });
 
-        // メッセージが20件以上の場合、送信を防ぐ
-        if (messagesData.length > 20) {
-            errors.push("メッセージは20件以内で送信してください");
+        // 一括登録が10件以上の場合、送信を防ぐ
+        if (messagesData.length > 10) {
+            errors.push("一度に登録できる件数は10件までです");
         }
 
         // エラーがある場合、表示して処理を中止
@@ -2450,12 +2541,12 @@ $(document).ready(function() {
             overlay.hide();
             let errorContainer = $('#error-messages');
             if (!errorContainer.length) {
-                errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                errorContainer = $('<div id="error-messages" class="alert alert-danger" style="max-height: 300px; overflow-y: auto;"><ul></ul></div>');
                 $('.pagenation-top').after(errorContainer);
             }
             errorContainer.empty();
             // エラーメッセージをまとめて追加
-            const errorList = errors.map(error => `<div class="text-danger">${error}</div>`).join('');
+            const errorList = errors.reverse().map(error => `<li class="text-danger">${error}</li>`).join('');
             errorContainer.append(errorList);
 
             return;
@@ -2485,18 +2576,26 @@ $(document).ready(function() {
                     const errors = response.errors;
 
                     let errorContainer = $('#error-messages');
-                    if (errorContainer.length === 0) {
-                        errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                    if (!errorContainer.length) {
+                        errorContainer = $('<div id="error-messages" class="alert alert-danger" style="max-height: 300px; overflow-y: auto;"><ul></ul></div>');
                         $('.pagenation-top').after(errorContainer);
                     }
 
                     errorContainer.empty();
 
-                    errors.forEach(error => {
-                        error.messages.forEach(message => {
-                            errorContainer.append(`<div class="text-danger">${message}</div>`);
+                    if (Array.isArray(errors)) {
+                        errors.forEach(error => {
+                            if (Array.isArray(error.messages)) {
+                                error.messages.forEach(message => {
+                                    errorContainer.append(`<li class="text-danger">${message}</li>`);
+                                });
+                            } else {
+                                console.error('Error messages is not an array:', error.messages);
+                            }
                         });
-                    });
+                    } else {
+                        console.error('Errors is not an array:', errors);
+                    }
                 } catch (e) {
                     console.error("Failed to parse response:", e);
                 }
@@ -2509,6 +2608,15 @@ $(document).ready(function() {
     // 編集モード
     $('.messageEditBtn').each(function() {
         $(this).on('click', function() {
+            const overlay = $('#overlay');
+            if (overlay.length) {
+                console.log('Overlay element found');
+                overlay.show(); // オーバーレイを表示
+                console.log('Overlay should be visible now');
+            } else {
+                console.error('Overlay element not found');
+            }
+
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
 
@@ -2538,6 +2646,8 @@ $(document).ready(function() {
             const endDatetimeText = row.find('.end-datetime-text').get(0);
             // 配信店舗数
             const shopCount = row.find('.shop-count').get(0);
+            // 編集、配信停止ボタン
+            const buttonGroup = row.find('.button-group').get(0);
             // 編集ボタングループ
             const messageEditBtnGroup = row.find('.message-edit-btn-group').get(0);
             // 編集ボタン
@@ -2554,7 +2664,7 @@ $(document).ready(function() {
                 // 対象業態
                 if (brandText) {
                     $(brandText).hide();
-                    const allBrandsSelected = targetBrand.length === brandList.length;
+                    const allBrandsSelected = targetBrand.length == brandList.length;
                     const brandInputGroupHtml = `
                         <div class="brand-input-group" style="width: max-content;">
                             <select class="form-control" name="brand[]" style="cursor: pointer;">
@@ -2593,7 +2703,7 @@ $(document).ready(function() {
                     <div class="category-input-group" style="width: max-content;">
                         <select class="form-control" name="category_id" style="cursor: pointer;">
                             ${categoryList.map(category => `
-                                ${(org1Id === 8 || category.id !== 7) ? `
+                                ${(org1Id == 8 || category.id !== 7) ? `
                                     <option value="${category.id}"
                                         ${message.category_id == category.id ? 'selected' : ''}
                                         >${category.name}
@@ -2704,6 +2814,11 @@ $(document).ready(function() {
                     $(shopCount).after(shopEditGroupHtml);
                 }
 
+                // 編集、配信停止ボタン
+                if (buttonGroup) {
+                    $(buttonGroup).hide();
+                }
+
                 // 編集ボタン
                 if (messageEditBtn) {
                     $(messageEditBtn).hide();
@@ -2733,6 +2848,23 @@ $(document).ready(function() {
                     if ($('tr.new-modified').length === 0 && $('tr.edit-modified').length === 0) {
                         $('#messageAllSaveBtn').addClass('disabled');
                     }
+
+                    // 業連ファイル、店舗を初期化
+                    delete fileDataByMessageId['edit'][messageId];
+                    delete selectedValuesByMessageId['edit'][messageId];
+                    // 既存のイベントリスナーを解除
+                    $(document).off(`.editTitleFileModal-${messageId}`);
+                    $(document).off(`.editJoinFileModal-${messageId}`);
+                    $(document).off(`.editShopModal-${messageId}`);
+                    $(document).off(`.editShopSelectModal-${messageId}`);
+                    $(document).off(`.editShopImportModal-${messageId}`);
+                    $(document).off(`.allBtn-${messageId}`);
+                    // モーダルを削除
+                    $(`#editTitleFileModal-${messageId}`).remove();
+                    $(`#editJoinFileModal-${messageId}`).remove();
+                    $(`#editShopModal-${messageId}`).remove();
+                    $(`#editShopSelectModal-${messageId}`).remove();
+                    $(`#editShopImportModal-${messageId}`).remove();
 
                     // 対象業態
                     if (brandText) {
@@ -2802,6 +2934,11 @@ $(document).ready(function() {
                         if (shopEditGroup) shopEditGroup.remove();
                     }
 
+                    // 編集、配信停止ボタン
+                    if (buttonGroup) {
+                        $(buttonGroup).show();
+                    }
+
                     // 編集ボタン
                     const messageEditSaveBtn = row.find('.messageEditSaveBtn');
                     const messageEditDeleteBtn = row.find('.messageEditDeleteBtn');
@@ -2826,7 +2963,7 @@ $(document).ready(function() {
                     const row = $(`tr[data-message_id="${messageId}"]`);
 
                     // 各データを収集
-                    let messageNumber = row.attr('data-message-number') || null;
+                    let editMessageNumber = parseInt(row.find('[data-message-number]').text(), 10) || null;
                     let categoryId = row.find('select[name="category_id"]').val() || null;
                     let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
                     let title = row.find('input[name="title"]').val() || null;
@@ -2862,18 +2999,18 @@ $(document).ready(function() {
                     } else if (title.length > 20) {
                         errors.push("タイトルは20文字以内で入力してください");
                     }
-                    if (fileName.length === 0) errors.push("ファイルを添付してください");
-                    if (organizationShops.length === 0) errors.push("対象店舗を選択してください");
+                    if (!fileName.length) errors.push("ファイルを添付してください");
+                    if (!organizationShops.length) errors.push("対象店舗を選択してください");
                     if (errors.length > 0) {
                         overlay.hide();
                         let errorContainer = $('#error-messages');
                         if (!errorContainer.length) {
-                            errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                            errorContainer = $('<div id="error-messages" class="alert alert-danger"><ul></ul></div>');
                             $('.pagenation-top').after(errorContainer);
                         }
                         errorContainer.empty();
                         // エラーメッセージをまとめて追加
-                        const errorList = errors.map(error => `<div class="text-danger">No.${messageNumber} : ${error}</div>`).join('');
+                        const errorList = errors.reverse().map(error => `<li class="text-danger">No.${editMessageNumber} : ${error}</li>`).join('');
                         errorContainer.append(errorList);
 
                         return;
@@ -2924,7 +3061,7 @@ $(document).ready(function() {
 
                                 let errorContainer = $('#error-messages');
                                 if (!errorContainer.length) {
-                                    errorContainer = $('<div id="error-messages" class="alert alert-danger"></div>');
+                                    errorContainer = $('<div id="error-messages" class="alert alert-danger"><ul></ul></div>');
                                     $('.pagenation-top').after(errorContainer);
                                 }
 
@@ -2933,7 +3070,7 @@ $(document).ready(function() {
                                 for (const field in errors) {
                                     if (errors.hasOwnProperty(field)) {
                                         errors[field].forEach(message => {
-                                            errorContainer.append(`<div class="text-danger">No.${messageNumber} : ${message}</div>`);
+                                            errorContainer.append(`<li class="text-danger">No.${editMessageNumber} : ${message}</li>`);
                                         });
                                     }
                                 }
@@ -2961,8 +3098,6 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     if (!shopDataFetched) {
-                        // No
-                        messageNumber = response.message_number;
                         // カテゴリ
                         categoryList = response.category_list;
                         // 対象者
@@ -2998,6 +3133,9 @@ $(document).ready(function() {
                     console.error("Response Text:", jqXHR.responseText);
                 }
             });
+
+            // オーバーレイを非表示
+            overlay.hide();
         });
     });
 });
