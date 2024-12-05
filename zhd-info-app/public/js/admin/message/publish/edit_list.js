@@ -62,7 +62,7 @@ $(document).ready(function() {
                         fileInputsHtml += `
                             <div class="file-input-container">
                                 <div class="row">
-                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="${messageContent.id}" required>
+                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="${messageContent.id ?? ''}" required>
                                     <label class="col-sm-2 control-label">${index === 0 ? '業連' : '添付' + index}<span class="text-danger required">*</span></label>
                                     <div class="col-sm-8">
                                         <label class="inputFile form-control">
@@ -70,9 +70,9 @@ $(document).ready(function() {
                                                 ${messageContent.content_name || 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能'}
                                             </span>
                                             <input type="file" name="file" accept=".pdf" data-cache="active">
-                                            <input type="hidden" name="file_name[]" value="${messageContent.content_name}">
-                                            <input type="hidden" name="file_path[]" value="${messageContent.content_url}">
-                                            <input type="hidden" name="join_flg[]" value="${messageContent.join_flg}">
+                                            <input type="hidden" name="file_name[]" value="${messageContent.content_name ?? ''}">
+                                            <input type="hidden" name="file_path[]" value="${messageContent.content_url ?? ''}">
+                                            <input type="hidden" name="join_flg[]" value="${messageContent.join_flg ?? ''}">
                                             <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                                         </label>
                                         <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
@@ -89,7 +89,7 @@ $(document).ready(function() {
                         fileInputsHtml = `
                             <div class="file-input-container">
                                 <div class="row">
-                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="${message.id}" required>
+                                    <input type="hidden" data-variable-name="message_content_id" name="content_id[]" value="${message.id ?? ''}" required>
                                     <label class="col-sm-2 control-label">業連<span class="text-danger required">*</span></label>
                                     <div class="col-sm-8">
                                         <label class="inputFile form-control">
@@ -97,8 +97,8 @@ $(document).ready(function() {
                                                 ${message.content_name || 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能'}
                                             </span>
                                             <input type="file" name="file" accept=".pdf" data-cache="active">
-                                            <input type="hidden" name="file_name[]" value="${message.content_name}">
-                                            <input type="hidden" name="file_path[]" value="${message.content_url}">
+                                            <input type="hidden" name="file_name[]" value="${message.content_name ?? ''}">
+                                            <input type="hidden" name="file_path[]" value="${message.content_url ?? ''}">
                                             <input type="hidden" name="join_flg[]" value="">
                                             <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
                                         </label>
@@ -317,19 +317,31 @@ $(document).ready(function() {
 
             // 各ファイルの情報を取得して配列に保存
             $(`${editTitleFileInputsSelector} [name='content_id[]']`).each(function() {
-                contentIds.push($(this).val());
+                const value = $(this).val();
+                if (value !== null && value !== undefined) {
+                    contentIds.push(value);
+                }
             });
 
             $(`${editTitleFileInputsSelector} [name='file_name[]']`).each(function() {
-                fileNames.push($(this).val());
+                const value = $(this).val();
+                if (value !== null && value !== undefined) {
+                    fileNames.push(value);
+                }
             });
 
             $(`${editTitleFileInputsSelector} [name='file_path[]']`).each(function() {
-                filePaths.push($(this).val());
+                const value = $(this).val();
+                if (value !== null && value !== undefined) {
+                    filePaths.push(value);
+                }
             });
 
             $(`${editTitleFileInputsSelector} [name='join_flg[]']`).each(function() {
-                joinFlags.push($(this).val());
+                const value = $(this).val();
+                if (value !== null && value !== undefined) {
+                    joinFlags.push(value);
+                }
             });
 
             // message_idをキーとしてファイル情報を保存
@@ -340,7 +352,6 @@ $(document).ready(function() {
                 joinFlags: joinFlags
             };
         }
-
 
         // 新規モードの場合は業連ファイルの初期化
         if(mode === 'new'){
@@ -2721,7 +2732,7 @@ $(document).ready(function() {
                 const titleInputGroupHtml = `
                     <div class="title-input-group" style="display: flex;">
                         <input type="text" class="form-control" name="title"
-                            value="${message.title}" style="border-radius:4px 0 0 4px;">
+                            value="${message.title ?? ''}" style="border-radius:4px 0 0 4px;">
                         <input type="button" class="btn btn-admin" id="titleFileEditBtn-${messageId}"
                             data-toggle="modal" data-target="#editTitleFileModal-${messageId}" value="ファイル設定"
                             style="border-radius:0 4px 4px 0;">
@@ -2730,6 +2741,9 @@ $(document).ready(function() {
                 if (titleText) {
                     $(titleText).hide();
                     $(titleText).after(titleInputGroupHtml);
+                } else {
+                    const titleColumn = row.find('.label-title').get(0);
+                    $(titleColumn).append(titleInputGroupHtml);
                 }
 
                 // 検索タグ
