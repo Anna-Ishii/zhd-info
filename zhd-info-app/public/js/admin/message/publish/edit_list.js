@@ -84,6 +84,35 @@ $(document).ready(function() {
                             </div>
                         `;
                     });
+                } else if (!messageContents.length) {
+                    fileInputsHtml = `
+                        <div class="file-input-container">
+                            <div class="row">
+                                <label class="col-sm-2 control-label">業連<span class="text-danger required">*</span></label>
+                                <div class="col-sm-8">
+                                    <label class="inputFile form-control">
+                                        <span class="fileName" style="text-align: center;">
+                                            ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能
+                                        </span>
+                                        <input type="file" name="file[]" accept=".pdf" multiple="multiple">
+                                        <input type="hidden" name="file_name[]" value="">
+                                        <input type="hidden" name="file_path[]" value="">
+                                        <input type="hidden" name="join_flg[]" value="">
+                                    </label>
+                                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                        <div class="progress-bar" style="width: 0%"></div>
+                                    </div>
+                                </div>
+                                <label class="col-sm-2" style="padding-top: 10px; display: none;">結合</label>
+                            </div>
+                        </div>
+                        <div class="col-sm-11 join-file-btn">
+                            <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
+                                <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
+                                <input type="button" class="btn btn-admin joinFile" id="joinFileId-${messageId}" data-toggle="modal" data-target="#editJoinFileModal-${messageId}" value="ファイルの結合">
+                            </label>
+                        </div>
+                    `;
                 } else {
                     if (message) {
                         fileInputsHtml = `
@@ -244,7 +273,7 @@ $(document).ready(function() {
         }
 
 
-        // 選択されたファイルのカウントを更新する関数
+        // 結合モーダルの選択されたファイルのカウントを更新する関数
         function updateJoinFileCount(messageId) {
             var checkedCount = $(`${editJoinFileModalSelector} #fileCheckboxes-${messageId} input[type="checkbox"]:checked`).length;
 
@@ -261,7 +290,9 @@ $(document).ready(function() {
             // ボタンの有効/無効を設定
             var modalFooterJoinFileBtn = $(`${editJoinFileModalSelector} .modal-footer #joinFileBtn-${messageId}`);
             if (modalFooterJoinFileBtn.length) {
-                if (checkedCount === 1) {
+                if (checkedCount == 1) {
+                    modalFooterJoinFileBtn.prop('disabled', true);
+                } else if (checkedCount == 0) {
                     modalFooterJoinFileBtn.prop('disabled', true);
                 } else {
                     modalFooterJoinFileBtn.prop('disabled', false);
@@ -371,24 +402,45 @@ $(document).ready(function() {
                 joinFlags: joinFlags
             };
 
-            // 結合モーダルの初期状態で結合ボタンを無効化
-            $(`${editJoinFileModalSelector} .modal-footer #joinFileBtn-${messageId}`).prop('disabled', true);
+            // 結合モーダルの初期状態でメッセージを表示
+            updateJoinFileCount(messageId);
 
         // 編集モードの場合はボタンの有効/無効を設定し、メッセージを表示
         } else if(mode === 'edit'){
-            addFileInputAdd();
-            addJoinFileBtn(messageId);
-            // 「結合中」メッセージを更新する関数の呼び出し
-            updateModalFooterMessage();
-            // 初期状態でメッセージを表示
-            updateJoinFileCount(messageId);
-            // "join" フラグがあるか
-            updateJoinFileLabel(messageId);
-            // 業連ファイルを保存
-            saveFileData(messageId);
+            if (messageContents.length) {
+                addFileInputAdd();
+                addJoinFileBtn(messageId);
+                // 「結合中」メッセージを更新する関数の呼び出し
+                updateModalFooterMessage();
+                // 結合モーダルの初期状態でメッセージを表示
+                updateJoinFileCount(messageId);
+                // "join" フラグがあるか
+                updateJoinFileLabel(messageId);
+                // 業連ファイルを保存
+                saveFileData(messageId);
 
-            // ファイル設定ボタンを有効化
-            $(`#editTitleFileModal-${messageId} #fileImportBtn-${messageId}`).prop('disabled', false);
+                // ファイル設定ボタンを有効化
+                $(`#editTitleFileModal-${messageId} #fileImportBtn-${messageId}`).prop('disabled', false);
+            } else {
+                const contentIds = [];
+                const fileNames = [];
+                const filePaths = [];
+                const joinFlags = [];
+
+                if (!fileDataByMessageId[mode]) {
+                    fileDataByMessageId[mode] = {};
+                }
+
+                fileDataByMessageId[mode][messageId] = {
+                    contentIds: contentIds,
+                    fileNames: fileNames,
+                    filePaths: filePaths,
+                    joinFlags: joinFlags
+                };
+
+                // 結合モーダルの初期状態でメッセージを表示
+                updateJoinFileCount(messageId);
+            }
         }
 
 
@@ -689,7 +741,7 @@ $(document).ready(function() {
                     $modalBody.append(checkbox);
                 });
 
-                // 選択されたファイルのカウントを更新する関数
+                // 結合モーダルの選択されたファイルのカウントを更新する関数
                 updateJoinFileCount(messageId);
             } else {
                 $modalFooter.append(`<p style="float: left;">結合するファイルが選択されていません。</p>`);
@@ -746,7 +798,7 @@ $(document).ready(function() {
 
         // 結合モーダルのチェックボックス変更イベント処理
         $(document).on(`change.editJoinFileModal-${messageId}`, `${editJoinFileModalSelector} #fileCheckboxes-${messageId} input[type="checkbox"]`, function() {
-            // 選択されたファイルのカウントを更新する関数
+            // 結合モーダルの選択されたファイルのカウントを更新する関数
             updateJoinFileCount(messageId);
         });
 
@@ -2212,6 +2264,11 @@ $(document).ready(function() {
         // 一括登録ボタンを活性化
         $('#messageAllSaveBtn').removeClass('disabled');
 
+        // エラーメッセージを削除
+        if ($('#error-messages').length) {
+            $('#error-messages').remove();
+        }
+
         const csrfToken = $('meta[name="csrf-token"]').attr("content");
 
         // 新しいmessage_id
@@ -2240,6 +2297,11 @@ $(document).ready(function() {
             $(`.messageNewDeleteBtn[data-message-id="${newMessageId}"]`).on('click', function() {
                 // ボタンが属する行を削除
                 $(this).closest('tr').remove();
+
+                // エラーメッセージを削除
+                if ($('#error-messages').length) {
+                    $('#error-messages').remove();
+                }
 
                 // メッセージ番号を振り直す
                 newMessageNumber--;
@@ -2628,6 +2690,11 @@ $(document).ready(function() {
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
 
+            // エラーメッセージを削除
+            if ($('#error-messages').length) {
+                $('#error-messages').remove();
+            }
+
             // 一括登録ボタンを活性化
             $('#messageAllSaveBtn').removeClass('disabled');
 
@@ -2857,6 +2924,11 @@ $(document).ready(function() {
                     const row = $(this).closest('tr');
                     // modifiedクラスを削除
                     row.removeClass('edit-modified');
+
+                    // エラーメッセージを削除
+                    if ($('#error-messages').length) {
+                        $('#error-messages').remove();
+                    }
 
                     // new-modifiedまたはedit-modifiedが1つもない場合は、一括登録ボタンを非活性
                     if ($('tr.new-modified').length === 0 && $('tr.edit-modified').length === 0) {
@@ -3133,6 +3205,7 @@ $(document).ready(function() {
                     // 対象業態
                     let targetBrand = response.target_brand;
                     let targetOrg = response.target_org;
+                    console.log(targetOrg);
 
 
                     // 編集画面処理
