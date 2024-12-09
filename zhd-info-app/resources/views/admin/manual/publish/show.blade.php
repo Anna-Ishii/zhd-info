@@ -174,7 +174,7 @@
                     <th class="text-center">AR</th>
                     <th class="text-center" colspan="2">店舗名</th>
                     <th class="text-center">既読状況</th>
-                    <th class="text-center">閲覧日時</th>
+                    <th class="text-center">最終閲覧日時</th>
                 </tr>
             </thead>
             <tbody>

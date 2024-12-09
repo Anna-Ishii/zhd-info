@@ -212,7 +212,9 @@ class MessageController extends Controller
             DB::beginTransaction();
             $message = Message::findOrFail($message_id);
             $message->putCrewRead($reading_crews);
-            $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message_id, [
+
+            // 既読をつける
+            $user->message()->updateExistingPivot($message_id, [
                 'read_flg' => true,
                 'readed_datetime' => Carbon::now(),
             ]);
