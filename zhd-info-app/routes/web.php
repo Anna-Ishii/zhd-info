@@ -115,6 +115,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('new', [AccountController::class, 'new'])->name('new');
             Route::post('new', [AccountController::class, 'store'])->name('new.store');
             Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+            Route::get('/organization', [AccountController::class,  'getOrganization']);
+            Route::get('/account-export', [AccountController::class, 'export'])->name('export');
         });
         Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'check.allowpage:account-admin'], function () {
             Route::get('/', [AdminAccountController::class, 'index'])->name('index');
