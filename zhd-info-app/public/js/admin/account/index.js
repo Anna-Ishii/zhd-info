@@ -15,7 +15,7 @@ $(document).ready(function () {
     let DSWidth = th0Width;
     let BLWidth = DSWidth + th1Width;
     let ARWidth = BLWidth + th2Width;
-    let shopIDWidth = ARWidth + th3Width;
+    let shopIDWidth = ARWidth + th3Width + 1;
     let shopNameWidth = shopIDWidth + th4Width;
 
     // テーブルの横スクロールの位置取得
