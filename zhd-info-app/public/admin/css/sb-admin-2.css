@@ -919,6 +919,16 @@ table.account {
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
+    border: 1px solid #000 !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+table.account th,
+table.account td {
+    border: 1px solid #000 !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
 }
 
 /* 縦スクロール */
