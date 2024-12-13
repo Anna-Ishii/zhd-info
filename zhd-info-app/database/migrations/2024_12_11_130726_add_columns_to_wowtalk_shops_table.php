@@ -18,10 +18,6 @@ return new class extends Migration
             if (Schema::hasColumn('wowtalk_shops', 'notification_target')) {
                 $table->renameColumn('notification_target', 'notification_target1');
             }
-            $table->string('wowtalk2_id')->nullable()->after('wowtalk1_id');
-            $table->boolean('notification_target2')->default(false)->after('notification_target1');
-            $table->boolean('business_notification1')->default(false)->after('notification_target2');
-            $table->boolean('business_notification2')->default(false)->after('business_notification1');
         });
     }
 
@@ -37,10 +33,6 @@ return new class extends Migration
             if (Schema::hasColumn('wowtalk_shops', 'notification_target1')) {
                 $table->renameColumn('notification_target1', 'notification_target');
             }
-            $table->dropColumn('wowtalk2_id');
-            $table->dropColumn('notification_target2');
-            $table->dropColumn('business_notification1');
-            $table->dropColumn('business_notification2');
         });
     }
 };
