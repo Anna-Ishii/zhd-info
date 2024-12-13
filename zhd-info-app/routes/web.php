@@ -115,6 +115,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('new', [AccountController::class, 'new'])->name('new');
             Route::post('new', [AccountController::class, 'store'])->name('new.store');
             Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+            Route::post('/wowtalkAlertUpdate', [AccountController::class, 'wowtalkAlertUpdate'])->name('wowtalkAlertUpdate');
             Route::get('/organization', [AccountController::class,  'getOrganization']);
             Route::get('/account-export', [AccountController::class, 'export'])->name('export');
         });

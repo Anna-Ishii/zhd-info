@@ -11,6 +11,7 @@ use App\Models\Organization2;
 use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\WowtalkShop;
 use App\Exports\ShopAccountExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -51,8 +52,7 @@ class AccountController extends Controller
         }
 
         // ユーザー情報を取得
-        $users =
-            User::query()
+        $users = User::query()
             ->select(
                 'users.id',
                 'shops.name as shop_name',
@@ -64,22 +64,15 @@ class AccountController extends Controller
                 'wowtalk_shops.wowtalk2_id',
                 'wowtalk_shops.notification_target2',
                 'wowtalk_shops.business_notification2',
-                'users_roles.DM_id',
-                'users_roles.DM_name',
-                'users_roles.DM_email',
-                'users_roles.DM_view_notification',
-                'users_roles.BM_id',
-                'users_roles.BM_name',
-                'users_roles.BM_email',
-                'users_roles.BM_view_notification',
-                'users_roles.AM_id',
-                'users_roles.AM_name',
-                'users_roles.AM_email',
-                'users_roles.AM_view_notification'
+                'organization3.name as org3_name',
+                'organization4.name as org4_name',
+                'organization5.name as org5_name'
             )
             ->leftJoin('shops', 'users.shop_id', '=', 'shops.id')
             ->leftJoin('wowtalk_shops', 'users.shop_id', '=', 'wowtalk_shops.shop_id')
-            ->leftJoin('users_roles', 'users.id', '=', 'users_roles.user_id')
+            ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+            ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+            ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('shops.name', $q);
             })
@@ -110,15 +103,14 @@ class AccountController extends Controller
             })
             ->when(isset($message_freeword), function ($query) use ($message_freeword) {
                 $query->where(function ($query) use ($message_freeword) {
-                    $query->where('users_roles.DM_id', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('users_roles.BM_id', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('users_roles.AM_id', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('users_roles.DM_name', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('users_roles.BM_name', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('users_roles.AM_name', 'like', '%' . $message_freeword . '%');
+                    $query->where('wowtalk_shops.wowtalk1_id', 'like', '%' . $message_freeword . '%')
+                        ->orWhere('wowtalk_shops.wowtalk2_id', 'like', '%' . $message_freeword . '%');
                 });
             })
-            ->orderBy('users.created_at', 'desc')
+            ->orderBy('organization3.order_no')
+            ->orderBy('organization4.order_no')
+            ->orderBy('organization5.order_no')
+            ->orderBy('users.shop_id')
             ->paginate(50)
             ->appends(request()->query());
 
@@ -133,39 +125,16 @@ class AccountController extends Controller
             $organization_list["BL"] = $organization1->getOrganization5();
         }
 
-        $organization_ids = $users->pluck('shop_id')->unique();
-
-        $org3_data = DB::table('shops')
-            ->select('shops.id as shop_id', 'organization3.name as org3_name')
-            ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
-            ->whereIn('shops.id', $organization_ids)
-            ->get()
-            ->groupBy('shop_id');
-
-        $org4_data = DB::table('shops')
-            ->select('shops.id as shop_id', 'organization4.name as org4_name')
-            ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
-            ->whereIn('shops.id', $organization_ids)
-            ->get()
-            ->groupBy('shop_id');
-
-        $org5_data = DB::table('shops')
-            ->select('shops.id as shop_id', 'organization5.name as org5_name')
-            ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
-            ->whereIn('shops.id', $organization_ids)
-            ->get()
-            ->groupBy('shop_id');
-
         foreach ($users as $user) {
             $shop_id = $user->shop_id;
-            if (isset($org3_data[$shop_id])) {
-                $organizations[$shop_id]['DS'] = $org3_data[$shop_id];
+            if ($user->org3_name) {
+                $organizations[$shop_id]['DS'] = collect([['org3_name' => $user->org3_name]]);
             }
-            if (isset($org4_data[$shop_id])) {
-                $organizations[$shop_id]['AR'] = $org4_data[$shop_id];
+            if ($user->org4_name) {
+                $organizations[$shop_id]['AR'] = collect([['org4_name' => $user->org4_name]]);
             }
-            if (isset($org5_data[$shop_id])) {
-                $organizations[$shop_id]['BL'] = $org5_data[$shop_id];
+            if ($user->org5_name) {
+                $organizations[$shop_id]['BL'] = collect([['org5_name' => $user->org5_name]]);
             }
         }
 
@@ -175,9 +144,6 @@ class AccountController extends Controller
             $user->business_notification1 = $user->business_notification1 ? '〇' : '';
             $user->notification_target2 = $user->notification_target2 ? '〇' : '';
             $user->business_notification2 = $user->business_notification2 ? '〇' : '';
-            $user->DM_view_notification = $user->DM_view_notification ? '〇' : '';
-            $user->BM_view_notification = $user->BM_view_notification ? '〇' : '';
-            $user->AM_view_notification = $user->AM_view_notification ? '〇' : '';
             return $user;
         });
 
@@ -259,6 +225,48 @@ class AccountController extends Controller
         $data = $request->json()->all();
         User::whereIn('id', $data['user_id'])->delete();
         return response()->json(['message' => '削除しました'], status: 200);
+    }
+
+    // WowTalkのアラート設定を更新
+    public function wowtalkAlertUpdate(Request $request)
+    {
+        try {
+            DB::beginTransaction();
+
+            $wowtalkAlertData = json_decode($request->input('wowtalkAlertData'), true);
+
+            foreach ($wowtalkAlertData as $data) {
+                $wowtalkShop = WowtalkShop::where('shop_id', $data['shop_id'])->first();
+
+                if (!$wowtalkShop) {
+                    continue;
+                }
+
+                $wowtalkShop->update([
+                    'notification_target1' => $data['WT1_status'],
+                    'business_notification1' => $data['WT1_send'],
+                    'notification_target2' => $data['WT2_status'],
+                    'business_notification2' => $data['WT2_send'],
+                    'updated_at' => now()
+                ]);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'status' => 'success',
+                'message' => '更新が完了しました。'
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return response()->json([
+                'status' => 'error',
+                'message' => '更新中にエラーが発生しました。',
+                'errors' => ['system' => [$e->getMessage()]]
+            ], 500);
+        }
     }
 
     public function export(Request $request)
