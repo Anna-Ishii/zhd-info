@@ -59,8 +59,6 @@
 
 @section('content')
     <div id="page-wrapper">
-        {{-- @livewire('admin.account-search-form')
-        </form> --}}
 
         <!-- 絞り込み部分 -->
         <form method="get" class="mb24">
@@ -116,6 +114,13 @@
         <form>
             <div class="pagenation-top">
                 @include('common.admin.pagenation', ['objects' => $users])
+                <div>
+                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                        <div class="account-edit-btn-group">
+                            <p class="accountEditBtn btn btn-admin" onclick="this.style.pointerEvents = 'none';">編集</p>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div class="tableInner" style="height: 70vh;">
@@ -130,9 +135,6 @@
                             <th class="head1" colspan="2" nowrap>店舗</th>
                             <th class="head1" colspan="3" nowrap>WowTalk1</th>
                             <th class="head2" colspan="3" nowrap>WowTalk2</th>
-                            <th class="head1" colspan="4" nowrap>DM</th>
-                            <th class="head1" colspan="4" nowrap>BM</th>
-                            <th class="head1" colspan="4" nowrap>AM</th>
                         </tr>
                         <tr>
                             <!-- 店舗のサブヘッダー -->
@@ -140,54 +142,63 @@
                             <th class="head1" nowrap data-column="4">店舗名</th>
                             <!-- WowTalk1のサブヘッダー -->
                             <th class="head1" nowrap>ID</th>
-                            <th class="head1" nowrap>閲覧状況通知</th>
-                            <th class="head1" nowrap>業連配信通知</th>
+                            <th class="head1 head-WT1_status" nowrap>閲覧状況通知<br class="WT1StatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT1StatusAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
+                            <th class="head1 head-WT1_send" nowrap>業連配信通知<br class="WT1SendBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT1SendAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
                             <!-- WowTalk2のサブヘッダー -->
                             <th class="head2" nowrap>ID</th>
-                            <th class="head2" nowrap>閲覧状況通知</th>
-                            <th class="head2" nowrap>業連配信通知</th>
-                            <!-- DMのサブヘッダー -->
-                            <th class="head1" nowrap>ID</th>
-                            <th class="head1" nowrap>氏名</th>
-                            <th class="head1" nowrap>メール</th>
-                            <th class="head1" nowrap>閲覧状況通知</th>
-                            <!-- BMのサブヘッダー -->
-                            <th class="head1" nowrap>ID</th>
-                            <th class="head1" nowrap>氏名</th>
-                            <th class="head1" nowrap>メール</th>
-                            <th class="head1" nowrap>閲覧状況通知</th>
-                            <!-- AMのサブヘッダー -->
-                            <th class="head1" nowrap>ID</th>
-                            <th class="head1" nowrap>氏名</th>
-                            <th class="head1" nowrap>メール</th>
-                            <th class="head1" nowrap>閲覧状況通知</th>
+                            <th class="head2 head-WT2_status" nowrap>閲覧状況通知<br class="WT2StatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT2StatusAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
+                            <th class="head2 head-WT2_send" nowrap>業連配信通知<br class="WT2SendBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT2SendAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody>
                         @foreach ($users as $u)
-                            <tr class="">
+                            <tr data-shop_id="{{ $u->shop_id }}" class="">
                                 <!-- DS -->
                                 <td class="label-DS" nowrap>
-                                    @if(isset($organizations[$u->shop_id]['DS']))
-                                        @foreach($organizations[$u->shop_id]['DS'] as $ds)
-                                            {{ $ds->org3_name }}
+                                    @if (isset($organizations[$u->shop_id]['DS']))
+                                        @foreach ($organizations[$u->shop_id]['DS'] as $ds)
+                                            {{ $ds['org3_name'] }}
                                         @endforeach
                                     @endif
                                 </td>
                                 <!-- BL -->
                                 <td class="label-BL" nowrap>
-                                    @if(isset($organizations[$u->shop_id]['BL']))
-                                        @foreach($organizations[$u->shop_id]['BL'] as $bl)
-                                            {{ $bl->org5_name }}
+                                    @if (isset($organizations[$u->shop_id]['BL']))
+                                        @foreach ($organizations[$u->shop_id]['BL'] as $bl)
+                                            {{ $bl['org5_name'] }}
                                         @endforeach
                                     @endif
                                 </td>
                                 <!-- AR -->
                                 <td class="label-AR" nowrap>
-                                    @if(isset($organizations[$u->shop_id]['AR']))
-                                        @foreach($organizations[$u->shop_id]['AR'] as $ar)
-                                            {{ $ar->org4_name }}
+                                    @if (isset($organizations[$u->shop_id]['AR']))
+                                        @foreach ($organizations[$u->shop_id]['AR'] as $ar)
+                                            {{ $ar['org4_name'] }}
                                         @endforeach
                                     @endif
                                 </td>
@@ -196,27 +207,24 @@
                                 <td class="label-shop_name" nowrap>{{ $u->shop_name }}</td>
                                 <!-- WowTalk1 -->
                                 <td class="label-WT1_id" nowrap>{{ $u->wowtalk1_id }}</td>
-                                <td class="label-WT1_status" nowrap>{{ $u->notification_target1 }}</td>
-                                <td class="label-WT1_send" nowrap>{{ $u->business_notification1 }}</td>
+                                <td class="label-WT1_status" nowrap>
+                                    <span class="WT1_status-select"
+                                        value="{{ $u->notification_target1 == '〇' ? 'selected' : '' }}">{{ $u->notification_target1 }}</span>
+                                </td>
+                                <td class="label-WT1_send" nowrap>
+                                    <span class="WT1_send-select"
+                                        value="{{ $u->business_notification1 == '〇' ? 'selected' : '' }}">{{ $u->business_notification1 }}</span>
+                                </td>
                                 <!-- WowTalk2 -->
                                 <td class="label-WT2_id" nowrap>{{ $u->wowtalk2_id }}</td>
-                                <td class="label-WT2_status" nowrap>{{ $u->notification_target2 }}</td>
-                                <td class="label-WT2_send" nowrap>{{ $u->business_notification2 }}</td>
-                                <!-- DM -->
-                                <td class="label-DM_id" nowrap>{{ $u->DM_id }}</td>
-                                <td class="label-DM_name" nowrap>{{ $u->DM_name }}</td>
-                                <td class="label-DM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->DM_email }}</a></td>
-                                <td class="label-DM_view" nowrap>{{ $u->DM_view_notification }}</td>
-                                <!-- BM -->
-                                <td class="label-BM_id" nowrap>{{ $u->BM_id }}</td>
-                                <td class="label-BM_name" nowrap>{{ $u->BM_name }}</td>
-                                <td class="label-BM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->BM_email }}</a></td>
-                                <td class="label-BM_view" nowrap>{{ $u->BM_view_notification }}</td>
-                                <!-- AM -->
-                                <td class="label-AM_id" nowrap>{{ $u->AM_id }}</td>
-                                <td class="label-AM_name" nowrap>{{ $u->AM_name }}</td>
-                                <td class="label-AM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->AM_email }}</a></td>
-                                <td class="label-AM_view" nowrap>{{ $u->AM_view_notification }}</td>
+                                <td class="label-WT2_status" nowrap>
+                                    <span class="WT2_status-select"
+                                        value="{{ $u->notification_target2 == '〇' ? 'selected' : '' }}">{{ $u->notification_target2 }}</span>
+                                </td>
+                                <td class="label-WT2_send" nowrap>
+                                    <span class="WT2_send-select"
+                                        value="{{ $u->business_notification2 == '〇' ? 'selected' : '' }}">{{ $u->business_notification2 }}</span>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
