@@ -63,6 +63,7 @@ class ShopAccountExport implements
             ->select(
                 'users.id',
                 'shops.name as shop_name',
+                'shops.shop_code',
                 'users.email',
                 'users.shop_id',
                 'wowtalk_shops.wowtalk1_id',
@@ -92,7 +93,7 @@ class ShopAccountExport implements
             ->orderBy('organization3.order_no')
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
-            ->orderBy('users.shop_id')
+            ->orderBy('shops.shop_code')
             ->get();
 
         // 組織情報を取得

@@ -98,14 +98,13 @@ class AccountController extends Controller
             ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                 $query->where(function ($query) use ($shop_freeword) {
                     $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
-                        ->orWhere(DB::raw('SUBSTRING(shops.id, -4)'), 'LIKE', '%' . $shop_freeword . '%')
-                        ->orWhere('shops.shop_code', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%'); // 追加部分
+                        ->orWhere('shops.shop_code', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%');
                 });
             })
             ->orderBy('organization3.order_no')
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
-            ->orderBy('users.shop_id')
+            ->orderBy('shops.shop_code')
             ->paginate(5000)
             ->appends(request()->query());
 

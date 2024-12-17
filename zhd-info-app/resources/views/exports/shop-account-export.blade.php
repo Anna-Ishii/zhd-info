@@ -11,7 +11,7 @@
         </tr>
         <tr>
             <!-- 店舗のサブヘッダー -->
-            <th class="head1" style="background-color: #d1daef;">ID</th>
+            <th class="head1" style="background-color: #d1daef;">コード</th>
             <th class="head1" style="background-color: #d1daef;">店舗名</th>
             <!-- WowTalk1のサブヘッダー -->
             <th class="head1" style="background-color: #d1daef;">ID</th>
@@ -51,7 +51,7 @@
                     @endif
                 </td>
                 <!-- 店舗 -->
-                <td class="label-shop_id" style="text-align: left;">{{ $u->shop_id }}</td>
+                <td class="label-shop_id" style="text-align: left;">{{ $u->shop_code }}</td>
                 <td class="label-shop_name" style="text-align: left;">{{ $u->shop_name }}</td>
                 <!-- WowTalk1 -->
                 <td class="label-WT1_id" style="text-align: left;">{{ $u->wowtalk1_id }}</td>
