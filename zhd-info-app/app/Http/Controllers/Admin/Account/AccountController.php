@@ -30,7 +30,6 @@ class AccountController extends Controller
         // request
         $org = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
-        $message_freeword = $request->input('message_freeword');
 
         $organization1_id = $request->input('organization1', $organization1_list[0]->id);
         $organization1 = Organization1::find($organization1_id);
@@ -56,6 +55,7 @@ class AccountController extends Controller
             ->select(
                 'users.id',
                 'shops.name as shop_name',
+                'shops.shop_code',
                 'users.email',
                 'users.shop_id',
                 'wowtalk_shops.wowtalk1_id',
@@ -98,20 +98,15 @@ class AccountController extends Controller
             ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                 $query->where(function ($query) use ($shop_freeword) {
                     $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
-                        ->orwhere(DB::raw('SUBSTRING(shops.id, -4)'), 'LIKE', '%' . $shop_freeword . '%');
-                });
-            })
-            ->when(isset($message_freeword), function ($query) use ($message_freeword) {
-                $query->where(function ($query) use ($message_freeword) {
-                    $query->where('wowtalk_shops.wowtalk1_id', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('wowtalk_shops.wowtalk2_id', 'like', '%' . $message_freeword . '%');
+                        ->orWhere(DB::raw('SUBSTRING(shops.id, -4)'), 'LIKE', '%' . $shop_freeword . '%')
+                        ->orWhere('shops.shop_code', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%'); // 追加部分
                 });
             })
             ->orderBy('organization3.order_no')
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
             ->orderBy('users.shop_id')
-            ->paginate(50)
+            ->paginate(5000)
             ->appends(request()->query());
 
         // 組織情報を取得

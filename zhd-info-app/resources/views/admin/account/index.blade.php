@@ -96,10 +96,6 @@
                     <input type="text" name="shop_freeword" class="form-control"
                         value="{{ request()->input('shop_freeword') }}">
                 </div>
-                <div class="input-group col-lg-1 spMb16">
-                    <input name="message_freeword" value="{{ request()->input('message_freeword') }}" class="form-control"
-                        placeholder="キーワードを入力してください" />
-                </div>
                 <div class="input-group">
                     <button class="btn btn-admin">検索</button>
                 </div>
