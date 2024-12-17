@@ -38,8 +38,6 @@ class ShopAccountExport implements
 
         // request
         $org = $this->request->input('org');
-        $shop_freeword = $this->request->input('shop_freeword');
-        $message_freeword = $this->request->input('message_freeword');
 
         $organization1_id = $this->request->input('organization1', $organization1_list[0]->id);
         $organization1 = Organization1::find($organization1_id);
@@ -85,43 +83,17 @@ class ShopAccountExport implements
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('shops.name', $q);
             })
-            ->when(!empty($shops), function ($query) use ($shops) {
-                $query->whereIn('users.shop_id', $shops);
-            })
             ->when(isset($roll), function ($query) use ($roll) {
                 $query->where('roll_id', '=', $roll);
             })
             ->when(isset($organization1_id), function ($query) use ($organization1_id) {
                 $query->where('shops.organization1_id', '=', $organization1_id);
             })
-            ->where('shops.organization1_id', '=', $organization1->id)
-            ->when(isset($org['DS']), function ($query) use ($org) {
-                $query->where('shops.organization3_id', '=', $org['DS']);
-            })
-            ->when(isset($org['AR']), function ($query) use ($org) {
-                $query->where('shops.organization4_id', '=', $org['AR']);
-            })
-            ->when(isset($org['BL']), function ($query) use ($org) {
-                $query->where('shops.organization5_id', '=', $org['BL']);
-            })
-            ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
-                $query->where(function ($query) use ($shop_freeword) {
-                    $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
-                        ->orwhere(DB::raw('SUBSTRING(shops.id, -4)'), 'LIKE', '%' . $shop_freeword . '%');
-                });
-            })
-            ->when(isset($message_freeword), function ($query) use ($message_freeword) {
-                $query->where(function ($query) use ($message_freeword) {
-                    $query->where('wowtalk_shops.wowtalk1_id', 'like', '%' . $message_freeword . '%')
-                        ->orWhere('wowtalk_shops.wowtalk2_id', 'like', '%' . $message_freeword . '%');
-                });
-            })
             ->orderBy('organization3.order_no')
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
             ->orderBy('users.shop_id')
-            ->paginate(50)
-            ->appends(request()->query());
+            ->get();
 
         // 組織情報を取得
         if ($organization1->isExistOrg3()) {
@@ -148,7 +120,7 @@ class ShopAccountExport implements
         }
 
         // 閲覧状況通知、業務連絡通知のチェックを〇に変換
-        $users->getCollection()->transform(function ($user) {
+        $users->transform(function ($user) {
             $user->notification_target1 = $user->notification_target1 ? '〇' : '';
             $user->business_notification1 = $user->business_notification1 ? '〇' : '';
             $user->notification_target2 = $user->notification_target2 ? '〇' : '';
