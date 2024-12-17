@@ -134,7 +134,7 @@
                         </tr>
                         <tr>
                             <!-- 店舗のサブヘッダー -->
-                            <th class="head1" nowrap data-column="3">ID</th>
+                            <th class="head1" nowrap data-column="3">コード</th>
                             <th class="head1" nowrap data-column="4">店舗名</th>
                             <!-- WowTalk1のサブヘッダー -->
                             <th class="head1" nowrap>ID</th>
@@ -199,7 +199,7 @@
                                     @endif
                                 </td>
                                 <!-- 店舗 -->
-                                <td class="label-shop_id" nowrap>{{ $u->shop_id }}</td>
+                                <td class="label-shop_id" nowrap>{{ $u->shop_code }}</td>
                                 <td class="label-shop_name" nowrap>{{ $u->shop_name }}</td>
                                 <!-- WowTalk1 -->
                                 <td class="label-WT1_id" nowrap>{{ $u->wowtalk1_id }}</td>
