@@ -362,6 +362,10 @@ class MessagePublishController extends Controller
                 return $errorLogs;
             }
 
+            // 業連配信通知フラグを更新
+            $_message->is_broadcast_notification = true;
+            $_message->save();
+
             return "WowTalk通知完了";
         } else {
             return "WowTalk通知なし";
