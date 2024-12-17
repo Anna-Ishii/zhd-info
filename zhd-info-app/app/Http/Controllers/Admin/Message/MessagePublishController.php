@@ -36,6 +36,7 @@ use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
+use App\Utils\SendWowTalkApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -273,6 +274,98 @@ class MessagePublishController extends Controller
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
         ]);
+    }
+
+    // WowTalk通知の処理
+    public function sendWowtalkNotification($message_id)
+    {
+        // 現在の東京時刻を取得
+        $currentDate = Carbon::now('Asia/Tokyo');
+        // 現在掲載中と掲載終了を取得
+        $_message = Message::where('id', $message_id)->where('editing_flg', false)->first();
+        $errorLogs = [];
+
+        // 掲載開始日または登録日が存在しない場合の処理
+        if (!$_message || !$_message->start_datetime || !$_message->created_at) {
+            return $errorLogs[] = "WowTalk通知なし";
+        }
+
+        if ($_message->end_datetime) {
+            // 掲載終了日が今日よりも古い場合の処理
+            if ($currentDate->gt(Carbon::parse($_message->end_datetime))) {
+                return $errorLogs[] = "WowTalk通知なし";
+            }
+        }
+
+        // 掲載開始日が現在日時以前の場合に通知
+        if ($_message->start_datetime->lessThanOrEqualTo($currentDate)) {
+            // 通知対象の店舗とWowTalk IDを取得
+            $wowtalk_data = DB::table('wowtalk_shops')
+                ->join('message_shop', 'wowtalk_shops.shop_id', '=', 'message_shop.shop_id')
+                ->where('message_shop.message_id', $_message->id)
+                ->where(function ($query) {
+                    $query->where(function ($subQuery) {
+                        $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
+                                ->where('wowtalk_shops.notification_target1', true);
+                    })
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
+                                ->where('wowtalk_shops.notification_target2', true);
+                    });
+                })
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+                ->get()
+                ->map(function ($result) {
+                    return [
+                        'shop_id' => $result->shop_id,
+                        'wowtalk1_id' => $result->wowtalk1_id,
+                        'wowtalk2_id' => $result->wowtalk2_id,
+                    ];
+                })
+                ->toArray();
+
+            // 通知対象のWowTalkIDがない場合
+            if (empty($wowtalk_data)) {
+                return $errorLogs[] = "WowTalk通知なし";
+            }
+
+            // エラーログのための配列
+            foreach ($wowtalk_data as $data) {
+                // メッセージ内容を生成
+                $messageContent = "業連が配信されました。確認してください。\n";
+                $messageContent .= "・業連名：{$_message->title}\n";
+                // $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+                $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+
+                // // メッセージ内容が800文字を超える場合はエラーをスロー
+                // if (mb_strlen($messageContent) > 800) {
+                //     throw new \Exception("Message content exceeds 800 characters.");
+                // }
+
+                // WowTalk APIを呼び出す
+                foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
+                    if (!empty($data[$wowtalkIdKey])) {
+                        try {
+                            $apiResult = SendWowTalkApi::sendWowTalkApiRequest([$data[$wowtalkIdKey]], $messageContent);
+                            if (is_array($apiResult)) {
+                                $errorLogs[] = $this->createErrorLog($_message, $data, $data[$wowtalkIdKey], $apiResult, $messageContent);
+                            }
+                        } catch (\Exception $e) {
+                            $errorLogs[] = "店舗ID: " . $data['shop_id'] . " WowTalk ID: " . $data[$wowtalkIdKey] . " エラーメッセージ: " . $e->getMessage();
+                        }
+                    }
+                }
+            }
+
+            // エラーログがある場合はエラーログを返す
+            if (!empty($errorLogs)) {
+                return $errorLogs;
+            }
+
+            return "WowTalk通知完了";
+        } else {
+            return "WowTalk通知なし";
+        }
     }
 
     // 閲覧率の更新処理
@@ -791,6 +884,12 @@ class MessagePublishController extends Controller
             }
 
             DB::commit();
+
+            // WowTalk通知の処理
+            if (isset($request->wowtalk_notification) && $request->wowtalk_notification === 'on') {
+                $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
+                dd($wowtalk_notification_result);
+            }
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $organization1->id]));
@@ -1533,6 +1632,12 @@ class MessagePublishController extends Controller
             }
             $message->tag()->sync($tag_ids);
             DB::commit();
+
+            // WowTalk通知の処理
+            if (isset($request->wowtalk_notification) && $request->wowtalk_notification === 'on') {
+                $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
+                dd($wowtalk_notification_result);
+            }
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $message->organization1_id]));
