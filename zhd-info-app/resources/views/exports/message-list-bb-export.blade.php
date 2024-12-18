@@ -16,6 +16,7 @@
             <th>状態</th>
             <th>対象業態</th>
             <th>配信店舗</th>
+            <th>WowTalk通知</th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,7 @@
                 <td>{{$message->status->text()}}</td>
                 <td>{{$message->brand_name}}</td>
                 <td>{{$message->shop_names}}</td>
+                <td>{{$message->is_broadcast_notification ? "〇" : ""}}</td>
             </tr>
         @endforeach
     </tbody>

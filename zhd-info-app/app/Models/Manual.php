@@ -15,7 +15,7 @@ use Mockery\Matcher\HasKey;
 class Manual extends Model
 {
     use WhereLike;
-    
+
     protected $table = 'manuals';
 
     protected $fillable =
@@ -29,6 +29,7 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'editing_flg',
+        'is_broadcast_notification',
         'organization1_id',
         'number',
         'updated_admin_id',
@@ -38,6 +39,7 @@ class Manual extends Model
 
     protected $casts = [
         'editing_flg' => 'boolean',
+        'is_broadcast_notification' => 'boolean',
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime'
     ];

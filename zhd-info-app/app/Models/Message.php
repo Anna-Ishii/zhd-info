@@ -29,6 +29,7 @@ class Message extends Model
         'create_admin_id',
         'emergency_flg',
         'editing_flg',
+        'is_broadcast_notification',
         'organization1_id',
         'number',
         'updated_admin_id',
@@ -40,6 +41,7 @@ class Message extends Model
     protected $casts = [
         'emergency_flg' => 'boolean',
         'editing_flg' => 'boolean',
+        'is_broadcast_notification' => 'boolean',
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime',
     ];

@@ -209,6 +209,7 @@
                             <th class="text-center" colspan="2">掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
                             <th class="text-center" nowrap>配信店舗数</th>
+                            <th class="text-center" nowrap>WowTalk通知</th>
                             <th class="text-center" colspan="3" nowrap>閲覧率</th>
                             <th class="text-center" colspan="2" nowrap>登録</th>
                             <th class="text-center" colspan="2" nowrap>更新</th>
@@ -313,6 +314,10 @@
                                         <div class="shop-edit-group">
                                             <span class="shop-count">{{ $message->shop_count }}</span>
                                         </div>
+                                    </td>
+                                    <!-- WowTalk通知 -->
+                                    <td class="label-notification-group">
+                                        <div class="wowtalk-notification-text">{{ $message->is_broadcast_notification ? 'あり' : 'なし' }}</div>
                                     </td>
                                     <!-- 閲覧率 -->
                                     @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)

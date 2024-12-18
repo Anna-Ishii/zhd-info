@@ -27,8 +27,10 @@ use App\Models\ManualViewRate;
 use App\Models\Organization1;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\WowTalkNotificationLog;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
+use App\Utils\SendWowTalkApi;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -194,6 +196,107 @@ class ManualPublishController extends Controller
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
         ]);
+    }
+
+    // WowTalk通知の処理
+    public function sendWowtalkNotification($manual_id)
+    {
+        // 現在の東京時刻を取得
+        $currentDate = Carbon::now('Asia/Tokyo');
+        // 現在掲載中と掲載終了を取得
+        $_manual = Manual::where('id', $manual_id)->where('editing_flg', false)->where('is_broadcast_notification', true)->first();
+        $errorLogs = [];
+
+        // 掲載開始日または登録日が存在しない場合の処理
+        if (!$_manual || !$_manual->start_datetime || !$_manual->created_at) {
+            return $errorLogs[] = "manual_id: " . $manual_id . " 掲載開始日または登録日が存在しない";
+        }
+
+        // 掲載開始日が今日よりも新しい場合の処理
+        if ($_manual->start_datetime->gt($currentDate)) {
+            return $errorLogs[] = "manual_id: " . $manual_id . " 掲載開始日が今日よりも新しい";
+        }
+
+        if ($_manual->end_datetime) {
+            // 掲載終了日が今日よりも古い場合の処理
+            if ($currentDate->gt(Carbon::parse($_manual->end_datetime))) {
+                return $errorLogs[] = "manual_id: " . $manual_id . " 掲載終了日が今日以前";
+            }
+        }
+
+        // 掲載開始日が現在日時以前の場合に通知
+        if ($_manual->start_datetime->lessThanOrEqualTo($currentDate)) {
+            // 通知対象の店舗とWowTalk IDを取得
+            $wowtalk_data = DB::table('wowtalk_shops')
+                ->join('manual_shop', 'wowtalk_shops.shop_id', '=', 'manual_shop.shop_id')
+                ->where('manual_shop.manual_id', $_manual->id)
+                ->where(function ($query) {
+                    $query->where(function ($subQuery) {
+                        $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
+                                ->where('wowtalk_shops.notification_target1', true);
+                    })
+                    ->orWhere(function ($subQuery) {
+                        $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
+                                ->where('wowtalk_shops.notification_target2', true);
+                    });
+                })
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+                ->get()
+                ->map(function ($result) {
+                    return [
+                        'shop_id' => $result->shop_id,
+                        'wowtalk1_id' => $result->wowtalk1_id,
+                        'wowtalk2_id' => $result->wowtalk2_id,
+                    ];
+                })
+                ->toArray();
+
+            // 通知対象のWowTalkIDがない場合
+            if (empty($wowtalk_data)) {
+                return $errorLogs[] = "manual_id: " . $manual_id . " 通知対象のWowTalkIDなし";
+            }
+
+            // エラーログのための配列
+            foreach ($wowtalk_data as $data) {
+                // メッセージ内容を生成
+                $messageContent = "マニュアルが配信されました。確認してください。\n";
+                $messageContent .= "・業連名：{$_manual->title}\n";
+                // $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+                $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+
+                // // メッセージ内容が800文字を超える場合はエラーをスロー
+                // if (mb_strlen($messageContent) > 800) {
+                //     throw new \Exception("Message content exceeds 800 characters.");
+                // }
+
+                // WowTalk APIを呼び出す
+                foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
+                    if (!empty($data[$wowtalkIdKey])) {
+                        try {
+                            $apiResult = SendWowTalkApi::sendWowTalkApiRequest([$data[$wowtalkIdKey]], $messageContent);
+                            if (is_array($apiResult)) {
+                                $errorLogs[] = $this->createErrorLog($_manual, $data, $data[$wowtalkIdKey], $apiResult, $messageContent);
+                            }
+                        } catch (\Exception $e) {
+                            $errorLogs[] = "manual_id: " . $manual_id . " 店舗ID: " . $data['shop_id'] . " WowTalk ID: " . $data[$wowtalkIdKey] . " エラーメッセージ: " . $e->getMessage();
+                        }
+                    }
+                }
+            }
+
+            // エラーログがある場合はエラーログを返す
+            if (!empty($errorLogs)) {
+                return $errorLogs;
+            }
+
+            // 業連配信通知フラグを更新
+            $_manual->is_broadcast_notification = false;
+            $_manual->save();
+
+            return [];
+        } else {
+            return "manual_id: " . $manual_id . " WowTalk通知なし";
+        }
     }
 
     // 閲覧率の更新処理
@@ -471,6 +574,8 @@ class ManualPublishController extends Controller
         $manual_params['organization1_id'] = $organization1->id;
         $manual_params['number'] = Manual::getCurrentNumber($organization1->id) + 1;
         $manual_params['editing_flg'] = isset($request->save);
+        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $is_broadcast_notification = $manual_params['is_broadcast_notification'];
 
         try {
             DB::beginTransaction();
@@ -579,6 +684,28 @@ class ManualPublishController extends Controller
             }
 
             DB::commit();
+
+            // WowTalk通知の処理
+            if ($is_broadcast_notification) {
+                $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
+
+                // WowTalk通知の結果をログに記録
+                $manualLog = new WowTalkNotificationLog();
+                $manualLog->log_type = 'manual';
+                $manualLog->command_name = 'sendWowtalkNotification';
+                $manualLog->started_at = Carbon::now();
+                $manualLog->status = empty($wowtalk_notification_result);
+                $manualLog->attempts = 1;
+
+                // エラーメッセージをログに記録
+                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+                    $manualLog->error_message = implode(', ', $wowtalk_notification_result);
+                } elseif (is_string($wowtalk_notification_result)) {
+                    $manualLog->error_message = $wowtalk_notification_result;
+                }
+
+                $manualLog->save();
+            }
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
@@ -817,6 +944,8 @@ class ManualPublishController extends Controller
         }
         $manual_params['updated_admin_id'] = $admin->id;
         $manual_params['editing_flg'] = isset($request->save) ? true : false;
+        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $is_broadcast_notification = $manual_params['is_broadcast_notification'];
 
 
         // 手順を登録する
@@ -996,6 +1125,29 @@ class ManualPublishController extends Controller
             $manual->tag()->sync($tag_ids);
 
             DB::commit();
+
+            // WowTalk通知の処理
+            if ($is_broadcast_notification) {
+                $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
+
+                // WowTalk通知の結果をログに記録
+                $manualLog = new WowTalkNotificationLog();
+                $manualLog->log_type = 'manual';
+                $manualLog->command_name = 'sendWowtalkNotification';
+                $manualLog->started_at = Carbon::now();
+                $manualLog->status = empty($wowtalk_notification_result);
+                $manualLog->attempts = 1;
+
+                // エラーメッセージをログに記録
+                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+                    $manualLog->error_message = implode(', ', $wowtalk_notification_result);
+                } elseif (is_string($wowtalk_notification_result)) {
+                    $manualLog->error_message = $wowtalk_notification_result;
+                }
+
+                $manualLog->save();
+            }
+
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));

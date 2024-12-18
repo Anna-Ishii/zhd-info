@@ -392,8 +392,12 @@
                 <div class="col-lg-4">
                     <label>
                         <input type="checkbox" name="wowtalk_notification" class="mr8"
-                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}>
-                        あり
+                            @if(request()->old())
+                                {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}
+                            @else
+                                {{ $message->is_broadcast_notification ? 'checked' : '' }}
+                            @endif
+                            >あり
                     </label>
                 </div>
             </div>
