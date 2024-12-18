@@ -32,6 +32,7 @@ use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
+use App\Models\WowTalkNotificationLog;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
@@ -282,18 +283,23 @@ class MessagePublishController extends Controller
         // 現在の東京時刻を取得
         $currentDate = Carbon::now('Asia/Tokyo');
         // 現在掲載中と掲載終了を取得
-        $_message = Message::where('id', $message_id)->where('editing_flg', false)->first();
+        $_message = Message::where('id', $message_id)->where('editing_flg', false)->where('is_broadcast_notification', true)->first();
         $errorLogs = [];
 
         // 掲載開始日または登録日が存在しない場合の処理
         if (!$_message || !$_message->start_datetime || !$_message->created_at) {
-            return $errorLogs[] = "WowTalk通知なし";
+            return $errorLogs[] = "message_id: " . $message_id . " 掲載開始日または登録日が存在しない";
+        }
+
+        // 掲載開始日が今日よりも新しい場合の処理
+        if ($_message->start_datetime->gt($currentDate)) {
+            return $errorLogs[] = "message_id: " . $message_id . " 掲載開始日が今日よりも新しい";
         }
 
         if ($_message->end_datetime) {
             // 掲載終了日が今日よりも古い場合の処理
             if ($currentDate->gt(Carbon::parse($_message->end_datetime))) {
-                return $errorLogs[] = "WowTalk通知なし";
+                return $errorLogs[] = "message_id: " . $message_id . " 掲載終了日が今日以前";
             }
         }
 
@@ -326,7 +332,7 @@ class MessagePublishController extends Controller
 
             // 通知対象のWowTalkIDがない場合
             if (empty($wowtalk_data)) {
-                return $errorLogs[] = "WowTalk通知なし";
+                return $errorLogs[] = "message_id: " . $message_id . " 通知対象のWowTalkIDなし";
             }
 
             // エラーログのための配列
@@ -351,7 +357,7 @@ class MessagePublishController extends Controller
                                 $errorLogs[] = $this->createErrorLog($_message, $data, $data[$wowtalkIdKey], $apiResult, $messageContent);
                             }
                         } catch (\Exception $e) {
-                            $errorLogs[] = "店舗ID: " . $data['shop_id'] . " WowTalk ID: " . $data[$wowtalkIdKey] . " エラーメッセージ: " . $e->getMessage();
+                            $errorLogs[] = "message_id: " . $message_id . " 店舗ID: " . $data['shop_id'] . " WowTalk ID: " . $data[$wowtalkIdKey] . " エラーメッセージ: " . $e->getMessage();
                         }
                     }
                 }
@@ -363,12 +369,12 @@ class MessagePublishController extends Controller
             }
 
             // 業連配信通知フラグを更新
-            $_message->is_broadcast_notification = true;
+            $_message->is_broadcast_notification = false;
             $_message->save();
 
-            return "WowTalk通知完了";
+            return [];
         } else {
-            return "WowTalk通知なし";
+            return "message_id: " . $message_id . " WowTalk通知なし";
         }
     }
 
@@ -779,6 +785,8 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = is_null($number) ? 1 : $number + 1;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         try {
             DB::beginTransaction();
@@ -890,9 +898,25 @@ class MessagePublishController extends Controller
             DB::commit();
 
             // WowTalk通知の処理
-            if (isset($request->wowtalk_notification) && $request->wowtalk_notification === 'on') {
+            if ($is_broadcast_notification) {
                 $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
-                dd($wowtalk_notification_result);
+
+                // WowTalk通知の結果をログに記録
+                $messageLog = new WowTalkNotificationLog();
+                $messageLog->log_type = 'message';
+                $messageLog->command_name = 'sendWowtalkNotification';
+                $messageLog->started_at = Carbon::now();
+                $messageLog->status = empty($wowtalk_notification_result);
+                $messageLog->attempts = 1;
+
+                // エラーメッセージをログに記録
+                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+                    $messageLog->error_message = implode(', ', $wowtalk_notification_result);
+                } elseif (is_string($wowtalk_notification_result)) {
+                    $messageLog->error_message = $wowtalk_notification_result;
+                }
+
+                $messageLog->save();
             }
 
             // 閲覧率の更新処理
@@ -927,6 +951,7 @@ class MessagePublishController extends Controller
         $title = $request->input('title') === 'null' ? null : $request->input('title');
         $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
         $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
 
         $start_datetime_input = $request->input('start_datetime');
         $end_datetime_input = $request->input('end_datetime');
@@ -975,6 +1000,7 @@ class MessagePublishController extends Controller
             'title' => $title,
             'category_id' => $category_id,
             'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
             'tag_name' => $tag_name,
             'start_datetime' => $start_datetime,
             'end_datetime' => $end_datetime,
@@ -1382,6 +1408,8 @@ class MessagePublishController extends Controller
 
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         // 手順を登録する
         $content_data = [];
@@ -1638,9 +1666,25 @@ class MessagePublishController extends Controller
             DB::commit();
 
             // WowTalk通知の処理
-            if (isset($request->wowtalk_notification) && $request->wowtalk_notification === 'on') {
+            if ($is_broadcast_notification) {
                 $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
-                dd($wowtalk_notification_result);
+
+                // WowTalk通知の結果をログに記録
+                $messageLog = new WowTalkNotificationLog();
+                $messageLog->log_type = 'message';
+                $messageLog->command_name = 'sendWowtalkNotification';
+                $messageLog->started_at = Carbon::now();
+                $messageLog->status = empty($wowtalk_notification_result);
+                $messageLog->attempts = 1;
+
+                // エラーメッセージをログに記録
+                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+                    $messageLog->error_message = implode(', ', $wowtalk_notification_result);
+                } elseif (is_string($wowtalk_notification_result)) {
+                    $messageLog->error_message = $wowtalk_notification_result;
+                }
+
+                $messageLog->save();
             }
 
             // 閲覧率の更新処理
@@ -1676,6 +1720,7 @@ class MessagePublishController extends Controller
         $title = $request->input('title') === 'null' ? null : $request->input('title');
         $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
         $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
 
         $start_datetime_input = $request->input('start_datetime');
         $end_datetime_input = $request->input('end_datetime');
@@ -1725,6 +1770,7 @@ class MessagePublishController extends Controller
             'title' => $title,
             'category_id' => $category_id,
             'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
             'tag_name' => $tag_name,
             'start_datetime' => $start_datetime,
             'end_datetime' => $end_datetime,
@@ -1971,7 +2017,8 @@ class MessagePublishController extends Controller
                         $end_datetime,
                         $status,
                         $brand,
-                        $shop
+                        $shop,
+                        $wowtalk_notification
                     ]
                 ) {
                     if (is_null($no)) {
@@ -1998,6 +2045,7 @@ class MessagePublishController extends Controller
                             'end_datetime'   => $end_datetime,
                             'brand'          => $brand_param,
                             'shops'          => $shop_param,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '',
                             'roll'           => $target_roll,
                             'is_new'         => true
                         ]);
@@ -2027,6 +2075,7 @@ class MessagePublishController extends Controller
                             'end_datetime'   => $end_datetime,
                             'brand'          => $brand_param,
                             'shops'          => $shop_param,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '',
                             'roll'           => $target_roll,
                             'is_new'         => false
                         ]);
@@ -2208,6 +2257,7 @@ class MessagePublishController extends Controller
                         $message->updated_admin_id   = null;
                         $message->organization1_id   = $organization1_id;
                         $message->editing_flg        = false;
+                        $message->is_broadcast_notification = isset($ms["is_broadcast_notification"]) && $ms["is_broadcast_notification"];
                         $message->save();
 
                         $message->roll()->attach($ms["roll"]);
@@ -2342,6 +2392,7 @@ class MessagePublishController extends Controller
                         $message->updated_at         = now();
                         if ($message->isDirty()) $message->updated_admin_id = $admin->id;
                         $message->editing_flg        = false;
+                        $message->is_broadcast_notification = isset($ms["is_broadcast_notification"]) && $ms["is_broadcast_notification"];
                         $message->save();
 
                         $message->roll()->sync($ms["roll"]);
