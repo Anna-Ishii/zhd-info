@@ -2001,6 +2001,11 @@ class MessagePublishController extends Controller
 
                 Excel::import(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
 
+                $last_message = Message::where('organization1_id', $organization1)
+                    ->orderBy('number', 'desc')
+                    ->value('number');
+                $number = $last_message ? $last_message + 1 : 1;
+
                 $array = [];
                 foreach (
                     $collection[0] as $key => [
@@ -2036,7 +2041,7 @@ class MessagePublishController extends Controller
                         $target_roll = $message->roll()->pluck('id')->toArray();
 
                         array_push($array, [
-                            'number'         => $key + 1 + $message->number,
+                            'number'         => $number,
                             'emergency_flg'  => isset($emergency_flg),
                             'category'       =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
                             'title'          => $title,
@@ -2050,6 +2055,8 @@ class MessagePublishController extends Controller
                             'roll'           => $target_roll,
                             'is_new'         => true
                         ]);
+
+                        $number++;
 
                     } else {
                         // noがある場合は更新
