@@ -137,7 +137,7 @@
                     <div>
                         <span>最終更新日時:
                             @if ($manual_list->isNotEmpty() && $manual_list->last()->last_updated)
-                                {{ \Carbon\Carbon::parse($manual_list->last()->last_updated)->format('Y-m-d H:i:s') }}
+                                {{ \Carbon\Carbon::parse($manual_list->last()->last_updated)->format('Y/m/d H:i:s') }}
                             @else
                                 更新なし
                             @endif

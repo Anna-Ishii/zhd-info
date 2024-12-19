@@ -9,7 +9,9 @@ use App\Models\Message;
 use App\Models\Shop;
 use App\Models\Organization1;
 use App\Models\WowTalkNotificationLog;
+use App\Models\WowtalkRecipient;
 use Illuminate\Support\Facades\Mail;
+use App\Utils\SESMailer;
 
 class WowTalkUnreadNotificationSenderCommand extends Command
 {
@@ -314,7 +316,10 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         $unreadMessageCounts = $crewMessageCounts - $crewMessageReadCounts;
 
         // メッセージ内容を生成
-        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
+        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n\n";
+        // $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+        $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+
         return $messageContent;
     }
 
@@ -407,7 +412,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
      */
     private function notifySystemAdmin($errorType, $requestData, $responseData)
     {
-        $to = ['yhonda@nssx.co.jp'];
+        // DBから通知対象のメールアドレスを取得
+        $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】WowTalk連携エラー';
 
         $message = "WowTalk連携でエラーが発生しました。ご確認ください。\n\n";
@@ -439,23 +445,11 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             $message .= "エラーメッセージ : $responseData\n";
         }
 
-        try {
-            // 直接エンコードした送信者名とメールアドレスを設定
-            $fromAddress = 'yhonda@nssx.co.jp';
-            $fromName = '=?UTF-8?B?' . base64_encode('システム管理者（NSS様、IT担当（佐溝様、北川様））') . '?=';
-
-            Mail::raw($message, function ($msg) use ($to, $subject, $fromAddress, $fromName) {
-                $msg->to($to)
-                    ->subject($subject)
-                    ->from($fromAddress, $fromName);
-            });
-
-            // メール送信成功時のログ
+        $mailer = new SESMailer();
+        if ($mailer->sendEmail($to, $subject, $message)) {
             $this->info("システム管理者にエラーメールを送信しました。");
-        } catch (\Exception $e) {
-            // メール送信失敗時のログ
-            $this->error("メール送信中にエラーが発生しました: " . $e->getMessage());
-            $this->error("メール送信エラー: " . $e->getMessage());
+        } else {
+            $this->error("メール送信中にエラーが発生しました。");
         }
     }
 
