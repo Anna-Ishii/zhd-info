@@ -231,11 +231,11 @@ class WowTalkNotificationSenderCommand extends Command
                 ->where(function ($query) {
                     $query->where(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
-                                ->where('wowtalk_shops.notification_target1', true);
+                                ->where('wowtalk_shops.business_notification1', true);
                     })
                     ->orWhere(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
-                                ->where('wowtalk_shops.notification_target2', true);
+                                ->where('wowtalk_shops.business_notification2', true);
                     });
                 })
                 ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
@@ -256,11 +256,11 @@ class WowTalkNotificationSenderCommand extends Command
                 ->where(function ($query) {
                     $query->where(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
-                                ->where('wowtalk_shops.notification_target1', true);
+                                ->where('wowtalk_shops.business_notification1', true);
                     })
                     ->orWhere(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
-                                ->where('wowtalk_shops.notification_target2', true);
+                                ->where('wowtalk_shops.business_notification2', true);
                     });
                 })
                 ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
@@ -428,10 +428,10 @@ class WowTalkNotificationSenderCommand extends Command
             $message .= "業態コード : " . ($requestData['org1_name'] ?? '') . "\n";
             $message .= "店舗コード : " . ($requestData['shop_code'] ?? '') . "\n";
             $message .= "店舗名 : " . ($requestData['shop_name'] ?? '') . "\n";
-            if ($requestData['data_type'] === 'message') {
+            if ($requestData['log_type'] === 'message') {
                 $message .= "業連ID : " . ($requestData['message_id'] ?? '') . "\n";
                 $message .= "業連名 : " . ($requestData['message_title'] ?? '') . "\n\n";
-            } elseif ($requestData['data_type'] === 'manual') {
+            } elseif ($requestData['log_type'] === 'manual') {
                 $message .= "マニュアルID : " . ($requestData['manual_id'] ?? '') . "\n";
                 $message .= "マニュアル名 : " . ($requestData['manual_title'] ?? '') . "\n\n";
             }
