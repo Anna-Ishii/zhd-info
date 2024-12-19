@@ -30,6 +30,7 @@ use Symfony\Component\Mime\MessageConverter;
 Route::get('/member/auth', [MemberAuthController::class, 'index'])->name('auth');
 Route::post('/member/auth', [MemberAuthController::class, 'login']);
 Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
+Route::post('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
@@ -64,8 +65,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('update-view-rates', [MessagePublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
+            Route::post('messageNewData/{organization1_id}', [MessagePublishController::class, 'messageNewData'])->name('messageNewData');
+            Route::post('messageStoreData', [MessagePublishController::class, 'messageStoreData'])->name('messageStoreData');
             Route::post('{organization1}/new', [MessagePublishController::class, 'store'])->name('new.store');
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
+            Route::post('messageEditData/{message_id}/{organization1_id}', [MessagePublishController::class, 'messageEditData'])->name('messageEditData')->where('message_id', '^\d+$');
+            Route::post('messageUpdateData', [MessagePublishController::class, 'messageUpdateData'])->name('messageUpdateData');
+            Route::post('messageAllSaveData', [MessagePublishController::class, 'messageAllSaveData'])->name('messageAllSaveData');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');

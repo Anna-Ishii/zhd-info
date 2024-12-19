@@ -85,11 +85,10 @@ class ManualController extends Controller
         $manual = Manual::find($manual_id);
 
         // 既読をつける
-        $member->manual()->wherePivot('read_flg', false)->updateExistingPivot($manual->id, [
+        $member->manual()->updateExistingPivot($manual->id, [
             'read_flg' => true,
             'readed_datetime' => Carbon::now(),
         ]);
-        //
 
         $contents = $manual->content;
         return view('manual.detail', [

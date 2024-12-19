@@ -1386,3 +1386,9 @@ input.check-selected {
     color: white;
     border: 1px solid #7e7e7e;
 }
+
+.btn.disabled {
+    pointer-events: none;
+    opacity: 0.5;
+    cursor: not-allowed;
+}

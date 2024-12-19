@@ -26,35 +26,35 @@ class AccountController extends Controller
         $q = $request->input('q');
 
         $shops = [];
-        if(is_null($request->input('shop'))){
-            if(isset($organization2)) {
-                $shops = Shop::select('id')->where('organization2_id', '=',$organization2)->get()->toArray();
+        if (is_null($request->input('shop'))) {
+            if (isset($organization2)) {
+                $shops = Shop::select('id')->where('organization2_id', '=', $organization2)->get()->toArray();
             }
-        }else{
+        } else {
             $shops[] = $request->input('shop');
         }
 
-        $users = 
+        $users =
             User::query()
             ->when(isset($q), function ($query) use ($q) {
                 $query->whereLike('name', $q);
             })
-            ->when(!empty($shops), function ($query) use ($shops){
+            ->when(!empty($shops), function ($query) use ($shops) {
                 $query->whereIn('shop_id', $shops);
             })
-            ->when(isset($roll), function ($query) use ($roll){
+            ->when(isset($roll), function ($query) use ($roll) {
                 $query->where('roll_id', '=', $roll);
             })
             ->orderBy('created_at', 'desc')
             ->paginate(50)
             ->appends(request()->query());
 
-        return view('admin.account.index',[
+        return view('admin.account.index', [
             'users' => $users,
             'roll_list' => $roll_list,
         ]);
     }
-    
+
     public function new()
     {
         $user_count = User::withTrashed()->max('id') + 1;
@@ -62,7 +62,7 @@ class AccountController extends Controller
         $organization2_list = Organization2::get();
         $shops = Shop::where('organization2_id', 1)->get();
         $roll_list = Roll::get();
-        return view('admin.account.new',[
+        return view('admin.account.new', [
             'user_count' => $user_count,
             'shops' => $shops,
             'organization1_list' => $organization1_list,
@@ -77,7 +77,7 @@ class AccountController extends Controller
 
         $params = $request->safe()->all();
         $params['password'] = Hash::make($request->password);
-        
+
         $roll_id = $request->roll_id;
         $shop = Shop::find($request->shop_id);
         $organization4_id = $shop->organization4_id;

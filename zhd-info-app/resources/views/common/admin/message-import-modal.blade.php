@@ -5,13 +5,13 @@
                 <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
                 <h4 class="modal-title">業務連絡csvインポート</h4>
             </div>
-            <div class="modal-body">           
-                <div>
+            <div class="modal-body" style="max-height: 400px; overflow-y: auto; overflow-x: hidden;">
+                <div class="modal-text">
                     csvデータを業務連絡に上書きします
                 </div>
                 <form class="form-horizontal">
                     <input type="hidden" name="organization1" value="{{$organization1->id}}">
-                    <div class="form-group">
+                    <div class="form-group fileImport">
                         <label class="col-sm-2 control-label">csv添付<span class="text-danger required">*<span></label>
                         <div class="col-sm-9">
                             <label class="inputFile form-control">
@@ -28,7 +28,7 @@
                             <span class="text-danger required">*</span>：必須項目
                         </div>
                         <div class="col-sm-2 col-sm-offset-6 control-label">
-                            <input type="button" class="btn btn-admin" value="インポート" disabled>
+                            <input type="button" class="btn btn-admin" value="開く" disabled>
                         </div>
                     </div>
                 </form>
