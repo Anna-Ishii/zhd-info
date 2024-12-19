@@ -246,6 +246,7 @@ class MessagePublishController extends Controller
             // セッションにデータを保存
             session()->put('message_list', $message_list);
         }
+
         // 店舗数をカウント
         if ($message_list) {
             // すべてのメッセージIDを取得
@@ -2506,6 +2507,28 @@ class MessagePublishController extends Controller
                                 'join_flg'       => 'single'
                             ]);
                         }
+                    }
+
+                    // WowTalk通知の処理
+                    if ($message->is_broadcast_notification) {
+                        $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
+
+                        // WowTalk通知の結果をログに記録
+                        $messageLog = new WowTalkNotificationLog();
+                        $messageLog->log_type = 'message';
+                        $messageLog->command_name = 'sendWowtalkNotification';
+                        $messageLog->started_at = Carbon::now();
+                        $messageLog->status = empty($wowtalk_notification_result);
+                        $messageLog->attempts = 1;
+
+                        // エラーメッセージをログに記録
+                        if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+                            $messageLog->error_message = implode(', ', $wowtalk_notification_result);
+                        } elseif (is_string($wowtalk_notification_result)) {
+                            $messageLog->error_message = $wowtalk_notification_result;
+                        }
+
+                        $messageLog->save();
                     }
 
                     // 閲覧率の更新処理
