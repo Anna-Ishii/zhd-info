@@ -120,12 +120,16 @@ class MessageListBBExport implements
                     }
                 })
                 ->join('admin', 'create_admin_id', '=', 'admin.id')
-                ->orderBy('messages.number', 'desc')
+                ->orderBy('messages.number', 'asc')
                 ->get();
 
         } else {
             // 一部ページのデータをエクスポート
             $message_list = session('message_list');
+
+            if ($message_list) {
+                $message_list = $message_list->sortBy('number');
+            }
         }
 
         // 店舗を取得
