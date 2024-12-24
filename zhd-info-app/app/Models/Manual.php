@@ -39,7 +39,6 @@ class Manual extends Model
 
     protected $casts = [
         'editing_flg' => 'boolean',
-        'is_broadcast_notification' => 'boolean',
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime'
     ];
@@ -311,5 +310,15 @@ class Manual extends Model
 
     public static function getCurrentNumber($organization1_id): Int{
         return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
+    }
+
+    public function getIsBroadcastNotificationAttribute()
+    {
+        $statusMapping = [
+            0 => 'なし',
+            1 => '待ち',
+            2 => '済み',
+        ];
+        return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
     }
 }

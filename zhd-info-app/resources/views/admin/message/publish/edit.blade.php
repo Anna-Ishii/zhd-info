@@ -395,7 +395,7 @@
                             @if(request()->old())
                                 {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}
                             @else
-                                {{ $message->is_broadcast_notification ? 'checked' : '' }}
+                                {{ $message->is_broadcast_notification == 1 ? 'checked' : '' }}
                             @endif
                             >あり
                     </label>

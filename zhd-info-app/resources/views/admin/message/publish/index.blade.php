@@ -317,7 +317,7 @@
                                     </td>
                                     <!-- WowTalk通知 -->
                                     <td class="label-notification-group">
-                                        <div class="wowtalk-notification-text">{{ $message->is_broadcast_notification ? 'あり' : 'なし' }}</div>
+                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
                                     </td>
                                     <!-- 閲覧率 -->
                                     @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
@@ -411,6 +411,10 @@
                                     </td>
                                     <td>{{ $message->status->text() }}</td>
                                     <td style="text-align: right">{{ $message->shop_count }}</td>
+                                    <!-- WowTalk通知 -->
+                                    <td class="label-notification-group">
+                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
+                                    </td>
                                     @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
                                         <td></td>
                                         <td></td>

@@ -240,6 +240,10 @@
                                 </td>
                                 <td>{{ $manual->status->text() }}</td>
                                 <td style="text-align: right">{{ $manual->shop_count }}</td>
+                                <!-- WowTalk通知 -->
+                                <td class="label-notification-group">
+                                    <div class="wowtalk-notification-text">{{ $manual->broadcast_notification_status }}</div>
+                                </td>
                                 @if ($manual->status == App\Enums\PublishStatus::Wait || $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('manuals', function (Blueprint $table) {
-            $table->boolean('is_broadcast_notification')->default(false);
+            $table->unsignedTinyInteger('is_broadcast_notification')->default(0);
         });
     }
 
