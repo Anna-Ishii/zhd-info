@@ -2916,7 +2916,7 @@ $(document).ready(function() {
                     <div class="wowtalk-notification-input-group" style="background-color: #ffffff00; color: black;">
                         <label style="cursor: pointer;">
                             <input type="checkbox" name="wowtalk_notification" class="checkCommon mr8" style="cursor: pointer;"
-                                ${wowtalkNotificationChecked ? 'checked' : ''}
+                                ${wowtalkNotificationChecked == 1 ? 'checked' : ''}
                                 ><span>あり</span>
                         </label>
                     </div>

@@ -41,7 +41,6 @@ class Message extends Model
     protected $casts = [
         'emergency_flg' => 'boolean',
         'editing_flg' => 'boolean',
-        'is_broadcast_notification' => 'boolean',
         'start_datetime' => 'datetime',
         'end_datetime' => 'datetime',
     ];
@@ -351,5 +350,16 @@ class Message extends Model
             ];
         }
         DB::table('crew_message_logs')->insert($params);
+    }
+
+    public function getBroadcastNotificationStatusAttribute()
+    {
+        $statusMapping = [
+            0 => 'なし',
+            1 => '待ち',
+            2 => '済み',
+        ];
+
+        return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
     }
 }

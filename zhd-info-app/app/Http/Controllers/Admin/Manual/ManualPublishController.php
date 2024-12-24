@@ -203,8 +203,8 @@ class ManualPublishController extends Controller
     {
         // 現在の東京時刻を取得
         $currentDate = Carbon::now('Asia/Tokyo');
-        // 現在掲載中と掲載終了を取得
-        $_manual = Manual::where('id', $manual_id)->where('editing_flg', false)->where('is_broadcast_notification', true)->first();
+        // 現在掲載中と掲載終了を取得（is_broadcast_notificationが1:待ちの場合）
+        $_manual = Manual::where('id', $manual_id)->where('editing_flg', false)->where('is_broadcast_notification', 1)->first();
         $errorLogs = [];
 
         // 掲載開始日または登録日が存在しない場合の処理
@@ -264,11 +264,6 @@ class ManualPublishController extends Controller
                 // $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
                 $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
 
-                // // メッセージ内容が800文字を超える場合はエラーをスロー
-                // if (mb_strlen($messageContent) > 800) {
-                //     throw new \Exception("Message content exceeds 800 characters.");
-                // }
-
                 // WowTalk APIを呼び出す
                 foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
                     if (!empty($data[$wowtalkIdKey])) {
@@ -289,9 +284,11 @@ class ManualPublishController extends Controller
                 return $errorLogs;
             }
 
-            // 業連配信通知フラグを更新
-            $_manual->is_broadcast_notification = false;
+            // 業連配信通知フラグを更新（2:済み）
+            $_manual->timestamps = false; // タイムスタンプを無効にする
+            $_manual->is_broadcast_notification = 2;
             $_manual->save();
+            $_manual->timestamps = true; // タイムスタンプを再度有効にする
 
             return [];
         } else {
@@ -574,7 +571,7 @@ class ManualPublishController extends Controller
         $manual_params['organization1_id'] = $organization1->id;
         $manual_params['number'] = Manual::getCurrentNumber($organization1->id) + 1;
         $manual_params['editing_flg'] = isset($request->save);
-        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
         $is_broadcast_notification = $manual_params['is_broadcast_notification'];
 
         try {
@@ -686,7 +683,7 @@ class ManualPublishController extends Controller
             DB::commit();
 
             // WowTalk通知の処理
-            if ($is_broadcast_notification) {
+            if ($is_broadcast_notification == 1) {
                 $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
 
                 // WowTalk通知の結果をログに記録
@@ -944,7 +941,7 @@ class ManualPublishController extends Controller
         }
         $manual_params['updated_admin_id'] = $admin->id;
         $manual_params['editing_flg'] = isset($request->save) ? true : false;
-        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? true : false;
+        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
         $is_broadcast_notification = $manual_params['is_broadcast_notification'];
 
 
@@ -1127,7 +1124,7 @@ class ManualPublishController extends Controller
             DB::commit();
 
             // WowTalk通知の処理
-            if ($is_broadcast_notification) {
+            if ($is_broadcast_notification == 1)  {
                 $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
 
                 // WowTalk通知の結果をログに記録

@@ -470,9 +470,11 @@ class WowTalkNotificationSenderCommand extends Command
      */
     private function createSuccessResponse($dataType, $logType)
     {
-        // 業連配信通知フラグを更新
-        $dataType->is_broadcast_notification = false;
+        // 業連配信通知フラグを更新（2:済み）
+        $dataType->timestamps = false; // タイムスタンプを無効にする
+        $dataType->is_broadcast_notification = 2;
         $dataType->save();
+        $dataType->timestamps = true; // タイムスタンプを再度有効にする
 
         return [
             'status' => 'success',
