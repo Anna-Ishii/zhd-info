@@ -240,13 +240,13 @@ class ManualPublishController extends Controller
                                 ->where('wowtalk_shops.notification_target2', true);
                     });
                 })
-                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.notification_target1', 'wowtalk_shops.notification_target2')
                 ->get()
                 ->map(function ($result) {
                     return [
                         'shop_id' => $result->shop_id,
-                        'wowtalk1_id' => $result->wowtalk1_id,
-                        'wowtalk2_id' => $result->wowtalk2_id,
+                        'wowtalk1_id' => $result->notification_target1 ? $result->wowtalk1_id : null,
+                        'wowtalk2_id' => $result->notification_target2 ? $result->wowtalk2_id : null,
                     ];
                 })
                 ->toArray();
@@ -256,14 +256,14 @@ class ManualPublishController extends Controller
                 return $errorLogs[] = "manual_id: " . $manual_id . " 通知対象のWowTalkIDなし";
             }
 
-            // エラーログのための配列
-            foreach ($wowtalk_data as $data) {
-                // メッセージ内容を生成
-                $messageContent = "マニュアルが配信されました。確認してください。\n";
-                $messageContent .= "・業連名：{$_manual->title}\n";
-                // $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
-                $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            // メッセージ内容を生成
+            $messageContent = "マニュアルが配信されました。確認してください。\n";
+            $messageContent .= "・業連名：{$_manual->title}\n";
+            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
 
+            // 通知対象のWowTalkIDがある場合
+            foreach ($wowtalk_data as $data) {
                 // WowTalk APIを呼び出す
                 foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
                     if (!empty($data[$wowtalkIdKey])) {
