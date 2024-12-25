@@ -238,13 +238,13 @@ class WowTalkNotificationSenderCommand extends Command
                                 ->where('wowtalk_shops.business_notification2', true);
                     });
                 })
-                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.notification_target1', 'wowtalk_shops.notification_target2')
                 ->get()
                 ->map(function ($result) {
                     return [
                         'shop_id' => $result->shop_id,
-                        'wowtalk1_id' => $result->wowtalk1_id,
-                        'wowtalk2_id' => $result->wowtalk2_id,
+                        'wowtalk1_id' => $result->notification_target1 ? $result->wowtalk1_id : null,
+                        'wowtalk2_id' => $result->notification_target2 ? $result->wowtalk2_id : null,
                     ];
                 })
                 ->toArray();
@@ -263,13 +263,13 @@ class WowTalkNotificationSenderCommand extends Command
                                 ->where('wowtalk_shops.business_notification2', true);
                     });
                 })
-                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.notification_target1', 'wowtalk_shops.notification_target2')
                 ->get()
                 ->map(function ($result) {
                     return [
                         'shop_id' => $result->shop_id,
-                        'wowtalk1_id' => $result->wowtalk1_id,
-                        'wowtalk2_id' => $result->wowtalk2_id,
+                        'wowtalk1_id' => $result->notification_target1 ? $result->wowtalk1_id : null,
+                        'wowtalk2_id' => $result->notification_target2 ? $result->wowtalk2_id : null,
                     ];
                 })
                 ->toArray();
@@ -280,7 +280,7 @@ class WowTalkNotificationSenderCommand extends Command
             return $this->createFailureResponse($dataType, $logType);
         }
 
-        // エラーログのための配列
+        // 通知対象のWowTalkIDがある場合
         $errorLogs = [];
         foreach ($wowtalk_data as $data) {
             try {
@@ -391,14 +391,14 @@ class WowTalkNotificationSenderCommand extends Command
             // メッセージ内容を生成
             $messageContent = "業連が配信されました。確認してください。\n";
             $messageContent .= "・業連名：{$dataType->title}\n";
-            // $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-            $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
         } elseif ($logType === 'manual') {
             // メッセージ内容を生成
             $messageContent = "マニュアルが配信されました。確認してください。\n";
             $messageContent .= "・業連名：{$dataType->title}\n";
-            // $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
-            $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
         }
 
         return $messageContent;

@@ -37,7 +37,7 @@
                 <td>{{$message->status->text()}}</td>
                 <td>{{$message->brand_name}}</td>
                 <td>{{$message->shop_names}}</td>
-                <td>{{$message->is_broadcast_notification ? "〇" : ""}}</td>
+                <td>{{$message->is_broadcast_notification == 1 ? "〇" : ""}}</td>
             </tr>
         @endforeach
     </tbody>
