@@ -1,0 +1,173 @@
+2024-12-26 14:34:08,622 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 14:34:08,630 INFO supervisord started with pid 256
+2024-12-26 14:34:09,637 INFO spawned: 'laravel-queue_00' with pid 257
+2024-12-26 14:34:10,641 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 14:34:24,657 WARN received SIGINT indicating exit request
+2024-12-26 14:34:24,657 INFO waiting for laravel-queue_00 to die
+2024-12-26 14:34:24,745 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 14:35:10,990 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 14:35:10,992 INFO supervisord started with pid 262
+2024-12-26 14:35:11,997 INFO spawned: 'laravel-queue_00' with pid 263
+2024-12-26 14:35:13,229 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:13:53,344 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 15:13:53,346 INFO supervisord started with pid 253
+2024-12-26 15:13:54,351 INFO spawned: 'laravel-queue_00' with pid 254
+2024-12-26 15:13:56,258 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:19:11,090 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 15:19:11,093 INFO supervisord started with pid 1
+2024-12-26 15:19:12,096 INFO spawned: 'httpd' with pid 7
+2024-12-26 15:19:12,098 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 15:19:12,100 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 15:19:12,147 WARN exited: php-fpm (exit status 0; not expected)
+2024-12-26 15:19:13,358 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:19:13,358 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:19:13,362 INFO spawned: 'php-fpm' with pid 199
+2024-12-26 15:19:13,387 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:19:13,387 INFO reaped unknown pid 200 (exit status 78)
+2024-12-26 15:19:15,392 INFO spawned: 'php-fpm' with pid 201
+2024-12-26 15:19:15,417 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:19:15,417 INFO reaped unknown pid 202 (exit status 78)
+2024-12-26 15:19:18,422 INFO spawned: 'php-fpm' with pid 203
+2024-12-26 15:19:18,449 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:19:18,449 INFO reaped unknown pid 204 (exit status 78)
+2024-12-26 15:19:19,449 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 15:22:39,066 WARN received SIGTERM indicating exit request
+2024-12-26 15:22:39,072 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 15:22:40,268 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 15:22:40,379 INFO stopped: httpd (exit status 0)
+2024-12-26 15:25:36,077 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 15:25:36,101 INFO supervisord started with pid 1
+2024-12-26 15:25:37,107 INFO spawned: 'httpd' with pid 7
+2024-12-26 15:25:37,117 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 15:25:37,125 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 15:25:38,804 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:25:38,805 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:25:38,805 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 15:25:38,805 INFO exited: php-fpm (exit status 0; expected)
+2024-12-26 15:25:39,276 INFO spawned: 'php-fpm' with pid 195
+2024-12-26 15:25:39,338 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:25:39,338 INFO reaped unknown pid 196 (exit status 78)
+2024-12-26 15:25:40,342 INFO spawned: 'php-fpm' with pid 201
+2024-12-26 15:25:40,393 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:25:40,393 INFO reaped unknown pid 202 (exit status 78)
+2024-12-26 15:25:42,397 INFO spawned: 'php-fpm' with pid 203
+2024-12-26 15:25:42,453 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:25:42,453 INFO reaped unknown pid 204 (exit status 78)
+2024-12-26 15:25:45,459 INFO spawned: 'php-fpm' with pid 205
+2024-12-26 15:25:45,553 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 15:25:45,555 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 15:25:46,558 INFO reaped unknown pid 206 (exit status 78)
+2024-12-26 16:01:35,328 WARN received SIGTERM indicating exit request
+2024-12-26 16:01:35,333 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 16:01:36,464 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 16:01:36,588 INFO stopped: httpd (exit status 0)
+2024-12-26 16:01:43,565 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 16:01:43,566 INFO supervisord started with pid 1
+2024-12-26 16:01:44,568 INFO spawned: 'httpd' with pid 7
+2024-12-26 16:01:44,570 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 16:01:44,572 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 16:01:44,792 WARN exited: php-fpm (exit status 0; not expected)
+2024-12-26 16:01:45,795 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:01:45,796 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:01:45,800 INFO spawned: 'php-fpm' with pid 199
+2024-12-26 16:01:45,827 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:01:45,827 INFO reaped unknown pid 200 (exit status 78)
+2024-12-26 16:01:47,833 INFO spawned: 'php-fpm' with pid 201
+2024-12-26 16:01:47,855 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:01:47,855 INFO reaped unknown pid 202 (exit status 78)
+2024-12-26 16:01:50,863 INFO spawned: 'php-fpm' with pid 258
+2024-12-26 16:01:50,886 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:01:50,886 INFO reaped unknown pid 259 (exit status 78)
+2024-12-26 16:01:51,887 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 16:08:40,317 WARN received SIGTERM indicating exit request
+2024-12-26 16:08:40,318 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 16:08:41,499 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 16:08:41,530 INFO stopped: httpd (exit status 0)
+2024-12-26 16:08:56,245 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 16:08:56,247 INFO supervisord started with pid 1
+2024-12-26 16:08:57,250 INFO spawned: 'httpd' with pid 7
+2024-12-26 16:08:57,252 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 16:08:57,254 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 16:08:57,303 WARN exited: php-fpm (exit status 0; not expected)
+2024-12-26 16:08:58,506 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:08:58,507 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:08:58,508 INFO spawned: 'php-fpm' with pid 199
+2024-12-26 16:08:58,532 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:08:58,533 INFO reaped unknown pid 200 (exit status 78)
+2024-12-26 16:09:00,537 INFO spawned: 'php-fpm' with pid 256
+2024-12-26 16:09:00,569 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:09:00,569 INFO reaped unknown pid 257 (exit status 78)
+2024-12-26 16:09:03,576 INFO spawned: 'php-fpm' with pid 258
+2024-12-26 16:09:03,608 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:09:03,609 INFO reaped unknown pid 259 (exit status 78)
+2024-12-26 16:09:04,610 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 16:11:01,759 WARN received SIGTERM indicating exit request
+2024-12-26 16:11:01,759 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 16:11:02,781 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 16:11:02,810 INFO stopped: httpd (exit status 0)
+2024-12-26 16:11:09,503 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 16:11:09,508 INFO supervisord started with pid 1
+2024-12-26 16:11:10,511 INFO spawned: 'httpd' with pid 7
+2024-12-26 16:11:10,513 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 16:11:10,514 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 16:11:10,547 WARN exited: php-fpm (exit status 0; not expected)
+2024-12-26 16:11:11,706 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:11:11,706 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:11:11,710 INFO spawned: 'php-fpm' with pid 199
+2024-12-26 16:11:11,735 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:11:11,735 INFO reaped unknown pid 200 (exit status 78)
+2024-12-26 16:11:13,739 INFO spawned: 'php-fpm' with pid 256
+2024-12-26 16:11:13,771 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:11:13,771 INFO reaped unknown pid 257 (exit status 78)
+2024-12-26 16:11:16,777 INFO spawned: 'php-fpm' with pid 258
+2024-12-26 16:11:16,805 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:11:16,805 INFO reaped unknown pid 259 (exit status 78)
+2024-12-26 16:11:17,807 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 16:36:51,211 WARN received SIGTERM indicating exit request
+2024-12-26 16:36:51,220 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 16:36:52,651 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 16:36:52,756 INFO stopped: httpd (exit status 0)
+2024-12-26 16:37:07,001 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-26 16:37:07,005 INFO supervisord started with pid 1
+2024-12-26 16:37:08,005 INFO spawned: 'httpd' with pid 7
+2024-12-26 16:37:08,007 INFO spawned: 'laravel-queue_00' with pid 8
+2024-12-26 16:37:08,009 INFO spawned: 'php-fpm' with pid 9
+2024-12-26 16:37:08,385 WARN exited: php-fpm (exit status 0; not expected)
+2024-12-26 16:37:09,387 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:37:09,387 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-26 16:37:09,388 INFO spawned: 'php-fpm' with pid 199
+2024-12-26 16:37:09,412 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:37:09,412 INFO reaped unknown pid 200 (exit status 78)
+2024-12-26 16:37:11,417 INFO spawned: 'php-fpm' with pid 201
+2024-12-26 16:37:11,439 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:37:11,439 INFO reaped unknown pid 202 (exit status 78)
+2024-12-26 16:37:14,447 INFO spawned: 'php-fpm' with pid 203
+2024-12-26 16:37:14,468 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-26 16:37:14,469 INFO reaped unknown pid 204 (exit status 78)
+2024-12-26 16:37:15,470 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-26 16:48:49,603 WARN received SIGTERM indicating exit request
+2024-12-26 16:48:49,603 INFO waiting for httpd, laravel-queue_00 to die
+2024-12-26 16:48:50,746 INFO stopped: laravel-queue_00 (exit status 0)
+2024-12-26 16:48:50,778 INFO stopped: httpd (exit status 0)
+2024-12-27 01:09:16,183 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2024-12-27 01:09:16,221 INFO supervisord started with pid 1
+2024-12-27 01:09:17,230 INFO spawned: 'httpd' with pid 8
+2024-12-27 01:09:17,237 INFO spawned: 'laravel-queue_00' with pid 9
+2024-12-27 01:09:17,245 INFO spawned: 'php-fpm' with pid 10
+2024-12-27 01:09:19,004 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-27 01:09:19,004 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-27 01:09:19,004 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2024-12-27 01:09:19,005 INFO exited: php-fpm (exit status 0; expected)
+2024-12-27 01:09:19,610 INFO spawned: 'php-fpm' with pid 251
+2024-12-27 01:09:19,656 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-27 01:09:19,656 INFO reaped unknown pid 252 (exit status 78)
+2024-12-27 01:09:20,662 INFO spawned: 'php-fpm' with pid 257
+2024-12-27 01:09:20,774 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-27 01:09:20,774 INFO reaped unknown pid 258 (exit status 78)
+2024-12-27 01:09:22,804 INFO spawned: 'php-fpm' with pid 259
+2024-12-27 01:09:22,876 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-27 01:09:22,876 INFO reaped unknown pid 260 (exit status 78)
+2024-12-27 01:09:25,881 INFO spawned: 'php-fpm' with pid 261
+2024-12-27 01:09:25,910 WARN exited: php-fpm (exit status 70; not expected)
+2024-12-27 01:09:26,912 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2024-12-27 01:09:26,912 INFO reaped unknown pid 262 (exit status 78)

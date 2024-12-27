@@ -38,6 +38,7 @@ use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
 use App\Utils\SendWowTalkApi;
+use App\Jobs\SendWowtalkNotificationJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -300,6 +301,11 @@ class MessagePublishController extends Controller
         if ($_message->end_datetime) {
             // 掲載終了日が今日よりも古い場合の処理
             if ($currentDate->gt(Carbon::parse($_message->end_datetime))) {
+                // 業連配信通知フラグを更新（0:なし）
+                $_message->timestamps = false; // タイムスタンプを無効にする
+                $_message->is_broadcast_notification = 0;
+                $_message->save();
+                $_message->timestamps = true; // タイムスタンプを再度有効にする
                 return $errorLogs[] = "message_id: " . $message_id . " 掲載終了日が今日以前";
             }
         }
@@ -313,26 +319,31 @@ class MessagePublishController extends Controller
                 ->where(function ($query) {
                     $query->where(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
-                                ->where('wowtalk_shops.notification_target1', true);
+                                ->where('wowtalk_shops.business_notification1', true);
                     })
                     ->orWhere(function ($subQuery) {
                         $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
-                                ->where('wowtalk_shops.notification_target2', true);
+                                ->where('wowtalk_shops.business_notification2', true);
                     });
                 })
-                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.notification_target1', 'wowtalk_shops.notification_target2')
+                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.business_notification1', 'wowtalk_shops.business_notification2')
                 ->get()
                 ->map(function ($result) {
                     return [
                         'shop_id' => $result->shop_id,
-                        'wowtalk1_id' => $result->notification_target1 ? $result->wowtalk1_id : null,
-                        'wowtalk2_id' => $result->notification_target2 ? $result->wowtalk2_id : null,
+                        'wowtalk1_id' => $result->business_notification1 ? $result->wowtalk1_id : null,
+                        'wowtalk2_id' => $result->business_notification2 ? $result->wowtalk2_id : null,
                     ];
                 })
                 ->toArray();
 
             // 通知対象のWowTalkIDがない場合
             if (empty($wowtalk_data)) {
+                // 業連配信通知フラグを更新（0:なし）
+                $_message->timestamps = false; // タイムスタンプを無効にする
+                $_message->is_broadcast_notification = 0;
+                $_message->save();
+                $_message->timestamps = true; // タイムスタンプを再度有効にする
                 return $errorLogs[] = "message_id: " . $message_id . " 通知対象のWowTalkIDなし";
             }
 
@@ -342,19 +353,36 @@ class MessagePublishController extends Controller
             $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
             // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
 
-            // 通知対象のWowTalkIDがある場合
+            // WowTalk IDを一括で収集
+            $wowtalkIds = [];
             foreach ($wowtalk_data as $data) {
-                // WowTalk APIを呼び出す
                 foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
                     if (!empty($data[$wowtalkIdKey])) {
-                        try {
-                            $apiResult = SendWowTalkApi::sendWowTalkApiRequest([$data[$wowtalkIdKey]], $messageContent);
-                            if (is_array($apiResult)) {
-                                $errorLogs[] = $this->createErrorLog($_message, $data, $data[$wowtalkIdKey], $apiResult, $messageContent);
-                            }
-                        } catch (\Exception $e) {
-                            $errorLogs[] = "message_id: " . $message_id . " 店舗ID: " . $data['shop_id'] . " WowTalk ID: " . $data[$wowtalkIdKey] . " エラーメッセージ: " . $e->getMessage();
+                        $wowtalkIds[] = $data[$wowtalkIdKey];
+                    }
+                }
+            }
+
+            // WowTalk IDを20件ずつのバッチに分割してAPIを呼び出す
+            $chunkedWowtalkIds = array_chunk($wowtalkIds, 20);
+            foreach ($chunkedWowtalkIds as $batch) {
+                try {
+                    $apiResult = SendWowTalkApi::sendWowTalkApiRequest($batch, $messageContent);
+                    if (is_array($apiResult)) {
+                        if (isset($apiResult['type']) && ($apiResult['type'] === 'WowTalkAPI_error' || $apiResult['type'] === 'unexpected_response')) {
+                            // エラーがある場合のみログを記録
+                            $requestTarget = is_array($apiResult['request_target'])
+                                ? implode(', ', $apiResult['request_target'])
+                                : $apiResult['request_target'];
+                            $responseResult = is_array($apiResult['response_result'])
+                                ? implode(', ', $apiResult['response_result'])
+                                : $apiResult['response_result'];
+                            $errorLogs[] = "message_id: " . $message_id . " WowTalk ID: " . $requestTarget . " エラーメッセージ: " . $responseResult;
                         }
+                    }
+                } catch (\Exception $e) {
+                    foreach ($batch as $wowtalkId) {
+                        $errorLogs[] = "message_id: " . $message_id . " WowTalk ID: " . $wowtalkId . " エラーメッセージ: " . $e->getMessage();
                     }
                 }
             }
@@ -895,26 +923,31 @@ class MessagePublishController extends Controller
 
             DB::commit();
 
-            // WowTalk通知の処理
+            // // WowTalk通知の処理
+            // if ($is_broadcast_notification == 1) {
+            //     $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
+
+            //     // WowTalk通知の結果をログに記録
+            //     $messageLog = new WowTalkNotificationLog();
+            //     $messageLog->log_type = 'message';
+            //     $messageLog->command_name = 'sendWowtalkNotification';
+            //     $messageLog->started_at = Carbon::now();
+            //     $messageLog->status = empty($wowtalk_notification_result);
+            //     $messageLog->attempts = 1;
+
+            //     // エラーメッセージをログに記録
+            //     if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+            //         $messageLog->error_message = implode(', ', $wowtalk_notification_result);
+            //     } elseif (is_string($wowtalk_notification_result)) {
+            //         $messageLog->error_message = $wowtalk_notification_result;
+            //     }
+
+            //     $messageLog->save();
+            // }
+
+            // WowTalk通知のジョブをキューに追加
             if ($is_broadcast_notification == 1) {
-                $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
-
-                // WowTalk通知の結果をログに記録
-                $messageLog = new WowTalkNotificationLog();
-                $messageLog->log_type = 'message';
-                $messageLog->command_name = 'sendWowtalkNotification';
-                $messageLog->started_at = Carbon::now();
-                $messageLog->status = empty($wowtalk_notification_result);
-                $messageLog->attempts = 1;
-
-                // エラーメッセージをログに記録
-                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
-                    $messageLog->error_message = implode(', ', $wowtalk_notification_result);
-                } elseif (is_string($wowtalk_notification_result)) {
-                    $messageLog->error_message = $wowtalk_notification_result;
-                }
-
-                $messageLog->save();
+                SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_store');
             }
 
             // 閲覧率の更新処理
@@ -1663,26 +1696,31 @@ class MessagePublishController extends Controller
             $message->tag()->sync($tag_ids);
             DB::commit();
 
-            // WowTalk通知の処理
+            // // WowTalk通知の処理
+            // if ($is_broadcast_notification == 1) {
+            //     $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
+
+            //     // WowTalk通知の結果をログに記録
+            //     $messageLog = new WowTalkNotificationLog();
+            //     $messageLog->log_type = 'message';
+            //     $messageLog->command_name = 'sendWowtalkNotification';
+            //     $messageLog->started_at = Carbon::now();
+            //     $messageLog->status = empty($wowtalk_notification_result);
+            //     $messageLog->attempts = 1;
+
+            //     // エラーメッセージをログに記録
+            //     if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
+            //         $messageLog->error_message = implode(', ', $wowtalk_notification_result);
+            //     } elseif (is_string($wowtalk_notification_result)) {
+            //         $messageLog->error_message = $wowtalk_notification_result;
+            //     }
+
+            //     $messageLog->save();
+            // }
+
+            // WowTalk通知のジョブをキューに追加
             if ($is_broadcast_notification == 1) {
-                $wowtalk_notification_result = $this->sendWowtalkNotification($message->id);
-
-                // WowTalk通知の結果をログに記録
-                $messageLog = new WowTalkNotificationLog();
-                $messageLog->log_type = 'message';
-                $messageLog->command_name = 'sendWowtalkNotification';
-                $messageLog->started_at = Carbon::now();
-                $messageLog->status = empty($wowtalk_notification_result);
-                $messageLog->attempts = 1;
-
-                // エラーメッセージをログに記録
-                if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
-                    $messageLog->error_message = implode(', ', $wowtalk_notification_result);
-                } elseif (is_string($wowtalk_notification_result)) {
-                    $messageLog->error_message = $wowtalk_notification_result;
-                }
-
-                $messageLog->save();
+                SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_update');
             }
 
             // 閲覧率の更新処理
