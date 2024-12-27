@@ -6,10 +6,14 @@ ENV NODE_VERSION 18.18.0
 COPY ./config/httpd/httpd.conf /etc/httpd/conf/httpd.conf
 COPY ./config/php/php.ini /etc/php.ini
 
-RUN mkdir /run/php-fpm 
+RUN mkdir /run/php-fpm
 
 RUN dnf update -y && \
-    dnf install -y httpd wget php-fpm php-mysqli php-json php php-devel php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel mariadb105 poppler-utils
+    dnf install -y \
+    httpd wget php-fpm php-mysqli php-json php php-devel \
+    php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel \
+    mariadb105-server poppler-utils python3-pip && \
+    pip3 install supervisor
 
 RUN git clone https://github.com/xdebug/xdebug.git
 RUN cd /xdebug && \
@@ -31,4 +35,4 @@ ENV PATH      $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 RUN python3 -m pip install opencv-python pdf2image
 
-RUN apk add --no-cache php-gd
+COPY ./supervisord.conf /etc/supervisor/conf.d/supervisord.conf

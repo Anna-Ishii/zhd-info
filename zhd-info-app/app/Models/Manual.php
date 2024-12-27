@@ -312,13 +312,14 @@ class Manual extends Model
         return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
     }
 
-    public function getIsBroadcastNotificationAttribute()
+    public function getBroadcastNotificationStatusAttribute()
     {
         $statusMapping = [
             0 => 'なし',
             1 => '待ち',
             2 => '済み',
         ];
+
         return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
     }
 }

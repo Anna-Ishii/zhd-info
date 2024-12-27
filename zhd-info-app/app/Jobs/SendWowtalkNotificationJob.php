@@ -1,10 +1,16 @@
 <?php
 
-namespace App\Console\Commands;
+namespace App\Jobs;
 
-use Illuminate\Console\Command;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use App\Models\Message;
 use App\Models\Manual;
 use App\Models\WowTalkNotificationLog;
@@ -12,83 +18,68 @@ use App\Models\WowtalkRecipient;
 use App\Utils\SESMailer;
 use App\Utils\SendWowTalkApi;
 
-class WowTalkNotificationSenderCommand extends Command
+class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
 {
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    protected $id;
+    protected $type;
+    protected $mode;
+
+
     /**
-     * The name and signature of the console command.
-     *
-     * @var string
+     * Create a new job instance.
      */
-    protected $signature = 'wowtalk:send-notifications';
+    public function __construct($id, $type, $mode)
+    {
+        $this->id = $id;
+        $this->type = $type;
+        $this->mode = $mode;
+    }
+
+
+    public function uniqueId()
+    {
+        return $this->id . '_' . $this->type . '_' . $this->mode;
+    }
 
 
     /**
-     * The console command description.
-     *
-     * @var string
-     */
-    protected $description = 'WowTalkで通知を送信するコマンドです。';
-
-
-    /**
-     * Execute the console command.
+     * Execute the job.
      */
     public function handle()
     {
         // メモリ制限を無効にする
         ini_set('memory_limit', '-1');
 
-        $this->info('WowTalk通知送信開始');
+        Log::info('WowTalk通知送信開始');
 
-        try {
-            // 業務連絡送信
-            try {
-                $this->processNotification('message');
-            } catch (\Throwable $th) {
-                $this->error('業務連絡送信中にエラーが発生しました: ' . $th->getMessage());
-            }
-
-            // マニュアル送信
-            try {
-                $this->processNotification('manual');
-            } catch (\Throwable $th) {
-                $this->error('マニュアル送信中にエラーが発生しました: ' . $th->getMessage());
-            }
-        } finally {
-            // 処理後にメモリ制限を元に戻す
-            ini_restore('memory_limit');
-        }
-    }
-
-
-    /**
-     * 通知処理を実行するメソッド
-     *
-     * @param string $type ログのタイプ ('message' または 'manual')
-     */
-    private function processNotification($type)
-    {
         try {
             // ログを作成
             $messageLog = new WowTalkNotificationLog();
-            $messageLog->log_type = $type;
-            $messageLog->command_name = $this->signature;
+            $messageLog->log_type = $this->type;
+            $messageLog->command_name = 'wowtalk:send-notifications';
             $messageLog->started_at = Carbon::now();
             $messageLog->status = true;
             $messageLog->attempts = 1;
             $messageLog->save();
 
             // メイン処理を実行
-            $this->sendNotifications($messageLog, $type);
+            $this->sendNotifications($messageLog, $this->id, $this->type);
 
             // 成功時の処理
             $messageLog->finished_at = Carbon::now();
             $messageLog->save();
 
-            $this->info('WowTalk通知送信完了');
         } catch (\Throwable $th) {
             // エラー発生時にログを更新し、エラーメッセージを記録
             $this->finalizeLog($messageLog, false, $th->getMessage());
+        } finally {
+
+            // 処理後にメモリ制限を元に戻す
+            ini_restore('memory_limit');
+
+            Log::info('WowTalk通知送信完了');
         }
     }
 
@@ -120,21 +111,21 @@ class WowTalkNotificationSenderCommand extends Command
      * @param WowTalkNotificationLog $messageLog ログオブジェクト
      * @param string $type ログのタイプ ('message' または 'manual')
      */
-    private function sendNotifications($messageLog, $type)
+    private function sendNotifications($messageLog, $id, $type)
     {
         // 現在の東京時刻を取得
         $currentDate = Carbon::now('Asia/Tokyo');
 
         // 現在掲載中と掲載終了を取得（is_broadcast_notificationが1:待ちの場合）
-        $dataTypes = [];
+        $dataType = null;
         if ($type === 'message') {
-            $dataTypes = Message::where('editing_flg', false)->where('is_broadcast_notification', true)->get();
+            $dataType = Message::where('id', $id)->where('editing_flg', false)->where('is_broadcast_notification', 1)->first();
         } elseif ($type === 'manual') {
-            $dataTypes = Manual::where('editing_flg', false)->where('is_broadcast_notification', true)->get();
+            $dataType = Manual::where('id', $id)->where('editing_flg', false)->where('is_broadcast_notification', 1)->first();
         }
 
         // $dataTypesがnullまたはfalseでないことを確認
-        if (!$dataTypes) {
+        if (!$dataType) {
             return $this->createErrorResponse('', 'データが見つかりませんでした。タイプ: ' . $type, 1);
         }
 
@@ -143,29 +134,27 @@ class WowTalkNotificationSenderCommand extends Command
         $failureLogs = [];
         $errorLogs = [];
 
-        foreach ($dataTypes as $dataType) {
-            $sendResult = $this->processItem($dataType, $currentDate, $type);
+        $sendResult = $this->processItem($dataType, $currentDate, $type);
 
-            // 処理結果に応じてログを分類
-            switch ($sendResult['status']) {
-                case 'success':
-                    $successLogs[] = [
-                        'title' => $dataType->title,
-                    ];
-                    break;
-                case 'failure':
-                    $failureLogs[] = [
-                        'title' => $dataType->title,
-                    ];
-                    break;
-                case 'error':
-                    $errorLogs[] = [
-                        'title' => $dataType->title,
-                        'error_message' => $sendResult['error_message'] ?? '不明なエラー',
-                        'attempts' => $sendResult['attempts'] ?? 1
-                    ];
-                    break;
-            }
+        // 処理結果に応じてログを分類
+        switch ($sendResult['status']) {
+            case 'success':
+                $successLogs[] = [
+                    'title' => $dataType->title,
+                ];
+                break;
+            case 'failure':
+                $failureLogs[] = [
+                    'title' => $dataType->title,
+                ];
+                break;
+            case 'error':
+                $errorLogs[] = [
+                    'title' => $dataType->title,
+                    'error_message' => $sendResult['error_message'] ?? '不明なエラー',
+                    'attempts' => $sendResult['attempts'] ?? 1
+                ];
+                break;
         }
 
         // ログの出力
@@ -475,9 +464,9 @@ class WowTalkNotificationSenderCommand extends Command
 
         $mailer = new SESMailer();
         if ($mailer->sendEmail($to, $subject, $message)) {
-            $this->info("システム管理者にエラーメールを送信しました。");
+            Log::info("システム管理者にエラーメールを送信しました。");
         } else {
-            $this->error("メール送信中にエラーが発生しました。");
+            Log::error("メール送信中にエラーが発生しました。");
         }
     }
 
@@ -576,6 +565,7 @@ class WowTalkNotificationSenderCommand extends Command
                 'response_target' => $apiResult['response_target'] ?? '',
                 'attempts' => $apiResult['attempts'] ?? 1
             ];
+
         } elseif ($type === 'manual') {
             return [
                 'type' => $apiResult['type'],
@@ -602,27 +592,27 @@ class WowTalkNotificationSenderCommand extends Command
     private function logResults($messageLog, $successLogs, $failureLogs, $errorLogs, $type)
     {
         if ($type === 'message') {
-            $this->info("---業務連絡---");
+            Log::info("---業務連絡---");
         } elseif ($type === 'manual') {
-            $this->info("---マニュアル---");
+            Log::info("---マニュアル---");
         }
 
         foreach ($successLogs as $log) {
             $label = "業務連絡：";
-            $this->info($label . $log['title']);
+            Log::info($label . $log['title']);
         }
 
-        $this->info("---送信しない---");
+        Log::info("---送信しない---");
         foreach ($failureLogs as $log) {
             $label = "業務連絡：";
-            $this->warn($label . $log['title']);
+            Log::info($label . $log['title']);
         }
 
-        $this->info("---送信エラー---");
+        Log::info("---送信エラー---");
         foreach ($errorLogs as $log) {
             $label = "業務連絡：";
-            $this->error($label . $log['title']);
-            $this->error("エラー内容：" . $log['error_message']);
+            Log::error($label . $log['title']);
+            Log::error("エラー内容：" . $log['error_message']);
 
             // エラーログをデータベースに保存
             $this->storeErrorLogsInDatabase($messageLog, $log, $type);
@@ -640,7 +630,7 @@ class WowTalkNotificationSenderCommand extends Command
     {
         try {
             $messageLog->log_type = $type;
-            $messageLog->command_name = $this->signature;
+            $messageLog->command_name = 'wowtalk:send-notifications';
             $messageLog->started_at = Carbon::now();
             $messageLog->status = false;
 
@@ -651,7 +641,7 @@ class WowTalkNotificationSenderCommand extends Command
             $messageLog->finished_at = Carbon::now();
             $messageLog->save();
         } catch (\Exception $e) {
-            $this->error("エラーログのデータベース保存に失敗しました: " . $e->getMessage());
+            Log::error("エラーログのデータベース保存に失敗しました: " . $e->getMessage());
         }
     }
 }
