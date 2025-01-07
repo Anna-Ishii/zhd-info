@@ -732,10 +732,6 @@ class ManualPublishController extends Controller
             //     $manualLog->save();
             // }
 
-            // WowTalk通知のジョブをキューに追加
-            if ($is_broadcast_notification == 1) {
-                SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_store');
-            }
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
@@ -753,6 +749,11 @@ class ManualPublishController extends Controller
 
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
+
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_store');
+        }
 
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
@@ -1178,11 +1179,6 @@ class ManualPublishController extends Controller
             //     $manualLog->save();
             // }
 
-            // WowTalk通知のジョブをキューに追加
-            if ($is_broadcast_notification == 1) {
-                SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_update');
-            }
-
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));
 
@@ -1199,6 +1195,11 @@ class ManualPublishController extends Controller
 
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
+
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_update');
+        }
 
         return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
     }
