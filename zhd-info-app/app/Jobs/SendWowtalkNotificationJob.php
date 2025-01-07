@@ -58,7 +58,7 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
             // ログを作成
             $messageLog = new WowTalkNotificationLog();
             $messageLog->log_type = $this->type;
-            $messageLog->command_name = 'wowtalk:send-notifications';
+            $messageLog->command_name = 'wowtalk:send-notifications-job';
             $messageLog->started_at = Carbon::now();
             $messageLog->status = true;
             $messageLog->attempts = 1;
@@ -284,11 +284,23 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
             // メッセージ内容生成に失敗した場合のエラー処理
             $errorLog = $this->createErrorLog($dataType, $type, ['type' => 'message_content_error', 'response_result' => 'メッセージ生成に失敗しました', 'response_status' => $e->getMessage(), 'attempts' => 1], null, $messageContent);
 
-            $this->notifySystemAdmin(
-                $errorLog['type'],
-                $errorLog,
-                ['error_message' => $errorLog['error_message'],'status' => 'error', 'response_target' => $errorLog['response_target']]
-            );
+            if ($errorLog) {
+                $this->notifySystemAdmin(
+                    $errorLog['type'] ?? 'unknown',
+                    [
+                        'message_id' => $errorLog['message_id'] ?? '',
+                        'message_title' => $errorLog['message_title'] ?? '',
+                        'request_message' => $errorLog['request_message'] ?? '',
+                        'request_target' => $errorLog['request_target'] ?? '',
+                        'log_type' => $type
+                    ],
+                    [
+                        'error_message' => $errorLog['error_message'] ?? 'エラーメッセージがありません',
+                        'status' => 'error',
+                        'response_target' => $errorLog['response_target'] ?? '不明'
+                    ]
+                );
+            }
 
             return $this->createErrorResponse($dataType, $e->getMessage(), 1);
         }
@@ -344,36 +356,36 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
             if ($type === 'message') {
                 foreach ($errorLogs as $errorLog) {
                     $this->notifySystemAdmin(
-                        $errorLog['type'],
+                        $errorLog['type'] ?? 'unknown',
                         [
-                            'message_id' => $errorLog['message_id'],
-                            'message_title' => $errorLog['message_title'],
-                            'request_message' => $errorLog['request_message'],
-                            'request_target' => $errorLog['request_target'],
+                            'message_id' => $errorLog['message_id'] ?? '',
+                            'message_title' => $errorLog['message_title'] ?? '',
+                            'request_message' => $errorLog['request_message'] ?? '',
+                            'request_target' => $errorLog['request_target'] ?? '',
                             'log_type' => $type
                         ],
                         [
-                            'error_message' => $errorLog['error_message'],
+                            'error_message' => $errorLog['error_message'] ?? 'エラーメッセージがありません',
                             'status' => 'error',
-                            'response_target' => $errorLog['response_target']
+                            'response_target' => $errorLog['response_target'] ?? '不明'
                         ]
                     );
                 }
             } elseif ($type === 'manual') {
                 foreach ($errorLogs as $errorLog) {
                     $this->notifySystemAdmin(
-                        $errorLog['type'],
+                        $errorLog['type'] ?? 'unknown',
                         [
-                            'manual_id' => $errorLog['manual_id'],
-                            'manual_title' => $errorLog['manual_title'],
-                            'request_message' => $errorLog['request_message'],
-                            'request_target' => $errorLog['request_target'],
+                            'manual_id' => $errorLog['manual_id'] ?? '',
+                            'manual_title' => $errorLog['manual_title'] ?? '',
+                            'request_message' => $errorLog['request_message'] ?? '',
+                            'request_target' => $errorLog['request_target'] ?? '',
                             'log_type' => $type
                         ],
                         [
-                            'error_message' => $errorLog['error_message'],
+                            'error_message' => $errorLog['error_message'] ?? 'エラーメッセージがありません',
                             'status' => 'error',
-                            'response_target' => $errorLog['response_target']
+                            'response_target' => $errorLog['response_target'] ?? '不明'
                         ]
                     );
                 }
@@ -565,7 +577,6 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
                 'response_target' => $apiResult['response_target'] ?? '',
                 'attempts' => $apiResult['attempts'] ?? 1
             ];
-
         } elseif ($type === 'manual') {
             return [
                 'type' => $apiResult['type'],
@@ -630,7 +641,7 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
     {
         try {
             $messageLog->log_type = $type;
-            $messageLog->command_name = 'wowtalk:send-notifications';
+            $messageLog->command_name = 'wowtalk:send-notifications-job';
             $messageLog->started_at = Carbon::now();
             $messageLog->status = false;
 
