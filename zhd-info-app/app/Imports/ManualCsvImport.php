@@ -9,7 +9,8 @@ use App\Models\ManualCategoryLevel2;
 use App\Models\ManualTagMaster;
 use App\Models\Shop;
 use App\Models\User;
-use App\Rules\Import\OrganizationRule;
+use App\Rules\Import\BrandRule;
+use App\Rules\Import\ShopRule;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -31,20 +32,22 @@ class ManualCsvImport implements
     use Importable;
 
     private $organization1;
+    private $organization = [];
     private $brand = [];
-    private $category_list = [];
+    private $shop = [];
+    private $new_category_list = [];
 
-    public function __construct($organization1, $brand)
+    public function __construct($organization1, $organization, $shop_list)
     {
         $this->organization1 = $organization1;
-        $this->brand = $brand;
-        array_push(($this->brand), "全て");
+        $this->organization = $organization;
+        $this->brand = array_merge(array_column($this->organization, 'brand_name'), ["全て"]);
+        $this->shop = array_merge(array_column($shop_list, 'display_name'), ["全店"]);
         $this->new_category_list = $this->getNewCategoryList();
     }
 
-    public function collection(Collection $rows)
-    {
-        
+    public function collection(Collection $rows) {
+
     }
 
     public function headingRow(): int
@@ -72,8 +75,9 @@ class ManualCsvImport implements
     {
         return [
             '0' => ['required'],
-            '1' => ['nullable', Rule::in($this->new_category_list)],
-            '11' => ['nullable', new OrganizationRule(parameter: $this->brand)],
+            '1' => ['required', Rule::in($this->new_category_list)],
+            '11' => ['required', new BrandRule(parameter: $this->brand)],
+            '12' => ['required', new ShopRule(parameter: $this->shop)],
         ];
     }
 
@@ -83,6 +87,8 @@ class ManualCsvImport implements
             '0.required' => 'Noは必須です',
             '0.int' => 'Noは数値である必要があります',
             '1.in' => 'カテゴリの項目が間違っています',
+            '11.required' => '対象業態は必須項目です',
+            '12.required' => '配信店舗は必須項目です',
         ];
     }
 
@@ -108,6 +114,53 @@ class ManualCsvImport implements
             'use_bom' => false,
             'input_encoding' => 'CP932'
         ];
+    }
+
+    private function getOrganizationForm($organization1_id)
+    {
+        return Shop::query()
+            ->leftjoin('brands', 'brand_id', '=', 'brands.id')
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('brand_id')
+            ->distinct('organization2_id')
+            ->distinct('organization3_id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'brand_id',
+                'brands.name as brand_name',
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization5_id',
+                'organization5.name as organization5_name'
+            )
+            ->where('shops.organization1_id', $organization1_id)
+            ->get()
+            ->toArray();
+    }
+
+    private function getShopForm($organization1_id)
+    {
+        return Shop::query()
+            ->select([
+                'shops.*',
+                DB::raw("GROUP_CONCAT(brands.name SEPARATOR ',') as brand_names")
+            ])
+            ->join('brands', function ($join) {
+                $join->on('shops.organization1_id', '=', 'brands.organization1_id')
+                    ->on('shops.brand_id', '=', 'brands.id');
+            })
+            ->where('shops.organization1_id', $organization1_id)
+            ->groupBy('shops.id')
+            ->get()
+            ->toArray();
     }
 
     private function tagImportParam(?array $tags): array
@@ -152,36 +205,6 @@ class ManualCsvImport implements
             ->toArray();
     }
 
-    private function getOrg3All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization3.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
-            ->pluck('organization3.id')
-            ->toArray();
-    }
-
-    private function getOrg4All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization4.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
-            ->pluck('organization4.id')
-            ->toArray();
-    }
-
-    private function getOrg5All(Int $org1_id): array
-    {
-        return Shop::query()
-            ->distinct('organization5.id')
-            ->where('organization1_id', '=', $org1_id)
-            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-            ->pluck('organization5.id')
-            ->toArray();
-    }
-
     private function getNewCategoryList(): array
     {
         $new_category_list = ManualCategoryLevel2::query()
@@ -191,22 +214,38 @@ class ManualCsvImport implements
             ->leftjoin('manual_category_level1s', 'manual_category_level1s.id', '=', 'manual_category_level2s.level1')
             ->pluck('name')
             ->toArray();
-        
+
         return $new_category_list;
     }
 
-    private function targetUserParam($brand): array
+    private function targetUserParam($organizations): array
     {
-        // manual_userに該当のユーザーを登録する
-        $target_users_data = [];
-        // 該当のショップID
-        $shops_id = Shop::select('id')->whereIn('brand_id', $brand)->get()->toArray();
-        // 該当のユーザー
-        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->get()->toArray();
-        foreach ($target_users as $target_user) {
-            $target_users_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        $shops_id = [];
+        $target_user_data = [];
+
+        // shopを取得する
+        if (isset($organizations->organization_shops)) {
+            $organization_shops = explode(',', $organizations->organization_shops);
+            foreach ($organization_shops as $_shop_id) {
+                foreach ($organizations->brand as $brand) {
+                    $_shops_id = Shop::select('id')
+                        ->where('id', $_shop_id)
+                        ->where('brand_id', $brand)
+                        ->get()
+                        ->toArray();
+                    $shops_id = array_merge($shops_id, $_shops_id);
+                }
+            }
         }
-        return $target_users_data;
+
+        // 取得したshopのリストからユーザーを取得する
+        $target_users = User::select('id', 'shop_id')->whereIn('shop_id', $shops_id)->whereIn('roll_id', $organizations->target_roll)->get()->toArray();
+        // ユーザーに業務連絡の閲覧権限を与える
+        foreach ($target_users as $target_user) {
+            $target_user_data[$target_user['id']] = ['shop_id' => $target_user['shop_id']];
+        }
+
+        return $target_user_data;
     }
 
     private function parseDateTime($datetime)

@@ -161,34 +161,30 @@ class ManualPublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
-        // 店舗数をカウント
-        // すべてのメッセージIDを取得
-        $manual_ids = $manual_list->pluck('id')->toArray();
-        // すべての店舗数を取得
-        $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-        // 各メッセージに関連する店舗数を取得
-        $manual_shop_counts = ManualShop::select('manual_id', DB::raw('COUNT(*) as shop_count'))
-            ->whereIn('manual_id', $manual_ids)
-            ->groupBy('manual_id')
-            ->pluck('shop_count', 'manual_id');
-        // 各メッセージに関連するユーザー数を取得（店舗数が0の場合に使用）
-        $manual_user_counts = ManualUser::select('manual_id', DB::raw('COUNT(*) as user_count'))
-            ->whereIn('manual_id', $manual_ids)
-            ->groupBy('manual_id')
-            ->pluck('user_count', 'manual_id');
+        // セッションにデータを保存
+        session()->put('manual_list', $manual_list);
 
-        // メッセージリストをループして、店舗数を割り当て
-        foreach ($manual_list as &$manual) {
-            $shop_count = $manual_shop_counts[$manual->id] ?? 0;
-            // 店舗数が0の場合は、ユーザー数を使用
-            if ($shop_count == 0) {
-                $shop_count = $manual_user_counts[$manual->id] ?? 0;
+        // 店舗数をカウント
+        if ($manual_list) {
+            // すべてのマニュアルIDを取得
+            $manual_ids = $manual_list->pluck('id')->toArray();
+            // すべての店舗数を取得
+            $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
+            // 各マニュアルに関連する店舗数を取得
+            $manual_shop_counts = ManualShop::select('manual_id', DB::raw('COUNT(*) as shop_count'))
+                ->whereIn('manual_id', $manual_ids)
+                ->groupBy('manual_id')
+                ->pluck('shop_count', 'manual_id');
+
+            // マニュアルリストをループして、店舗数を割り当て
+            foreach ($manual_list as &$manual) {
+                $shop_count = $manual_shop_counts[$manual->id] ?? 0;
+                // 全店舗数と同じ場合は「全店」と表示
+                if ($shop_count == $all_shop_count) {
+                    $shop_count = "全店";
+                }
+                $manual->shop_count = $shop_count;
             }
-            // 全店舗数と同じ場合は「全店」と表示
-            if ($shop_count == $all_shop_count) {
-                $shop_count = "全店";
-            }
-            $manual->shop_count = $shop_count;
         }
 
         return view('admin.manual.publish.index', [
@@ -197,131 +193,6 @@ class ManualPublishController extends Controller
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
         ]);
-    }
-
-    // WowTalk通知の処理
-    public function sendWowtalkNotification($manual_id)
-    {
-        // 現在の東京時刻を取得
-        $currentDate = Carbon::now('Asia/Tokyo');
-        // 現在掲載中と掲載終了を取得（is_broadcast_notificationが1:待ちの場合）
-        $_manual = Manual::where('id', $manual_id)->where('editing_flg', false)->where('is_broadcast_notification', 1)->first();
-        $errorLogs = [];
-
-        // 掲載開始日または登録日が存在しない場合の処理
-        if (!$_manual || !$_manual->start_datetime || !$_manual->created_at) {
-            return $errorLogs[] = "manual_id: " . $manual_id . " 掲載開始日または登録日が存在しない";
-        }
-
-        // 掲載開始日が今日よりも新しい場合の処理
-        if ($_manual->start_datetime->gt($currentDate)) {
-            return $errorLogs[] = "manual_id: " . $manual_id . " 掲載開始日が今日よりも新しい";
-        }
-
-        if ($_manual->end_datetime) {
-            // 掲載終了日が今日よりも古い場合の処理
-            if ($currentDate->gt(Carbon::parse($_manual->end_datetime))) {
-                // 業連配信通知フラグを更新（0:なし）
-                $_manual->timestamps = false; // タイムスタンプを無効にする
-                $_manual->is_broadcast_notification = 0;
-                $_manual->save();
-                $_manual->timestamps = true; // タイムスタンプを再度有効にする
-                return $errorLogs[] = "manual_id: " . $manual_id . " 掲載終了日が今日以前";
-            }
-        }
-
-        // 掲載開始日が現在日時以前の場合に通知
-        if ($_manual->start_datetime->lessThanOrEqualTo($currentDate)) {
-            // 通知対象の店舗とWowTalk IDを取得
-            $wowtalk_data = DB::table('wowtalk_shops')
-                ->join('manual_shop', 'wowtalk_shops.shop_id', '=', 'manual_shop.shop_id')
-                ->where('manual_shop.manual_id', $_manual->id)
-                ->where(function ($query) {
-                    $query->where(function ($subQuery) {
-                        $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
-                                ->where('wowtalk_shops.business_notification1', true);
-                    })
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
-                                ->where('wowtalk_shops.business_notification2', true);
-                    });
-                })
-                ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.business_notification1', 'wowtalk_shops.business_notification2')
-                ->get()
-                ->map(function ($result) {
-                    return [
-                        'shop_id' => $result->shop_id,
-                        'wowtalk1_id' => $result->business_notification1 ? $result->wowtalk1_id : null,
-                        'wowtalk2_id' => $result->business_notification2 ? $result->wowtalk2_id : null,
-                    ];
-                })
-                ->toArray();
-
-            // 通知対象のWowTalkIDがない場合
-            if (empty($wowtalk_data)) {
-                // 業連配信通知フラグを更新（0:なし）
-                $_manual->timestamps = false; // タイムスタンプを無効にする
-                $_manual->is_broadcast_notification = 0;
-                $_manual->save();
-                $_manual->timestamps = true; // タイムスタンプを再度有効にする
-                return $errorLogs[] = "manual_id: " . $manual_id . " 通知対象のWowTalkIDなし";
-            }
-
-            // メッセージ内容を生成
-            $messageContent = "マニュアルが配信されました。確認してください。\n";
-            $messageContent .= "・マニュアル名：{$_manual->title}\n";
-            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual/?search_period=all\n";
-            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
-
-            // WowTalk IDを一括で収集
-            $wowtalkIds = [];
-            foreach ($wowtalk_data as $data) {
-                foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
-                    if (!empty($data[$wowtalkIdKey])) {
-                        $wowtalkIds[] = $data[$wowtalkIdKey];
-                    }
-                }
-            }
-
-            // WowTalk IDを20件ずつのバッチに分割してAPIを呼び出す
-            $chunkedWowtalkIds = array_chunk($wowtalkIds, 20);
-            foreach ($chunkedWowtalkIds as $batch) {
-                try {
-                    $apiResult = SendWowTalkApi::sendWowTalkApiRequest($batch, $messageContent);
-                    if (is_array($apiResult)) {
-                        if (isset($apiResult['type']) && ($apiResult['type'] === 'WowTalkAPI_error' || $apiResult['type'] === 'unexpected_response')) {
-                            // エラーがある場合のみログを記録
-                            $requestTarget = is_array($apiResult['request_target'])
-                                ? implode(', ', $apiResult['request_target'])
-                                : $apiResult['request_target'];
-                            $responseResult = is_array($apiResult['response_result'])
-                                ? implode(', ', $apiResult['response_result'])
-                                : $apiResult['response_result'];
-                            $errorLogs[] = "manual_id: " . $manual_id . " WowTalk ID: " . $requestTarget . " エラーメッセージ: " . $responseResult;
-                        }
-                    }
-                } catch (\Exception $e) {
-                    foreach ($batch as $wowtalkId) {
-                        $errorLogs[] = "manual_id: " . $manual_id . " WowTalk ID: " . $wowtalkId . " エラーメッセージ: " . $e->getMessage();
-                    }
-                }
-            }
-
-            // エラーログがある場合はエラーログを返す
-            if (!empty($errorLogs)) {
-                return $errorLogs;
-            }
-
-            // 業連配信通知フラグを更新（2:済み）
-            $_manual->timestamps = false; // タイムスタンプを無効にする
-            $_manual->is_broadcast_notification = 2;
-            $_manual->save();
-            $_manual->timestamps = true; // タイムスタンプを再度有効にする
-
-            return [];
-        } else {
-            return "manual_id: " . $manual_id . " WowTalk通知なし";
-        }
     }
 
     // 閲覧率の更新処理
@@ -709,29 +580,6 @@ class ManualPublishController extends Controller
             }
 
             DB::commit();
-
-            // // WowTalk通知の処理
-            // if ($is_broadcast_notification == 1) {
-            //     $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
-
-            //     // WowTalk通知の結果をログに記録
-            //     $manualLog = new WowTalkNotificationLog();
-            //     $manualLog->log_type = 'manual';
-            //     $manualLog->command_name = 'sendWowtalkNotification';
-            //     $manualLog->started_at = Carbon::now();
-            //     $manualLog->status = empty($wowtalk_notification_result);
-            //     $manualLog->attempts = 1;
-
-            //     // エラーメッセージをログに記録
-            //     if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
-            //         $manualLog->error_message = implode(', ', $wowtalk_notification_result);
-            //     } elseif (is_string($wowtalk_notification_result)) {
-            //         $manualLog->error_message = $wowtalk_notification_result;
-            //     }
-
-            //     $manualLog->save();
-            // }
-
 
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
@@ -1157,28 +1005,6 @@ class ManualPublishController extends Controller
 
             DB::commit();
 
-            // // WowTalk通知の処理
-            // if ($is_broadcast_notification == 1)  {
-            //     $wowtalk_notification_result = $this->sendWowtalkNotification($manual->id);
-
-            //     // WowTalk通知の結果をログに記録
-            //     $manualLog = new WowTalkNotificationLog();
-            //     $manualLog->log_type = 'manual';
-            //     $manualLog->command_name = 'sendWowtalkNotification';
-            //     $manualLog->started_at = Carbon::now();
-            //     $manualLog->status = empty($wowtalk_notification_result);
-            //     $manualLog->attempts = 1;
-
-            //     // エラーメッセージをログに記録
-            //     if (is_array($wowtalk_notification_result) && !empty($wowtalk_notification_result)) {
-            //         $manualLog->error_message = implode(', ', $wowtalk_notification_result);
-            //     } elseif (is_string($wowtalk_notification_result)) {
-            //         $manualLog->error_message = $wowtalk_notification_result;
-            //     }
-
-            //     $manualLog->save();
-            // }
-
             // 閲覧率の更新処理
             $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));
 
@@ -1328,14 +1154,21 @@ class ManualPublishController extends Controller
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
 
-        $csv_content = file_get_contents($csv);
-        $encoding = mb_detect_encoding($csv_content);
-        if ($encoding == "UTF-8") {
-            $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
-            file_put_contents($csv, $shift_jis_content);
+        try {
+            $csv_content = file_get_contents($csv);
+            $encoding = mb_detect_encoding($csv_content);
+            if ($encoding == "UTF-8") {
+                $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
+                file_put_contents($csv, $shift_jis_content);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'ファイルをアップロードしてください'
+            ], 500);
         }
 
-        $brands = $this->getBrandNameArray($organization1);
+        $organization = $this->getOrganizationForm($organization1);
+        $shop_list = $this->getShopForm($organization1);
 
         $csv_path = Storage::putFile('csv', $csv);
         Log::info("マニュアルCSVインポート", [
@@ -1344,9 +1177,7 @@ class ManualPublishController extends Controller
         ]);
 
         try {
-            Excel::import(new ManualCsvImport($organization1, $brands), $csv, \Maatwebsite\Excel\Excel::CSV);
-            $collection = Excel::toCollection(new ManualCsvImport($organization1, $brands), $csv, \Maatwebsite\Excel\Excel::CSV);
-
+            $collection = Excel::toCollection(new ManualCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
             $count = $collection[0]->count();
             if ($count >= 100) {
                 File::delete($file_path);
@@ -1354,6 +1185,9 @@ class ManualPublishController extends Controller
                     'message' => "100行以内にしてください"
                 ], 500);
             }
+
+            Excel::import(new ManualCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
+
             $array = [];
             foreach (
                 $collection[0] as $key => [
@@ -1369,6 +1203,8 @@ class ManualPublishController extends Controller
                     $end_datetime,
                     $status,
                     $brand,
+                    $shop,
+                    $wowtalk_notification,
                     $description
                 ]
             ) {
@@ -1376,35 +1212,41 @@ class ManualPublishController extends Controller
                     ->where('organization1_id', $organization1)
                     ->firstOrFail();
 
-                $CONTENTS_RAW_NUMBER = 13;
+                $CONTENTS_RAW_NUMBER = 15;
                 $row_contents = $collection[0][$key]->slice($CONTENTS_RAW_NUMBER);
 
                 $contents = [];
                 if (isset($manual->content)) {
                     foreach ($manual->content as $key => $content) {
                         $content = [];
-                        $content["title"] = $row_contents[($key * 2) + 13] ?? '';
-                        $content["description"] = $row_contents[($key * 2) + 14] ?? '';
+                        $content["title"] = $row_contents[($key * 2) + 14] ?? '';
+                        $content["description"] = $row_contents[($key * 2) + 15] ?? '';
                         array_push($contents, $content);
                     }
                 }
-                $brand_param = ($brand == "全て") ? $brands : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                $shop_param = ($shop == "全店")
+                    ? ['all_shops_flag' => true, 'shop_ids' => array_column($shop_list, 'id')]
+                    : ['all_shops_flag' => false, 'shop_ids' => Shop::whereIn('display_name', $this->strToArray($shop))->pluck('id')->toArray()];
+
                 $category_array = isset($category) ? explode('|', $category) : null;
                 $category_level1_name = isset($category_array[0]) ? str_replace(' ', '', trim($category_array[0], "\"")) : NULL;
                 $category_level2_name = isset($category_array[1]) ? str_replace(' ', '', trim($category_array[1], "\"")) : NULL;
 
                 array_push($array, [
-                    'id' => $manual->id,
-                    'number' => $no,
-                    'category_level1_id' =>  isset($category_array[0]) ? ManualCategoryLevel1::where('name', $category_level1_name)->pluck('id')->first() : NULL,
-                    'category_level2_id' =>  isset($category_array[1]) ? ManualCategoryLevel2::where('name', $category_level2_name)->pluck('id')->first() : NULL,
-                    'title' => $title,
-                    'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
-                    'start_datetime' => $start_datetime,
-                    'end_datetime' => $end_datetime,
-                    'brand' => $brand_param,
-                    'description' => $description,
-                    'contents' => $contents
+                    'id'                        => $manual->id,
+                    'number'                    => $no,
+                    'category_level1_id'        => isset($category_array[0]) ? ManualCategoryLevel1::where('name', $category_level1_name)->pluck('id')->first() : NULL,
+                    'category_level2_id'        => isset($category_array[1]) ? ManualCategoryLevel2::where('name', $category_level2_name)->pluck('id')->first() : NULL,
+                    'title'                     => $title,
+                    'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                    'start_datetime'            => $start_datetime,
+                    'end_datetime'              => $end_datetime,
+                    'brand'                     => $brand_param,
+                    'shops'                     => $shop_param,
+                    'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
+                    'description'               => $description,
+                    'contents'                  => $contents
                 ]);
 
                 file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
@@ -1423,6 +1265,11 @@ class ManualPublishController extends Controller
                 $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
                 $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
             }
+
+            // 行でソート
+            usort($errorMessage, function ($a, $b) {
+                return $a['row'] <=> $b['row'];
+            });
 
             File::delete($file_path);
             return response()->json([
@@ -1471,20 +1318,99 @@ class ManualPublishController extends Controller
         try {
             DB::beginTransaction();
             foreach ($manuals as $key => $ml) {
-                $manual = Manual::find($ml["id"]);
-                $manual->number = $ml["number"];
-                $manual->description = $ml["description"];
-                $manual->category_level1_id = $ml["category_level1_id"];
-                $manual->category_level2_id = $ml["category_level2_id"];
-                $manual->title = $ml["title"];
+                $organization1_id = Brand::where('id', $ml["brand"])->pluck('organization1_id')->first();
+
+                $manual                            = Manual::find($ml["id"]);
+                $manual->number                    = $ml["number"];
+                $manual->description               = $ml["description"];
+                $manual->category_level1_id        = $ml["category_level1_id"];
+                $manual->category_level2_id        = $ml["category_level2_id"];
+                $manual->title                     = $ml["title"];
                 $manual->tag()->sync($ml["tag"]);
-                $manual->start_datetime = $ml["start_datetime"];
-                $manual->end_datetime = $ml["end_datetime"];
+                $manual->start_datetime            = $ml["start_datetime"];
+                $manual->end_datetime              = $ml["end_datetime"];
+                $manual->is_broadcast_notification = $ml["is_broadcast_notification"];
                 if ($manual->isDirty()) $manual->updated_admin_id = $admin->id;
                 $manual->save();
 
+                ManualShop::where('manual_id', $manual->id)->delete();
+                // manual_shopにインサート
+                $chunkSize = 200;
+
+                // manual_shopにshop_idとmanual_idをバルクインサート
+                if (isset($ml["shops"])) {
+
+                    // ショップデータの事前取得とグループ化
+                    $shopsData = Shop::whereIn('id', $ml["shops"]['shop_ids'])
+                        ->whereIn('brand_id', $ml["brand"])
+                        ->get(['id', 'brand_id'])
+                        ->groupBy('id');
+
+                    $insertData = [];
+                    // 事前に選択フラグを決定
+                    $selectedFlg = (isset($ml["shops"]['all_shops_flag']) && $ml["shops"]['all_shops_flag'] === true) ? 'all' : 'store';
+
+                    foreach ($ml["shops"]['shop_ids'] as $_shop_id) {
+                        if (isset($shopsData[$_shop_id])) {
+                            foreach ($shopsData[$_shop_id] as $shop) {
+                                $insertData[] = [
+                                    'manual_id'    => $manual->id,
+                                    'shop_id'      => $shop->id,
+                                    'brand_id'     => $shop->brand_id,
+                                    'selected_flg' => $selectedFlg,
+                                    'created_at'   => now(),
+                                    'updated_at'   => now()
+                                ];
+
+                                // チャンクサイズに達したらバルクインサート
+                                if (count($insertData) >= $chunkSize) {
+                                    ManualShop::insert($insertData);
+                                    $insertData = [];
+                                }
+                            }
+                        }
+                    }
+
+                    // 最後に残ったデータをインサート
+                    if (!empty($insertData)) {
+                        ManualShop::insert($insertData);
+                    }
+                }
+
+                ManualOrganization::where('manual_id', $manual->id)->delete();
+                // manual_organizationにインサート
+                // Shopモデルを使用して、各組織レベルのIDを取得
+                $shopIds = $ml["shops"]['shop_ids'];
+                $shops = Shop::whereIn('id', $shopIds)->get();
+
+                $bulkData = [];
+                foreach ($shops as $shop) {
+                    $orgData = [
+                        'manual_id'        => $manual->id,
+                        'organization1_id' => $manual->organization1_id,
+                        'created_at'       => now(),
+                        'updated_at'       => now(),
+                        'organization5_id' => $shop->organization5_id ?? null,
+                        'organization4_id' => $shop->organization4_id ?? null,
+                        'organization3_id' => $shop->organization3_id ?? null,
+                        'organization2_id' => $shop->organization2_id ?? null,
+                    ];
+
+                    // 組織IDが設定されている場合のみデータを追加
+                    if (!empty(array_intersect_key($orgData, array_flip(['organization5_id', 'organization4_id', 'organization3_id', 'organization2_id'])))) {
+                        $bulkData[] = $orgData;
+                    }
+                }
+
+                // バルクインサート
+                if (!empty($bulkData)) {
+                    DB::table('manual_organization')->insert($bulkData);
+                }
+
+                // ブランドの同期
                 $manual->brand()->sync($ml["brand"]);
 
+                // manual_contentの同期
                 if (isset($manual->content)) {
                     foreach ($manual->content as $key => $content) {
                         $content_title = $ml["contents"][$key]["title"] ?? '';
@@ -1495,10 +1421,13 @@ class ManualPublishController extends Controller
                     }
                 }
 
-                // ユーザー配信
+                // manual_userの同期
                 if (!$manual->editing_flg) {
                     $origin_user = $manual->user()->pluck('id')->toArray();
-                    $new_target_user = $this->targetUserParam($ml["brand"]);
+                    $new_target_user = $this->getTargetUsersByShopId((object)[
+                        'organization_shops' => implode(',', $ml["shops"]['shop_ids']),
+                        'brand' => $ml["brand"]
+                    ]);
                     $new_target_user_id = array_keys($new_target_user);
                     $detach_user = array_diff($origin_user, $new_target_user_id);
                     $attach_user = array_diff($new_target_user_id, $origin_user);
@@ -1509,6 +1438,57 @@ class ManualPublishController extends Controller
                     }
                 }
             }
+
+            // WowTalk通知のジョブをキューに追加
+            if ($manual->is_broadcast_notification == 1) {
+                SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_import');
+            }
+
+            // 閲覧率の更新処理
+            $rate = $request->input('rate');
+            $manual_id = $manual->id;
+
+            // マニュアルの既読・総ユーザー数を一度に集計
+            $manualRates = DB::table('manual_user')
+                ->select([
+                    'manual_user.manual_id',
+                    DB::raw('sum(manual_user.read_flg) as read_users'),
+                    DB::raw('count(distinct manual_user.user_id) as total_users'),
+                    DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
+                ])
+                ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
+                ->where('manuals.organization1_id', $organization1_id)
+                ->when($manual_id, function ($query) use ($manual_id) {
+                    $query->where('manual_user.manual_id', $manual_id);
+                })
+                ->groupBy('manual_user.manual_id')
+                ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                    $min = isset($rate[0]) ? $rate[0] : 0;
+                    $max = isset($rate[1]) ? $rate[1] : 100;
+                    $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+                })
+                ->get();
+
+            // バルクアップデート用のデータ準備
+            $updateData = [];
+            foreach ($manualRates as $manual) {
+                $updateData[] = [
+                    'manual_id'        => $manual->manual_id,
+                    'organization1_id' => $organization1_id,
+                    'view_rate'        => $manual->view_rate,     // 閲覧率の計算
+                    'read_users'       => $manual->read_users,    // 既読ユーザー数
+                    'total_users'      => $manual->total_users,   // 全体ユーザー数
+                    'created_at'       => now(),
+                    'updated_at'       => now(),
+                ];
+            }
+
+            // バルクアップデートを実行
+            DB::table('manual_view_rates')->upsert(
+                $updateData,
+                ['manual_id', 'organization1_id'],
+                ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+            );
 
             DB::table('manual_csv_logs')
                 ->where('id', $log_id)

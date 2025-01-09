@@ -151,8 +151,8 @@
                         </div>
                     @endif
                     <div>
-                        <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
-                            class="btn btn-admin">エクスポート</a>
+                        <input type="button" class="btn btn-admin" data-toggle="modal"
+                            data-target="#manualExportModal" value="エクスポート">
                     </div>
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
@@ -294,6 +294,8 @@
 
     </div>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
+    @include('common.admin.manual-export-modal', ['organization1' => $organization1])
+
     <script src="{{ asset('/js/admin/manual/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
