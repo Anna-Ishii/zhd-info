@@ -130,6 +130,11 @@ class ManualListExport implements
             $manual_list = session('manual_list');
 
             if ($manual_list) {
+                // コンテンツ数をカウント
+                foreach ($manual_list as &$manual) {
+                    $manual->content_counts = count($manual->content);
+                }
+                // マニュアルリストをソート
                 $manual_list = $manual_list->sortBy('number');
             }
         }

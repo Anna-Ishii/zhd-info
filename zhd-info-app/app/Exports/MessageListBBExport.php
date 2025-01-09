@@ -125,6 +125,7 @@ class MessageListBBExport implements
             $message_list = session('message_list');
 
             if ($message_list) {
+                // メッセージリストをソート
                 $message_list = $message_list->sortBy('number');
             }
         }

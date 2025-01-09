@@ -1202,9 +1202,9 @@ class ManualPublishController extends Controller
                     $start_datetime,
                     $end_datetime,
                     $status,
+                    $wowtalk_notification,
                     $brand,
                     $shop,
-                    $wowtalk_notification,
                     $description
                 ]
             ) {
@@ -1242,9 +1242,9 @@ class ManualPublishController extends Controller
                     'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
                     'start_datetime'            => $start_datetime,
                     'end_datetime'              => $end_datetime,
+                    'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
                     'brand'                     => $brand_param,
                     'shops'                     => $shop_param,
-                    'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
                     'description'               => $description,
                     'contents'                  => $contents
                 ]);

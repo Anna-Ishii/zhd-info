@@ -76,8 +76,8 @@ class ManualCsvImport implements
         return [
             '0' => ['required'],
             '1' => ['required', Rule::in($this->new_category_list)],
-            '11' => ['required', new BrandRule(parameter: $this->brand)],
-            '12' => ['required', new ShopRule(parameter: $this->shop)],
+            '12' => ['required', new BrandRule(parameter: $this->brand)],
+            '13' => ['required', new ShopRule(parameter: $this->shop)],
         ];
     }
 
@@ -87,8 +87,8 @@ class ManualCsvImport implements
             '0.required' => 'Noは必須です',
             '0.int' => 'Noは数値である必要があります',
             '1.in' => 'カテゴリの項目が間違っています',
-            '11.required' => '対象業態は必須項目です',
-            '12.required' => '配信店舗は必須項目です',
+            '12.required' => '対象業態は必須項目です',
+            '13.required' => '配信店舗は必須項目です',
         ];
     }
 
