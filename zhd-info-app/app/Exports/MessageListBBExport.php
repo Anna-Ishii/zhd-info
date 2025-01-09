@@ -3,11 +3,8 @@
 namespace App\Exports;
 
 use App\Enums\PublishStatus;
-use App\Models\Brand;
-use App\Models\Organization1;
 use App\Models\Message;
 use App\Models\MessageShop;
-use App\Models\MessageUser;
 use App\Models\Shop;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\View\View;
