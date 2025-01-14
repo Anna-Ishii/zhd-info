@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -25,7 +25,7 @@
                     </ul>
                 </li>
                 @endif
-                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
+                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true) || in_array('account-mail', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
@@ -35,7 +35,9 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+                        @if (in_array('account-mail', $arrow_pages, true))
+                            <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif
@@ -146,7 +148,7 @@
             <div class="col-lg-12">
                 @foreach ($roll_list as $roll)
                 <label class="mr16">
-                    <input type="radio" name="roll_id" value="{{$roll->id}}" class="mr8" 
+                    <input type="radio" name="roll_id" value="{{$roll->id}}" class="mr8"
                         {{($roll->id == old('roll_id')) ? "checked" : ""}}>
                         {{$roll->name}}
                 </label>

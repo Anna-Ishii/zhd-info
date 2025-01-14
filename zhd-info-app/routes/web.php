@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\Account\AccountController;
 use App\Http\Controllers\Admin\Account\AdminAccountController;
+use App\Http\Controllers\Admin\Account\MailAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -122,6 +123,12 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('new', [AdminAccountController::class, 'store'])->name('new.store');
             Route::get('edit/{admin}', [AdminAccountController::class, 'edit'])->name('edit');
             Route::post('edit/{admin}', [AdminAccountController::class, 'update'])->name('update');
+        });
+        Route::group(['prefix' => 'mail', 'as' => 'mail.', 'middleware' => 'check.allowpage:account-mail'], function () {
+            Route::get('/', [MailAccountController::class, 'index'])->name('index');
+            Route::get('new', [MailAccountController::class, 'new'])->name('new');
+            Route::post('new', [MailAccountController::class, 'store'])->name('new.store');
+            Route::get('export', [MailAccountController::class, 'export'])->name('export');
         });
     });
 
