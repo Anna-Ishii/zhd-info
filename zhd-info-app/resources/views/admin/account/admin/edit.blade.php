@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -25,7 +25,7 @@
                     </ul>
                 </li>
                 @endif
-                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
+                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true) || in_array('account-mail', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
@@ -35,7 +35,9 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li class="active"><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+                        @if (in_array('account-mail', $arrow_pages, true))
+                            <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif
@@ -92,8 +94,8 @@
                 </div>
                 @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8" 
-                        @if(request()->old())    
+                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8"
+                        @if(request()->old())
                             {{ in_array((string)$organization1->id, old('organization1', []), true) ? 'checked' : ''}}
                         @else
                             {{ in_array($organization1->id, $edit_admin->organization1->pluck('id')->toArray(), true) ? 'checked' : ''}}
@@ -106,10 +108,10 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">権限</label>
-            <div class="col-lg-4">  
+            <div class="col-lg-4">
                 <select name="ability" class="form-control">
                     @foreach ($ability_list as $ability)
-                        <option value="{{$ability->value}}" class="mr8" 
+                        <option value="{{$ability->value}}" class="mr8"
                             @if(request()->old())
                                 {{($ability->value == old('ability')) ? "selected" : ""}}
                             @else
@@ -139,7 +141,7 @@
                 </div>
                 @foreach ($adminpage_list as $page)
                 <label class="mr16">
-                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8" 
+                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8"
                         @if(request()->old())
                             {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}
                         @else
@@ -155,7 +157,7 @@
             <label class="col-lg-2 control-label">状態</label>
             <div class="col-lg-10 checkArea">
                 <label class="mr16">
-                    <input type="radio" name="is_valid" value="true" class="mr8" 
+                    <input type="radio" name="is_valid" value="true" class="mr8"
                         @if(request()->old())
                             {{!old("is_valid") ? '' : 'checked'}}
                         @else
@@ -165,7 +167,7 @@
                     有効
                 </label>
                 <label class="mr16">
-                    <input type="radio" name="is_valid" value="" class="mr8" 
+                    <input type="radio" name="is_valid" value="" class="mr8"
                         @if(request()->old())
                             {{!old("is_valid") ? 'checked' : ''}}
                         @else

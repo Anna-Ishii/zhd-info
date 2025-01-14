@@ -5,7 +5,7 @@
         <div class="sidebar-nav navbar-collapse">
             <ul class="nav">
                 @if(in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                <li>          
+                <li>
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
@@ -25,7 +25,7 @@
                     </ul>
                 </li>
                 @endif
-                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
+                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true) || in_array('account-mail', $arrow_pages, true))
                 <li>
                     <a href="#" class="nav-label">3.管理</span></a>
                     <ul class="nav nav-second-level">
@@ -35,7 +35,9 @@
                         @if (in_array('account-admin', $arrow_pages, true))
                             <li class="active"><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                         @endif
-                        
+                        @if (in_array('account-mail', $arrow_pages, true))
+                            <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
+                        @endif
                     </ul>
                 </li>
                 @endif
@@ -80,14 +82,14 @@
             <div class="col-lg-10 checkArea">
                 <div class="mb8">
                     <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" 
+                        <input type="checkbox" id="checkAll" class="mr8"
                             {{(old('organization1', []) == $organization1_list->pluck('id')->toArray()) ? 'checked' : '' }}>
                         全て
                     </label>
                 </div>
                 @foreach ($organization1_list as $organization1)
                 <label class="mr16">
-                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8" 
+                    <input type="checkbox" name="organization1[]" value="{{ $organization1->id }}" class="checkCommon mr8"
                        {{ in_array((string)$organization1->id, old('organization1', []), true) ? 'checked' : ''}}>
                     {{ $organization1->name }}
                 </label>
@@ -96,15 +98,15 @@
         </div>
         <div class="form-group">
             <label class="col-lg-2 control-label">権限</label>
-            <div class="col-lg-4">  
+            <div class="col-lg-4">
                 <select name="ability" class="form-control">
                     @foreach ($ability_list as $ability)
-                    <option value="{{$ability->value}}" class="mr8" 
+                    <option value="{{$ability->value}}" class="mr8"
                         {{($ability->value == old('ability')) ? "selected" : ""}}>
                         {{$ability->text()}}
                     </option>
                     @endforeach
-                    
+
                 </select>
             </div>
         </div>
@@ -120,7 +122,7 @@
                 </div>
                 @foreach ($adminpage_list as $page)
                 <label class="mr16">
-                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8" 
+                    <input type="checkbox" name="page[]" value="{{$page->id}}" class="checkCommon mr8"
                        {{ in_array((string)$page->id, old('page', []), true) ? 'checked' : ''}}>
                     {{$page->name}}
                 </label>
