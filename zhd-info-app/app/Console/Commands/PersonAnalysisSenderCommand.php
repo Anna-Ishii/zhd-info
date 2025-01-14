@@ -12,9 +12,6 @@ use App\Utils\SESMailer;
 use App\Models\EmailSendLog;
 use App\Exports\PersonAnalysisExport;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\View;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Maatwebsite\Excel\Facades\Excel;
 
 class PersonAnalysisSenderCommand extends Command
@@ -180,12 +177,14 @@ class PersonAnalysisSenderCommand extends Command
         $organization_list = [];
         $viewRates = [];
         $messages = [];
+        $message_count = 0;
+        $messagesFlg = false;
 
         // 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡を取得
         $startOfLastWeek = now('Asia/Tokyo')->startOfWeek()->subWeek()->format('Y-m-d H:i:s');
         $endOfLastWeek = now('Asia/Tokyo')->endOfWeek()->subWeek()->endOfDay()->format('Y-m-d H:i:s');
 
-        // 業務連絡を9件取得
+        // 業務連絡を取得
         $messages = Message::query()
             ->select('messages.*')
             ->leftJoin('message_user', 'message_user.message_id', '=', 'messages.id')
@@ -199,100 +198,136 @@ class PersonAnalysisSenderCommand extends Command
             ->groupBy('messages.id')
             ->get();
 
-        if (empty($messages)) {
-            return $this->createFailureResponse($organization1);
-        }
+        if ($messages->isNotEmpty()) {
+            // 業務連絡のidを取得
+            $_messages = $messages->pluck('id')->toArray();
+            $message_count = count($_messages);
 
-        // 業務連絡の10件のidを取得
-        $_messages = $messages->pluck('id')->toArray();
+            // DS, AR, BLがあるかで処理を分ける
+            if ($organization1->isExistOrg3()) {
+                $organizations[] = "DS";
+                $organization_list["DS"] = $organization1->getOrganization3();
+            }
+            if ($organization1->isExistOrg4()) {
+                $organizations[] = "AR";
+                $organization_list["AR"] = $organization1->getOrganization4();
+            }
+            if ($organization1->isExistOrg5()) {
+                $organizations[] = "BL";
+                $organization_list["BL"] = $organization1->getOrganization5();
+            }
 
-        // DS, AR, BLがあるかで処理を分ける
-        if ($organization1->isExistOrg3()) {
-            $organizations[] = "DS";
-            $organization_list["DS"] = $organization1->getOrganization3();
-        }
-        if ($organization1->isExistOrg4()) {
-            $organizations[] = "AR";
-            $organization_list["AR"] = $organization1->getOrganization4();
-        }
-        if ($organization1->isExistOrg5()) {
-            $organizations[] = "BL";
-            $organization_list["BL"] = $organization1->getOrganization5();
-        }
+            foreach ($_messages as $key => $ms) {
+                // 組織ごと
+                if (in_array('BL', $organizations)) {
+                    $viewRateOrgSub =
+                        DB::table('message_user')
+                        ->select([
+                            DB::raw('shops.organization5_id as o5_id'),
+                            DB::raw('count(crews.id) as count'),
+                            DB::raw('count(crew_message_logs.id) as read_count'),
+                            DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
+                        ])
+                        ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
+                        ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
+                        ->leftJoin('crew_message_logs', function ($join) use ($ms) {
+                            $join->on('crew_message_logs.crew_id', '=', 'crews.id')
+                                ->where('crew_message_logs.message_id', '=', $ms);
+                        })
+                        ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
+                        ->where('message_user.message_id', '=', $ms)
+                        ->groupBy('shops.organization5_id');
 
-        foreach ($_messages as $key => $ms) {
-            // 組織ごと
-            if (in_array('BL', $organizations)) {
-                $viewRateOrgSub =
-                    DB::table('message_user')
-                    ->select([
-                        DB::raw('shops.organization5_id as o5_id'),
-                        DB::raw('count(crews.id) as count'),
-                        DB::raw('count(crew_message_logs.id) as read_count'),
-                        DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
-                    ])
-                    ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
-                    ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
-                    ->leftJoin('crew_message_logs', function ($join) use ($ms) {
-                        $join->on('crew_message_logs.crew_id', '=', 'crews.id')
-                            ->where('crew_message_logs.message_id', '=', $ms);
-                    })
-                    ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
-                    ->where('message_user.message_id', '=', $ms)
-                    ->groupBy('shops.organization5_id');
+                    $viewRate =
+                        DB::table('shops')
+                        ->select([
+                            DB::raw('organization3.name as org3_name'),
+                            DB::raw('organization4.name as org4_name'),
+                            DB::raw('organization5.id as id'),
+                            DB::raw('organization5.order_no as order_no'),
+                            DB::raw('organization5.name as org5_name'),
+                            DB::raw('sub.count as count'),
+                            DB::raw('sub.read_count as read_count'),
+                            DB::raw('sub.view_rate as view_rate')
+                        ])
+                        ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+                        ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+                        ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+                        ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
+                            $join->on('shops.organization5_id', '=', 'sub.o5_id');
+                        })
+                        ->where('shops.organization1_id', '=', $organization1->id)
+                        ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
+                        ->orderBy('organization3.order_no')
+                        ->orderBy('organization4.order_no')
+                        ->orderBy('organization5.order_no')
+                        ->get();
 
-                $viewRate =
-                    DB::table('shops')
-                    ->select([
-                        DB::raw('organization3.name as org3_name'),
-                        DB::raw('organization4.name as org4_name'),
-                        DB::raw('organization5.id as id'),
-                        DB::raw('organization5.order_no as order_no'),
-                        DB::raw('organization5.name as org5_name'),
-                        DB::raw('sub.count as count'),
-                        DB::raw('sub.read_count as read_count'),
-                        DB::raw('sub.view_rate as view_rate')
-                    ])
-                    ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
-                    ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
-                    ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
-                    ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
-                        $join->on('shops.organization5_id', '=', 'sub.o5_id');
-                    })
-                    ->where('shops.organization1_id', '=', $organization1->id)
-                    ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
-                    ->orderBy('organization3.order_no')
-                    ->orderBy('organization4.order_no')
-                    ->orderBy('organization5.order_no')
-                    ->get();
-
-                $viewRates['BL'][] = $viewRate;
-                $viewRatesArray = $viewRate->toArray();
-                foreach ($viewRatesArray as $key => $value) {
-                    $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
-                    $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    $viewRates['BL'][] = $viewRate;
+                    $viewRatesArray = $viewRate->toArray();
+                    foreach ($viewRatesArray as $key => $value) {
+                        $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
+                        $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    }
                 }
             }
+
+            // メッセージがある場合はフラグをtrueにする
+            $messagesFlg = true;
         }
 
         // エクセルファイルを生成
         $excelFilePath = null;
-        try {
-            $excelFilePath = $this->generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek);
-        } catch (\Exception $e) {
-            $this->error("エクセルファイルの生成に失敗しました: " . $e->getMessage());
-            return $this->createFailureResponse($organization1);
+        if ($messagesFlg) {
+            try {
+                $excelFilePath = $this->generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek);
+            } catch (\Exception $e) {
+                $this->error("エクセルファイルの生成に失敗しました: " . $e->getMessage());
+                return $this->createFailureResponse($organization1);
+            }
+
+            // コレクションから最初のメッセージを取得
+            $messages = $messages->first();
         }
 
-        // コレクションから最初のメッセージを取得
-        $messages = $messages->first();
-
-        if ($messages && $viewRates && $excelFilePath) {
-            // メール送信処理の実行
-            return $this->sendPersonAnalysisMail($organization1, $messages, $viewRates, $startOfLastWeek, $endOfLastWeek, $excelFilePath);
-        }
+        // メール送信処理の実行
+        return $this->sendPersonAnalysisMail($organization1, $messagesFlg, $messages, $message_count, $viewRates, $startOfLastWeek, $endOfLastWeek, $excelFilePath);
 
         return $this->createFailureResponse($organization1);
+    }
+
+
+    /**
+     * Excelファイルを生成するメソッド
+     *
+     * @param array $organization1 組織オブジェクト
+     * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
+     * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
+     * @return string 生成されたExcelファイルのパス
+     * @throws \Exception Excelファイルの生成に失敗した場合
+     */
+    private function generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek)
+    {
+        $now = new Carbon('now');
+        $file_name = '業務連絡閲覧状況_' . $organization1['name'] . $now->format('_Y_m_d') . '.xlsx';
+
+        // exportフォルダが存在しない場合は作成
+        $exportDir = storage_path('app/export');
+        if (!file_exists($exportDir)) {
+            mkdir($exportDir, 0755, true);
+        }
+
+        // storage/app/exportディレクトリにExcelファイルを生成して保存
+        $exportPath = $exportDir . '/' . $file_name;
+        $export = new PersonAnalysisExport($organization1, $startOfLastWeek, $endOfLastWeek);
+        Excel::store($export, 'export/' . $file_name, 'local');
+
+        // ファイルが正しく保存されたか確認
+        if (!Storage::exists('export/' . $file_name)) {
+            $this->error("Excelファイルの保存に失敗しました。");
+        }
+
+        return $exportPath;
     }
 
 
@@ -301,47 +336,60 @@ class PersonAnalysisSenderCommand extends Command
      * 各店舗に対して閲覧状況メールを送信します。
      *
      * @param Organization1 $organization1 組織オブジェクト
-     * @param array $messages メッセージオブジェクト
-     * @param array $viewRates 閲覧状況データ
+     * @param bool $messagesFlg メッセージがあるかどうかのフラグ
+     * @param array|null $messages メッセージオブジェクト
+     * @param int|null $message_count メッセージの件数
+     * @param array|null $viewRates 閲覧状況データ
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
      * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-     * @param string $excelFilePath Excelファイルのパス
+     * @param string|null $excelFilePath Excelファイルのパス
      * @return array メッセージ送信結果のレスポンス（成功、失敗、エラーのいずれか）
      */
-    private function sendPersonAnalysisMail($organization1, $messages, $viewRates, $startOfLastWeek, $endOfLastWeek, $excelFilePath)
+    private function sendPersonAnalysisMail($organization1, $messagesFlg, $messages = null, $message_count = null, $viewRates = null, $startOfLastWeek, $endOfLastWeek, $excelFilePath = null)
     {
         // 通知対象の店舗とWowTalk IDを取得
-        $messageIds = is_array($messages) ? $messages['id'] : [$messages['id']];
+        $messageIds = [];
+        if ($messagesFlg) {
+            $messageIds = is_array($messages) ? $messages['id'] : [$messages['id']];
+        }
 
         $user_role_data = [];
         $user_role_data = DB::table('users_roles')
-            ->join('message_user', function ($join) use ($messageIds) {
-                $join->on('users_roles.user_id', '=', 'message_user.user_id')
-                    ->on('users_roles.shop_id', '=', 'message_user.shop_id')
-                    ->whereIn('message_user.message_id', $messageIds);
+            ->when(!empty($messageIds), function ($query) use ($messageIds) {
+                $query->join('message_user', function ($join) use ($messageIds) {
+                    $join->on('users_roles.user_id', '=', 'message_user.user_id')
+                        ->on('users_roles.shop_id', '=', 'message_user.shop_id')
+                        ->whereIn('message_user.message_id', $messageIds);
+                })
+                ->select('message_user.message_id', 'users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification');
+            }, function ($query) use ($organization1) {
+                $query->join('shops', function ($join) use ($organization1) {
+                    $join->on('users_roles.shop_id', '=', 'shops.id')
+                        ->where('shops.organization1_id', $organization1->id);
+                })
+                ->select('users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification');
             })
             ->where(function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery->whereNotNull('users_roles.DM_email')
                         ->where('users_roles.DM_view_notification', true);
                 })
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereNotNull('users_roles.BM_email')
-                            ->where('users_roles.BM_view_notification', true);
-                    })
-                    ->orWhere(function ($subQuery) {
-                        $subQuery->whereNotNull('users_roles.AM_email')
-                            ->where('users_roles.AM_view_notification', true);
-                    });
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereNotNull('users_roles.BM_email')
+                        ->where('users_roles.BM_view_notification', true);
+                })
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereNotNull('users_roles.AM_email')
+                        ->where('users_roles.AM_view_notification', true);
+                });
             })
-            ->select('message_user.message_id', 'users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email')
             ->get()
             ->map(function ($result) {
                 return [
-                    'message_id' => $result->message_id,
-                    'DM_email' => $result->DM_email ? $result->DM_email : null,
-                    'BM_email' => $result->BM_email ? $result->BM_email : null,
-                    'AM_email' => $result->AM_email ? $result->AM_email : null,
+                    'message_id' => $result->message_id ?? null,
+                    'DM_email' => isset($result->DM_view_notification) && $result->DM_view_notification ? $result->DM_email : null,
+                    'BM_email' => isset($result->BM_view_notification) && $result->BM_view_notification ? $result->BM_email : null,
+                    'AM_email' => isset($result->AM_view_notification) && $result->AM_view_notification ? $result->AM_email : null,
                 ];
             })
             ->toArray();
@@ -357,7 +405,7 @@ class PersonAnalysisSenderCommand extends Command
         // メッセージ内容を生成
         $messageContent = null;
         try {
-            $messageContent = $this->generateMessageContent($viewRates);
+            $messageContent = $this->generateMessageContent($messagesFlg, $message_count, $viewRates);
         } catch (\Exception $e) {
             // メッセージ内容生成に失敗した場合のエラー処理
             $errorLog = $this->createErrorLog(
@@ -409,7 +457,7 @@ class PersonAnalysisSenderCommand extends Command
                         $messages,
                         'メール送信に失敗しました。',
                         'mail_send_error',
-                        ['type' => 'mail_send_error', 'response_result' => 'メール送信に失敗しました', 'response_status' => $e->getMessage(), 'attempts' => 1],
+                        ['type' => 'mail_send_error', 'response_result' => 'メール送信に失敗しました', 'response_status' => $e->getMessage()],
                         null,
                         $messageContent
                     );
@@ -450,83 +498,49 @@ class PersonAnalysisSenderCommand extends Command
 
 
     /**
-     * Excelファイルを生成するメソッド
-     *
-     * @param array $organization1 組織オブジェクト
-     * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
-     * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-     * @return string 生成されたExcelファイルのパス
-     * @throws \Exception Excelファイルの生成に失敗した場合
-     */
-    private function generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek)
-    {
-        $now = new Carbon('now');
-        $file_name = '業務連絡閲覧状況_' . $organization1['name'] . '_' . $now->format('_Y_m_d') . '.xlsx';
-
-        // exportフォルダが存在しない場合は作成
-        $exportDir = storage_path('app/export');
-        if (!file_exists($exportDir)) {
-            mkdir($exportDir, 0755, true);
-        }
-
-        // storage/app/exportディレクトリにExcelファイルを生成して保存
-        $exportPath = $exportDir . '/' . $file_name;
-        $export = new PersonAnalysisExport($organization1, $startOfLastWeek, $endOfLastWeek);
-        Excel::store($export, 'export/' . $file_name, 'local');
-
-        // ファイルが正しく保存されたか確認
-        if (!Storage::exists('export/' . $file_name)) {
-            $this->error("Excelファイルの保存に失敗しました。");
-        }
-
-        return $exportPath;
-    }
-
-
-    /**
      * 各業態の閲覧率などのメッセージ内容を生成するメソッド
      *
-     * @param array $viewRates 閲覧状況データ
+     * @param bool $messagesFlg メッセージがあるかどうかのフラグ
+     * @param int|null $message_count メッセージの件数
+     * @param array|null $viewRates 閲覧状況データ
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function generateMessageContent($viewRates)
+    private function generateMessageContent($messagesFlg, $message_count = null, $viewRates = null)
     {
         // メッセージ内容を生成
-        $messageContent = now('Asia/Tokyo')->format('n/j') . "4:00時点でのBL単位に集計した個人の閲覧状況を提示させて頂きます。\n\n";
-        $messageContent .= str_repeat('-', 50) . "\n";
-
-        if (isset($viewRates['BL'][0])) {
-            $displayedOrgNames = [];
-            foreach ($viewRates['BL'][0] as $v_org_key => $v_o) {
-                if (isset($v_o->org3_name)) {
-                    if (!in_array($v_o->org3_name, $displayedOrgNames)) {
-                        $messageContent .= "\n{$v_o->org3_name}\n";
-                        $displayedOrgNames[] = $v_o->org3_name;
+        $messageContent = now('Asia/Tokyo')->format('n/j') . " 4:00時点でのBL単位に集計した個人の閲覧状況を提示させて頂きます。\n";
+        if ($messagesFlg) {
+            $messageContent .= "当期間に配信された業連は{$message_count}件です。\n\n";
+            if (isset($viewRates['BL'][0])) {
+                $displayedOrgNames = [];
+                foreach ($viewRates['BL'][0] as $v_org_key => $v_o) {
+                    if (isset($v_o->org3_name)) {
+                        if (!in_array($v_o->org3_name, $displayedOrgNames)) {
+                            $messageContent .= "\n{$v_o->org3_name}\n";
+                            $displayedOrgNames[] = $v_o->org3_name;
+                        }
                     }
-                }
-                if (isset($v_o->org4_name)) {
-                    if (!in_array($v_o->org4_name, $displayedOrgNames)) {
-                        $messageContent .= "\n{$v_o->org4_name}\n";
-                        $displayedOrgNames[] = $v_o->org4_name;
+                    if (isset($v_o->org4_name)) {
+                        if (!in_array($v_o->org4_name, $displayedOrgNames)) {
+                            $messageContent .= "\n{$v_o->org4_name}\n";
+                            $displayedOrgNames[] = $v_o->org4_name;
+                        }
                     }
-                }
-                $messageContent .= "・{$v_o->org5_name}：{$viewRates['BL_read_sum'][$v_o->id]} / {$viewRates['BL_sum'][$v_o->id]}";
-                if (isset($viewRates['BL_read_sum'][$v_o->id]) && ($viewRates['BL_sum'][$v_o->id] ?? 0) > 0) {
-                    $viewRate = number_format(
-                        $viewRates['BL_read_sum'][$v_o->id] /
-                            $viewRates['BL_sum'][$v_o->id],
-                        1,
-                    );
-                    $messageContent .= " ({$viewRate}%)\n";
-                } else {
-                    $messageContent .= " (0.0%)\n";
+                    $messageContent .= "・{$v_o->org5_name}：{$viewRates['BL_read_sum'][$v_o->id]} / {$viewRates['BL_sum'][$v_o->id]}";
+                    if (isset($viewRates['BL_read_sum'][$v_o->id]) && ($viewRates['BL_sum'][$v_o->id] ?? 0) > 0) {
+                        $viewRate = number_format(($viewRates['BL_read_sum'][$v_o->id] / $viewRates['BL_sum'][$v_o->id]) * 100, 1);
+                        $messageContent .= " ({$viewRate}%)\n";
+                    } else {
+                        $messageContent .= " (0.0%)\n";
+                    }
                 }
             }
+        } else {
+            $messageContent .= "\n当期間に配信された業連は0件です。\n";
         }
 
-        $messageContent .= "\n以上、よろしくお願いいたします。\n\n";
-        $messageContent .= str_repeat('-', 50) . "\n";
+        $messageContent .= "\n以上、よろしくお願いいたします。";
 
         return $messageContent;
     }
@@ -540,11 +554,11 @@ class PersonAnalysisSenderCommand extends Command
      * @param string $messageContent メッセージ内容
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
      * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-     * @param string $filePath 生成されたExcelファイルのパス
+     * @param string|null $filePath 生成されたExcelファイルのパス
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function sendMail($user_role_data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePath)
+    private function sendMail($user_role_data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePath = null)
     {
         // 通知対象のメールアドレスを取得
         $to = array_filter([$user_role_data['DM_email'], $user_role_data['BM_email'], $user_role_data['AM_email']]);
@@ -651,17 +665,17 @@ class PersonAnalysisSenderCommand extends Command
      *
      * @param Organization1 $organization1 組織オブジェクト
      * @param array $user_role_data 通知対象のユーザーデータ
-     * @param array $messages メッセージオブジェクト
+     * @param array|null $messages メッセージオブジェクト
      * @param string $errorMessage エラーメッセージ
      * @return array エラーレスポンス
      */
-    private function createErrorResponse($organization1, $user_role_data, $messages, $errorMessage)
+    private function createErrorResponse($organization1, $user_role_data, $messages = null, $errorMessage)
     {
         return [
             'status' => 'error',
             'org1_name' => $organization1->name,
             'email' => $user_role_data[0]['DM_email'] . ',' . $user_role_data[0]['BM_email'] . ',' . $user_role_data[0]['AM_email'],
-            'subject' => $messages['start_datetime'] . ' | ' . $messages['title'] . ' _ ' . now(),
+            'subject' => $messages ? $messages['start_datetime'] . ' | ' . $messages['title'] . ' _ ' . now() : null,
             'error_message' => $errorMessage
         ];
     }
@@ -672,11 +686,11 @@ class PersonAnalysisSenderCommand extends Command
      *
      * @param Organization1 $organization1 組織オブジェクト
      * @param array $data メールデータ
-     * @param array $messages メッセージオブジェクト
-     * @param string $messageContent 送信されたメッセージ内容
+     * @param array|null $messages メッセージオブジェクト
+     * @param string|null $messageContent 送信されたメッセージ内容
      * @return array エラーログ
      */
-    private function createErrorLog($organization1, $data, $messages, $messageContent = null)
+    private function createErrorLog($organization1, $data, $messages = null, $messageContent = null)
     {
         return [
             'type' => 'message_content_error',
@@ -684,8 +698,8 @@ class PersonAnalysisSenderCommand extends Command
             'DM_email' => $data['DM_email'] ?? '',
             'BM_email' => $data['BM_email'] ?? '',
             'AM_email' => $data['AM_email'] ?? '',
-            'message_id' => $messages['id'] ?? '',
-            'message_title' => $messages['title'] ?? '',
+            'message_id' => $messages ? $messages['id'] : '',
+            'message_title' => $messages ? $messages['title'] : '',
             'error_message' => $messageContent ?? '',
             'response_target' => array_filter([$data['DM_email'] ?? '', $data['BM_email'] ?? '', $data['AM_email'] ?? ''])
         ];
