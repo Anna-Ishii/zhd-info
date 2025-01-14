@@ -2223,22 +2223,21 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td></td>
-                <td style="text-align: right">
-                    <div class="shop-edit-group">
-                        <input type="button" class="btn btn-admin" id="checkAll-${newMessageId}" name="organizationAll" value="全店">
-                        <input type="hidden" id="selectOrganizationAll-${newMessageId}" name="select_organization[all]" value="">
-
-                        <input type="button" class="btn btn-admin" id="shopEditBtn-${newMessageId}"
-                            data-toggle="modal" data-target="#editShopModal-${newMessageId}" value="一部">
-                        <input type="hidden" id="selectStore-${newMessageId}" name="select_organization[store]" value="">
-                    </div>
-                </td>
                 <td class="label-notification-group">
                     <div class="wowtalk-notification-input-group" style="background-color: #ffffff00; color: black;">
                         <label style="cursor: pointer;">
                             <input type="checkbox" name="wowtalk_notification" class="checkCommon mr8" style="cursor: pointer;">
                             <span>あり</span>
                         </label>
+                    </div>
+                </td>
+                <td style="text-align: right">
+                    <div class="shop-edit-group">
+                        <input type="button" class="btn btn-admin" id="checkAll-${newMessageId}" name="organizationAll" value="全店">
+                        <input type="hidden" id="selectOrganizationAll-${newMessageId}" name="select_organization[all]" value="">
+                        <input type="button" class="btn btn-admin" id="shopEditBtn-${newMessageId}"
+                            data-toggle="modal" data-target="#editShopModal-${newMessageId}" value="一部">
+                        <input type="hidden" id="selectStore-${newMessageId}" name="select_organization[store]" value="">
                     </div>
                 </td>
                 <td class="view-rate"></td>
