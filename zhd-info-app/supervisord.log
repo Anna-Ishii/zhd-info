@@ -1,4 +1,0 @@
-2025-01-14 00:02:22,027 WARN received SIGTERM indicating exit request
-2025-01-14 00:02:22,032 INFO waiting for httpd, laravel-queue_00 to die
-2025-01-14 00:02:23,240 INFO stopped: laravel-queue_00 (exit status 0)
-2025-01-14 00:02:23,347 INFO stopped: httpd (exit status 0)
