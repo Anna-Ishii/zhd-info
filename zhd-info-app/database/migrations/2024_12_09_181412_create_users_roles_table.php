@@ -19,17 +19,17 @@ return new class extends Migration
             // 役割ごとのカラムを追加
             $table->unsignedBigInteger('DM_id')->nullable();
             $table->string('DM_name')->nullable();
-            $table->string('DM_email')->unique()->nullable();
+            $table->string('DM_email')->nullable();
             $table->boolean('DM_view_notification')->default(false);
 
             $table->unsignedBigInteger('BM_id')->nullable();
             $table->string('BM_name')->nullable();
-            $table->string('BM_email')->unique()->nullable();
+            $table->string('BM_email')->nullable();
             $table->boolean('BM_view_notification')->default(false);
 
             $table->unsignedBigInteger('AM_id')->nullable();
             $table->string('AM_name')->nullable();
-            $table->string('AM_email')->unique()->nullable();
+            $table->string('AM_email')->nullable();
             $table->boolean('AM_view_notification')->default(false);
 
             $table->timestamps();

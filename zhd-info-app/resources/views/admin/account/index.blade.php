@@ -138,14 +138,14 @@
                             <th class="head1" nowrap data-column="4">店舗名</th>
                             <!-- WowTalk1のサブヘッダー -->
                             <th class="head1" nowrap>ID</th>
-                            <th class="head1 head-WT1_status" nowrap>閲覧状況通知<br class="WT1StatusBreak" style="display: none;">
+                            <th class="head1 head-WT1_status" nowrap>業連閲覧状況の通知<br class="WT1StatusBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm WT1StatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
-                            <th class="head1 head-WT1_send" nowrap>業連配信通知<br class="WT1SendBreak" style="display: none;">
+                            <th class="head1 head-WT1_send" nowrap>業連・マニュアル配信の通知<br class="WT1SendBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm WT1SendAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
@@ -154,14 +154,14 @@
                             </th>
                             <!-- WowTalk2のサブヘッダー -->
                             <th class="head2" nowrap>ID</th>
-                            <th class="head2 head-WT2_status" nowrap>閲覧状況通知<br class="WT2StatusBreak" style="display: none;">
+                            <th class="head2 head-WT2_status" nowrap>業連閲覧状況の通知<br class="WT2StatusBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm WT2StatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
-                            <th class="head2 head-WT2_send" nowrap>業連配信通知<br class="WT2SendBreak" style="display: none;">
+                            <th class="head2 head-WT2_send" nowrap>業連・マニュアル配信の通知<br class="WT2SendBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm WT2SendAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
