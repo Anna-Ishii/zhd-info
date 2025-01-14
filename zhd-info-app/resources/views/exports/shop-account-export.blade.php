@@ -15,12 +15,12 @@
             <th class="head1" style="background-color: #d1daef;">店舗名</th>
             <!-- WowTalk1のサブヘッダー -->
             <th class="head1" style="background-color: #d1daef;">ID</th>
-            <th class="head1" style="background-color: #d1daef;">閲覧状況通知</th>
-            <th class="head1" style="background-color: #d1daef;">業連配信通知</th>
+            <th class="head1" style="background-color: #d1daef;">業連閲覧状況の通知</th>
+            <th class="head1" style="background-color: #d1daef;">業連・マニュアル配信の通知</th>
             <!-- WowTalk2のサブヘッダー -->
             <th class="head2" style="background-color: #bbbbbb;">ID</th>
-            <th class="head2" style="background-color: #bbbbbb;">閲覧状況通知</th>
-            <th class="head2" style="background-color: #bbbbbb;">業連配信通知</th>
+            <th class="head2" style="background-color: #bbbbbb;">業連閲覧状況の通知</th>
+            <th class="head2" style="background-color: #bbbbbb;">業連・マニュアル配信の通知</th>
         </tr>
     </thead>
 
