@@ -336,6 +336,16 @@
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-lg-2 control-label">WowTalk通知</label>
+                <div class="col-lg-4">
+                    <label>
+                        <input type="checkbox" name="wowtalk_notification" class="mr8"
+                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}>
+                        あり
+                    </label>
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-lg-2 control-label" for="description">説明文</label>
                 <div class="col-lg-4">
                     <textarea class="form-control" name="description" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{ old('description') }}</textarea>

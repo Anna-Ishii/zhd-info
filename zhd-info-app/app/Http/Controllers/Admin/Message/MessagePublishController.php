@@ -27,7 +27,6 @@ use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\MessageShop;
 use App\Models\MessageUser;
-use App\Models\MessageViewRate;
 use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
@@ -36,6 +35,7 @@ use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
+use App\Jobs\SendWowtalkNotificationJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -244,6 +244,7 @@ class MessagePublishController extends Controller
             // セッションにデータを保存
             session()->put('message_list', $message_list);
         }
+
         // 店舗数をカウント
         if ($message_list) {
             // すべてのメッセージIDを取得
@@ -682,6 +683,8 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = is_null($number) ? 1 : $number + 1;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         try {
             DB::beginTransaction();
@@ -812,6 +815,11 @@ class MessagePublishController extends Controller
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_store');
+        }
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
@@ -824,6 +832,7 @@ class MessagePublishController extends Controller
         $title = $request->input('title') === 'null' ? null : $request->input('title');
         $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
         $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
 
         $start_datetime_input = $request->input('start_datetime');
         $end_datetime_input = $request->input('end_datetime');
@@ -872,6 +881,7 @@ class MessagePublishController extends Controller
             'title' => $title,
             'category_id' => $category_id,
             'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
             'tag_name' => $tag_name,
             'start_datetime' => $start_datetime,
             'end_datetime' => $end_datetime,
@@ -1279,6 +1289,8 @@ class MessagePublishController extends Controller
 
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         // 手順を登録する
         $content_data = [];
@@ -1555,6 +1567,11 @@ class MessagePublishController extends Controller
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_update');
+        }
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
     }
 
@@ -1567,6 +1584,7 @@ class MessagePublishController extends Controller
         $title = $request->input('title') === 'null' ? null : $request->input('title');
         $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
         $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
 
         $start_datetime_input = $request->input('start_datetime');
         $end_datetime_input = $request->input('end_datetime');
@@ -1616,6 +1634,7 @@ class MessagePublishController extends Controller
             'title' => $title,
             'category_id' => $category_id,
             'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
             'tag_name' => $tag_name,
             'start_datetime' => $start_datetime,
             'end_datetime' => $end_datetime,
@@ -1769,7 +1788,6 @@ class MessagePublishController extends Controller
         );
     }
 
-    // API
     public function fileUpload(FileUpdateApiRequest $request)
     {
         $validated = $request->validated();
@@ -1866,9 +1884,9 @@ class MessagePublishController extends Controller
                         $start_datetime,
                         $end_datetime,
                         $status,
+                        $wowtalk_notification,
                         $brand,
-                        $shop,
-                        $wowtalk_notification
+                        $shop
                     ]
                 ) {
                     if (is_null($no)) {
@@ -1885,19 +1903,19 @@ class MessagePublishController extends Controller
                         $target_roll = $message->roll()->pluck('id')->toArray();
 
                         array_push($array, [
-                            'number'         => $number,
-                            'emergency_flg'  => isset($emergency_flg),
-                            'category'       =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
-                            'title'          => $title,
-                            'check_file'     => isset($check_file) && $check_file !== '',
-                            'tag'            => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
-                            'start_datetime' => $start_datetime,
-                            'end_datetime'   => $end_datetime,
-                            'brand'          => $brand_param,
-                            'shops'          => $shop_param,
-                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '',
-                            'roll'           => $target_roll,
-                            'is_new'         => true
+                            'number'                    => $number,
+                            'emergency_flg'             => isset($emergency_flg),
+                            'category'                  => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                            'title'                     => $title,
+                            'check_file'                => isset($check_file) && $check_file !== '',
+                            'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                            'start_datetime'            => $start_datetime,
+                            'end_datetime'              => $end_datetime,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
+                            'brand'                     => $brand_param,
+                            'shops'                     => $shop_param,
+                            'roll'                      => $target_roll,
+                            'is_new'                    => true
                         ]);
 
                         $number++;
@@ -1916,19 +1934,20 @@ class MessagePublishController extends Controller
                         $target_roll = $message->roll()->pluck('id')->toArray();
 
                         array_push($array, [
-                            'id'             => $message->id,
-                            'number'         => $no,
-                            'emergency_flg'  => isset($emergency_flg),
-                            'category'       =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
-                            'title'          => $title,
-                            'check_file'     => isset($check_file) && $check_file !== '',
-                            'tag'            => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
-                            'start_datetime' => $start_datetime,
-                            'end_datetime'   => $end_datetime,
-                            'brand'          => $brand_param,
-                            'shops'          => $shop_param,
-                            'roll'           => $target_roll,
-                            'is_new'         => false
+                            'id'                        => $message->id,
+                            'number'                    => $no,
+                            'emergency_flg'             => isset($emergency_flg),
+                            'category'                  => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                            'title'                     => $title,
+                            'check_file'                => isset($check_file) && $check_file !== '',
+                            'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                            'start_datetime'            => $start_datetime,
+                            'end_datetime'              => $end_datetime,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
+                            'brand'                     => $brand_param,
+                            'shops'                     => $shop_param,
+                            'roll'                      => $target_roll,
+                            'is_new'                    => false
                         ]);
                     }
 
@@ -1973,11 +1992,11 @@ class MessagePublishController extends Controller
                     $message = Message::firstOrCreate(
                         ['number' => $no, 'organization1_id' => $organization1],
                         [
-                            'title' => $title,
-                            'category_id' => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : null,
-                            'emergency_flg' => isset($emergency_flg),
+                            'title'          => $title,
+                            'category_id'    => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : null,
+                            'emergency_flg'  => isset($emergency_flg),
                             'start_datetime' => $start_datetime,
-                            'end_datetime' => $end_datetime,
+                            'end_datetime'   => $end_datetime,
                         ]
                     );
 
@@ -1989,19 +2008,19 @@ class MessagePublishController extends Controller
                     $target_roll = $message->roll()->pluck('id')->toArray();
 
                     array_push($array, [
-                        'id' => $message->id,
-                        'number' => $no,
-                        'emergency_flg' => isset($emergency_flg),
-                        'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
-                        'title' => $title,
-                        'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                        'id'             => $message->id,
+                        'number'         => $no,
+                        'emergency_flg'  => isset($emergency_flg),
+                        'category'       => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                        'title'          => $title,
+                        'tag'            => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
                         'start_datetime' => $start_datetime,
-                        'end_datetime' => $end_datetime,
-                        'brand' => $brand_param,
+                        'end_datetime'   => $end_datetime,
+                        'brand'          => $brand_param,
                         // 'organization3' => $org3_param,
                         // 'organization4' => $org4_param,
                         // 'organization5' => $org5_param,
-                        'roll' => $target_roll
+                        'roll'           => $target_roll
                     ]);
 
                     file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
@@ -2016,10 +2035,10 @@ class MessagePublishController extends Controller
 
             $errorMessage = [];
             foreach ($failures as $index => $failure) {
-                $errorMessage[$index]["row"]         = $failure->row(); // row that went wrong
-                $errorMessage[$index]["attribute"]   = $failure->attribute(); // either heading key (if using heading row concern) or column index
-                $errorMessage[$index]["errors"]      = $failure->errors(); // Actual error messages from Laravel validator
-                $errorMessage[$index]["value"]       = $failure->values(); // The values of the row that has failed.
+                $errorMessage[$index]["row"]       = $failure->row(); // row that went wrong
+                $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
+                $errorMessage[$index]["errors"]    = $failure->errors(); // Actual error messages from Laravel validator
+                $errorMessage[$index]["value"]     = $failure->values(); // The values of the row that has failed.
             }
 
             // 行でソート
@@ -2086,11 +2105,11 @@ class MessagePublishController extends Controller
 
                     // 新規作成
                     if ($ms["is_new"]) {
-                        $message = new Message();
-                        $message->number             = $ms["number"];
-                        $message->emergency_flg      = $ms["emergency_flg"];
-                        $message->category_id        = $ms["category"];
-                        $message->title              = $ms["title"];
+                        $message                = new Message();
+                        $message->number        = $ms["number"];
+                        $message->emergency_flg = $ms["emergency_flg"];
+                        $message->category_id   = $ms["category"];
+                        $message->title         = $ms["title"];
 
                         // check_fileがtrueの場合
                         if (isset($ms["check_file"]) && $ms["check_file"] === true) {
@@ -2100,14 +2119,15 @@ class MessagePublishController extends Controller
                             $message_changed_flg     = true;
                         }
 
-                        $message->start_datetime     = $ms["start_datetime"];
-                        $message->end_datetime       = $ms["end_datetime"];
-                        $message->created_at         = now();
-                        $message->create_admin_id    = $admin->id;
-                        $message->updated_at         = null;
-                        $message->updated_admin_id   = null;
-                        $message->organization1_id   = $organization1_id;
-                        $message->editing_flg        = false;
+                        $message->start_datetime            = $ms["start_datetime"];
+                        $message->end_datetime              = $ms["end_datetime"];
+                        $message->created_at                = now();
+                        $message->create_admin_id           = $admin->id;
+                        $message->updated_at                = null;
+                        $message->updated_admin_id          = null;
+                        $message->organization1_id          = $organization1_id;
+                        $message->editing_flg               = false;
+                        $message->is_broadcast_notification = $ms["is_broadcast_notification"];
                         $message->save();
 
                         $message->roll()->attach($ms["roll"]);
@@ -2132,12 +2152,12 @@ class MessagePublishController extends Controller
                                 if (isset($shopsData[$_shop_id])) {
                                     foreach ($shopsData[$_shop_id] as $shop) {
                                         $insertData[] = [
-                                            'message_id' => $message->id,
-                                            'shop_id' => $shop->id,
-                                            'brand_id' => $shop->brand_id,
+                                            'message_id'   => $message->id,
+                                            'shop_id'      => $shop->id,
+                                            'brand_id'     => $shop->brand_id,
                                             'selected_flg' => $selectedFlg,
-                                            'created_at' => now(),
-                                            'updated_at' => now()
+                                            'created_at'   => now(),
+                                            'updated_at'   => now()
                                         ];
 
                                         // チャンクサイズに達したらバルクインサート
@@ -2163,10 +2183,10 @@ class MessagePublishController extends Controller
                         $bulkData = [];
                         foreach ($shops as $shop) {
                             $orgData = [
-                                'message_id' => $message->id,
+                                'message_id'       => $message->id,
                                 'organization1_id' => $message->organization1_id,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
                                 'organization5_id' => $shop->organization5_id ?? null,
                                 'organization4_id' => $shop->organization4_id ?? null,
                                 'organization3_id' => $shop->organization3_id ?? null,
@@ -2222,11 +2242,11 @@ class MessagePublishController extends Controller
 
                     // 更新
                     } else {
-                        $message = Message::find($ms["id"]);
-                        $message->number             = $ms["number"];
-                        $message->emergency_flg      = $ms["emergency_flg"];
-                        $message->category_id        = $ms["category"];
-                        $message->title              = $ms["title"];
+                        $message                = Message::find($ms["id"]);
+                        $message->number        = $ms["number"];
+                        $message->emergency_flg = $ms["emergency_flg"];
+                        $message->category_id   = $ms["category"];
+                        $message->title         = $ms["title"];
 
                         // check_fileがtrueの場合
                         if (isset($ms["check_file"]) && $ms["check_file"] === true) {
@@ -2237,11 +2257,12 @@ class MessagePublishController extends Controller
                         }
 
                         $message->tag()->sync($ms["tag"]);
-                        $message->start_datetime     = $ms["start_datetime"];
-                        $message->end_datetime       = $ms["end_datetime"];
-                        $message->updated_at         = now();
+                        $message->start_datetime            = $ms["start_datetime"];
+                        $message->end_datetime              = $ms["end_datetime"];
+                        $message->updated_at                = now();
                         if ($message->isDirty()) $message->updated_admin_id = $admin->id;
-                        $message->editing_flg        = false;
+                        $message->editing_flg               = false;
+                        $message->is_broadcast_notification = $ms["is_broadcast_notification"];
                         $message->save();
 
                         $message->roll()->sync($ms["roll"]);
@@ -2267,12 +2288,12 @@ class MessagePublishController extends Controller
                                 if (isset($shopsData[$_shop_id])) {
                                     foreach ($shopsData[$_shop_id] as $shop) {
                                         $insertData[] = [
-                                            'message_id' => $message->id,
-                                            'shop_id' => $shop->id,
-                                            'brand_id' => $shop->brand_id,
+                                            'message_id'   => $message->id,
+                                            'shop_id'      => $shop->id,
+                                            'brand_id'     => $shop->brand_id,
                                             'selected_flg' => $selectedFlg,
-                                            'created_at' => now(),
-                                            'updated_at' => now()
+                                            'created_at'   => now(),
+                                            'updated_at'   => now()
                                         ];
 
                                         // チャンクサイズに達したらバルクインサート
@@ -2299,10 +2320,10 @@ class MessagePublishController extends Controller
                         $bulkData = [];
                         foreach ($shops as $shop) {
                             $orgData = [
-                                'message_id' => $message->id,
+                                'message_id'       => $message->id,
                                 'organization1_id' => $message->organization1_id,
-                                'created_at' => now(),
-                                'updated_at' => now(),
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
                                 'organization5_id' => $shop->organization5_id ?? null,
                                 'organization4_id' => $shop->organization4_id ?? null,
                                 'organization3_id' => $shop->organization3_id ?? null,
@@ -2357,6 +2378,11 @@ class MessagePublishController extends Controller
                         }
                     }
 
+                    // WowTalk通知のジョブをキューに追加
+                    if ($message->is_broadcast_notification == 1) {
+                        SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_import');
+                    }
+
                     // 閲覧率の更新処理
                     $rate = $request->input('rate');
                     $message_id = $message->id;
@@ -2386,13 +2412,13 @@ class MessagePublishController extends Controller
                     $updateData = [];
                     foreach ($messageRates as $message) {
                         $updateData[] = [
-                            'message_id' => $message->message_id,
+                            'message_id'       => $message->message_id,
                             'organization1_id' => $organization1_id,
-                            'view_rate' => $message->view_rate,     // 閲覧率の計算
-                            'read_users' => $message->read_users,   // 既読ユーザー数
-                            'total_users' => $message->total_users, // 全体ユーザー数
-                            'created_at' => now(),
-                            'updated_at' => now(),
+                            'view_rate'        => $message->view_rate,     // 閲覧率の計算
+                            'read_users'       => $message->read_users,    // 既読ユーザー数
+                            'total_users'      => $message->total_users,   // 全体ユーザー数
+                            'created_at'       => now(),
+                            'updated_at'       => now(),
                         ];
                     }
 
@@ -2406,14 +2432,14 @@ class MessagePublishController extends Controller
 
             } else {
                 foreach ($messages as $key => $ms) {
-                    $message = Message::find($ms["id"]);
-                    $message->number = $ms["number"];
-                    $message->emergency_flg = $ms["emergency_flg"];
-                    $message->category_id = $ms["category"];
-                    $message->title = $ms["title"];
+                    $message                 = Message::find($ms["id"]);
+                    $message->number         = $ms["number"];
+                    $message->emergency_flg  = $ms["emergency_flg"];
+                    $message->category_id    = $ms["category"];
+                    $message->title          = $ms["title"];
                     $message->tag()->sync($ms["tag"]);
                     $message->start_datetime = $ms["start_datetime"];
-                    $message->end_datetime = $ms["end_datetime"];
+                    $message->end_datetime   = $ms["end_datetime"];
                     if ($message->isDirty()) $message->updated_admin_id = $admin->id;
                     $message->save();
 
