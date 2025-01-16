@@ -5,7 +5,8 @@ services:
     ports:
       - 80:80
       - 5173:5173
-    command: bash -c "php-fpm && httpd -D FOREGROUND"
+    # command: bash -c "php-fpm && httpd -D FOREGROUND"
+    command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     volumes:
       - type: bind
         # source: ./zhd-info-app
@@ -14,7 +15,7 @@ services:
     working_dir: /var/www/zhd-info-app
     depends_on:
       - db
-    
+
   db:
     build: ./docker/mysql
     platform: linux/x86_64
@@ -52,7 +53,7 @@ services:
     ports:
       - 3360:3306
 
-  minio : 
+  minio :
     image: minio/minio:RELEASE.2023-10-25T06-33-25Z
     container_name: minio
     ports:

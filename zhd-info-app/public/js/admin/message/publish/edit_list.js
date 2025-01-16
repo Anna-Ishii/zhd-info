@@ -2223,11 +2223,18 @@ $(document).ready(function() {
                     </div>
                 </td>
                 <td></td>
+                <td class="label-notification-group">
+                    <div class="wowtalk-notification-input-group" style="background-color: #ffffff00; color: black;">
+                        <label style="cursor: pointer;">
+                            <input type="checkbox" name="wowtalk_notification" class="checkCommon mr8" style="cursor: pointer;">
+                            <span>あり</span>
+                        </label>
+                    </div>
+                </td>
                 <td style="text-align: right">
                     <div class="shop-edit-group">
                         <input type="button" class="btn btn-admin" id="checkAll-${newMessageId}" name="organizationAll" value="全店">
                         <input type="hidden" id="selectOrganizationAll-${newMessageId}" name="select_organization[all]" value="">
-
                         <input type="button" class="btn btn-admin" id="shopEditBtn-${newMessageId}"
                             data-toggle="modal" data-target="#editShopModal-${newMessageId}" value="一部">
                         <input type="hidden" id="selectStore-${newMessageId}" name="select_organization[store]" value="">
@@ -2344,6 +2351,7 @@ $(document).ready(function() {
                 // 各データを収集
                 let categoryId = row.find('select[name="category_id"]').val() || null;
                 let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+                let wowtalkNotification = row.find('input[name="wowtalk_notification"]').is(':checked') ? 'on' : 'off';
                 let title = row.find('input[name="title"]').val() || null;
                 let startDatetime = row.find('input[name="start_datetime"]').val() || null;
                 let endDatetime = row.find('input[name="end_datetime"]').val() || null;
@@ -2398,6 +2406,7 @@ $(document).ready(function() {
                 // 各データをformDataに追加
                 formData.append('org1Id', org1Id);
                 formData.append('emergency_flg', emergencyFlg);
+                formData.append('wowtalk_notification', wowtalkNotification);
                 formData.append('category_id', categoryId);
                 formData.append('title', title);
                 formData.append('start_datetime', startDatetime);
@@ -2519,6 +2528,7 @@ $(document).ready(function() {
             // 各データを収集
             let categoryId = row.find('select[name="category_id"]').val() || null;
             let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+            let wowtalkNotification = row.find('input[name="wowtalk_notification"]').is(':checked') ? 'on' : 'off';
             let title = row.find('input[name="title"]').val() || null;
             let startDatetime = row.find('input[name="start_datetime"]').val() || null;
             let endDatetime = row.find('input[name="end_datetime"]').val() || null;
@@ -2570,6 +2580,7 @@ $(document).ready(function() {
                     operation: 'new',
                     org1Id: org1Id,
                     emergency_flg: emergencyFlg,
+                    wowtalk_notification: wowtalkNotification,
                     category_id: categoryId,
                     title: title,
                     start_datetime: startDatetime,
@@ -2589,6 +2600,7 @@ $(document).ready(function() {
                     operation: 'edit',
                     message_id: messageId,
                     emergency_flg: emergencyFlg,
+                    wowtalk_notification: wowtalkNotification,
                     category_id: categoryId,
                     title: title,
                     start_datetime: startDatetime,
@@ -2721,6 +2733,8 @@ $(document).ready(function() {
             const endDatetimeText = row.find('.end-datetime-text').get(0);
             // 配信店舗数
             const shopCount = row.find('.shop-count').get(0);
+            // WowTalk通知
+            const wowtalkNotificationText = row.find('.wowtalk-notification-text').get(0);
             // 編集、配信停止ボタン
             const buttonGroup = row.find('.button-group').get(0);
             // 編集ボタングループ
@@ -2895,6 +2909,25 @@ $(document).ready(function() {
                     $(shopCount).after(shopEditGroupHtml);
                 }
 
+                // WowTalk通知
+                const wowtalkNotificationChecked = message.is_broadcast_notification;
+                const wowtalkNotificationInputGroupHtml = `
+                    <div class="wowtalk-notification-input-group" style="background-color: #ffffff00; color: black;">
+                        <label style="cursor: pointer;">
+                            <input type="checkbox" name="wowtalk_notification" class="checkCommon mr8" style="cursor: pointer;"
+                                ${wowtalkNotificationChecked == 1 ? 'checked' : ''}
+                                ><span>あり</span>
+                        </label>
+                    </div>
+                `;
+                if (wowtalkNotificationText) {
+                    $(wowtalkNotificationText).hide();
+                    $(wowtalkNotificationText).after(wowtalkNotificationInputGroupHtml);
+                } else {
+                    const wowtalkNotificationColumn = row.find('.label-notification-group').get(0);
+                    $(wowtalkNotificationColumn).append(wowtalkNotificationInputGroupHtml);
+                }
+
                 // 編集、配信停止ボタン
                 if (buttonGroup) {
                     $(buttonGroup).hide();
@@ -3020,6 +3053,17 @@ $(document).ready(function() {
                         if (shopEditGroup) shopEditGroup.remove();
                     }
 
+                    // WowTalk通知
+                    if (wowtalkNotificationText) {
+                        $(wowtalkNotificationText).show();
+                        const wowtalkNotificationInputGroup = $(wowtalkNotificationText).next();
+                        if (wowtalkNotificationInputGroup) wowtalkNotificationInputGroup.remove();
+                    } else {
+                        const wowtalkNotificationColumn = row.find('.label-notification-group');
+                        const wowtalkNotificationInputGroup = wowtalkNotificationColumn.find('.wowtalk-notification-input-group');
+                        if (wowtalkNotificationInputGroup) wowtalkNotificationInputGroup.remove();
+                    }
+
                     // 編集、配信停止ボタン
                     if (buttonGroup) {
                         $(buttonGroup).show();
@@ -3052,6 +3096,7 @@ $(document).ready(function() {
                     let editMessageNumber = parseInt(row.find('[data-message-number]').text(), 10) || null;
                     let categoryId = row.find('select[name="category_id"]').val() || null;
                     let emergencyFlg = row.find('input[name="emergency_flg"]').is(':checked') ? 'on' : 'off';
+                    let wowtalkNotification = row.find('input[name="wowtalk_notification"]').is(':checked') ? 'on' : 'off';
                     let title = row.find('input[name="title"]').val() || null;
                     let startDatetime = row.find('input[name="start_datetime"]').val() || null;
                     let endDatetime = row.find('input[name="end_datetime"]').val() || null;
@@ -3105,6 +3150,7 @@ $(document).ready(function() {
                     // 各データをformDataに追加
                     formData.append('message_id', messageId);
                     formData.append('emergency_flg', emergencyFlg);
+                    formData.append('wowtalk_notification', wowtalkNotification);
                     formData.append('category_id', categoryId);
                     formData.append('title', title);
                     formData.append('start_datetime', startDatetime);
