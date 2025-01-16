@@ -309,6 +309,16 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-lg-2 control-label">WowTalk通知</label>
+                <div class="col-lg-4">
+                    <label>
+                        <input type="checkbox" name="wowtalk_notification" class="mr8"
+                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}>
+                        あり
+                    </label>
+                </div>
+            </div>
             <div class="form-group text-left">
                 <div class="col-lg-2 control-label">
                     <span class="text-danger required">*</span>：必須項目

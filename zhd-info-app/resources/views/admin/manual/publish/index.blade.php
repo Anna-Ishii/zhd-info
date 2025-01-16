@@ -153,8 +153,8 @@
                         </div>
                     @endif
                     <div>
-                        <a href="{{ route('admin.manual.publish.export-list') }}?{{ http_build_query(request()->query()) }}"
-                            class="btn btn-admin">エクスポート</a>
+                        <input type="button" class="btn btn-admin" data-toggle="modal"
+                            data-target="#manualExportModal" value="エクスポート">
                     </div>
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
@@ -178,6 +178,7 @@
                             <th class="text-center" nowrap>再生時間</th>
                             <th class="text-center" colspan="2" nowrap>掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
+                            <th class="text-center" nowrap>WowTalk通知</th>
                             <th class="text-center" nowrap>配信店舗数</th>
                             <th class="text-center" colspan="3" nowrap>閲覧率</th>
                             <th class="text-center" colspan="2" nowrap>登録者</th>
@@ -241,6 +242,10 @@
                                     <div>{{ $manual->formatted_end_datetime }}</div>
                                 </td>
                                 <td>{{ $manual->status->text() }}</td>
+                                <!-- WowTalk通知 -->
+                                <td class="label-notification-group">
+                                    <div class="wowtalk-notification-text">{{ $manual->broadcast_notification_status }}</div>
+                                </td>
                                 <td style="text-align: right">{{ $manual->shop_count }}</td>
                                 @if ($manual->status == App\Enums\PublishStatus::Wait || $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
@@ -291,6 +296,8 @@
 
     </div>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
+    @include('common.admin.manual-export-modal', ['organization1' => $organization1])
+
     <script src="{{ asset('/js/admin/manual/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection

@@ -14,6 +14,7 @@
             <th>掲載開始日時</th>
             <th>掲載終了日時</th>
             <th>状態</th>
+            <th>WowTalk通知</th>
             <th>対象業態</th>
             <th>配信店舗</th>
         </tr>
@@ -34,6 +35,7 @@
                 <td>{{$message->formatted_start_datetime_for_export}}</td>
                 <td>{{$message->formatted_end_datetime_for_export}}</td>
                 <td>{{$message->status->text()}}</td>
+                <td>{{$message->is_broadcast_notification == 1 ? "〇" : ""}}</td>
                 <td>{{$message->brand_name}}</td>
                 <td>{{$message->shop_names}}</td>
             </tr>
