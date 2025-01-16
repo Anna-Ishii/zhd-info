@@ -387,6 +387,20 @@
                     </div>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-lg-2 control-label">WowTalk通知</label>
+                <div class="col-lg-4">
+                    <label>
+                        <input type="checkbox" name="wowtalk_notification" class="mr8"
+                            @if(request()->old())
+                                {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}
+                            @else
+                                {{ $message->is_broadcast_notification == 1 ? 'checked' : '' }}
+                            @endif
+                            >あり
+                    </label>
+                </div>
+            </div>
             <div class="form-group text-left">
                 <div class="col-lg-2 control-label">
                     <span class="text-danger required">*</span>：必須項目
