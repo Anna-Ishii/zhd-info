@@ -7,7 +7,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Message;
 use App\Models\Organization1;
+use App\Models\BatchProcessDate;
 use App\Models\WowtalkRecipient;
+use App\Models\AdminRecipient;
 use App\Utils\SESMailer;
 use App\Models\EmailSendLog;
 use App\Exports\PersonAnalysisExport;
@@ -122,8 +124,21 @@ class PersonAnalysisSenderCommand extends Command
      */
     private function sendPersonAnalysis()
     {
-        // 全業態を取得
-        $organization1_list = Organization1::get();
+        // 業態を取得
+        $organization1_list = [];
+        $organization1_list = DB::table('batch_process_dates')
+            ->join('organization1', 'batch_process_dates.organization1_id', '=', 'organization1.id')
+            ->where('batch_process_dates.process_name', 'person_analysis')
+            ->select('organization1.id', 'organization1.name', 'batch_process_dates.execution_date')
+            ->get()
+            ->map(function ($result) {
+                return [
+                    'id' => $result->id,
+                    'name' => $result->name,
+                    'execution_date' => $result->execution_date,
+                ];
+            })
+            ->toArray();
 
         // 各種ログ用の配列を初期化
         $successLogs = [];
@@ -137,12 +152,12 @@ class PersonAnalysisSenderCommand extends Command
             switch ($sendResult['status']) {
                 case 'success':
                     $successLogs[] = [
-                        'org1_name' => $organization1->name,
+                        'org1_name' => $organization1['name'],
                     ];
                     break;
                 case 'failure':
                     $failureLogs[] = [
-                        'org1_name' => $organization1->name,
+                        'org1_name' => $organization1['name'],
                         'email' => $sendResult['email'] ?? '',
                         'subject' => $sendResult['subject'] ?? '',
                         'error_message' => $sendResult['error_message'] ?? '不明なエラー'
@@ -150,7 +165,7 @@ class PersonAnalysisSenderCommand extends Command
                     break;
                 case 'error':
                     $errorLogs[] = [
-                        'org1_name' => $organization1->name,
+                        'org1_name' => $organization1['name'],
                         'email' => $sendResult['email'] ?? '',
                         'subject' => $sendResult['subject'] ?? '',
                         'error_message' => $sendResult['error_message'] ?? '不明なエラー'
@@ -174,15 +189,14 @@ class PersonAnalysisSenderCommand extends Command
     private function processItem($organization1)
     {
         $organizations = [];
-        $organization_list = [];
         $viewRates = [];
         $messages = [];
         $message_count = 0;
         $messagesFlg = false;
 
-        // 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡を取得
-        $startOfLastWeek = now('Asia/Tokyo')->startOfWeek()->subWeek()->format('Y-m-d H:i:s');
-        $endOfLastWeek = now('Asia/Tokyo')->endOfWeek()->subWeek()->endOfDay()->format('Y-m-d H:i:s');
+        // 現在の日付から7日前の0:00時から現在のexecution_dateまでの業務連絡を取得
+        $startOfLastWeek = now('Asia/Tokyo')->subWeek()->startOfDay()->format('Y-m-d H:i:s');
+        $endOfLastWeek = now('Asia/Tokyo')->format('Y-m-d') . ' ' . Carbon::parse($organization1['execution_date'])->format('H:i:s');
 
         // 業務連絡を取得
         $messages = Message::query()
@@ -193,7 +207,7 @@ class PersonAnalysisSenderCommand extends Command
             ->where('start_datetime', '>=', $startOfLastWeek)
             ->where('start_datetime', '<=', $endOfLastWeek)
             ->where('editing_flg', false)
-            ->where('messages.organization1_id', '=', $organization1->id)
+            ->where('messages.organization1_id', '=', $organization1['id'])
             ->orderBy('messages.id', 'desc')
             ->groupBy('messages.id')
             ->get();
@@ -203,72 +217,57 @@ class PersonAnalysisSenderCommand extends Command
             $_messages = $messages->pluck('id')->toArray();
             $message_count = count($_messages);
 
-            // DS, AR, BLがあるかで処理を分ける
-            if ($organization1->isExistOrg3()) {
-                $organizations[] = "DS";
-                $organization_list["DS"] = $organization1->getOrganization3();
-            }
-            if ($organization1->isExistOrg4()) {
-                $organizations[] = "AR";
-                $organization_list["AR"] = $organization1->getOrganization4();
-            }
-            if ($organization1->isExistOrg5()) {
-                $organizations[] = "BL";
-                $organization_list["BL"] = $organization1->getOrganization5();
-            }
-
+            $organizations[] = "BL";
             foreach ($_messages as $key => $ms) {
                 // 組織ごと
-                if (in_array('BL', $organizations)) {
-                    $viewRateOrgSub =
-                        DB::table('message_user')
-                        ->select([
-                            DB::raw('shops.organization5_id as o5_id'),
-                            DB::raw('count(crews.id) as count'),
-                            DB::raw('count(crew_message_logs.id) as read_count'),
-                            DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
-                        ])
-                        ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
-                        ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
-                        ->leftJoin('crew_message_logs', function ($join) use ($ms) {
-                            $join->on('crew_message_logs.crew_id', '=', 'crews.id')
-                                ->where('crew_message_logs.message_id', '=', $ms);
-                        })
-                        ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
-                        ->where('message_user.message_id', '=', $ms)
-                        ->groupBy('shops.organization5_id');
+                $viewRateOrgSub =
+                    DB::table('message_user')
+                    ->select([
+                        DB::raw('shops.organization5_id as o5_id'),
+                        DB::raw('count(crews.id) as count'),
+                        DB::raw('count(crew_message_logs.id) as read_count'),
+                        DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
+                    ])
+                    ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
+                    ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
+                    ->leftJoin('crew_message_logs', function ($join) use ($ms) {
+                        $join->on('crew_message_logs.crew_id', '=', 'crews.id')
+                            ->where('crew_message_logs.message_id', '=', $ms);
+                    })
+                    ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
+                    ->where('message_user.message_id', '=', $ms)
+                    ->groupBy('shops.organization5_id');
 
-                    $viewRate =
-                        DB::table('shops')
-                        ->select([
-                            DB::raw('organization3.name as org3_name'),
-                            DB::raw('organization4.name as org4_name'),
-                            DB::raw('organization5.id as id'),
-                            DB::raw('organization5.order_no as order_no'),
-                            DB::raw('organization5.name as org5_name'),
-                            DB::raw('sub.count as count'),
-                            DB::raw('sub.read_count as read_count'),
-                            DB::raw('sub.view_rate as view_rate')
-                        ])
-                        ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
-                        ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
-                        ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
-                        ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
-                            $join->on('shops.organization5_id', '=', 'sub.o5_id');
-                        })
-                        ->where('shops.organization1_id', '=', $organization1->id)
-                        ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
-                        ->orderBy('organization3.order_no')
-                        ->orderBy('organization4.order_no')
-                        ->orderBy('organization5.order_no')
-                        ->get();
+                $viewRate =
+                    DB::table('shops')
+                    ->select([
+                        DB::raw('organization3.name as org3_name'),
+                        DB::raw('organization4.name as org4_name'),
+                        DB::raw('organization5.id as id'),
+                        DB::raw('organization5.order_no as order_no'),
+                        DB::raw('organization5.name as org5_name'),
+                        DB::raw('sub.count as count'),
+                        DB::raw('sub.read_count as read_count'),
+                        DB::raw('sub.view_rate as view_rate')
+                    ])
+                    ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+                    ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+                    ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+                    ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
+                        $join->on('shops.organization5_id', '=', 'sub.o5_id');
+                    })
+                    ->where('shops.organization1_id', '=', $organization1['id'])
+                    ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
+                    ->orderBy('organization3.order_no')
+                    ->orderBy('organization4.order_no')
+                    ->orderBy('organization5.order_no')
+                    ->get();
 
-                    $viewRates['BL'][] = $viewRate;
-                    $viewRatesArray = $viewRate->toArray();
-                    foreach ($viewRatesArray as $key => $value) {
-                        $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
-                        $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
-                    }
+                $viewRates['BL'][] = $viewRate;
+                $viewRatesArray = $viewRate->toArray();
+                foreach ($viewRatesArray as $key => $value) {
+                    $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
+                    $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
                 }
             }
 
@@ -319,7 +318,8 @@ class PersonAnalysisSenderCommand extends Command
 
         // storage/app/exportディレクトリにExcelファイルを生成して保存
         $exportPath = $exportDir . '/' . $file_name;
-        $export = new PersonAnalysisExport($organization1, $startOfLastWeek, $endOfLastWeek);
+        $org1 = Organization1::find($organization1['id']);
+        $export = new PersonAnalysisExport($org1, $startOfLastWeek, $endOfLastWeek);
         Excel::store($export, 'export/' . $file_name, 'local');
 
         // ファイルが正しく保存されたか確認
@@ -365,7 +365,7 @@ class PersonAnalysisSenderCommand extends Command
             }, function ($query) use ($organization1) {
                 $query->join('shops', function ($join) use ($organization1) {
                     $join->on('users_roles.shop_id', '=', 'shops.id')
-                        ->where('shops.organization1_id', $organization1->id);
+                        ->where('shops.organization1_id', $organization1['id']);
                 })
                 ->select('users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification');
             })
@@ -405,7 +405,7 @@ class PersonAnalysisSenderCommand extends Command
         // メッセージ内容を生成
         $messageContent = null;
         try {
-            $messageContent = $this->generateMessageContent($messagesFlg, $message_count, $viewRates);
+            $messageContent = $this->generateMessageContent($organization1, $messagesFlg, $message_count, $viewRates);
         } catch (\Exception $e) {
             // メッセージ内容生成に失敗した場合のエラー処理
             $errorLog = $this->createErrorLog(
@@ -500,16 +500,17 @@ class PersonAnalysisSenderCommand extends Command
     /**
      * 各業態の閲覧率などのメッセージ内容を生成するメソッド
      *
+     * @param Organization1 $organization1 組織オブジェクト
      * @param bool $messagesFlg メッセージがあるかどうかのフラグ
      * @param int|null $message_count メッセージの件数
      * @param array|null $viewRates 閲覧状況データ
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function generateMessageContent($messagesFlg, $message_count = null, $viewRates = null)
+    private function generateMessageContent($organization1, $messagesFlg, $message_count = null, $viewRates = null)
     {
         // メッセージ内容を生成
-        $messageContent = now('Asia/Tokyo')->format('n/j') . " 4:00時点でのBL単位に集計した個人の閲覧状況を提示させて頂きます。\n";
+        $messageContent = now('Asia/Tokyo')->format('n/j') . " " . Carbon::parse($organization1['execution_date'])->format('H:i') . "時点でのBL単位に集計した個人の閲覧状況を提示させて頂きます。\n";
         if ($messagesFlg) {
             $messageContent .= "当期間に配信された業連は{$message_count}件です。\n\n";
             if (isset($viewRates['BL'][0])) {
@@ -517,13 +518,21 @@ class PersonAnalysisSenderCommand extends Command
                 foreach ($viewRates['BL'][0] as $v_org_key => $v_o) {
                     if (isset($v_o->org3_name)) {
                         if (!in_array($v_o->org3_name, $displayedOrgNames)) {
-                            $messageContent .= "\n{$v_o->org3_name}\n";
+                            if ($v_org_key == 0) {
+                                $messageContent .= "{$v_o->org3_name}\n";
+                            } else {
+                                $messageContent .= "\n{$v_o->org3_name}\n";
+                            }
                             $displayedOrgNames[] = $v_o->org3_name;
                         }
                     }
                     if (isset($v_o->org4_name)) {
                         if (!in_array($v_o->org4_name, $displayedOrgNames)) {
-                            $messageContent .= "\n{$v_o->org4_name}\n";
+                            if ($v_org_key == 0) {
+                                $messageContent .= "{$v_o->org4_name}\n";
+                            } else {
+                                $messageContent .= "\n{$v_o->org4_name}\n";
+                            }
                             $displayedOrgNames[] = $v_o->org4_name;
                         }
                     }
@@ -537,7 +546,7 @@ class PersonAnalysisSenderCommand extends Command
                 }
             }
         } else {
-            $messageContent .= "\n当期間に配信された業連は0件です。\n";
+            $messageContent .= "当期間に配信された業連は0件です。\n";
         }
 
         $messageContent .= "\n以上、よろしくお願いいたします。";
@@ -564,7 +573,7 @@ class PersonAnalysisSenderCommand extends Command
         $to = array_filter([$user_role_data['DM_email'], $user_role_data['BM_email'], $user_role_data['AM_email']]);
 
         // ここ修正必須！！
-        // $to = array_merge($to, WowtalkRecipient::where('target', true)->pluck('email')->toArray());
+        // $to = array_merge($to, AdminRecipient::where('target', true)->pluck('email')->toArray());
 
         $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek)) . ')';
 
@@ -640,7 +649,7 @@ class PersonAnalysisSenderCommand extends Command
     {
         return [
             'status' => 'success',
-            'org1_name' => $organization1->name
+            'org1_name' => $organization1['name']
         ];
     }
 
@@ -655,7 +664,7 @@ class PersonAnalysisSenderCommand extends Command
     {
         return [
             'status' => 'failure',
-            'org1_name' => $organization1->name
+            'org1_name' => $organization1['name']
         ];
     }
 
@@ -673,7 +682,7 @@ class PersonAnalysisSenderCommand extends Command
     {
         return [
             'status' => 'error',
-            'org1_name' => $organization1->name,
+            'org1_name' => $organization1['name'],
             'email' => $user_role_data[0]['DM_email'] . ',' . $user_role_data[0]['BM_email'] . ',' . $user_role_data[0]['AM_email'],
             'subject' => $messages ? $messages['start_datetime'] . ' | ' . $messages['title'] . ' _ ' . now() : null,
             'error_message' => $errorMessage
@@ -694,7 +703,7 @@ class PersonAnalysisSenderCommand extends Command
     {
         return [
             'type' => 'message_content_error',
-            'org1_name' => $organization1->name ?? '',
+            'org1_name' => $organization1['name'] ?? '',
             'DM_email' => $data['DM_email'] ?? '',
             'BM_email' => $data['BM_email'] ?? '',
             'AM_email' => $data['AM_email'] ?? '',

@@ -10,11 +10,16 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class PersonAnalysisExport implements
     FromView,
     ShouldAutoSize,
-    WithCustomCsvSettings
+    WithCustomCsvSettings,
+    WithHeadings,
+    WithStyles
 {
     protected $organization1;
     protected $startOfLastWeek;
@@ -286,5 +291,19 @@ class PersonAnalysisExport implements
             'organization_list' => $organization_list,
             'organization1' => $organization1
         ]);
+    }
+
+    public function headings(): array
+    {
+        return [
+            'ヘッダー1',
+            'ヘッダー2',
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        // ヘッダー行とA～D列を固定
+        $sheet->freezePane('E2'); // E2の位置で固定
     }
 }
