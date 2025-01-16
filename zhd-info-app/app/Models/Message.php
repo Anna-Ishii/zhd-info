@@ -29,6 +29,7 @@ class Message extends Model
         'create_admin_id',
         'emergency_flg',
         'editing_flg',
+        'is_broadcast_notification',
         'organization1_id',
         'number',
         'updated_admin_id',
@@ -349,5 +350,16 @@ class Message extends Model
             ];
         }
         DB::table('crew_message_logs')->insert($params);
+    }
+
+    public function getBroadcastNotificationStatusAttribute()
+    {
+        $statusMapping = [
+            0 => 'なし',
+            1 => '待ち',
+            2 => '済み',
+        ];
+
+        return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
     }
 }

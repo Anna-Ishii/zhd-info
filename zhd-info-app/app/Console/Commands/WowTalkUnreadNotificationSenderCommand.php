@@ -203,13 +203,23 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         $wowtalk_data = DB::table('wowtalk_shops')
             ->join('message_shop', 'wowtalk_shops.shop_id', '=', 'message_shop.shop_id')
             ->where('message_shop.message_id', $message->id)
-            ->where('wowtalk_shops.notification_target', true)
-            ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk_id')
+            ->where(function ($query) {
+                $query->where(function ($subQuery) {
+                    $subQuery->whereNotNull('wowtalk_shops.wowtalk1_id')
+                            ->where('wowtalk_shops.notification_target1', true);
+                })
+                ->orWhere(function ($subQuery) {
+                    $subQuery->whereNotNull('wowtalk_shops.wowtalk2_id')
+                            ->where('wowtalk_shops.notification_target2', true);
+                });
+            })
+            ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
             ->get()
             ->map(function ($result) {
                 return [
                     'shop_id' => $result->shop_id,
-                    'wowtalk_id' => $result->wowtalk_id,
+                    'wowtalk1_id' => $result->wowtalk1_id,
+                    'wowtalk2_id' => $result->wowtalk2_id,
                 ];
             })
             ->toArray();
@@ -243,12 +253,20 @@ class WowTalkUnreadNotificationSenderCommand extends Command
                 return $this->createErrorResponse($message, $e->getMessage(), 1);
             }
 
-            // APIリクエストを1件ずつ送信
-            $apiResult = $this->sendWowTalkApiRequest([$data['wowtalk_id']], $messageContent);
+            if (!empty($data['wowtalk1_id'])) {
+                $apiResult1 = $this->sendWowTalkApiRequest([$data['wowtalk1_id']], $messageContent);
+                if (is_array($apiResult1)) {
+                    // エラーログを生成
+                    $errorLogs[] = $this->createErrorLog($message, $data, $data['wowtalk1_id'], $apiResult1, $messageContent);
+                }
+            }
 
-            if (is_array($apiResult)) {
-                // エラーログを生成
-                $errorLogs[] = $this->createErrorLog($message, $data, $apiResult, $messageContent);
+            if (!empty($data['wowtalk2_id'])) {
+                $apiResult2 = $this->sendWowTalkApiRequest([$data['wowtalk2_id']], $messageContent);
+                if (is_array($apiResult2)) {
+                    // エラーログを生成
+                    $errorLogs[] = $this->createErrorLog($message, $data, $data['wowtalk2_id'], $apiResult2, $messageContent);
+                }
             }
         }
 
@@ -538,7 +556,7 @@ class WowTalkUnreadNotificationSenderCommand extends Command
      * @param string $messageContent 送信されたメッセージ内容
      * @return array エラーログ
      */
-    private function createErrorLog($message, $data, $apiResult, $messageContent = null)
+    private function createErrorLog($message, $data, $wowtalkId = null, $apiResult, $messageContent = null)
     {
         $shop = Shop::where('id', $data['shop_id'] ?? 0)
             ->select('shop_code', 'display_name', 'organization1_id')
@@ -557,7 +575,7 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             'message_title' => $message->title,
             'error_message' => $apiResult['response_result'] . ' : ' . $apiResult['response_status'],
             'request_message' => $messageContent ?? '',
-            'request_target' => $data['wowtalk_id'] ?? '',
+            'request_target' => $wowtalkId ?? '',
             'response_target' => $apiResult['response_target'] ?? '',
             'attempts' => $apiResult['attempts'] ?? 1
         ];
