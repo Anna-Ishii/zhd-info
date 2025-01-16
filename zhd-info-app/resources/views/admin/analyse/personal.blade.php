@@ -206,7 +206,6 @@
                                                 <div>{{ $v_org1[0]->readed_count }} / </div>
                                                 <div>{{ $v_org1[0]->count }}</div>
                                             </div>
-
                                         </td>
                                         <td class={{ $v_org1[0]->view_rate < 10 ? 'under-quota' : '' }} nowrap>
                                             <div>{{ $v_org1[0]->view_rate }}%</div>
@@ -249,8 +248,9 @@
                                             @php
                                                 $viewrate = 0;
                                                 $viewrate = number_format(
-                                                    $viewrates[$organization . '_readed_sum'][$v_o->id] /
-                                                        $viewrates[$organization . '_sum'][$v_o->id],
+                                                    ($viewrates[$organization . '_readed_sum'][$v_o->id] /
+                                                        $viewrates[$organization . '_sum'][$v_o->id]) *
+                                                        100,
                                                     1,
                                                 );
                                             @endphp
@@ -299,7 +299,6 @@
 
                 {{-- 店舗ごと --}}
                 <tbody>
-
                     @isset($viewrates['shop'][0])
                         @foreach ($viewrates['shop'][0] as $v_key => $m_c)
                             <tr>
@@ -378,7 +377,6 @@
                         @endforeach
                     @endisset
                 </tbody>
-
             </table>
         </div>
     </div>
