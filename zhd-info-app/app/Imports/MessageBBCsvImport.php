@@ -67,8 +67,8 @@ class MessageBBCsvImport implements
         return [
             '2' => ['required', Rule::in($this->category_list)],
             '3' => ['required'],
-            '13' => ['required', new BrandRule(parameter: $this->brand)],
-            '14' => ['required', new ShopRule(parameter: $this->shop)],
+            '14' => ['required', new BrandRule(parameter: $this->brand)],
+            '15' => ['required', new ShopRule(parameter: $this->shop)],
         ];
     }
 
@@ -79,8 +79,8 @@ class MessageBBCsvImport implements
             '2.required' => 'カテゴリは必須項目です',
             '2.in' => 'カテゴリの項目が間違っています',
             '3.required' => 'タイトルは必須項目です',
-            '13.required' => '対象業態は必須項目です',
-            '14.required' => '配信店舗は必須項目です',
+            '14.required' => '対象業態は必須項目です',
+            '15.required' => '配信店舗は必須項目です',
         ];
     }
 

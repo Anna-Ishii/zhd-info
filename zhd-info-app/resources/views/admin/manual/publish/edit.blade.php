@@ -292,7 +292,7 @@
                 <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{ old("end_datetime") ? old("end_datetime") : $manual->end_datetime}}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateTo"
-                         @if(old("end_datetime"))
+                        @if(old("end_datetime"))
                             {{ empty(old("end_datetime")) ? 'checked' : ''  }}
                         @else
                             {{ empty($manual->end_datetime) ? 'checked' : '' }}
@@ -401,6 +401,20 @@
                         <input type="hidden" name="manual_id" value="{{$manual->id}}">
                     </label>
                 </div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-lg-2 control-label">WowTalk通知</label>
+            <div class="col-lg-4">
+                <label>
+                    <input type="checkbox" name="wowtalk_notification" class="mr8"
+                        @if(request()->old())
+                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}
+                        @else
+                            {{ $manual->is_broadcast_notification == 1 ? 'checked' : '' }}
+                        @endif
+                        >あり
+                </label>
             </div>
         </div>
         <div class="form-group">
