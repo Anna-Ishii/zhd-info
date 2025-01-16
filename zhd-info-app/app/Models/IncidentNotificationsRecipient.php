@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class WowtalkRecipient extends Model
+class IncidentNotificationsRecipient extends Model
 {
-    protected $table = 'wowtalk_recipients';
+    protected $table = 'incident_notifications_recipients';
 
     protected $fillable = [
         'id',
