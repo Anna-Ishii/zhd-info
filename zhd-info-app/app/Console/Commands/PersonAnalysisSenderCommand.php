@@ -575,11 +575,11 @@ class PersonAnalysisSenderCommand extends Command
         // ここ修正必須！！
         // $to = array_merge($to, AdminRecipient::where('target', true)->pluck('email')->toArray());
 
-        $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek)) . ')';
-
+        $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . ')';
+        $fromName = '業連・動画配信ツール';
         // メール送信
         $mailer = new SESMailer();
-        if ($mailer->sendEmail($to, $subject, $messageContent, $filePath)) {
+        if ($mailer->sendEmail($fromName, $to, $subject, $messageContent, $filePath)) {
             $this->info("閲覧率のメールを送信しました。");
         } else {
             $this->error("メール送信中にエラーが発生しました。");
@@ -597,6 +597,7 @@ class PersonAnalysisSenderCommand extends Command
     private function notifySystemAdmin($errorType, $requestData, $responseData)
     {
         // DBから通知対象のメールアドレスを取得
+        $fromName = 'システム管理者';
         $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】閲覧状況メール送信エラー';
 
@@ -630,7 +631,7 @@ class PersonAnalysisSenderCommand extends Command
         }
 
         $mailer = new SESMailer();
-        if ($mailer->sendEmail($to, $subject, $message)) {
+        if ($mailer->sendEmail($fromName, $to, $subject, $message)) {
             $this->info("システム管理者にエラーメールを送信しました。");
         } else {
             $this->error("メール送信中にエラーが発生しました。");

@@ -129,42 +129,43 @@
                             <th class="head1" rowspan="2" nowrap data-column="0">DS</th>
                             <th class="head1" rowspan="2" nowrap data-column="1">BL</th>
                             <th class="head1" rowspan="2" nowrap data-column="2">AR</th>
-                            <!-- 店舗を2つの列に分ける -->
                             <th class="head1" colspan="2" nowrap>店舗</th>
-                            <th class="head1" colspan="3" nowrap>WowTalk1</th>
-                            <th class="head2" colspan="3" nowrap>WowTalk2</th>
+                            <th class="head1" colspan="4" nowrap>DM</th>
+                            <th class="head1" colspan="4" nowrap>BM</th>
+                            <th class="head1" colspan="4" nowrap>AM</th>
                         </tr>
                         <tr>
                             <!-- 店舗のサブヘッダー -->
                             <th class="head1" nowrap data-column="3">コード</th>
                             <th class="head1" nowrap data-column="4">店舗名</th>
-                            <!-- WowTalk1のサブヘッダー -->
-                            <th class="head1" nowrap>ID</th>
-                            <th class="head1 head-WT1_status" nowrap>業連閲覧状況の通知<br class="WT1StatusBreak" style="display: none;">
-                                <button type="button" class="btn btn-outline-primary btn-sm WT1StatusAllSelectBtn"
+                            <!-- DMのサブヘッダー -->
+                            <th class="head1" nowrap>従業員番号</th>
+                            <th class="head1" nowrap>氏名</th>
+                            <th class="head1" nowrap>メールアドレス</th>
+                            <th class="head1 head-DM_status" nowrap>業連閲覧状況メール配信<br class="DMStatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm DMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
-                            <th class="head1 head-WT1_send" nowrap>業連・マニュアル配信の通知<br class="WT1SendBreak" style="display: none;">
-                                <button type="button" class="btn btn-outline-primary btn-sm WT1SendAllSelectBtn"
+                            <!-- BMのサブヘッダー -->
+                            <th class="head1" nowrap>従業員番号</th>
+                            <th class="head1" nowrap>氏名</th>
+                            <th class="head1" nowrap>メールアドレス</th>
+                            <th class="head1 head-BM_status" nowrap>業連閲覧状況メール配信<br class="BMStatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm BMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
-                            <!-- WowTalk2のサブヘッダー -->
-                            <th class="head2" nowrap>ID</th>
-                            <th class="head2 head-WT2_status" nowrap>業連閲覧状況の通知<br class="WT2StatusBreak" style="display: none;">
-                                <button type="button" class="btn btn-outline-primary btn-sm WT2StatusAllSelectBtn"
-                                    data-toggle="button" aria-pressed="false"
-                                    style="position: relative; z-index: 10; display: none;">
-                                    すべて選択/解除
-                                </button>
-                            </th>
-                            <th class="head2 head-WT2_send" nowrap>業連・マニュアル配信の通知<br class="WT2SendBreak" style="display: none;">
-                                <button type="button" class="btn btn-outline-primary btn-sm WT2SendAllSelectBtn"
+                            <!-- AMのサブヘッダー -->
+                            <th class="head1" nowrap>従業員番号</th>
+                            <th class="head1" nowrap>氏名</th>
+                            <th class="head1" nowrap>メールアドレス</th>
+                            <th class="head1 head-AM_status" nowrap>業連閲覧状況メール配信<br class="AMStatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm AMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
                                     style="position: relative; z-index: 10; display: none;">
                                     すべて選択/解除
@@ -203,25 +204,29 @@
                                 <!-- 店舗 -->
                                 <td class="label-shop_id" nowrap>{{ $u->shop_code }}</td>
                                 <td class="label-shop_name" nowrap>{{ $u->shop_name }}</td>
-                                <!-- WowTalk1 -->
-                                <td class="label-WT1_id" nowrap>{{ $u->wowtalk1_id }}</td>
-                                <td class="label-WT1_status" nowrap>
-                                    <span class="WT1_status-select"
-                                        value="{{ $u->notification_target1 == '〇' ? 'selected' : '' }}">{{ $u->notification_target1 }}</span>
+                                <!-- DM -->
+                                <td class="label-DM_no" nowrap>{{ $u->DM_id }}</td>
+                                <td class="label-DM_name" nowrap>{{ $u->DM_name }}</td>
+                                <td class="label-DM_email" nowrap>{{ $u->DM_email }}</td>
+                                <td class="label-DM_status" nowrap>
+                                    <span class="DM_status-select"
+                                        value="{{ $u->DM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->DM_view_notification }}</span>
                                 </td>
-                                <td class="label-WT1_send" nowrap>
-                                    <span class="WT1_send-select"
-                                        value="{{ $u->business_notification1 == '〇' ? 'selected' : '' }}">{{ $u->business_notification1 }}</span>
+                                <!-- BM -->
+                                <td class="label-BM_no" nowrap>{{ $u->BM_id }}</td>
+                                <td class="label-BM_name" nowrap>{{ $u->BM_name }}</td>
+                                <td class="label-BM_email" nowrap>{{ $u->BM_email }}</td>
+                                <td class="label-BM_status" nowrap>
+                                    <span class="BM_status-select"
+                                        value="{{ $u->BM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->BM_view_notification }}</span>
                                 </td>
-                                <!-- WowTalk2 -->
-                                <td class="label-WT2_id" nowrap>{{ $u->wowtalk2_id }}</td>
-                                <td class="label-WT2_status" nowrap>
-                                    <span class="WT2_status-select"
-                                        value="{{ $u->notification_target2 == '〇' ? 'selected' : '' }}">{{ $u->notification_target2 }}</span>
-                                </td>
-                                <td class="label-WT2_send" nowrap>
-                                    <span class="WT2_send-select"
-                                        value="{{ $u->business_notification2 == '〇' ? 'selected' : '' }}">{{ $u->business_notification2 }}</span>
+                                <!-- AM -->
+                                <td class="label-AM_no" nowrap>{{ $u->AM_id }}</td>
+                                <td class="label-AM_name" nowrap>{{ $u->AM_name }}</td>
+                                <td class="label-AM_email" nowrap>{{ $u->AM_email }}</td>
+                                <td class="label-AM_status" nowrap>
+                                    <span class="AM_status-select"
+                                        value="{{ $u->AM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->AM_view_notification }}</span>
                                 </td>
                             </tr>
                         @endforeach
