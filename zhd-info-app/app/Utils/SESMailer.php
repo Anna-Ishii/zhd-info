@@ -17,11 +17,10 @@ class SESMailer
         ]);
     }
 
-    public function sendEmail($to, $subject, $message, $filePath = null)
+    public function sendEmail($fromName, $to, $subject, $message, $filePath = null)
     {
         try {
             $fromAddress = 'zhd-gyoren-system@zensho.com';
-            $fromName = 'システム管理者';
             $from = '=?UTF-8?B?' . base64_encode($fromName) . '?= <' . $fromAddress . '>';
 
             $boundary = uniqid('np');
