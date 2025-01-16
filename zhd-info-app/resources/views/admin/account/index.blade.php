@@ -59,114 +59,172 @@
 
 @section('content')
     <div id="page-wrapper">
-        @livewire('admin.account-search-form')
 
+        <!-- 絞り込み部分 -->
+        <form method="get" class="mb24">
+            <div class="form-group form-inline mb16 ">
+                <div class="input-group col-lg-1 spMb16">
+                    <label class="input-group-addon">業態</label>
+                    <select name="organization1" class="form-control">
+                        @foreach ($organization1_list as $org1)
+                            <option value="{{ $org1->id }}"
+                                {{ request()->input('organization1') == $org1->id ? 'selected' : '' }}>{{ $org1->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                @foreach (['DS', 'BL', 'AR'] as $organization)
+                    <div class="input-group col-lg-1 spMb16">
+                        <label class="input-group-addon">{{ $organization }}</label>
+                        @if (isset($organization_list[$organization]))
+                            <select name="org[{{ $organization }}]" class="form-control">
+                                <option value="">全て</option>
+                                @foreach ($organization_list[$organization] as $org)
+                                    <option value="{{ $org->id }}"
+                                        {{ request()->input('org.' . $organization) == $org->id ? 'selected' : '' }}>
+                                        {{ $org->name }}</option>
+                                @endforeach
+                            </select>
+                        @else
+                            <select name="org[{{ $organization }}]" class="form-control" disabled></select>
+                        @endif
+                    </div>
+                @endforeach
+
+                <div class="input-group spMb16">
+                    <label class="input-group-addon">店舗</label>
+                    <input type="text" name="shop_freeword" class="form-control"
+                        value="{{ request()->input('shop_freeword') }}">
+                </div>
+                <div class="input-group">
+                    <button class="btn btn-admin">検索</button>
+                </div>
+                <div class="input-group">
+                    <a href="{{ route('admin.account.export') }}?{{ http_build_query(request()->query()) }}"
+                        class="btn btn-admin">エクスポート</a>
+                </div>
+            </div>
         </form>
 
         <!-- 検索結果 -->
         <form>
             <div class="pagenation-top">
                 @include('common.admin.pagenation', ['objects' => $users])
+                <div>
+                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                        <div class="account-edit-btn-group">
+                            <p class="accountEditBtn btn btn-admin" onclick="this.style.pointerEvents = 'none';">編集</p>
+                        </div>
+                    @endif
+                </div>
             </div>
 
             <div class="tableInner" style="height: 70vh;">
-                <table id="list" class="table-list table table-bordered table-hover table-condensed text-center">
+                <table id="list" class="account table-list table table-bordered table-hover table-condensed text-center">
+
                     <thead>
-                        {{-- <tr>
-                            <th nowrap class="text-center"></th>
-                            <th nowrap class="text-center">ユーザーID</th>
-                            <th nowrap class="text-center">氏名</th>
-                            <th nowrap class="text-center">社員番号</th>
-                            <th nowrap class="text-center">所属</th>
-                            <th nowrap class="text-center">メールアドレス</th>
-                        </tr> --}}
                         <tr>
-                            <th class="text-center" rowspan="2" nowrap></th>
-                            <th class="text-center" rowspan="2" nowrap>DS</th>
-                            <th class="text-center" rowspan="2" nowrap>BL</th>
-                            <th class="text-center" rowspan="2" nowrap>AR</th>
+                            <th class="head1" rowspan="2" nowrap data-column="0">DS</th>
+                            <th class="head1" rowspan="2" nowrap data-column="1">BL</th>
+                            <th class="head1" rowspan="2" nowrap data-column="2">AR</th>
                             <!-- 店舗を2つの列に分ける -->
-                            <th class="text-center" colspan="2" nowrap>店舗</th>
-                            <th class="text-center" colspan="3" nowrap>WowTalk1</th>
-                            <th class="text-center" colspan="3" nowrap>WowTalk2</th>
-                            <th class="text-center" colspan="4" nowrap>DM</th>
-                            <th class="text-center" colspan="4" nowrap>BM</th>
-                            <th class="text-center" colspan="4" nowrap>AM</th>
+                            <th class="head1" colspan="2" nowrap>店舗</th>
+                            <th class="head1" colspan="3" nowrap>WowTalk1</th>
+                            <th class="head2" colspan="3" nowrap>WowTalk2</th>
                         </tr>
                         <tr>
                             <!-- 店舗のサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>店舗名</th>
+                            <th class="head1" nowrap data-column="3">コード</th>
+                            <th class="head1" nowrap data-column="4">店舗名</th>
                             <!-- WowTalk1のサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>閲覧状況</th>
-                            <th class="text-center" nowrap>業連配信</th>
+                            <th class="head1" nowrap>ID</th>
+                            <th class="head1 head-WT1_status" nowrap>業連閲覧状況の通知<br class="WT1StatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT1StatusAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
+                            <th class="head1 head-WT1_send" nowrap>業連・マニュアル配信の通知<br class="WT1SendBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT1SendAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
                             <!-- WowTalk2のサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>閲覧状況</th>
-                            <th class="text-center" nowrap>業連配信</th>
-                            <!-- DMのサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>氏名</th>
-                            <th class="text-center" nowrap>メール</th>
-                            <th class="text-center" nowrap>閲覧状況通知</th>
-                            <!-- BMのサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>氏名</th>
-                            <th class="text-center" nowrap>メール</th>
-                            <th class="text-center" nowrap>閲覧状況通知</th>
-                            <!-- AMのサブヘッダー -->
-                            <th class="text-center" nowrap>ID</th>
-                            <th class="text-center" nowrap>氏名</th>
-                            <th class="text-center" nowrap>メール</th>
-                            <th class="text-center" nowrap>閲覧状況通知</th>
+                            <th class="head2" nowrap>ID</th>
+                            <th class="head2 head-WT2_status" nowrap>業連閲覧状況の通知<br class="WT2StatusBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT2StatusAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
+                            <th class="head2 head-WT2_send" nowrap>業連・マニュアル配信の通知<br class="WT2SendBreak" style="display: none;">
+                                <button type="button" class="btn btn-outline-primary btn-sm WT2SendAllSelectBtn"
+                                    data-toggle="button" aria-pressed="false"
+                                    style="position: relative; z-index: 10; display: none;">
+                                    すべて選択/解除
+                                </button>
+                            </th>
                         </tr>
                     </thead>
 
                     <tbody>
-                        {{-- @foreach ($users as $u)
-                            <tr class="">
-                                <td>
-                                    <input type="checkbox" class="form-check-input">
-                                </td>
-                                <td class="user_id" nowrap>{{ $u->id }}</td>
-                                <td nowrap>{{ $u->name }}</td>
-                                <td nowrap>{{ $u->employee_code }}</td>
-                                <td nowrap>{{ $u->belong_label }}</td>
-                                <td nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->email }}</a></td>
-                            </tr>
-                        @endforeach --}}
                         @foreach ($users as $u)
-                            <tr class="">
-                                <td>
-                                    <input type="checkbox" class="form-check-input">
+                            <tr data-shop_id="{{ $u->shop_id }}" class="">
+                                <!-- DS -->
+                                <td class="label-DS" nowrap>
+                                    @if (isset($organizations[$u->shop_id]['DS']))
+                                        @foreach ($organizations[$u->shop_id]['DS'] as $ds)
+                                            {{ $ds['org3_name'] }}
+                                        @endforeach
+                                    @endif
                                 </td>
-                                <td class="label-DS" nowrap></td>
-                                <td class="label-BL" nowrap></td>
-                                <td class="label-AR" nowrap></td>
-                                <td class="label-shop_id" nowrap>{{ $u->id }}</td>
-                                <td class="label-shop_name" nowrap>{{ $u->name }}</td>
-                                <td class="label-WT1_id" nowrap></td>
-                                <td class="label-WT1_status" nowrap></td>
-                                <td class="label-WT1_send" nowrap></td>
-                                <td class="label-WT2_id" nowrap></td>
-                                <td class="label-WT2_status" nowrap></td>
-                                <td class="label-WT2_send" nowrap></td>
-                                <td class="label-DM_id" nowrap></td>
-                                <td class="label-DM_name" nowrap>{{ $u->name }}</td>
-                                <td class="label-DM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->email }}</a></td>
-                                <td class="label-DM_view" nowrap></td>
-                                <td class="label-BM_id" nowrap></td>
-                                <td class="label-BM_name" nowrap>{{ $u->name }}</td>
-                                <td class="label-BM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->email }}</a></td>
-                                <td class="label-BM_view" nowrap></td>
-                                <td class="label-AM_id" nowrap></td>
-                                <td class="label-AM_name" nowrap>{{ $u->name }}</td>
-                                <td class="label-AM_email" nowrap><a href="mailto:hogehoge@hoge.jp">{{ $u->email }}</a></td>
-                                <td class="label-AM_view" nowrap></td>
+                                <!-- BL -->
+                                <td class="label-BL" nowrap>
+                                    @if (isset($organizations[$u->shop_id]['BL']))
+                                        @foreach ($organizations[$u->shop_id]['BL'] as $bl)
+                                            {{ $bl['org5_name'] }}
+                                        @endforeach
+                                    @endif
+                                </td>
+                                <!-- AR -->
+                                <td class="label-AR" nowrap>
+                                    @if (isset($organizations[$u->shop_id]['AR']))
+                                        @foreach ($organizations[$u->shop_id]['AR'] as $ar)
+                                            {{ $ar['org4_name'] }}
+                                        @endforeach
+                                    @endif
+                                </td>
+                                <!-- 店舗 -->
+                                <td class="label-shop_id" nowrap>{{ $u->shop_code }}</td>
+                                <td class="label-shop_name" nowrap>{{ $u->shop_name }}</td>
+                                <!-- WowTalk1 -->
+                                <td class="label-WT1_id" nowrap>{{ $u->wowtalk1_id }}</td>
+                                <td class="label-WT1_status" nowrap>
+                                    <span class="WT1_status-select"
+                                        value="{{ $u->notification_target1 == '〇' ? 'selected' : '' }}">{{ $u->notification_target1 }}</span>
+                                </td>
+                                <td class="label-WT1_send" nowrap>
+                                    <span class="WT1_send-select"
+                                        value="{{ $u->business_notification1 == '〇' ? 'selected' : '' }}">{{ $u->business_notification1 }}</span>
+                                </td>
+                                <!-- WowTalk2 -->
+                                <td class="label-WT2_id" nowrap>{{ $u->wowtalk2_id }}</td>
+                                <td class="label-WT2_status" nowrap>
+                                    <span class="WT2_status-select"
+                                        value="{{ $u->notification_target2 == '〇' ? 'selected' : '' }}">{{ $u->notification_target2 }}</span>
+                                </td>
+                                <td class="label-WT2_send" nowrap>
+                                    <span class="WT2_send-select"
+                                        value="{{ $u->business_notification2 == '〇' ? 'selected' : '' }}">{{ $u->business_notification2 }}</span>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
+
                 </table>
             </div>
 
