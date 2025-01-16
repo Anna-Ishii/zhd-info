@@ -208,6 +208,7 @@
                             <th class="text-center" nowrap>添付ファイル</th>
                             <th class="text-center" colspan="2">掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
+                            <th class="text-center" nowrap>WowTalk通知</th>
                             <th class="text-center" nowrap>配信店舗数</th>
                             <th class="text-center" colspan="3" nowrap>閲覧率</th>
                             <th class="text-center" colspan="2" nowrap>登録</th>
@@ -308,6 +309,10 @@
                                     </td>
                                     <!-- 状態 -->
                                     <td>{{ $message->status->text() }}</td>
+                                    <!-- WowTalk通知 -->
+                                    <td class="label-notification-group">
+                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
+                                    </td>
                                     <!-- 配信店舗数 -->
                                     <td style="text-align: right">
                                         <div class="shop-edit-group">
@@ -405,6 +410,10 @@
                                         <div>{{ $message->formatted_end_datetime }}</div>
                                     </td>
                                     <td>{{ $message->status->text() }}</td>
+                                    <!-- WowTalk通知 -->
+                                    <td class="label-notification-group">
+                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
+                                    </td>
                                     <td style="text-align: right">{{ $message->shop_count }}</td>
                                     @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
                                         <td></td>
