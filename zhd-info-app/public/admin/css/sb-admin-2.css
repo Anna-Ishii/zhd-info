@@ -915,7 +915,43 @@ table.personal td[class*="org"] {
     text-align: center;
 }
 
+table.account {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #000 !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+table.account th,
+table.account td {
+    border: 1px solid #000 !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
+}
+
+/* 縦スクロール */
+table.account thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+}
+
+/* ヘッダーのスタイル */
+table.account thead>tr>th.head1 {
+    background-color: rgb(209, 218, 239);
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.account thead>tr>th.head2 {
+    background-color: #bbb;
+    vertical-align: middle;
+    text-align: center;
+}
+
 table tr.deleted {
     background-color: #d9d9d9;
-    ;
 }
