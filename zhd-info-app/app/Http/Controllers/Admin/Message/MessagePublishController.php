@@ -239,8 +239,8 @@ class MessagePublishController extends Controller
             $message->file_count = count($file_list);
         }
 
-        // BBの場合
-        if ($organization1_id == 2) {
+        // BBの場合、SKの場合
+        if ($organization1_id == 2 || $organization1_id == 8) {
             // セッションにデータを保存
             session()->put('message_list', $message_list);
         }
@@ -1736,8 +1736,8 @@ class MessagePublishController extends Controller
 
         $file_name = '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
 
-        // BBの場合
-        if ($organization1->id == 2) {
+        // BBの場合、SKの場合
+        if ($organization1->id == 2 || $organization1->id == 8) {
             return Excel::download(
                 new MessageListBBExport($request),
                 $file_name
@@ -1837,7 +1837,8 @@ class MessagePublishController extends Controller
 
         $organization = $this->getOrganizationForm($organization1);
 
-        if ($organization1 == 2) {
+        // BBの場合、SKの場合
+        if ($organization1 == 2 || $organization1 == 8) {
             $shop_list = $this->getShopForm($organization1);
         }
 
@@ -1850,8 +1851,8 @@ class MessagePublishController extends Controller
 
 
         try {
-            if ($organization1 == 2) {
-                // BBの場合
+            // BBの場合、SKの場合
+            if ($organization1 == 2 || $organization1 == 8) {
                 $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
                 $count = $collection[0]->count();
                 if ($count >= 100) {
@@ -2095,8 +2096,8 @@ class MessagePublishController extends Controller
         try {
             DB::beginTransaction();
 
-            // BBの場合
-            if ($org1_id == 2) {
+            // BBの場合、SKの場合
+            if ($org1_id == 2 || $org1_id == 8) {
                 foreach ($messages as $key => $ms) {
                     $organization1_id = Brand::where('id', $ms["brand"])->pluck('organization1_id')->first();
 
@@ -2723,8 +2724,8 @@ class MessagePublishController extends Controller
                 return strcmp($a['shop_code'], $b['shop_code']);
             });
 
-            // BBの場合
-            if ($organization1_id == 2) {
+            // BBの場合、SKの場合
+            if ($organization1_id == 2 || $organization1_id == 8) {
                 return response()->json([
                     'storesJson' => $storesJson,
                     // 'brand_list' => $brand_list,

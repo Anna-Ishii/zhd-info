@@ -9,10 +9,9 @@ use App\Models\Message;
 use App\Models\Shop;
 use App\Models\Organization1;
 use App\Models\WowTalkNotificationLog;
-use App\Models\WowtalkRecipient;
-use Illuminate\Support\Facades\Mail;
+use App\Models\IncidentNotificationsRecipient;
 use App\Utils\SESMailer;
-
+use App\Utils\SendWowTalkApi;
 class WowTalkUnreadNotificationSenderCommand extends Command
 {
     /**
@@ -42,7 +41,7 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         $this->info('WowTalk未読通知送信開始');
 
         try {
-            // 業務連絡メッセージ送信のログを作成
+            // ログを作成
             $messageLog = new WowTalkNotificationLog();
             $messageLog->log_type = 'message';
             $messageLog->command_name = $this->signature;
@@ -51,20 +50,20 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             $messageLog->attempts = 1;
             $messageLog->save();
 
-            // 業務連絡メッセージ送信のメイン処理を実行
+            // メイン処理を実行
             $this->sendNotifications();
 
             // 成功時の処理
             $messageLog->finished_at = Carbon::now();
             $messageLog->save();
-
-            $this->info('WowTalk未読通知送信完了');
         } catch (\Throwable $th) {
             // エラー発生時にログを更新し、エラーメッセージを記録
             $this->finalizeLog($messageLog, false, $th->getMessage());
         } finally {
             // 処理後にメモリ制限を元に戻す
             ini_restore('memory_limit');
+
+            $this->info('WowTalk未読通知送信完了');
         }
     }
 
@@ -213,13 +212,13 @@ class WowTalkUnreadNotificationSenderCommand extends Command
                             ->where('wowtalk_shops.notification_target2', true);
                 });
             })
-            ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id')
+            ->select('wowtalk_shops.shop_id', 'wowtalk_shops.wowtalk1_id', 'wowtalk_shops.wowtalk2_id', 'wowtalk_shops.notification_target1', 'wowtalk_shops.notification_target2')
             ->get()
             ->map(function ($result) {
                 return [
-                    'shop_id' => $result->shop_id,
-                    'wowtalk1_id' => $result->wowtalk1_id,
-                    'wowtalk2_id' => $result->wowtalk2_id,
+                    'shop_id' => $result->shop_id ?? null,
+                    'wowtalk1_id' => $result->notification_target1 ? $result->wowtalk1_id : null,
+                    'wowtalk2_id' => $result->notification_target2 ? $result->wowtalk2_id : null,
                 ];
             })
             ->toArray();
@@ -229,43 +228,100 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             return $this->createFailureResponse($message);
         }
 
-        // エラーログのための配列
+        // 通知対象のWowTalkIDがある場合
         $errorLogs = [];
+        // メッセージ内容を生成
+        $messageContent = null;
+
+        // shop_idをキーにしてWowTalk IDを一括で収集
+        $wowtalkIds = [];
         foreach ($wowtalk_data as $data) {
-            try {
-                // メッセージ内容を生成
-                $messageContent = $this->calculateAndGenerateMessageContent($message, $data['shop_id']);
-
-                // メッセージ内容が800文字を超える場合はエラーをスロー
-                if (mb_strlen($messageContent) > 800) {
-                    throw new \Exception("Message content exceeds 800 characters.");
-                }
-            } catch (\Exception $e) {
-                // メッセージ内容生成に失敗した場合のエラー処理
-                $errorLog = $this->createErrorLog($message, $data, ['type' => 'message_content_error', 'response_result' => 'メッセージ生成に失敗しました', 'response_status' => $e->getMessage(), 'attempts' => 1], $messageContent = '');
-
-                $this->notifySystemAdmin(
-                    $errorLog['type'],
-                    $errorLog,
-                    ['error_message' => $errorLog['error_message'], 'status' => 'error', 'response_target' => $errorLog['response_target']]
-                );
-
-                return $this->createErrorResponse($message, $e->getMessage(), 1);
-            }
-
-            if (!empty($data['wowtalk1_id'])) {
-                $apiResult1 = $this->sendWowTalkApiRequest([$data['wowtalk1_id']], $messageContent);
-                if (is_array($apiResult1)) {
-                    // エラーログを生成
-                    $errorLogs[] = $this->createErrorLog($message, $data, $data['wowtalk1_id'], $apiResult1, $messageContent);
+            $shopId = $data['shop_id'] ?? null;
+            foreach (['wowtalk1_id', 'wowtalk2_id'] as $wowtalkIdKey) {
+                if (!empty($data[$wowtalkIdKey])) {
+                    $wowtalkIds[$shopId][] = $data[$wowtalkIdKey];
                 }
             }
+        }
 
-            if (!empty($data['wowtalk2_id'])) {
-                $apiResult2 = $this->sendWowTalkApiRequest([$data['wowtalk2_id']], $messageContent);
-                if (is_array($apiResult2)) {
+        // WowTalk IDを20件ずつのバッチに分割してAPIを呼び出す
+        foreach ($wowtalkIds as $shopId => $ids) {
+            $chunkedWowtalkIds = array_chunk($ids, 20);
+            foreach ($chunkedWowtalkIds as $batch) {
+                try {
+                    $messageContent = $this->calculateAndGenerateMessageContent($message, $shopId);
+                } catch (\Exception $e) {
+                    // メッセージ内容生成に失敗した場合のエラー処理
+                    $errorLog = $this->createErrorLog(
+                        $message,
+                        [
+                            'type' => 'message_content_error',
+                            'response_result' => 'メッセージ生成に失敗しました',
+                            'response_status' => $e->getMessage(),
+                            'attempts' => 1
+                        ],
+                        $shopId,
+                        $batch,
+                        $messageContent = ''
+                    );
+
+                    if ($errorLog) {
+                        $this->notifySystemAdmin(
+                            $errorLog['type'] ?? 'unknown',
+                            $errorLog,
+                            [
+                                'error_message' => $errorLog['error_message'] ?? 'エラーメッセージがありません',
+                                'status' => 'error',
+                                'response_target' => $errorLog['response_target'] ?? '不明'
+                            ]
+                        );
+                    }
+
+                    return $this->createErrorResponse($message, $e->getMessage(), 1);
+                }
+
+                try {
+                    $apiResult = SendWowTalkApi::sendWowTalkApiRequest($batch, $messageContent);
+                    if (is_array($apiResult)) {
+                        if (isset($apiResult['type']) && ($apiResult['type'] === 'WowTalkAPI_error' || $apiResult['type'] === 'unexpected_response')) {
+                            // エラーがある場合のみログを記録
+                            $requestTarget = is_array($apiResult['request_target'])
+                                ? implode(', ', $apiResult['request_target'])
+                                : $apiResult['request_target'];
+                            $responseResult = is_array($apiResult['response_result'])
+                                ? implode(', ', $apiResult['response_result'])
+                                : $apiResult['response_result'];
+
+                            // エラーログを生成
+                            $errorLogs[] = $this->createErrorLog(
+                                $message,
+                                [
+                                    'type' => $apiResult['type'],
+                                    'request_target' => $requestTarget,
+                                    'response_result' => $responseResult,
+                                    'response_status' => $apiResult['response_status'],
+                                    'attempts' => $apiResult['attempts']
+                                ],
+                                $shopId,
+                                $batch,
+                                $messageContent
+                            );
+                        }
+                    }
+                } catch (\Exception $e) {
                     // エラーログを生成
-                    $errorLogs[] = $this->createErrorLog($message, $data, $data['wowtalk2_id'], $apiResult2, $messageContent);
+                    $errorLogs[] = $this->createErrorLog(
+                        $message,
+                        [
+                            'type' => 'api_error',
+                            'response_result' => 'API呼び出しに失敗しました',
+                            'response_status' => $e->getMessage(),
+                            'attempts' => 1
+                        ],
+                        $shopId,
+                        $batch,
+                        $messageContent
+                    );
                 }
             }
         }
@@ -274,20 +330,20 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         if (!empty($errorLogs)) {
             foreach ($errorLogs as $errorLog) {
                 $this->notifySystemAdmin(
-                    $errorLog['type'],
+                    $errorLog['type'] ?? 'unknown',
                     [
-                        'org1_name' => $errorLog['org1_name'],
-                        'shop_code' => $errorLog['shop_code'],
-                        'shop_name' => $errorLog['shop_name'],
-                        'message_id' => $errorLog['message_id'],
-                        'message_title' => $errorLog['message_title'],
-                        'request_message' => $errorLog['request_message'],
-                        'request_target' => $errorLog['request_target']
+                        'org1_name' => $errorLog['org1_name'] ?? '',
+                        'shop_code' => $errorLog['shop_code'] ?? '',
+                        'shop_name' => $errorLog['shop_name'] ?? '',
+                        'message_id' => $errorLog['message_id'] ?? '',
+                        'message_title' => $errorLog['message_title'] ?? '',
+                        'request_message' => $errorLog['request_message'] ?? '',
+                        'request_target' => $errorLog['request_target'] ?? ''
                     ],
                     [
-                        'error_message' => $errorLog['error_message'],
+                        'error_message' => $errorLog['error_message'] ?? 'エラーメッセージがありません',
                         'status' => 'error',
-                        'response_target' => $errorLog['response_target']
+                        'response_target' => $errorLog['response_target'] ?? '不明'
                     ]
                 );
             }
@@ -335,89 +391,10 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
         // メッセージ内容を生成
         $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n\n";
-        // $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-        $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+        $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+        // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
 
         return $messageContent;
-    }
-
-
-    /**
-     * WowTalkメッセージを送信するAPIリクエストを行う関数
-     */
-    private function sendWowTalkApiRequest($wowtalk_ids, $messageContent)
-    {
-        // WowTalk API
-        $url = 'https://wow-talk.zensho.com/message';
-
-        // 送信するデータ
-        $data = array(
-            'message' => $messageContent, // メッセージ本文 最大800文字 改行コードは\nで挿入できる
-            'target'  => $wowtalk_ids     // 送信先のWowtalkID（ユーザーID）最大20件 20件を超えた分は送信しない
-        );
-
-        $retryCount = 1;
-        $maxRetries = 3;
-        $retryInterval = 60;
-        do {
-            // cURLセッションを初期化
-            $ch = curl_init($url);
-
-            // ヘッダーを設定
-            $api_key = 'osKHSzS8682LsLcM6Yw0O6PSVIXY5UBJ745nUcNv';  // APIキー
-            $headers = array(
-                'x-api-key: ' . $api_key,
-                'Content-Type: application/json'
-            );
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-
-            // オプションを設定
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-
-            // リクエストを実行してレスポンスを取得
-            $response = curl_exec($ch);
-
-            // リクエストが失敗した場合のエラーハンドリング
-            if ($response === false) {
-                $error = curl_error($ch);
-                curl_close($ch);
-                return 'curl_error: ' . $error;
-            }
-            $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            // cURLセッションを終了
-            curl_close($ch);
-
-            // レスポンスをデコード
-            $response_data = json_decode($response, true);
-
-            // レスポンスの存在と形式を確認
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                $jsonError = 'json_decode_error: ' . json_last_error_msg();
-                $this->error("JSONデコードエラー: $jsonError");
-                return $jsonError;
-            }
-
-            // レスポンスの内容に基づいて処理を分岐
-            if ($httpCode === 200) {
-                // 成功レスポンス
-                return 'success';
-            } elseif (in_array($httpCode, [400, 403])) {
-                // 400または403エラー
-                return $this->createApiErrorResponse($messageContent, $wowtalk_ids, $response_data, $httpCode, $retryCount, 'WowTalkAPI_error');
-            } elseif ($httpCode === 500 && $retryCount < $maxRetries) {
-                // 500エラー
-                $retryCount++;
-                sleep($retryInterval);
-            } else {
-                // 想定外のレスポンス処理
-                return $this->createApiErrorResponse($messageContent, $wowtalk_ids, $response_data, $httpCode, $retryCount, 'unexpected_response');
-            }
-        } while ($retryCount < $maxRetries);
-        // リトライ回数を超えた場合のエラーハンドリング
-        return $this->createApiErrorResponse($messageContent, $wowtalk_ids, $response_data, $httpCode, $retryCount, 'WowTalkAPI_error');
     }
 
 
@@ -431,7 +408,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
     private function notifySystemAdmin($errorType, $requestData, $responseData)
     {
         // DBから通知対象のメールアドレスを取得
-        $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
+        $fromName = 'システム管理者';
+        $to = IncidentNotificationsRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】WowTalk連携エラー';
 
         $message = "WowTalk連携でエラーが発生しました。ご確認ください。\n\n";
@@ -464,7 +442,7 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         }
 
         $mailer = new SESMailer();
-        if ($mailer->sendEmail($to, $subject, $message)) {
+        if ($mailer->sendEmail($fromName, $to, $subject, $message)) {
             $this->info("システム管理者にエラーメールを送信しました。");
         } else {
             $this->error("メール送信中にエラーが発生しました。");
@@ -523,42 +501,18 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
 
     /**
-     * APIエラーレスポンスまたは想定外のレスポンスを生成するメソッド
-     *
-     * @param string $messageContent メッセージ内容
-     * @param array $wowtalk_ids WowTalk IDの配列
-     * @param array $response_data APIからのレスポンスデータ
-     * @param int $httpCode HTTPステータスコード
-     * @param int $retryCount リトライ回数（デフォルトは1）
-     * @param string $type エラーのタイプ ('WowTalkAPI_error' または 'unexpected_response')
-     * @return array エラーレスポンス
-     */
-    private function createApiErrorResponse($messageContent, $wowtalk_ids, $response_data, $httpCode, $retryCount, $type)
-    {
-        return [
-            'type' => $type,
-            'message' => $messageContent,
-            'request_target' => $wowtalk_ids,
-            'response_result' => $response_data['result'] ?? 'unexpected_response',
-            'response_status' => $httpCode,
-            'response_target' => $response_data['target'] ?? [],
-            'attempts' => $retryCount
-        ];
-    }
-
-
-    /**
      * エラーログを生成するメソッド
      *
      * @param Message $message メッセージオブジェクト
-     * @param array $data 店舗データ
      * @param array $apiResult APIリクエストの結果
+     * @param int $shopId 店舗ID
+     * @param array $wowtalkId WowTalk IDの配列
      * @param string $messageContent 送信されたメッセージ内容
      * @return array エラーログ
      */
-    private function createErrorLog($message, $data, $wowtalkId = null, $apiResult, $messageContent = null)
+    private function createErrorLog($message ,$apiResult, $shopId = null, $wowtalkId = null, $messageContent = null)
     {
-        $shop = Shop::where('id', $data['shop_id'] ?? 0)
+        $shop = Shop::where('id', $shopId ?? 0)
             ->select('shop_code', 'display_name', 'organization1_id')
             ->first();
 
