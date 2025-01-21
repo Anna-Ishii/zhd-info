@@ -129,8 +129,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
         Route::group(['prefix' => 'mail', 'as' => 'mail.', 'middleware' => 'check.allowpage:account-mail'], function () {
             Route::get('/', [MailAccountController::class, 'index'])->name('index');
-            Route::get('new', [MailAccountController::class, 'new'])->name('new');
-            Route::post('new', [MailAccountController::class, 'store'])->name('new.store');
+            Route::post('/userRoleUpdate', [MailAccountController::class, 'userRoleUpdate'])->name('userRoleUpdate');
+            Route::get('/organization', [MailAccountController::class,  'getOrganization']);
             Route::get('export', [MailAccountController::class, 'export'])->name('export');
         });
     });

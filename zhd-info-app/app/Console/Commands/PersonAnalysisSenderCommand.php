@@ -7,14 +7,17 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use App\Models\Message;
 use App\Models\Organization1;
-use App\Models\BatchProcessDate;
-use App\Models\WowtalkRecipient;
 use App\Models\AdminRecipient;
+use App\Models\IncidentNotificationsRecipient;
 use App\Utils\SESMailer;
 use App\Models\EmailSendLog;
 use App\Exports\PersonAnalysisExport;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
+// use setasign\Fpdi\TcpdfFpdi;
+
+// require_once(resource_path("outputpdf/libs/tcpdf/tcpdf.php"));
+// require_once(resource_path("outputpdf/libs/fpdi/autoload.php"));
 
 class PersonAnalysisSenderCommand extends Command
 {
@@ -217,57 +220,173 @@ class PersonAnalysisSenderCommand extends Command
             $_messages = $messages->pluck('id')->toArray();
             $message_count = count($_messages);
 
-            $organizations[] = "BL";
+            // DS, AR, BLがあるかで処理を分ける
+            if (isset($organization1['id'])) {
+                $org1Model = Organization1::find($organization1['id']);
+                if ($org1Model && $org1Model->isExistOrg3()) {
+                    $organizations[] = "DS";
+                    $organization_list["DS"] = $org1Model->getOrganization3();
+                }
+                if ($org1Model && $org1Model->isExistOrg4()) {
+                    $organizations[] = "AR";
+                    $organization_list["AR"] = $org1Model->getOrganization4();
+                }
+                if ($org1Model && $org1Model->isExistOrg5()) {
+                    $organizations[] = "BL";
+                    $organization_list["BL"] = $org1Model->getOrganization5();
+                }
+            }
+
             foreach ($_messages as $key => $ms) {
                 // 組織ごと
-                $viewRateOrgSub =
-                    DB::table('message_user')
-                    ->select([
-                        DB::raw('shops.organization5_id as o5_id'),
-                        DB::raw('count(crews.id) as count'),
-                        DB::raw('count(crew_message_logs.id) as read_count'),
-                        DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
-                    ])
-                    ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
-                    ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
-                    ->leftJoin('crew_message_logs', function ($join) use ($ms) {
-                        $join->on('crew_message_logs.crew_id', '=', 'crews.id')
-                            ->where('crew_message_logs.message_id', '=', $ms);
-                    })
-                    ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
-                    ->where('message_user.message_id', '=', $ms)
-                    ->groupBy('shops.organization5_id');
+                if (in_array('DS', $organizations)) {
+                    $viewRates_org_sub =
+                        DB::table('message_user')
+                        ->select([
+                            DB::raw('shops.organization3_id as o3_id'),
+                            DB::raw('count(crews.id) as count'),
+                            DB::raw('count(crew_message_logs.id) as read_count'),
+                            DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
+                        ])
+                        ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
+                        ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
+                        ->leftJoin('crew_message_logs', function ($join) use ($ms) {
+                            $join->on('crew_message_logs.crew_id', '=', 'crews.id')
+                                ->where('crew_message_logs.message_id', '=', $ms);
+                        })
+                        ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
+                        ->where('message_user.message_id', '=', $ms)
+                        ->groupBy('shops.organization3_id');
 
-                $viewRate =
-                    DB::table('shops')
-                    ->select([
-                        DB::raw('organization3.name as org3_name'),
-                        DB::raw('organization4.name as org4_name'),
-                        DB::raw('organization5.id as id'),
-                        DB::raw('organization5.order_no as order_no'),
-                        DB::raw('organization5.name as org5_name'),
-                        DB::raw('sub.count as count'),
-                        DB::raw('sub.read_count as read_count'),
-                        DB::raw('sub.view_rate as view_rate')
-                    ])
-                    ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
-                    ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
-                    ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
-                    ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
-                        $join->on('shops.organization5_id', '=', 'sub.o5_id');
-                    })
-                    ->where('shops.organization1_id', '=', $organization1['id'])
-                    ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
-                    ->orderBy('organization3.order_no')
-                    ->orderBy('organization4.order_no')
-                    ->orderBy('organization5.order_no')
-                    ->get();
+                    $viewRate =
+                        DB::table('shops')
+                        ->select([
+                            DB::raw('organization3.id as id'),
+                            DB::raw('organization3.order_no as order_no'),
+                            DB::raw('organization3.name as org3_name'),
+                            DB::raw('sub.count as count'),
+                            DB::raw('sub.read_count as read_count'),
+                            DB::raw('sub.view_rate as view_rate')
+                        ])
+                        ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+                        ->leftJoinSub($viewRates_org_sub, 'sub', function ($join) {
+                            $join->on('shops.organization3_id', '=', 'sub.o3_id');
+                        })
+                        ->where('shops.organization1_id', '=', $organization1['id'])
+                        ->groupBy('shops.organization3_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
+                        ->orderBy('organization3.order_no')
+                        ->get();
 
-                $viewRates['BL'][] = $viewRate;
-                $viewRatesArray = $viewRate->toArray();
-                foreach ($viewRatesArray as $key => $value) {
-                    $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
-                    $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    $viewRates['DS'][] = $viewRate;
+                    $viewRatesArray = $viewRate->toArray();
+                    foreach ($viewRatesArray as $key => $value) {
+                        $viewRates['DS_sum'][$value->id] = ($viewRates['DS_sum'][$value->id] ?? 0) + $value->count;
+                        $viewRates['DS_read_sum'][$value->id] = ($viewRates['DS_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    }
+                }
+
+                if (in_array('AR', $organizations)) {
+                    $viewRates_org_sub =
+                        DB::table('message_user')
+                        ->select([
+                            DB::raw('shops.organization4_id as o4_id'),
+                            DB::raw('count(crews.id) as count'),
+                            DB::raw('count(crew_message_logs.id) as read_count'),
+                            DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
+                        ])
+                        ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
+                        ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
+                        ->leftJoin('crew_message_logs', function ($join) use ($ms) {
+                            $join->on('crew_message_logs.crew_id', '=', 'crews.id')
+                                ->where('crew_message_logs.message_id', '=', $ms);
+                        })
+                        ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
+                        ->where('message_user.message_id', '=', $ms)
+                        ->groupBy('shops.organization4_id');
+
+                    $viewRate =
+                        DB::table('shops')
+                        ->select([
+                            DB::raw('organization3.name as org3_name'),
+                            DB::raw('organization5.name as org5_name'),
+                            DB::raw('organization4.id as id'),
+                            DB::raw('organization4.order_no as order_no'),
+                            DB::raw('organization4.name as org4_name'),
+                            DB::raw('sub.count as count'),
+                            DB::raw('sub.read_count as read_count'),
+                            DB::raw('sub.view_rate as view_rate')
+                        ])
+                        ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+                        ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+                        ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+                        ->leftJoinSub($viewRates_org_sub, 'sub', function ($join) {
+                            $join->on('shops.organization4_id', '=', 'sub.o4_id');
+                        })
+                        ->where('shops.organization1_id', '=', $organization1['id'])
+                        ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
+                        ->orderBy('organization3.order_no')
+                        ->orderBy('organization4.order_no')
+                        ->orderBy('organization5.order_no')
+                        ->get();
+
+                    $viewRates['AR'][] = $viewRate;
+                    $viewRatesArray = $viewRate->toArray();
+                    foreach ($viewRatesArray as $key => $value) {
+                        $viewRates['AR_sum'][$value->id] = ($viewRates['AR_sum'][$value->id] ?? 0) + $value->count;
+                        $viewRates['AR_read_sum'][$value->id] = ($viewRates['AR_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    }
+                }
+
+                if (in_array('BL', $organizations)) {
+                    $viewRateOrgSub =
+                        DB::table('message_user')
+                        ->select([
+                            DB::raw('shops.organization5_id as o5_id'),
+                            DB::raw('count(crews.id) as count'),
+                            DB::raw('count(crew_message_logs.id) as read_count'),
+                            DB::raw('round((count(crew_message_logs.id) / count(crews.id)) * 100, 1) as view_rate')
+                        ])
+                        ->leftJoin('users', 'users.id', '=', 'message_user.user_id')
+                        ->leftJoin('crews', 'crews.user_id', '=', 'users.id')
+                        ->leftJoin('crew_message_logs', function ($join) use ($ms) {
+                            $join->on('crew_message_logs.crew_id', '=', 'crews.id')
+                                ->where('crew_message_logs.message_id', '=', $ms);
+                        })
+                        ->leftJoin('shops', 'message_user.shop_id', '=', 'shops.id')
+                        ->where('message_user.message_id', '=', $ms)
+                        ->groupBy('shops.organization5_id');
+
+                    $viewRate =
+                        DB::table('shops')
+                        ->select([
+                            DB::raw('organization3.name as org3_name'),
+                            DB::raw('organization4.name as org4_name'),
+                            DB::raw('organization5.id as id'),
+                            DB::raw('organization5.order_no as order_no'),
+                            DB::raw('organization5.name as org5_name'),
+                            DB::raw('sub.count as count'),
+                            DB::raw('sub.read_count as read_count'),
+                            DB::raw('sub.view_rate as view_rate')
+                        ])
+                        ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
+                        ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
+                        ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
+                        ->leftJoinSub($viewRateOrgSub, 'sub', function ($join) {
+                            $join->on('shops.organization5_id', '=', 'sub.o5_id');
+                        })
+                        ->where('shops.organization1_id', '=', $organization1['id'])
+                        ->groupBy('shops.organization3_id', 'shops.organization4_id', 'shops.organization5_id', 'sub.count', 'sub.read_count', 'sub.view_rate')
+                        ->orderBy('organization3.order_no')
+                        ->orderBy('organization4.order_no')
+                        ->orderBy('organization5.order_no')
+                        ->get();
+
+                    $viewRates['BL'][] = $viewRate;
+                    $viewRatesArray = $viewRate->toArray();
+                    foreach ($viewRatesArray as $key => $value) {
+                        $viewRates['BL_sum'][$value->id] = ($viewRates['BL_sum'][$value->id] ?? 0) + $value->count;
+                        $viewRates['BL_read_sum'][$value->id] = ($viewRates['BL_read_sum'][$value->id] ?? 0) + $value->read_count;
+                    }
                 }
             }
 
@@ -284,15 +403,10 @@ class PersonAnalysisSenderCommand extends Command
                 $this->error("エクセルファイルの生成に失敗しました: " . $e->getMessage());
                 return $this->createFailureResponse($organization1);
             }
-
-            // コレクションから最初のメッセージを取得
-            $messages = $messages->first();
         }
 
         // メール送信処理の実行
         return $this->sendPersonAnalysisMail($organization1, $messagesFlg, $messages, $message_count, $viewRates, $startOfLastWeek, $endOfLastWeek, $excelFilePath);
-
-        return $this->createFailureResponse($organization1);
     }
 
 
@@ -331,6 +445,74 @@ class PersonAnalysisSenderCommand extends Command
     }
 
 
+    // /**
+    //  * Excelファイルを生成し、PDFに変換するメソッド
+    //  *
+    //  * @param array $organization1 組織オブジェクト
+    //  * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
+    //  * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
+    //  * @return string 生成されたPDFファイルのパス
+    //  * @throws \Exception Excelファイルの生成に失敗した場合
+    //  */
+    // private function generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek)
+    // {
+    //     $now = new Carbon('now');
+    //     $file_name = '業務連絡閲覧状況_' . $organization1['name'] . $now->format('_Y_m_d') . '.xlsx';
+
+    //     // exportフォルダが存在しない場合は作成
+    //     $exportDir = storage_path('app/export');
+    //     if (!file_exists($exportDir)) {
+    //         mkdir($exportDir, 0755, true);
+    //     }
+
+    //     // storage/app/exportディレクトリにExcelファイルを生成して保存
+    //     $exportPath = $exportDir . '/' . $file_name;
+    //     $org1 = Organization1::find($organization1['id']);
+    //     $export = new PersonAnalysisExport($org1, $startOfLastWeek, $endOfLastWeek);
+    //     Excel::store($export, 'export/' . $file_name, 'local');
+
+    //     // ファイルが正しく保存されたか確認
+    //     if (!Storage::exists('export/' . $file_name)) {
+    //         $this->error("Excelファイルの保存に失敗しました。");
+    //     }
+
+    //     // ExcelファイルをPDFに変換
+    //     $pdfFileName = pathinfo($file_name, PATHINFO_FILENAME) . '.pdf';
+    //     $pdfFilePath = $exportDir . '/' . $pdfFileName;
+
+    //     // PDF生成処理
+    //     $this->convertExcelToPdf($exportPath, $pdfFilePath);
+
+    //     return $pdfFilePath;
+    // }
+
+    // /**
+    //  * ExcelファイルをPDFに変換するメソッド
+    //  *
+    //  * @param string $excelFilePath Excelファイルのパス
+    //  * @param string $pdfFilePath PDFファイルの保存先パス
+    //  */
+    // private function convertExcelToPdf($excelFilePath, $pdfFilePath)
+    // {
+    //     // Excelファイルを読み込む
+    //     $data = Excel::toArray([], $excelFilePath);
+
+    //     // PDFを生成する
+    //     $pdf = new TcpdfFpdi();
+    //     $pdf->AddPage();
+
+    //     // ExcelデータをPDFに書き込む
+    //     foreach ($data as $sheet) {
+    //         foreach ($sheet as $row) {
+    //             $pdf->Cell(0, 10, implode(' ', $row), 0, 1);
+    //         }
+    //     }
+
+    //     // PDFを保存する
+    //     $pdf->Output($pdfFilePath, 'F');
+    // }
+
+
     /**
      * 閲覧状況メールを送信するメソッド
      * 各店舗に対して閲覧状況メールを送信します。
@@ -347,28 +529,13 @@ class PersonAnalysisSenderCommand extends Command
      */
     private function sendPersonAnalysisMail($organization1, $messagesFlg, $messages = null, $message_count = null, $viewRates = null, $startOfLastWeek, $endOfLastWeek, $excelFilePath = null)
     {
-        // 通知対象の店舗とWowTalk IDを取得
-        $messageIds = [];
-        if ($messagesFlg) {
-            $messageIds = is_array($messages) ? $messages['id'] : [$messages['id']];
-        }
-
         $user_role_data = [];
-        $user_role_data = DB::table('users_roles')
-            ->when(!empty($messageIds), function ($query) use ($messageIds) {
-                $query->join('message_user', function ($join) use ($messageIds) {
-                    $join->on('users_roles.user_id', '=', 'message_user.user_id')
-                        ->on('users_roles.shop_id', '=', 'message_user.shop_id')
-                        ->whereIn('message_user.message_id', $messageIds);
-                })
-                ->select('message_user.message_id', 'users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification');
-            }, function ($query) use ($organization1) {
-                $query->join('shops', function ($join) use ($organization1) {
-                    $join->on('users_roles.shop_id', '=', 'shops.id')
-                        ->where('shops.organization1_id', $organization1['id']);
-                })
-                ->select('users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification');
+            $user_role_data = DB::table('users_roles')
+            ->join('shops', function ($join) use ($organization1) {
+                $join->on('users_roles.shop_id', '=', 'shops.id')
+                    ->where('shops.organization1_id', $organization1['id']);
             })
+            ->select('users_roles.DM_email', 'users_roles.BM_email', 'users_roles.AM_email', 'users_roles.DM_view_notification', 'users_roles.BM_view_notification', 'users_roles.AM_view_notification')
             ->where(function ($query) {
                 $query->where(function ($subQuery) {
                     $subQuery->whereNotNull('users_roles.DM_email')
@@ -386,10 +553,9 @@ class PersonAnalysisSenderCommand extends Command
             ->get()
             ->map(function ($result) {
                 return [
-                    'message_id' => $result->message_id ?? null,
-                    'DM_email' => isset($result->DM_view_notification) && $result->DM_view_notification ? $result->DM_email : null,
-                    'BM_email' => isset($result->BM_view_notification) && $result->BM_view_notification ? $result->BM_email : null,
-                    'AM_email' => isset($result->AM_view_notification) && $result->AM_view_notification ? $result->AM_email : null,
+                    'DM_email' => $result->DM_view_notification ? $result->DM_email : null,
+                    'BM_email' => $result->BM_view_notification ? $result->BM_email : null,
+                    'AM_email' => $result->AM_view_notification ? $result->AM_email : null,
                 ];
             })
             ->toArray();
@@ -405,13 +571,12 @@ class PersonAnalysisSenderCommand extends Command
         // メッセージ内容を生成
         $messageContent = null;
         try {
-            $messageContent = $this->generateMessageContent($organization1, $messagesFlg, $message_count, $viewRates);
+            $messageContent = $this->generateMessageContent($organization1, $messagesFlg, $startOfLastWeek, $endOfLastWeek, $messages, $message_count, $viewRates);
         } catch (\Exception $e) {
             // メッセージ内容生成に失敗した場合のエラー処理
             $errorLog = $this->createErrorLog(
                 $organization1,
-                $messages,
-                $viewRates,
+                $user_role_data,
                 'メッセージ生成に失敗しました',
                 'message_content_error',
                 ['type' => 'message_content_error', 'response_result' => 'メール内容の生成に失敗しました', 'response_status' => $e->getMessage()],
@@ -427,8 +592,6 @@ class PersonAnalysisSenderCommand extends Command
                         'DM_email' => $errorLog['DM_email'] ?? '',
                         'BM_email' => $errorLog['BM_email'] ?? '',
                         'AM_email' => $errorLog['AM_email'] ?? '',
-                        'message_id' => $errorLog['message_id'] ?? '',
-                        'message_title' => $errorLog['message_title'] ?? '',
                         'response_target' => $errorLog['response_target'] ?? ''
                     ],
                     [
@@ -439,7 +602,7 @@ class PersonAnalysisSenderCommand extends Command
                 );
             }
 
-            return $this->createErrorResponse($organization1, $user_role_data, $messages, $e->getMessage());
+            return $this->createErrorResponse($organization1, $user_role_data, $e->getMessage());
         }
 
         // 通知対象のユーザーを50件ずつのバッチに分割してAPIを呼び出す
@@ -454,7 +617,6 @@ class PersonAnalysisSenderCommand extends Command
                     $errorLogs[] = $this->createErrorLog(
                         $organization1,
                         $batch,
-                        $messages,
                         'メール送信に失敗しました。',
                         'mail_send_error',
                         ['type' => 'mail_send_error', 'response_result' => 'メール送信に失敗しました', 'response_status' => $e->getMessage()],
@@ -475,8 +637,6 @@ class PersonAnalysisSenderCommand extends Command
                         'DM_email' => $errorLog['DM_email'] ?? '',
                         'BM_email' => $errorLog['BM_email'] ?? '',
                         'AM_email' => $errorLog['AM_email'] ?? '',
-                        'message_id' => $errorLog['message_id'] ?? '',
-                        'message_title' => $errorLog['message_title'] ?? '',
                         'response_target' => $errorLog['response_target'] ?? ''
                     ],
                     [
@@ -489,7 +649,7 @@ class PersonAnalysisSenderCommand extends Command
 
             // エラー時のレスポンスを返す
             $errorMessageString = implode('; ', array_unique(array_column($errorLogs, 'error_message')));
-            return $this->createErrorResponse($organization1, $user_role_data, $messages, $errorMessageString);
+            return $this->createErrorResponse($organization1, $user_role_data, $errorMessageString);
         }
 
         // 成功時のレスポンスを返す
@@ -498,58 +658,144 @@ class PersonAnalysisSenderCommand extends Command
 
 
     /**
+     * 曜日の漢字を取得するメソッド
+     *
+     * @param array $organization1 組織オブジェクト
+     * @return string 曜日の漢字
+     */
+    private function getWeekdayKanji($organization1)
+    {
+        $dayOfWeek = Carbon::parse($organization1['execution_date'])->format('w');
+        $kanjiDays = ['日', '月', '火', '水', '木', '金', '土'];
+        $weekdayKanji = $kanjiDays[$dayOfWeek];
+        return $weekdayKanji;
+    }
+
+
+    /**
      * 各業態の閲覧率などのメッセージ内容を生成するメソッド
      *
-     * @param Organization1 $organization1 組織オブジェクト
+     * @param array $organization1 組織オブジェクト
      * @param bool $messagesFlg メッセージがあるかどうかのフラグ
+     * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
+     * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
+     * @param array|null $messages メッセージデータ
      * @param int|null $message_count メッセージの件数
      * @param array|null $viewRates 閲覧状況データ
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function generateMessageContent($organization1, $messagesFlg, $message_count = null, $viewRates = null)
+    private function generateMessageContent($organization1, $messagesFlg, $startOfLastWeek, $endOfLastWeek, $messages = null, $message_count = null, $viewRates = null)
     {
         // メッセージ内容を生成
-        $messageContent = now('Asia/Tokyo')->format('n/j') . " " . Carbon::parse($organization1['execution_date'])->format('H:i') . "時点でのBL単位に集計した個人の閲覧状況を提示させて頂きます。\n";
+        $messageContent = "・集約期間：" . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . "\n";
         if ($messagesFlg) {
-            $messageContent .= "当期間に配信された業連は{$message_count}件です。\n\n";
-            if (isset($viewRates['BL'][0])) {
-                $displayedOrgNames = [];
-                foreach ($viewRates['BL'][0] as $v_org_key => $v_o) {
-                    if (isset($v_o->org3_name)) {
-                        if (!in_array($v_o->org3_name, $displayedOrgNames)) {
-                            if ($v_org_key == 0) {
-                                $messageContent .= "{$v_o->org3_name}\n";
-                            } else {
-                                $messageContent .= "\n{$v_o->org3_name}\n";
+            $messageContent .= "・配信業連：" . mb_convert_kana((string)$message_count, 'n') . "件\n\n";
+            $messageContent .= "※期間中に発行された業務連絡が集計対象。\n";
+            $messageContent .= "※期間中に対象の業務連絡を閲覧したクルー数を集計。\n";
+            $messageContent .= "※集約日時の時点で、本部システム上在籍している全クルーが対象。\n";
+            $messageContent .= "（雇用手続きの関係上、実際の稼働人数と異なる場合があります。）\n\n";
+            $messageContent .= now('Asia/Tokyo')->format('n/j') . "(" . $this->getWeekdayKanji($organization1) . ")" . Carbon::parse($organization1['execution_date'])->format('H:i') . "時点\n";
+
+            // 業務連絡のidを取得
+            foreach ($messages as $key => $ms) {
+                $messageContent .= "\n業連" . ($key + 1) . "：{$ms->title}\n";
+
+                // DSの情報を表示
+                if (isset($viewRates['DS'][$key])) {
+                    foreach ($viewRates['DS'][$key] as $v_org3_key => $v_o3) {
+                        if (isset($viewRates['DS'][$key][$v_org3_key]->count)) {
+                            $messageContent .= "\n■{$viewRates['DS'][$key][$v_org3_key]->org3_name}：{$viewRates['DS'][$key][$v_org3_key]->read_count} / {$viewRates['DS'][$key][$v_org3_key]->count} ({$viewRates['DS'][$key][$v_org3_key]->view_rate}%)\n\n";
+                        } else {
+                            $messageContent .= "\n■{$viewRates['DS'][$key][$v_org3_key]->org3_name}：0 / 0 (0.0%)\n\n";
+                        }
+
+                        // BLの情報を表示
+                        if (isset($viewRates['BL'][$key])) {
+                            foreach ($viewRates['BL'][$key] as $v_org5_key => $v_o5) {
+                                if (isset($viewRates['BL'][$key][$v_org5_key]->count)) {
+                                    if ($viewRates['DS'][$key][$v_org3_key]->org3_name == $viewRates['BL'][$key][$v_org5_key]->org3_name) {
+                                        $messageContent .= "・ {$viewRates['BL'][$key][$v_org5_key]->org5_name}：{$viewRates['BL'][$key][$v_org5_key]->read_count} / {$viewRates['BL'][$key][$v_org5_key]->count} ({$viewRates['BL'][$key][$v_org5_key]->view_rate}%)\n";
+                                    }
+                                } else {
+                                    $messageContent .= "・{$viewRates['BL'][$key][$v_org5_key]->org5_name}：0 / 0 (0.0%)\n";
+                                }
+
+                                // ARの情報を表示
+                                if (isset($viewRates['AR'][$key])) {
+                                    foreach ($viewRates['AR'][$key] as $v_org4_key => $v_o4) {
+                                        if (isset($viewRates['AR'][$key][$v_org4_key]->count)) {
+                                            if ($viewRates['DS'][$key][$v_org3_key]->org3_name == $viewRates['AR'][$key][$v_org4_key]->org3_name) {
+                                                $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：{$viewRates['AR'][$key][$v_org4_key]->read_count} / {$viewRates['AR'][$key][$v_org4_key]->count} ({$viewRates['AR'][$key][$v_org4_key]->view_rate}%)\n";
+                                            }
+                                        } else {
+                                            $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：0 / 0 (0.0%)\n";
+                                        }
+                                    }
+                                }
                             }
-                            $displayedOrgNames[] = $v_o->org3_name;
+                        } else {
+                            // ARの情報を表示
+                            if (isset($viewRates['AR'][$key])) {
+                                foreach ($viewRates['AR'][$key] as $v_org4_key => $v_o4) {
+                                    if (isset($viewRates['AR'][$key][$v_org4_key]->count)) {
+                                        if ($viewRates['DS'][$key][$v_org3_key]->org3_name == $viewRates['AR'][$key][$v_org4_key]->org3_name) {
+                                            $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：{$viewRates['AR'][$key][$v_org4_key]->read_count} / {$viewRates['AR'][$key][$v_org4_key]->count} ({$viewRates['AR'][$key][$v_org4_key]->view_rate}%)\n";
+                                        }
+                                    } else {
+                                        $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：0 / 0 (0.0%)\n";
+                                    }
+                                }
+                            }
                         }
                     }
-                    if (isset($v_o->org4_name)) {
-                        if (!in_array($v_o->org4_name, $displayedOrgNames)) {
-                            if ($v_org_key == 0) {
-                                $messageContent .= "{$v_o->org4_name}\n";
+                } else {
+                    // BLの情報を表示
+                    if (isset($viewRates['BL'][$key])) {
+                        $displayedOrg5Names = [];
+                        foreach ($viewRates['BL'][$key] as $v_org5_key => $v_o5) {
+                            if (isset($viewRates['BL'][$key][$v_org5_key]->count)) {
+                                if (!in_array($viewRates['BL'][$key][$v_org5_key]->org5_name, $displayedOrg5Names)) {
+                                    if ($v_org5_key == 0) {
+                                        $messageContent .= "\n・ {$viewRates['BL'][$key][$v_org5_key]->org5_name}：{$viewRates['BL'][$key][$v_org5_key]->read_count} / {$viewRates['BL'][$key][$v_org5_key]->count} ({$viewRates['BL'][$key][$v_org5_key]->view_rate}%)\n";
+                                    } else {
+                                        $messageContent .= "・ {$viewRates['BL'][$key][$v_org5_key]->org5_name}：{$viewRates['BL'][$key][$v_org5_key]->read_count} / {$viewRates['BL'][$key][$v_org5_key]->count} ({$viewRates['BL'][$key][$v_org5_key]->view_rate}%)\n";
+                                    }
+                                }
+                                $displayedOrg5Names[] = $viewRates['BL'][$key][$v_org5_key]->org5_name;
                             } else {
-                                $messageContent .= "\n{$v_o->org4_name}\n";
+                                $messageContent .= "・{$viewRates['BL'][$key][$v_org5_key]->org5_name}：0 / 0 (0.0%)\n";
                             }
-                            $displayedOrgNames[] = $v_o->org4_name;
                         }
                     }
-                    $messageContent .= "・{$v_o->org5_name}：{$viewRates['BL_read_sum'][$v_o->id]} / {$viewRates['BL_sum'][$v_o->id]}";
-                    if (isset($viewRates['BL_read_sum'][$v_o->id]) && ($viewRates['BL_sum'][$v_o->id] ?? 0) > 0) {
-                        $viewRate = number_format(($viewRates['BL_read_sum'][$v_o->id] / $viewRates['BL_sum'][$v_o->id]) * 100, 1);
-                        $messageContent .= " ({$viewRate}%)\n";
-                    } else {
-                        $messageContent .= " (0.0%)\n";
+
+                    // ARの情報を表示
+                    if (isset($viewRates['AR'][$key])) {
+                    $displayedOrg4Names = [];
+                        foreach ($viewRates['AR'][$key] as $v_org4_key => $v_o4) {
+                            if (isset($viewRates['AR'][$key][$v_org4_key]->count)) {
+                                if (!in_array($viewRates['AR'][$key][$v_org4_key]->org4_name, $displayedOrg4Names)) {
+                                    if ($v_org4_key == 0) {
+                                        $messageContent .= "\n・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：{$viewRates['AR'][$key][$v_org4_key]->read_count} / {$viewRates['AR'][$key][$v_org4_key]->count} ({$viewRates['AR'][$key][$v_org4_key]->view_rate}%)\n";
+                                    } else {
+                                        $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：{$viewRates['AR'][$key][$v_org4_key]->read_count} / {$viewRates['AR'][$key][$v_org4_key]->count} ({$viewRates['AR'][$key][$v_org4_key]->view_rate}%)\n";
+                                    }
+                                }
+                                $displayedOrg4Names[] = $viewRates['AR'][$key][$v_org4_key]->org4_name;
+                            } else {
+                                $messageContent .= "・{$viewRates['AR'][$key][$v_org4_key]->org4_name}：0 / 0 (0.0%)\n";
+                            }
+                        }
                     }
                 }
             }
         } else {
-            $messageContent .= "当期間に配信された業連は0件です。\n";
+            $messageContent .= "・配信業連：0件\n\n";
+            $messageContent .= "※期間中に発行された業務連絡が集計対象。\n";
+            $messageContent .= "※期間中に対象の業務連絡を閲覧したクルー数を集計。\n";
+            $messageContent .= "※集約日時の時点で、本部システム上在籍している全クルーが対象。\n";
+            $messageContent .= "（雇用手続きの関係上、実際の稼働人数と異なる場合があります。）\n\n";
         }
-
-        $messageContent .= "\n以上、よろしくお願いいたします。";
 
         return $messageContent;
     }
@@ -598,7 +844,7 @@ class PersonAnalysisSenderCommand extends Command
     {
         // DBから通知対象のメールアドレスを取得
         $fromName = 'システム管理者';
-        $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
+        $to = IncidentNotificationsRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】閲覧状況メール送信エラー';
 
         $message = "メール送信でエラーが発生しました。ご確認ください。\n\n";
@@ -612,8 +858,6 @@ class PersonAnalysisSenderCommand extends Command
             $message .= "DM_email : " . ($requestData['DM_email'] ?? '') . "\n";
             $message .= "BM_email : " . ($requestData['BM_email'] ?? '') . "\n";
             $message .= "AM_email : " . ($requestData['AM_email'] ?? '') . "\n";
-            $message .= "業連ID : " . ($requestData['message_id'] ?? '') . "\n";
-            $message .= "業連名 : " . ($requestData['message_title'] ?? '') . "\n\n";
             $message .= "■リクエスト\n";
             $message .= "target : " . (is_array($requestData['response_target']) ? implode(', ', $requestData['response_target']) : $requestData['response_target']) . "\n\n";
         } else {
@@ -675,17 +919,15 @@ class PersonAnalysisSenderCommand extends Command
      *
      * @param Organization1 $organization1 組織オブジェクト
      * @param array $user_role_data 通知対象のユーザーデータ
-     * @param array|null $messages メッセージオブジェクト
      * @param string $errorMessage エラーメッセージ
      * @return array エラーレスポンス
      */
-    private function createErrorResponse($organization1, $user_role_data, $messages = null, $errorMessage)
+    private function createErrorResponse($organization1, $user_role_data, $errorMessage)
     {
         return [
             'status' => 'error',
             'org1_name' => $organization1['name'],
             'email' => $user_role_data[0]['DM_email'] . ',' . $user_role_data[0]['BM_email'] . ',' . $user_role_data[0]['AM_email'],
-            'subject' => $messages ? $messages['start_datetime'] . ' | ' . $messages['title'] . ' _ ' . now() : null,
             'error_message' => $errorMessage
         ];
     }
@@ -696,11 +938,10 @@ class PersonAnalysisSenderCommand extends Command
      *
      * @param Organization1 $organization1 組織オブジェクト
      * @param array $data メールデータ
-     * @param array|null $messages メッセージオブジェクト
      * @param string|null $messageContent 送信されたメッセージ内容
      * @return array エラーログ
      */
-    private function createErrorLog($organization1, $data, $messages = null, $messageContent = null)
+    private function createErrorLog($organization1, $data, $messageContent = null)
     {
         return [
             'type' => 'message_content_error',
@@ -708,8 +949,6 @@ class PersonAnalysisSenderCommand extends Command
             'DM_email' => $data['DM_email'] ?? '',
             'BM_email' => $data['BM_email'] ?? '',
             'AM_email' => $data['AM_email'] ?? '',
-            'message_id' => $messages ? $messages['id'] : '',
-            'message_title' => $messages ? $messages['title'] : '',
             'error_message' => $messageContent ?? '',
             'response_target' => array_filter([$data['DM_email'] ?? '', $data['BM_email'] ?? '', $data['AM_email'] ?? ''])
         ];

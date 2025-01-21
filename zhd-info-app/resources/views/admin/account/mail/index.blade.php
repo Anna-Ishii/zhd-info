@@ -122,7 +122,7 @@
             </div>
 
             <div class="tableInner" style="height: 70vh;">
-                <table id="list" class="account table-list table table-bordered table-hover table-condensed text-center">
+                <table id="list" class="mail-account table-list table table-bordered table-hover table-condensed text-center">
 
                     <thead>
                         <tr>
@@ -176,7 +176,7 @@
 
                     <tbody>
                         @foreach ($users as $u)
-                            <tr data-shop_id="{{ $u->shop_id }}" class="">
+                            <tr data-user_id="{{ $u->id }}" data-shop_id="{{ $u->shop_id }}" class="">
                                 <!-- DS -->
                                 <td class="label-DS" nowrap>
                                     @if (isset($organizations[$u->shop_id]['DS']))
@@ -205,7 +205,7 @@
                                 <td class="label-shop_id" nowrap>{{ $u->shop_code }}</td>
                                 <td class="label-shop_name" nowrap>{{ $u->shop_name }}</td>
                                 <!-- DM -->
-                                <td class="label-DM_no" nowrap>{{ $u->DM_id }}</td>
+                                <td class="label-DM_id" nowrap>{{ $u->DM_id }}</td>
                                 <td class="label-DM_name" nowrap>{{ $u->DM_name }}</td>
                                 <td class="label-DM_email" nowrap>{{ $u->DM_email }}</td>
                                 <td class="label-DM_status" nowrap>
@@ -213,7 +213,7 @@
                                         value="{{ $u->DM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->DM_view_notification }}</span>
                                 </td>
                                 <!-- BM -->
-                                <td class="label-BM_no" nowrap>{{ $u->BM_id }}</td>
+                                <td class="label-BM_id" nowrap>{{ $u->BM_id }}</td>
                                 <td class="label-BM_name" nowrap>{{ $u->BM_name }}</td>
                                 <td class="label-BM_email" nowrap>{{ $u->BM_email }}</td>
                                 <td class="label-BM_status" nowrap>
@@ -221,7 +221,7 @@
                                         value="{{ $u->BM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->BM_view_notification }}</span>
                                 </td>
                                 <!-- AM -->
-                                <td class="label-AM_no" nowrap>{{ $u->AM_id }}</td>
+                                <td class="label-AM_id" nowrap>{{ $u->AM_id }}</td>
                                 <td class="label-AM_name" nowrap>{{ $u->AM_name }}</td>
                                 <td class="label-AM_email" nowrap>{{ $u->AM_email }}</td>
                                 <td class="label-AM_status" nowrap>
@@ -240,5 +240,5 @@
         </form>
 
     </div>
-    <script src="{{ asset('/js/admin/account/index.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/account/mailaccount/index.js') }}?date={{ date('Ymd') }}" defer></script>
 @endsection
