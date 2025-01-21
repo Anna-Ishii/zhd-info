@@ -81,7 +81,7 @@
                 </div>
                 <div class="input-group col-lg-1 spMb16">
                     <label class="input-group-addon">カテゴリ</label>
-                    <select name="category" class="form-control">
+                    <select name="category" class="form-control" multiple="multiple">
                         <option value="">指定なし</option>
                         @foreach ($category_list as $category)
                             {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
