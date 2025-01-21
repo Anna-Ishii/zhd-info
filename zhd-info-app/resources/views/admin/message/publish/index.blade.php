@@ -160,8 +160,8 @@
                     @endif
 
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                        {{-- BBの場合 --}}
-                        @if ($organization1->id === 2)
+                        {{-- BBの場合、SKの場合 --}}
+                        @if ($organization1->id == 2 || $organization1->id == 8)
                             <div>
                                 <input type="button" class="btn btn-admin" data-toggle="modal"
                                     data-target="#messageExportModal" value="エクスポート">
@@ -187,8 +187,8 @@
                 <table id="list" class="message-table table-list table-hover table-condensed text-center">
                     <thead>
                         <tr>
-                            {{-- BBの場合 --}}
-                            @if ($organization1->id === 2)
+                            {{-- BBの場合、SKの場合 --}}
+                            @if ($organization1->id == 2 || $organization1->id == 8)
                                 @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                     <th class="text-center" nowrap>
                                         <p class="btn btn-admin" id="messageAddBtn" style="position: relative; z-index: 10;">追加</p>
@@ -228,8 +228,8 @@
                                 @elseif($message->status == App\Enums\PublishStatus::Wait) wait
                                 @elseif($message->status == App\Enums\PublishStatus::Editing) editing @endif">
 
-                                {{-- BBの場合 --}}
-                                @if ($organization1->id === 2)
+                                {{-- BBの場合、SKの場合 --}}
+                                @if ($organization1->id == 2 || $organization1->id == 8)
                                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                         <td class="message-edit-btn-group" nowrap>
                                             <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}" onclick="this.style.pointerEvents = 'none';">編集</p>
@@ -237,8 +237,8 @@
                                     @endif
                                 @endif
 
-                                {{-- BBの場合 --}}
-                                @if ($organization1->id === 2)
+                                {{-- BBの場合、SKの場合 --}}
+                                @if ($organization1->id == 2 || $organization1->id == 8)
                                     <!-- No -->
                                     <td class="shop-id" data-message-number="{{ $message->number }}">{{ $message->number }}</td>
                                     <!-- 対象業態 -->
