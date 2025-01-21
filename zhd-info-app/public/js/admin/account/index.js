@@ -1,52 +1,43 @@
-// ユーザー削除ボタン
-$(document).on("click", "#deleteBtn", function (e) {
-    e.preventDefault();
-    console.log("delete");
+$(document).ready(function () {
+    // DS, BL, AR, 店舗ID, 店舗名の幅を取得
+    let th0 = $('table.mail-account thead th[data-column="0"]');
+    let th1 = $('table.mail-account thead th[data-column="1"]');
+    let th2 = $('table.mail-account thead th[data-column="2"]');
+    let th3 = $('table.mail-account thead th[data-column="3"]');
+    let th4 = $('table.mail-account thead th[data-column="4"]');
 
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
-    var checkedCheckboxes = $(".form-check-input:checked");
+    let th0Width = th0.length ? Math.round(th0.outerWidth()) : 0;
+    let th1Width = th1.length ? Math.floor(th1.outerWidth()) : 0;
+    let th2Width = th2.length ? Math.floor(th2.outerWidth()) : 0;
+    let th3Width = th3.length ? Math.floor(th3.outerWidth()) : 0;
+    let th4Width = th4.length ? Math.floor(th4.outerWidth()) : 0;
 
-    if (checkedCheckboxes.length < 1) {
-        alert("ユーザーを選択してください");
-        return;
+    let DSWidth = th0Width;
+    let BLWidth = DSWidth + th1Width;
+    let ARWidth = BLWidth + th2Width;
+    // let shopIDWidth = ARWidth + th3Width + 1;
+    let shopIDWidth = ARWidth + th3Width;
+    let shopNameWidth = shopIDWidth + th4Width;
+
+    // テーブルの横スクロールの位置取得
+    let org1Array = {
+        1: "JP",
+        2: "BB",
+        3: "TAG",
+        4: "HY",
+        8: "SK",
+    };
+    let org1 = $('select[name="organization1"]').val();
+    // 業態がJP以外の場合、ARWidthを調整
+    if (org1Array[org1] !== "JP") {
+        ARWidth = BLWidth + th2Width + 1;
     }
 
-    let checkedValues = checkedCheckboxes
-        .map(function () {
-            var row = $(this).closest("tr");
-            return row.find(".user_id").text();
-        })
-        .get();
-
-    fetch("/admin/account/delete", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": csrfToken,
-        },
-        body: JSON.stringify({
-            user_id: checkedValues,
-        }),
-    })
-        .then((response) => {
-            if (response.ok) {
-                return response.json();
-            } else {
-                return response.json().then((data) => {
-                    throw new Error(data.message); // エラーメッセージをスロー
-                });
-            }
-        })
-        .then((data) => {
-            const message = data.message;
-            // メッセージの表示や処理を行う
-            alert(message);
-            window.location.reload();
-        })
-        .catch((error) => {
-            const message = error.message;
-            alert(message);
-        });
+    // 幅をCSSに適用
+    document.documentElement.style.setProperty("--left-2", `${DSWidth}px`);
+    document.documentElement.style.setProperty("--left-3", `${BLWidth}px`);
+    document.documentElement.style.setProperty("--left-4", `${ARWidth}px`);
+    document.documentElement.style.setProperty("--left-5", `${shopIDWidth}px`);
 });
 
 
@@ -169,110 +160,87 @@ $(document).ready(function() {
             $(accountEditBtnGroup).append(deleteButtonHtml);
         }
 
-        // WowTalk1の閲覧状況通知のすべて選択/解除ボタン
-        const WT1StatusBreak = $('.WT1StatusBreak');
-        const WT1StatusAllSelectBtn = $('.WT1StatusAllSelectBtn');
-        WT1StatusBreak.show();
-        WT1StatusAllSelectBtn.show();
+        // DMの業連閲覧状況メール配信のすべて選択/解除ボタン
+        const DMStatusBreak = $('.DMStatusBreak');
+        const DMStatusAllSelectBtn = $('.DMStatusAllSelectBtn');
+        DMStatusBreak.show();
+        DMStatusAllSelectBtn.show();
 
-        // WowTalk1の業連配信通知のすべて選択/解除ボタン
-        const WT1SendBreak = $('.WT1SendBreak');
-        const WT1SendAllSelectBtn = $('.WT1SendAllSelectBtn');
-        WT1SendBreak.show();
-        WT1SendAllSelectBtn.show();
+        // BMの業連閲覧状況メール配信のすべて選択/解除ボタン
+        const BMStatusBreak = $('.BMStatusBreak');
+        const BMStatusAllSelectBtn = $('.BMStatusAllSelectBtn');
+        BMStatusBreak.show();
+        BMStatusAllSelectBtn.show();
 
-        // WowTalk2の閲覧状況通知のすべて選択/解除ボタン
-        const WT2StatusBreak = $('.WT2StatusBreak');
-        const WT2StatusAllSelectBtn = $('.WT2StatusAllSelectBtn');
-        WT2StatusBreak.show();
-        WT2StatusAllSelectBtn.show()
+        // AMの業連閲覧状況メール配信のすべて選択/解除ボタン
+        const AMStatusBreak = $('.AMStatusBreak');
+        const AMStatusAllSelectBtn = $('.AMStatusAllSelectBtn');
+        AMStatusBreak.show();
+        AMStatusAllSelectBtn.show()
 
-        // WowTalk2の業連配信通知のすべて選択/解除ボタン
-        const WT2SendBreak = $('.WT2SendBreak')
-        const WT2SendAllSelectBtn = $('.WT2SendAllSelectBtn');
-        WT2SendBreak.show();
-        WT2SendAllSelectBtn.show();
-
-        $('table#list.account tbody tr').each(function() {
+        $('table#list.mail-account tbody tr').each(function() {
             const row = $(this);
-            const shopId = row.data('shop_id');
 
-            // WowTalk1の閲覧状況通知
-            const wt1Status = row.find('.WT1_status-select');
-            // WowTalk1の業連配信通知
-            const wt1Send = row.find('.WT1_send-select');
-            // WowTalk2の閲覧状況通知
-            const wt2Status = row.find('.WT2_status-select');
-            // WowTalk2の業連配信通知
-            const wt2Send = row.find('.WT2_send-select');
+            // DMの業連閲覧状況メール配信
+            const dmStatus = row.find('.DM_status-select');
+            // BMの業連閲覧状況メール配信
+            const bmStatus = row.find('.BM_status-select');
+            // AMの業連閲覧状況メール配信
+            const amStatus = row.find('.AM_status-select');
 
-            // WowTalk1の閲覧状況通知
-            if (wt1Status) {
-                $(wt1Status).hide();
-                const wt1StatusSelectGroupHtml = `
-                    <div class="wowtalk1-status-select-group">
-                        <select class="form-control" name="WT1_status" style="padding: 0px; cursor: pointer;">
+            // DMの業連閲覧状況メール配信
+            if (dmStatus) {
+                $(dmStatus).hide();
+                const dmStatusSelectGroupHtml = `
+                    <div class="dm-status-select-group">
+                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;">
                             <option value="0">未設定</option>
-                            <option value="1" ${wt1Status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
+                            <option value="1" ${dmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
                     </div>
                 `;
-                $(wt1Status).after(wt1StatusSelectGroupHtml);
+                $(dmStatus).after(dmStatusSelectGroupHtml);
             }
 
-            // WowTalk1の業連配信通知
-            if (wt1Send) {
-                $(wt1Send).hide();
-                const wt1SendSelectGroupHtml = `
-                <div class="wowtalk1-send-select-group">
-                    <select class="form-control" name="WT1_send" style="padding: 0px; cursor: pointer;">
+            // BMの業連閲覧状況メール配信
+            if (bmStatus) {
+                $(bmStatus).hide();
+                const bmStatusSelectGroupHtml = `
+                <div class="bm-status-select-group">
+                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;">
                         <option value="0">未設定</option>
-                        <option value="1" ${wt1Send.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
+                        <option value="1" ${bmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
                 </div>
             `;
-                $(wt1Send).after(wt1SendSelectGroupHtml);
+                $(bmStatus).after(bmStatusSelectGroupHtml);
             }
 
-            // WowTalk2の閲覧状況通知
-            if (wt2Status) {
-                $(wt2Status).hide();
-                const wt2StatusSelectGroupHtml = `
-                <div class="wowtalk2-status-select-group">
-                    <select class="form-control" name="WT2_status" style="padding: 0px; cursor: pointer;">
+            // AMの業連閲覧状況メール配信
+            if (amStatus) {
+                $(amStatus).hide();
+                const amStatusSelectGroupHtml = `
+                <div class="am-status-select-group">
+                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;">
                         <option value="0">未設定</option>
-                        <option value="1" ${wt2Status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
+                        <option value="1" ${amStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
                 </div>
             `;
-                $(wt2Status).after(wt2StatusSelectGroupHtml);
-            }
-
-            // WowTalk2の業連配信通知
-            if (wt2Send) {
-                $(wt2Send).hide();
-                const wt2SendSelectGroupHtml = `
-                <div class="wowtalk2-send-select-group">
-                    <select class="form-control" name="WT2_send" style="padding: 0px; cursor: pointer;">
-                        <option value="0">未設定</option>
-                        <option value="1" ${wt2Send.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
-                    </select>
-                </div>
-            `;
-                $(wt2Send).after(wt2SendSelectGroupHtml);
+                $(amStatus).after(amStatusSelectGroupHtml);
             }
         });
 
 
         // セレクトの変更を監視
-        $('table#list.account').on('change', 'select', function() {
+        $('table#list.mail-account').on('change', 'select', function() {
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
         });
 
 
         // すべて選択/解除ボタン処理
-        $('.WT1StatusAllSelectBtn, .WT1SendAllSelectBtn, .WT2StatusAllSelectBtn, .WT2SendAllSelectBtn').on('click', function() {
+        $('.DMStatusAllSelectBtn, .BMStatusAllSelectBtn, .AMStatusAllSelectBtn').on('click', function() {
             const buttonClass = $(this).attr('class').split(' ').find(cls => cls.includes('AllSelectBtn'));
             let targetName;
             const isActive = $(this).hasClass('active');
@@ -280,21 +248,18 @@ $(document).ready(function() {
 
             // ボタンのクラスに基づいて対象のselect要素を決定
             switch(buttonClass) {
-                case 'WT1StatusAllSelectBtn':
-                    targetName = 'WT1_status';
+                case 'DMStatusAllSelectBtn':
+                    targetName = 'DM_status';
                     break;
-                case 'WT1SendAllSelectBtn':
-                    targetName = 'WT1_send';
+                case 'BMStatusAllSelectBtn':
+                    targetName = 'BM_status';
                     break;
-                case 'WT2StatusAllSelectBtn':
-                    targetName = 'WT2_status';
-                    break;
-                case 'WT2SendAllSelectBtn':
-                    targetName = 'WT2_send';
+                case 'AMStatusAllSelectBtn':
+                    targetName = 'AM_status';
                     break;
             }
 
-            $('table#list.account tbody tr').each(function() {
+            $('table#list.mail-account tbody tr').each(function() {
                 const row = $(this);
                 row.addClass('edit-modified');
                 row.find(`select[name="${targetName}"]`).val(newValue);
@@ -319,57 +284,44 @@ $(document).ready(function() {
             }
 
             // すべて選択/解除ボタン
-            const WT1StatusAllSelectBtn = $('.WT1StatusAllSelectBtn');
-            WT1StatusAllSelectBtn.hide();
-            const WT1SendAllSelectBtn = $('.WT1SendAllSelectBtn');
-            WT1SendAllSelectBtn.hide();
-            const WT2StatusAllSelectBtn = $('.WT2StatusAllSelectBtn');
-            WT2StatusAllSelectBtn.hide();
-            const WT2SendAllSelectBtn = $('.WT2SendAllSelectBtn');
-            WT2SendAllSelectBtn.hide();
+            const DMStatusAllSelectBtn = $('.DMStatusAllSelectBtn');
+            DMStatusAllSelectBtn.hide();
+            const BMStatusAllSelectBtn = $('.BMStatusAllSelectBtn');
+            BMStatusAllSelectBtn.hide();
+            const AMStatusAllSelectBtn = $('.AMStatusAllSelectBtn');
+            AMStatusAllSelectBtn.hide();
 
-            $('table#list.account tbody tr').each(function() {
+            $('table#list.mail-account tbody tr').each(function() {
                 const row = $(this);
                 // modifiedクラスを削除
                 row.removeClass('edit-modified');
 
-                const shopId = row.data('shop_id');
+                // DMの業連閲覧状況メール配信
+                const dmStatus = row.find('.DM_status-select');
+                // BMの業連閲覧状況メール配信
+                const bmStatus = row.find('.BM_status-select');
+                // AMの業連閲覧状況メール配信
+                const amStatus = row.find('.AM_status-select');
 
-                // WowTalk1の閲覧状況通知
-                const wt1Status = row.find('.WT1_status-select');
-                // WowTalk1の業連配信通知
-                const wt1Send = row.find('.WT1_send-select');
-                // WowTalk2の閲覧状況通知
-                const wt2Status = row.find('.WT2_status-select');
-                // WowTalk2の業連配信通知
-                const wt2Send = row.find('.WT2_send-select');
-
-                // WowTalk1の閲覧状況通知
-                if (wt1Status) {
-                    $(wt1Status).show();
-                    const wt1StatusGroup = $(wt1Status).next();
-                    if (wt1StatusGroup) wt1StatusGroup.remove();
+                // DMの業連閲覧状況メール配信
+                if (dmStatus) {
+                    $(dmStatus).show();
+                    const dmStatusGroup = $(dmStatus).next();
+                    if (dmStatusGroup) dmStatusGroup.remove();
                 }
 
-                // WowTalk1の業連配信通知
-                if (wt1Send) {
-                    $(wt1Send).show();
-                    const wt1SendGroup = $(wt1Send).next();
-                    if (wt1SendGroup) wt1SendGroup.remove();
+                // BMの業連閲覧状況メール配信
+                if (bmStatus) {
+                    $(bmStatus).show();
+                    const bmStatusGroup = $(bmStatus).next();
+                    if (bmStatusGroup) bmStatusGroup.remove();
                 }
 
-                // WowTalk2の閲覧状況通知
-                if (wt2Status) {
-                    $(wt2Status).show();
-                    const wt2StatusGroup = $(wt2Status).next();
-                    if (wt2StatusGroup) wt2StatusGroup.remove();
-                }
-
-                // WowTalk2の業連配信通知
-                if (wt2Send) {
-                    $(wt2Send).show();
-                    const wt2SendGroup = $(wt2Send).next();
-                    if (wt2SendGroup) wt2SendGroup.remove();
+                // AMの業連閲覧状況メール配信
+                if (amStatus) {
+                    $(amStatus).show();
+                    const amStatusGroup = $(amStatus).next();
+                    if (amStatusGroup) amStatusGroup.remove();
                 }
             });
         });
@@ -381,30 +333,31 @@ $(document).ready(function() {
             overlay.show(); // オーバーレイを表示
 
             const csrfToken = $('meta[name="csrf-token"]').attr("content");
-            const wowtalkAlertData = [];
+            const userRoleData = [];
 
             $($('tr.edit-modified').get().reverse()).each(function() {
                 const row = $(this);
+                const userId = row.data('user_id');
                 const shopId = row.data('shop_id');
 
                 // 各データを収集
                 const rowData = {
+                    user_id: userId,
                     shop_id: shopId,
-                    WT1_status: row.find('select[name="WT1_status"]').val() || 0,
-                    WT1_send: row.find('select[name="WT1_send"]').val() || 0,
-                    WT2_status: row.find('select[name="WT2_status"]').val() || 0,
-                    WT2_send: row.find('select[name="WT2_send"]').val() || 0
+                    DM_status: row.find('select[name="DM_status"]').val() || 0,
+                    BM_status: row.find('select[name="BM_status"]').val() || 0,
+                    AM_status: row.find('select[name="AM_status"]').val() || 0
                 };
 
-                wowtalkAlertData.push(rowData);
+                userRoleData.push(rowData);
             });
 
             // 保存のリクエストを送信
             $.ajax({
-                url: `/admin/account/wowtalkAlertUpdate`,
+                url: `/admin/account/mail/userRoleUpdate`,
                 type: "post",
                 data: {
-                    wowtalkAlertData: JSON.stringify(wowtalkAlertData)
+                    userRoleData: JSON.stringify(userRoleData)
                 },
                 headers: {
                     "X-CSRF-TOKEN": csrfToken,
@@ -416,7 +369,7 @@ $(document).ready(function() {
                     const searchParams = currentUrl.searchParams;
 
                     // リダイレクト先のURLを構築
-                    let redirectUrl = "/admin/account";
+                    let redirectUrl = "/admin/account/mail";
                     if (searchParams.toString()) {
                         redirectUrl += "?" + searchParams.toString();
                     }

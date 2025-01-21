@@ -64,20 +64,25 @@ class MailAccountExport implements
                 'users.id',
                 'shops.name as shop_name',
                 'shops.shop_code',
-                'users.email',
                 'users.shop_id',
-                'wowtalk_shops.wowtalk1_id',
-                'wowtalk_shops.notification_target1',
-                'wowtalk_shops.business_notification1',
-                'wowtalk_shops.wowtalk2_id',
-                'wowtalk_shops.notification_target2',
-                'wowtalk_shops.business_notification2',
+                'users_roles.DM_id',
+                'users_roles.DM_name',
+                'users_roles.DM_email',
+                'users_roles.DM_view_notification',
+                'users_roles.BM_id',
+                'users_roles.BM_name',
+                'users_roles.BM_email',
+                'users_roles.BM_view_notification',
+                'users_roles.AM_id',
+                'users_roles.AM_name',
+                'users_roles.AM_email',
+                'users_roles.AM_view_notification',
                 'organization3.name as org3_name',
                 'organization4.name as org4_name',
                 'organization5.name as org5_name'
             )
             ->leftJoin('shops', 'users.shop_id', '=', 'shops.id')
-            ->leftJoin('wowtalk_shops', 'users.shop_id', '=', 'wowtalk_shops.shop_id')
+            ->leftJoin('users_roles', 'users.shop_id', '=', 'users_roles.shop_id')
             ->leftJoin('organization3', 'shops.organization3_id', '=', 'organization3.id')
             ->leftJoin('organization4', 'shops.organization4_id', '=', 'organization4.id')
             ->leftJoin('organization5', 'shops.organization5_id', '=', 'organization5.id')
@@ -120,12 +125,11 @@ class MailAccountExport implements
             }
         }
 
-        // 閲覧状況通知、業務連絡通知のチェックを〇に変換
+        // 業連閲覧状況メール配信のチェックを〇に変換
         $users->transform(function ($user) {
-            $user->notification_target1 = $user->notification_target1 ? '〇' : '';
-            $user->business_notification1 = $user->business_notification1 ? '〇' : '';
-            $user->notification_target2 = $user->notification_target2 ? '〇' : '';
-            $user->business_notification2 = $user->business_notification2 ? '〇' : '';
+            $user->DM_view_notification = $user->DM_view_notification ? '〇' : '';
+            $user->BM_view_notification = $user->BM_view_notification ? '〇' : '';
+            $user->AM_view_notification = $user->AM_view_notification ? '〇' : '';
             return $user;
         });
 
