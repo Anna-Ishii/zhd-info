@@ -1,0 +1,18 @@
+2025-01-21 23:52:30,646 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-01-21 23:52:30,656 INFO supervisord started with pid 1
+2025-01-21 23:52:31,661 INFO spawned: 'httpd' with pid 8
+2025-01-21 23:52:31,666 INFO spawned: 'laravel-queue_00' with pid 9
+2025-01-21 23:52:31,673 INFO spawned: 'php-fpm' with pid 10
+2025-01-21 23:52:32,040 WARN exited: php-fpm (exit status 0; not expected)
+2025-01-21 23:52:33,042 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-01-21 23:52:33,042 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-01-21 23:52:33,044 INFO spawned: 'php-fpm' with pid 200
+2025-01-21 23:52:33,089 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-21 23:52:33,089 INFO reaped unknown pid 201 (exit status 78)
+2025-01-21 23:52:35,093 INFO spawned: 'php-fpm' with pid 202
+2025-01-21 23:52:35,126 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-21 23:52:35,126 INFO reaped unknown pid 203 (exit status 78)
+2025-01-21 23:52:38,131 INFO spawned: 'php-fpm' with pid 204
+2025-01-21 23:52:38,159 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-21 23:52:38,159 INFO reaped unknown pid 205 (exit status 78)
+2025-01-21 23:52:39,161 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
