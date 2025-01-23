@@ -174,3 +174,58 @@ $(document).ready(function () {
         };
     });
 });
+
+
+// 選択されたカテゴリを表示
+function updateSelectedCategories() {
+    const selected = [];
+    const checkboxes = document.querySelectorAll('input[name="new_category[]"]:checked');
+    checkboxes.forEach((checkbox) => {
+        selected.push(checkbox.nextElementSibling.textContent);
+    });
+    document.getElementById('selectedCategories').textContent = selected.length > 0 ? selected.join(', ') : '指定なし';
+
+    // すべて選択チェックボックスの状態を更新
+    const allCheckbox = document.getElementById('selectAllCategories');
+    const allCheckboxes = document.querySelectorAll('input[name="new_category[]"]');
+    allCheckbox.checked = allCheckboxes.length === checkboxes.length;
+}
+
+// すべて選択チェックボックスのクリックイベント
+document.addEventListener('DOMContentLoaded', updateSelectedCategories);
+
+function toggleAllCategories() {
+    const selectAllCheckbox = document.getElementById('selectAllCategories');
+    const checkboxes = document.querySelectorAll('input[name="new_category[]"]');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    updateSelectedCategories();
+}
+
+// 選択された状態を表示
+function updateSelectedStatuses() {
+    const selected = [];
+    const checkboxes = document.querySelectorAll('input[name="status[]"]:checked');
+    checkboxes.forEach((checkbox) => {
+        selected.push(checkbox.nextElementSibling.textContent);
+    });
+    document.getElementById('selectedStatus').textContent = selected.length > 0 ? selected.join(', ') : '指定なし';
+
+    // すべて選択チェックボックスの状態を更新
+    const allCheckbox = document.getElementById('selectAllStatuses');
+    const allCheckboxes = document.querySelectorAll('input[name="status[]"]');
+    allCheckbox.checked = allCheckboxes.length === checkboxes.length;
+}
+
+// すべて選択チェックボックスのクリックイベント
+document.addEventListener('DOMContentLoaded', updateSelectedStatuses);
+
+function toggleAllStatuses() {
+    const selectAllCheckbox = document.getElementById('selectAllStatuses');
+    const checkboxes = document.querySelectorAll('input[name="status[]"]');
+    checkboxes.forEach((checkbox) => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+    updateSelectedStatuses();
+}

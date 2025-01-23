@@ -60,8 +60,11 @@ class MessagePublishController extends Controller
         $organization1_list = $admin->getOrganization1();
 
         // request
-        $category_id = $request->input('category');
-        $status = PublishStatus::tryFrom($request->input('status'));
+        $category_ids = $request->input('category');
+        $statusArray = $request->input('status') ?? [];
+        $statuses = array_map(function($status) {
+            return PublishStatus::tryFrom((int)$status);
+        }, $statusArray);
         $q = $request->input('q');
         $organization1_id = $request->input('brand', $organization1_list[0]->id);
         $label = $request->input('label');
@@ -126,26 +129,36 @@ class MessagePublishController extends Controller
                         });
                 });
             })
-            ->when(isset($status), function ($query) use ($status) {
-                switch ($status) {
-                    case PublishStatus::Wait:
-                        $query->waitMessage();
-                        break;
-                    case PublishStatus::Publishing:
-                        $query->publishingMessage();
-                        break;
-                    case PublishStatus::Published:
-                        $query->publishedMessage();
-                        break;
-                    case PublishStatus::Editing:
-                        $query->where('editing_flg', '=', true);
-                        break;
-                    default:
-                        break;
-                }
+            ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
+                $query->where(function ($query) use ($statuses) {
+                    foreach ($statuses as $status) {
+                        switch ($status) {
+                            case PublishStatus::Wait:
+                                $query->orWhere(function ($q) {
+                                    $q->waitMessage();
+                                });
+                                break;
+                            case PublishStatus::Publishing:
+                                $query->orWhere(function ($q) {
+                                    $q->publishingMessage();
+                                });
+                                break;
+                            case PublishStatus::Published:
+                                $query->orWhere(function ($q) {
+                                    $q->publishedMessage();
+                                });
+                                break;
+                            case PublishStatus::Editing:
+                                $query->orWhere('editing_flg', '=', true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
             })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
+            ->when(isset($category_ids), function ($query) use ($category_ids) {
+                $query->whereIn('category_id', $category_ids);
             })
             ->when(isset($label), function ($query) use ($label) {
                 $query->where('emergency_flg', true);
