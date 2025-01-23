@@ -16,3 +16,25 @@
 2025-01-21 23:52:38,159 WARN exited: php-fpm (exit status 70; not expected)
 2025-01-21 23:52:38,159 INFO reaped unknown pid 205 (exit status 78)
 2025-01-21 23:52:39,161 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
+2025-01-23 01:11:22,468 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-01-23 01:11:22,475 INFO supervisord started with pid 1
+2025-01-23 01:11:23,487 INFO spawned: 'httpd' with pid 7
+2025-01-23 01:11:23,494 INFO spawned: 'laravel-queue_00' with pid 8
+2025-01-23 01:11:23,500 INFO spawned: 'php-fpm' with pid 9
+2025-01-23 01:11:24,819 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-01-23 01:11:24,820 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-01-23 01:11:24,820 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-01-23 01:11:24,820 INFO exited: php-fpm (exit status 0; expected)
+2025-01-23 01:11:25,825 INFO spawned: 'php-fpm' with pid 199
+2025-01-23 01:11:25,897 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-23 01:11:26,900 INFO spawned: 'php-fpm' with pid 201
+2025-01-23 01:11:26,901 INFO reaped unknown pid 200 (exit status 78)
+2025-01-23 01:11:26,955 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-23 01:11:26,956 INFO reaped unknown pid 202 (exit status 78)
+2025-01-23 01:11:28,960 INFO spawned: 'php-fpm' with pid 203
+2025-01-23 01:11:29,016 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-23 01:11:29,016 INFO reaped unknown pid 204 (exit status 78)
+2025-01-23 01:11:32,020 INFO spawned: 'php-fpm' with pid 206
+2025-01-23 01:11:32,049 WARN exited: php-fpm (exit status 70; not expected)
+2025-01-23 01:11:32,049 INFO reaped unknown pid 207 (exit status 78)
+2025-01-23 01:11:33,050 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
