@@ -88,7 +88,7 @@
                                 <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" style="width: 200px; padding: 5px; border-radius: 10px; font-size: 12px;">
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" onclick="event.stopPropagation();">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="selectAllCategories" onclick="toggleAllCategories()">
                                 <label class="form-check-label" for="selectAllCategories" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
@@ -117,7 +117,7 @@
                                 <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
                             </svg>
                         </button>
-                        <div class="dropdown-menu" aria-labelledby="dropdownStatusButton" style="width: 200px; padding: 5px; border-radius: 10px; font-size: 12px;">
+                        <div class="dropdown-menu" aria-labelledby="dropdownStatusButton" onclick="event.stopPropagation();">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="selectAllStatuses" onclick="toggleAllStatuses()">
                                 <label class="form-check-label" for="selectAllStatuses" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
