@@ -79,20 +79,39 @@
                     <div class="input-group col-lg-1 spMb16">
                         <label class="input-group-addon">{{ $organization }}</label>
                         @if (isset($organization_list[$organization]))
-                            <select name="org[{{ $organization }}]" class="form-control">
-                                <option value="">全て</option>
-                                @foreach ($organization_list[$organization] as $org)
-                                    <option value="{{ $org->id }}"
-                                        {{ request()->input('org.' . $organization) == $org->id ? 'selected' : '' }}>
-                                        {{ $org->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">全て</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                                <div id="selectOrg{{ $organization }}" class="dropdown-menu" aria-labelledby="dropdownOrg{{ $organization }}" onclick="event.stopPropagation();">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllOrgs{{ $organization }}" onclick="toggleAllOrgs('{{ $organization }}')">
+                                        <label class="form-check-label" for="selectAllOrgs{{ $organization }}" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
+                                    </div>
+                                    @foreach ($organization_list[$organization] as $org)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="org[{{ $organization }}][]" value="{{ $org->id }}"
+                                                {{ in_array($org->id, request()->input('org.' . $organization, [])) ? 'checked' : '' }} id="org{{ $organization }}{{ $org->id }}" onchange="updateSelectedOrgs('{{ $organization }}')">
+                                            <label class="form-check-label" for="org{{ $organization }}{{ $org->id }}" class="custom-label" onclick="event.stopPropagation();">
+                                                {{ $org->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         @else
-                            <select name="org[{{ $organization }}]" class="form-control" disabled></select>
+                            <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+                                <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">　</span>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                    <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                            </button>
                         @endif
                     </div>
                 @endforeach
-
                 <div class="input-group spMb16">
                     <label class="input-group-addon">店舗</label>
                     <input type="text" name="shop_freeword" class="form-control"

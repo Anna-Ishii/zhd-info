@@ -82,6 +82,34 @@
     padding-top: 20px;
 }
 
+#page-wrapper .custom-dropdown {
+    border-radius: 0px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#page-wrapper .custom-dropdown-text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+#page-wrapper .form-check-label {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+#page-wrapper .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    width: 200px;
+    padding: 5px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
 .navbar-top-links {
     margin-right: 0;
 }

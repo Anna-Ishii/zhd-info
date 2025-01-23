@@ -23,7 +23,7 @@ class PersonalContoller extends Controller
         $publish_to_date = $request->input('publish-to-date');
         $publish_from_check = $request->has('publish-from-check');
         $publish_to_check = $request->has('publish-to-check');
-        $org = $request->input('org');
+        $orgs = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
         $message_freeword = $request->input('message_freeword');
         $organization1_id = $request->input('organization1', $organization1_list[0]->id);
@@ -169,8 +169,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization3_id', '=', 'sub.o3_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['DS']), function ($query) use ($org) {
-                        $query->where('shops.organization3_id', '=', $org['DS']);
+                    ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization3_id', $orgs['DS']);
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization3.order_no')
@@ -217,8 +217,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization4_id', '=', 'sub.o4_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['AR']), function ($query) use ($org) {
-                        $query->where('shops.organization4_id', '=', $org['AR']);
+                    ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization4_id', $orgs['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization4.order_no')
@@ -265,8 +265,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization5_id', '=', 'sub.o5_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['BL']), function ($query) use ($org) {
-                        $query->where('shops.organization5_id', '=', $org['BL']);
+                    ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization5_id', $orgs['BL']);
                     })
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization5.order_no')
@@ -314,14 +314,14 @@ class PersonalContoller extends Controller
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
                 ->where('shops.organization1_id', '=', $organization1->id)
-                ->when(isset($org['DS']), function ($query) use ($org) {
-                    $query->where('shops.organization3_id', '=', $org['DS']);
+                ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization3_id', $orgs['DS']);
                 })
-                ->when(isset($org['AR']), function ($query) use ($org) {
-                    $query->where('shops.organization4_id', '=', $org['AR']);
+                ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization4_id', $orgs['AR']);
                 })
-                ->when(isset($org['BL']), function ($query) use ($org) {
-                    $query->where('shops.organization5_id', '=', $org['BL']);
+                ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization5_id', $orgs['BL']);
                 })
                 ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                     $query->where(function ($query) use ($shop_freeword) {
