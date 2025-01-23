@@ -562,6 +562,16 @@ function createDropdownMenu(organization, organizationList) {
 }
 
 
+// ドロップダウンメニューを閉じる
+document.addEventListener('click', function(event) {
+    const dropdowns = document.querySelectorAll('.dropdown-menu');
+    dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+});
+
 // 選択された組織を表示
 function updateSelectedOrgs(organization) {
     const selected = [];

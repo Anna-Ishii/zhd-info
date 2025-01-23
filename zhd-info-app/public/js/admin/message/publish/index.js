@@ -161,6 +161,16 @@ $(document).ready(function () {
 });
 
 
+// ドロップダウンメニューを閉じる
+document.addEventListener('click', function(event) {
+    const dropdowns = document.querySelectorAll('.dropdown-menu');
+    dropdowns.forEach(dropdown => {
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove('show');
+        }
+    });
+});
+
 // 選択されたカテゴリを表示
 function updateSelectedCategories() {
     const selected = [];
