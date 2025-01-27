@@ -12,12 +12,10 @@ use App\Models\IncidentNotificationsRecipient;
 use App\Utils\SESMailer;
 use App\Models\EmailSendLog;
 use App\Exports\PersonAnalysisExport;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
-// use setasign\Fpdi\TcpdfFpdi;
+use setasign\Fpdi\TcpdfFpdi;
 
-// require_once(resource_path("outputpdf/libs/tcpdf/tcpdf.php"));
-// require_once(resource_path("outputpdf/libs/fpdi/autoload.php"));
+require_once(resource_path("outputpdf/libs/tcpdf/tcpdf.php"));
+require_once(resource_path("outputpdf/libs/fpdi/autoload.php"));
 
 class PersonAnalysisSenderCommand extends Command
 {
@@ -394,35 +392,36 @@ class PersonAnalysisSenderCommand extends Command
             $messagesFlg = true;
         }
 
-        // エクセルファイルを生成
-        $excelFilePath = null;
+        // PDFファイルを生成
+        $pdfFilePath = null;
         if ($messagesFlg) {
             try {
-                $excelFilePath = $this->generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek);
+                $pdfFilePath = $this->generatePdfFile($organization1, $startOfLastWeek, $endOfLastWeek);
             } catch (\Exception $e) {
-                $this->error("エクセルファイルの生成に失敗しました: " . $e->getMessage());
+                $this->error("PDFファイルの生成に失敗しました: " . $e->getMessage());
                 return $this->createFailureResponse($organization1);
             }
         }
 
         // メール送信処理の実行
-        return $this->sendPersonAnalysisMail($organization1, $messagesFlg, $messages, $message_count, $viewRates, $startOfLastWeek, $endOfLastWeek, $excelFilePath);
+        return $this->sendPersonAnalysisMail($organization1, $messagesFlg, $messages, $message_count, $viewRates, $startOfLastWeek, $endOfLastWeek, $pdfFilePath);
     }
 
 
     /**
-     * Excelファイルを生成するメソッド
+     * PDFファイルを生成するメソッド
      *
      * @param array $organization1 組織オブジェクト
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
      * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-     * @return string 生成されたExcelファイルのパス
-     * @throws \Exception Excelファイルの生成に失敗した場合
+     * @return string 生成されたPDFファイルのパス
+     * @throws \Exception PDFファイルの生成に失敗した場合
      */
-    private function generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek)
+    private function generatePdfFile($organization1, $startOfLastWeek, $endOfLastWeek)
     {
         $now = new Carbon('now');
-        $file_name = '業務連絡閲覧状況_' . $organization1['name'] . $now->format('_Y_m_d') . '.xlsx';
+        $org1 = Organization1::find($organization1['id']);
+        $file_name = '業務連絡閲覧状況_' . $org1->name . $now->format('_Y_m_d') . '.pdf';
 
         // exportフォルダが存在しない場合は作成
         $exportDir = storage_path('app/export');
@@ -430,87 +429,64 @@ class PersonAnalysisSenderCommand extends Command
             mkdir($exportDir, 0755, true);
         }
 
-        // storage/app/exportディレクトリにExcelファイルを生成して保存
-        $exportPath = $exportDir . '/' . $file_name;
-        $org1 = Organization1::find($organization1['id']);
+        // PDFファイルを生成して保存
         $export = new PersonAnalysisExport($org1, $startOfLastWeek, $endOfLastWeek);
-        Excel::store($export, 'export/' . $file_name, 'local');
+        $viewData = $export->view()->getData();
 
-        // ファイルが正しく保存されたか確認
-        if (!Storage::exists('export/' . $file_name)) {
-            $this->error("Excelファイルの保存に失敗しました。");
+        // メッセージを4件ずつに分割
+        $messages = $viewData['messages'];
+        $org1Sum = $viewData['viewrates']['org1'];
+        $pdfFilePaths = [];
+
+        // メッセージの数を4の倍数に調整
+        while (count($messages) % 4 !== 0) {
+            $messages[] = collect();
+            $org1Sum[] = collect();
+        }
+        $chunkedMessages = $messages->chunk(4);
+        // $org1Sumを4つずつに分割
+        $chunkedOrg1Sum = array_chunk($org1Sum, 4);
+
+        foreach ($chunkedMessages as $index => $chunk) {
+            $chunkFileName = '業務連絡閲覧状況_' . $org1->name . '_' . ($index + 1) . $now->format('_Y_m_d') . '.pdf';
+            $chunkExportPath = $exportDir . '/' . $chunkFileName;
+
+            // PDFに内容を追加
+            $html = view('exports.personal-analysis-export', [
+                'messages' => $chunk,
+                'org1Sum' => $chunkedOrg1Sum[$index] ?? [],
+                'viewrates' => $viewData['viewrates'],
+                'organizations' => $viewData['organizations'],
+                'organization_list' => $viewData['organization_list'],
+                'organization1' => $org1,
+                'isEven' => function($index) {
+                    return $index % 2 == 0;
+                },
+            ])->render();
+
+            $pdf = new TcpdfFpdi();
+            $pdf->SetCreator(PDF_CREATOR);
+            $pdf->SetAuthor('システム管理者');
+            $pdf->SetTitle('業務連絡閲覧状況');
+            $pdf->SetMargins(0, 0, 0);
+            $pdf->AddPage();
+
+            // 日本語フォントを設定
+            $pdf->SetFont('kozgopromedium', '', 6);
+
+            $pdf->writeHTML($html, true, false, true, false, '');
+            $pdf->Output($chunkExportPath, 'F');
+
+            // ファイルが正しく保存されたか確認
+            if (!file_exists($chunkExportPath)) {
+                $this->error("PDFファイルの保存に失敗しました: {$chunkFileName}");
+            }
+
+            $pdfFilePaths[] = $chunkExportPath;
         }
 
-        return $exportPath;
+        return $pdfFilePaths;
     }
-
-
-    // /**
-    //  * Excelファイルを生成し、PDFに変換するメソッド
-    //  *
-    //  * @param array $organization1 組織オブジェクト
-    //  * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
-    //  * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-    //  * @return string 生成されたPDFファイルのパス
-    //  * @throws \Exception Excelファイルの生成に失敗した場合
-    //  */
-    // private function generateExcelFile($organization1, $startOfLastWeek, $endOfLastWeek)
-    // {
-    //     $now = new Carbon('now');
-    //     $file_name = '業務連絡閲覧状況_' . $organization1['name'] . $now->format('_Y_m_d') . '.xlsx';
-
-    //     // exportフォルダが存在しない場合は作成
-    //     $exportDir = storage_path('app/export');
-    //     if (!file_exists($exportDir)) {
-    //         mkdir($exportDir, 0755, true);
-    //     }
-
-    //     // storage/app/exportディレクトリにExcelファイルを生成して保存
-    //     $exportPath = $exportDir . '/' . $file_name;
-    //     $org1 = Organization1::find($organization1['id']);
-    //     $export = new PersonAnalysisExport($org1, $startOfLastWeek, $endOfLastWeek);
-    //     Excel::store($export, 'export/' . $file_name, 'local');
-
-    //     // ファイルが正しく保存されたか確認
-    //     if (!Storage::exists('export/' . $file_name)) {
-    //         $this->error("Excelファイルの保存に失敗しました。");
-    //     }
-
-    //     // ExcelファイルをPDFに変換
-    //     $pdfFileName = pathinfo($file_name, PATHINFO_FILENAME) . '.pdf';
-    //     $pdfFilePath = $exportDir . '/' . $pdfFileName;
-
-    //     // PDF生成処理
-    //     $this->convertExcelToPdf($exportPath, $pdfFilePath);
-
-    //     return $pdfFilePath;
-    // }
-
-    // /**
-    //  * ExcelファイルをPDFに変換するメソッド
-    //  *
-    //  * @param string $excelFilePath Excelファイルのパス
-    //  * @param string $pdfFilePath PDFファイルの保存先パス
-    //  */
-    // private function convertExcelToPdf($excelFilePath, $pdfFilePath)
-    // {
-    //     // Excelファイルを読み込む
-    //     $data = Excel::toArray([], $excelFilePath);
-
-    //     // PDFを生成する
-    //     $pdf = new TcpdfFpdi();
-    //     $pdf->AddPage();
-
-    //     // ExcelデータをPDFに書き込む
-    //     foreach ($data as $sheet) {
-    //         foreach ($sheet as $row) {
-    //             $pdf->Cell(0, 10, implode(' ', $row), 0, 1);
-    //         }
-    //     }
-
-    //     // PDFを保存する
-    //     $pdf->Output($pdfFilePath, 'F');
-    // }
 
 
     /**
@@ -524,10 +500,10 @@ class PersonAnalysisSenderCommand extends Command
      * @param array|null $viewRates 閲覧状況データ
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
      * @param string $endOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の終了日時
-     * @param string|null $excelFilePath Excelファイルのパス
+     * @param string|null $pdfFilePath PDFファイルのパス
      * @return array メッセージ送信結果のレスポンス（成功、失敗、エラーのいずれか）
      */
-    private function sendPersonAnalysisMail($organization1, $messagesFlg, $messages = null, $message_count = null, $viewRates = null, $startOfLastWeek, $endOfLastWeek, $excelFilePath = null)
+    private function sendPersonAnalysisMail($organization1, $messagesFlg, $messages = null, $message_count = null, $viewRates = null, $startOfLastWeek, $endOfLastWeek, $pdfFilePath = null)
     {
         $user_role_data = [];
             $user_role_data = DB::table('users_roles')
@@ -611,7 +587,7 @@ class PersonAnalysisSenderCommand extends Command
             foreach ($batch as $data) {
                 try {
                     // メール送信
-                    $this->sendMail($data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $excelFilePath);
+                    $this->sendMail($data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $pdfFilePath);
                 } catch (\Exception $e) {
                     // エラーログを生成
                     $errorLogs[] = $this->createErrorLog(

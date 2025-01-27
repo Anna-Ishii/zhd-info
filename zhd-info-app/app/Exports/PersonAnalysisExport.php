@@ -45,7 +45,7 @@ class PersonAnalysisExport implements
         $organization1 = $this->organization1;
         $startOfLastWeek = $this->startOfLastWeek;
         $endOfLastWeek = $this->endOfLastWeek;
-        $orgazanizations = [];
+        $organizations = [];
         $viewrates = [];
 
         // 業務連絡を9件取得
@@ -60,20 +60,20 @@ class PersonAnalysisExport implements
             ->orderBy('messages.id', 'desc')
             ->groupBy('messages.id')
             ->get();
-        // 業務連絡の10件のidを取得
+
         $_messages = $messages->pluck('id')->toArray();
 
         // DS, AR, BLがあるかで処理を分ける
         if ($organization1->isExistOrg3()) {
-            $orgazanizations[] = "DS";
+            $organizations[] = "DS";
             $organization_list["DS"] = $organization1->getOrganization3();
         }
         if ($organization1->isExistOrg4()) {
-            $orgazanizations[] = "AR";
+            $organizations[] = "AR";
             $organization_list["AR"] = $organization1->getOrganization4();
         }
         if ($organization1->isExistOrg5()) {
-            $orgazanizations[] = "BL";
+            $organizations[] = "BL";
             $organization_list["BL"] = $organization1->getOrganization5();
         }
 
@@ -103,7 +103,7 @@ class PersonAnalysisExport implements
             $viewrates['org1_readed_sum'] = ($viewrates['org1_readed_sum'] ?? 0) +  ($viewrate_org1[0]->readed_count ?? 0);
 
             // 組織ごと
-            if (in_array('DS', $orgazanizations)) {
+            if (in_array('DS', $organizations)) {
                 $viewrates_org_sub =
                     DB::table('message_user')
                     ->select([
@@ -147,7 +147,8 @@ class PersonAnalysisExport implements
                     $viewrates['DS_readed_sum'][$value->id] = ($viewrates['DS_readed_sum'][$value->id] ?? 0) + $value->readed_count;
                 }
             }
-            if (in_array('AR', $orgazanizations)) {
+
+            if (in_array('AR', $organizations)) {
                 $viewrates_org_sub =
                     DB::table('message_user')
                     ->select([
@@ -191,7 +192,8 @@ class PersonAnalysisExport implements
                     $viewrates['AR_readed_sum'][$value->id] = ($viewrates['AR_readed_sum'][$value->id] ?? 0) + $value->readed_count;
                 }
             }
-            if (in_array('BL', $orgazanizations)) {
+
+            if (in_array('BL', $organizations)) {
                 $viewrates_org_sub =
                     DB::table('message_user')
                     ->select([
@@ -235,7 +237,6 @@ class PersonAnalysisExport implements
                     $viewrates['BL_readed_sum'][$value->id] = ($viewrates['BL_readed_sum'][$value->id] ?? 0) + $value->readed_count;
                 }
             }
-
 
             // 店舗ごと
             $viewrate_sub = DB::table('message_user')
@@ -284,10 +285,10 @@ class PersonAnalysisExport implements
             }
         }
 
-        return view('exports.message-personal-export', [
+        return view('exports.personal-analysis-export', [
             'messages' => $messages,
             'viewrates' => $viewrates,
-            'organizations' => $orgazanizations,
+            'organizations' => $organizations,
             'organization_list' => $organization_list,
             'organization1' => $organization1
         ]);
