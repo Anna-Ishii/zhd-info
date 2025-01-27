@@ -565,9 +565,7 @@ class PersonAnalysisSenderCommand extends Command
                     'message_content_error',
                     [
                         'org1_name' => $errorLog['org1_name'] ?? '',
-                        'DM_email' => $errorLog['DM_email'] ?? '',
-                        'BM_email' => $errorLog['BM_email'] ?? '',
-                        'AM_email' => $errorLog['AM_email'] ?? '',
+                        'email' => $errorLog['email'] ?? '',
                         'response_target' => $errorLog['response_target'] ?? ''
                     ],
                     [
@@ -581,18 +579,24 @@ class PersonAnalysisSenderCommand extends Command
             return $this->createErrorResponse($organization1, $user_role_data, $e->getMessage());
         }
 
+        // 重複を削除
+        $user_role_data = array_unique(array_column($user_role_data, 'DM_email'));
+        $user_role_data = array_merge($user_role_data, array_column($user_role_data, 'AM_email'));
+        $user_role_data = array_merge($user_role_data, array_column($user_role_data, 'BM_email'));
+        $user_role_data = array_unique($user_role_data);
+
         // 通知対象のユーザーを50件ずつのバッチに分割してAPIを呼び出す
         $chunkedUserRoleData = array_chunk($user_role_data, 50);
         foreach ($chunkedUserRoleData as $batch) {
-            foreach ($batch as $data) {
+            foreach ($batch as $email) {
                 try {
                     // メール送信
-                    $this->sendMail($data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $pdfFilePath);
+                    $this->sendMail($email, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $pdfFilePath);
                 } catch (\Exception $e) {
                     // エラーログを生成
                     $errorLogs[] = $this->createErrorLog(
                         $organization1,
-                        $batch,
+                        $email,
                         'メール送信に失敗しました。',
                         'mail_send_error',
                         ['type' => 'mail_send_error', 'response_result' => 'メール送信に失敗しました', 'response_status' => $e->getMessage()],
@@ -610,9 +614,7 @@ class PersonAnalysisSenderCommand extends Command
                     'mail_send_error',
                     [
                         'org1_name' => $errorLog['org1_name'] ?? '',
-                        'DM_email' => $errorLog['DM_email'] ?? '',
-                        'BM_email' => $errorLog['BM_email'] ?? '',
-                        'AM_email' => $errorLog['AM_email'] ?? '',
+                        'email' => $errorLog['email'] ?? '',
                         'response_target' => $errorLog['response_target'] ?? ''
                     ],
                     [
@@ -780,7 +782,7 @@ class PersonAnalysisSenderCommand extends Command
     /**
      * メール送信のメソッド
      *
-     * @param array $user_role_data 通知対象のユーザーデータ
+     * @param string $email 通知対象のユーザーデータ
      * @param array $organization1 組織オブジェクト
      * @param string $messageContent メッセージ内容
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
@@ -789,16 +791,17 @@ class PersonAnalysisSenderCommand extends Command
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function sendMail($user_role_data, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePath = null)
+    private function sendMail($email, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePath = null)
     {
         // 通知対象のメールアドレスを取得
-        $to = array_filter([$user_role_data['DM_email'], $user_role_data['BM_email'], $user_role_data['AM_email']]);
+        $to = $email;
 
         // ここ修正必須！！
         // $to = array_merge($to, AdminRecipient::where('target', true)->pluck('email')->toArray());
 
         $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . ')';
         $fromName = '業連・動画配信ツール';
+
         // メール送信
         $mailer = new SESMailer();
         if ($mailer->sendEmail($fromName, $to, $subject, $messageContent, $filePath)) {
@@ -831,9 +834,7 @@ class PersonAnalysisSenderCommand extends Command
             // 基本情報
             $message .= "■基本情報\n";
             $message .= "業態コード : " . ($requestData['org1_name'] ?? '') . "\n";
-            $message .= "DM_email : " . ($requestData['DM_email'] ?? '') . "\n";
-            $message .= "BM_email : " . ($requestData['BM_email'] ?? '') . "\n";
-            $message .= "AM_email : " . ($requestData['AM_email'] ?? '') . "\n";
+            $message .= "email : " . ($requestData['email'] ?? '') . "\n";
             $message .= "■リクエスト\n";
             $message .= "target : " . (is_array($requestData['response_target']) ? implode(', ', $requestData['response_target']) : $requestData['response_target']) . "\n\n";
         } else {
@@ -903,7 +904,7 @@ class PersonAnalysisSenderCommand extends Command
         return [
             'status' => 'error',
             'org1_name' => $organization1['name'],
-            'email' => $user_role_data[0]['DM_email'] . ',' . $user_role_data[0]['BM_email'] . ',' . $user_role_data[0]['AM_email'],
+            'email' => $user_role_data[0],
             'error_message' => $errorMessage
         ];
     }
@@ -913,20 +914,18 @@ class PersonAnalysisSenderCommand extends Command
      * エラーログを生成するメソッド
      *
      * @param Organization1 $organization1 組織オブジェクト
-     * @param array $data メールデータ
+     * @param string $email メールデータ
      * @param string|null $messageContent 送信されたメッセージ内容
      * @return array エラーログ
      */
-    private function createErrorLog($organization1, $data, $messageContent = null)
+    private function createErrorLog($organization1, $email, $messageContent = null)
     {
         return [
             'type' => 'message_content_error',
             'org1_name' => $organization1['name'] ?? '',
-            'DM_email' => $data['DM_email'] ?? '',
-            'BM_email' => $data['BM_email'] ?? '',
-            'AM_email' => $data['AM_email'] ?? '',
+            'email' => $email ?? '',
             'error_message' => $messageContent ?? '',
-            'response_target' => array_filter([$data['DM_email'] ?? '', $data['BM_email'] ?? '', $data['AM_email'] ?? ''])
+            'response_target' => array_filter([$email ?? ''])
         ];
     }
 
