@@ -15,8 +15,7 @@ $(document).ready(function () {
     let DSWidth = th0Width;
     let BLWidth = DSWidth + th1Width;
     let ARWidth = BLWidth + th2Width;
-    // let shopIDWidth = ARWidth + th3Width + 1;
-    let shopIDWidth = ARWidth + th3Width;
+    let shopIDWidth = ARWidth + th3Width + 1;
     let shopNameWidth = shopIDWidth + th4Width;
 
     // テーブルの横スクロールの位置取得
@@ -31,6 +30,10 @@ $(document).ready(function () {
     // 業態がJP以外の場合、ARWidthを調整
     if (org1Array[org1] !== "JP") {
         ARWidth = BLWidth + th2Width + 1;
+    }
+    // 業態がJPの場合、shopIDWidthを調整
+    if (org1Array[org1] === "JP") {
+        shopIDWidth = ARWidth + th3Width;
     }
 
     // 幅をCSSに適用
@@ -235,17 +238,20 @@ $(document).ready(function() {
 
             // DMの業連閲覧状況メール配信
             const dmStatus = row.find('.DM_status-select');
+            const dmId = row.data('dm_id');
             // BMの業連閲覧状況メール配信
             const bmStatus = row.find('.BM_status-select');
+            const bmId = row.data('bm_id');
             // AMの業連閲覧状況メール配信
             const amStatus = row.find('.AM_status-select');
+            const amId = row.data('am_id');
 
             // DMの業連閲覧状況メール配信
             if (dmStatus) {
                 $(dmStatus).hide();
                 const dmStatusSelectGroupHtml = `
                     <div class="dm-status-select-group">
-                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;">
+                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;" data-dm_id="${dmId}">
                             <option value="0">未設定</option>
                             <option value="1" ${dmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -259,7 +265,7 @@ $(document).ready(function() {
                 $(bmStatus).hide();
                 const bmStatusSelectGroupHtml = `
                 <div class="bm-status-select-group">
-                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;">
+                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;" data-bm_id="${bmId}">
                         <option value="0">未設定</option>
                         <option value="1" ${bmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -273,7 +279,7 @@ $(document).ready(function() {
                 $(amStatus).hide();
                 const amStatusSelectGroupHtml = `
                 <div class="am-status-select-group">
-                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;">
+                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;" data-am_id="${amId}">
                         <option value="0">未設定</option>
                         <option value="1" ${amStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -288,6 +294,40 @@ $(document).ready(function() {
         $('table#list.mail-account').on('change', 'select', function() {
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
+            const selectedValue = $(this).val();
+
+            // セレクトのIDを取得
+            let areaId;
+            if ($(this).data('dm_id')) {
+                areaId = $(this).data('dm_id');
+            }
+            if ($(this).data('bm_id')) {
+                areaId = $(this).data('bm_id');
+            }
+            if ($(this).data('am_id')) {
+                areaId = $(this).data('am_id');
+            }
+
+            // 同じIDの場合、セレクトの値を変更
+            $('table#list.mail-account tbody tr').each(function() {
+                const currentRow = $(this);
+                const currentDmId = currentRow.data('dm_id');
+                const currentBmId = currentRow.data('bm_id');
+                const currentAmId = currentRow.data('am_id');
+
+                if (currentDmId === areaId) {
+                    currentRow.addClass('edit-modified');
+                    currentRow.find('select[name="DM_status"]').val(selectedValue);
+                }
+                if (currentBmId === areaId) {
+                    currentRow.addClass('edit-modified');
+                    currentRow.find('select[name="BM_status"]').val(selectedValue);
+                }
+                if (currentAmId === areaId) {
+                    currentRow.addClass('edit-modified');
+                    currentRow.find('select[name="AM_status"]').val(selectedValue);
+                }
+            });
         });
 
 

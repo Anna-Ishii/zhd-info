@@ -164,7 +164,7 @@
                             <th class="head1 head-DM_status" nowrap>業連閲覧状況メール配信<br class="DMStatusBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm DMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
-                                    style="position: relative; z-index: 10; display: none;">
+                                    style="position: relative; z-index: 5; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
@@ -175,7 +175,7 @@
                             <th class="head1 head-BM_status" nowrap>業連閲覧状況メール配信<br class="BMStatusBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm BMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
-                                    style="position: relative; z-index: 10; display: none;">
+                                    style="position: relative; z-index: 5; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
@@ -186,7 +186,7 @@
                             <th class="head1 head-AM_status" nowrap>業連閲覧状況メール配信<br class="AMStatusBreak" style="display: none;">
                                 <button type="button" class="btn btn-outline-primary btn-sm AMStatusAllSelectBtn"
                                     data-toggle="button" aria-pressed="false"
-                                    style="position: relative; z-index: 10; display: none;">
+                                    style="position: relative; z-index: 5; display: none;">
                                     すべて選択/解除
                                 </button>
                             </th>
@@ -195,7 +195,12 @@
 
                     <tbody>
                         @foreach ($users as $u)
-                            <tr data-user_id="{{ $u->id }}" data-shop_id="{{ $u->shop_id }}" class="">
+                            <tr data-user_id="{{ $u->id }}"
+                                data-shop_id="{{ $u->shop_id }}"
+                                data-DM_id="{{ $u->DM_id }}"
+                                data-BM_id="{{ $u->BM_id }}"
+                                data-AM_id="{{ $u->AM_id }}"
+                                class="">
                                 <!-- DS -->
                                 <td class="label-DS" nowrap>
                                     @if (isset($organizations[$u->shop_id]['DS']))
@@ -236,7 +241,7 @@
                                 <td class="label-BM_name" nowrap>{{ $u->BM_name }}</td>
                                 <td class="label-BM_email" nowrap>{{ $u->BM_email }}</td>
                                 <td class="label-BM_status" nowrap>
-                                    <span class="BM_status-select"
+                                    <span class="BM_status-select" data-BM_id="{{ $u->BM_id }}"
                                         value="{{ $u->BM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->BM_view_notification }}</span>
                                 </td>
                                 <!-- AM -->
@@ -244,7 +249,7 @@
                                 <td class="label-AM_name" nowrap>{{ $u->AM_name }}</td>
                                 <td class="label-AM_email" nowrap>{{ $u->AM_email }}</td>
                                 <td class="label-AM_status" nowrap>
-                                    <span class="AM_status-select"
+                                    <span class="AM_status-select" data-AM_id="{{ $u->AM_id }}"
                                         value="{{ $u->AM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->AM_view_notification }}</span>
                                 </td>
                             </tr>

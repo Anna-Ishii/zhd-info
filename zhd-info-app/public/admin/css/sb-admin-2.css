@@ -1004,7 +1004,7 @@ table.mail-account td {
 table.mail-account thead {
     position: sticky;
     top: 0;
-    z-index: 10;
+    z-index: 100;
     background-color: white;
 }
 
@@ -1013,7 +1013,7 @@ table.mail-account thead  th[data-column="0"],
 table.mail-account tbody td:nth-child(1) {
     position: sticky;
     left: 0;
-    z-index: 2;
+    z-index: 20;
     background-color: white;
 }
 
@@ -1021,7 +1021,7 @@ table.mail-account thead th[data-column="1"],
 table.mail-account tbody td:nth-child(2) {
     position: sticky;
     left: var(--left-2);
-    z-index: 2;
+    z-index: 20;
     background-color: white;
 }
 
@@ -1029,7 +1029,7 @@ table.mail-account thead th[data-column="2"],
 table.mail-account tbody td:nth-child(3) {
     position: sticky;
     left: var(--left-3);
-    z-index: 1;
+    z-index: 10;
     background-color: white;
 }
 
@@ -1037,14 +1037,14 @@ table.mail-account thead th:nth-child(4),
 table.mail-account tbody td:nth-child(4) {
     position: sticky;
     left: var(--left-4);
-    z-index: 2;
+    z-index: 20;
     background-color: white;
 }
 
 table.mail-account tbody td:nth-child(5) {
     position: sticky;
     left: var(--left-5);
-    z-index: 2;
+    z-index: 20;
     background-color: white;
 }
 
@@ -1052,13 +1052,13 @@ table.mail-account tbody td:nth-child(5) {
 table.mail-account thead th[data-column="3"] {
     position: sticky;
     left: var(--left-4);
-    z-index: 3;
+    z-index: 30;
 }
 
 table.mail-account thead th[data-column="4"] {
     position: sticky;
     left: var(--left-5);
-    z-index: 3;
+    z-index: 30;
 }
 
 /* ヘッダーのスタイル */
