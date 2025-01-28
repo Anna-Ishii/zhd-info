@@ -626,7 +626,8 @@ class PersonAnalysisSenderCommand extends Command
             }
 
             // エラー時のレスポンスを返す
-            $errorMessageString = implode('; ', array_unique(array_column($errorLogs, 'error_message')));
+            $errorMessages = array_filter(array_column($errorLogs, 'error_message'));
+            $errorMessageString = implode('; ', array_unique($errorMessages));
             return $this->createErrorResponse($organization1, $user_role_data, $errorMessageString);
         }
 
@@ -802,13 +803,13 @@ class PersonAnalysisSenderCommand extends Command
         $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . ')';
         $fromName = '業連・動画配信ツール';
 
-        // メール送信
-        $mailer = new SESMailer();
-        if ($mailer->sendEmail($fromName, $to, $subject, $messageContent, $filePath)) {
-            $this->info("閲覧率のメールを送信しました。");
-        } else {
-            $this->error("メール送信中にエラーが発生しました。");
-        }
+        // // メール送信
+        // $mailer = new SESMailer();
+        // if ($mailer->sendEmail($fromName, $to, $subject, $messageContent, $filePath)) {
+        //     $this->info("閲覧率のメールを送信しました。");
+        // } else {
+        //     $this->error("メール送信中にエラーが発生しました。");
+        // }
     }
 
 
@@ -836,7 +837,7 @@ class PersonAnalysisSenderCommand extends Command
             $message .= "業態コード : " . ($requestData['org1_name'] ?? '') . "\n";
             $message .= "email : " . ($requestData['email'] ?? '') . "\n";
             $message .= "■リクエスト\n";
-            $message .= "target : " . (is_array($requestData['response_target']) ? implode(', ', $requestData['response_target']) : $requestData['response_target']) . "\n\n";
+            $message .= "target : " . (is_array($requestData['response_target']) ? implode(', ', $requestData['response_target']) : (string)$requestData['response_target']) . "\n\n";
         } else {
             $message .= "■リクエスト : $requestData\n\n";
         }
@@ -846,18 +847,18 @@ class PersonAnalysisSenderCommand extends Command
         if (is_array($responseData)) {
             $message .= "result : " . ($responseData['error_message'] ?? '') . "\n";
             $message .= "status : " . ($responseData['status'] ?? '') . "\n";
-            $message .= "target : " . (is_array($responseData['response_target']) ? implode(', ', $responseData['response_target']) : $responseData['response_target']) . "\n";
+            $message .= "target : " . (is_array($responseData['response_target']) ? implode(', ', $responseData['response_target']) : (string)$responseData['response_target']) . "\n";
         } else {
             $message .= "エラーメッセージ : $responseData\n";
         }
 
-        $mailer = new SESMailer();
-        if ($mailer->sendEmail($fromName, $to, $subject, $message)) {
-            $this->info("システム管理者にエラーメールを送信しました。");
-        } else {
-            $this->error("メール送信中にエラーが発生しました。");
-            throw new \Exception("システム管理者にエラーメール送信に失敗しました");
-        }
+        // $mailer = new SESMailer();
+        // if ($mailer->sendEmail($fromName, $to, $subject, $message)) {
+        //     $this->info("システム管理者にエラーメールを送信しました。");
+        // } else {
+        //     $this->error("メール送信中にエラーが発生しました。");
+        //     throw new \Exception("システム管理者にエラーメール送信に失敗しました");
+        // }
     }
 
 
