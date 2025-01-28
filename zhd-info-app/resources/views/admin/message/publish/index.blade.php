@@ -9,10 +9,14 @@
                         <a href="#" class="nav-label">1.配信</a>
                         <ul class="nav nav-second-level">
                             @if (in_array('message', $arrow_pages, true))
-                                <li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                                <li class="message-publish active">
+                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
+                                </li>
                             @endif
                             @if (in_array('manual', $arrow_pages, true))
-                                <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                                <li class="manual-publish">
+                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                                </li>
                             @endif
                         </ul>
                     </li>
@@ -21,7 +25,9 @@
                     <li>
                         <a href="#" class="nav-label">2.データ抽出</span></a>
                         <ul class="nav nav-second-level">
-                            <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                            <li class="analyse-personal">
+                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -157,9 +163,13 @@
                 <div class="input-group col-lg-1">
                     <button class="btn btn-admin">検索</button>
                 </div>
+                <div class="input-group col-lg-1" style="float: right;">
+                    <input type="button" class="btn btn-admin saveSearchBtn" value="検索条件を保存">
+                </div>
                 <div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>
             </div>
         </form>
+
         <!-- 検索結果 -->
         <form method="post" action="#">
             <div class="pagenation-top">

@@ -9,21 +9,44 @@ use App\Http\Requests\Admin\Account\AdminAccountUpdateRequest;
 use App\Models\Admin;
 use App\Models\Adminpage;
 use App\Models\Organization1;
+use App\Models\SearchCondition;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 
-class AdminAccountController extends Controller 
+class AdminAccountController extends Controller
 {
     public function index()
     {
+        $admin = session('admin');
         $admin_list = Admin::withTrashed()->paginate(50);
         $organization1_list = Organization1::orderby('name')->get();
         $page_list = Adminpage::orderby('name')->get();
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.account.admin.index',[
             'admin_list' => $admin_list,
             'organization1_list' => $organization1_list,
             'page_list' => $page_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
@@ -90,7 +113,7 @@ class AdminAccountController extends Controller
         $admin = Admin::withTrashed()
             ->where('id', $admin_id)
             ->first();
-        
+
         try {
             DB::beginTransaction();
             $admin->fill([
