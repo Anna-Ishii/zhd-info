@@ -6,7 +6,9 @@ use App\Exports\MessagePersonalExport;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Organization1;
+use App\Models\SearchCondition;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
@@ -354,14 +356,57 @@ class PersonalContoller extends Controller
             }
         }
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.analyse.personal', [
             'messages' => $messages,
             'viewrates' => $viewrates,
             'organizations' => $orgazanizations,
             'organization_list' => $organization_list,
             'organization1' => $organization1,
-            'organization1_list' => $organization1_list
+            'organization1_list' => $organization1_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // 検索条件を保存
+    public function saveSearchConditions(Request $request)
+    {
+        $admin = session('admin');
+
+        try {
+            SearchCondition::updateOrCreate(
+                [
+                    'admin_id' => $admin->id,
+                    'page_name' => 'analyse-personal',
+                ],
+                [
+                    'url' => $request->input('url'),
+                ]
+            );
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            // エラーログを記録
+            Log::error('Error saving search conditions: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => '検索条件の保存中にエラーが発生しました。'], 500);
+        }
     }
 
     public function export(Request $request)

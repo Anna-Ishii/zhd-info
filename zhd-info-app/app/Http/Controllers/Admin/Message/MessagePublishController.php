@@ -31,6 +31,7 @@ use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
+use App\Models\SearchCondition;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
@@ -281,12 +282,55 @@ class MessagePublishController extends Controller
             }
         }
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // 検索条件を保存
+    public function saveSearchConditions(Request $request)
+    {
+        $admin = session('admin');
+
+        try {
+            SearchCondition::updateOrCreate(
+                [
+                    'admin_id' => $admin->id,
+                    'page_name' => 'message-publish',
+                ],
+                [
+                    'url' => $request->input('url'),
+                ]
+            );
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            // エラーログを記録
+            Log::error('Error saving search conditions: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => '検索条件の保存中にエラーが発生しました。'], 500);
+        }
     }
 
     // 閲覧率の更新処理
@@ -345,6 +389,8 @@ class MessagePublishController extends Controller
 
     public function show(Request $request, $message_id)
     {
+        $admin = session('admin');
+
         $message = Message::where('id', $message_id)
             ->withCount(['user as total_users'])
             ->withCount(['readed_user as read_users'])
@@ -418,6 +464,23 @@ class MessagePublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.message.publish.show', [
             'message' => $message,
             'user_list' => $user_list,
@@ -426,12 +489,17 @@ class MessagePublishController extends Controller
             'org4_list' => $org4_list,
             'org5_list' => $org5_list,
             'brands' => $brands,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
     public function new(Organization1 $organization1)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+
+        $admin = session('admin');
 
         $category_list = MessageCategory::all();
 
@@ -527,6 +595,25 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
+
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
@@ -537,6 +624,9 @@ class MessagePublishController extends Controller
             'brand_list' => $brand_list,
             'organization_list' => $organization_list,
             'all_shop_list' => $all_shop_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
@@ -914,6 +1004,8 @@ class MessagePublishController extends Controller
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
 
+        $admin = session('admin');
+
         $message = Message::find($message_id);
         if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
 
@@ -1077,6 +1169,25 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
+
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
@@ -1091,6 +1202,9 @@ class MessagePublishController extends Controller
             'message_target_roll' => $message_target_roll,
             'target_brand' => $target_brand,
             'target_org' => $target_org,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
