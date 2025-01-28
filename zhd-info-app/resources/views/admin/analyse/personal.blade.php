@@ -9,10 +9,14 @@
                         <a href="#" class="nav-label">1.配信</a>
                         <ul class="nav nav-second-level">
                             @if (in_array('message', $arrow_pages, true))
-                                <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                                <li class="message-publish">
+                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
+                                </li>
                             @endif
                             @if (in_array('manual', $arrow_pages, true))
-                                <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                                <li class="manual-publish">
+                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                                </li>
                             @endif
                         </ul>
                     </li>
@@ -21,7 +25,9 @@
                     <li>
                         <a href="#" class="nav-label">2.データ抽出</span></a>
                         <ul class="nav nav-second-level">
-                            <li class="active"><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                            <li class="analyse-personal active">
+                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -148,9 +154,8 @@
                 <div class="input-group">
                     <button class="btn btn-admin">検索</button>
                 </div>
-                <div class="input-group">
-                    <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query()) }}"
-                        class="btn btn-admin">エクスポート</a>
+                <div class="input-group col-lg-1" style="float: right;">
+                    <input type="button" class="btn btn-admin saveSearchBtn" value="検索条件を保存">
                 </div>
                 <div class="input-group">
                     <p>※ 直近の業連を最大10件表示しています。</p>
@@ -158,6 +163,15 @@
                 </div>
             </div>
         </form>
+
+        <div class="pagenation-top" style="justify-content: right;">
+            <div>
+                <div class="input-group">
+                    <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query()) }}"
+                        class="btn btn-admin exportBtn" data-filename="{{ '業務連絡閲覧状況_' . $organization1->name . now()->format('_Y_m_d') . '.xlsx' }}">エクスポート</a>
+                </div>
+            </div>
+        </div>
 
         <div class="message-tableInner table-responsive-xxl">
             <table id="table" class="personal table table-bordered {sorter:'metadata'}" style="border: none;">

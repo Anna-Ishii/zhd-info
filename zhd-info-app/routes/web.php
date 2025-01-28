@@ -63,6 +63,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
+            Route::post('save-search-conditions', [MessagePublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
             Route::get('update-view-rates', [MessagePublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
@@ -91,6 +92,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'check.allowpage:manual'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
+            Route::post('save-search-conditions', [ManualPublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
             Route::get('update-view-rates', [ManualPublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
             Route::get('{organization1}/new', [ManualPublishController::class, 'new'])->name('new');
@@ -146,6 +148,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     });
     Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
+        Route::post('/personal/save-search-conditions', [PersonalContoller::class, 'saveSearchConditions'])->name('save-search-conditions');
         Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
         Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
         Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);
