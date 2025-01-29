@@ -8,6 +8,7 @@ use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\UsersRole;
+use App\Models\SearchCondition;
 use App\Exports\MailAccountExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -140,12 +141,32 @@ class MailAccountController extends Controller
             return $user;
         });
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.account.mail.index', [
             'users' => $users,
             'roll_list' => $roll_list,
             'organization1_list' => $organization1_list,
             'organization_list' => $organization_list,
             'organizations' => $organizations,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
