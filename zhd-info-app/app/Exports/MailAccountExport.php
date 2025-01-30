@@ -10,11 +10,16 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MailAccountExport implements
     FromView,
     ShouldAutoSize,
-    WithCustomCsvSettings
+    WithCustomCsvSettings,
+    WithHeadings,
+    WithStyles
 {
     protected $request;
 
@@ -37,7 +42,8 @@ class MailAccountExport implements
         $organization1_list = $admin->organization1()->orderby('name')->get();
 
         // request
-        $org = $this->request->input('org');
+        $orgs = $this->request->input('org');
+        $shop_freeword = $this->request->input('shop_freeword');
 
         $organization1_id = $this->request->input('organization1', $organization1_list[0]->id);
         $organization1 = Organization1::find($organization1_id);
@@ -95,6 +101,22 @@ class MailAccountExport implements
             ->when(isset($organization1_id), function ($query) use ($organization1_id) {
                 $query->where('shops.organization1_id', '=', $organization1_id);
             })
+            ->where('shops.organization1_id', '=', $organization1->id)
+            ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization3_id', $orgs['DS']);
+            })
+            ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization4_id', $orgs['AR']);
+            })
+            ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization5_id', $orgs['BL']);
+            })
+            ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
+                $query->where(function ($query) use ($shop_freeword) {
+                    $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
+                        ->orWhere('shops.shop_code', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%');
+                });
+            })
             ->orderBy('organization3.order_no')
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
@@ -139,5 +161,19 @@ class MailAccountExport implements
             'organization_list' => $organization_list,
             'organizations' => $organizations,
         ]);
+    }
+
+    public function headings(): array
+    {
+        return [
+            'ヘッダー1',
+            'ヘッダー2',
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        // ヘッダー行とA～E列を固定
+        $sheet->freezePane('F3'); // F3の位置で固定
     }
 }

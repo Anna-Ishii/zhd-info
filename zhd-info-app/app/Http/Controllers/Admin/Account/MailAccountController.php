@@ -170,6 +170,17 @@ class MailAccountController extends Controller
         ]);
     }
 
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['mail_account_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // 業連閲覧状況メール配信の設定を更新
     public function userRoleUpdate(Request $request)
     {
@@ -220,7 +231,7 @@ class MailAccountController extends Controller
 
         $organization1 = $organization1->name;
         $now = new Carbon('now');
-        $file_name = '店舗アカウント_' . $organization1 . $now->format('_Y_m_d') . '.xlsx';
+        $file_name = 'メール配信設定_' . $organization1 . $now->format('_Y_m_d') . '.xlsx';
         return Excel::download(
             new MailAccountExport($request),
             $file_name,
