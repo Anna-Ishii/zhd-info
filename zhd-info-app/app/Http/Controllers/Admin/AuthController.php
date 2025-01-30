@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AuthLoginRequest;
 use App\Models\Admin;
 use App\Models\Organization1;
+use App\Models\SearchCondition;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
@@ -39,6 +40,10 @@ class AuthController extends Controller
         if(Hash::check($request->password, $admin->password)){
             session()->put(['admin' => $admin]);
 
+            $message_saved_url = $this->getMessageSavedUrl($admin);
+            if($message_saved_url){
+                return redirect()->to($message_saved_url->url);
+            }
             return redirect()->route('admin.message.publish.index');
         }
 
@@ -53,5 +58,15 @@ class AuthController extends Controller
         $admin = session('admin');
         session()->forget('admin');
         return redirect()->route('admin.auth');
+    }
+
+    public function getMessageSavedUrl(Admin $admin)
+    {
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('url')
+            ->first();
+        return $message_saved_url;
     }
 }
