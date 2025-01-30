@@ -215,7 +215,7 @@
         <div class="pagenation-bottom">
             @include('common.admin.pagenation', ['objects' => $user_list])
         </div>
-        <a href="{{ route('admin.manual.publish.index', ['brand' => session('brand_id')]) }}">
+        <a href="/admin/manual/publish?{{ session('manual_publish_url') }}">
             <button class="btn btn-admin">戻る</button>
         </a>
     </div>

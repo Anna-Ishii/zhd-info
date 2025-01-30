@@ -382,8 +382,7 @@
                         onclick="window.onbeforeunload=null" />
                 </div>
                 <div class="col-lg-2">
-                    <a href="{{ route('admin.manual.publish.index', ['brand' => session('brand_id')]) }}"
-                        class="btn btn-admin">一覧に戻る</a>
+                    <a href="/admin/manual/publish?{{ session('manual_publish_url') }}" class="btn btn-admin">一覧に戻る</a>
                 </div>
             </div>
 

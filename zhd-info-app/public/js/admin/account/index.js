@@ -197,8 +197,40 @@ function toggleAllOrgs(organization) {
 }
 
 
-// 編集モード
 $(document).ready(function() {
+    // ページロード時に検索条件を削除
+    sessionStorage.removeItem('searchParams');
+
+    // クエリパラメータを取得して保存
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+        sessionStorage.setItem('searchParams', params.toString());
+        window.history.replaceState({}, '', window.location.pathname); // URLのパラメータを削除
+    }
+
+    // ページロード時に検索条件を復元
+    const savedParams = sessionStorage.getItem('searchParams');
+    if (savedParams) {
+        // URLにパラメーターを追加せずにリクエストを実行
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        fetch("/admin/account/save-session-conditions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({ params: savedParams })
+        })
+        .then(response => response.json())
+        .then(data => {
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+    // 編集モード
     $('.accountEditBtn').on('click', function() {
         const overlay = $('#overlay');
         overlay.show(); // オーバーレイを表示
@@ -462,18 +494,12 @@ $(document).ready(function() {
                     "X-CSRF-TOKEN": csrfToken,
                 },
                 success: function(response) {
-                    // console.log(response);
-                    // 現在のURLから検索パラメータを取得
-                    const currentUrl = new URL(window.location.href);
-                    const searchParams = currentUrl.searchParams;
-
                     // リダイレクト先のURLを構築
-                    let redirectUrl = "/admin/account";
-                    if (searchParams.toString()) {
-                        redirectUrl += "?" + searchParams.toString();
+                    if (savedParams) {
+                        window.location.href = "/admin/account?" + savedParams;
+                    } else {
+                        window.location.href = "/admin/account";
                     }
-
-                    window.location.href = redirectUrl;
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Error:", errorThrown);
