@@ -171,6 +171,17 @@ class AccountController extends Controller
         ]);
     }
 
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['shop_account_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     public function new()
     {
         $user_count = User::withTrashed()->max('id') + 1;

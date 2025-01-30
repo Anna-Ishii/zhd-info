@@ -249,8 +249,41 @@ function toggleAllStatuses() {
     updateSelectedStatuses();
 }
 
-// 検索条件を保存
+
 $(document).ready(function () {
+    // ページロード時に検索条件を削除
+    sessionStorage.removeItem('searchParams');
+
+    // クエリパラメータを取得して保存
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+        sessionStorage.setItem('searchParams', params.toString());
+        window.history.replaceState({}, '', window.location.pathname); // URLのパラメータを削除
+    }
+
+    // ページロード時に検索条件を復元
+    const savedParams = sessionStorage.getItem('searchParams');
+    if (savedParams) {
+        // URLにパラメーターを追加せずにリクエストを実行
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        fetch("/admin/manual/publish/save-session-conditions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({ params: savedParams })
+        })
+        .then(response => response.json())
+        .then(data => {
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+    // 検索条件を保存
     $(".saveSearchBtn").on("click", function (e) {
         e.preventDefault();
         var csrfToken = $('meta[name="csrf-token"]').attr("content");

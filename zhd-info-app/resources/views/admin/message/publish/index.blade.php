@@ -219,7 +219,7 @@
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
                             <a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"
-                                class=" btn btn-admin">新規登録</a>
+                                class="btn btn-admin">新規登録</a>
                         </div>
                     @endif
 
