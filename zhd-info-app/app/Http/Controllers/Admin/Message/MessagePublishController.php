@@ -253,12 +253,6 @@ class MessagePublishController extends Controller
             $message->file_count = count($file_list);
         }
 
-        // BBの場合、SKの場合
-        if ($organization1_id == 2 || $organization1_id == 8) {
-            // セッションにデータを保存
-            session()->put('message_list', $message_list);
-        }
-
         // 店舗数をカウント
         if ($message_list) {
             // すべてのメッセージIDを取得
@@ -308,6 +302,17 @@ class MessagePublishController extends Controller
             'manual_saved_url' => $manual_saved_url,
             'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['message_publish_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // 検索条件を保存
@@ -382,6 +387,12 @@ class MessagePublishController extends Controller
             ['message_id', 'organization1_id'],
             ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
         );
+
+        // 検索条件をセッションから取得してリダイレクト
+        $message_publish_url = session('message_publish_url');
+        if ($message_publish_url) {
+            return redirect()->route('admin.message.publish.index', [$message_publish_url]);
+        }
 
         // 処理完了後にページをリダイレクトして結果を表示
         return redirect()->back()->with('success', '閲覧率が更新されました。');
@@ -921,6 +932,12 @@ class MessagePublishController extends Controller
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
             SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_store');
+        }
+
+        // 検索条件をセッションから取得してリダイレクト
+        $message_publish_url = session('message_publish_url');
+        if ($message_publish_url) {
+            return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
@@ -1697,6 +1714,12 @@ class MessagePublishController extends Controller
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
             SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_update');
+        }
+
+        // 検索条件をセッションから取得してリダイレクト
+        $message_publish_url = session('message_publish_url');
+        if ($message_publish_url) {
+            return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
