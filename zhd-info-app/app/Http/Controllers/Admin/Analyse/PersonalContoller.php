@@ -112,7 +112,7 @@ class PersonalContoller extends Controller
         }
 
         foreach ($_messages as $key => $ms) {
-            // 業業 (計)
+            // 業態 (計)
             $viewrate_org1 = DB::table('message_user')
                 ->select([
                     DB::raw('count(crews.id) as count'),
@@ -384,6 +384,17 @@ class PersonalContoller extends Controller
             'manual_saved_url' => $manual_saved_url,
             'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['analyse_personal_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     // 検索条件を保存
