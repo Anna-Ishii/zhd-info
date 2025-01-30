@@ -1,4 +1,7 @@
-$(document).ready(function() {
+$(document).ready(function () {
+    // 検索条件をセッションから取得してリダイレクト
+    const savedParams = sessionStorage.getItem('searchParams');
+
     // 組織ID
     const org1Id = $('input[name="organization1_id"]').val();
     // 業連ファイルを管理
@@ -2433,17 +2436,12 @@ $(document).ready(function() {
                         "X-CSRF-TOKEN": csrfToken,
                     },
                     success: function(response) {
-                        // 現在のURLから検索パラメータを取得
-                        const currentUrl = new URL(window.location.href);
-                        const searchParams = currentUrl.searchParams;
-
                         // リダイレクト先のURLを構築
-                        let redirectUrl = "/admin/message/publish/";
-                        if (searchParams.toString()) {
-                            redirectUrl += "?" + searchParams.toString();
+                        if (savedParams) {
+                            window.location.href = "/admin/message/publish?" + savedParams;
+                        } else {
+                            window.location.href = "/admin/message/publish";
                         }
-
-                        window.location.href = redirectUrl;
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         overlay.hide(); // オーバーレイを非表示にする
@@ -2671,17 +2669,12 @@ $(document).ready(function() {
                 "X-CSRF-TOKEN": csrfToken,
             },
             success: function(response) {
-                // 現在のURLから検索パラメータを取得
-                const currentUrl = new URL(window.location.href);
-                const searchParams = currentUrl.searchParams;
-
                 // リダイレクト先のURLを構築
-                let redirectUrl = "/admin/message/publish/";
-                if (searchParams.toString()) {
-                    redirectUrl += "?" + searchParams.toString();
+                if (savedParams) {
+                    window.location.href = "/admin/message/publish?" + savedParams;
+                } else {
+                    window.location.href = "/admin/message/publish";
                 }
-
-                window.location.href = redirectUrl;
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error("Error:", errorThrown);
@@ -3205,17 +3198,12 @@ $(document).ready(function() {
                             "X-CSRF-TOKEN": csrfToken,
                         },
                         success: function(response) {
-                            // 現在のURLから検索パラメータを取得
-                            const currentUrl = new URL(window.location.href);
-                            const searchParams = currentUrl.searchParams;
-
                             // リダイレクト先のURLを構築
-                            let redirectUrl = "/admin/message/publish/";
-                            if (searchParams.toString()) {
-                                redirectUrl += "?" + searchParams.toString();
+                            if (savedParams) {
+                                window.location.href = "/admin/message/publish?" + savedParams;
+                            } else {
+                                window.location.href = "/admin/message/publish";
                             }
-
-                            window.location.href = redirectUrl;
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
                             console.error("Error:", errorThrown);
