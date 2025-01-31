@@ -43,7 +43,7 @@ class MessageListExport implements
         }, $statusArray);
         $q = $this->request->input('q');
         // $rate = $this->request->input('rate');
-        $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $this->request->input('brand') ? base64_decode($this->request->input('brand')) : $admin->firstOrganization1()->id;
         $label = $this->request->input('label');
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('messages')

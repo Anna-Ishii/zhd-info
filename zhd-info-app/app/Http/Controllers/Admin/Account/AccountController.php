@@ -32,7 +32,7 @@ class AccountController extends Controller
         $orgs = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
 
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
         $organization2 = $request->input('organization2');
         $roll = $request->input('roll');
@@ -299,7 +299,7 @@ class AccountController extends Controller
     {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
 
         $organization1 = $organization1->name;
