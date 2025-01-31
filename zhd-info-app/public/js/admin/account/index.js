@@ -49,104 +49,118 @@ $(document).on("click", "#deleteBtn", function (e) {
         });
 });
 
+$(document).ready(function () {
+    // Base64デコード関数を追加
+    function base64Decode(str) {
+        try {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            console.error('Base64 decode error:', e);
+            return '';
+        }
+    }
 
-// DS、BL、ARの組織を取得
-$(document).on("change", 'select[name="organization1"]', function (e) {
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
-    const url = "/admin/account/organization";
-    let organization1 = e.target.value;
 
-    let selectDS = $('#selectOrgDS');
-    let selectBL = $('#selectOrgBL');
-    let selectAR = $('#selectOrgAR');
+    // DS、BL、ARの組織を取得
+    $(document).on("change", 'select[name="organization1"]', function (e) {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        const url = "/admin/account/organization";
+        let organization1 = base64Decode(e.target.value);
 
-    let buttonDS = $('#dropdownOrgDS');
-    let buttonBL = $('#dropdownOrgBL');
-    let buttonAR = $('#dropdownOrgAR');
+        let selectDS = $('#selectOrgDS');
+        let selectBL = $('#selectOrgBL');
+        let selectAR = $('#selectOrgAR');
 
-    let selectedOrgsDS = $('#selectedOrgsDS');
-    let selectedOrgsBL = $('#selectedOrgsBL');
-    let selectedOrgsAR = $('#selectedOrgsAR');
+        let buttonDS = $('#dropdownOrgDS');
+        let buttonBL = $('#dropdownOrgBL');
+        let buttonAR = $('#dropdownOrgAR');
 
-    $.ajax({
-        type: "GET",
-        url: url,
-        data: {
-            organization1: organization1,
-        },
-        dataType: "json",
-        headers: {
-            "X-CSRF-TOKEN": csrfToken,
-        },
-    })
-        .done(function (res) {
-            // console.log(res);
-            selectDS.empty();
-            selectBL.empty();
-            selectAR.empty();
+        let selectedOrgsDS = $('#selectedOrgsDS');
+        let selectedOrgsBL = $('#selectedOrgsBL');
+        let selectedOrgsAR = $('#selectedOrgsAR');
 
-            let resDS = res.organization3;
-            let resAR = res.organization4;
-            let resBL = res.organization5;
-
-            // DSの組織を設定
-            if (!resDS.length) {
-                buttonDS.prop("disabled", true);
-                selectedOrgsDS.text('　');
-            } else {
-                buttonDS.prop("disabled", false);
-                selectedOrgsDS.text('全て');
-                createDropdownMenu('DS', resDS);
-            }
-
-            // BLの組織を設定
-            if (!resBL.length) {
-                buttonBL.prop("disabled", true);
-                selectedOrgsBL.text('　');
-            } else {
-                buttonBL.prop("disabled", false);
-                selectedOrgsBL.text('全て');
-                createDropdownMenu('BL', resBL);
-            }
-
-            // ARの組織を設定
-            if (!resAR.length) {
-                buttonAR.prop("disabled", true);
-                selectedOrgsAR.text('　');
-            } else {
-                buttonAR.prop("disabled", false);
-                selectedOrgsAR.text('全て');
-                createDropdownMenu('AR', resAR);
-            }
+        $.ajax({
+            type: "GET",
+            url: url,
+            data: {
+                organization1: organization1,
+            },
+            dataType: "json",
+            headers: {
+                "X-CSRF-TOKEN": csrfToken,
+            },
         })
-        .fail((jqXHR, textStatus, errorThrown) => {
-            console.error("Ajax error:", textStatus, errorThrown);
-            throw errorThrown;
-        });
-});
+            .done(function (res) {
+                // console.log(res);
+                selectDS.empty();
+                selectBL.empty();
+                selectAR.empty();
 
-// ドロップダウンメニューの生成
-function createDropdownMenu(organization, organizationList) {
-    let dropdownMenu = `
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" id="selectAllOrgs${organization}" onclick="toggleAllOrgs('${organization}')">
-            <label class="form-check-label" for="selectAllOrgs${organization}" class="custom-label" onclick="event.stopPropagation();">すべて選択/選択解除</label>
-        </div>
-    `;
+                let resDS = res.organization3;
+                let resAR = res.organization4;
+                let resBL = res.organization5;
 
-    organizationList.forEach(org => {
-        dropdownMenu += `
-            <div class="form-check">
-                <input class="form-check-input" type="checkbox" name="org[${organization}][]" value="${org.id}" id="org${organization}${org.id}" onchange="updateSelectedOrgs('${organization}')">
-                <label class="form-check-label" for="org${organization}${org.id}" class="custom-label" onclick="event.stopPropagation();">
-                    ${org.name}
-                </label>
-            </div>
-        `;
+                // DSの組織を設定
+                if (!resDS.length) {
+                    buttonDS.prop("disabled", true);
+                    selectedOrgsDS.text('　');
+                } else {
+                    buttonDS.prop("disabled", false);
+                    selectedOrgsDS.text('全て');
+                    createDropdownMenu('DS', resDS);
+                }
+
+                // BLの組織を設定
+                if (!resBL.length) {
+                    buttonBL.prop("disabled", true);
+                    selectedOrgsBL.text('　');
+                } else {
+                    buttonBL.prop("disabled", false);
+                    selectedOrgsBL.text('全て');
+                    createDropdownMenu('BL', resBL);
+                }
+
+                // ARの組織を設定
+                if (!resAR.length) {
+                    buttonAR.prop("disabled", true);
+                    selectedOrgsAR.text('　');
+                } else {
+                    buttonAR.prop("disabled", false);
+                    selectedOrgsAR.text('全て');
+                    createDropdownMenu('AR', resAR);
+                }
+            })
+            .fail((jqXHR, textStatus, errorThrown) => {
+                console.error("Ajax error:", textStatus, errorThrown);
+                throw errorThrown;
+            });
     });
 
-    $(`#selectOrg${organization}`).append(dropdownMenu);
-}
+    // ドロップダウンメニューの生成
+    function createDropdownMenu(organization, organizationList) {
+        let dropdownMenu = `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="selectAllOrgs${organization}" onclick="toggleAllOrgs('${organization}')">
+                <label class="form-check-label" for="selectAllOrgs${organization}" class="custom-label" onclick="event.stopPropagation();">すべて選択/選択解除</label>
+            </div>
+        `;
+
+        organizationList.forEach(org => {
+            dropdownMenu += `
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" name="org[${organization}][]" value="${org.id}" id="org${organization}${org.id}" onchange="updateSelectedOrgs('${organization}')">
+                    <label class="form-check-label" for="org${organization}${org.id}" class="custom-label" onclick="event.stopPropagation();">
+                        ${org.name}
+                    </label>
+                </div>
+            `;
+        });
+
+        $(`#selectOrg${organization}`).append(dropdownMenu);
+    }
+});
 
 
 // ドロップダウンメニューを閉じる
