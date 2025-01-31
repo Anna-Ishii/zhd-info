@@ -40,7 +40,7 @@ class MessageViewRateExport implements
         $_brand = $message->organization1->brand()->orderBy('id', 'asc');
         $brands = $_brand->pluck('name')->toArray();
 
-        $brand_id = $this->request->brand;
+        $brand_id = $this->request->brand ? base64_decode($this->request->brand) : null;
         $shop_code = $this->request->shop_code;
         $shop_name = $this->request->shop_name;
         $org3 = $this->request->org3;
