@@ -30,6 +30,19 @@ $(window).on("load", function () {
 });
 
 $(document).ready(function () {
+    // Base64デコード関数を追加
+    function base64Decode(str) {
+        try {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            console.error('Base64 decode error:', e);
+            return '';
+        }
+    }
+
+
     // テーブルソートの初期化
     $("#table").tablesorter({
         headers: {
@@ -76,7 +89,7 @@ $(document).ready(function () {
         4: "HY",
         8: "SK",
     };
-    let org1 = $('select[name="organization1"]').val();
+    let org1 = base64Decode($('select[name="organization1"]').val());
     // 業態がJP以外の場合、ARWidthを調整
     if (org1Array[org1] !== "JP") {
         ARWidth = BLWidth + th2Width + 1;
@@ -468,9 +481,22 @@ $(document).on("click", '.view_rate[data-view-type="orgs"]', function (e) {
 
 // DS、BL、ARの組織を取得
 $(document).on("change", 'select[name="organization1"]', function (e) {
+    // Base64デコード関数を追加
+    function base64Decode(str) {
+        try {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            console.error('Base64 decode error:', e);
+            return '';
+        }
+    }
+
+
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     const url = "/admin/analyse/personal/organization";
-    let organization1 = e.target.value;
+    let organization1 = base64Decode(e.target.value);
 
     let selectDS = $("#selectOrgDS");
     let selectBL = $("#selectOrgBL");
