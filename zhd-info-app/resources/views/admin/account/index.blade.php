@@ -75,8 +75,9 @@
                     <label class="input-group-addon">業態</label>
                     <select name="organization1" class="form-control">
                         @foreach ($organization1_list as $org1)
-                            <option value="{{ $org1->id }}"
-                                {{ request()->input('organization1') == $org1->id ? 'selected' : '' }}>{{ $org1->name }}
+                            <option value="{{ base64_encode($org1->id) }}"
+                                {{ request()->input('organization1') == base64_encode($org1->id) ? 'selected' : '' }}>
+                                {{ $org1->name }}
                             </option>
                         @endforeach
                     </select>

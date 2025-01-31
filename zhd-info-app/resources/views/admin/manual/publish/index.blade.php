@@ -76,7 +76,8 @@
                     <select name="brand" class="form-control">
                         @foreach ($organization1_list as $org1)
                             <option
-                                value="{{ $org1->id }}"{{ request()->input('brand') == $org1->id ? 'selected' : '' }}>
+                                value="{{ base64_encode($org1->id) }}"
+                                {{ request()->input('brand') == base64_encode($org1->id) ? 'selected' : '' }}>
                                 {{ $org1->name }}</option>
                         @endforeach
                     </select>

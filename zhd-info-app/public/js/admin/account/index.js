@@ -205,7 +205,7 @@ $(document).ready(function() {
     const params = new URLSearchParams(window.location.search);
     if (params.toString()) {
         sessionStorage.setItem('searchParams', params.toString());
-        window.history.replaceState({}, '', window.location.pathname); // URLのパラメータを削除
+        // window.history.replaceState({}, '', window.location.pathname); // URLのパラメータを削除
     }
 
     // ページロード時に検索条件を復元
