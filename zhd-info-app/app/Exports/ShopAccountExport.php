@@ -45,7 +45,7 @@ class ShopAccountExport implements
         $orgs = $this->request->input('org');
         $shop_freeword = $this->request->input('shop_freeword');
 
-        $organization1_id = $this->request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $this->request->input('organization1') ? base64_decode($this->request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
         $organization2 = $this->request->input('organization2');
         $roll = $this->request->input('roll');

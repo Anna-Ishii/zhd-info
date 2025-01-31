@@ -121,8 +121,9 @@
                     <select name="brand" class="form-control">
                         <option value="">指定なし</option>
                         @foreach ($brand_list as $brand)
-                            <option value="{{ $brand->id }}"
-                                {{ request()->input('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}
+                            <option value="{{ base64_encode($brand->id) }}"
+                                {{ request()->input('brand') == base64_encode($brand->id) ? 'selected' : '' }}>
+                                {{ $brand->name }}
                             </option>
                         @endforeach
                     </select>
