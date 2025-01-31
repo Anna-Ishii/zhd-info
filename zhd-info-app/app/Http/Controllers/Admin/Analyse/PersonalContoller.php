@@ -28,7 +28,7 @@ class PersonalContoller extends Controller
         $orgs = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
         $message_freeword = $request->input('message_freeword');
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
 
         $organization1 = Organization1::find($organization1_id);
         $orgazanizations = [];
@@ -424,7 +424,7 @@ class PersonalContoller extends Controller
     {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
 
         $organization1 = $organization1->name;

@@ -63,7 +63,7 @@ class ManualPublishController extends Controller
             return PublishStatus::tryFrom((int)$status);
         }, $statusArray);
         $q = $request->input('q');
-        $organization1_id = $request->input('brand', $organization1_list[0]->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $organization1_list[0]->id;
         $publish_date = $request->input('publish-date');
 
         $organization1 = Organization1::find($organization1_id);
@@ -264,7 +264,7 @@ class ManualPublishController extends Controller
     public function updateViewRates(Request $request)
     {
         $admin = session('admin');
-        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $admin->firstOrganization1()->id;
         $rate = $request->input('rate');
         $manual_id = $request->input('manual_id'); // manual_idを取得
 
@@ -338,7 +338,7 @@ class ManualPublishController extends Controller
         $org5_list = Organization1Repository::getOrg5($organization1);
 
         // request
-        $brand_id = $request->input('brand');
+        $brand_id = $request->input('brand') ? base64_decode($request->input('brand')) : null;
         $shop_freeword = $request->input('shop_freeword');
         $org3 = $request->input('org3');
         $org4 = $request->input('org4');
@@ -1234,7 +1234,7 @@ class ManualPublishController extends Controller
     public function exportList(Request $request)
     {
         $admin = session('admin');
-        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $admin->firstOrganization1()->id;
         $organization1 = Organization1::find($organization1_id);
 
         $file_name = '動画マニュアル_' . $organization1->name . now()->format('_Y_m_d') . '.csv';

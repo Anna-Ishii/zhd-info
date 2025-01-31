@@ -37,7 +37,7 @@ class ManualListExport implements
     public function view(): View
     {
         $admin = session('admin');
-        $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $this->request->input('brand') ? base64_decode($this->request->input('brand')) : $admin->firstOrganization1()->id;
 
         // クエリパラメータから全ページか一部ページかを判断
         $all = filter_var($this->request->query('all', false), FILTER_VALIDATE_BOOLEAN);
