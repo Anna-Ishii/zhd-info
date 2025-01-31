@@ -100,8 +100,8 @@
                                 <label class="form-check-label" for="selectAllCategories" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
                             </div>
                             @foreach ($category_list as $category)
-                                {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
-                                @if ($organization1->id === 8 || $category->id !== 7)
+                                {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
+                                @if ($organization1->id === 8 || $category->id !== 7 && $category->id !== 8)
                                     <div class="form-check">
                                         <input class="form-check-input" type="checkbox" name="category[]" value="{{ $category->id }}"
                                             {{ in_array($category->id, request()->input('category', [])) ? 'checked' : '' }} id="category{{ $category->id }}" onchange="updateSelectedCategories()">
