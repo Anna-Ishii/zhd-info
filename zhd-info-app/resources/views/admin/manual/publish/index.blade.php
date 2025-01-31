@@ -97,16 +97,13 @@
                                 <label class="form-check-label" for="selectAllCategories" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
                             </div>
                             @foreach ($new_category_list as $category)
-                                {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
-                                @if ($organization1->id === 8 || $category->id !== 7)
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="new_category[]" value="{{ $category->id }}"
-                                            {{ in_array($category->id, request()->input('new_category', [])) ? 'checked' : '' }} id="new_category{{ $category->id }}" onchange="updateSelectedCategories()">
-                                        <label class="form-check-label" for="new_category{{ $category->id }}" class="custom-label" onclick="event.stopPropagation();">
-                                            {{ $category->name }}
-                                        </label>
-                                    </div>
-                                @endif
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="new_category[]" value="{{ $category->id }}"
+                                        {{ in_array($category->id, request()->input('new_category', [])) ? 'checked' : '' }} id="new_category{{ $category->id }}" onchange="updateSelectedCategories()">
+                                    <label class="form-check-label" for="new_category{{ $category->id }}" class="custom-label" onclick="event.stopPropagation();">
+                                        {{ $category->name }}
+                                    </label>
+                                </div>
                             @endforeach
                         </div>
                     </div>
