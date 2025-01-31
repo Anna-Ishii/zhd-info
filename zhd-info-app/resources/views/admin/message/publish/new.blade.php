@@ -76,8 +76,8 @@
                         <select name="category_id" class="form-control">
                             <option value="" hidden>カテゴリを選択</option>
                             @foreach ($category_list as $category)
-                                {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
-                                @if ($organization1->id === 8 || $category->id !== 7)
+                                {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
+                                @if ($organization1->id === 8 || $category->id !== 7 && $category->id !== 8)
                                     <option value="{{ $category->id }}"
                                         {{ old('category_id') == $category->id ? 'selected' : '' }}>
                                         {{ $category->name }}
