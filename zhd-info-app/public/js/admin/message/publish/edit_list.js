@@ -2184,7 +2184,7 @@ $(document).ready(function () {
                     <div class="category-input-group" style="width: max-content;">
                         <select class="form-control" name="category_id" style="cursor: pointer;">
                             ${categoryList.map(category => `
-                                ${(org1Id == 8 || category.id !== 7) ? `
+                                ${(org1Id == 8 || category.id !== 7 && category.id !== 8) ? `
                                     <option value="${category.id}" >
                                         ${category.name}
                                     </option>
@@ -2813,7 +2813,7 @@ $(document).ready(function () {
                     <div class="category-input-group" style="width: max-content;">
                         <select class="form-control" name="category_id" style="cursor: pointer;">
                             ${categoryList.map(category => `
-                                ${(org1Id == 8 || category.id !== 7) ? `
+                                ${(org1Id == 8 || category.id !== 7 && category.id !== 8) ? `
                                     <option value="${category.id}"
                                         ${message.category_id == category.id ? 'selected' : ''}
                                         >${category.name}
