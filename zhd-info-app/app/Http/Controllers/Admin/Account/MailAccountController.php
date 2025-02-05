@@ -189,20 +189,24 @@ class MailAccountController extends Controller
 
             $userRoleData = json_decode($request->input('userRoleData'), true);
 
-            foreach ($userRoleData as $data) {
-                $userRole = UsersRole::where('user_id', $data['user_id'])->where('shop_id', $data['shop_id'])->first();
+            // データをチャンクして処理
+            $chunkSize = 500; // チャンクサイズを設定
+            collect($userRoleData)->chunk($chunkSize)->each(function ($chunk) {
+                foreach ($chunk as $data) {
+                    $userRole = UsersRole::where('user_id', $data['user_id'])->where('shop_id', $data['shop_id'])->first();
 
-                if (!$userRole) {
-                    continue;
+                    if (!$userRole) {
+                        continue;
+                    }
+
+                    $userRole->update([
+                        'DM_view_notification' => $data['DM_status'],
+                        'BM_view_notification' => $data['BM_status'],
+                        'AM_view_notification' => $data['AM_status'],
+                        'updated_at' => now()
+                    ]);
                 }
-
-                $userRole->update([
-                    'DM_view_notification' => $data['DM_status'],
-                    'BM_view_notification' => $data['BM_status'],
-                    'AM_view_notification' => $data['AM_status'],
-                    'updated_at' => now()
-                ]);
-            }
+            });
 
             DB::commit();
 
