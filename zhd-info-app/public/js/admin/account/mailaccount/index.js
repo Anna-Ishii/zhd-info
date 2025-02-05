@@ -264,38 +264,73 @@ $(document).ready(function() {
         const DMStatusAllSelectBtn = $('.DMStatusAllSelectBtn');
         DMStatusBreak.show();
         DMStatusAllSelectBtn.show();
+        let dmFlg = true;
 
         // BMの業連閲覧状況メール配信のすべて選択/解除ボタン
         const BMStatusBreak = $('.BMStatusBreak');
         const BMStatusAllSelectBtn = $('.BMStatusAllSelectBtn');
         BMStatusBreak.show();
         BMStatusAllSelectBtn.show();
+        let bmFlg = true;
 
         // AMの業連閲覧状況メール配信のすべて選択/解除ボタン
         const AMStatusBreak = $('.AMStatusBreak');
         const AMStatusAllSelectBtn = $('.AMStatusAllSelectBtn');
         AMStatusBreak.show();
-        AMStatusAllSelectBtn.show()
+        AMStatusAllSelectBtn.show();
+        let amFlg = true;
 
         $('table#list.mail-account tbody tr').each(function() {
             const row = $(this);
 
             // DMの業連閲覧状況メール配信
-            const dmStatus = row.find('.DM_status-select');
             const dmId = row.data('dm_id');
+            const dmStatus = row.find('.DM_status-select');
+            let dmNumberFlg = true;
+            if (!row.find('.label-DM_id').text()) {
+                dmNumberFlg = false;
+                dmFlg = false;
+            }
+            let dmMailFlg = true;
+            if (!row.find('.label-DM_email').text()) {
+                dmMailFlg = false;
+                dmFlg = false;
+            }
+
             // BMの業連閲覧状況メール配信
-            const bmStatus = row.find('.BM_status-select');
             const bmId = row.data('bm_id');
+            const bmStatus = row.find('.BM_status-select');
+            let bmNumberFlg = true;
+            if (!row.find('.label-BM_id').text()) {
+                bmNumberFlg = false;
+                bmFlg = false;
+            }
+            let bmMailFlg = true;
+            if (!row.find('.label-BM_email').text()) {
+                bmMailFlg = false;
+                bmFlg = false;
+            }
+
             // AMの業連閲覧状況メール配信
-            const amStatus = row.find('.AM_status-select');
             const amId = row.data('am_id');
+            const amStatus = row.find('.AM_status-select');
+            let amNumberFlg = true;
+            if (!row.find('.label-AM_id').text()) {
+                amNumberFlg = false;
+                amFlg = false;
+            }
+            let amMailFlg = true;
+            if (!row.find('.label-AM_email').text()) {
+                amMailFlg = false;
+                amFlg = false;
+            }
 
             // DMの業連閲覧状況メール配信
             if (dmStatus) {
                 $(dmStatus).hide();
                 const dmStatusSelectGroupHtml = `
                     <div class="dm-status-select-group">
-                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;" data-dm_id="${dmId}">
+                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;" data-dm_id="${dmId}" ${!(dmNumberFlg && dmMailFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${dmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -309,7 +344,7 @@ $(document).ready(function() {
                 $(bmStatus).hide();
                 const bmStatusSelectGroupHtml = `
                 <div class="bm-status-select-group">
-                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;" data-bm_id="${bmId}">
+                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;" data-bm_id="${bmId}" ${!(bmNumberFlg && bmMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${bmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -323,7 +358,7 @@ $(document).ready(function() {
                 $(amStatus).hide();
                 const amStatusSelectGroupHtml = `
                 <div class="am-status-select-group">
-                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;" data-am_id="${amId}">
+                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;" data-am_id="${amId}" ${!(amNumberFlg && amMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${amStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -333,6 +368,16 @@ $(document).ready(function() {
             }
         });
 
+        // すべて選択/解除ボタンの表示/非表示
+        if (dmFlg) {
+            $('.DMStatusAllSelectBtn').hide();
+        }
+        if (bmFlg) {
+            $('.BMStatusAllSelectBtn').hide();
+        }
+        if (amFlg) {
+            $('.AMStatusAllSelectBtn').hide();
+        }
 
         // セレクトの変更を監視
         $('table#list.mail-account').on('change', 'select', function() {
