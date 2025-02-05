@@ -264,21 +264,18 @@ $(document).ready(function() {
         const DMStatusAllSelectBtn = $('.DMStatusAllSelectBtn');
         DMStatusBreak.show();
         DMStatusAllSelectBtn.show();
-        let dmFlg = true;
 
         // BMの業連閲覧状況メール配信のすべて選択/解除ボタン
         const BMStatusBreak = $('.BMStatusBreak');
         const BMStatusAllSelectBtn = $('.BMStatusAllSelectBtn');
         BMStatusBreak.show();
         BMStatusAllSelectBtn.show();
-        let bmFlg = true;
 
         // AMの業連閲覧状況メール配信のすべて選択/解除ボタン
         const AMStatusBreak = $('.AMStatusBreak');
         const AMStatusAllSelectBtn = $('.AMStatusAllSelectBtn');
         AMStatusBreak.show();
         AMStatusAllSelectBtn.show();
-        let amFlg = true;
 
         $('table#list.mail-account tbody tr').each(function() {
             const row = $(this);
@@ -289,12 +286,10 @@ $(document).ready(function() {
             let dmNumberFlg = true;
             if (!row.find('.label-DM_id').text()) {
                 dmNumberFlg = false;
-                dmFlg = false;
             }
             let dmMailFlg = true;
             if (!row.find('.label-DM_email').text()) {
                 dmMailFlg = false;
-                dmFlg = false;
             }
 
             // BMの業連閲覧状況メール配信
@@ -303,12 +298,10 @@ $(document).ready(function() {
             let bmNumberFlg = true;
             if (!row.find('.label-BM_id').text()) {
                 bmNumberFlg = false;
-                bmFlg = false;
             }
             let bmMailFlg = true;
             if (!row.find('.label-BM_email').text()) {
                 bmMailFlg = false;
-                bmFlg = false;
             }
 
             // AMの業連閲覧状況メール配信
@@ -317,12 +310,10 @@ $(document).ready(function() {
             let amNumberFlg = true;
             if (!row.find('.label-AM_id').text()) {
                 amNumberFlg = false;
-                amFlg = false;
             }
             let amMailFlg = true;
             if (!row.find('.label-AM_email').text()) {
                 amMailFlg = false;
-                amFlg = false;
             }
 
             // DMの業連閲覧状況メール配信
@@ -368,17 +359,6 @@ $(document).ready(function() {
             }
         });
 
-        // すべて選択/解除ボタンの表示/非表示
-        if (dmFlg) {
-            $('.DMStatusAllSelectBtn').hide();
-        }
-        if (bmFlg) {
-            $('.BMStatusAllSelectBtn').hide();
-        }
-        if (amFlg) {
-            $('.AMStatusAllSelectBtn').hide();
-        }
-
         // セレクトの変更を監視
         $('table#list.mail-account').on('change', 'select', function() {
             const row = $(this).closest('tr');
@@ -400,19 +380,28 @@ $(document).ready(function() {
             // 同じIDの場合、セレクトの値を変更
             $('table#list.mail-account tbody tr').each(function() {
                 const currentRow = $(this);
-                const currentDmId = currentRow.data('dm_id');
-                const currentBmId = currentRow.data('bm_id');
-                const currentAmId = currentRow.data('am_id');
 
-                if (currentDmId === areaId) {
+                const currentDmId = currentRow.data('dm_id');
+                const hasDmNumber = !!currentRow.find('.label-DM_id').text();
+                const hasDmMail = !!currentRow.find('.label-DM_email').text();
+
+                const currentBmId = currentRow.data('bm_id');
+                const hasBmNumber = !!currentRow.find('.label-BM_id').text();
+                const hasBmMail = !!currentRow.find('.label-BM_email').text();
+
+                const currentAmId = currentRow.data('am_id');
+                const hasAmNumber = !!currentRow.find('.label-AM_id').text();
+                const hasAmMail = !!currentRow.find('.label-AM_email').text();
+
+                if (currentDmId === areaId && hasDmNumber && hasDmMail) {
                     currentRow.addClass('edit-modified');
                     currentRow.find('select[name="DM_status"]').val(selectedValue);
                 }
-                if (currentBmId === areaId) {
+                if (currentBmId === areaId && hasBmNumber && hasBmMail) {
                     currentRow.addClass('edit-modified');
                     currentRow.find('select[name="BM_status"]').val(selectedValue);
                 }
-                if (currentAmId === areaId) {
+                if (currentAmId === areaId && hasAmNumber && hasAmMail) {
                     currentRow.addClass('edit-modified');
                     currentRow.find('select[name="AM_status"]').val(selectedValue);
                 }
@@ -424,6 +413,7 @@ $(document).ready(function() {
         $('.DMStatusAllSelectBtn, .BMStatusAllSelectBtn, .AMStatusAllSelectBtn').on('click', function() {
             const buttonClass = $(this).attr('class').split(' ').find(cls => cls.includes('AllSelectBtn'));
             let targetName;
+            let targetId;
             const isActive = $(this).hasClass('active');
             const newValue = isActive ? '0' : '1';
 
@@ -431,19 +421,29 @@ $(document).ready(function() {
             switch(buttonClass) {
                 case 'DMStatusAllSelectBtn':
                     targetName = 'DM_status';
+                    targetId = 'label-DM_id';
                     break;
                 case 'BMStatusAllSelectBtn':
                     targetName = 'BM_status';
+                    targetId = 'label-BM_id';
                     break;
                 case 'AMStatusAllSelectBtn':
                     targetName = 'AM_status';
+                    targetId = 'label-AM_id';
                     break;
             }
 
             $('table#list.mail-account tbody tr').each(function() {
                 const row = $(this);
-                row.addClass('edit-modified');
-                row.find(`select[name="${targetName}"]`).val(newValue);
+
+                // numberとmailの両方が存在するか確認
+                const hasNumber = !!row.find(`.${targetId}`).text();
+                const hasMail = !!row.find(`.${targetId.replace('id', 'email')}`).text();
+
+                if (hasNumber && hasMail) {
+                    row.addClass('edit-modified');
+                    row.find(`select[name="${targetName}"]`).val(newValue);
+                }
             });
         });
 
