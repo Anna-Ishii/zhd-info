@@ -425,16 +425,14 @@ class WowTalkNotificationSenderCommand extends Command
     {
         if ($type === 'message') {
             // メッセージ内容を生成
-            $messageContent = "業連が配信されました。確認してください。\n";
-            $messageContent .= "・業連名：{$dataType->title}\n";
-            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+            $messageContent = "業連：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
+            // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
         } elseif ($type === 'manual') {
             // メッセージ内容を生成
-            $messageContent = "マニュアルが配信されました。確認してください。\n";
-            $messageContent .= "・マニュアル名：{$dataType->title}\n";
-            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
-            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            $messageContent = "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent .= "https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            // $messageContent .= "https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
         }
 
         return $messageContent;
