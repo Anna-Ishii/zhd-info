@@ -86,6 +86,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/csv/store/upload', [MessagePublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [MessagePublishController::class, 'storeProgress'])->name('storeProgress');
             Route::post('/csv/store/import', [MessagePublishController::class, 'csvStoreImport'])->name('csvStoreImport');
+            Route::post('/csv/store/all/import', [MessagePublishController::class, 'csvStoreAllImport'])->name('csvStoreAllImport');
         });
     });
     // 管理画面-動画マニュアル
