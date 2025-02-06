@@ -321,7 +321,7 @@ $(document).ready(function() {
                 $(dmStatus).hide();
                 const dmStatusSelectGroupHtml = `
                     <div class="dm-status-select-group">
-                        <select class="form-control" name="DM_status" style="padding: 0px; cursor: pointer;" data-dm_id="${dmId}" ${!(dmNumberFlg && dmMailFlg) ? 'disabled' : ''}>
+                        <select class="form-control" name="DM_status" style="padding: 0px; ${!(dmNumberFlg && dmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-dm_id="${dmId}" ${!(dmNumberFlg && dmMailFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${dmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -335,7 +335,7 @@ $(document).ready(function() {
                 $(bmStatus).hide();
                 const bmStatusSelectGroupHtml = `
                 <div class="bm-status-select-group">
-                    <select class="form-control" name="BM_status" style="padding: 0px; cursor: pointer;" data-bm_id="${bmId}" ${!(bmNumberFlg && bmMailFlg) ? 'disabled' : ''}>
+                    <select class="form-control" name="BM_status" style="padding: 0px; ${!(bmNumberFlg && bmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-bm_id="${bmId}" ${!(bmNumberFlg && bmMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${bmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -349,7 +349,7 @@ $(document).ready(function() {
                 $(amStatus).hide();
                 const amStatusSelectGroupHtml = `
                 <div class="am-status-select-group">
-                    <select class="form-control" name="AM_status" style="padding: 0px; cursor: pointer;" data-am_id="${amId}" ${!(amNumberFlg && amMailFlg) ? 'disabled' : ''}>
+                    <select class="form-control" name="AM_status" style="padding: 0px; ${!(amNumberFlg && amMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-am_id="${amId}" ${!(amNumberFlg && amMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${amStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
