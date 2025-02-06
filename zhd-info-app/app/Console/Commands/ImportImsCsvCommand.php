@@ -128,6 +128,7 @@ class ImportImsCsvCommand extends Command
         foreach ($shops_data as $index => $shop) {
             $organization1_id = Organization1::where('name', $shop[0])->value('id');
 
+            // 新CSV 閉店日36行目なので$shop[35]
             $close_date = $this->parseDateTime($shop[30]);
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
