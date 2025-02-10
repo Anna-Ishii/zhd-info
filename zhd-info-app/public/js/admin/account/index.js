@@ -299,17 +299,28 @@ $(document).ready(function() {
             const wt1Status = row.find('.WT1_status-select');
             // WowTalk1の業連配信通知
             const wt1Send = row.find('.WT1_send-select');
+
+            let wt1IdFlg = true;
+            if (!row.find('.label-WT1_id').text()) {
+                wt1IdFlg = false;
+            }
+
             // WowTalk2の閲覧状況通知
             const wt2Status = row.find('.WT2_status-select');
             // WowTalk2の業連配信通知
             const wt2Send = row.find('.WT2_send-select');
+
+            let wt2IdFlg = true;
+            if (!row.find('.label-WT2_id').text()) {
+                wt2IdFlg = false;
+            }
 
             // WowTalk1の閲覧状況通知
             if (wt1Status) {
                 $(wt1Status).hide();
                 const wt1StatusSelectGroupHtml = `
                     <div class="wowtalk1-status-select-group">
-                        <select class="form-control" name="WT1_status" style="padding: 0px; cursor: pointer;">
+                        <select class="form-control" name="WT1_status" style="padding: 0px; ${!(wt1IdFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" ${!(wt1IdFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${wt1Status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -323,7 +334,7 @@ $(document).ready(function() {
                 $(wt1Send).hide();
                 const wt1SendSelectGroupHtml = `
                 <div class="wowtalk1-send-select-group">
-                    <select class="form-control" name="WT1_send" style="padding: 0px; cursor: pointer;">
+                    <select class="form-control" name="WT1_send" style="padding: 0px; ${!(wt1IdFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" ${!(wt1IdFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${wt1Send.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -337,7 +348,7 @@ $(document).ready(function() {
                 $(wt2Status).hide();
                 const wt2StatusSelectGroupHtml = `
                 <div class="wowtalk2-status-select-group">
-                    <select class="form-control" name="WT2_status" style="padding: 0px; cursor: pointer;">
+                    <select class="form-control" name="WT2_status" style="padding: 0px; ${!(wt2IdFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" ${!(wt2IdFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${wt2Status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -351,7 +362,7 @@ $(document).ready(function() {
                 $(wt2Send).hide();
                 const wt2SendSelectGroupHtml = `
                 <div class="wowtalk2-send-select-group">
-                    <select class="form-control" name="WT2_send" style="padding: 0px; cursor: pointer;">
+                    <select class="form-control" name="WT2_send" style="padding: 0px; ${!(wt2IdFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" ${!(wt2IdFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${wt2Send.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -373,6 +384,7 @@ $(document).ready(function() {
         $('.WT1StatusAllSelectBtn, .WT1SendAllSelectBtn, .WT2StatusAllSelectBtn, .WT2SendAllSelectBtn').on('click', function() {
             const buttonClass = $(this).attr('class').split(' ').find(cls => cls.includes('AllSelectBtn'));
             let targetName;
+            let targetId;
             const isActive = $(this).hasClass('active');
             const newValue = isActive ? '0' : '1';
 
@@ -380,22 +392,32 @@ $(document).ready(function() {
             switch(buttonClass) {
                 case 'WT1StatusAllSelectBtn':
                     targetName = 'WT1_status';
+                    targetId = 'label-WT1_id';
                     break;
                 case 'WT1SendAllSelectBtn':
                     targetName = 'WT1_send';
+                    targetId = 'label-WT1_id';
                     break;
                 case 'WT2StatusAllSelectBtn':
                     targetName = 'WT2_status';
+                    targetId = 'label-WT2_id';
                     break;
                 case 'WT2SendAllSelectBtn':
                     targetName = 'WT2_send';
+                    targetId = 'label-WT2_id';
                     break;
             }
 
             $('table#list.account tbody tr').each(function() {
                 const row = $(this);
-                row.addClass('edit-modified');
-                row.find(`select[name="${targetName}"]`).val(newValue);
+
+                // wowtalkIdが存在するか確認
+                const hasId = !!row.find(`.${targetId}`).text();
+
+                if (hasId) {
+                    row.addClass('edit-modified');
+                    row.find(`select[name="${targetName}"]`).val(newValue);
+                }
             });
         });
 
@@ -430,8 +452,6 @@ $(document).ready(function() {
                 const row = $(this);
                 // modifiedクラスを削除
                 row.removeClass('edit-modified');
-
-                const shopId = row.data('shop_id');
 
                 // WowTalk1の閲覧状況通知
                 const wt1Status = row.find('.WT1_status-select');
