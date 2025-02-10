@@ -692,9 +692,6 @@ class ManualPublishController extends Controller
 
             DB::commit();
 
-            // // 閲覧率の更新処理
-            // $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
-
             // 閲覧率の更新処理
             $organization1_id = $organization1->id;
             $rate = $request->input('rate');
@@ -723,13 +720,13 @@ class ManualPublishController extends Controller
 
             // バルクアップデート用のデータ準備
             $updateData = [];
-            foreach ($manualRates as $manual) {
+            foreach ($manualRates as $m) {
                 $updateData[] = [
-                    'manual_id' => $manual->manual_id,
+                    'manual_id' => $m->manual_id,
                     'organization1_id' => $organization1_id,
-                    'view_rate' => $manual->view_rate,     // 閲覧率の計算
-                    'read_users' => $manual->read_users,   // 既読ユーザー数
-                    'total_users' => $manual->total_users, // 全体ユーザー数
+                    'view_rate' => $m->view_rate,     // 閲覧率の計算
+                    'read_users' => $m->read_users,   // 既読ユーザー数
+                    'total_users' => $m->total_users, // 全体ユーザー数
                     'created_at' => now(),
                     'updated_at' => now(),
                 ];
@@ -758,7 +755,7 @@ class ManualPublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_store');
+            SendWowtalkNotificationJob::dispatch($manual_id, 'manual', 'manual_store');
         }
 
         // 検索条件をセッションから取得してリダイレクト
@@ -1193,9 +1190,6 @@ class ManualPublishController extends Controller
 
             DB::commit();
 
-            // // 閲覧率の更新処理
-            // $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));
-
             // 閲覧率の更新処理
             $organization1_id = $manual->organization1_id;
             $rate = $request->input('rate');
@@ -1224,13 +1218,13 @@ class ManualPublishController extends Controller
 
         // バルクアップデート用のデータ準備
         $updateData = [];
-        foreach ($manualRates as $manual) {
+        foreach ($manualRates as $m) {
             $updateData[] = [
-                'manual_id' => $manual->manual_id,
+                'manual_id' => $m->manual_id,
                 'organization1_id' => $organization1_id,
-                'view_rate' => $manual->view_rate,     // 閲覧率の計算
-                'read_users' => $manual->read_users,   // 既読ユーザー数
-                'total_users' => $manual->total_users, // 全体ユーザー数
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -1259,7 +1253,7 @@ class ManualPublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_update');
+            SendWowtalkNotificationJob::dispatch($manual_id, 'manual', 'manual_update');
         }
 
         // 検索条件をセッションから取得してリダイレクト

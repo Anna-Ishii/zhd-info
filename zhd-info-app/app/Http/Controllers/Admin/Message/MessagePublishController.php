@@ -293,11 +293,6 @@ class MessagePublishController extends Controller
             ->select('page_name', 'url')
             ->first();
 
-            if ($request->is('admin/message/publish')) {
-                // ここで特定の処理を実行
-                session()->put('menu_action', '1-1.業務連絡');
-            }
-
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
@@ -908,9 +903,6 @@ class MessagePublishController extends Controller
 
             DB::commit();
 
-            // // 閲覧率の更新処理
-            // $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $organization1->id]));
-
             // 閲覧率の更新処理
             $organization1_id = $organization1->id;
             $rate = $request->input('rate');
@@ -939,13 +931,13 @@ class MessagePublishController extends Controller
 
         // バルクアップデート用のデータ準備
         $updateData = [];
-        foreach ($messageRates as $message) {
+        foreach ($messageRates as $m) {
             $updateData[] = [
-                'message_id' => $message->message_id,
+                'message_id' => $m->message_id,
                 'organization1_id' => $organization1_id,
-                'view_rate' => $message->view_rate,     // 閲覧率の計算
-                'read_users' => $message->read_users,   // 既読ユーザー数
-                'total_users' => $message->total_users, // 全体ユーザー数
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -977,7 +969,7 @@ class MessagePublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_store');
+            SendWowtalkNotificationJob::dispatch($message_id, 'message', 'message_store');
         }
 
         // 検索条件をセッションから取得してリダイレクト
@@ -1736,9 +1728,6 @@ class MessagePublishController extends Controller
             $message->tag()->sync($tag_ids);
             DB::commit();
 
-            // // 閲覧率の更新処理
-            // $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $message->organization1_id]));
-
             // 閲覧率の更新処理
             $organization1_id = $message->organization1_id;
             $rate = $request->input('rate');
@@ -1767,13 +1756,13 @@ class MessagePublishController extends Controller
 
         // バルクアップデート用のデータ準備
         $updateData = [];
-        foreach ($messageRates as $message) {
+        foreach ($messageRates as $m) {
             $updateData[] = [
-                'message_id' => $message->message_id,
+                'message_id' => $m->message_id,
                 'organization1_id' => $organization1_id,
-                'view_rate' => $message->view_rate,     // 閲覧率の計算
-                'read_users' => $message->read_users,   // 既読ユーザー数
-                'total_users' => $message->total_users, // 全体ユーザー数
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
                 'created_at' => now(),
                 'updated_at' => now(),
             ];
@@ -1806,7 +1795,7 @@ class MessagePublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_update');
+            SendWowtalkNotificationJob::dispatch($message_id, 'message', 'message_update');
         }
 
         // 検索条件をセッションから取得してリダイレクト
