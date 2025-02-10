@@ -279,7 +279,7 @@ class ManualPublishController extends Controller
             ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
             ->where('manuals.organization1_id', $organization1_id)
             ->when($manual_id, function ($query) use ($manual_id) {
-                $query->where('manual_user.manual_id', $manual_id); // manual_idでフィルタリング
+                $query->where('manual_user.manual_id', $manual_id);
             })
             ->groupBy('manual_user.manual_id')
             ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
@@ -309,12 +309,6 @@ class ManualPublishController extends Controller
             ['manual_id', 'organization1_id'],
             ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
         );
-
-        // 検索条件をセッションから取得してリダイレクト
-        $manual_publish_url = session('manual_publish_url');
-        if ($manual_publish_url) {
-            return redirect()->route('admin.manual.publish.index', [$manual_publish_url]);
-        }
 
         // 処理完了後にページをリダイレクトして結果を表示
         return redirect()->back()->with('success', '閲覧率が更新されました。');
@@ -699,7 +693,51 @@ class ManualPublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $organization1->id]));
+            $organization1_id = $organization1->id;
+            $rate = $request->input('rate');
+            $manual_id = $manual->id;
+
+            // メッセージの既読・総ユーザー数を一度に集計
+            $manualRates = DB::table('manual_user')
+                ->select([
+                    'manual_user.manual_id',
+                    DB::raw('sum(manual_user.read_flg) as read_users'),
+                    DB::raw('count(distinct manual_user.user_id) as total_users'),
+                    DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
+                ])
+                ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
+                ->where('manuals.organization1_id', $organization1_id)
+                ->when($manual_id, function ($query) use ($manual_id) {
+                    $query->where('manual_user.manual_id', $manual_id);
+                })
+                ->groupBy('manual_user.manual_id')
+                ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                    $min = isset($rate[0]) ? $rate[0] : 0;
+                    $max = isset($rate[1]) ? $rate[1] : 100;
+                    $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+                })
+                ->get();
+
+            // バルクアップデート用のデータ準備
+            $updateData = [];
+            foreach ($manualRates as $m) {
+                $updateData[] = [
+                    'manual_id' => $m->manual_id,
+                    'organization1_id' => $organization1_id,
+                    'view_rate' => $m->view_rate,     // 閲覧率の計算
+                    'read_users' => $m->read_users,   // 既読ユーザー数
+                    'total_users' => $m->total_users, // 全体ユーザー数
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
+
+            // バルクアップデートを実行
+            DB::table('manual_view_rates')->upsert(
+                $updateData,
+                ['manual_id', 'organization1_id'],
+                ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+            );
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -717,7 +755,7 @@ class ManualPublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_store');
+            SendWowtalkNotificationJob::dispatch($manual_id, 'manual', 'manual_store');
         }
 
         // 検索条件をセッションから取得してリダイレクト
@@ -1153,7 +1191,51 @@ class ManualPublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['manual_id' => $manual->id, 'brand' => $manual->organization1_id]));
+            $organization1_id = $manual->organization1_id;
+            $rate = $request->input('rate');
+            $manual_id = $manual->id;
+
+            // メッセージの既読・総ユーザー数を一度に集計
+            $manualRates = DB::table('manual_user')
+            ->select([
+                'manual_user.manual_id',
+                DB::raw('sum(manual_user.read_flg) as read_users'),
+                DB::raw('count(distinct manual_user.user_id) as total_users'),
+                DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
+            ])
+            ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
+            ->where('manuals.organization1_id', $organization1_id)
+            ->when($manual_id, function ($query) use ($manual_id) {
+                $query->where('manual_user.manual_id', $manual_id);
+            })
+            ->groupBy('manual_user.manual_id')
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->get();
+
+        // バルクアップデート用のデータ準備
+        $updateData = [];
+        foreach ($manualRates as $m) {
+            $updateData[] = [
+                'manual_id' => $m->manual_id,
+                'organization1_id' => $organization1_id,
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // バルクアップデートを実行
+        DB::table('manual_view_rates')->upsert(
+            $updateData,
+            ['manual_id', 'organization1_id'],
+            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+        );
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -1171,7 +1253,7 @@ class ManualPublishController extends Controller
 
         // WowTalk通知のジョブをキューに追加
         if ($is_broadcast_notification == 1) {
-            SendWowtalkNotificationJob::dispatch($manual->id, 'manual', 'manual_update');
+            SendWowtalkNotificationJob::dispatch($manual_id, 'manual', 'manual_update');
         }
 
         // 検索条件をセッションから取得してリダイレクト
@@ -1758,7 +1840,6 @@ class ManualPublishController extends Controller
         $storesJson = $request->json('file_json');
         $organization1_id = $request->json('organization1_id');
 
-        $csvStoreIds = [];
         $brand_id = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
 
         // ショップIDを取得
@@ -1771,16 +1852,14 @@ class ManualPublishController extends Controller
 
         try {
             // 業態一覧を取得する
-            $brand_list = Brand::where('organization1_id', $organization1_id)->get();
+            $brand_list = Brand::where('organization1_id', $organization1_id)->get(['id']);
 
-            $organization_list = [];
             $organization_list = Shop::query()
                 ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
                 ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
                 ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
                 ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-                ->distinct('organization4_id')
-                ->distinct('organization5_id')
+                ->distinct()
                 ->select(
                     'organization2_id',
                     'organization2.name as organization2_name',
@@ -1793,20 +1872,15 @@ class ManualPublishController extends Controller
                     'organization4.order_no as organization4_order_no',
                     'organization5_id',
                     'organization5.name as organization5_name',
-                    'organization5.order_no as organization5_order_no',
+                    'organization5.order_no as organization5_order_no'
                 )
                 ->where('organization1_id', $organization1_id)
-                ->orderByRaw('organization2_id is null asc')
-                ->orderByRaw('organization3_id is null asc')
-                ->orderByRaw('organization4_id is null asc')
-                ->orderByRaw('organization5_id is null asc')
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
                 ->orderBy("organization5_order_no", "asc")
                 ->get()
                 ->toArray();
-
 
             // 事前に必要なデータをすべて一括取得
             $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1830,38 +1904,24 @@ class ManualPublishController extends Controller
                 ->get()
                 ->toArray();
 
-
             // 組織別にデータを整理する
             $organization_list = array_map(function ($org) use ($all_shops) {
-                $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization5_id'] == $org['organization5_id'];
-                });
-                $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
-                });
-                $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
-                $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
+                $org['organization5_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization5_id'] == $org['organization5_id']);
+                $org['organization4_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']));
+                $org['organization3_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                $org['organization2_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 return $org;
             }, $organization_list);
 
             // shop_code でソート済みの $all_shops をそのまま利用
-            $all_shop_list = array_map(function ($shop) {
-                return [
-                    'shop_id' => $shop['id'],
-                    'shop_code' => $shop['shop_code'],
-                    'display_name' => $shop['display_name'],
-                ];
-            }, $all_shops);
-
+            $all_shop_list = array_map(fn($shop) => [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ], $all_shops);
 
             // shop_codeを基準にソートするためのカスタム比較関数を定義
-            usort($all_shop_list, function ($a, $b) {
-                return strcmp($a['shop_code'], $b['shop_code']);
-            });
+            usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
 
             return response()
                 ->view('common.admin.manual-csv-store-modal', [
