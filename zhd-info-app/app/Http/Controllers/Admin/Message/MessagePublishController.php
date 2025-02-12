@@ -2056,9 +2056,9 @@ class MessagePublishController extends Controller
 
         try {
             $csv_content = file_get_contents($csv);
-            $encoding = mb_detect_encoding($csv_content);
+            $encoding = mb_detect_encoding($csv_content, ['UTF-8', 'SJIS', 'EUC-JP', 'ISO-2022-JP']);
             if ($encoding == "UTF-8") {
-                $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
+                $shift_jis_content = mb_convert_encoding($csv_content, 'SJIS-win', 'UTF-8');
                 file_put_contents($csv, $shift_jis_content);
             }
         } catch (\Exception $e) {
