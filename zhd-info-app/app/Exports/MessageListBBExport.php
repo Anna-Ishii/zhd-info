@@ -36,15 +36,18 @@ class MessageListBBExport implements
     public function view(): View
     {
         $admin = session('admin');
-        $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $this->request->input('brand') ? base64_decode($this->request->input('brand')) : $admin->firstOrganization1()->id;
 
         // クエリパラメータから全ページか一部ページかを判断
         $all = filter_var($this->request->query('all', false), FILTER_VALIDATE_BOOLEAN);
 
         if ($all === true) {
             // 全ページのデータをエクスポート
-            $category_id = $this->request->input('category');
-            $status = PublishStatus::tryFrom($this->request->input('status'));
+            $category_ids = $this->request->input('category');
+            $statusArray = $this->request->input('status') ?? [];
+            $statuses = array_map(function($status) {
+                return PublishStatus::tryFrom((int)$status);
+            }, $statusArray);
             $q = $this->request->input('q');
             $label = $this->request->input('label');
             $publish_date = $this->request->input('publish-date');
@@ -81,26 +84,36 @@ class MessageListBBExport implements
                             });
                     });
                 })
-                ->when($status, function ($query) use ($status) {
-                    switch ($status) {
-                        case PublishStatus::Wait:
-                            $query->waitMessage();
-                            break;
-                        case PublishStatus::Publishing:
-                            $query->publishingMessage();
-                            break;
-                        case PublishStatus::Published:
-                            $query->publishedMessage();
-                            break;
-                        case PublishStatus::Editing:
-                            $query->where('editing_flg', '=', true);
-                            break;
-                        default:
-                            break;
-                    }
+                ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
+                    $query->where(function ($query) use ($statuses) {
+                        foreach ($statuses as $status) {
+                            switch ($status) {
+                                case PublishStatus::Wait:
+                                    $query->orWhere(function ($q) {
+                                        $q->waitMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Publishing:
+                                    $query->orWhere(function ($q) {
+                                        $q->publishingMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Published:
+                                    $query->orWhere(function ($q) {
+                                        $q->publishedMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Editing:
+                                    $query->orWhere('editing_flg', '=', true);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    });
                 })
-                ->when($category_id, function ($query) use ($category_id) {
-                    $query->where('category_id', $category_id);
+                ->when(isset($category_ids), function ($query) use ($category_ids) {
+                    $query->whereIn('category_id', $category_ids);
                 })
                 ->when($label, function ($query) {
                     $query->where('emergency_flg', true);
@@ -122,7 +135,96 @@ class MessageListBBExport implements
 
         } else {
             // 一部ページのデータをエクスポート
-            $message_list = session('message_list');
+            $category_ids = $this->request->input('category');
+            $statusArray = $this->request->input('status') ?? [];
+            $statuses = array_map(function($status) {
+                return PublishStatus::tryFrom((int)$status);
+            }, $statusArray);
+            $q = $this->request->input('q');
+            $label = $this->request->input('label');
+            $publish_date = $this->request->input('publish-date');
+            $cte = DB::table('messages')
+                ->select([
+                    'messages.id as message_id',
+                    DB::raw('
+                                CASE
+                                    WHEN (COUNT(DISTINCT b.name)) = 0 THEN ""
+                                    ELSE group_concat(distinct b.name order by b.name)
+                                END as brand_name')
+                ])
+                ->leftJoin('message_brand as m_b', 'messages.id', '=', 'm_b.message_id')
+                ->leftJoin('brands as b', 'm_b.brand_id', '=', 'b.id')
+                ->groupBy('messages.id');
+
+            $message_list = Message::query()
+                ->select([
+                    'messages.*',
+                    'org.*',
+                ])
+                ->with(['category', 'brand', 'tag'])
+                ->leftJoin('message_user', 'messages.id', '=', 'message_id')
+                ->leftJoinSub($cte, 'org', function ($join) {
+                    $join->on('messages.id', '=', 'org.message_id');
+                })
+                ->where('messages.organization1_id', $organization1_id)
+                ->groupBy('messages.id')
+                ->when($q, function ($query) use ($q) {
+                    $query->where(function ($query) use ($q) {
+                        $query->whereLike('title', $q)
+                            ->orWhereHas('tag', function ($query) use ($q) {
+                                $query->where('name', $q);
+                            });
+                    });
+                })
+                ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
+                    $query->where(function ($query) use ($statuses) {
+                        foreach ($statuses as $status) {
+                            switch ($status) {
+                                case PublishStatus::Wait:
+                                    $query->orWhere(function ($q) {
+                                        $q->waitMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Publishing:
+                                    $query->orWhere(function ($q) {
+                                        $q->publishingMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Published:
+                                    $query->orWhere(function ($q) {
+                                        $q->publishedMessage();
+                                    });
+                                    break;
+                                case PublishStatus::Editing:
+                                    $query->orWhere('editing_flg', '=', true);
+                                    break;
+                                default:
+                                    break;
+                            }
+                        }
+                    });
+                })
+                ->when(isset($category_ids), function ($query) use ($category_ids) {
+                    $query->whereIn('category_id', $category_ids);
+                })
+                ->when($label, function ($query) {
+                    $query->where('emergency_flg', true);
+                })
+                ->when($publish_date, function ($query) use ($publish_date) {
+                    if (isset($publish_date[0])) {
+                        $query->where('start_datetime', '>=', $publish_date[0]);
+                    }
+                    if (isset($publish_date[1])) {
+                        $query->where(function ($query) use ($publish_date) {
+                            $query->where('end_datetime', '<=', $publish_date[1])
+                                ->orWhereNull('end_datetime');
+                        });
+                    }
+                })
+                ->join('admin', 'create_admin_id', '=', 'admin.id')
+                ->orderBy('messages.number', 'desc')
+                ->limit(50)
+                ->get();
 
             if ($message_list) {
                 // メッセージリストをソート

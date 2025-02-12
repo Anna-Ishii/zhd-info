@@ -6,7 +6,9 @@ use App\Exports\MessagePersonalExport;
 use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Organization1;
+use App\Models\SearchCondition;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Facades\Excel;
@@ -23,10 +25,10 @@ class PersonalContoller extends Controller
         $publish_to_date = $request->input('publish-to-date');
         $publish_from_check = $request->has('publish-from-check');
         $publish_to_check = $request->has('publish-to-check');
-        $org = $request->input('org');
+        $orgs = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
         $message_freeword = $request->input('message_freeword');
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
 
         $organization1 = Organization1::find($organization1_id);
         $orgazanizations = [];
@@ -110,7 +112,7 @@ class PersonalContoller extends Controller
         }
 
         foreach ($_messages as $key => $ms) {
-            // 業業 (計)
+            // 業態 (計)
             $viewrate_org1 = DB::table('message_user')
                 ->select([
                     DB::raw('count(crews.id) as count'),
@@ -169,8 +171,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization3_id', '=', 'sub.o3_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['DS']), function ($query) use ($org) {
-                        $query->where('shops.organization3_id', '=', $org['DS']);
+                    ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization3_id', $orgs['DS']);
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization3.order_no')
@@ -217,8 +219,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization4_id', '=', 'sub.o4_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['AR']), function ($query) use ($org) {
-                        $query->where('shops.organization4_id', '=', $org['AR']);
+                    ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization4_id', $orgs['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization4.order_no')
@@ -265,8 +267,8 @@ class PersonalContoller extends Controller
                         $join->on('shops.organization5_id', '=', 'sub.o5_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['BL']), function ($query) use ($org) {
-                        $query->where('shops.organization5_id', '=', $org['BL']);
+                    ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization5_id', $orgs['BL']);
                     })
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization5.order_no')
@@ -314,14 +316,14 @@ class PersonalContoller extends Controller
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
                 ->where('shops.organization1_id', '=', $organization1->id)
-                ->when(isset($org['DS']), function ($query) use ($org) {
-                    $query->where('shops.organization3_id', '=', $org['DS']);
+                ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization3_id', $orgs['DS']);
                 })
-                ->when(isset($org['AR']), function ($query) use ($org) {
-                    $query->where('shops.organization4_id', '=', $org['AR']);
+                ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization4_id', $orgs['AR']);
                 })
-                ->when(isset($org['BL']), function ($query) use ($org) {
-                    $query->where('shops.organization5_id', '=', $org['BL']);
+                ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization5_id', $orgs['BL']);
                 })
                 ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                     $query->where(function ($query) use ($shop_freeword) {
@@ -354,21 +356,75 @@ class PersonalContoller extends Controller
             }
         }
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.analyse.personal', [
             'messages' => $messages,
             'viewrates' => $viewrates,
             'organizations' => $orgazanizations,
             'organization_list' => $organization_list,
             'organization1' => $organization1,
-            'organization1_list' => $organization1_list
+            'organization1_list' => $organization1_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['analyse_personal_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // 検索条件を保存
+    public function saveSearchConditions(Request $request)
+    {
+        $admin = session('admin');
+
+        try {
+            SearchCondition::updateOrCreate(
+                [
+                    'admin_id' => $admin->id,
+                    'page_name' => 'analyse-personal',
+                ],
+                [
+                    'url' => $request->input('url'),
+                ]
+            );
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            // エラーログを記録
+            Log::error('Error saving search conditions: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => '検索条件の保存中にエラーが発生しました。'], 500);
+        }
     }
 
     public function export(Request $request)
     {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
 
         $organization1 = $organization1->name;

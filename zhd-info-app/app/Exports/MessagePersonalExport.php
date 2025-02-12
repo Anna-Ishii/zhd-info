@@ -10,18 +10,25 @@ use Illuminate\Contracts\View\View;
 use Maatwebsite\Excel\Concerns\FromView;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithCustomCsvSettings;
+use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
 class MessagePersonalExport implements
     FromView,
     ShouldAutoSize,
-    WithCustomCsvSettings
+    WithCustomCsvSettings,
+    WithHeadings,
+    WithStyles
 {
     protected $manual_id;
     protected $request;
+    protected $organizations;
 
     public function __construct($request)
     {
         $this->request = $request;
+        $this->organizations = [];
     }
 
     public function getCsvSettings(): array
@@ -42,13 +49,14 @@ class MessagePersonalExport implements
         $publish_to_date = $this->request->input('publish-to-date');
         $publish_from_check = $this->request->has('publish-from-check');
         $publish_to_check = $this->request->has('publish-to-check');
-        $org = $this->request->input('org');
+        $orgs = $this->request->input('org');
         $shop_freeword = $this->request->input('shop_freeword');
         $message_freeword = $this->request->input('message_freeword');
-        $organization1_id = $this->request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $this->request->input('organization1') ? base64_decode($this->request->input('organization1')) : $organization1_list[0]->id;
 
         $organization1 = Organization1::find($organization1_id);
         $orgazanizations = [];
+        $this->organizations = [];
         $viewrates = [];
 
         // 業務連絡を9件取得
@@ -115,19 +123,22 @@ class MessagePersonalExport implements
         // DS, AR, BLがあるかで処理を分ける
         if ($organization1->isExistOrg3()) {
             $orgazanizations[] = "DS";
+            $this->organizations[] = "DS";
             $organization_list["DS"] = $organization1->getOrganization3();
         }
         if ($organization1->isExistOrg4()) {
             $orgazanizations[] = "AR";
+            $this->organizations[] = "AR";
             $organization_list["AR"] = $organization1->getOrganization4();
         }
         if ($organization1->isExistOrg5()) {
             $orgazanizations[] = "BL";
+            $this->organizations[] = "BL";
             $organization_list["BL"] = $organization1->getOrganization5();
         }
 
         foreach ($_messages as $key => $ms) {
-            // 業業 (計)
+            // 業態 (計)
             $viewrate_org1 = DB::table('message_user')
             ->select([
                 DB::raw('count(crews.id) as count'),
@@ -185,8 +196,8 @@ class MessagePersonalExport implements
                         $join->on('shops.organization3_id', '=', 'sub.o3_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['DS']), function ($query) use ($org) {
-                        $query->where('shops.organization3_id', '=', $org['DS']);
+                    ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization3_id', $orgs['DS']);
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization3.id')
@@ -232,8 +243,8 @@ class MessagePersonalExport implements
                         $join->on('shops.organization4_id', '=', 'sub.o4_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['AR']), function ($query) use ($org) {
-                        $query->where('shops_organization4_id', '=', $org['AR']);
+                    ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization4_id', $orgs['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization4.id')
@@ -279,8 +290,8 @@ class MessagePersonalExport implements
                         $join->on('shops.organization5_id', '=', 'sub.o5_id');
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
-                    ->when(isset($org['BL']), function ($query) use ($org) {
-                        $query->where('shops.organization5_id', '=', $org['BL']);
+                    ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                        $query->whereIn('shops.organization5_id', $orgs['BL']);
                     })
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
                     ->orderBy('organization5.id')
@@ -328,14 +339,14 @@ class MessagePersonalExport implements
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
                 ->where('shops.organization1_id', '=', $organization1->id)
-                ->when(isset($org['DS']), function ($query) use ($org) {
-                    $query->where('shops.organization3_id', '=', $org['DS']);
+                ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization3_id', $orgs['DS']);
                 })
-                ->when(isset($org['AR']), function ($query) use ($org) {
-                    $query->where('shops.organization4_id', '=', $org['AR']);
+                ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization4_id', $orgs['AR']);
                 })
-                ->when(isset($org['BL']), function ($query) use ($org) {
-                    $query->where('shops.organization5_id', '=', $org['BL']);
+                ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                    $query->whereIn('shops.organization5_id', $orgs['BL']);
                 })
                 ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                     $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
@@ -363,5 +374,28 @@ class MessagePersonalExport implements
             'organization_list' => $organization_list,
             'organization1' => $organization1
         ]);
+    }
+
+    public function headings(): array
+    {
+        return [
+            'ヘッダー1',
+            'ヘッダー2',
+        ];
+    }
+
+    public function styles(Worksheet $sheet)
+    {
+        $orgCount = count($this->organizations);
+
+        if ($orgCount === 1) {
+            $sheet->freezePane('D2'); // 要素が1つの場合
+        } elseif ($orgCount === 2) {
+            $sheet->freezePane('E2'); // 要素が2つの場合
+        } elseif ($orgCount === 3) {
+            $sheet->freezePane('F2'); // 要素が3つの場合
+        } else {
+            $sheet->freezePane('E2');
+        }
     }
 }

@@ -30,6 +30,19 @@ $(window).on("load", function () {
 });
 
 $(document).ready(function () {
+    // Base64デコード関数を追加
+    function base64Decode(str) {
+        try {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            console.error('Base64 decode error:', e);
+            return '';
+        }
+    }
+
+
     // テーブルソートの初期化
     $("#table").tablesorter({
         headers: {
@@ -54,7 +67,6 @@ $(document).ready(function () {
         },
     });
 
-
     // 横スクロールの位置取得
     // DS,BL,ARの幅を取得
     let th0 = $('table.personal thead th[data-column="0"]');
@@ -71,28 +83,32 @@ $(document).ready(function () {
 
     // テーブルの横スクロールの位置取得
     let org1Array = {
-        1: 'JP',
-        2: 'BB',
-        3: 'TAG',
-        4: 'HY',
-        8: 'SK',
-    }
-    let org1 = $('select[name="organization1"]').val();
+        1: "JP",
+        2: "BB",
+        3: "TAG",
+        4: "HY",
+        8: "SK",
+    };
+    let org1 = base64Decode($('select[name="organization1"]').val());
     // 業態がJP以外の場合、ARWidthを調整
-    if (org1Array[org1] !== 'JP') {
+    if (org1Array[org1] !== "JP") {
         ARWidth = BLWidth + th2Width + 1;
     }
 
     // 店舗名の幅を取得
-    let tableOffset = Math.round($('.personal.table.table-bordered').offset().left);
-    let shopName = $('table.personal tbody tr td.shop_name');
-    let shopNameLeft = shopName.length ? Math.round(shopName.offset().left - tableOffset) : 0;
+    let tableOffset = Math.round(
+        $(".personal.table.table-bordered").offset().left
+    );
+    let shopName = $("table.personal tbody tr td.shop_name");
+    let shopNameLeft = shopName.length
+        ? Math.round(shopName.offset().left - tableOffset)
+        : 0;
 
     // 幅をCSSに適用
-    document.documentElement.style.setProperty('--left-2', `${DSWidth}px`);
-    document.documentElement.style.setProperty('--left-3', `${BLWidth}px`);
-    document.documentElement.style.setProperty('--left-4', `${ARWidth}px`);
-    document.documentElement.style.setProperty('--left-5', `${shopNameLeft}px`);
+    document.documentElement.style.setProperty("--left-2", `${DSWidth}px`);
+    document.documentElement.style.setProperty("--left-3", `${BLWidth}px`);
+    document.documentElement.style.setProperty("--left-4", `${ARWidth}px`);
+    document.documentElement.style.setProperty("--left-5", `${shopNameLeft}px`);
 });
 
 //
@@ -463,14 +479,36 @@ $(document).on("click", '.view_rate[data-view-type="orgs"]', function (e) {
         });
 });
 
+// DS、BL、ARの組織を取得
 $(document).on("change", 'select[name="organization1"]', function (e) {
+    // Base64デコード関数を追加
+    function base64Decode(str) {
+        try {
+            return decodeURIComponent(atob(str).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+        } catch (e) {
+            console.error('Base64 decode error:', e);
+            return '';
+        }
+    }
+
+
     var csrfToken = $('meta[name="csrf-token"]').attr("content");
     const url = "/admin/analyse/personal/organization";
-    let organization1 = e.target.value;
+    let organization1 = base64Decode(e.target.value);
 
-    let selectDS = $('select[name="org[DS]"]');
-    let selectBL = $('select[name="org[BL]"]');
-    let selectAR = $('select[name="org[AR]"]');
+    let selectDS = $("#selectOrgDS");
+    let selectBL = $("#selectOrgBL");
+    let selectAR = $("#selectOrgAR");
+
+    let buttonDS = $("#dropdownOrgDS");
+    let buttonBL = $("#dropdownOrgBL");
+    let buttonAR = $("#dropdownOrgAR");
+
+    let selectedOrgsDS = $("#selectedOrgsDS");
+    let selectedOrgsBL = $("#selectedOrgsBL");
+    let selectedOrgsAR = $("#selectedOrgsAR");
 
     $.ajax({
         type: "GET",
@@ -484,74 +522,288 @@ $(document).on("change", 'select[name="organization1"]', function (e) {
         },
     })
         .done(function (res) {
-            console.log(res);
+            // console.log(res);
             selectDS.empty();
             selectBL.empty();
             selectAR.empty();
+
             let resDS = res.organization3;
             let resAR = res.organization4;
             let resBL = res.organization5;
 
+            // DSの組織を設定
             if (!resDS.length) {
-                selectDS.prop("disabled", true);
+                buttonDS.prop("disabled", true);
+                selectedOrgsDS.text("　");
             } else {
-                selectDS.prop("disabled", false);
-                let option1 = document.createElement("option");
-                option1.value = "";
-                option1.textContent = "全て";
-                option1.selected = true;
-                selectDS.append(option1);
-
-                let option;
-                resDS.forEach((value, index) => {
-                    option += `
-						<option value="${value.id}">${value.name}</option>
-					`;
-                });
-                selectDS.append(option);
+                buttonDS.prop("disabled", false);
+                selectedOrgsDS.text("全て");
+                createDropdownMenu("DS", resDS);
             }
 
+            // BLの組織を設定
             if (!resBL.length) {
-                selectBL.prop("disabled", true);
+                buttonBL.prop("disabled", true);
+                selectedOrgsBL.text("　");
             } else {
-                selectBL.prop("disabled", false);
-                let option1 = document.createElement("option");
-                option1.value = "";
-                option1.textContent = "全て";
-                option1.selected = true;
-                selectBL.append(option1);
-
-                let option;
-                resBL.forEach((value, index) => {
-                    option += `
-						<option value="${value.id}">${value.name}</option>
-					`;
-                });
-                selectBL.append(option);
+                buttonBL.prop("disabled", false);
+                selectedOrgsBL.text("全て");
+                createDropdownMenu("BL", resBL);
             }
 
+            // ARの組織を設定
             if (!resAR.length) {
-                selectAR.prop("disabled", true);
+                buttonAR.prop("disabled", true);
+                selectedOrgsAR.text("　");
             } else {
-                selectAR.prop("disabled", false);
-                let option1 = document.createElement("option");
-                option1.value = "";
-                option1.textContent = "全て";
-                option1.selected = true;
-                selectAR.append(option1);
-
-                let option;
-                resAR.forEach((value, index) => {
-                    option += `
-						<option value="${value.id}">${value.name}</option>
-					`;
-                });
-                selectAR.append(option);
+                buttonAR.prop("disabled", false);
+                selectedOrgsAR.text("全て");
+                createDropdownMenu("AR", resAR);
             }
         })
         .fail((jqXHR, textStatus, errorThrown) => {
             console.error("Ajax error:", textStatus, errorThrown);
-            throw errorThrown; // エラーを再スローして呼び出し元で処理できるようにする
+            throw errorThrown;
         });
-    console.log(e.target.value);
+});
+
+// CSVエクスポートボタンのクリックイベントにオーバーレイ表示
+$(document).ready(function () {
+    $(".exportBtn").on("click", function (e) {
+        e.preventDefault(); // デフォルトのリンク動作を防ぐ
+        var overlay = document.getElementById("overlay");
+        overlay.style.display = "block";
+
+        // エクスポート処理を実行
+        var exportUrl = $(this).attr("href");
+        var fileName = $(this).data("filename");
+        fetch(exportUrl)
+            .then((response) => {
+                if (response.ok) {
+                    return response.blob();
+                } else {
+                    throw new Error("エクスポートに失敗しました");
+                }
+            })
+            .then((blob) => {
+                overlay.style.display = "none";
+
+                // ダウンロードを開始
+                var url = window.URL.createObjectURL(blob);
+                var a = document.createElement("a");
+                a.href = url;
+                a.download = fileName;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch((error) => {
+                alert(error.message);
+                overlay.style.display = "none";
+            });
+
+        // ページがリロードされる前にオーバーレイを非表示にする
+        window.onbeforeunload = function () {
+            overlay.style.display = "none";
+        };
+    });
+});
+
+// ドロップダウンメニューの生成
+function createDropdownMenu(organization, organizationList) {
+    let dropdownMenu = `
+        <div class="form-check">
+            <input class="form-check-input" type="checkbox" id="selectAllOrgs${organization}" onclick="toggleAllOrgs('${organization}')">
+            <label class="form-check-label" for="selectAllOrgs${organization}" class="custom-label" onclick="event.stopPropagation();">すべて選択/選択解除</label>
+        </div>
+    `;
+
+    organizationList.forEach((org) => {
+        dropdownMenu += `
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" name="org[${organization}][]" value="${org.id}" id="org${organization}${org.id}" onchange="updateSelectedOrgs('${organization}')">
+                <label class="form-check-label" for="org${organization}${org.id}" class="custom-label" onclick="event.stopPropagation();">
+                    ${org.name}
+                </label>
+            </div>
+        `;
+    });
+
+    $(`#selectOrg${organization}`).append(dropdownMenu);
+}
+
+// ドロップダウンメニューを閉じる
+document.addEventListener("click", function (event) {
+    const dropdowns = document.querySelectorAll(".dropdown-menu");
+    dropdowns.forEach((dropdown) => {
+        if (!dropdown.contains(event.target)) {
+            dropdown.classList.remove("show");
+        }
+    });
+});
+
+// 選択された組織を表示
+function updateSelectedOrgs(organization) {
+    const selected = [];
+    const checkboxes = document.querySelectorAll(
+        `input[name="org[${organization}][]"]:checked`
+    );
+    checkboxes.forEach((checkbox) => {
+        selected.push(checkbox.nextElementSibling.textContent);
+    });
+    const dropdownButton = document.getElementById(
+        `dropdownOrg${organization}`
+    );
+    if (!dropdownButton.disabled) {
+        document.getElementById(`selectedOrgs${organization}`).textContent =
+            selected.length > 0 ? selected.join(", ") : "全て";
+    }
+    // すべて選択チェックボックスの状態を更新
+    const allCheckbox = document.getElementById(`selectAllOrgs${organization}`);
+    const allCheckboxes = document.querySelectorAll(
+        `input[name="org[${organization}][]"]`
+    );
+    if (allCheckbox) {
+        allCheckbox.checked = allCheckboxes.length === checkboxes.length;
+    }
+}
+
+// すべて選択チェックボックスのクリックイベント
+document.addEventListener("DOMContentLoaded", function () {
+    // すべての組織に対して選択された組織を表示
+    const organizations = ["DS", "BL", "AR"];
+    organizations.forEach((org) => updateSelectedOrgs(org));
+});
+
+function toggleAllOrgs(organization) {
+    const selectAllCheckbox = document.getElementById(
+        `selectAllOrgs${organization}`
+    );
+    const checkboxes = document.querySelectorAll(
+        `input[name="org[${organization}][]"]`
+    );
+    if (selectAllCheckbox) {
+        checkboxes.forEach((checkbox) => {
+            checkbox.checked = selectAllCheckbox.checked;
+        });
+        updateSelectedOrgs(organization);
+    }
+}
+
+
+$(document).ready(function () {
+    // ページロード時に検索条件を削除
+    sessionStorage.removeItem('searchParams');
+
+    // クエリパラメータを取得して保存
+    const params = new URLSearchParams(window.location.search);
+    if (params.toString()) {
+        sessionStorage.setItem('searchParams', params.toString());
+        // window.history.replaceState({}, '', window.location.pathname); // URLのパラメータを削除
+    }
+
+    // ページロード時に検索条件を復元
+    const savedParams = sessionStorage.getItem('searchParams');
+    if (savedParams) {
+        // URLにパラメーターを追加せずにリクエストを実行
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        fetch("/admin/analyse/personal/save-session-conditions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({ params: savedParams })
+        })
+        .then(response => response.json())
+        .then(data => {
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+
+
+    // 検索条件を保存
+    $(".saveSearchBtn").on("click", function (e) {
+        e.preventDefault();
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+
+        var overlay = document.getElementById("overlay");
+        overlay.style.display = "block";
+
+        // URLを構築
+        let baseUrl = "/admin/analyse/personal";
+        let params = new URLSearchParams({
+            organization1: document.querySelector('select[name="organization1"]').value,
+        });
+        const orgDS = Array.from(
+            document.querySelectorAll('input[name="org[DS][]"]:checked')
+        ).map((input) => input.value);
+        orgDS.forEach((org) => {
+            params.append("org[DS][]", org);
+        });
+        const orgBL = Array.from(
+            document.querySelectorAll('input[name="org[BL][]"]:checked')
+        ).map((input) => input.value);
+        orgBL.forEach((org) => {
+            params.append("org[BL][]", org);
+        });
+        const orgAR = Array.from(
+            document.querySelectorAll('input[name="org[AR][]"]:checked')
+        ).map((input) => input.value);
+        orgAR.forEach((org) => {
+            params.append("org[AR][]", org);
+        });
+        params.append("shop_freeword", document.querySelector('input[name="shop_freeword"]').value);
+        params.append("publish-from-date", document.querySelector('input[name="publish-from-date"]').value);
+        params.append("publish-to-date", document.querySelector('input[name="publish-to-date"]').value);
+        if (document.querySelector('input[name="publish-from-check"]').checked) {
+            params.append("publish-from-check", "on");
+        }
+        if (document.querySelector('input[name="publish-to-check"]').checked) {
+            params.append("publish-to-check", "on");
+        }
+        params.append("message_freeword", document.querySelector('input[name="message_freeword"]').value);
+
+        let fullUrl = `${baseUrl}?${params.toString()}`;
+
+        // 生成されたURLをコンソールに表示（デバッグ用）
+        // console.log(fullUrl);
+
+        // AJAXリクエストを送信
+        fetch("/admin/analyse/personal/save-search-conditions", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({
+                url: fullUrl,
+            }),
+        })
+            .then((response) => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    return response.text().then((text) => {
+                        throw new Error(text);
+                    });
+                }
+            })
+            .then((data) => {
+                if (data.success) {
+                    $(".analyse-personal.active a").attr("href", fullUrl);
+                    alert("検索条件が保存されました。");
+                    overlay.style.display = "none";
+                } else {
+                    alert("保存に失敗しました。");
+                    overlay.style.display = "none";
+                }
+            })
+            .catch((error) => {
+                alert(error.message);
+                overlay.style.display = "none";
+            });
+    });
 });
