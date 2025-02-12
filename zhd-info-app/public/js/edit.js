@@ -55,7 +55,7 @@ $(document).on('focusout' , '.inputPassword , .inputPassword2' , function(){
 	}
 
 	let chkLinkVal = linkTarget.val();
-	console.log(chkLinkVal);
+	// console.log(chkLinkVal);
 	if(chkLinkVal != '' && $(this).val() != chkLinkVal){
 		$('input[name=check_password]').val('1');
 	}else{
@@ -313,7 +313,7 @@ $(document).on('change', '#messageImportModal .fileImport input[type="file"]', f
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
-			console.log(response);
+			// console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
 		})
@@ -508,7 +508,7 @@ $(document).on('click', '#messageImportModal input[type="button"].importBtn', fu
 		},
 
 	}).done(function(response){
-		console.log(response);
+		// console.log(response);
 		overlay.style.display = 'none';
 
         // 成功テンプレート
@@ -591,7 +591,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
 		manualJson = response.json;
-		console.log(manualJson);
+		// console.log(manualJson);
     }).fail(function(jqXHR, textStatus, errorThrown){
 		$('#manualImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
@@ -634,7 +634,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
-			console.log(response);
+			// console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
 		})
@@ -677,7 +677,7 @@ $('#manualImportModal input[type="button"]').click(function(e){
 			'X-CSRF-TOKEN': csrfToken,
 		},
 	}).done(function(response){
-		console.log(response);
+		// console.log(response);
 		overlay.style.display = 'none';
 
         // 成功テンプレート

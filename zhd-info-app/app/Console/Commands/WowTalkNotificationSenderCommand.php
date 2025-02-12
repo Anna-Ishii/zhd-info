@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\Manual;
 use App\Models\WowTalkNotificationLog;
 use App\Models\IncidentNotificationsRecipient;
+use App\Models\Environment;
 use App\Utils\SESMailer;
 use App\Utils\SendWowTalkApi;
 
@@ -425,14 +426,14 @@ class WowTalkNotificationSenderCommand extends Command
     {
         if ($type === 'message') {
             // メッセージ内容を生成
+            $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
             $messageContent = "業連：{$dataType->title}が配信されました。確認してください。\n";
-            $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-            // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+            $messageContent .= $text->contents . "\n";
         } elseif ($type === 'manual') {
             // メッセージ内容を生成
+            $text = Environment::where('command_name', $this->signature)->where('type', 'manual')->select('contents')->first();
             $messageContent = "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
-            $messageContent .= "https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
-            // $messageContent .= "https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            $messageContent .= $text->contents . "\n";
         }
 
         return $messageContent;
