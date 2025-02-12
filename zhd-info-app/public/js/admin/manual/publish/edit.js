@@ -60,7 +60,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
                     var progVal = parseInt(e.loaded/e.total*10000)/100 ;
                     progressBar.show();
                     progressBar.css('width', progVal + '%');
-                    console.log(progVal);
+                    // console.log(progVal);
 
                     if (progVal == 100)
                     {

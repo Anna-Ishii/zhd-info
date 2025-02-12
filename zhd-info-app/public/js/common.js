@@ -104,12 +104,12 @@ $(window).on("load", function () {
         cnt = 0;
         chkTarget.each(function () {
             if ($(this).prop("checked")) {
-                console.log(chkBulkTarget.length);
+                // console.log(chkBulkTarget.length);
                 chkBulkTarget.prop("checked", true);
                 chkBulkTarget.addClass("isSelectAll");
             } else {
                 cnt = cnt + 1;
-                console.log(cnt);
+                // console.log(cnt);
             }
         });
         callback();
