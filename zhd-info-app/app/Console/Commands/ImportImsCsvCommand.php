@@ -20,6 +20,7 @@ use App\Models\Organization5;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\WowtalkShop;
+use App\Models\Environment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -290,8 +291,11 @@ class ImportImsCsvCommand extends Command
         }
 
         // wowtalk_shopテーブルのデータを更新
-        foreach ($new_shop as $n_s) {
-            $this->create_wowtalk_shop($n_s);
+        $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
+        if (!empty($environment) && !empty($new_shop)) {
+            foreach ($new_shop as $n_s) {
+                $this->create_wowtalk_shop($n_s);
+            }
         }
 
         // 削除する店舗一覧のID
@@ -311,8 +315,11 @@ class ImportImsCsvCommand extends Command
         }
         User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
         Shop::whereIn('id', $delete_shop)->delete();
+
         // wowtalk_shopテーブルのデータを削除
-        WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        if (!empty($environment) && !empty($delete_shop)) {
+            WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        }
 
         // ログ出力
         $this->info("---新しい店舗---");

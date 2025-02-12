@@ -10,6 +10,7 @@ use App\Models\Shop;
 use App\Models\Organization1;
 use App\Models\WowTalkNotificationLog;
 use App\Models\IncidentNotificationsRecipient;
+use App\Models\Environment;
 use App\Utils\SESMailer;
 use App\Utils\SendWowTalkApi;
 class WowTalkUnreadNotificationSenderCommand extends Command
@@ -390,9 +391,9 @@ class WowTalkUnreadNotificationSenderCommand extends Command
         $unreadMessageCounts = $crewMessageCounts - $crewMessageReadCounts;
 
         // メッセージ内容を生成
+        $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
         $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
-        $messageContent .= "https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-        // $messageContent .= "https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+        $messageContent .= $text->contents . "\n";
 
         return $messageContent;
     }
