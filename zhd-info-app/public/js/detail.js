@@ -60,7 +60,7 @@ $(window).on("load", function () {
     $(document).on("click", ".btnMoveFolder", function () {
         var chkTargetName = $(this).data("target-name");
         var modalTarget = $(".modal[data-target-name=" + chkTargetName + "]");
-        console.log(modalTarget.length);
+        // console.log(modalTarget.length);
         if (!$(".modalBg").is(":visible")) {
             $(".modalBg").show();
             modalTarget.show();
@@ -75,7 +75,7 @@ $(window).on("load", function () {
     $(document).on("change", ".moveFolder", function () {
         $(".modal__list__item").find("label").removeClass("isSelected");
         if ($(this).prop("checked", true)) {
-            console.log("test");
+            // console.log("test");
             $(this).parents("label").addClass("isSelected");
         }
     });
@@ -270,7 +270,7 @@ $(window).on("load", function () {
             }
         } else {
             /* 念のためフルスクリーン判定 */
-            console.log(modalVideoH);
+            // console.log(modalVideoH);
             if (document.webkitFullscreenElement) {
                 document.webkitExitFullscreen();
                 target.removeClass("isFullScreen");
