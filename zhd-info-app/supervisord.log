@@ -1,0 +1,22 @@
+2025-02-12 06:19:13,447 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-02-12 06:19:13,453 INFO supervisord started with pid 1
+2025-02-12 06:19:14,458 INFO spawned: 'httpd' with pid 8
+2025-02-12 06:19:14,460 INFO spawned: 'laravel-queue_00' with pid 9
+2025-02-12 06:19:14,464 INFO spawned: 'php-fpm' with pid 10
+2025-02-12 06:19:15,608 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-02-12 06:19:15,608 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-02-12 06:19:15,608 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-02-12 06:19:15,608 INFO exited: php-fpm (exit status 0; expected)
+2025-02-12 06:19:16,611 INFO spawned: 'php-fpm' with pid 200
+2025-02-12 06:19:16,643 WARN exited: php-fpm (exit status 70; not expected)
+2025-02-12 06:19:16,643 INFO reaped unknown pid 201 (exit status 78)
+2025-02-12 06:19:17,646 INFO spawned: 'php-fpm' with pid 257
+2025-02-12 06:19:17,676 WARN exited: php-fpm (exit status 70; not expected)
+2025-02-12 06:19:17,676 INFO reaped unknown pid 258 (exit status 78)
+2025-02-12 06:19:19,680 INFO spawned: 'php-fpm' with pid 259
+2025-02-12 06:19:19,710 WARN exited: php-fpm (exit status 70; not expected)
+2025-02-12 06:19:19,710 INFO reaped unknown pid 260 (exit status 78)
+2025-02-12 06:19:22,715 INFO spawned: 'php-fpm' with pid 261
+2025-02-12 06:19:22,741 WARN exited: php-fpm (exit status 70; not expected)
+2025-02-12 06:19:22,741 INFO reaped unknown pid 262 (exit status 78)
+2025-02-12 06:19:23,742 INFO gave up: php-fpm entered FATAL state, too many start retries too quickly
