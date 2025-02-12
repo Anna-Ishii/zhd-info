@@ -12,6 +12,7 @@ use App\Models\Roll;
 use App\Models\Shop;
 use App\Models\User;
 use App\Models\WowtalkShop;
+use App\Models\SearchCondition;
 use App\Exports\ShopAccountExport;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -28,10 +29,10 @@ class AccountController extends Controller
         $roll_list = Roll::all();
 
         // request
-        $org = $request->input('org');
+        $orgs = $request->input('org');
         $shop_freeword = $request->input('shop_freeword');
 
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
         $organization2 = $request->input('organization2');
         $roll = $request->input('roll');
@@ -86,14 +87,14 @@ class AccountController extends Controller
                 $query->where('shops.organization1_id', '=', $organization1_id);
             })
             ->where('shops.organization1_id', '=', $organization1->id)
-            ->when(isset($org['DS']), function ($query) use ($org) {
-                $query->where('shops.organization3_id', '=', $org['DS']);
+            ->when(isset($orgs['DS']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization3_id', $orgs['DS']);
             })
-            ->when(isset($org['AR']), function ($query) use ($org) {
-                $query->where('shops.organization4_id', '=', $org['AR']);
+            ->when(isset($orgs['AR']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization4_id', $orgs['AR']);
             })
-            ->when(isset($org['BL']), function ($query) use ($org) {
-                $query->where('shops.organization5_id', '=', $org['BL']);
+            ->when(isset($orgs['BL']), function ($query) use ($orgs) {
+                $query->whereIn('shops.organization5_id', $orgs['BL']);
             })
             ->when(isset($shop_freeword), function ($query) use ($shop_freeword) {
                 $query->where(function ($query) use ($shop_freeword) {
@@ -141,13 +142,44 @@ class AccountController extends Controller
             return $user;
         });
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.account.index', [
             'users' => $users,
             'roll_list' => $roll_list,
             'organization1_list' => $organization1_list,
             'organization_list' => $organization_list,
             'organizations' => $organizations,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['shop_account_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
     }
 
     public function new()
@@ -267,7 +299,7 @@ class AccountController extends Controller
     {
         $admin = session('admin');
         $organization1_list = $admin->organization1()->orderby('name')->get();
-        $organization1_id = $request->input('organization1', $organization1_list[0]->id);
+        $organization1_id = $request->input('organization1') ? base64_decode($request->input('organization1')) : $organization1_list[0]->id;
         $organization1 = Organization1::find($organization1_id);
 
         $organization1 = $organization1->name;

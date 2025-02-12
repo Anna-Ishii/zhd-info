@@ -19,6 +19,8 @@ use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Models\Shop;
 use App\Models\User;
+use App\Models\WowtalkShop;
+use App\Models\Environment;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -128,6 +130,7 @@ class ImportImsCsvCommand extends Command
         foreach ($shops_data as $index => $shop) {
             $organization1_id = Organization1::where('name', $shop[0])->value('id');
 
+            // 新CSV 閉店日36行目なので$shop[35]
             $close_date = $this->parseDateTime($shop[30]);
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
@@ -287,6 +290,14 @@ class ImportImsCsvCommand extends Command
             $this->create_user($n_s);
         }
 
+        // wowtalk_shopテーブルのデータを更新
+        $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
+        if (!empty($environment) && !empty($new_shop)) {
+            foreach ($new_shop as $n_s) {
+                $this->create_wowtalk_shop($n_s);
+            }
+        }
+
         // 削除する店舗一覧のID
         $diff_shop_id = array_diff($shop_list, $register_shop_id);
         $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
@@ -304,6 +315,11 @@ class ImportImsCsvCommand extends Command
         }
         User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
         Shop::whereIn('id', $delete_shop)->delete();
+
+        // wowtalk_shopテーブルのデータを削除
+        if (!empty($environment) && !empty($delete_shop)) {
+            WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        }
 
         // ログ出力
         $this->info("---新しい店舗---");
@@ -391,6 +407,114 @@ class ImportImsCsvCommand extends Command
         }
 
         return $employee_code;
+    }
+
+    // wowtalk_shopテーブルのデータを更新
+    private function create_wowtalk_shop($shop)
+    {
+        $data = $this->wowtalkid2shopcode($shop);
+        $chunkSize = 300;
+        // データをチャンクして挿入
+        collect($data)->chunk($chunkSize)->each(function ($chunk) {
+            DB::table('wowtalk_shops')->insert($chunk->toArray());
+        });
+    }
+
+    private function wowtalkid2shopcode(Shop $shop)
+    {
+        $data = [];
+
+        // JP
+        if ($shop->organization1_id == 1) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => '320010' . (string)$shop->shop_code, // 「320010」+「店舗コード4桁」
+                'notification_target1'   => false,                               // デフォルト[false]
+                'business_notification1' => false,                               // デフォルト[false]
+                'wowtalk2_id'            => '320000' . (string)$shop->shop_code, // 「320000」+「店舗コード4桁」
+                'notification_target2'   => false,                               // デフォルト[false]
+                'business_notification2' => false,                               // デフォルト[false]
+            ];
+
+        // ON
+        } elseif ($shop->organization1_id == 5) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => '2g0000' . (string)$shop->shop_code, // 「2g0000」+「店舗コード4桁」
+                'notification_target1'   => false,                               // デフォルトはなし
+                'business_notification1' => false,                               // デフォルトはなし
+                'wowtalk2_id'            => '3g0000' . (string)$shop->shop_code, // 「3g0000」+「店舗コード4桁」
+                'notification_target2'   => false,                               // デフォルトはなし
+                'business_notification2' => false,                               // デフォルトはなし
+                'created_at'             => now(),
+            ];
+
+        // TAG
+        } elseif ($shop->organization1_id == 3) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => 'tag' . (string)$shop->shop_code, // 「tag」+「店舗コード4桁」
+                'notification_target1'   => false,                            // デフォルト[false]
+                'business_notification1' => false,                            // デフォルト[false]
+                'wowtalk2_id'            => '',                               // なし
+                'notification_target2'   => false,                            // デフォルト[false]
+                'business_notification2' => false,                            // デフォルト[false]
+                'created_at'             => now(),
+            ];
+
+        // HY
+        } elseif ($shop->organization1_id == 4) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => '340000' . (string)$shop->shop_code, // 「340000」+「店舗コード4桁」
+                'notification_target1'   => false,                               // デフォルト[false]
+                'business_notification1' => false,                               // デフォルト[false]
+                'wowtalk2_id'            => '',                                  // なし
+                'notification_target2'   => false,                               // デフォルト[false]
+                'business_notification2' => false,                               // デフォルト[false]
+                'created_at'             => now(),
+            ];
+
+        // BB
+        } elseif ($shop->organization1_id == 2) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => '30300' . (string)$shop->shop_code . '0', // 「30300」+「店舗コード4桁」+「0」
+                'notification_target1'   => false,                                    // デフォルト[false]
+                'business_notification1' => false,                                    // デフォルト[false]
+                'wowtalk2_id'            => '',                                       // なし
+                'notification_target2'   => false,                                    // デフォルト[false]
+                'business_notification2' => false,                                    // デフォルト[false]
+                'created_at'             => now(),
+            ];
+
+        // SK
+        } elseif ($shop->organization1_id == 8) {
+            $data[] = [
+                'shop_id'                => $shop->id,
+                'shop_code'              => $shop->shop_code,
+                'shop_name'              => $shop->name,
+                'wowtalk1_id'            => '',               // なし
+                'notification_target1'   => false,            // デフォルト[false]
+                'business_notification1' => false,            // デフォルト[false]
+                'wowtalk2_id'            => '',               // なし
+                'notification_target2'   => false,            // デフォルト[false]
+                'business_notification2' => false,            // デフォルト[false]
+                'created_at'             => now(),
+            ];
+        }
+
+        return $data;
     }
 
     public function import_crews($crews_data)

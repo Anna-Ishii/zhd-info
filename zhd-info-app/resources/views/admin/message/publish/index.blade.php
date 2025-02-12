@@ -9,10 +9,14 @@
                         <a href="#" class="nav-label">1.配信</a>
                         <ul class="nav nav-second-level">
                             @if (in_array('message', $arrow_pages, true))
-                                <li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                                <li class="message-publish active">
+                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
+                                </li>
                             @endif
                             @if (in_array('manual', $arrow_pages, true))
-                                <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                                <li class="manual-publish">
+                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                                </li>
                             @endif
                         </ul>
                     </li>
@@ -21,7 +25,9 @@
                     <li>
                         <a href="#" class="nav-label">2.データ抽出</span></a>
                         <ul class="nav nav-second-level">
-                            <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                            <li class="analyse-personal">
+                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -66,8 +72,8 @@
                     <label class="input-group-addon">業態</label>
                     <select name="brand" class="form-control">
                         @foreach ($organization1_list as $org1)
-                            <option value="{{ $org1->id }}"
-                                {{ request()->input('brand') == $org1->id ? 'selected' : '' }}>
+                            <option value="{{ base64_encode($org1->id) }}"
+                                {{ request()->input('brand') == base64_encode($org1->id) ? 'selected' : '' }}>
                                 {{ $org1->name }}</option>
                         @endforeach
                     </select>
@@ -81,28 +87,58 @@
                 </div>
                 <div class="input-group col-lg-1 spMb16">
                     <label class="input-group-addon">カテゴリ</label>
-                    <select name="category" class="form-control">
-                        <option value="">指定なし</option>
-                        @foreach ($category_list as $category)
-                            {{-- 業態SKの時は「その他店舗へのお知らせ」を表示 --}}
-                            @if ($organization1->id === 8 || $category->id !== 7)
-                                <option value="{{ $category->id }}"
-                                    {{ request()->input('category') == $category->id ? 'selected' : '' }}>{{ $category->name }}
-                                </option>
-                            @endif
-                        @endforeach
-                    </select>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="selectedCategories" class="custom-dropdown-text">指定なし</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton" onclick="event.stopPropagation();">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllCategories" onclick="toggleAllCategories()">
+                                <label class="form-check-label" for="selectAllCategories" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
+                            </div>
+                            @foreach ($category_list as $category)
+                                {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
+                                @if ($organization1->id === 8 || $category->id !== 7 && $category->id !== 8)
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="category[]" value="{{ $category->id }}"
+                                            {{ in_array($category->id, request()->input('category', [])) ? 'checked' : '' }} id="category{{ $category->id }}" onchange="updateSelectedCategories()">
+                                        <label class="form-check-label" for="category{{ $category->id }}" class="custom-label" onclick="event.stopPropagation();">
+                                            {{ $category->name }}
+                                        </label>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <div class="input-group col-lg-1 spMb16">
                     <label class="input-group-addon">状態</label>
-                    <select name="status" class="form-control duration-form-text">
-                        <option value="">指定なし</option>
-                        @foreach ($publish_status as $status)
-                            <option value="{{ $status->value }}"
-                                {{ request()->input('status') == $status->value ? 'selected' : '' }}>{{ $status->text() }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <div class="dropdown">
+                        <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownStatusButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            <span id="selectedStatus" class="custom-dropdown-text">指定なし</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                            </svg>
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownStatusButton" onclick="event.stopPropagation();">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllStatuses" onclick="toggleAllStatuses()">
+                                <label class="form-check-label" for="selectAllStatuses" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
+                            </div>
+                            @foreach ($publish_status as $status)
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="status[]" value="{{ $status->value }}"
+                                        {{ in_array($status->value, request()->input('status', [])) ? 'checked' : '' }} id="status{{ $status->value }}" onchange="updateSelectedStatuses()">
+                                    <label class="form-check-label" for="status{{ $status->value }}" class="custom-label" onclick="event.stopPropagation();">
+                                        {{ $status->text() }}
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
                 </div>
                 <div class="input-group spMb16 ">
                     <label class="input-group-addon">掲載期間</label>
@@ -127,9 +163,13 @@
                 <div class="input-group col-lg-1">
                     <button class="btn btn-admin">検索</button>
                 </div>
+                <div class="input-group col-lg-1" style="float: right;">
+                    <input type="button" class="btn btn-admin saveSearchBtn" value="検索条件を保存">
+                </div>
                 <div class="input-group">※「インポート」、「エクスポート」、「新規登録」は検索時に設定した業態で行われます。</div>
             </div>
         </form>
+
         <!-- 検索結果 -->
         <form method="post" action="#">
             <div class="pagenation-top">
@@ -160,8 +200,8 @@
                     @endif
 
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                        {{-- BBの場合 --}}
-                        @if ($organization1->id === 2)
+                        {{-- BBの場合、SKの場合 --}}
+                        @if ($organization1->id == 2 || $organization1->id == 8)
                             <div>
                                 <input type="button" class="btn btn-admin" data-toggle="modal"
                                     data-target="#messageExportModal" value="エクスポート">
@@ -176,7 +216,7 @@
                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                         <div>
                             <a href="{{ route('admin.message.publish.new', ['organization1' => $organization1]) }}"
-                                class=" btn btn-admin">新規登録</a>
+                                class="btn btn-admin">新規登録</a>
                         </div>
                     @endif
 
@@ -187,8 +227,8 @@
                 <table id="list" class="message-table table-list table-hover table-condensed text-center">
                     <thead>
                         <tr>
-                            {{-- BBの場合 --}}
-                            @if ($organization1->id === 2)
+                            {{-- BBの場合、SKの場合 --}}
+                            @if ($organization1->id == 2 || $organization1->id == 8)
                                 @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                     <th class="text-center" nowrap>
                                         <p class="btn btn-admin" id="messageAddBtn" style="position: relative; z-index: 10;">追加</p>
@@ -228,8 +268,8 @@
                                 @elseif($message->status == App\Enums\PublishStatus::Wait) wait
                                 @elseif($message->status == App\Enums\PublishStatus::Editing) editing @endif">
 
-                                {{-- BBの場合 --}}
-                                @if ($organization1->id === 2)
+                                {{-- BBの場合、SKの場合 --}}
+                                @if ($organization1->id == 2 || $organization1->id == 8)
                                     @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                         <td class="message-edit-btn-group" nowrap>
                                             <p class="messageEditBtn btn btn-admin" data-message-id="{{ $message->id }}" onclick="this.style.pointerEvents = 'none';">編集</p>
@@ -237,8 +277,8 @@
                                     @endif
                                 @endif
 
-                                {{-- BBの場合 --}}
-                                @if ($organization1->id === 2)
+                                {{-- BBの場合、SKの場合 --}}
+                                @if ($organization1->id == 2 || $organization1->id == 8)
                                     <!-- No -->
                                     <td class="shop-id" data-message-number="{{ $message->number }}">{{ $message->number }}</td>
                                     <!-- 対象業態 -->

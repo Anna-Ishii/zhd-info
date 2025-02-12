@@ -1,4 +1,7 @@
-$(document).ready(function() {
+$(document).ready(function () {
+    // 検索条件をセッションから取得してリダイレクト
+    const savedParams = sessionStorage.getItem('searchParams');
+
     // 組織ID
     const org1Id = $('input[name="organization1_id"]').val();
     // 業連ファイルを管理
@@ -1762,7 +1765,7 @@ $(document).ready(function() {
                     // setTimeout(() => {
                     //     progress.hide();
                     // }, 1000);
-                    console.log(response);
+                    // console.log(response);
                 }).fail(function(qXHR, textStatus, errorThrown){
                     console.log("終了");
                 })
@@ -1795,7 +1798,7 @@ $(document).ready(function() {
 
             $(`#editShopImportModal-${messageId} .modal-body .alert-danger`).remove();
             $.ajax({
-                url: '/admin/message/publish/csv/store/import',
+                url: '/admin/message/publish/csv/store/all/import',
                 type: 'post',
                 data: JSON.stringify({
                     file_json: newMessageJson,
@@ -2181,7 +2184,7 @@ $(document).ready(function() {
                     <div class="category-input-group" style="width: max-content;">
                         <select class="form-control" name="category_id" style="cursor: pointer;">
                             ${categoryList.map(category => `
-                                ${(org1Id === 8 || category.id !== 7) ? `
+                                ${(org1Id == 8 || category.id !== 7 && category.id !== 8) ? `
                                     <option value="${category.id}" >
                                         ${category.name}
                                     </option>
@@ -2263,7 +2266,6 @@ $(document).ready(function() {
         // 店舗編集モーダル
         initializeShopModal(newMessageId, org1Id, organizationList, allShopList, {}, 'new');
     }
-
 
 
     // 追加ボタン処理
@@ -2434,7 +2436,12 @@ $(document).ready(function() {
                         "X-CSRF-TOKEN": csrfToken,
                     },
                     success: function(response) {
-                        window.location.href = "/admin/message/publish/";
+                        // リダイレクト先のURLを構築
+                        if (savedParams) {
+                            window.location.href = "/admin/message/publish?" + savedParams;
+                        } else {
+                            window.location.href = "/admin/message/publish";
+                        }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         overlay.hide(); // オーバーレイを非表示にする
@@ -2466,6 +2473,10 @@ $(document).ready(function() {
             });
         }
 
+
+        const overlay = $('#overlay');
+        overlay.show(); // オーバーレイを表示
+
         // 追加のリクエストを送信
         if (!shopDataFetched) {
             $.ajax({
@@ -2493,6 +2504,9 @@ $(document).ready(function() {
                     initializeNewSaveBtn(newMessageId, brandList, newMessageNumber);
                     // 削除ボタン処理
                     initializeNewDeleteBtn(newMessageId);
+
+                    // オーバーレイを非表示
+                    overlay.hide();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Error:", errorThrown);
@@ -2505,6 +2519,9 @@ $(document).ready(function() {
             initializeNewSaveBtn(newMessageId, brandList, newMessageNumber);
             // 削除ボタン処理
             initializeNewDeleteBtn(newMessageId);
+
+            // オーバーレイを非表示
+            overlay.hide();
         }
     });
 
@@ -2640,6 +2657,7 @@ $(document).ready(function() {
             return;
         }
 
+
         // 一括登録のリクエストを送信
         $.ajax({
             url: `/admin/message/publish/messageAllSaveData`,
@@ -2651,7 +2669,12 @@ $(document).ready(function() {
                 "X-CSRF-TOKEN": csrfToken,
             },
             success: function(response) {
-                window.location.href = "/admin/message/publish/";
+                // リダイレクト先のURLを構築
+                if (savedParams) {
+                    window.location.href = "/admin/message/publish?" + savedParams;
+                } else {
+                    window.location.href = "/admin/message/publish";
+                }
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 console.error("Error:", errorThrown);
@@ -2692,13 +2715,9 @@ $(document).ready(function() {
     });
 
 
-
     // 編集モード
     $('.messageEditBtn').each(function() {
         $(this).on('click', function() {
-            const overlay = $('#overlay');
-            overlay.show(); // オーバーレイを表示
-
             const row = $(this).closest('tr');
             row.addClass('edit-modified');
 
@@ -2794,7 +2813,7 @@ $(document).ready(function() {
                     <div class="category-input-group" style="width: max-content;">
                         <select class="form-control" name="category_id" style="cursor: pointer;">
                             ${categoryList.map(category => `
-                                ${(org1Id == 8 || category.id !== 7) ? `
+                                ${(org1Id == 8 || category.id !== 7 && category.id !== 8) ? `
                                     <option value="${category.id}"
                                         ${message.category_id == category.id ? 'selected' : ''}
                                         >${category.name}
@@ -3179,7 +3198,12 @@ $(document).ready(function() {
                             "X-CSRF-TOKEN": csrfToken,
                         },
                         success: function(response) {
-                            window.location.href = "/admin/message/publish/";
+                            // リダイレクト先のURLを構築
+                            if (savedParams) {
+                                window.location.href = "/admin/message/publish?" + savedParams;
+                            } else {
+                                window.location.href = "/admin/message/publish";
+                            }
                         },
                         error: function(jqXHR, textStatus, errorThrown) {
                             console.error("Error:", errorThrown);
@@ -3214,6 +3238,9 @@ $(document).ready(function() {
                 });
             }
 
+
+            const overlay = $('#overlay');
+            overlay.show(); // オーバーレイを表示
 
             // 編集のリクエストを送信
             $.ajax({
@@ -3251,8 +3278,6 @@ $(document).ready(function() {
                     // 対象業態
                     let targetBrand = response.target_brand;
                     let targetOrg = response.target_org;
-                    console.log(targetOrg);
-
 
                     // 編集画面処理
                     initializeEditRow(messageId, org1Id, categoryList, targetRollList, brandList, organizationList, allShopList, targetTag, message, messageContents, targetBrand, targetOrg);
@@ -3260,15 +3285,15 @@ $(document).ready(function() {
                     initializeEditSaveBtn(messageId, brandList);
                     // 取消ボタン処理
                     initializeEditDeleteBtn(messageId);
+
+                    // オーバーレイを非表示
+                    overlay.hide();
                 },
                 error: function(jqXHR, textStatus, errorThrown) {
                     console.error("Error:", errorThrown);
                     console.error("Response Text:", jqXHR.responseText);
                 }
             });
-
-            // オーバーレイを非表示
-            overlay.hide();
         });
     });
 });

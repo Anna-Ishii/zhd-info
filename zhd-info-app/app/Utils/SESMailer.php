@@ -17,7 +17,7 @@ class SESMailer
         ]);
     }
 
-    public function sendEmail($to, $subject, $message)
+    public function sendEmail($fromName, $to, $subject, $message)
     {
         try {
             // 送信者名とメールアドレスを設定

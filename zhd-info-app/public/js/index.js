@@ -53,7 +53,7 @@ function chkScroll() {
         $(".scrollHintR").fadeIn("fast");
     }
 
-    console.log(scrollVal);
+    // console.log(scrollVal);
 }
 function CurrentScroll() {
     let target = $(".isCurrent");

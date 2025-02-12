@@ -55,7 +55,7 @@ $(document).on('focusout' , '.inputPassword , .inputPassword2' , function(){
 	}
 
 	let chkLinkVal = linkTarget.val();
-	console.log(chkLinkVal);
+	// console.log(chkLinkVal);
 	if(chkLinkVal != '' && $(this).val() != chkLinkVal){
 		$('input[name=check_password]').val('1');
 	}else{
@@ -216,20 +216,10 @@ $(document).on('submit' , '#form' , function(event){
 // })
 
 
-// 成功テンプレート
-const successTamplate = `
-	<div class="modal-body">
-		<div class="text-center">
-			<div class="form-group">
-				csv取り込み完了しました
-			</div>
-			<div class="text-right">
-				<a href="" class="btn btn-admin" onClick="location.reload()">閉じる</a>
-			</div>
-		</div>
-	</div>
-`;
-
+let savedParams;
+$(document).ready(function() {
+    savedParams = sessionStorage.getItem('searchParams');
+});
 
 // 業務連絡 CSV アップロード
 let messageJson;
@@ -323,7 +313,7 @@ $(document).on('change', '#messageImportModal .fileImport input[type="file"]', f
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
-			console.log(response);
+			// console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
 		})
@@ -518,9 +508,23 @@ $(document).on('click', '#messageImportModal input[type="button"].importBtn', fu
 		},
 
 	}).done(function(response){
-		console.log(response);
+		// console.log(response);
 		overlay.style.display = 'none';
-		$('#messageImportModal .modal-body').replaceWith(successTamplate);
+
+        // 成功テンプレート
+        const successMessageTemplate = `
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="form-group">
+                        csv取り込み完了しました
+                    </div>
+                    <div class="text-right">
+                        ${savedParams ? `<a href="/admin/message/publish?${savedParams}" class="btn btn-admin">閉じる</a>` : `<a href="/admin/message/publish" class="btn btn-admin">閉じる</a>`}
+                    </div>
+                </div>
+            </div>
+        `;
+		$('#messageImportModal .modal-body').replaceWith(successMessageTemplate);
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
 		overlay.style.display = 'none';
@@ -587,7 +591,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 		button.prop("disabled", false);
         labelForm.parent().find('.text-danger').remove();
 		manualJson = response.json;
-		console.log(manualJson);
+		// console.log(manualJson);
     }).fail(function(jqXHR, textStatus, errorThrown){
 		$('#manualImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
@@ -630,7 +634,7 @@ $(document).on('change', '#manualImportModal input[type="file"]', function() {
 			persent = response;
 			progressBar.show();
 			progressBar.css('width', persent + '%');
-			console.log(response);
+			// console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
 		})
@@ -673,9 +677,23 @@ $('#manualImportModal input[type="button"]').click(function(e){
 			'X-CSRF-TOKEN': csrfToken,
 		},
 	}).done(function(response){
-		console.log(response);
+		// console.log(response);
 		overlay.style.display = 'none';
-		$('#manualImportModal .modal-body').replaceWith(successTamplate);
+
+        // 成功テンプレート
+        const successManualTemplate = `
+            <div class="modal-body">
+                <div class="text-center">
+                    <div class="form-group">
+                        csv取り込み完了しました
+                    </div>
+                    <div class="text-right">
+                        ${savedParams ? `<a href="/admin/manual/publish?${savedParams}" class="btn btn-admin">閉じる</a>` : `<a href="/admin/manual/publish" class="btn btn-admin">閉じる</a>`}
+                    </div>
+                </div>
+			</div>
+		`;
+		$('#manualImportModal .modal-body').replaceWith(successManualTemplate);
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
 		overlay.style.display = 'none';
@@ -770,10 +788,20 @@ function createTag(tagLabelText) {
 
 // モーダルを閉じた時にリロード
 $('#messageImportModal').on('hidden.bs.modal', function (e) {
-	window.location.reload();
+	// リダイレクト先のURLを構築
+	if (savedParams) {
+		window.location.href = "/admin/message/publish?" + savedParams;
+	} else {
+		window.location.href = "/admin/message/publish";
+	}
 })
 $('#manualImportModal').on('hidden.bs.modal', function (e) {
-	window.location.reload();
+	// リダイレクト先のURLを構築
+	if (savedParams) {
+		window.location.href = "/admin/manual/publish?" + savedParams;
+	} else {
+		window.location.href = "/admin/manual/publish";
+	}
 })
 
 function isEmptyImportFile(modal) {

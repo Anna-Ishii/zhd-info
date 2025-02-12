@@ -8,7 +8,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Message;
 use App\Models\Manual;
 use App\Models\WowTalkNotificationLog;
-use App\Models\WowtalkRecipient;
+use App\Models\IncidentNotificationsRecipient;
+use App\Models\Environment;
 use App\Utils\SESMailer;
 use App\Utils\SendWowTalkApi;
 
@@ -425,16 +426,14 @@ class WowTalkNotificationSenderCommand extends Command
     {
         if ($type === 'message') {
             // メッセージ内容を生成
-            $messageContent = "業連が配信されました。確認してください。\n";
-            $messageContent .= "・業連名：{$dataType->title}\n";
-            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/message/?search_period=all\n";
-            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/message/?search_period=all\n";
+            $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
+            $messageContent = "業連：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent .= $text->contents . "\n";
         } elseif ($type === 'manual') {
             // メッセージ内容を生成
-            $messageContent = "マニュアルが配信されました。確認してください。\n";
-            $messageContent .= "・マニュアル名：{$dataType->title}\n";
-            $messageContent .= "・URL：https://stag-innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
-            // $messageContent .= "・URL：https://innerstreaming.zensho-i.net/manual?keyword=&search_period=all\n";
+            $text = Environment::where('command_name', $this->signature)->where('type', 'manual')->select('contents')->first();
+            $messageContent = "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent .= $text->contents . "\n";
         }
 
         return $messageContent;
@@ -451,7 +450,8 @@ class WowTalkNotificationSenderCommand extends Command
     private function notifySystemAdmin($errorType, $requestData, $responseData)
     {
         // DBから通知対象のメールアドレスを取得
-        $to = WowtalkRecipient::where('target', true)->pluck('email')->toArray();
+        $fromName = 'システム管理者';
+        $to = IncidentNotificationsRecipient::where('target', true)->pluck('email')->toArray();
         $subject = '【業連・動画配信システム】業連配信通知 WowTalk連携エラー';
 
         $message = "WowTalk連携でエラーが発生しました。ご確認ください。\n\n";
@@ -486,7 +486,7 @@ class WowTalkNotificationSenderCommand extends Command
         }
 
         $mailer = new SESMailer();
-        if ($mailer->sendEmail($to, $subject, $message)) {
+        if ($mailer->sendEmail($fromName, $to, $subject, $message)) {
             $this->info("システム管理者にエラーメールを送信しました。");
         } else {
             $this->error("メール送信中にエラーが発生しました。");
