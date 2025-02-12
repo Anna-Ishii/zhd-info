@@ -40,7 +40,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
     progressBar.hide();
     progressBar.css('width', 0 + '%');
     progress.show();
-    
+
     let fileName = $(this).siblings('input[data-variable-name="manual_file_name"]');
     let filePath = $(this).siblings('input[data-variable-name="manual_file_path"]');
 
@@ -60,7 +60,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
                     var progVal = parseInt(e.loaded/e.total*10000)/100 ;
                     progressBar.show();
                     progressBar.css('width', progVal + '%');
-                    console.log(progVal);
+                    // console.log(progVal);
 
                     if (progVal == 100)
                     {
@@ -68,7 +68,7 @@ $(document).on('change', '.fileInputs input[type="file"]', function() {
                         setTimeout(() => {
                             progress.hide();
                         }, 1000);
-                    } 
+                    }
                 }, false);
             }
             return XHR;
@@ -158,6 +158,6 @@ function _manual_flow_detailCheck(objects) {
             return false; //ループを抜ける
         }
     });
-    console.log(rtn);
+    // console.log(rtn);
     return rtn;
 }

@@ -1798,7 +1798,7 @@ $(document).ready(function () {
 
             $(`#editShopImportModal-${messageId} .modal-body .alert-danger`).remove();
             $.ajax({
-                url: '/admin/message/publish/csv/store/import',
+                url: '/admin/message/publish/csv/store/all/import',
                 type: 'post',
                 data: JSON.stringify({
                     file_json: newMessageJson,

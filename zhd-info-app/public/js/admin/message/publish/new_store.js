@@ -18,8 +18,11 @@ $(document).ready(function () {
 
 // 店舗選択中の処理
 function updateSelectedStores() {
-    const selectedCount = document.querySelectorAll('#storeModal input[name="organization_shops[]"]:checked').length;
-    document.querySelector('#storeModal div[id="storeSelected"]').textContent = `${selectedCount}店舗選択中`;
+    const selectedCount = $('#storeModal input[name="organization_shops[]"]:checked').length;
+    const storeSelectedElement = $('#storeModal #storeSelected');
+    if (storeSelectedElement.length) {
+        storeSelectedElement.text(`${selectedCount}店舗選択中`);
+    }
 }
 
 // チェックボックスの連携を設定
@@ -165,8 +168,8 @@ $(document).on("change", "#selectStoreCode", function () {
 
 // 組織単位タブの全選択/選択解除
 $(document).on("change", "#selectAllOrganization", function () {
-    var overlay = document.getElementById('overlay');
-    overlay.style.display = 'block';  // オーバーレイを表示
+    var overlay = $('#overlay');
+    overlay.css('display', 'block');  // オーバーレイを表示
 
     const checked = this.checked;
     const items = $('#storeModal #byOrganization input[type="checkbox"]').toArray(); // 組織のチェックボックス
@@ -217,7 +220,7 @@ $(document).on("change", "#selectAllOrganization", function () {
         updateSelectAllCheckboxes();
 
         // オーバーレイを非表示にする
-        overlay.style.display = 'none';
+        overlay.css('display', 'none');
     }
 
     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
@@ -225,8 +228,8 @@ $(document).on("change", "#selectAllOrganization", function () {
 
 // 店舗コード順タブの全選択/選択解除
 $(document).on("change", "#selectAllStoreCode", function () {
-    var overlay = document.getElementById('overlay');
-    overlay.style.display = 'block';  // オーバーレイを表示
+    var overlay = $('#overlay');
+    overlay.css('display', 'block');  // オーバーレイを表示
 
     const checked = this.checked;
     const items = $('#storeModal #byStoreCode input[type="checkbox"]').toArray(); // 店舗コードのチェックボックス
@@ -267,7 +270,7 @@ $(document).on("change", "#selectAllStoreCode", function () {
         updateSelectAllCheckboxes();
 
         // オーバーレイを非表示にする
-        overlay.style.display = 'none';
+        overlay.css('display', 'none');
     }
 
     requestIdleCallback(processNextBatch); // 最初のアイドル時間で処理を開始
@@ -656,7 +659,7 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
             // setTimeout(() => {
             //     progress.hide();
             // }, 1000);
-			console.log(response);
+			// console.log(response);
 		}).fail(function(qXHR, textStatus, errorThrown){
 			console.log("終了");
 		})
@@ -683,8 +686,8 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 	}
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
-	var overlay = document.getElementById('overlay');
-	overlay.style.display = 'block';
+    var overlay = $('#overlay');
+    overlay.css('display', 'block'); // オーバーレイを表示
 
 	$('#messageStoreImportModal .modal-body .alert-danger').remove();
 	$.ajax({
@@ -702,7 +705,7 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 
 	}).done(function(response){
 		// console.log(response);
-		overlay.style.display = 'none';
+		overlay.css('display', 'none');
 
         $('#messageStoreModal').html(response);
 
@@ -733,7 +736,7 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
         $('#importCsv').attr('data-target', '#messageStoreModal');
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
-		overlay.style.display = 'none';
+		overlay.css('display', 'none');
 
 		$('#messageStoreImportModal .modal-body').prepend(`
 			<div class="alert alert-danger">
