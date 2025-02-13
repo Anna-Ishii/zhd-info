@@ -32,6 +32,7 @@ use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Models\SearchCondition;
+use App\Models\Environment;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
@@ -292,6 +293,17 @@ class MessagePublishController extends Controller
             ->where('deleted_at', null)
             ->select('page_name', 'url')
             ->first();
+
+        // 特定のURLにアクセスされた場合
+        $specificUrl = Environment::where('command_name', 'message-publish')->where('type', 'message')->select('contents')->first();
+        // 現在のURLを取得
+        $currentUrl = $request->fullUrl();
+        if ($currentUrl === $specificUrl->contents) {
+            // 保存されたURLが存在する場合にリダイレクト
+            if ($message_saved_url && $message_saved_url->url) {
+                return redirect($message_saved_url->url);
+            }
+        }
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
