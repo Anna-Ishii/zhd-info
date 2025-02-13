@@ -36,12 +36,14 @@ class MessageListExport implements
     public function view(): View
     {
         $admin = session('admin');
-
-        $category_id = $this->request->input('category');
-        $status = PublishStatus::tryFrom($this->request->input('status'));
+        $category_ids = $this->request->input('category');
+        $statusArray = $this->request->input('status') ?? [];
+        $statuses = array_map(function($status) {
+            return PublishStatus::tryFrom((int)$status);
+        }, $statusArray);
         $q = $this->request->input('q');
         // $rate = $this->request->input('rate');
-        $organization1_id = $this->request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $this->request->input('brand') ? base64_decode($this->request->input('brand')) : $admin->firstOrganization1()->id;
         $label = $this->request->input('label');
         $publish_date = $this->request->input('publish-date');
         $cte = DB::table('messages')
@@ -113,26 +115,36 @@ class MessageListExport implements
                         });
                 });
             })
-            ->when(isset($status), function ($query) use ($status) {
-                switch ($status) {
-                    case PublishStatus::Wait:
-                        $query->waitMessage();
-                        break;
-                    case PublishStatus::Publishing:
-                        $query->publishingMessage();
-                        break;
-                    case PublishStatus::Published:
-                        $query->publishedMessage();
-                        break;
-                    case PublishStatus::Editing:
-                        $query->where('editing_flg', '=', true);
-                        break;
-                    default:
-                        break;
-                }
+            ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
+                $query->where(function ($query) use ($statuses) {
+                    foreach ($statuses as $status) {
+                        switch ($status) {
+                            case PublishStatus::Wait:
+                                $query->orWhere(function ($q) {
+                                    $q->waitMessage();
+                                });
+                                break;
+                            case PublishStatus::Publishing:
+                                $query->orWhere(function ($q) {
+                                    $q->publishingMessage();
+                                });
+                                break;
+                            case PublishStatus::Published:
+                                $query->orWhere(function ($q) {
+                                    $q->publishedMessage();
+                                });
+                                break;
+                            case PublishStatus::Editing:
+                                $query->orWhere('editing_flg', '=', true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
             })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
+            ->when(isset($category_ids), function ($query) use ($category_ids) {
+                $query->whereIn('category_id', $category_ids);
             })
             ->when(isset($label), function ($query) use ($label) {
                 $query->where('emergency_flg', true);
@@ -165,6 +177,6 @@ class MessageListExport implements
 
     public function chunkSize(): int
     {
-        return 100;
+        return 500;
     }
 }

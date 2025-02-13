@@ -62,11 +62,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function(){
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
+            Route::post('save-session-conditions', [MessagePublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
+            Route::post('save-search-conditions', [MessagePublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
             Route::get('update-view-rates', [MessagePublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
+            Route::post('messageNewData/{organization1_id}', [MessagePublishController::class, 'messageNewData'])->name('messageNewData');
+            Route::post('messageStoreData', [MessagePublishController::class, 'messageStoreData'])->name('messageStoreData');
             Route::post('{organization1}/new', [MessagePublishController::class, 'store'])->name('new.store');
             Route::get('edit/{message_id}', [MessagePublishController::class, 'edit'])->name('edit')->where('message_id', '^\d+$');
+            Route::post('messageEditData/{message_id}/{organization1_id}', [MessagePublishController::class, 'messageEditData'])->name('messageEditData')->where('message_id', '^\d+$');
+            Route::post('messageUpdateData', [MessagePublishController::class, 'messageUpdateData'])->name('messageUpdateData');
+            Route::post('messageAllSaveData', [MessagePublishController::class, 'messageAllSaveData'])->name('messageAllSaveData');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
@@ -79,12 +86,15 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/csv/store/upload', [MessagePublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [MessagePublishController::class, 'storeProgress'])->name('storeProgress');
             Route::post('/csv/store/import', [MessagePublishController::class, 'csvStoreImport'])->name('csvStoreImport');
+            Route::post('/csv/store/all/import', [MessagePublishController::class, 'csvStoreAllImport'])->name('csvStoreAllImport');
         });
     });
     // 管理画面-動画マニュアル
     Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'check.allowpage:manual'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
+            Route::post('save-session-conditions', [ManualPublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
+            Route::post('save-search-conditions', [ManualPublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
             Route::get('update-view-rates', [ManualPublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{manual_id}', [ManualPublishController::class, 'show'])->name('show')->where('manual_id', '^\d+$');
             Route::get('{organization1}/new', [ManualPublishController::class, 'new'])->name('new');
@@ -107,9 +117,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
         Route::group(['middleware' => 'check.allowpage:account-shop'], function(){
             Route::get('/', [AccountController::class, 'index'])->name('index');
+            Route::post('save-session-conditions', [AccountController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::get('new', [AccountController::class, 'new'])->name('new');
             Route::post('new', [AccountController::class, 'store'])->name('new.store');
             Route::post('/delete', [AccountController::class, 'delete'])->name('delete');
+            Route::post('/wowtalkAlertUpdate', [AccountController::class, 'wowtalkAlertUpdate'])->name('wowtalkAlertUpdate');
+            Route::get('/organization', [AccountController::class,  'getOrganization']);
+            Route::get('/account-export', [AccountController::class, 'export'])->name('export');
         });
         Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'check.allowpage:account-admin'], function () {
             Route::get('/', [AdminAccountController::class, 'index'])->name('index');
@@ -131,6 +145,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     });
     Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
+        Route::post('/personal/save-session-conditions', [PersonalContoller::class, 'saveSessionConditions'])->name('save-session-conditions');
+        Route::post('/personal/save-search-conditions', [PersonalContoller::class, 'saveSearchConditions'])->name('save-search-conditions');
         Route::get('/personal-export', [PersonalContoller::class, 'export'])->name('export');
         Route::get('/personal/shop-message', [PersonalContoller::class,  'getShopMessageViewRate']);
         Route::get('/personal/org-message', [PersonalContoller::class,  'getOrgMessageViewRate']);

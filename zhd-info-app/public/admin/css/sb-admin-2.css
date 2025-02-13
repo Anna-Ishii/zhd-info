@@ -82,6 +82,34 @@ body {
     padding-top: 20px;
 }
 
+#page-wrapper .custom-dropdown {
+    border-radius: 0px;
+    font-size: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+#page-wrapper .custom-dropdown-text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+#page-wrapper .form-check-label {
+    font-size: 12px;
+    font-weight: normal;
+}
+
+#page-wrapper .dropdown-menu {
+    max-height: 300px;
+    overflow-y: auto;
+    width: 200px;
+    padding: 5px;
+    border-radius: 10px;
+    font-size: 12px;
+}
+
 .navbar-top-links {
     margin-right: 0;
 }
@@ -623,6 +651,14 @@ table.dataTable thead .sorting:after {
     background-color: #f4a300;
 }
 
+.new-modified {
+    background-color: #f4a300;
+}
+
+.edit-modified {
+    background-color: #f4a300;
+}
+
 .admin-header {
     font-size: 13px;
 }
@@ -907,7 +943,43 @@ table.personal td[class*="org"] {
     text-align: center;
 }
 
+table.account {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #000 !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+table.account th,
+table.account td {
+    border: 1px solid #000 !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
+}
+
+/* 縦スクロール */
+table.account thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+}
+
+/* ヘッダーのスタイル */
+table.account thead>tr>th.head1 {
+    background-color: rgb(209, 218, 239);
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.account thead>tr>th.head2 {
+    background-color: #bbb;
+    vertical-align: middle;
+    text-align: center;
+}
+
 table tr.deleted {
     background-color: #d9d9d9;
-    ;
 }

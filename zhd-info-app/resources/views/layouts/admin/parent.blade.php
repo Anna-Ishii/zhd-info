@@ -67,7 +67,7 @@
                     <ul class="dropdown-menu dropdown-user">
                         <li><a href="{{ route('admin.setting.change_password.index') }}"><i class="fa fa-user"><span class="mr4">{{ $admin->name }}</span></i> パスワード変更</a></li>
                         <form id="logout-form" action="/admin/logout" method="post">@csrf</form>
-                        <li class="logout-btn"><a><i class="fa fa-sign-out fa-fw"></i> ログアウト</a></li>
+                        <li class="logout-btn" style="cursor: pointer;"><a><i class="fa fa-sign-out fa-fw"></i> ログアウト</a></li>
                     </ul>
                     <!-- /.dropdown-user -->
                 </li>

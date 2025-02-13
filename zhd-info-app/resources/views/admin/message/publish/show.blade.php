@@ -9,10 +9,14 @@
                         <a href="#" class="nav-label">1.配信</a>
                         <ul class="nav nav-second-level">
                             @if (in_array('message', $arrow_pages, true))
-                                <li class="active"><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                                <li class="message-publish active">
+                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
+                                </li>
                             @endif
                             @if (in_array('manual', $arrow_pages, true))
-                                <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                                <li class="manual-publish">
+                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                                </li>
                             @endif
                         </ul>
                     </li>
@@ -21,7 +25,9 @@
                     <li>
                         <a href="#" class="nav-label">2.データ抽出</span></a>
                         <ul class="nav nav-second-level">
-                            <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                            <li class="analyse-personal">
+                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -102,8 +108,9 @@
                     <select name="brand" class="form-control">
                         <option value="">指定なし</option>
                         @foreach ($brand_list as $brand)
-                            <option value="{{ $brand->id }}"
-                                {{ request()->input('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}
+                            <option value="{{ base64_encode($brand->id) }}"
+                                {{ request()->input('brand') == base64_encode($brand->id) ? 'selected' : '' }}>
+                                {{ $brand->name }}
                             </option>
                         @endforeach
                     </select>
@@ -190,7 +197,7 @@
                         <th class="text-center">AR</th>
                         <th class="text-center" colspan="2">店舗名</th>
                         <th class="text-center">既読状況</th>
-                        <th class="text-center">閲覧日時</th>
+                        <th class="text-center">最終閲覧日時</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -212,7 +219,7 @@
         <div class="pagenation-bottom">
             @include('common.admin.pagenation', ['objects' => $user_list])
         </div>
-        <a href="{{ route('admin.message.publish.index', ['brand' => session('brand_id')]) }}">
+        <a href="/admin/message/publish?{{ session('message_publish_url') }}">
             <button class="btn btn-admin">戻る</button>
         </a>
 

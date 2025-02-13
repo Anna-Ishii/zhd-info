@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Message;
 use Carbon\Carbon;
 use App\Enums\PublishStatus;
 use App\Exports\MessageListExport;
+use App\Exports\MessageListBBExport;
 use App\Exports\MessageStoreCsvExport;
 use App\Exports\MessageViewRateExport;
 use App\Http\Controllers\Controller;
@@ -18,6 +19,7 @@ use App\Models\User;
 use App\Http\Repository\Organization1Repository;
 use App\Http\Requests\Admin\Message\FileUpdateApiRequest;
 use App\Imports\MessageCsvImport;
+use App\Imports\MessageBBCsvImport;
 use App\Imports\MessageStoreCsvImport;
 use App\Models\Brand;
 use App\Models\MessageContent;
@@ -25,15 +27,16 @@ use App\Models\MessageOrganization;
 use App\Models\MessageTagMaster;
 use App\Models\MessageShop;
 use App\Models\MessageUser;
-use App\Models\MessageViewRate;
 use App\Models\Organization1;
 use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
+use App\Models\SearchCondition;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\PdfFileJoin;
+use App\Jobs\SendWowtalkNotificationJob;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -58,10 +61,13 @@ class MessagePublishController extends Controller
         $organization1_list = $admin->getOrganization1();
 
         // request
-        $category_id = $request->input('category');
-        $status = PublishStatus::tryFrom($request->input('status'));
+        $category_ids = $request->input('category');
+        $statusArray = $request->input('status') ?? [];
+        $statuses = array_map(function($status) {
+            return PublishStatus::tryFrom((int)$status);
+        }, $statusArray);
         $q = $request->input('q');
-        $organization1_id = $request->input('brand', $organization1_list[0]->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $organization1_list[0]->id;
         $label = $request->input('label');
         $publish_date = $request->input('publish-date');
 
@@ -124,26 +130,36 @@ class MessagePublishController extends Controller
                         });
                 });
             })
-            ->when(isset($status), function ($query) use ($status) {
-                switch ($status) {
-                    case PublishStatus::Wait:
-                        $query->waitMessage();
-                        break;
-                    case PublishStatus::Publishing:
-                        $query->publishingMessage();
-                        break;
-                    case PublishStatus::Published:
-                        $query->publishedMessage();
-                        break;
-                    case PublishStatus::Editing:
-                        $query->where('editing_flg', '=', true);
-                        break;
-                    default:
-                        break;
-                }
+            ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
+                $query->where(function ($query) use ($statuses) {
+                    foreach ($statuses as $status) {
+                        switch ($status) {
+                            case PublishStatus::Wait:
+                                $query->orWhere(function ($q) {
+                                    $q->waitMessage();
+                                });
+                                break;
+                            case PublishStatus::Publishing:
+                                $query->orWhere(function ($q) {
+                                    $q->publishingMessage();
+                                });
+                                break;
+                            case PublishStatus::Published:
+                                $query->orWhere(function ($q) {
+                                    $q->publishedMessage();
+                                });
+                                break;
+                            case PublishStatus::Editing:
+                                $query->orWhere('editing_flg', '=', true);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
             })
-            ->when(isset($category_id), function ($query) use ($category_id) {
-                $query->where('category_id', $category_id);
+            ->when(isset($category_ids), function ($query) use ($category_ids) {
+                $query->whereIn('category_id', $category_ids);
             })
             ->when(isset($label), function ($query) use ($label) {
                 $query->where('emergency_flg', true);
@@ -238,48 +254,95 @@ class MessagePublishController extends Controller
         }
 
         // 店舗数をカウント
-        // すべてのメッセージIDを取得
-        $message_ids = $message_list->pluck('id')->toArray();
-        // すべての店舗数を取得
-        $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
-        // 各メッセージに関連する店舗数を取得
-        $message_shop_counts = MessageShop::select('message_id', DB::raw('COUNT(*) as shop_count'))
-            ->whereIn('message_id', $message_ids)
-            ->groupBy('message_id')
-            ->pluck('shop_count', 'message_id');
-        // 各メッセージに関連するユーザー数を取得（店舗数が0の場合に使用）
-        $message_user_counts = MessageUser::select('message_id', DB::raw('COUNT(*) as user_count'))
-            ->whereIn('message_id', $message_ids)
-            ->groupBy('message_id')
-            ->pluck('user_count', 'message_id');
+        if ($message_list) {
+            // すべてのメッセージIDを取得
+            $message_ids = $message_list->pluck('id')->toArray();
+            // すべての店舗数を取得
+            $all_shop_count = Shop::where('organization1_id', $organization1_id)->count();
+            // 各メッセージに関連する店舗数を取得
+            $message_shop_counts = MessageShop::select('message_id', DB::raw('COUNT(*) as shop_count'))
+                ->whereIn('message_id', $message_ids)
+                ->groupBy('message_id')
+                ->pluck('shop_count', 'message_id');
 
-        // メッセージリストをループして、店舗数を割り当て
-        foreach ($message_list as &$message) {
-            $shop_count = $message_shop_counts[$message->id] ?? 0;
-            // 店舗数が0の場合は、ユーザー数を使用
-            if ($shop_count == 0) {
-                $shop_count = $message_user_counts[$message->id] ?? 0;
+            // メッセージリストをループして、店舗数を割り当て
+            foreach ($message_list as &$message) {
+                $shop_count = $message_shop_counts[$message->id] ?? 0;
+                // 全店舗数と同じ場合は「全店」と表示
+                if ($shop_count == $all_shop_count) {
+                    $shop_count = "全店";
+                }
+                $message->shop_count = $shop_count;
             }
-            // 全店舗数と同じ場合は「全店」と表示
-            if ($shop_count == $all_shop_count) {
-                $shop_count = "全店";
-            }
-            $message->shop_count = $shop_count;
         }
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
+    }
+
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['message_publish_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    // 検索条件を保存
+    public function saveSearchConditions(Request $request)
+    {
+        $admin = session('admin');
+
+        try {
+            SearchCondition::updateOrCreate(
+                [
+                    'admin_id' => $admin->id,
+                    'page_name' => 'message-publish',
+                ],
+                [
+                    'url' => $request->input('url'),
+                ]
+            );
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            // エラーログを記録
+            Log::error('Error saving search conditions: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => '検索条件の保存中にエラーが発生しました。'], 500);
+        }
     }
 
     // 閲覧率の更新処理
     public function updateViewRates(Request $request)
     {
         $admin = session('admin');
-        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $admin->firstOrganization1()->id;
         $rate = $request->input('rate');
         $message_id = $request->input('message_id'); // message_idを取得
 
@@ -294,7 +357,7 @@ class MessagePublishController extends Controller
             ->join('messages', 'message_user.message_id', '=', 'messages.id')
             ->where('messages.organization1_id', $organization1_id)
             ->when($message_id, function ($query) use ($message_id) {
-                $query->where('message_user.message_id', $message_id); // message_idでフィルタリング
+                $query->where('message_user.message_id', $message_id);
             })
             ->groupBy('message_user.message_id')
             ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
@@ -331,6 +394,8 @@ class MessagePublishController extends Controller
 
     public function show(Request $request, $message_id)
     {
+        $admin = session('admin');
+
         $message = Message::where('id', $message_id)
             ->withCount(['user as total_users'])
             ->withCount(['readed_user as read_users'])
@@ -345,7 +410,7 @@ class MessagePublishController extends Controller
         $org5_list = Organization1Repository::getOrg5($organization1);
 
         // request
-        $brand_id = $request->input('brand');
+        $brand_id = $request->input('brand') ? base64_decode($request->input('brand')) : null;
         $shop_freeword = $request->input('shop_freeword');
         $org3 = $request->input('org3');
         $org4 = $request->input('org4');
@@ -404,6 +469,23 @@ class MessagePublishController extends Controller
             ->paginate(50)
             ->appends(request()->query());
 
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
         return view('admin.message.publish.show', [
             'message' => $message,
             'user_list' => $user_list,
@@ -412,12 +494,17 @@ class MessagePublishController extends Controller
             'org4_list' => $org4_list,
             'org5_list' => $org5_list,
             'brands' => $brands,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
         ]);
     }
 
     public function new(Organization1 $organization1)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+
+        $admin = session('admin');
 
         $category_list = MessageCategory::all();
 
@@ -513,11 +600,139 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
+
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
         return view('admin.message.publish.new', [
             'organization1' => $organization1,
+            'category_list' => $category_list,
+            'target_roll_list' => $target_roll_list,
+            'brand_list' => $brand_list,
+            'organization_list' => $organization_list,
+            'all_shop_list' => $all_shop_list,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
+        ]);
+    }
+
+    // 一覧画面追加の組織一覧を取得する
+    public function messageNewData($organization1_id = null)
+    {
+        if ($organization1_id == null) {
+            return response()->json(['error' => 'Organization ID is required'], 400);
+        }
+
+        $category_list = MessageCategory::all();
+
+        $target_roll_list = Roll::get(); //「一般」を使わない場合 Roll::where('id', '!=', '1')->get();
+
+        // ブランド一覧を取得する
+        $brand_list = Brand::where('organization1_id', $organization1_id)->get();
+
+        $organization_list = [];
+        $organization_list = Shop::query()
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $organization1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
+
+
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $organization1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
+
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
+
+        return response()->json([
             'category_list' => $category_list,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
@@ -576,6 +791,8 @@ class MessagePublishController extends Controller
         $number = Message::where('organization1_id', $organization1->id)->max('number');
         $msg_params['number'] = is_null($number) ? 1 : $number + 1;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         try {
             DB::beginTransaction();
@@ -687,7 +904,51 @@ class MessagePublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $organization1->id]));
+            $organization1_id = $organization1->id;
+            $rate = $request->input('rate');
+            $message_id = $message->id;
+
+            // メッセージの既読・総ユーザー数を一度に集計
+            $messageRates = DB::table('message_user')
+            ->select([
+                'message_user.message_id',
+                DB::raw('sum(message_user.read_flg) as read_users'),
+                DB::raw('count(distinct message_user.user_id) as total_users'),
+                DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
+            ])
+            ->join('messages', 'message_user.message_id', '=', 'messages.id')
+            ->where('messages.organization1_id', $organization1_id)
+            ->when($message_id, function ($query) use ($message_id) {
+                $query->where('message_user.message_id', $message_id);
+            })
+            ->groupBy('message_user.message_id')
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->get();
+
+        // バルクアップデート用のデータ準備
+        $updateData = [];
+        foreach ($messageRates as $m) {
+            $updateData[] = [
+                'message_id' => $m->message_id,
+                'organization1_id' => $organization1_id,
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // バルクアップデートを実行
+        DB::table('message_view_rates')->upsert(
+            $updateData,
+            ['message_id', 'organization1_id'],
+            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+        );
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -706,12 +967,99 @@ class MessagePublishController extends Controller
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($message_id, 'message', 'message_store');
+        }
+
+        // 検索条件をセッションから取得してリダイレクト
+        $message_publish_url = session('message_publish_url');
+        if ($message_publish_url) {
+            return redirect()->route('admin.message.publish.index', [$message_publish_url]);
+        }
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+    }
+
+    // 一覧画面の登録
+    public function messageStoreData(PublishStoreRequest $request)
+    {
+        $organization1 = Organization1::find($request->input('org1Id'));
+
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
+
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+        $start_datetime = $start_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->store($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $organization1);
     }
 
     public function edit($message_id)
     {
         ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+
+        $admin = session('admin');
 
         $message = Message::find($message_id);
         if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
@@ -876,6 +1224,25 @@ class MessagePublishController extends Controller
             return strcmp($a['shop_code'], $b['shop_code']);
         });
 
+
+        // 検索条件を取得
+        $message_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'message-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $manual_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'manual-publish')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+        $analyse_personal_saved_url = SearchCondition::where('admin_id', $admin->id)
+            ->where('page_name', 'analyse-personal')
+            ->where('deleted_at', null)
+            ->select('page_name', 'url')
+            ->first();
+
+
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
@@ -883,6 +1250,192 @@ class MessagePublishController extends Controller
             'message' => $message,
             'message_contents' => $message_contents,
             'category_list' => $category_list,
+            'target_roll_list' => $target_roll_list,
+            'brand_list' => $brand_list,
+            'organization_list' => $organization_list,
+            'all_shop_list' => $all_shop_list,
+            'message_target_roll' => $message_target_roll,
+            'target_brand' => $target_brand,
+            'target_org' => $target_org,
+            'message_saved_url' => $message_saved_url,
+            'manual_saved_url' => $manual_saved_url,
+            'analyse_personal_saved_url' => $analyse_personal_saved_url,
+        ]);
+    }
+
+    // 一覧画面編集の業連ファイルと組織一覧を取得する
+    public function messageEditData($message_id, $org1_id)
+    {
+        $message = Message::find($message_id);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+
+        // 複数ファイルの場合の処理
+        $message_contents = MessageContent::where('message_id', $message_id)->get();
+
+        $category_list = MessageCategory::all();
+
+        $message_tag_ids = DB::table('message_tags')->where('message_id', $message_id)->pluck('tag_id')->toArray();
+        $target_tag = MessageTagMaster::whereIn('id', $message_tag_ids)->get();
+
+        $target_roll_list = Roll::get();
+
+        // 業態一覧を取得する
+        $brand_list = Brand::where('organization1_id', $org1_id)->get();
+
+        $organization_list = [];
+        $organization_list = Shop::query()
+            ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+            ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+            ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+            ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+            ->distinct('organization4_id')
+            ->distinct('organization5_id')
+            ->select(
+                'organization2_id',
+                'organization2.name as organization2_name',
+                'organization2.order_no as organization2_order_no',
+                'organization3_id',
+                'organization3.name as organization3_name',
+                'organization3.order_no as organization3_order_no',
+                'organization4_id',
+                'organization4.name as organization4_name',
+                'organization4.order_no as organization4_order_no',
+                'organization5_id',
+                'organization5.name as organization5_name',
+                'organization5.order_no as organization5_order_no',
+            )
+            ->where('organization1_id', $org1_id)
+            ->orderByRaw('organization2_id is null asc')
+            ->orderByRaw('organization3_id is null asc')
+            ->orderByRaw('organization4_id is null asc')
+            ->orderByRaw('organization5_id is null asc')
+            ->orderBy("organization2_order_no", "asc")
+            ->orderBy("organization3_order_no", "asc")
+            ->orderBy("organization4_order_no", "asc")
+            ->orderBy("organization5_order_no", "asc")
+            ->get()
+            ->toArray();
+
+
+        // 店舗情報を取得する
+        $brand_ids = $brand_list->pluck('id')->toArray();
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $org1_id)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        // 組織別にデータを整理する
+        $organization_list = array_map(function ($org) use ($all_shops) {
+            $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization5_id'] == $org['organization5_id'];
+            });
+            $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
+            });
+            $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            return $org;
+        }, $organization_list);
+
+        // shop_code でソート済みの $all_shops をそのまま利用
+        $all_shop_list = array_map(function ($shop) {
+            return [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ];
+        }, $all_shops);
+
+
+        // MessageOrganizationテーブルから各組織IDを取得し、配列に格納
+        $target_org = [];
+        $target_org['org5'] = MessageOrganization::where('message_id', $message_id)->pluck('organization5_id')->toArray();
+        $target_org['org4'] = MessageOrganization::where('message_id', $message_id)->pluck('organization4_id')->toArray();
+        $target_org['org3'] = MessageOrganization::where('message_id', $message_id)->pluck('organization3_id')->toArray();
+        $target_org['org2'] = MessageOrganization::where('message_id', $message_id)->pluck('organization2_id')->toArray();
+
+        $message_target_roll = $message->roll()->pluck('rolls.id')->toArray();
+        $target_brand = $message->brand()->pluck('brands.id')->toArray();
+
+        $target_org['shops'] = [];
+        $target_org['select'] = null;
+
+        $selectedFlg = null;
+        $chunkSize = 200; // チャンクサイズを設定
+        $offset = 0;
+
+        // MessageShopテーブルからメッセージに関連する店舗情報を取得
+        while (true) {
+            $shops = MessageShop::where('message_id', $message_id)
+                ->whereIn('brand_id', $target_brand)
+                ->offset($offset)
+                ->limit($chunkSize)
+                ->get(['shop_id', 'selected_flg']);
+
+            // 取得したデータが空ならループを終了
+            if ($shops->isEmpty()) {
+                break;
+            }
+
+            // 取得した店舗データをtarget_org['shops']配列に格納し、selected_flgを設定
+            foreach ($shops as $shop) {
+                $target_org['shops'][] = $shop->shop_id;
+                if (!$selectedFlg) {
+                    $selectedFlg = $shop->selected_flg;
+                }
+            }
+            $offset += $chunkSize;
+        }
+
+        // MessageShopテーブルにshop_idが存在しない場合はMessageUserテーブルを確認
+        if (empty($target_org['shops'])) {
+            MessageUser::where('message_id', $message_id)
+                ->orderBy('message_id')
+                ->chunk($chunkSize, function ($users) use (&$target_org) {
+                    foreach ($users as $user) {
+                        $target_org['shops'][] = $user->shop_id;
+                    }
+                });
+            $target_org['select'] = 'oldStore';
+        }
+        // target_org['shops']の配列内の重複する店舗IDを削除
+        $target_org['shops'] = array_unique($target_org['shops']);
+
+        // selectedFlgが設定されている場合はtarget_org['select']にその値を設定
+        if ($selectedFlg) {
+            $target_org['select'] = $selectedFlg;
+        }
+
+
+        // 店舗コードでshopsをソート
+        usort($all_shop_list, function ($a, $b) {
+            return strcmp($a['shop_code'], $b['shop_code']);
+        });
+
+        return response()->json([
+            'message' => $message,
+            'message_contents' => $message_contents,
+            'category_list' => $category_list,
+            'target_tag' => $target_tag,
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
             'organization_list' => $organization_list,
@@ -918,6 +1471,8 @@ class MessagePublishController extends Controller
 
         $msg_params['updated_admin_id'] = $admin->id;
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
+        $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
+        $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         // 手順を登録する
         $content_data = [];
@@ -1174,7 +1729,51 @@ class MessagePublishController extends Controller
             DB::commit();
 
             // 閲覧率の更新処理
-            $this->updateViewRates(new Request(['message_id' => $message->id, 'brand' => $message->organization1_id]));
+            $organization1_id = $message->organization1_id;
+            $rate = $request->input('rate');
+            $message_id = $message->id;
+
+            // メッセージの既読・総ユーザー数を一度に集計
+            $messageRates = DB::table('message_user')
+            ->select([
+                'message_user.message_id',
+                DB::raw('sum(message_user.read_flg) as read_users'),
+                DB::raw('count(distinct message_user.user_id) as total_users'),
+                DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
+            ])
+            ->join('messages', 'message_user.message_id', '=', 'messages.id')
+            ->where('messages.organization1_id', $organization1_id)
+            ->when($message_id, function ($query) use ($message_id) {
+                $query->where('message_user.message_id', $message_id);
+            })
+            ->groupBy('message_user.message_id')
+            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                $min = isset($rate[0]) ? $rate[0] : 0;
+                $max = isset($rate[1]) ? $rate[1] : 100;
+                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+            })
+            ->get();
+
+        // バルクアップデート用のデータ準備
+        $updateData = [];
+        foreach ($messageRates as $m) {
+            $updateData[] = [
+                'message_id' => $m->message_id,
+                'organization1_id' => $organization1_id,
+                'view_rate' => $m->view_rate,     // 閲覧率の計算
+                'read_users' => $m->read_users,   // 既読ユーザー数
+                'total_users' => $m->total_users, // 全体ユーザー数
+                'created_at' => now(),
+                'updated_at' => now(),
+            ];
+        }
+
+        // バルクアップデートを実行
+        DB::table('message_view_rates')->upsert(
+            $updateData,
+            ['message_id', 'organization1_id'],
+            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+        );
 
         } catch (\Throwable $th) {
             DB::rollBack();
@@ -1194,7 +1793,140 @@ class MessagePublishController extends Controller
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
+        // WowTalk通知のジョブをキューに追加
+        if ($is_broadcast_notification == 1) {
+            SendWowtalkNotificationJob::dispatch($message_id, 'message', 'message_update');
+        }
+
+        // 検索条件をセッションから取得してリダイレクト
+        $message_publish_url = session('message_publish_url');
+        if ($message_publish_url) {
+            return redirect()->route('admin.message.publish.index', [$message_publish_url]);
+        }
+
         return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+    }
+
+    // 一覧画面の編集
+    public function messageUpdateData(PublishUpdateRequest $request)
+    {
+        $message_id = $request->input('message_id');
+
+        // 各リクエストデータを取得し、'null'文字列をnullに変換
+        $title = $request->input('title') === 'null' ? null : $request->input('title');
+        $category_id = $request->input('category_id') === 'null' ? null : $request->input('category_id');
+        $emergency_flg = $request->input('emergency_flg') === 'null' ? null : $request->input('emergency_flg');
+        $wowtalk_notification = $request->input('wowtalk_notification') === 'null' ? null : $request->input('wowtalk_notification');
+
+        $start_datetime_input = $request->input('start_datetime');
+        $end_datetime_input = $request->input('end_datetime');
+
+        $start_datetime = $start_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($start_datetime_input))->format('Y-m-d H:i:s');
+        $end_datetime = $end_datetime_input === null ? null : Carbon::createFromFormat('Y/m/d H:i', $this->cleanDateString($end_datetime_input))->format('Y-m-d H:i:s');
+
+        $tag_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('tag_name', []));
+
+        $content_id = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('content_id', []));
+
+        $file_name = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_name', []));
+
+        $file_path = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('file_path', []));
+
+        $join_flg = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('join_flg', []));
+
+        $target_roll = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('target_roll', []));
+
+        $brand = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('brand', []));
+
+        $organization = array_map(function($org) {
+            return $org === 'null' ? null : $org;
+        }, $request->input('organization', []));
+
+        $organization_shops = $request->input('organization_shops') === 'null' ? null : $request->input('organization_shops');
+
+        $select_organization = array_map(function($item) {
+            return $item === 'null' ? null : $item;
+        }, $request->input('select_organization', []));
+
+        return $this->update($request->merge([
+            'title' => $title,
+            'category_id' => $category_id,
+            'emergency_flg' => $emergency_flg,
+            'wowtalk_notification' => $wowtalk_notification,
+            'tag_name' => $tag_name,
+            'start_datetime' => $start_datetime,
+            'end_datetime' => $end_datetime,
+            'content_id' => $content_id,
+            'file_name' => $file_name,
+            'file_path' => $file_path,
+            'join_flg' => $join_flg,
+            'target_roll' => $target_roll,
+            'brand' => $brand,
+            'organization' => $organization,
+            'organization_shops' => $organization_shops,
+            'select_organization' => $select_organization,
+        ]), $message_id);
+    }
+
+    // 一覧画面の一括登録
+    public function messageAllSaveData(Request $request)
+    {
+        $messagesData = $request->input('messagesData', []);
+        $errors = [];
+
+        foreach ($messagesData as $index => $messageData) {
+            $operation = $messageData['operation'] ?? null;
+
+            try {
+                if ($operation == 'new') {
+                    $request = Request::create('', 'POST', $messageData);
+                    $storeRequest = PublishStoreRequest::createFromBase($request);
+                    $storeRequest->setContainer(app());
+                    $storeRequest->setRedirector(app('redirect'));
+                    $storeRequest->validateResolved();
+                    $this->messageStoreData($storeRequest);
+                } else {
+                    $request = Request::create('', 'POST', $messageData);
+                    $updateRequest = PublishUpdateRequest::createFromBase($request);
+                    $updateRequest->setContainer(app());
+                    $updateRequest->setRedirector(app('redirect'));
+                    $updateRequest->validateResolved();
+                    $this->messageUpdateData($updateRequest);
+                }
+            } catch (\Illuminate\Validation\ValidationException $e) {
+                $errors[$index] = [
+                    'type' => 'validation',
+                    'messages' => $e->errors(),
+                    'data' => $messageData
+                ];
+            } catch (\Exception $e) {
+                $errors[$index] = [
+                    'type' => 'general',
+                    'messages' => [$e->getMessage()],
+                    'data' => $messageData
+                ];
+            }
+        }
+
+        if (!empty($errors)) {
+            return response()->json(['status' => 'error', 'errors' => $errors], 422);
+        }
+
+        return response()->json(['status' => 'success']);
     }
 
     public function stop(Request $request)
@@ -1231,10 +1963,19 @@ class MessagePublishController extends Controller
     public function exportList(Request $request)
     {
         $admin = session('admin');
-        $organization1_id = $request->input('brand', $admin->firstOrganization1()->id);
+        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $admin->firstOrganization1()->id;
         $organization1 = Organization1::find($organization1_id);
 
         $file_name = '業務連絡_' . $organization1->name . now()->format('_Y_m_d') . '.csv';
+
+        // BBの場合、SKの場合
+        if ($organization1->id == 2 || $organization1->id == 8) {
+            return Excel::download(
+                new MessageListBBExport($request),
+                $file_name
+            );
+        }
+
         return Excel::download(
             new MessageListExport($request),
             $file_name
@@ -1279,7 +2020,6 @@ class MessagePublishController extends Controller
         );
     }
 
-    // API
     public function fileUpload(FileUpdateApiRequest $request)
     {
         $validated = $request->validated();
@@ -1314,95 +2054,230 @@ class MessagePublishController extends Controller
         $csv = $request->file;
         $organization1 = (int) $request->input('organization1');
 
-        $csv_content = file_get_contents($csv);
-        $encoding = mb_detect_encoding($csv_content);
-        if ($encoding == "UTF-8") {
-            $shift_jis_content = mb_convert_encoding($csv_content, 'CP932', 'UTF-8');
-            file_put_contents($csv, $shift_jis_content);
+        try {
+            $csv_content = file_get_contents($csv);
+            $encoding = mb_detect_encoding($csv_content, ['UTF-8', 'SJIS', 'EUC-JP', 'ISO-2022-JP']);
+            if ($encoding == "UTF-8") {
+                $shift_jis_content = mb_convert_encoding($csv_content, 'SJIS-win', 'UTF-8');
+                file_put_contents($csv, $shift_jis_content);
+            }
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'ファイルをアップロードしてください'
+            ], 500);
         }
 
         $organization = $this->getOrganizationForm($organization1);
+
+        // BBの場合、SKの場合
+        if ($organization1 == 2 || $organization1 == 8) {
+            $shop_list = $this->getShopForm($organization1);
+        }
 
         $csv_path = Storage::putFile('csv', $csv);
         Log::info("業連CSVインポート", [
             'csv_path' => $csv_path,
             'admin' => $admin
         ]);
+
+
+
         try {
-            Excel::import(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+            // BBの場合、SKの場合
+            if ($organization1 == 2 || $organization1 == 8) {
+                $collection = Excel::toCollection(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
+                $count = $collection[0]->count();
+                if ($count >= 100) {
+                    File::delete($file_path);
+                    return response()->json([
+                        'message' => "100行以内にしてください"
+                    ], 500);
+                }
 
-            $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
-            $count = $collection[0]->count();
-            if ($count >= 100) {
-                File::delete($file_path);
+                Excel::import(new MessageBBCsvImport($organization1, $organization, $shop_list), $csv, \Maatwebsite\Excel\Excel::CSV);
+
+                $last_message = Message::where('organization1_id', $organization1)
+                    ->orderBy('number', 'desc')
+                    ->value('number');
+                $number = $last_message ? $last_message + 1 : 1;
+
+                $array = [];
+                foreach (
+                    $collection[0] as $key => [
+                        $no,
+                        $emergency_flg,
+                        $category,
+                        $title,
+                        $check_file,
+                        $tag1,
+                        $tag2,
+                        $tag3,
+                        $tag4,
+                        $tag5,
+                        $start_datetime,
+                        $end_datetime,
+                        $status,
+                        $wowtalk_notification,
+                        $brand,
+                        $shop
+                    ]
+                ) {
+                    if (is_null($no)) {
+                        // noがない場合は新規作成
+                        $message = Message::where('organization1_id', $organization1)
+                            ->orderBy('number', 'desc')
+                            ->first(['id', 'number']);
+
+                        $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                        $shop_param = ($shop == "全店")
+                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($shop_list, 'id')]
+                            : ['all_shops_flag' => false, 'shop_ids' => Shop::whereIn('display_name', $this->strToArray($shop))->pluck('id')->toArray()];
+
+                        $target_roll = $message->roll()->pluck('id')->toArray();
+
+                        array_push($array, [
+                            'number'                    => $number,
+                            'emergency_flg'             => isset($emergency_flg),
+                            'category'                  => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                            'title'                     => $title,
+                            'check_file'                => isset($check_file) && $check_file !== '',
+                            'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                            'start_datetime'            => $start_datetime,
+                            'end_datetime'              => $end_datetime,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
+                            'brand'                     => $brand_param,
+                            'shops'                     => $shop_param,
+                            'roll'                      => $target_roll,
+                            'is_new'                    => true
+                        ]);
+
+                        $number++;
+
+                    } else {
+                        // noがある場合は更新
+                        $message = Message::where('number', $no)
+                            ->where('organization1_id', $organization1)
+                            ->firstOrFail();
+
+                        $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                        $shop_param = ($shop == "全店")
+                            ? ['all_shops_flag' => true, 'shop_ids' => array_column($shop_list, 'id')]
+                            : ['all_shops_flag' => false, 'shop_ids' => Shop::whereIn('display_name', $this->strToArray($shop))->pluck('id')->toArray()];
+
+                        $target_roll = $message->roll()->pluck('id')->toArray();
+
+                        array_push($array, [
+                            'id'                        => $message->id,
+                            'number'                    => $no,
+                            'emergency_flg'             => isset($emergency_flg),
+                            'category'                  => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                            'title'                     => $title,
+                            'check_file'                => isset($check_file) && $check_file !== '',
+                            'tag'                       => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                            'start_datetime'            => $start_datetime,
+                            'end_datetime'              => $end_datetime,
+                            'is_broadcast_notification' => isset($wowtalk_notification) && $wowtalk_notification !== '' ? 1 : 0,
+                            'brand'                     => $brand_param,
+                            'shops'                     => $shop_param,
+                            'roll'                      => $target_roll,
+                            'is_new'                    => false
+                        ]);
+                    }
+
+                    file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
+                }
+
                 return response()->json([
-                    'message' => "100行以内にしてください"
-                ], 500);
+                    'json' => $array
+                ], 200);
+            } else {
+                Excel::import(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+
+                $collection = Excel::toCollection(new MessageCsvImport($organization1, $organization), $csv, \Maatwebsite\Excel\Excel::CSV);
+                $count = $collection[0]->count();
+                if ($count >= 100) {
+                    File::delete($file_path);
+                    return response()->json([
+                        'message' => "100行以内にしてください"
+                    ], 500);
+                }
+                $array = [];
+                foreach (
+                    $collection[0] as $key => [
+                        $no,
+                        $emergency_flg,
+                        $category,
+                        $title,
+                        $tag1,
+                        $tag2,
+                        $tag3,
+                        $tag4,
+                        $tag5,
+                        $start_datetime,
+                        $end_datetime,
+                        $status,
+                        $brand
+                        // $organization5,
+                        // $organization4,
+                        // $organization3
+                    ]
+                ) {
+                    $message = Message::firstOrCreate(
+                        ['number' => $no, 'organization1_id' => $organization1],
+                        [
+                            'title'          => $title,
+                            'category_id'    => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : null,
+                            'emergency_flg'  => isset($emergency_flg),
+                            'start_datetime' => $start_datetime,
+                            'end_datetime'   => $end_datetime,
+                        ]
+                    );
+
+                    $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
+                    // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
+                    // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
+                    // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
+
+                    $target_roll = $message->roll()->pluck('id')->toArray();
+
+                    array_push($array, [
+                        'id'             => $message->id,
+                        'number'         => $no,
+                        'emergency_flg'  => isset($emergency_flg),
+                        'category'       => $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
+                        'title'          => $title,
+                        'tag'            => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
+                        'start_datetime' => $start_datetime,
+                        'end_datetime'   => $end_datetime,
+                        'brand'          => $brand_param,
+                        // 'organization3' => $org3_param,
+                        // 'organization4' => $org4_param,
+                        // 'organization5' => $org5_param,
+                        'roll'           => $target_roll
+                    ]);
+
+                    file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
+                }
+
+                return response()->json([
+                    'json' => $array
+                ], 200);
             }
-            $array = [];
-            foreach (
-                $collection[0] as $key => [
-                    $no,
-                    $emergency_flg,
-                    $category,
-                    $title,
-                    $tag1,
-                    $tag2,
-                    $tag3,
-                    $tag4,
-                    $tag5,
-                    $start_datetime,
-                    $end_datetime,
-                    $status,
-                    $brand
-                    // $organization5,
-                    // $organization4,
-                    // $organization3
-                ]
-            ) {
-                $message = Message::where('number', $no)
-                    ->where('organization1_id', $organization1)
-                    ->firstOrFail();
-
-                $brand_param = ($brand == "全て") ? array_column($organization, 'brand_id') : Brand::whereIn('name',  $this->strToArray($brand))->pluck('id')->toArray();
-                // $org3_param = ($organization3 == "全て") ? array_column($organization, 'organization3_id') : Organization3::whereIn('name', $this->strToArray($organization3))->pluck('id')->toArray();
-                // $org4_param = ($organization4 == "全て") ? array_column($organization, 'organization4_id') : Organization4::whereIn('name', $this->strToArray($organization4))->pluck('id')->toArray();
-                // $org5_param = ($organization5 == "全て") ? array_column($organization, 'organization5_id') : Organization5::whereIn('name', $this->strToArray($organization5))->pluck('id')->toArray();
-
-                $target_roll = $message->roll()->pluck('id')->toArray();
-
-                array_push($array, [
-                    'id' => $message->id,
-                    'number' => $no,
-                    'emergency_flg' => isset($emergency_flg),
-                    'category' =>  $category ? MessageCategory::where('name', $category)->pluck('id')->first() : NULL,
-                    'title' => $title,
-                    'tag' => $this->tagImportParam([$tag1, $tag2, $tag3, $tag4, $tag5]),
-                    'start_datetime' => $start_datetime,
-                    'end_datetime' => $end_datetime,
-                    'brand' => $brand_param,
-                    // 'organization3' => $org3_param,
-                    // 'organization4' => $org4_param,
-                    // 'organization5' => $org5_param,
-                    'roll' => $target_roll
-                ]);
-
-                file_put_contents($file_path, ceil((($key + 1) / $count) * 100));
-            }
-
-            return response()->json([
-                'json' => $array
-            ], 200);
         } catch (ValidationException $e) {
             $failures = $e->failures();
 
             $errorMessage = [];
             foreach ($failures as $index => $failure) {
-                $errorMessage[$index]["row"] = $failure->row(); // row that went wrong
+                $errorMessage[$index]["row"]       = $failure->row(); // row that went wrong
                 $errorMessage[$index]["attribute"] = $failure->attribute(); // either heading key (if using heading row concern) or column index
-                $errorMessage[$index]["errors"] = $failure->errors(); // Actual error messages from Laravel validator
-                $errorMessage[$index]["value"] = $failure->values(); // The values of the row that has failed.
+                $errorMessage[$index]["errors"]    = $failure->errors(); // Actual error messages from Laravel validator
+                $errorMessage[$index]["value"]     = $failure->values(); // The values of the row that has failed.
             }
+
+            // 行でソート
+            usort($errorMessage, function ($a, $b) {
+                return $a['row'] <=> $b['row'];
+            });
 
             File::delete($file_path);
             return response()->json([
@@ -1428,7 +2303,6 @@ class MessagePublishController extends Controller
             ], 500);
         }
 
-
         $log = File::get($file_path);
         if ($log == 100) {
             File::delete($file_path);
@@ -1441,6 +2315,11 @@ class MessagePublishController extends Controller
         $admin = session('admin');
         $messages = $request->json();
 
+        foreach ($messages as $ms) {
+            $org1_id = Brand::where('id', $ms["brand"])->pluck('organization1_id')->first();
+            break;
+        }
+
         $log_id = DB::table('message_csv_logs')->insertGetId([
             'imported_datetime' => new Carbon('now'),
             'is_success' => false
@@ -1448,80 +2327,428 @@ class MessagePublishController extends Controller
 
         try {
             DB::beginTransaction();
-            foreach ($messages as $key => $ms) {
-                $message = Message::find($ms["id"]);
-                $message->number = $ms["number"];
-                $message->emergency_flg = $ms["emergency_flg"];
-                $message->category_id = $ms["category"];
-                $message->title = $ms["title"];
-                $message->tag()->sync($ms["tag"]);
-                $message->start_datetime = $ms["start_datetime"];
-                $message->end_datetime = $ms["end_datetime"];
-                if ($message->isDirty()) $message->updated_admin_id = $admin->id;
-                $message->save();
 
-                // MessageOrganization::where('message_id', $message->id)->delete();
-                // foreach ($ms["organization5"] as $org5_id) {
-                //     $message->organization()->create([
-                //         'message_id' => $message->id,
-                //         'organization1_id' => $message->organization1_id,
-                //         'organization5_id' => $org5_id
-                //     ]);
-                // }
+            // BBの場合、SKの場合
+            if ($org1_id == 2 || $org1_id == 8) {
+                foreach ($messages as $key => $ms) {
+                    $organization1_id = Brand::where('id', $ms["brand"])->pluck('organization1_id')->first();
 
-                // foreach ($ms["organization4"] as $org4_id) {
-                //     $message->organization()->create([
-                //         'message_id' => $message->id,
-                //         'organization1_id' => $message->organization1_id,
-                //         'organization4_id' => $org4_id
-                //     ]);
-                // }
+                    // ファイルを移動したかフラグ
+                    $message_changed_flg = false;
 
-                // foreach ($ms["organization3"] as $org3_id) {
-                //     $message->organization()->create([
-                //         'message_id' => $message->id,
-                //         'organization1_id' => $message->organization1_id,
-                //         'organization3_id' => $org3_id
-                //     ]);
-                // }
+                    // 新規作成
+                    if ($ms["is_new"]) {
+                        $message                = new Message();
+                        $message->number        = $ms["number"];
+                        $message->emergency_flg = $ms["emergency_flg"];
+                        $message->category_id   = $ms["category"];
+                        $message->title         = $ms["title"];
 
-                $message->brand()->sync($ms["brand"]);
+                        // check_fileがtrueの場合
+                        if (isset($ms["check_file"]) && $ms["check_file"] === true) {
+                            $message->content_name   = !empty($ms["file_name"]) ? $ms["file_name"] : null;
+                            $message->content_url    = !empty($ms["file_path"]) ? $this->registerFile($ms["file_path"]) : null;
+                            $message->thumbnails_url = !empty($message->content_url) ? ImageConverter::convert2image($message->content_url) : null;
+                            $message_changed_flg     = true;
+                        }
 
-                // if (!$message->editing_flg) {
-                //     $origin_user = $message->user()->pluck('id')->toArray();
-                //     $new_target_user = $this->targetUserParam((object)[
-                //         'organization' => [
-                //             'org5' => $ms["organization5"],
-                //             'org4' => $ms["organization4"],
-                //             'org3' => $ms["organization4"]
-                //         ],
-                //         'brand' => $ms["brand"],
-                //         'target_roll' => $ms["roll"]
-                //     ]);
-                //     $new_target_user_id = array_keys($new_target_user);
-                //     $detach_user = array_diff($origin_user, $new_target_user_id);
-                //     $attach_user = array_diff($new_target_user_id, $origin_user);
+                        $message->start_datetime            = $ms["start_datetime"];
+                        $message->end_datetime              = $ms["end_datetime"];
+                        $message->created_at                = now();
+                        $message->create_admin_id           = $admin->id;
+                        $message->updated_at                = null;
+                        $message->updated_admin_id          = null;
+                        $message->organization1_id          = $organization1_id;
+                        $message->editing_flg               = false;
+                        $message->is_broadcast_notification = $ms["is_broadcast_notification"];
+                        $message->save();
 
-                //     $message->user()->detach($detach_user);
-                //     foreach ($attach_user as $key => $user) {
-                //         $message->user()->attach([$user => $new_target_user[$user]]);
-                //     }
-                // }
+                        $message->roll()->attach($ms["roll"]);
+
+                        // message_shopにインサート
+                        $chunkSize = 200;
+
+                        // message_shopにshop_idとmessage_idをバルクインサート
+                        if (isset($ms["shops"])) {
+
+                            // ショップデータの事前取得とグループ化
+                            $shopsData = Shop::whereIn('id', $ms["shops"]['shop_ids'])
+                                ->whereIn('brand_id', $ms["brand"])
+                                ->get(['id', 'brand_id'])
+                                ->groupBy('id');
+
+                            $insertData = [];
+                            // 事前に選択フラグを決定
+                            $selectedFlg = (isset($ms["shops"]['all_shops_flag']) && $ms["shops"]['all_shops_flag'] === true) ? 'all' : 'store';
+
+                            foreach ($ms["shops"]['shop_ids'] as $_shop_id) {
+                                if (isset($shopsData[$_shop_id])) {
+                                    foreach ($shopsData[$_shop_id] as $shop) {
+                                        $insertData[] = [
+                                            'message_id'   => $message->id,
+                                            'shop_id'      => $shop->id,
+                                            'brand_id'     => $shop->brand_id,
+                                            'selected_flg' => $selectedFlg,
+                                            'created_at'   => now(),
+                                            'updated_at'   => now()
+                                        ];
+
+                                        // チャンクサイズに達したらバルクインサート
+                                        if (count($insertData) >= $chunkSize) {
+                                            MessageShop::insert($insertData);
+                                            $insertData = [];
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 最後に残ったデータをインサート
+                            if (!empty($insertData)) {
+                                MessageShop::insert($insertData);
+                            }
+                        }
+
+                        // message_organizationにインサート
+                        // Shopモデルを使用して、各組織レベルのIDを取得
+                        $shopIds = $ms["shops"]['shop_ids'];
+                        $shops = Shop::whereIn('id', $shopIds)->get();
+
+                        $bulkData = [];
+                        foreach ($shops as $shop) {
+                            $orgData = [
+                                'message_id'       => $message->id,
+                                'organization1_id' => $message->organization1_id,
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
+                                'organization5_id' => $shop->organization5_id ?? null,
+                                'organization4_id' => $shop->organization4_id ?? null,
+                                'organization3_id' => $shop->organization3_id ?? null,
+                                'organization2_id' => $shop->organization2_id ?? null,
+                            ];
+
+                            // 組織IDが設定されている場合のみデータを追加
+                            if (!empty(array_intersect_key($orgData, array_flip(['organization5_id', 'organization4_id', 'organization3_id', 'organization2_id'])))) {
+                                $bulkData[] = $orgData;
+                            }
+                        }
+
+                        // バルクインサート
+                        if (!empty($bulkData)) {
+                            DB::table('message_organization')->insert($bulkData);
+                        }
+
+                        // ブランドとタグの同期
+                        $message->brand()->sync($ms["brand"]);
+                        $message->tag()->sync($ms["tag"]);
+
+                        // message_userの同期
+                        if (!$message->editing_flg) {
+                            $origin_user = $message->user()->pluck('id')->toArray();
+                            $new_target_user = $this->getTargetUsersByShopId((object)[
+                                'organization_shops' => implode(',', $ms["shops"]['shop_ids']),
+                                'brand' => $ms["brand"],
+                                'target_roll' => $ms["roll"]
+                            ]);
+                            $new_target_user_id = array_keys($new_target_user);
+                            $detach_user = array_diff($origin_user, $new_target_user_id);
+                            $attach_user = array_diff($new_target_user_id, $origin_user);
+
+                            $message->user()->detach($detach_user);
+                            foreach ($attach_user as $key => $user) {
+                                $message->user()->attach([$user => $new_target_user[$user]]);
+                            }
+                        }
+
+                        // check_fileがtrueの場合
+                        if (isset($ms["check_file"]) && $ms["check_file"] === true) {
+                            // message_contentにインサート
+                            DB::table('message_contents')->insert([
+                                'message_id'     => $message->id,
+                                'content_name'   => $message->content_name,
+                                'content_url'    => $message->content_url,
+                                'thumbnails_url' => $message->thumbnails_url,
+                                'created_at'     => now(),
+                                'updated_at'     => now(),
+                                'join_flg'       => 'single'
+                            ]);
+                        }
+
+                    // 更新
+                    } else {
+                        $message                = Message::find($ms["id"]);
+                        $message->number        = $ms["number"];
+                        $message->emergency_flg = $ms["emergency_flg"];
+                        $message->category_id   = $ms["category"];
+                        $message->title         = $ms["title"];
+
+                        // check_fileがtrueの場合
+                        if (isset($ms["check_file"]) && $ms["check_file"] === true) {
+                            $message->content_name   = !empty($ms["file_name"]) ? $ms["file_name"] : null;
+                            $message->content_url    = !empty($ms["file_path"]) ? $this->registerFile($ms["file_path"]) : null;
+                            $message->thumbnails_url = !empty($message->content_url) ? ImageConverter::convert2image($message->content_url) : null;
+                            $message_changed_flg     = true;
+                        }
+
+                        $message->tag()->sync($ms["tag"]);
+                        $message->start_datetime            = $ms["start_datetime"];
+                        $message->end_datetime              = $ms["end_datetime"];
+                        $message->updated_at                = now();
+                        if ($message->isDirty()) $message->updated_admin_id = $admin->id;
+                        $message->editing_flg               = false;
+                        $message->is_broadcast_notification = $ms["is_broadcast_notification"];
+                        $message->save();
+
+                        $message->roll()->sync($ms["roll"]);
+
+                        MessageShop::where('message_id', $message->id)->delete();
+                        // message_shopにインサート
+                        $chunkSize = 200;
+
+                        // message_shopにshop_idとmessage_idをバルクインサート
+                        if (isset($ms["shops"])) {
+
+                            // ショップデータの事前取得とグループ化
+                            $shopsData = Shop::whereIn('id', $ms["shops"]['shop_ids'])
+                                ->whereIn('brand_id', $ms["brand"])
+                                ->get(['id', 'brand_id'])
+                                ->groupBy('id');
+
+                            $insertData = [];
+                            // 事前に選択フラグを決定
+                            $selectedFlg = (isset($ms["shops"]['all_shops_flag']) && $ms["shops"]['all_shops_flag'] === true) ? 'all' : 'store';
+
+                            foreach ($ms["shops"]['shop_ids'] as $_shop_id) {
+                                if (isset($shopsData[$_shop_id])) {
+                                    foreach ($shopsData[$_shop_id] as $shop) {
+                                        $insertData[] = [
+                                            'message_id'   => $message->id,
+                                            'shop_id'      => $shop->id,
+                                            'brand_id'     => $shop->brand_id,
+                                            'selected_flg' => $selectedFlg,
+                                            'created_at'   => now(),
+                                            'updated_at'   => now()
+                                        ];
+
+                                        // チャンクサイズに達したらバルクインサート
+                                        if (count($insertData) >= $chunkSize) {
+                                            MessageShop::insert($insertData);
+                                            $insertData = [];
+                                        }
+                                    }
+                                }
+                            }
+
+                            // 最後に残ったデータをインサート
+                            if (!empty($insertData)) {
+                                MessageShop::insert($insertData);
+                            }
+                        }
+
+                        MessageOrganization::where('message_id', $message->id)->delete();
+                        // message_organizationにインサート
+                        // Shopモデルを使用して、各組織レベルのIDを取得
+                        $shopIds = $ms["shops"]['shop_ids'];
+                        $shops = Shop::whereIn('id', $shopIds)->get();
+
+                        $bulkData = [];
+                        foreach ($shops as $shop) {
+                            $orgData = [
+                                'message_id'       => $message->id,
+                                'organization1_id' => $message->organization1_id,
+                                'created_at'       => now(),
+                                'updated_at'       => now(),
+                                'organization5_id' => $shop->organization5_id ?? null,
+                                'organization4_id' => $shop->organization4_id ?? null,
+                                'organization3_id' => $shop->organization3_id ?? null,
+                                'organization2_id' => $shop->organization2_id ?? null,
+                            ];
+
+                            // 組織IDが設定されている場合のみデータを追加
+                            if (!empty(array_intersect_key($orgData, array_flip(['organization5_id', 'organization4_id', 'organization3_id', 'organization2_id'])))) {
+                                $bulkData[] = $orgData;
+                            }
+                        }
+
+                        // バルクインサート
+                        if (!empty($bulkData)) {
+                            DB::table('message_organization')->insert($bulkData);
+                        }
+
+                        // ブランドの同期
+                        $message->brand()->sync($ms["brand"]);
+
+                        // message_userの同期
+                        if (!$message->editing_flg) {
+                            $origin_user = $message->user()->pluck('id')->toArray();
+                            $new_target_user = $this->getTargetUsersByShopId((object)[
+                                'organization_shops' => implode(',', $ms["shops"]['shop_ids']),
+                                'brand' => $ms["brand"],
+                                'target_roll' => $ms["roll"]
+                            ]);
+                            $new_target_user_id = array_keys($new_target_user);
+                            $detach_user = array_diff($origin_user, $new_target_user_id);
+                            $attach_user = array_diff($new_target_user_id, $origin_user);
+
+                            $message->user()->detach($detach_user);
+                            foreach ($attach_user as $key => $user) {
+                                $message->user()->attach([$user => $new_target_user[$user]]);
+                            }
+                        }
+
+                        // check_fileがtrueの場合
+                        if (isset($ms["check_file"]) && $ms["check_file"] === true) {
+                            // message_contentの更新
+                            $message->content()->delete();
+                            DB::table('message_contents')->insert([
+                                'message_id'     => $message->id,
+                                'content_name'   => $message->content_name,
+                                'content_url'    => $message->content_url,
+                                'thumbnails_url' => $message->thumbnails_url,
+                                'created_at'     => now(),
+                                'updated_at'     => now(),
+                                'join_flg'       => 'single'
+                            ]);
+                        }
+                    }
+
+                    // WowTalk通知のジョブをキューに追加
+                    if ($message->is_broadcast_notification == 1) {
+                        SendWowtalkNotificationJob::dispatch($message->id, 'message', 'message_import');
+                    }
+
+                    // 閲覧率の更新処理
+                    $rate = $request->input('rate');
+                    $message_id = $message->id;
+
+                    // メッセージの既読・総ユーザー数を一度に集計
+                    $messageRates = DB::table('message_user')
+                        ->select([
+                            'message_user.message_id',
+                            DB::raw('sum(message_user.read_flg) as read_users'),
+                            DB::raw('count(distinct message_user.user_id) as total_users'),
+                            DB::raw('round((sum(message_user.read_flg) / count(distinct message_user.user_id)) * 100, 1) as view_rate')
+                        ])
+                        ->join('messages', 'message_user.message_id', '=', 'messages.id')
+                        ->where('messages.organization1_id', $organization1_id)
+                        ->when($message_id, function ($query) use ($message_id) {
+                            $query->where('message_user.message_id', $message_id);
+                        })
+                        ->groupBy('message_user.message_id')
+                        ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                            $min = isset($rate[0]) ? $rate[0] : 0;
+                            $max = isset($rate[1]) ? $rate[1] : 100;
+                            $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+                        })
+                        ->get();
+
+                    // バルクアップデート用のデータ準備
+                    $updateData = [];
+                    foreach ($messageRates as $message) {
+                        $updateData[] = [
+                            'message_id'       => $message->message_id,
+                            'organization1_id' => $organization1_id,
+                            'view_rate'        => $message->view_rate,     // 閲覧率の計算
+                            'read_users'       => $message->read_users,    // 既読ユーザー数
+                            'total_users'      => $message->total_users,   // 全体ユーザー数
+                            'created_at'       => now(),
+                            'updated_at'       => now(),
+                        ];
+                    }
+
+                    // バルクアップデートを実行
+                    DB::table('message_view_rates')->upsert(
+                        $updateData,
+                        ['message_id', 'organization1_id'],
+                        ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+                    );
+                }
+
+            } else {
+                foreach ($messages as $key => $ms) {
+                    $message                 = Message::find($ms["id"]);
+                    $message->number         = $ms["number"];
+                    $message->emergency_flg  = $ms["emergency_flg"];
+                    $message->category_id    = $ms["category"];
+                    $message->title          = $ms["title"];
+                    $message->tag()->sync($ms["tag"]);
+                    $message->start_datetime = $ms["start_datetime"];
+                    $message->end_datetime   = $ms["end_datetime"];
+                    if ($message->isDirty()) $message->updated_admin_id = $admin->id;
+                    $message->save();
+
+                    // MessageOrganization::where('message_id', $message->id)->delete();
+                    // foreach ($ms["organization5"] as $org5_id) {
+                    //     $message->organization()->create([
+                    //         'message_id' => $message->id,
+                    //         'organization1_id' => $message->organization1_id,
+                    //         'organization5_id' => $org5_id
+                    //     ]);
+                    // }
+
+                    // foreach ($ms["organization4"] as $org4_id) {
+                    //     $message->organization()->create([
+                    //         'message_id' => $message->id,
+                    //         'organization1_id' => $message->organization1_id,
+                    //         'organization4_id' => $org4_id
+                    //     ]);
+                    // }
+
+                    // foreach ($ms["organization3"] as $org3_id) {
+                    //     $message->organization()->create([
+                    //         'message_id' => $message->id,
+                    //         'organization1_id' => $message->organization1_id,
+                    //         'organization3_id' => $org3_id
+                    //     ]);
+                    // }
+
+                    $message->brand()->sync($ms["brand"]);
+
+                    // if (!$message->editing_flg) {
+                    //     $origin_user = $message->user()->pluck('id')->toArray();
+                    //     $new_target_user = $this->targetUserParam((object)[
+                    //         'organization' => [
+                    //             'org5' => $ms["organization5"],
+                    //             'org4' => $ms["organization4"],
+                    //             'org3' => $ms["organization4"]
+                    //         ],
+                    //         'brand' => $ms["brand"],
+                    //         'target_roll' => $ms["roll"]
+                    //     ]);
+                    //     $new_target_user_id = array_keys($new_target_user);
+                    //     $detach_user = array_diff($origin_user, $new_target_user_id);
+                    //     $attach_user = array_diff($new_target_user_id, $origin_user);
+
+                    //     $message->user()->detach($detach_user);
+                    //     foreach ($attach_user as $key => $user) {
+                    //         $message->user()->attach([$user => $new_target_user[$user]]);
+                    //     }
+                    // }
+                }
             }
 
             DB::table('message_csv_logs')
-                ->where('id', $log_id)
-                ->update([
-                    'imported_datetime' => new Carbon('now'),
-                    'is_success' => true
-                ]);
+            ->where('id', $log_id)
+            ->update([
+                'imported_datetime' => new Carbon('now'),
+                'is_success' => true
+            ]);
 
             DB::commit();
+
             return response()->json([
                 'message' => "インポート完了しました"
             ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
+
+            if ($message_changed_flg) {
+                foreach ($messages as $message) {
+                    if (isset($message['content_url'])) {
+                        $this->rollbackRegisterFile($message['content_url']);
+                    }
+                }
+            }
+
             return response()->json([
                 'message' => $th->getMessage()
             ], 500);
@@ -1624,7 +2851,6 @@ class MessagePublishController extends Controller
         $storesJson = $request->json('file_json');
         $organization1_id = $request->json('organization1_id');
 
-        $csvStoreIds = [];
         $brand_id = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
 
         // ショップIDを取得
@@ -1637,16 +2863,14 @@ class MessagePublishController extends Controller
 
         try {
             // 業態一覧を取得する
-            $brand_list = Brand::where('organization1_id', $organization1_id)->get();
+            $brand_list = Brand::where('organization1_id', $organization1_id)->get(['id']);
 
-            $organization_list = [];
             $organization_list = Shop::query()
                 ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
                 ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
                 ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
                 ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
-                ->distinct('organization4_id')
-                ->distinct('organization5_id')
+                ->distinct()
                 ->select(
                     'organization2_id',
                     'organization2.name as organization2_name',
@@ -1659,20 +2883,15 @@ class MessagePublishController extends Controller
                     'organization4.order_no as organization4_order_no',
                     'organization5_id',
                     'organization5.name as organization5_name',
-                    'organization5.order_no as organization5_order_no',
+                    'organization5.order_no as organization5_order_no'
                 )
                 ->where('organization1_id', $organization1_id)
-                ->orderByRaw('organization2_id is null asc')
-                ->orderByRaw('organization3_id is null asc')
-                ->orderByRaw('organization4_id is null asc')
-                ->orderByRaw('organization5_id is null asc')
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
                 ->orderBy("organization5_order_no", "asc")
                 ->get()
                 ->toArray();
-
 
             // 店舗情報を取得する
             $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1696,38 +2915,34 @@ class MessagePublishController extends Controller
                 ->get()
                 ->toArray();
 
-
             // 組織別にデータを整理する
             $organization_list = array_map(function ($org) use ($all_shops) {
-                $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization5_id'] == $org['organization5_id'];
-                });
-                $org['organization4_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']);
-                });
-                $org['organization3_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
-                $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
-                    return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
-                });
+                $org['organization5_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization5_id'] == $org['organization5_id']);
+                $org['organization4_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']));
+                $org['organization3_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                $org['organization2_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 return $org;
             }, $organization_list);
 
             // shop_code でソート済みの $all_shops をそのまま利用
-            $all_shop_list = array_map(function ($shop) {
-                return [
-                    'shop_id' => $shop['id'],
-                    'shop_code' => $shop['shop_code'],
-                    'display_name' => $shop['display_name'],
-                ];
-            }, $all_shops);
-
+            $all_shop_list = array_map(fn($shop) => [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ], $all_shops);
 
             // 店舗コードでshopsをソート
-            usort($all_shop_list, function ($a, $b) {
-                return strcmp($a['shop_code'], $b['shop_code']);
-            });
+            usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
+
+            // // BBの場合、SKの場合
+            // if ($organization1_id == 2 || $organization1_id == 8) {
+            //     return response()->json([
+            //         'storesJson' => $storesJson,
+            //         'organization_list' => $organization_list,
+            //         'all_shop_list' => $all_shop_list,
+            //         'csvStoreIds' => $csvStoreIds,
+            //     ], 200);
+            // }
 
             return response()
                 ->view('common.admin.message-csv-store-modal', [
@@ -1738,6 +2953,112 @@ class MessagePublishController extends Controller
                     'csvStoreIds' => $csvStoreIds,
                 ], 200)
                 ->header('Content-Type', 'text/plain');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            return response()->json([
+                'message' => $th->getMessage()
+            ], 500);
+        }
+    }
+
+    // 業務連絡店舗CSV インポート（一覧画面/新規登録/編集 BBの場合、SKの場合）
+    public function csvStoreAllImport(Request $request)
+    {
+        $admin = session('admin');
+
+        // JSONデータの取得
+        $storesJson = $request->json('file_json');
+        $organization1_id = $request->json('organization1_id');
+
+        $brand_id = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
+
+        // ショップIDを取得
+        $csvStoreIds = DB::table('shops')
+            ->join('brands', 'shops.brand_id', '=', 'brands.id')
+            ->whereIn('brands.id', $brand_id)
+            ->whereIn('shops.shop_code', array_column($storesJson, 'store_code'))
+            ->pluck('shops.id')
+            ->toArray();
+
+        try {
+            // 業態一覧を取得する
+            $brand_list = Brand::where('organization1_id', $organization1_id)->get(['id']);
+
+            $organization_list = Shop::query()
+                ->leftjoin('organization2', 'organization2_id', '=', 'organization2.id')
+                ->leftjoin('organization3', 'organization3_id', '=', 'organization3.id')
+                ->leftjoin('organization4', 'organization4_id', '=', 'organization4.id')
+                ->leftjoin('organization5', 'organization5_id', '=', 'organization5.id')
+                ->distinct()
+                ->select(
+                    'organization2_id',
+                    'organization2.name as organization2_name',
+                    'organization2.order_no as organization2_order_no',
+                    'organization3_id',
+                    'organization3.name as organization3_name',
+                    'organization3.order_no as organization3_order_no',
+                    'organization4_id',
+                    'organization4.name as organization4_name',
+                    'organization4.order_no as organization4_order_no',
+                    'organization5_id',
+                    'organization5.name as organization5_name',
+                    'organization5.order_no as organization5_order_no'
+                )
+                ->where('organization1_id', $organization1_id)
+                ->orderBy("organization2_order_no", "asc")
+                ->orderBy("organization3_order_no", "asc")
+                ->orderBy("organization4_order_no", "asc")
+                ->orderBy("organization5_order_no", "asc")
+                ->get()
+                ->toArray();
+
+            // 店舗情報を取得する
+            $brand_ids = $brand_list->pluck('id')->toArray();
+            $all_shops = Shop::query()
+                ->select(
+                    'shops.id as id',
+                    'shops.shop_code',
+                    'shops.display_name',
+                    'shops.organization5_id',
+                    'shops.organization4_id',
+                    'shops.organization3_id',
+                    'shops.organization2_id'
+                )
+                ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+                ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+                ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+                ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+                ->where('shops.organization1_id', $organization1_id)
+                ->whereIn('shops.brand_id', $brand_ids)
+                ->orderBy('shops.shop_code', 'asc')
+                ->get()
+                ->toArray();
+
+            // 組織別にデータを整理する
+            $organization_list = array_map(function ($org) use ($all_shops) {
+                $org['organization5_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization5_id'] == $org['organization5_id']);
+                $org['organization4_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']));
+                $org['organization3_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                $org['organization2_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                return $org;
+            }, $organization_list);
+
+            // shop_code でソート済みの $all_shops をそのまま利用
+            $all_shop_list = array_map(fn($shop) => [
+                'shop_id' => $shop['id'],
+                'shop_code' => $shop['shop_code'],
+                'display_name' => $shop['display_name'],
+            ], $all_shops);
+
+            // 店舗コードでshopsをソート
+            usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
+
+            return response()->json([
+                'storesJson' => $storesJson,
+                'organization_list' => $organization_list,
+                'all_shop_list' => $all_shop_list,
+                'csvStoreIds' => $csvStoreIds,
+            ], 200);
         } catch (\Throwable $th) {
             DB::rollBack();
             return response()->json([
@@ -2161,5 +3482,11 @@ class MessagePublishController extends Controller
             ->groupBy('shops.id')
             ->get()
             ->toArray();
+    }
+
+    private function cleanDateString($dateString)
+    {
+        // 正規表現で日付文字列から曜日を削除
+        return preg_replace('/\(.+\)/', '', $dateString);
     }
 }
