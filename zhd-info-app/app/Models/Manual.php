@@ -15,7 +15,7 @@ use Mockery\Matcher\HasKey;
 class Manual extends Model
 {
     use WhereLike;
-    
+
     protected $table = 'manuals';
 
     protected $fillable =
@@ -29,6 +29,7 @@ class Manual extends Model
         'thumbnails_url',
         'create_admin_id',
         'editing_flg',
+        'is_broadcast_notification',
         'organization1_id',
         'number',
         'updated_admin_id',
@@ -309,5 +310,16 @@ class Manual extends Model
 
     public static function getCurrentNumber($organization1_id): Int{
         return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
+    }
+
+    public function getBroadcastNotificationStatusAttribute()
+    {
+        $statusMapping = [
+            0 => 'なし',
+            1 => '待ち',
+            2 => '済み',
+        ];
+
+        return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
     }
 }

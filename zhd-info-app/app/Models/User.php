@@ -70,43 +70,30 @@ class User extends Model
     {
         $shop = Shop::find($this->shop_id);
         $messages = [];
-        if (isset($shop->organization5_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization5_id', $shop->organization5_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization4_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization4_id', $shop->organization4_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization3_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization3_id', $shop->organization3_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
-        } elseif (isset($shop->organization2_id)) {
-            $messages = MessageOrganization::query()
-                ->join('message_brand', 'message_organization.message_id', '=', 'message_brand.message_id')
-                ->select('message_organization.message_id as id')
-                ->where('message_organization.organization2_id', $shop->organization2_id)
-                ->where('message_brand.brand_id', $shop->brand_id)
-                ->get()
-                ->toArray();
+
+        if (isset($shop->brand_id)) {
+            $messages = MessageShop::query()
+                ->select('message_shop.message_id as id')
+                ->where('message_shop.selected_flg', 'all')
+                ->where('message_shop.brand_id', $shop->brand_id)
+                ->cursor();
         }
 
         $message_data = [];
         foreach ($messages as $message) {
             $message_data[$message['id']] = ['shop_id' => $shop->id];
+        }
+
+        // message_shopテーブルにデータをインサート
+        foreach ($message_data as $message_id => $data) {
+            MessageShop::insert([
+                'message_id' => $message_id,
+                'shop_id' => $data['shop_id'],
+                'selected_flg' => 'all',
+                'created_at' => now(),
+                'updated_at' => now(),
+                'brand_id' => $shop->brand_id,
+            ]);
         }
 
         $user = User::find($this->id);

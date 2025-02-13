@@ -9,10 +9,14 @@
                         <a href="#" class="nav-label">1.配信</a>
                         <ul class="nav nav-second-level">
                             @if (in_array('message', $arrow_pages, true))
-                                <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                                <li class="message-publish">
+                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
+                                </li>
                             @endif
                             @if (in_array('manual', $arrow_pages, true))
-                                <li><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                                <li class="manual-publish">
+                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                                </li>
                             @endif
                         </ul>
                     </li>
@@ -21,7 +25,9 @@
                     <li>
                         <a href="#" class="nav-label">2.データ抽出</span></a>
                         <ul class="nav nav-second-level">
-                            <li class="active"><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                            <li class="analyse-personal active">
+                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                            </li>
                         </ul>
                     </li>
                 @endif
@@ -67,8 +73,9 @@
                     <label class="input-group-addon">業態</label>
                     <select name="organization1" class="form-control">
                         @foreach ($organization1_list as $org1)
-                            <option value="{{ $org1->id }}"
-                                {{ request()->input('organization1') == $org1->id ? 'selected' : '' }}>{{ $org1->name }}
+                            <option value="{{ base64_encode($org1->id) }}"
+                                {{ request()->input('organization1') == base64_encode($org1->id) ? 'selected' : '' }}>
+                                {{ $org1->name }}
                             </option>
                         @endforeach
                     </select>
@@ -77,20 +84,43 @@
                     <div class="input-group col-lg-1 spMb16">
                         <label class="input-group-addon">{{ $organization }}</label>
                         @if (in_array($organization, $organizations, true))
-                            <select name="org[{{ $organization }}]" class="form-control">
-                                <option value="">全て</option>
-                                @foreach ($organization_list[$organization] as $org)
-                                    <option value="{{ $org->id }}"
-                                        {{ request()->input('org.' . $organization) == $org->id ? 'selected' : '' }}>
-                                        {{ $org->name }}</option>
-                                @endforeach
-                            </select>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">全て</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                                <div id="selectOrg{{ $organization }}" class="dropdown-menu" aria-labelledby="dropdownOrg{{ $organization }}" onclick="event.stopPropagation();">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="selectAllOrgs{{ $organization }}" onclick="toggleAllOrgs('{{ $organization }}')">
+                                        <label class="form-check-label" for="selectAllOrgs{{ $organization }}" class="custom-label" onclick="event.stopPropagation();">全て選択/選択解除</label>
+                                    </div>
+                                    @foreach ($organization_list[$organization] as $org)
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="org[{{ $organization }}][]" value="{{ $org->id }}"
+                                                {{ in_array($org->id, request()->input('org.' . $organization, [])) ? 'checked' : '' }} id="org{{ $organization }}{{ $org->id }}" onchange="updateSelectedOrgs('{{ $organization }}')">
+                                            <label class="form-check-label" for="org{{ $organization }}{{ $org->id }}" class="custom-label" onclick="event.stopPropagation();">
+                                                {{ $org->name }}
+                                            </label>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         @else
-                            <select name="org[{{ $organization }}]" class="form-control" disabled></select>
+                            <div class="dropdown">
+                                <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
+                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">　</span>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
+                                        <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
+                                    </svg>
+                                </button>
+                                <div id="selectOrg{{ $organization }}" class="dropdown-menu" aria-labelledby="dropdownOrg{{ $organization }}" onclick="event.stopPropagation();">
+                                </div>
+                            </div>
                         @endif
                     </div>
                 @endforeach
-
                 <div class="input-group spMb16">
                     <label class="input-group-addon">店舗</label>
                     <input type="text" name="shop_freeword" class="form-control"
@@ -127,9 +157,8 @@
                 <div class="input-group">
                     <button class="btn btn-admin">検索</button>
                 </div>
-                <div class="input-group">
-                    <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query()) }}"
-                        class="btn btn-admin">エクスポート</a>
+                <div class="input-group col-lg-1" style="float: right;">
+                    <input type="button" class="btn btn-admin saveSearchBtn" value="検索条件を保存">
                 </div>
                 <div class="input-group">
                     <p>※ 直近の業連を最大10件表示しています。</p>
@@ -137,6 +166,15 @@
                 </div>
             </div>
         </form>
+
+        <div class="pagenation-top" style="justify-content: right;">
+            <div>
+                <div class="input-group">
+                    <a href="{{ route('admin.analyse.export') }}?{{ http_build_query(request()->query()) }}"
+                        class="btn btn-admin exportBtn" data-filename="{{ '業務連絡閲覧状況_' . $organization1->name . now()->format('_Y_m_d') . '.xlsx' }}">エクスポート</a>
+                </div>
+            </div>
+        </div>
 
         <div class="message-tableInner table-responsive-xxl">
             <table id="table" class="personal table table-bordered {sorter:'metadata'}" style="border: none;">
@@ -204,7 +242,6 @@
                                                 <div>{{ $v_org1[0]->readed_count }} / </div>
                                                 <div>{{ $v_org1[0]->count }}</div>
                                             </div>
-
                                         </td>
                                         <td class={{ $v_org1[0]->view_rate < 10 ? 'under-quota' : '' }} nowrap>
                                             <div>{{ $v_org1[0]->view_rate }}%</div>
@@ -247,8 +284,9 @@
                                             @php
                                                 $viewrate = 0;
                                                 $viewrate = number_format(
-                                                    $viewrates[$organization . '_readed_sum'][$v_o->id] /
-                                                        $viewrates[$organization . '_sum'][$v_o->id],
+                                                    ($viewrates[$organization . '_readed_sum'][$v_o->id] /
+                                                        $viewrates[$organization . '_sum'][$v_o->id]) *
+                                                        100,
                                                     1,
                                                 );
                                             @endphp
@@ -297,7 +335,6 @@
 
                 {{-- 店舗ごと --}}
                 <tbody>
-
                     @isset($viewrates['shop'][0])
                         @foreach ($viewrates['shop'][0] as $v_key => $m_c)
                             <tr>
@@ -376,7 +413,6 @@
                         @endforeach
                     @endisset
                 </tbody>
-
             </table>
         </div>
     </div>

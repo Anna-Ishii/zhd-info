@@ -9,10 +9,14 @@
                     <a href="#" class="nav-label">1.配信</a>
                     <ul class="nav nav-second-level">
                         @if (in_array('message', $arrow_pages, true))
-                            <li><a href="/admin/message/publish/">1-1 業務連絡</a></li>
+                            <li class="message-publish">
+                                <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '   /admin/message/publish/' }}">1-1 業務連絡</a>
+                            </li>
                         @endif
                         @if (in_array('manual', $arrow_pages, true))
-                            <li class="active"><a href="/admin/manual/publish/">1-2 動画マニュアル</a></li>
+                            <li class="manual-publish active">
+                                <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
+                            </li>
                         @endif
                     </ul>
                 </li>
@@ -21,7 +25,9 @@
                 <li>
                     <a href="#" class="nav-label">2.データ抽出</span></a>
                     <ul class="nav nav-second-level">
-                        <li><a href="/admin/analyse/personal">2-1.業務連絡の閲覧状況</a></li>
+                        <li class="analyse-personal">
+                            <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
+                        </li>
                     </ul>
                 </li>
                 @endif
@@ -290,7 +296,7 @@
                 <input id="dateTo" class="form-control mr16"  name="end_datetime" value="{{ old("end_datetime") ? old("end_datetime") : $manual->end_datetime}}" autocomplete="off">
                 <label>
                     <input type="checkbox" class="dateDisabled" data-target="dateTo"
-                         @if(old("end_datetime"))
+                        @if(old("end_datetime"))
                             {{ empty(old("end_datetime")) ? 'checked' : ''  }}
                         @else
                             {{ empty($manual->end_datetime) ? 'checked' : '' }}
@@ -402,6 +408,20 @@
             </div>
         </div>
         <div class="form-group">
+            <label class="col-lg-2 control-label">WowTalk通知</label>
+            <div class="col-lg-4">
+                <label>
+                    <input type="checkbox" name="wowtalk_notification" class="mr8"
+                        @if(request()->old())
+                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}
+                        @else
+                            {{ $manual->is_broadcast_notification == 1 ? 'checked' : '' }}
+                        @endif
+                        >あり
+                </label>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-lg-2 control-label" for="description">説明文</label>
             <div class="col-lg-4">
                 <textarea class="form-control" name="description" value="" id="description" placeholder="例：新任向けにレシートの交換手順について記載しています。">{{old('description', $manual->description)}}</textarea>
@@ -423,7 +443,7 @@
             </div>
             @endif
             <div class="col-lg-2">
-                <a href="{{ route('admin.manual.publish.index', ['brand' => session('brand_id')]) }}" class="btn btn-admin">一覧に戻る</a>
+                <a href="/admin/manual/publish?{{ session('manual_publish_url') }}" class="btn btn-admin">一覧に戻る</a>
             </div>
         </div>
 

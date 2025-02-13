@@ -26,7 +26,6 @@ class OrganizationRule implements ValidationRule
             $noMatchesStr = implode(',', $noMatches);
             $fail("選択フォーム以外の値が含まれています({$noMatchesStr})");
         }
-            
     }
 
     private function hasNonMatchingValues($a, $b)
@@ -51,5 +50,4 @@ class OrganizationRule implements ValidationRule
 
         return $returnArray;
     }
-
 }
