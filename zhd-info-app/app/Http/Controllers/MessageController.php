@@ -213,6 +213,8 @@ class MessageController extends Controller
             $message = Message::findOrFail($message_id);
             $message->putCrewRead($reading_crews);
 
+            $message_content = MessageContent::where('message_id', $message->id)->get()->toArray();
+
             // 既読をつける
             $user->message()->updateExistingPivot($message_id, [
                 'read_flg' => true,
@@ -226,7 +228,7 @@ class MessageController extends Controller
                 $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
                 return redirect()->to($url)->withInput();
             } else {
-                if (!empty($message_content)) {
+                if (isset($message_content)) {
                     if (count($message_content) > 1) {
                         $first_content = $message_content[0];
                         if ($message->content_name !== $first_content['content_name']) {
@@ -260,7 +262,8 @@ class MessageController extends Controller
     public function getCrews(Request $request)
     {
         $user = session('member');
-        $crews = $user->crew()
+
+        $query = $user->crew()
             ->select([
                 DB::raw(" * "),
                 DB::raw("
@@ -279,8 +282,14 @@ class MessageController extends Controller
                             end as name_sort
                         "),
             ])
-            ->orderBy("name_kana", 'asc')
-            ->get();
+            ->orderBy("name_kana", 'asc');
+
+        $crews = [];
+        $query->chunk(100, function ($chunk) use (&$crews) {
+            foreach ($chunk as $crew) {
+                $crews[] = $crew;
+            }
+        });
 
         return response()->json([
             'crews' => $crews,
@@ -289,13 +298,11 @@ class MessageController extends Controller
 
     public function getCrewsMessage(Request $request)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
-
         $message = $request->input('message');
         $text = $request->input('text');
         $user = session('member');
 
-        $crews = DB::table('messages as m')
+        $query = DB::table('messages as m')
             ->select([
                 DB::raw('
                             c.part_code as part_code,
@@ -345,11 +352,14 @@ class MessageController extends Controller
                     ->orWhere('c.part_code', 'like', '%' . addcslashes($text, '%_\\') . '%')
                     ->orWhere('c.name_kana', 'like', '%' . addcslashes($text, '%_\\') . '%');
             })
-            ->orderBy('c.name_kana', 'asc')
-            ->get();
+            ->orderBy('c.name_kana', 'asc');
 
-        // デフォルトの設定に戻す
-        ini_restore('memory_limit');
+        $crews = [];
+        $query->chunk(100, function ($chunk) use (&$crews) {
+            foreach ($chunk as $crew) {
+                $crews[] = $crew;
+            }
+        });
 
         return response()->json([
             'crews' => $crews,
