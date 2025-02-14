@@ -81,10 +81,6 @@ class PersonAnalysisSenderCommand extends Command
                 }
                 rmdir($exportDir);
             }
-
-            // 処理後にメモリ制限を元に戻す
-            ini_restore('memory_limit');
-
             $this->info('閲覧状況のサマリをメール送信完了');
         }
     }
