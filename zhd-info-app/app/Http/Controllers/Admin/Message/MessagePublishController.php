@@ -990,7 +990,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の登録
@@ -1074,7 +1074,7 @@ class MessagePublishController extends Controller
         $admin = session('admin');
 
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1279,7 +1279,7 @@ class MessagePublishController extends Controller
     public function messageEditData($message_id, $org1_id)
     {
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1816,7 +1816,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の編集
