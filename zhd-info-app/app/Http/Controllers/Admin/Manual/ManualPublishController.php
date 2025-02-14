@@ -776,7 +776,7 @@ class ManualPublishController extends Controller
             return redirect()->route('admin.manual.publish.index', [$manual_publish_url]);
         }
 
-        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     public function edit($manual_id)
@@ -786,7 +786,7 @@ class ManualPublishController extends Controller
         $admin = session('admin');
 
         $manual = Manual::find($manual_id);
-        if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         $admin = session('admin');
 
@@ -1274,7 +1274,7 @@ class ManualPublishController extends Controller
             return redirect()->route('admin.manual.publish.index', [$manual_publish_url]);
         }
 
-        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     public function detail($manual_id)
