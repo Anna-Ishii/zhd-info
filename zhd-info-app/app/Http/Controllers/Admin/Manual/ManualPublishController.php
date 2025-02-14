@@ -29,6 +29,7 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Models\WowTalkNotificationLog;
 use App\Models\SearchCondition;
+use App\Models\Environment;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\SendWowTalkApi;
@@ -214,6 +215,17 @@ class ManualPublishController extends Controller
             ->where('deleted_at', null)
             ->select('page_name', 'url')
             ->first();
+
+        // 特定のURLにアクセスされた場合
+        $specificUrl = Environment::where('command_name', 'manual-publish')->where('type', 'manual')->select('contents')->first();
+        // 現在のURLを取得
+        $currentUrl = $request->fullUrl();
+        if ($currentUrl === $specificUrl->contents) {
+            // 保存されたURLが存在する場合にリダイレクト
+            if ($manual_saved_url && $manual_saved_url->url) {
+                return redirect($manual_saved_url->url);
+            }
+        }
 
         return view('admin.manual.publish.index', [
             'new_category_list' => $new_category_list,
@@ -764,7 +776,7 @@ class ManualPublishController extends Controller
             return redirect()->route('admin.manual.publish.index', [$manual_publish_url]);
         }
 
-        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     public function edit($manual_id)
@@ -774,7 +786,7 @@ class ManualPublishController extends Controller
         $admin = session('admin');
 
         $manual = Manual::find($manual_id);
-        if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        if (empty($manual)) return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         $admin = session('admin');
 
@@ -1262,7 +1274,7 @@ class ManualPublishController extends Controller
             return redirect()->route('admin.manual.publish.index', [$manual_publish_url]);
         }
 
-        return redirect()->route('admin.manual.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.manual.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     public function detail($manual_id)

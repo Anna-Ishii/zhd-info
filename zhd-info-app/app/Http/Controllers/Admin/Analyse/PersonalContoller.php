@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Message;
 use App\Models\Organization1;
 use App\Models\SearchCondition;
+use App\Models\Environment;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\Request;
@@ -372,6 +373,17 @@ class PersonalContoller extends Controller
             ->where('deleted_at', null)
             ->select('page_name', 'url')
             ->first();
+
+        // 特定のURLにアクセスされた場合
+        $specificUrl = Environment::where('command_name', 'analyse-personal')->where('type', 'analyse')->select('contents')->first();
+        // 現在のURLを取得
+        $currentUrl = $request->fullUrl();
+        if ($currentUrl === $specificUrl->contents) {
+            // 保存されたURLが存在する場合にリダイレクト
+            if ($analyse_personal_saved_url && $analyse_personal_saved_url->url) {
+                return redirect($analyse_personal_saved_url->url);
+            }
+        }
 
         return view('admin.analyse.personal', [
             'messages' => $messages,
