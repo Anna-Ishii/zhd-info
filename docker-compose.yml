@@ -9,8 +9,7 @@ services:
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     volumes:
       - type: bind
-        # source: ./zhd-info-app
-        source: \\wsl.localhost\Ubuntu-22.04\home\yushi\workspace\zhd-info/zhd-info-app
+        source: ./zhd-info-app
         target: /var/www/zhd-info-app
     working_dir: /var/www/zhd-info-app
     depends_on:
