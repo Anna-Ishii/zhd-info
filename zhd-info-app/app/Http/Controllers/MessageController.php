@@ -228,7 +228,7 @@ class MessageController extends Controller
                 $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
                 return redirect()->to($url)->withInput();
             } else {
-                if (isset($message_content)) {
+                if (!empty($message_content)) {
                     if (count($message_content) > 1) {
                         $first_content = $message_content[0];
                         if ($message->content_name !== $first_content['content_name']) {
