@@ -32,6 +32,7 @@ use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Models\SearchCondition;
+use App\Models\Environment;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
@@ -292,6 +293,17 @@ class MessagePublishController extends Controller
             ->where('deleted_at', null)
             ->select('page_name', 'url')
             ->first();
+
+        // 特定のURLにアクセスされた場合
+        $specificUrl = Environment::where('command_name', 'message-publish')->where('type', 'message')->select('contents')->first();
+        // 現在のURLを取得
+        $currentUrl = $request->fullUrl();
+        if ($currentUrl === $specificUrl->contents) {
+            // 保存されたURLが存在する場合にリダイレクト
+            if ($message_saved_url && $message_saved_url->url) {
+                return redirect($message_saved_url->url);
+            }
+        }
 
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
@@ -978,7 +990,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の登録
@@ -1062,7 +1074,7 @@ class MessagePublishController extends Controller
         $admin = session('admin');
 
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1267,7 +1279,7 @@ class MessagePublishController extends Controller
     public function messageEditData($message_id, $org1_id)
     {
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1804,7 +1816,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の編集
