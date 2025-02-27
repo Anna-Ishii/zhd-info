@@ -1,0 +1,494 @@
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+PHP Warning:  require(/var/www/zhd-info-app/vendor/autoload.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/artisan on line 18
+PHP Fatal error:  Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/autoload.php' (include_path='.:/usr/share/pear:/usr/share/php') in /var/www/zhd-info-app/artisan:18
+Stack trace:
+#0 {main}
+  thrown in /var/www/zhd-info-app/artisan on line 18
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
+Xdebug: [Step Debug] Could not connect to debugging client. Tried: host.docker.internal:9000 (through xdebug.client_host/xdebug.client_port).
