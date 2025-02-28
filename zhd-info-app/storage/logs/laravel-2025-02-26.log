@@ -1,0 +1,190 @@
+[2025-02-26 15:58:39] local.INFO: Detected N+1 Query  
+[2025-02-26 15:58:39] local.INFO: Model: App\Models\Admin
+Relation: App\Models\Adminpage
+Num-Called: 2
+Call-Stack:
+#12 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:23
+#13 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:52
+#15 /app/Http/ViewComposers/UserComposer.php:12
+#16 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:124
+#17 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:162
+#21 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:177
+#22 /vendor/laravel/framework/src/Illuminate/View/View.php:176
+#23 /vendor/laravel/framework/src/Illuminate/View/View.php:147
+#24 /vendor/laravel/framework/src/Illuminate/Http/Response.php:69
+#25 /vendor/laravel/framework/src/Illuminate/Http/Response.php:35
+#26 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:911
+#27 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:878
+#28 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#29 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:141
+#30 /app/Http/Middleware/CheckAllowPage.php:22
+#31 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#32 /app/Http/Middleware/Adminauth.php:32
+#33 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#34 /vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php:50
+#35 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#36 /vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php:78
+#37 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#38 /vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php:49
+#39 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#40 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:121
+#41 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:64
+#42 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#43 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php:37
+#44 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#45 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php:67
+#46 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#47 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:116
+#48 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#49 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:777
+  
+[2025-02-26 15:58:39] local.INFO: Model: App\Models\Message
+Relation: App\Models\MessageContent
+Num-Called: 50
+Call-Stack:
+#14 /app/Models/Message.php:212
+#20 /storage/framework/views/e2f8907148d8a159072781c25811b49d.php:341
+#22 /vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php:125
+#23 /vendor/laravel/framework/src/Illuminate/View/Engines/PhpEngine.php:58
+#24 /vendor/livewire/livewire/src/ComponentConcerns/RendersLivewireComponents.php:69
+#25 /vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php:72
+#26 /vendor/livewire/livewire/src/ComponentConcerns/RendersLivewireComponents.php:35
+#27 /vendor/laravel/framework/src/Illuminate/View/View.php:195
+#28 /vendor/laravel/framework/src/Illuminate/View/View.php:178
+#29 /vendor/laravel/framework/src/Illuminate/View/View.php:147
+#30 /vendor/laravel/framework/src/Illuminate/Http/Response.php:69
+#31 /vendor/laravel/framework/src/Illuminate/Http/Response.php:35
+#32 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:911
+#33 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:878
+#34 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#35 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:141
+#36 /app/Http/Middleware/CheckAllowPage.php:22
+#37 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#38 /app/Http/Middleware/Adminauth.php:32
+#39 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#40 /vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php:50
+#41 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#42 /vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php:78
+#43 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#44 /vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php:49
+#45 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#46 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:121
+#47 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:64
+#48 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#49 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php:37
+  
+[2025-02-26 15:58:47] local.INFO: Detected N+1 Query  
+[2025-02-26 15:58:47] local.INFO: Model: App\Models\Admin
+Relation: App\Models\Adminpage
+Num-Called: 2
+Call-Stack:
+#12 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:23
+#13 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:52
+#15 /app/Http/ViewComposers/UserComposer.php:12
+#16 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:124
+#17 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:162
+#21 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:177
+#22 /vendor/laravel/framework/src/Illuminate/View/View.php:176
+#23 /vendor/laravel/framework/src/Illuminate/View/View.php:147
+#24 /vendor/laravel/framework/src/Illuminate/Http/Response.php:69
+#25 /vendor/laravel/framework/src/Illuminate/Http/Response.php:35
+#26 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:911
+#27 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:878
+#28 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#29 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:141
+#30 /app/Http/Middleware/CheckAllowPage.php:22
+#31 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#32 /app/Http/Middleware/Adminauth.php:32
+#33 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#34 /vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php:50
+#35 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#36 /vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php:78
+#37 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#38 /vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php:49
+#39 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#40 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:121
+#41 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:64
+#42 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#43 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php:37
+#44 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#45 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php:67
+#46 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#47 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:116
+#48 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#49 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:777
+  
+[2025-02-26 15:58:52] local.INFO: Detected N+1 Query  
+[2025-02-26 15:58:52] local.INFO: Model: App\Models\Admin
+Relation: App\Models\Adminpage
+Num-Called: 2
+Call-Stack:
+#12 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:23
+#13 /vendor/laravel/framework/src/Illuminate/Support/Traits/ForwardsCalls.php:52
+#15 /app/Http/ViewComposers/UserComposer.php:12
+#16 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:124
+#17 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:162
+#21 /vendor/laravel/framework/src/Illuminate/View/Concerns/ManagesEvents.php:177
+#22 /vendor/laravel/framework/src/Illuminate/View/View.php:176
+#23 /vendor/laravel/framework/src/Illuminate/View/View.php:147
+#24 /vendor/laravel/framework/src/Illuminate/Http/Response.php:69
+#25 /vendor/laravel/framework/src/Illuminate/Http/Response.php:35
+#26 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:911
+#27 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:878
+#28 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#29 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:141
+#30 /app/Http/Middleware/CheckAllowPage.php:22
+#31 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#32 /app/Http/Middleware/Adminauth.php:32
+#33 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#34 /vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php:50
+#35 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#36 /vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php:78
+#37 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#38 /vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php:49
+#39 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#40 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:121
+#41 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:64
+#42 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#43 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php:37
+#44 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#45 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/EncryptCookies.php:67
+#46 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#47 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:116
+#48 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#49 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:777
+  
+[2025-02-26 15:58:52] local.INFO: Model: App\Models\Message
+Relation: App\Models\MessageContent
+Num-Called: 50
+Call-Stack:
+#14 /app/Models/Message.php:212
+#20 /storage/framework/views/e2f8907148d8a159072781c25811b49d.php:341
+#22 /vendor/laravel/framework/src/Illuminate/Filesystem/Filesystem.php:125
+#23 /vendor/laravel/framework/src/Illuminate/View/Engines/PhpEngine.php:58
+#24 /vendor/livewire/livewire/src/ComponentConcerns/RendersLivewireComponents.php:69
+#25 /vendor/laravel/framework/src/Illuminate/View/Engines/CompilerEngine.php:72
+#26 /vendor/livewire/livewire/src/ComponentConcerns/RendersLivewireComponents.php:35
+#27 /vendor/laravel/framework/src/Illuminate/View/View.php:195
+#28 /vendor/laravel/framework/src/Illuminate/View/View.php:178
+#29 /vendor/laravel/framework/src/Illuminate/View/View.php:147
+#30 /vendor/laravel/framework/src/Illuminate/Http/Response.php:69
+#31 /vendor/laravel/framework/src/Illuminate/Http/Response.php:35
+#32 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:911
+#33 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:878
+#34 /vendor/laravel/framework/src/Illuminate/Routing/Router.php:798
+#35 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:141
+#36 /app/Http/Middleware/CheckAllowPage.php:22
+#37 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#38 /app/Http/Middleware/Adminauth.php:32
+#39 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#40 /vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php:50
+#41 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#42 /vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/VerifyCsrfToken.php:78
+#43 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#44 /vendor/laravel/framework/src/Illuminate/View/Middleware/ShareErrorsFromSession.php:49
+#45 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#46 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:121
+#47 /vendor/laravel/framework/src/Illuminate/Session/Middleware/StartSession.php:64
+#48 /vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php:180
+#49 /vendor/laravel/framework/src/Illuminate/Cookie/Middleware/AddQueuedCookiesToResponse.php:37
+  

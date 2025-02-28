@@ -27,6 +27,7 @@
     <tbody>
         @foreach ($users as $u)
             <tr>
+                <!-- DS -->
                 <td class="label-DS" style="text-align: left;">
                     @if(isset($organizations[$u->shop_id]['DS']))
                         @foreach($organizations[$u->shop_id]['DS'] as $ds)
