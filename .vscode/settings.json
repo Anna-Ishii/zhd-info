@@ -1,6 +1,7 @@
 {
     "php.validate.executablePath": "./php.sh",
     "cSpell.words": [
+        "isset",
         "wowtalk"
     ]
 }
