@@ -1,2 +1,10 @@
 /*
 !/.gitignore
+
+# .minio.sysディレクトリ内のすべてを確実に無視
+.minio.sys/
+.minio.sys/**/*
+.minio.sys/buckets/.bloomcycle.bin/
+.minio.sys/buckets/.usage.json/
+.minio.sys/buckets/.bloomcycle.bin/xl.meta
+.minio.sys/buckets/.usage.json/xl.meta
