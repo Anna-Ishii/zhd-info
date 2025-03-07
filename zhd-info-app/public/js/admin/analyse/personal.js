@@ -90,9 +90,9 @@ $(document).ready(function () {
         8: "SK",
     };
     let org1 = base64Decode($('select[name="organization1"]').val());
-    // 業態がJP以外の場合、ARWidthを調整
+    // 業態がJP以外の場合、BLWidthを調整
     if (org1Array[org1] !== "JP") {
-        ARWidth = BLWidth + th2Width + 1;
+        BLWidth = DSWidth + th1Width + 1;
     }
 
     // 店舗名の幅を取得

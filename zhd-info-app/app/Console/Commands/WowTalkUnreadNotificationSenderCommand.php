@@ -389,7 +389,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
         // メッセージ内容を生成
         $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
-        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
+        $messageContent = "【業連・動画ツール】\n";
+        $messageContent .= "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
         $messageContent .= $text->contents . "\n";
 
         return $messageContent;
