@@ -61,9 +61,6 @@ class WowTalkUnreadNotificationSenderCommand extends Command
             // エラー発生時にログを更新し、エラーメッセージを記録
             $this->finalizeLog($messageLog, false, $th->getMessage());
         } finally {
-            // 処理後にメモリ制限を元に戻す
-            ini_restore('memory_limit');
-
             $this->info('WowTalk未読通知送信完了');
         }
     }
@@ -392,7 +389,8 @@ class WowTalkUnreadNotificationSenderCommand extends Command
 
         // メッセージ内容を生成
         $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
-        $messageContent = "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
+        $messageContent = "【業連・動画ツール】\n";
+        $messageContent .= "{$message->title}（" . $message->start_datetime->format('Y/m/d H:i') . "配信）の未読者が{$unreadMessageCounts}名います。確認してください。\n";
         $messageContent .= $text->contents . "\n";
 
         return $messageContent;

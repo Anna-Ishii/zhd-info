@@ -21,6 +21,7 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Models\WowtalkShop;
 use App\Models\Environment;
+use App\Models\UsersRole;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -128,10 +129,14 @@ class ImportImsCsvCommand extends Command
         $register_shop_id = [];
 
         foreach ($shops_data as $index => $shop) {
-            $organization1_id = Organization1::where('name', $shop[0])->value('id');
+            $organization1 = Organization1::where('name', $shop[0])->first();
+            if (!$organization1) {
+                $this->error("組織1 '{$shop[0]}' が見つかりません");
+                continue;
+            }
+            $organization1_id = $organization1->id;
 
-            // 新CSV 閉店日36行目なので$shop[35]
-            $close_date = $this->parseDateTime($shop[30]);
+            $close_date = $this->parseDateTime($shop[35]);
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
@@ -142,77 +147,230 @@ class ImportImsCsvCommand extends Command
             $organization3_id = null; // DS
             $organization4_id = null; // AR
             $organization5_id = null; // BL
+            // DM
+            $DM_id = null;
+            $DM_name = null;
+            $DM_email = null;
+            // BM
+            $BM_id = null;
+            $BM_name = null;
+            $BM_email = null;
+            // AM
+            $AM_id = null;
+            $AM_name = null;
+            $AM_email = null;
+            // 4th
+            $forth_id = null;
+            $forth_name = null;
+            $forth_email = null;
+            // 5th
+            $fifth_id = null;
+            $fifth_name = null;
+            $fifth_email = null;
 
-            for ($i = 5; $i < 30; $i += 5) {
+            for ($i = 5; $i < 35; $i += 6) {
                 $organization_name = $shop[$i + 1];
                 $order_no = (int)$shop[$i + 2];
+
                 if ($shop[$i] == "営業部") {
-                    $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
+                    $organization2_id = Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization2::where('name', $shop[$i + 1])->update([
+                    Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization2_id)) {
                         $organization2 = Organization2::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization2_id = $organization2->id;
                     }
+
                 }
+
                 if ($shop[$i] == "DS") {
-                    $organization3_id = Organization3::where('name', $shop[$i + 1])->value('id');
+                    $organization3_id = Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization3::where('name', $shop[$i + 1])->update([
+                    Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization3_id)) {
                         $organization3 = Organization3::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization3_id = $organization3->id;
                     }
+
+                    // DM [BB]
+                    if ($organization1_id == 2) {
+                        $DM_id = $shop[$i + 3];    // 第2階層DM 組織長コード
+                        $DM_name = $shop[$i + 4];  // 第2階層DM 組織長名
+                        $DM_email = $shop[$i + 5]; // 第2階層DM 組織長メアド
+                    }
+                    // DM,BM[HY]
+                    elseif ($organization1_id == 4) {
+                        $DM_id = null;
+                        $DM_name = null;
+                        $DM_email = null;
+                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
+                    }
+                    // DM,BM[JP]
+                    elseif ($organization1_id == 1) {
+                        $DM_id = null;
+                        $DM_name = null;
+                        $DM_email = null;
+                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
+                    }
+                    // DM,BM[ON]
+                    elseif ($organization1_id == 3) {
+                        $DM_id = null;
+                        $DM_name = null;
+                        $DM_email = null;
+                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
+                    }
+                    // DM[TAG]
+                    elseif ($organization1_id == 3) {
+                        $DM_id = $shop[$i + 3];    // 第2階層DM 組織長コード
+                        $DM_name = $shop[$i + 4];  // 第2階層DM 組織長名
+                        $DM_email = $shop[$i + 5]; // 第2階層DM 組織長メアド
+                    }
+
                 }
+
                 if ($shop[$i] == "AR") {
-                    $organization4_id = Organization4::where('name', $shop[$i + 1])->value('id');
+                    $organization4_id = Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization4::where('name', $shop[$i + 1])->update([
+                    Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization4_id)) {
                         $organization4 = Organization4::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization4_id = $organization4->id;
                     }
+
+                    // AM,4th[BB]
+                    if ($organization1_id == 2) {
+                        $AM_id = null;                // AM 組織長コード
+                        $AM_name = null;              // AM 組織長名
+                        $AM_email = null;             // AM 組織長メアド
+                        $forth_id = $shop[$i + 3];    // 第4階層4th 組織長コード
+                        $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
+                        $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
+                    }
+                    // AM,4th[HY]
+                    elseif ($organization1_id == 4) {
+                        $AM_id = null;                // AM 組織長コード
+                        $AM_name = null;              // AM 組織長名
+                        $AM_email = null;             // AM 組織長メアド
+                        $forth_id = $shop[$i + 3];    // 第4階層4th 組織長コード
+                        $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
+                        $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
+                    }
+                    // AM,4th[JP]
+                    elseif ($organization1_id == 1) {
+                        $AM_id = null;
+                        $AM_name = null;
+                        $AM_email = null;
+                        $forth_id = $shop[$i + 3];    // 第4階層4th 組織長コード
+                        $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
+                        $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
+                    }
+                    // AM,4th[ON]
+                    elseif ($organization1_id == 3) {
+                        $AM_id = null;
+                        $AM_name = null;
+                        $AM_email = null;
+                        $forth_id = $shop[$i + 3];    // 第4階層4th 組織長コード
+                        $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
+                        $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
+                    }
+                    // BM,AM,4th[SK]
+                    elseif ($organization1_id == 8) {
+                        $BM_id = $shop[$i + 3];    // 第4階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第4階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第4階層BM 組織長メアド
+                        $AM_id = null;
+                        $AM_name = null;
+                        $AM_email = null;
+                        $forth_id = null;
+                        $forth_name = null;
+                        $forth_email = null;
+                    }
+                    // AM,4th[TAG]
+                    elseif ($organization1_id == 3) {
+                        $AM_id = null;
+                        $AM_name = null;
+                        $AM_email = null;
+                        $forth_id = $shop[$i + 3];    // 第4階層4th 組織長コード
+                        $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
+                        $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
+                    }
+
                 }
+
                 if ($shop[$i] == "BL") {
-                    $organization5_id = Organization5::where('name', $shop[$i + 1])->value('id');
+                    $organization5_id = Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization5::where('name', $shop[$i + 1])->update([
+                    Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $this->formatOrg5Name($organization_name)
+                        'display_name' => $this->formatOrg5Name($organization_name),
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization5_id)) {
                         $organization5 = Organization5::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $this->formatOrg5Name($organization_name)
+                            'display_name' => $this->formatOrg5Name($organization_name),
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization5_id = $organization5->id;
                     }
+
+                    // BM [BB]
+                    if ($organization1_id == 2) {
+                        $BM_id = $shop[$i + 3];    // 第3階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第3階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第3階層BM 組織長メアド
+                    }
+                    // DM[SK]
+                    elseif ($organization1_id == 8) {
+                        $DM_id = $shop[$i + 3];    // 第3階層DM 組織長コード
+                        $DM_name = $shop[$i + 4];  // 第3階層DM 組織長名
+                        $DM_email = $shop[$i + 5]; // 第3階層DM 組織長メアド
+                    }
+                    // BM[TAG]
+                    elseif ($organization1_id == 3) {
+                        $BM_id = $shop[$i + 3];    // 第3階層BM 組織長コード
+                        $BM_name = $shop[$i + 4];  // 第3階層BM 組織長名
+                        $BM_email = $shop[$i + 5]; // 第3階層BM 組織長メアド
+                    }
+
                 }
             }
 
@@ -248,6 +406,37 @@ class ImportImsCsvCommand extends Command
                     'organization4_id' => $organization4_id,
                     'organization5_id' => $organization5_id,
                     'brand_id' => $brand_id
+                ]
+            );
+
+            // users_rolesテーブルのデータを更新
+            UsersRole::updateOrCreate(
+                [
+                    'shop_id' => $shop->id,
+                    'shop_code' => $shop_code,
+                    'shop_name' => $shop_name,
+                ],
+                [
+                    'DM_id' => $DM_id,
+                    'DM_name' => $DM_name,
+                    'DM_email' => $DM_email,
+                    'DM_view_notification' => false,
+                    'BM_id' => $BM_id,
+                    'BM_name' => $BM_name,
+                    'BM_email' => $BM_email,
+                    'BM_view_notification' => false,
+                    'AM_id' => $AM_id,
+                    'AM_name' => $AM_name,
+                    'AM_email' => $AM_email,
+                    'AM_view_notification' => false,
+                    '4th_id' => $forth_id,
+                    '4th_name' => $forth_name,
+                    '4th_email' => $forth_email,
+                    '4th_view_notification' => false,
+                    '5th_id' => $fifth_id,
+                    '5th_name' => $fifth_name,
+                    '5th_email' => $fifth_email,
+                    '5th_view_notification' => false,
                 ]
             );
 
@@ -420,6 +609,7 @@ class ImportImsCsvCommand extends Command
         });
     }
 
+    // wowtalkIDを作成
     private function wowtalkid2shopcode(Shop $shop)
     {
         $data = [];

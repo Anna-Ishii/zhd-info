@@ -41,6 +41,9 @@
                             @if (in_array('account-admin', $arrow_pages, true))
                                 <li class="active"><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                             @endif
+                            @if (in_array('account-mail', $arrow_pages, true))
+                                <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
+                            @endif
                         </ul>
                     </li>
                 @endif

@@ -63,16 +63,8 @@
                             {{ $viewrates[$organization . '_sum'][$v_o->id] }}
                         </td>
                         <td>
-                            {{ number_format(
-                                $viewrates[$organization . '_sum'][$v_o->id]
-                                    ? round(
-                                        ($viewrates[$organization . '_readed_sum'][$v_o->id] / $viewrates[$organization . '_sum'][$v_o->id]) * 100,
-                                        1,
-                                    )
-                                    : 0,
-                                1,
-                            ),
-                                1 }}%
+                            {{ number_format($viewrates[$organization.'_sum'][$v_o->id] ?
+                                round(($viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id]) * 100, 1) : 0, 1) , 1 }}%
                         </td>
                         @foreach ($messages as $key => $ms)
                             @isset($viewrates[$organization][$key][$v_org_key]->count)

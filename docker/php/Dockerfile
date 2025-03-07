@@ -12,7 +12,7 @@ RUN dnf update -y && \
     dnf install -y \
     httpd wget php-fpm php-mysqli php-json php php-devel \
     php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel \
-    mariadb105-server poppler-utils python3-pip && \
+    mariadb105-server poppler-utils python3-pip qpdf && \
     pip3 install supervisor
 
 RUN git clone https://github.com/xdebug/xdebug.git
