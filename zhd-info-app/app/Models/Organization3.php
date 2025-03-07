@@ -12,6 +12,7 @@ class Organization3 extends Model
     [
         'id',
         'name',
-        'display_name'
+        'display_name',
+        'organization1_id'
     ];
 }

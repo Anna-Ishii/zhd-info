@@ -200,7 +200,7 @@ class MessagePersonalExport implements
                         $query->whereIn('shops.organization3_id', $orgs['DS']);
                     })
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization3.id')
+                    ->orderBy('organization3.order_no')
                     ->get();
 
                 $viewrates['DS'][] = $viewrate;
@@ -247,7 +247,7 @@ class MessagePersonalExport implements
                         $query->whereIn('shops.organization4_id', $orgs['AR']);
                     })
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization4.id')
+                    ->orderBy('organization4.order_no')
                     ->get();
 
                 $viewrates['AR'][] = $viewrate;
@@ -294,7 +294,7 @@ class MessagePersonalExport implements
                         $query->whereIn('shops.organization5_id', $orgs['BL']);
                     })
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization5.id')
+                    ->orderBy('organization5.order_no')
                     ->get();
 
                 $viewrates['BL'][] = $viewrate;
@@ -352,9 +352,10 @@ class MessagePersonalExport implements
                     $query->where('shops.name', 'like', '%' . addcslashes($shop_freeword, '%_\\') . '%')
                         ->orwhere(DB::raw('SUBSTRING(shop_code, -4)'), 'LIKE', '%' . $shop_freeword . '%');
                 })
-                ->orderBy('organization3.id')
-                ->orderBy('organization4.id')
-                ->orderBy('organization5.id')
+                ->orderBy('organization3.order_no')
+                ->orderBy('organization4.order_no')
+                ->orderBy('organization5.order_no')
+                ->orderBy('shops.shop_code')
                 ->groupBy('shops.id')
                 ->get();
 

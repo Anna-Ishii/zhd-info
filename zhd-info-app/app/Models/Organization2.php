@@ -8,10 +8,11 @@ class Organization2 extends Model
 {
     protected $table = 'organization2';
 
-    protected $fillable = 
+    protected $fillable =
     [
         'id',
         'name',
-        'display_name'
+        'display_name',
+        'organization1_id'
     ];
 }

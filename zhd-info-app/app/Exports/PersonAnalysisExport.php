@@ -137,7 +137,7 @@ class PersonAnalysisExport implements
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
                     ->groupBy('shops.organization3_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization3.id')
+                    ->orderBy('organization3.order_no')
                     ->get();
 
                 $viewrates['DS'][] = $viewrate;
@@ -182,7 +182,7 @@ class PersonAnalysisExport implements
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
                     ->groupBy('shops.organization4_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization4.id')
+                    ->orderBy('organization4.order_no')
                     ->get();
 
                 $viewrates['AR'][] = $viewrate;
@@ -227,7 +227,7 @@ class PersonAnalysisExport implements
                     })
                     ->where('shops.organization1_id', '=', $organization1->id)
                     ->groupBy('shops.organization5_id', 'sub.count', 'sub.readed_count', 'sub.view_rate')
-                    ->orderBy('organization5.id')
+                    ->orderBy('organization5.order_no')
                     ->get();
 
                 $viewrates['BL'][] = $viewrate;
@@ -271,9 +271,10 @@ class PersonAnalysisExport implements
                     $join->on('shops.id', '=', 'view_rate._shop_id');
                 })
                 ->where('shops.organization1_id', '=', $organization1->id)
-                ->orderBy('organization3.id')
-                ->orderBy('organization4.id')
-                ->orderBy('organization5.id')
+                ->orderBy('organization3.order_no')
+                ->orderBy('organization4.order_no')
+                ->orderBy('organization5.order_no')
+                ->orderBy('shops.shop_code')
                 ->groupBy('shops.id')
                 ->get();
 

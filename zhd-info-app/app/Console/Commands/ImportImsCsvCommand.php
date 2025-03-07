@@ -21,6 +21,7 @@ use App\Models\Shop;
 use App\Models\User;
 use App\Models\WowtalkShop;
 use App\Models\Environment;
+use App\Models\UsersRole;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -53,8 +54,9 @@ class ImportImsCsvCommand extends Command
         $ims_log->import_at = new Carbon('now');
         $ims_log->save();
 
-        $now = new Carbon('now');
-        $now_str = $now->format("Ymd");
+        // $now = new Carbon('now');
+        // $now_str = $now->format("Ymd");
+        $now_str = "20250114_2";
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
@@ -128,7 +130,12 @@ class ImportImsCsvCommand extends Command
         $register_shop_id = [];
 
         foreach ($shops_data as $index => $shop) {
-            $organization1_id = Organization1::where('name', $shop[0])->value('id');
+            $organization1 = Organization1::where('name', $shop[0])->first();
+            if (!$organization1) {
+                $this->error("組織1 '{$shop[0]}' が見つかりません");
+                continue;
+            }
+            $organization1_id = $organization1->id;
 
             // 新CSV 閉店日36行目なので$shop[35]
             $close_date = $this->parseDateTime($shop[30]);
@@ -147,72 +154,84 @@ class ImportImsCsvCommand extends Command
                 $organization_name = $shop[$i + 1];
                 $order_no = (int)$shop[$i + 2];
                 if ($shop[$i] == "営業部") {
-                    $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
+                    $organization2_id = Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization2::where('name', $shop[$i + 1])->update([
+                    Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization2_id)) {
                         $organization2 = Organization2::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization2_id = $organization2->id;
                     }
+
                 }
                 if ($shop[$i] == "DS") {
-                    $organization3_id = Organization3::where('name', $shop[$i + 1])->value('id');
+                    $organization3_id = Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization3::where('name', $shop[$i + 1])->update([
+                    Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization3_id)) {
                         $organization3 = Organization3::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization3_id = $organization3->id;
                     }
+
                 }
                 if ($shop[$i] == "AR") {
-                    $organization4_id = Organization4::where('name', $shop[$i + 1])->value('id');
+                    $organization4_id = Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization4::where('name', $shop[$i + 1])->update([
+                    Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization4_id)) {
                         $organization4 = Organization4::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $organization_name
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization4_id = $organization4->id;
                     }
+
                 }
                 if ($shop[$i] == "BL") {
-                    $organization5_id = Organization5::where('name', $shop[$i + 1])->value('id');
+                    $organization5_id = Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization5::where('name', $shop[$i + 1])->update([
+                    Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $this->formatOrg5Name($organization_name)
+                        'display_name' => $this->formatOrg5Name($organization_name),
+                        'organization1_id' => $organization1_id
                     ]);
-                    //
+
                     if (is_null($organization5_id)) {
                         $organization5 = Organization5::create([
                             "name" => $organization_name,
                             "order_no" => $order_no,
-                            'display_name' => $this->formatOrg5Name($organization_name)
+                            'display_name' => $this->formatOrg5Name($organization_name),
+                            'organization1_id' => $organization1_id
                         ]);
                         $organization5_id = $organization5->id;
                     }
+
                 }
             }
 
@@ -420,6 +439,7 @@ class ImportImsCsvCommand extends Command
         });
     }
 
+    // wowtalkIDを作成
     private function wowtalkid2shopcode(Shop $shop)
     {
         $data = [];

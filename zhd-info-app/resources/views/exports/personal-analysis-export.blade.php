@@ -1,6 +1,6 @@
 <table class="personal table">
     <thead>
-        <tr style="line-height: 12px; text-align: center;">
+        <tr style="line-height: 11px; text-align: center;">
             @foreach ($organizations as $organization)
                 <th colspan="2" style="background-color: #bbbbbb;">
                     <div>{{ $organization }}</div>
@@ -15,7 +15,7 @@
             @foreach ($messages as $m)
                 <th class="head2" colspan="3" style="background-color: #d1daef;">
                     @isset($m->start_datetime)
-                        <div>{{ $m->start_datetime?->isoFormat('YYYY/MM/DD') }}<br>{{ Str::limit($m->title, 38) }}</div>
+                        <div>{{ $m->start_datetime?->isoFormat('YYYY/MM/DD') }}<br>{{ Str::limit($m->title, 58) }}</div>
                     @endisset
                 </th>
             @endforeach
@@ -32,7 +32,7 @@
             <td style="border-bottom: 1px solid black; text-align: center;">
                 {{ $viewrates['org1_sum'] ?? 0 }}
             </td>
-            <td style="border-bottom: 1px solid black; text-align: right;">
+            <td style="border-bottom: 1px solid black; text-align: right;
                 @if (isset($viewrates['org1_readed_sum']) && isset($viewrates['org1_sum']))
                     @php
                         $viewrate = 0;
@@ -41,7 +41,13 @@
                             1,
                         );
                     @endphp
-                        {{ $viewrate }}%
+                    color: {{ $viewrate < 10 ? '#ff0000' : '#333' }};
+                @else
+                    color: #ff0000;
+                @endif
+                ">
+                @if (isset($viewrates['org1_readed_sum']) && isset($viewrates['org1_sum']))
+                    {{ $viewrate }}%
                 @else
                     0.0%
                 @endif
@@ -55,8 +61,9 @@
                         <td style="border-bottom: 1px solid black; text-align: center;">
                             {{ $v_org1[0]->count }}
                         </td>
-                        <td style="border-bottom: 1px solid black; text-align: right;">
-                            {{ $v_org1[0]->view_rate }}%
+                        <td style="border-bottom: 1px solid black; text-align: right;
+                            color: {{ $v_org1[0]->view_rate < 10 ? '#ff0000' : '#333' }};">
+                            {{ $v_org1[0]->view_rate ? number_format($v_org1[0]->view_rate, 1) : '0.0' }}%
                         </td>
                     @else
                         <td style="border-bottom: 1px solid black; text-align: right;"></td>
@@ -69,10 +76,10 @@
     </tbody>
 
     {{-- 組織ごと (計) --}}
+    @php $index = 0; @endphp
     @foreach ($organizations as $organization)
         <tbody>
             @isset($viewrates[$organization][0])
-                @php $index = 0; @endphp
                 @foreach ($viewrates[$organization][0] as $v_org_key => $v_o)
                     <tr style="{{ $isEven($index) ? 'background-color: #d3d3d3;' : '' }}">
                         <td colspan="{{ count($organizations) * 2 + 3 }}" style="border-bottom: 1px solid black;">{{ $v_o->name }}</td>
@@ -82,9 +89,13 @@
                         <td style="border-bottom: 1px solid black; text-align: center;">
                             {{ $viewrates[$organization . '_sum'][$v_o->id] }}
                         </td>
-                        <td style="border-bottom: 1px solid black; text-align: right;">
-                            {{ number_format($viewrates[$organization.'_sum'][$v_o->id] ?
-                                round(($viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id]) * 100, 1) : 0, 1) , 1 }}%
+                        <td style="border-bottom: 1px solid black; text-align: right;
+                            @php
+                                $viewrate = $viewrates[$organization.'_sum'][$v_o->id] ?
+                                    round(($viewrates[$organization.'_readed_sum'][$v_o->id] / $viewrates[$organization.'_sum'][$v_o->id]) * 100, 1) : 0;
+                            @endphp
+                            color: {{ $viewrate < 10 ? '#ff0000' : '#333' }};">
+                            {{ number_format($viewrate, 1) }}%
                         </td>
                         @foreach ($messages as $key => $ms)
                             @isset($viewrates[$organization][$key][$v_org_key]->count)
@@ -94,8 +105,9 @@
                                 <td class="message-viewlate" style="border-bottom: 1px solid black; text-align: center;">
                                     {{ $viewrates[$organization][$key][$v_org_key]->count }}
                                 </td>
-                                <td data-message={{ $ms->id }} class="message-viewlate" style="border-bottom: 1px solid black; text-align: right;">
-                                    {{ $viewrates[$organization][$key][$v_org_key]->view_rate }}%
+                                <td data-message={{ $ms->id }} class="message-viewlate" style="border-bottom: 1px solid black; text-align: right;
+                                    color: {{ $viewrates[$organization][$key][$v_org_key]->view_rate < 10 ? '#ff0000' : '#333' }};">
+                                    {{ $viewrates[$organization][$key][$v_org_key]->view_rate ? number_format($viewrates[$organization][$key][$v_org_key]->view_rate, 1) : '0.0' }}%
                                 </td>
                             @else
                                 <td style="border-bottom: 1px solid black; text-align: right;"></td>
@@ -113,9 +125,17 @@
     {{-- 店舗ごと --}}
     <tbody>
         @isset($viewrates['shop'][0])
-            @php $index = 0; @endphp
+            @php
+                $previousO5Name = null;
+            @endphp
             @foreach ($viewrates['shop'][0] as $v_key => $m_c)
-                <tr style="{{ $isEven($index) ? 'background-color: #d3d3d3;' : '' }}">
+                @php
+                    // o5_nameが変わった場合、インデックスを増やす
+                    if ($previousO5Name !== $m_c->o5_name) {
+                        $index++;
+                    }
+                @endphp
+                <tr style="{{ $isEven($index) ? '' : 'background-color: #d3d3d3;' }}">
                     @isset($m_c->o3_name)
                         <td class="orgDS" colspan="2" style="border-bottom: 1px solid black; text-align: left;">{{ $m_c->o3_name }}</td>
                     @endisset
@@ -133,9 +153,13 @@
                     <td style="border-bottom: 1px solid black; text-align: center;">
                         {{ $viewrates['shop_sum'][$m_c->shop_code] }}
                     </td>
-                    <td style="border-bottom: 1px solid black; text-align: right;">
-                        {{ number_format($viewrates['shop_sum'][$m_c->shop_code] ?
-                            round(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1) : 0, 1) , 1 }}%
+                    <td style="border-bottom: 1px solid black; text-align: right;
+                        @php
+                            $viewrate = $viewrates['shop_sum'][$m_c->shop_code] ?
+                                round(($viewrates['shop_readed_sum'][$m_c->shop_code] / $viewrates['shop_sum'][$m_c->shop_code]) * 100, 1) : 0;
+                        @endphp
+                        color: {{ $viewrate < 10 ? '#ff0000' : '#333' }};">
+                        {{ number_format($viewrate, 1) }}%
                     </td>
                     @foreach ($messages as $key => $ms)
                         @isset($viewrates['shop'][$key][$v_key]->count)
@@ -145,8 +169,9 @@
                             <td class="message-viewlate" style="border-bottom: 1px solid black; text-align: center;">
                                 {{ $viewrates['shop'][$key][$v_key]->count }}
                             </td>
-                            <td data-message={{ $ms->id }} class="message-viewlate" style="border-bottom: 1px solid black; text-align: right;">
-                                {{ $viewrates['shop'][$key][$v_key]->view_rate }}%
+                            <td data-message={{ $ms->id }} class="message-viewlate" style="border-bottom: 1px solid black; text-align: right;
+                                color: {{ $viewrates['shop'][$key][$v_key]->view_rate < 10 ? '#ff0000' : '#333' }};">
+                                {{ $viewrates['shop'][$key][$v_key]->view_rate ? number_format($viewrates['shop'][$key][$v_key]->view_rate, 1) : '0.0' }}%
                             </td>
                         @else
                             <td style="border-bottom: 1px solid black; text-align: right;"></td>
@@ -155,7 +180,9 @@
                         @endisset
                     @endforeach
                 </tr>
-                @php $index++; @endphp
+                @php
+                    $previousO5Name = $m_c->o5_name;
+                @endphp
             @endforeach
         @endisset
     </tbody>

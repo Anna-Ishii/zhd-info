@@ -416,12 +416,14 @@ class SendWowtalkNotificationJob implements ShouldQueue, ShouldBeUnique
         if ($type === 'message') {
             // メッセージ内容を生成
             $text = Environment::where('command_name', 'wowtalk:send-notifications')->where('type', 'message')->select('contents')->first();
-            $messageContent = "業連：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent = "【業連・動画ツール】\n";
+            $messageContent .= "業連：{$dataType->title}が配信されました。確認してください。\n";
             $messageContent .= $text->contents . "\n";
         } elseif ($type === 'manual') {
             // メッセージ内容を生成
             $text = Environment::where('command_name', 'wowtalk:send-notifications')->where('type', 'manual')->select('contents')->first();
-            $messageContent = "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent = "【業連・動画ツール】\n";
+            $messageContent .= "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
             $messageContent .= $text->contents . "\n";
         }
 
