@@ -32,6 +32,7 @@ use App\Models\Organization3;
 use App\Models\Organization4;
 use App\Models\Organization5;
 use App\Models\SearchCondition;
+use App\Models\Environment;
 use App\Rules\Import\OrganizationRule;
 use App\Utils\ImageConverter;
 use App\Utils\Util;
@@ -293,6 +294,17 @@ class MessagePublishController extends Controller
             ->select('page_name', 'url')
             ->first();
 
+        // 特定のURLにアクセスされた場合
+        $specificUrl = Environment::where('command_name', 'message-publish')->where('type', 'message')->select('contents')->first();
+        // 現在のURLを取得
+        $currentUrl = $request->fullUrl();
+        if ($currentUrl === $specificUrl->contents) {
+            // 保存されたURLが存在する場合にリダイレクト
+            if ($message_saved_url && $message_saved_url->url) {
+                return redirect($message_saved_url->url);
+            }
+        }
+
         return view('admin.message.publish.index', [
             'category_list' => $category_list,
             'message_list' => $message_list,
@@ -533,7 +545,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $organization1->id)
+            ->where('shops.organization1_id', $organization1->id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -545,6 +557,12 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($organization1->id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -671,7 +689,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $organization1_id)
+            ->where('shops.organization1_id', $organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -682,7 +700,6 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
-
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -978,7 +995,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の登録
@@ -1062,7 +1079,7 @@ class MessagePublishController extends Controller
         $admin = session('admin');
 
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1097,7 +1114,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $message->organization1_id)
+            ->where('shops.organization1_id', $message->organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -1109,6 +1126,12 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($organization1->id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1267,7 +1290,7 @@ class MessagePublishController extends Controller
     public function messageEditData($message_id, $org1_id)
     {
         $message = Message::find($message_id);
-        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        if (empty($message)) return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
 
         // 複数ファイルの場合の処理
         $message_contents = MessageContent::where('message_id', $message_id)->get();
@@ -1304,7 +1327,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $org1_id)
+            ->where('shops.organization1_id', $org1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -1315,7 +1338,6 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
-
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1804,7 +1826,7 @@ class MessagePublishController extends Controller
             return redirect()->route('admin.message.publish.index', [$message_publish_url]);
         }
 
-        return redirect()->route('admin.message.publish.index', ['brand' => session('brand_id')]);
+        return redirect()->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))]);
     }
 
     // 一覧画面の編集
@@ -2885,7 +2907,7 @@ class MessagePublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no'
                 )
-                ->where('organization1_id', $organization1_id)
+                ->where('shops.organization1_id', $organization1_id)
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
@@ -2933,16 +2955,6 @@ class MessagePublishController extends Controller
 
             // 店舗コードでshopsをソート
             usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
-
-            // // BBの場合、SKの場合
-            // if ($organization1_id == 2 || $organization1_id == 8) {
-            //     return response()->json([
-            //         'storesJson' => $storesJson,
-            //         'organization_list' => $organization_list,
-            //         'all_shop_list' => $all_shop_list,
-            //         'csvStoreIds' => $csvStoreIds,
-            //     ], 200);
-            // }
 
             return response()
                 ->view('common.admin.message-csv-store-modal', [
@@ -3004,7 +3016,7 @@ class MessagePublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no'
                 )
-                ->where('organization1_id', $organization1_id)
+                ->where('shops.organization1_id', $organization1_id)
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
