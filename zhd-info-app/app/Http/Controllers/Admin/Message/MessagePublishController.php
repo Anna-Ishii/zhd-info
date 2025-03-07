@@ -545,7 +545,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $organization1->id)
+            ->where('shops.organization1_id', $organization1->id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -557,6 +557,12 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($organization1->id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -683,7 +689,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $organization1_id)
+            ->where('shops.organization1_id', $organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -694,7 +700,6 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
-
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1109,7 +1114,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $message->organization1_id)
+            ->where('shops.organization1_id', $message->organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -1121,6 +1126,12 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($organization1->id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1316,7 +1327,7 @@ class MessagePublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $org1_id)
+            ->where('shops.organization1_id', $org1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -1327,7 +1338,6 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
-
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -2897,7 +2907,7 @@ class MessagePublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no'
                 )
-                ->where('organization1_id', $organization1_id)
+                ->where('shops.organization1_id', $organization1_id)
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
@@ -2945,16 +2955,6 @@ class MessagePublishController extends Controller
 
             // 店舗コードでshopsをソート
             usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
-
-            // // BBの場合、SKの場合
-            // if ($organization1_id == 2 || $organization1_id == 8) {
-            //     return response()->json([
-            //         'storesJson' => $storesJson,
-            //         'organization_list' => $organization_list,
-            //         'all_shop_list' => $all_shop_list,
-            //         'csvStoreIds' => $csvStoreIds,
-            //     ], 200);
-            // }
 
             return response()
                 ->view('common.admin.message-csv-store-modal', [
@@ -3016,7 +3016,7 @@ class MessagePublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no'
                 )
-                ->where('organization1_id', $organization1_id)
+                ->where('shops.organization1_id', $organization1_id)
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
