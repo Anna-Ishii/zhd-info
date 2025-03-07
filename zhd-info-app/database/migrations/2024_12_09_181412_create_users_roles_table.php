@@ -13,8 +13,9 @@ return new class extends Migration
     {
         Schema::create('users_roles', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('shop_id');
+            $table->string('shop_code');
+            $table->string('shop_name');
 
             // 役割ごとのカラムを追加
             $table->string('DM_id')->nullable();
@@ -45,7 +46,6 @@ return new class extends Migration
             $table->timestamps();
 
             // 外部キー制約
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('shop_id')->references('id')->on('shops')->onDelete('cascade');
         });
     }

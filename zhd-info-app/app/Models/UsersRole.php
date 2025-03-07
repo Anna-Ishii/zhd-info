@@ -10,8 +10,9 @@ class UsersRole extends Model
 
     protected $fillable = [
         'id',
-        'user_id',
         'shop_id',
+        'shop_code',
+        'shop_name',
         'DM_id',
         'DM_name',
         'DM_email',
@@ -24,6 +25,13 @@ class UsersRole extends Model
         'AM_name',
         'AM_email',
         'AM_view_notification',
+        '4th_id',
+        '4th_name',
+        '4th_email',
+        '4th_view_notification',
+        '5th_id',
+        '5th_name',
+        '5th_email',
         'created_at',
         'updated_at',
     ];
