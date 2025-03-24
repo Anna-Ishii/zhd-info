@@ -318,7 +318,7 @@
                                     <td>
                                         <div class="button-group">
                                             <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin">配信停止</button>
+                                            <button class="StopBtn btn btn-admin" {{ $manual->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
                                         </div>
                                     </td>
                                 @endif
@@ -336,6 +336,8 @@
     </div>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
     @include('common.admin.manual-export-modal', ['organization1' => $organization1])
+    @include('common.admin.confirm-modal')
+    @include('common.admin.complete-modal')
 
     <script src="{{ asset('/js/admin/manual/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/index.js') }}?date={{ date('Ymd') }}" defer></script>

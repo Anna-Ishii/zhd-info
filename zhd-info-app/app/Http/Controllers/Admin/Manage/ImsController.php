@@ -29,7 +29,6 @@ class ImsController extends Controller
             ->select('page_name', 'url')
             ->first();
 
-
         return view('admin.manage.ims', [
             'log' => $log,
             'message_saved_url' => $message_saved_url,

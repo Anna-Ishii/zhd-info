@@ -325,7 +325,7 @@
                                     <td>
                                         <div class="button-group">
                                             <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin">配信停止</button>
+                                            <button class="StopBtn btn btn-admin" <?php echo e($manual->status == App\Enums\PublishStatus::Published ? 'disabled' : ''); ?>>配信停止</button>
                                         </div>
                                     </td>
                                 <?php endif; ?>
@@ -343,6 +343,8 @@
     </div>
     <?php echo $__env->make('common.admin.manual-import-modal', ['organization1' => $organization1], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
     <?php echo $__env->make('common.admin.manual-export-modal', ['organization1' => $organization1], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('common.admin.confirm-modal', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
+    <?php echo $__env->make('common.admin.complete-modal', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
     <script src="<?php echo e(asset('/js/admin/manual/publish/index.js')); ?>?date=<?php echo e(date('Ymd')); ?>" defer></script>
     <script src="<?php echo e(asset('/js/index.js')); ?>?date=<?php echo e(date('Ymd')); ?>" defer></script>
