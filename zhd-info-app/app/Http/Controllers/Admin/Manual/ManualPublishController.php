@@ -1312,7 +1312,7 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id)->first();
         $status = $manual->status;
         //掲載終了だと、エラーを返す
-        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています']);
+        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています。']);
 
         $admin = session('admin');
         $now = Carbon::now();
@@ -1322,7 +1322,7 @@ class ManualPublishController extends Controller
             'editing_flg' => false
         ]);
 
-        return response()->json(['message' => '停止しました']);
+        return response()->json(['message' => '配信停止しました。']);
     }
 
     // 詳細画面のエクスポート
