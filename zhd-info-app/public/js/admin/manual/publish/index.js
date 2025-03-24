@@ -11,24 +11,31 @@ $(".editBtn").on("click", function (e) {
 
 $(".StopBtn").on("click", function (e) {
     e.preventDefault();
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
     var targetElement = $(this).parents("tr");
     var manual_id = targetElement.attr("data-manual_id");
 
-    let manuals = [];
-    manuals.push(manual_id);
+    // モーダルにmanual_idを設定
+    $('#confirmModal').data('manual_id', manual_id).modal('show');
 
-    fetch("/admin/manual/publish/stop", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": csrfToken,
-        },
-        body: JSON.stringify({
-            manual_id: manuals,
-        }),
-    })
+    // モーダルの移動ボタンのクリックイベント
+    $('.confirmBtn').on('click', function() {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        var manual_id = $('#confirmModal').data('manual_id');
+
+        let manuals = [];
+        manuals.push(manual_id);
+
+        fetch("/admin/manual/publish/stop", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({
+                manual_id: manuals,
+            }),
+        })
         .then((response) => {
             if (response.ok) {
                 return response.json();
@@ -40,14 +47,33 @@ $(".StopBtn").on("click", function (e) {
         })
         .then((data) => {
             const message = data.message;
-            // メッセージの表示や処理を行う
-            alert(message);
-            window.location.reload();
+            // メッセージをモーダルに表示
+            $('#completeModal .message-content').text(message);
+            $('#completeModal').modal('show');
+
+            // モーダルが閉じられたときにページをリロード
+            $('#completeModal').on('hidden.bs.modal', function () {
+                window.location.reload();
+            });
         })
         .catch((error) => {
             const message = error.message;
-            alert(message);
+            // エラーメッセージをモーダに表示
+            $('#completeModal .message-content').text(message);
+            $('#completeModal').modal('show');
+
+            // エラーの場合はリロードしない
+            $('#completeModal').off('hidden.bs.modal');
         });
+
+        // モーダルを閉じる
+        $('#confirmModal').modal('hide');
+    });
+
+    // キャンセルボタンのクリックイベントはモーダル内で処理
+    $('.cancelBtn').on('click', function() {
+        $('#confirmModal').modal('hide');
+    });
 });
 
 $(".label-title").each((i, dt) => {
