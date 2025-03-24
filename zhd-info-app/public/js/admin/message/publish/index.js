@@ -12,28 +12,30 @@ $(".editBtn").on("click", function (e) {
 $(".StopBtn").on("click", function (e) {
     e.preventDefault();
 
-    // 確認アラートを表示
-    if (!confirm("実行しますがよろしいでしょうか？")) {
-        return; // キャンセルされた場合、処理を中断
-    }
-
-    var csrfToken = $('meta[name="csrf-token"]').attr("content");
     var targetElement = $(this).parents("tr");
     var message_id = targetElement.attr("data-message_id");
 
-    let messages = [];
-    messages.push(message_id);
+    // モーダルにmessage_idを設定
+    $('#confirmModal').data('message_id', message_id).modal('show');
 
-    fetch("/admin/message/publish/stop", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json",
-            "X-CSRF-TOKEN": csrfToken,
-        },
-        body: JSON.stringify({
-            message_id: messages,
-        }),
-    })
+    // モーダルの移動ボタンのクリックイベント
+    $('.confirmBtn').on('click', function() {
+        var csrfToken = $('meta[name="csrf-token"]').attr("content");
+        var message_id = $('#confirmModal').data('message_id');
+
+        let messages = [];
+        messages.push(message_id);
+
+        fetch("/admin/message/publish/stop", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRF-TOKEN": csrfToken,
+            },
+            body: JSON.stringify({
+                message_id: messages,
+            }),
+        })
         .then((response) => {
             if (response.ok) {
                 return response.json();
@@ -45,14 +47,33 @@ $(".StopBtn").on("click", function (e) {
         })
         .then((data) => {
             const message = data.message;
-            // メッセージの表示や処理を行う
-            alert(message);
-            window.location.reload();
+            // メッセージをモーダルに表示
+            $('#completeModal .message-content').text(message);
+            $('#completeModal').modal('show');
+
+            // モーダルが閉じられたときにページをリロード
+            $('#completeModal').on('hidden.bs.modal', function () {
+                window.location.reload();
+            });
         })
         .catch((error) => {
             const message = error.message;
-            alert(message);
+            // エラーメッセージをモーダルに表示
+            $('#completeModal .message-content').text(message);
+            $('#completeModal').modal('show');
+
+            // エラーの場合はリロードしない
+            $('#completeModal').off('hidden.bs.modal');
         });
+
+        // モーダルを閉じる
+        $('#confirmModal').modal('hide');
+    });
+
+    // キャンセルボタンのクリックイベントはモーダル内で処理
+    $('.cancelBtn').on('click', function() {
+        $('#confirmModal').modal('hide');
+    });
 });
 
 $(window).on("load", function () {
@@ -274,8 +295,7 @@ $(document).ready(function () {
         e.preventDefault();
         var csrfToken = $('meta[name="csrf-token"]').attr("content");
 
-        var overlay = document.getElementById("overlay");
-        overlay.style.display = "block";
+        var overlay = document.getElementById("overlay");　       overlay.style.display = "block";
 
         // URLを構築
         let baseUrl = "/admin/message/publish";

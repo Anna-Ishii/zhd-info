@@ -490,7 +490,7 @@
                                     <td nowrap>
                                         <div class="button-group">
                                             <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin">配信停止</button>
+                                            <button class="StopBtn btn btn-admin" {{ $message->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
                                         </div>
                                     </td>
                                 @endif
@@ -508,6 +508,8 @@
     </div>
     @include('common.admin.message-import-modal', ['organization1' => $organization1])
     @include('common.admin.message-export-modal', ['organization1' => $organization1])
+    @include('common.admin.confirm-modal')
+    @include('common.admin.complete-modal')
 
     @include('common.admin.message-new-single-file-modal', ['message_list' => $message_list])
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>

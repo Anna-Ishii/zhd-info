@@ -1127,7 +1127,7 @@ class MessagePublishController extends Controller
             ->toArray();
 
         // JPのオープン前の組織を削除
-        if ($organization1->id == 1) {
+        if ($message->organization1_id == 1) {
             $organization_list = array_filter($organization_list, function ($org) {
                 return $org['organization2_name'] != 'オープン前';
             });
@@ -1958,7 +1958,7 @@ class MessagePublishController extends Controller
         $message = Message::find($message_id)->first();
         $status = $message->status;
         //掲載終了だと、エラーを返す
-        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています']);
+        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています。']);
         $admin = session('admin');
         $now = Carbon::now();
         Message::whereIn('id', $message_id)->update([
@@ -1967,7 +1967,7 @@ class MessagePublishController extends Controller
             'editing_flg' => false
         ]);
 
-        return response()->json(['message' => '停止しました']);
+        return response()->json(['message' => '配信停止しました。']);
     }
 
     // 詳細画面のエクスポート

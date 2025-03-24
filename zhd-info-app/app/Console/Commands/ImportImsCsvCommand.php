@@ -410,35 +410,10 @@ class ImportImsCsvCommand extends Command
             );
 
             // users_rolesテーブルのデータを更新
-            UsersRole::updateOrCreate(
-                [
-                    'shop_id' => $shop->id,
-                    'shop_code' => $shop_code,
-                    'shop_name' => $shop_name,
-                ],
-                [
-                    'DM_id' => $DM_id,
-                    'DM_name' => $DM_name,
-                    'DM_email' => $DM_email,
-                    'DM_view_notification' => false,
-                    'BM_id' => $BM_id,
-                    'BM_name' => $BM_name,
-                    'BM_email' => $BM_email,
-                    'BM_view_notification' => false,
-                    'AM_id' => $AM_id,
-                    'AM_name' => $AM_name,
-                    'AM_email' => $AM_email,
-                    'AM_view_notification' => false,
-                    '4th_id' => $forth_id,
-                    '4th_name' => $forth_name,
-                    '4th_email' => $forth_email,
-                    '4th_view_notification' => false,
-                    '5th_id' => $fifth_id,
-                    '5th_name' => $fifth_name,
-                    '5th_email' => $fifth_email,
-                    '5th_view_notification' => false,
-                ]
-            );
+            $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
+            if (!empty($environment) && !empty($shop)) {
+                $this->create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email);
+            }
 
             // 新規店舗の場合
             if (is_null($shop_id)) {
@@ -487,28 +462,28 @@ class ImportImsCsvCommand extends Command
             }
         }
 
-        // 削除する店舗一覧のID
-        $diff_shop_id = array_diff($shop_list, $register_shop_id);
-        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
+        // 削除する店舗一覧のIDは物理削除しないように修正
+        // $diff_shop_id = array_diff($shop_list, $register_shop_id);
+        // $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
 
-        $delete_shop = array_merge($diff_shop, $close_shop);
-        $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
-        foreach ($diff_shop_user as $key => $user) {
-            $user->message()->detach();
-            // message_shopのshop_idを削除
-            MessageShop::where('shop_id', $user->shop_id)->delete();
+        // $delete_shop = array_merge($diff_shop, $close_shop);
+        // $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
+        // foreach ($diff_shop_user as $key => $user) {
+        //     $user->message()->detach();
+        //     // message_shopのshop_idを削除
+        //     MessageShop::where('shop_id', $user->shop_id)->delete();
 
-            $user->manual()->detach();
-            // manual_shopのshop_idを削除
-            ManualShop::where('shop_id', $user->shop_id)->delete();
-        }
-        User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
-        Shop::whereIn('id', $delete_shop)->delete();
+        //     $user->manual()->detach();
+        //     // manual_shopのshop_idを削除
+        //     ManualShop::where('shop_id', $user->shop_id)->delete();
+        // }
+        // User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
+        // Shop::whereIn('id', $delete_shop)->delete();
 
-        // wowtalk_shopテーブルのデータを削除
-        if (!empty($environment) && !empty($delete_shop)) {
-            WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
-        }
+        // // wowtalk_shopテーブルのデータを削除
+        // if (!empty($environment) && !empty($delete_shop)) {
+        //     WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        // }
 
         // ログ出力
         $this->info("---新しい店舗---");
@@ -530,6 +505,41 @@ class ImportImsCsvCommand extends Command
                 $this->info("shopID" . $s);
             }
         }
+    }
+
+    // users_rolesテーブルのデータを更新
+    private function create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email)
+    {
+        // users_rolesテーブルのデータを更新
+        UsersRole::updateOrCreate(
+            [
+                'shop_id' => $shop->id,
+                'shop_code' => $shop_code,
+                'shop_name' => $shop_name,
+            ],
+            [
+                'DM_id' => $DM_id,
+                'DM_name' => $DM_name,
+                'DM_email' => $DM_email,
+                'DM_view_notification' => false,
+                'BM_id' => $BM_id,
+                'BM_name' => $BM_name,
+                'BM_email' => $BM_email,
+                'BM_view_notification' => false,
+                'AM_id' => $AM_id,
+                'AM_name' => $AM_name,
+                'AM_email' => $AM_email,
+                'AM_view_notification' => false,
+                '4th_id' => $forth_id,
+                '4th_name' => $forth_name,
+                '4th_email' => $forth_email,
+                '4th_view_notification' => false,
+                '5th_id' => $fifth_id,
+                '5th_name' => $fifth_name,
+                '5th_email' => $fifth_email,
+                '5th_view_notification' => false,
+            ]
+        );
     }
 
     // ユーザー作成
@@ -779,18 +789,18 @@ class ImportImsCsvCommand extends Command
             });
         });
 
-        // クルーの削除
-        $crew_list = Crew::query()
-            ->pluck('part_code')
-            ->toArray();
-        $diff_crew_id = array_diff($crew_list, $register_crews);
+        // クルーの削除は物理削除しないように修正
+        // $crew_list = Crew::query()
+        //     ->pluck('part_code')
+        //     ->toArray();
+        // $diff_crew_id = array_diff($crew_list, $register_crews);
 
-        // 1000件ごとにチャンクして削除処理
-        collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
-            $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
-            $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
-            Crew::whereIn('part_code', $chunk)->delete();
-        });
+        // // 1000件ごとにチャンクして削除処理
+        // collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
+        //     $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
+        //     $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
+        //     Crew::whereIn('part_code', $chunk)->delete();
+        // });
 
         // ログ出力
         $this->info("---新しいクルー---");
