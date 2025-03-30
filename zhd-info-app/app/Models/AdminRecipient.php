@@ -10,6 +10,9 @@ class AdminRecipient extends Model
 
     protected $fillable = [
         'id',
+        'employee_number',
+        'name',
+        'organization1_id',
         'email',
         'target',
         'created_at',
