@@ -147,11 +147,12 @@ class ImportImsCsvCommand extends Command
                 $organization_name = $shop[$i + 1];
                 $order_no = (int)$shop[$i + 2];
                 if ($shop[$i] == "営業部") {
-                    $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
+                    $organization2_id = Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization2::where('name', $shop[$i + 1])->update([
+                    Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization2_id)) {
@@ -159,18 +160,20 @@ class ImportImsCsvCommand extends Command
                             $organization2 = Organization2::create([
                                 "name" => $organization_name,
                                 "order_no" => $order_no,
-                                'display_name' => $organization_name
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
                             ]);
                             $organization2_id = $organization2->id;
                         }
                     }
                 }
                 if ($shop[$i] == "DS") {
-                    $organization3_id = Organization3::where('name', $shop[$i + 1])->value('id');
+                    $organization3_id = Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization3::where('name', $shop[$i + 1])->update([
+                    Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization3_id)) {
@@ -178,18 +181,20 @@ class ImportImsCsvCommand extends Command
                             $organization3 = Organization3::create([
                                 "name" => $organization_name,
                                 "order_no" => $order_no,
-                                'display_name' => $organization_name
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
                             ]);
                             $organization3_id = $organization3->id;
                         }
                     }
                 }
                 if ($shop[$i] == "AR") {
-                    $organization4_id = Organization4::where('name', $shop[$i + 1])->value('id');
+                    $organization4_id = Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization4::where('name', $shop[$i + 1])->update([
+                    Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization4_id)) {
@@ -197,18 +202,20 @@ class ImportImsCsvCommand extends Command
                             $organization4 = Organization4::create([
                                 "name" => $organization_name,
                                 "order_no" => $order_no,
-                                'display_name' => $organization_name
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
                             ]);
                             $organization4_id = $organization4->id;
                         }
                     }
                 }
                 if ($shop[$i] == "BL") {
-                    $organization5_id = Organization5::where('name', $shop[$i + 1])->value('id');
+                    $organization5_id = Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization5::where('name', $shop[$i + 1])->update([
+                    Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $this->formatOrg5Name($organization_name)
+                        'display_name' => $this->formatOrg5Name($organization_name),
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization5_id)) {
@@ -216,7 +223,8 @@ class ImportImsCsvCommand extends Command
                             $organization5 = Organization5::create([
                                 "name" => $organization_name,
                                 "order_no" => $order_no,
-                                'display_name' => $this->formatOrg5Name($organization_name)
+                                'display_name' => $this->formatOrg5Name($organization_name),
+                                'organization1_id' => $organization1_id
                             ]);
                             $organization5_id = $organization5->id;
                         }
