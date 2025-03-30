@@ -55,7 +55,7 @@ class PersonAnalysisExport implements
             ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
             ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
             ->where('start_datetime', '>=', $startOfLastWeek)
-            ->where('start_datetime', '<=', $endOfLastWeek)
+            ->where('start_datetime', '<', $endOfLastWeek)
             ->where('messages.organization1_id', '=', $organization1->id)
             ->orderBy('messages.id', 'desc')
             ->groupBy('messages.id')
