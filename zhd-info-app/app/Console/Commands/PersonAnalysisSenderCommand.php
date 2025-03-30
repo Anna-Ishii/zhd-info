@@ -198,8 +198,10 @@ class PersonAnalysisSenderCommand extends Command
         $messagesFlg = false;
 
         // 現在の日付から7日前の0:00時から現在のexecution_dateまでの業務連絡を取得
-        $startOfLastWeek = now('Asia/Tokyo')->subWeek()->startOfDay()->format('Y-m-d H:i:s');
-        $endOfLastWeek = now('Asia/Tokyo')->format('Y-m-d') . ' ' . Carbon::parse($organization1['execution_date'])->format('H:i:s');
+        // $startOfLastWeek = now('Asia/Tokyo')->subWeek()->startOfDay()->format('Y-m-d H:i:s');
+        // $endOfLastWeek = now('Asia/Tokyo')->format('Y-m-d') . ' ' . Carbon::parse($organization1['execution_date'])->format('H:i:s');
+        $startOfLastWeek = now('Asia/Tokyo')->subDays(7)->startOfDay()->format('Y-m-d H:i:s');
+        $endOfLastWeek = now('Asia/Tokyo')->startOfDay()->format('Y-m-d H:i:s');
 
         // 業務連絡を取得
         $messages = Message::query()
@@ -208,7 +210,7 @@ class PersonAnalysisSenderCommand extends Command
             ->leftJoin('users', 'message_user.user_id', '=', 'users.id')
             ->leftJoin('shops', 'shops.id', '=', 'message_user.shop_id')
             ->where('start_datetime', '>=', $startOfLastWeek)
-            ->where('start_datetime', '<=', $endOfLastWeek)
+            ->where('start_datetime', '<', $endOfLastWeek)
             ->where('editing_flg', false)
             ->where('messages.organization1_id', '=', $organization1['id'])
             ->orderBy('messages.id', 'desc')
@@ -511,7 +513,7 @@ class PersonAnalysisSenderCommand extends Command
     private function sendPersonAnalysisMail($organization1, $messagesFlg, $messages = null, $message_count = null, $viewRates = null, $startOfLastWeek, $endOfLastWeek, $pdfFilePaths = [])
     {
         $user_role_data = [];
-            $user_role_data = DB::table('users_roles')
+        $user_role_data = DB::table('users_roles')
             ->join('shops', function ($join) use ($organization1) {
                 $join->on('users_roles.shop_id', '=', 'shops.id')
                     ->where('shops.organization1_id', $organization1['id']);
@@ -541,8 +543,14 @@ class PersonAnalysisSenderCommand extends Command
             })
             ->toArray();
 
+        // AdminRecipientから取得したメールアドレス
+        $adminEmails = AdminRecipient::where('organization1_id', $organization1['id'])
+            ->where('target', true)
+            ->pluck('email')
+            ->toArray();
+
         // 通知対象のユーザーがない場合
-        if (empty($user_role_data)) {
+        if (empty($user_role_data) && empty($adminEmails)) {
             return $this->createFailureResponse($organization1);
         }
 
@@ -584,21 +592,42 @@ class PersonAnalysisSenderCommand extends Command
             return $this->createErrorResponse($organization1, $user_role_data, $e->getMessage());
         }
 
-        // 重複を削除
-        $user_role_data = array_unique(array_column($user_role_data, 'DM_email'));
-        $user_role_data = array_merge($user_role_data, array_column($user_role_data, 'AM_email'));
-        $user_role_data = array_merge($user_role_data, array_column($user_role_data, 'BM_email'));
-        $user_role_data = array_unique($user_role_data);
+        // メールアドレスを抽出して配列に格納
+        $email_addresses = [];
+        foreach ($user_role_data as $data) {
+            if (!empty($data['DM_email'])) {
+                $email_addresses[] = $data['DM_email'];
+            }
+            if (!empty($data['BM_email'])) {
+                $email_addresses[] = $data['BM_email'];
+            }
+            if (!empty($data['AM_email'])) {
+                $email_addresses[] = $data['AM_email'];
+            }
+        }
 
-        // 通知対象のユーザーを50件ずつのバッチに分割してAPIを呼び出す
-        $chunkedUserRoleData = array_chunk($user_role_data, 50);
+        // 重複を削除
+        $email_addresses = array_unique($email_addresses);
+
+        // AdminRecipientのメールアドレスをマージ
+        foreach ($adminEmails as $adminEmail) {
+            if (!empty($adminEmail) && filter_var($adminEmail, FILTER_VALIDATE_EMAIL)) {
+                $email_addresses[] = $adminEmail;
+            }
+        }
+
+        // 空の値を削除
+        $email_addresses = array_filter($email_addresses);
+
+        // 通知対象のユーザーを50件ずつのバッチに分割してメール送信
+        $chunkedUserRoleData = array_chunk($email_addresses, 50);
         foreach ($chunkedUserRoleData as $batch) {
-            foreach ($batch as $email) {
-                try {
-                    // メール送信
-                    $this->sendMail($email, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $pdfFilePaths);
-                } catch (\Exception $e) {
-                    // エラーログを生成
+            try {
+                // バッチ単位でメール送信（複数の宛先に一括で送信）
+                $this->sendMail($batch, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $pdfFilePaths);
+            } catch (\Exception $e) {
+                // エラーログを生成（バッチ内の各メールアドレスについてログを記録）
+                foreach ($batch as $email) {
                     $errorLogs[] = $this->createErrorLog(
                         $organization1,
                         $email,
@@ -629,7 +658,6 @@ class PersonAnalysisSenderCommand extends Command
                     ]
                 );
             }
-
 
             // エラー時のレスポンスを返す
             $errorMessages = array_filter(array_column($errorLogs, 'error_message'));
@@ -798,7 +826,7 @@ class PersonAnalysisSenderCommand extends Command
     /**
      * メール送信のメソッド
      *
-     * @param string $email 通知対象のユーザーデータ
+     * @param string $emails 通知対象のユーザーデータ
      * @param array $organization1 組織オブジェクト
      * @param string $messageContent メッセージ内容
      * @param string $startOfLastWeek 前週月曜の0:00から前週日曜の23:59に掲載開始した業務連絡の開始日時
@@ -807,25 +835,42 @@ class PersonAnalysisSenderCommand extends Command
      * @return string|array 生成されたメッセージ内容またはエラーログ
      * @throws \Exception メール送信に失敗した場合
      */
-    private function sendMail($email, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePaths = [])
+    private function sendMail($emails, $organization1, $messageContent, $startOfLastWeek, $endOfLastWeek, $filePaths = [])
     {
         // 通知対象のメールアドレスを取得
-        // $to = $email;
+        $to = [];
 
-        // ここ修正必須！！
-        // $to = array_merge($to, AdminRecipient::where('target', true)->pluck('email')->toArray());
+        // 配列で受け取ったメールアドレスを処理
+        if (is_array($emails)) {
+            foreach ($emails as $email) {
+                if (!empty($email) && filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                    $to[] = $email;
+                }
+            }
+        } else {
+            // 単一のメールアドレスの場合
+            if (!empty($emails) && filter_var($emails, FILTER_VALIDATE_EMAIL)) {
+                $to[] = $emails;
+            }
+        }
 
-        $to = AdminRecipient::where('target', true)->pluck('email')->toArray();
+        // 送信先が空の場合はスキップ
+        if (empty($to)) {
+            $this->info("{$organization1['name']}：送信先メールアドレスが設定されていないためスキップします。");
+            return false;
+        }
 
-        $subject =  $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . ')';
+        $subject = $organization1['name'] . '_業連閲覧状況(' . date('n/j', strtotime($startOfLastWeek)) . '~' . date('n/j', strtotime($endOfLastWeek . ' -1 day')) . ')';
         $fromName = '業連・動画配信ツール';
 
         // メール送信
         $mailer = new SESMailer();
         if ($mailer->sendEmail($fromName, $to, $subject, $messageContent, $filePaths)) {
-            $this->info("閲覧率のメールを送信しました。");
+            $this->info("閲覧率のメールを送信しました。送信先: " . implode(', ', $to));
+            return true;
         } else {
             $this->error("メール送信中にエラーが発生しました。");
+            throw new \Exception("メール送信に失敗しました。");
         }
     }
 

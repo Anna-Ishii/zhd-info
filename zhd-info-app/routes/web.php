@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\Account\AccountController;
 use App\Http\Controllers\Admin\Account\AdminAccountController;
 use App\Http\Controllers\Admin\Account\MailAccountController;
+use App\Http\Controllers\Admin\Account\MailAdminAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
@@ -139,6 +140,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/userRoleUpdate', [MailAccountController::class, 'userRoleUpdate'])->name('userRoleUpdate');
             Route::get('/organization', [MailAccountController::class,  'getOrganization']);
             Route::get('export', [MailAccountController::class, 'export'])->name('export');
+        });
+        Route::group(['prefix' => 'adminmail', 'as' => 'adminmail.', 'middleware' => 'check.allowpage:account-admin-mail'], function () {
+            Route::get('/', [MailAdminAccountController::class, 'index'])->name('index');
+            Route::post('/adminAccountUpdate', [MailAdminAccountController::class, 'adminAccountUpdate'])->name('adminAccountUpdate');
         });
     });
 
