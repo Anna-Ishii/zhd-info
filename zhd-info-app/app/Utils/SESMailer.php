@@ -17,7 +17,7 @@ class SESMailer
         ]);
     }
 
-    public function sendEmail($fromName, $to, $subject, $message, $filePath = null)
+    public function sendEmail($fromName, $to, $subject, $message, $filePaths = [])
     {
         try {
             $fromAddress = 'zhd-gyoren-system@zensho.com';
@@ -36,7 +36,8 @@ class SESMailer
             $body .= "Content-Transfer-Encoding: 7bit\r\n\r\n";
             $body .= $message . "\r\n";
 
-            if ($filePath) {
+            // 複数のファイルを添付
+            foreach ($filePaths as $filePath) {
                 $attachment = new \SplFileInfo($filePath);
                 $attachmentPath = $attachment->getRealPath();
                 $attachmentContent = file_get_contents($attachmentPath);

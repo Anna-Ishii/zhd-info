@@ -87,6 +87,17 @@ class MailAdminAccountController extends Controller
         ]);
     }
 
+    // SESSIONに検索条件を保存
+    public function saveSessionConditions(Request $request)
+    {
+        try {
+            session(['mail_admin_account_url' => $request->input('params')]);
+            return response()->json(['success' => true]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
     // 業連閲覧状況メール配信の設定を更新
     public function adminAccountUpdate(Request $request)
     {
