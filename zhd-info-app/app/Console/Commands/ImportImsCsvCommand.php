@@ -147,71 +147,87 @@ class ImportImsCsvCommand extends Command
                 $organization_name = $shop[$i + 1];
                 $order_no = (int)$shop[$i + 2];
                 if ($shop[$i] == "営業部") {
-                    $organization2_id = Organization2::where('name', $shop[$i + 1])->value('id');
+                    $organization2_id = Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization2::where('name', $shop[$i + 1])->update([
+                    Organization2::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization2_id)) {
-                        $organization2 = Organization2::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name
-                        ]);
-                        $organization2_id = $organization2->id;
+                        if (!empty($organization_name)) {
+                            $organization2 = Organization2::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization2_id = $organization2->id;
+                        }
                     }
                 }
                 if ($shop[$i] == "DS") {
-                    $organization3_id = Organization3::where('name', $shop[$i + 1])->value('id');
+                    $organization3_id = Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization3::where('name', $shop[$i + 1])->update([
+                    Organization3::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization3_id)) {
-                        $organization3 = Organization3::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name
-                        ]);
-                        $organization3_id = $organization3->id;
+                        if (!empty($organization_name)) {
+                            $organization3 = Organization3::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization3_id = $organization3->id;
+                        }
                     }
                 }
                 if ($shop[$i] == "AR") {
-                    $organization4_id = Organization4::where('name', $shop[$i + 1])->value('id');
+                    $organization4_id = Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization4::where('name', $shop[$i + 1])->update([
+                    Organization4::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $organization_name
+                        'display_name' => $organization_name,
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization4_id)) {
-                        $organization4 = Organization4::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name
-                        ]);
-                        $organization4_id = $organization4->id;
+                        if (!empty($organization_name)) {
+                            $organization4 = Organization4::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization4_id = $organization4->id;
+                        }
                     }
                 }
                 if ($shop[$i] == "BL") {
-                    $organization5_id = Organization5::where('name', $shop[$i + 1])->value('id');
+                    $organization5_id = Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
-                    Organization5::where('name', $shop[$i + 1])->update([
+                    Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
-                        'display_name' => $this->formatOrg5Name($organization_name)
+                        'display_name' => $this->formatOrg5Name($organization_name),
+                        'organization1_id' => $organization1_id
                     ]);
                     //
                     if (is_null($organization5_id)) {
-                        $organization5 = Organization5::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $this->formatOrg5Name($organization_name)
-                        ]);
-                        $organization5_id = $organization5->id;
+                        if (!empty($organization_name)) {
+                            $organization5 = Organization5::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $this->formatOrg5Name($organization_name),
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization5_id = $organization5->id;
+                        }
                     }
                 }
             }
@@ -298,28 +314,28 @@ class ImportImsCsvCommand extends Command
             }
         }
 
-        // 削除する店舗一覧のID
-        $diff_shop_id = array_diff($shop_list, $register_shop_id);
-        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
+        // 削除する店舗一覧のIDは物理削除しないように修正
+        // $diff_shop_id = array_diff($shop_list, $register_shop_id);
+        // $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
 
-        $delete_shop = array_merge($diff_shop, $close_shop);
-        $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
-        foreach ($diff_shop_user as $key => $user) {
-            $user->message()->detach();
-            // message_shopのshop_idを削除
-            MessageShop::where('shop_id', $user->shop_id)->delete();
+        // $delete_shop = array_merge($diff_shop, $close_shop);
+        // $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
+        // foreach ($diff_shop_user as $key => $user) {
+        //     $user->message()->detach();
+        //     // message_shopのshop_idを削除
+        //     MessageShop::where('shop_id', $user->shop_id)->delete();
 
-            $user->manual()->detach();
-            // manual_shopのshop_idを削除
-            ManualShop::where('shop_id', $user->shop_id)->delete();
-        }
-        User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
-        Shop::whereIn('id', $delete_shop)->delete();
+        //     $user->manual()->detach();
+        //     // manual_shopのshop_idを削除
+        //     ManualShop::where('shop_id', $user->shop_id)->delete();
+        // }
+        // User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
+        // Shop::whereIn('id', $delete_shop)->delete();
 
-        // wowtalk_shopテーブルのデータを削除
-        if (!empty($environment) && !empty($delete_shop)) {
-            WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
-        }
+        // // wowtalk_shopテーブルのデータを削除
+        // if (!empty($environment) && !empty($delete_shop)) {
+        //     WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        // }
 
         // ログ出力
         $this->info("---新しい店舗---");
@@ -420,6 +436,7 @@ class ImportImsCsvCommand extends Command
         });
     }
 
+    // wowtalkIDを作成
     private function wowtalkid2shopcode(Shop $shop)
     {
         $data = [];
@@ -589,18 +606,18 @@ class ImportImsCsvCommand extends Command
             });
         });
 
-        // クルーの削除
-        $crew_list = Crew::query()
-            ->pluck('part_code')
-            ->toArray();
-        $diff_crew_id = array_diff($crew_list, $register_crews);
+        // クルーの削除は物理削除しないように修正
+        // $crew_list = Crew::query()
+        //     ->pluck('part_code')
+        //     ->toArray();
+        // $diff_crew_id = array_diff($crew_list, $register_crews);
 
-        // 1000件ごとにチャンクして削除処理
-        collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
-            $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
-            $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
-            Crew::whereIn('part_code', $chunk)->delete();
-        });
+        // // 1000件ごとにチャンクして削除処理
+        // collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
+        //     $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
+        //     $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
+        //     Crew::whereIn('part_code', $chunk)->delete();
+        // });
 
         // ログ出力
         $this->info("---新しいクルー---");

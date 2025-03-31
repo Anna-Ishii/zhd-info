@@ -41,23 +41,18 @@ class WowTalkNotificationSenderCommand extends Command
 
         $this->info('WowTalk通知送信開始');
 
+        // 業務連絡送信
         try {
-            // 業務連絡送信
-            try {
-                $this->processNotification('message');
-            } catch (\Throwable $th) {
-                $this->error('業務連絡送信中にエラーが発生しました: ' . $th->getMessage());
-            }
+            $this->processNotification('message');
+        } catch (\Throwable $th) {
+            $this->error('業務連絡送信中にエラーが発生しました: ' . $th->getMessage());
+        }
 
-            // マニュアル送信
-            try {
-                $this->processNotification('manual');
-            } catch (\Throwable $th) {
-                $this->error('マニュアル送信中にエラーが発生しました: ' . $th->getMessage());
-            }
-        } finally {
-            // 処理後にメモリ制限を元に戻す
-            ini_restore('memory_limit');
+        // マニュアル送信
+        try {
+            $this->processNotification('manual');
+        } catch (\Throwable $th) {
+            $this->error('マニュアル送信中にエラーが発生しました: ' . $th->getMessage());
         }
     }
 
@@ -427,12 +422,14 @@ class WowTalkNotificationSenderCommand extends Command
         if ($type === 'message') {
             // メッセージ内容を生成
             $text = Environment::where('command_name', $this->signature)->where('type', 'message')->select('contents')->first();
-            $messageContent = "業連：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent = "【業連・動画ツール】\n";
+            $messageContent .= "業連：{$dataType->title}が配信されました。確認してください。\n";
             $messageContent .= $text->contents . "\n";
         } elseif ($type === 'manual') {
             // メッセージ内容を生成
             $text = Environment::where('command_name', $this->signature)->where('type', 'manual')->select('contents')->first();
-            $messageContent = "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
+            $messageContent = "【業連・動画ツール】\n";
+            $messageContent .= "マニュアル：{$dataType->title}が配信されました。確認してください。\n";
             $messageContent .= $text->contents . "\n";
         }
 

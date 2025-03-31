@@ -31,7 +31,7 @@
                         </ul>
                     </li>
                 @endif
-                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true))
+                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true) || in_array('account-mail', $arrow_pages, true) || in_array('account-admin-mail', $arrow_pages, true))
                     <li>
                         <a href="#" class="nav-label">3.管理</span></a>
                         <ul class="nav nav-second-level">
@@ -41,7 +41,12 @@
                             @if (in_array('account-admin', $arrow_pages, true))
                                 <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
                             @endif
-
+                            @if (in_array('account-mail', $arrow_pages, true))
+                                <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
+                            @endif
+                            @if (in_array('account-admin-mail', $arrow_pages, true))
+                                <li><a href="/admin/account/adminmail">3-4.本部従業員への配信設定</a></li>
+                            @endif
                         </ul>
                     </li>
                 @endif
@@ -316,7 +321,7 @@
                                     <td>
                                         <div class="button-group">
                                             <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin">配信停止</button>
+                                            <button class="StopBtn btn btn-admin" {{ $manual->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
                                         </div>
                                     </td>
                                 @endif
@@ -334,6 +339,8 @@
     </div>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
     @include('common.admin.manual-export-modal', ['organization1' => $organization1])
+    @include('common.admin.confirm-modal')
+    @include('common.admin.complete-modal')
 
     <script src="{{ asset('/js/admin/manual/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/index.js') }}?date={{ date('Ymd') }}" defer></script>

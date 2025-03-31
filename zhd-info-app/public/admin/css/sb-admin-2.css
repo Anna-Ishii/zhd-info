@@ -3,7 +3,7 @@
  * Copyright 2013-2016 Start Bootstrap
  * Licensed under MIT (https://github.com/BlackrockDigital/startbootstrap/blob/gh-pages/LICENSE)
  */
-body {
+ body {
     background-color: #f8f8f8;
     font-size: 12px;
 }
@@ -982,4 +982,184 @@ table.account thead>tr>th.head2 {
 
 table tr.deleted {
     background-color: #d9d9d9;
+}
+
+table.mail-account {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #000 !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+table.mail-account th,
+table.mail-account td {
+    border: 1px solid #000 !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
+}
+
+/* 縦スクロール */
+table.mail-account thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white;
+}
+
+/* 横スクロール */
+table.mail-account thead  th[data-column="0"],
+table.mail-account tbody td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-account thead th[data-column="1"],
+table.mail-account tbody td:nth-child(2) {
+    position: sticky;
+    left: var(--left-2);
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-account thead th[data-column="2"],
+table.mail-account tbody td:nth-child(3) {
+    position: sticky;
+    left: var(--left-3);
+    z-index: 10;
+    background-color: white;
+}
+
+table.mail-account thead th:nth-child(4),
+table.mail-account tbody td:nth-child(4) {
+    position: sticky;
+    left: var(--left-4);
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-account tbody td:nth-child(5) {
+    position: sticky;
+    left: var(--left-5);
+    z-index: 20;
+    background-color: white;
+}
+
+/* サブヘッダーのスタイル */
+table.mail-account thead th[data-column="3"] {
+    position: sticky;
+    left: var(--left-4);
+    z-index: 30;
+}
+
+table.mail-account thead th[data-column="4"] {
+    position: sticky;
+    left: var(--left-5);
+    z-index: 30;
+}
+
+/* ヘッダーのスタイル */
+table.mail-account thead>tr>th.head1 {
+    background-color: rgb(209, 218, 239);
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.mail-account thead>tr>th.head2 {
+    background-color: #bbb;
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.mail-admin-account {
+    border-collapse: separate;
+    border-spacing: 0;
+    width: 100%;
+    border: 1px solid #000 !important;
+    border-left: 0px !important;
+    border-top: 0px !important;
+}
+
+table.mail-admin-account th,
+table.mail-admin-account td {
+    border: 1px solid #000 !important;
+    border-right: 0px !important;
+    border-bottom: 0px !important;
+}
+
+/* 縦スクロール */
+table.mail-admin-account thead {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background-color: white;
+}
+
+/* 横スクロール */
+table.mail-admin-account thead  th[data-column="0"],
+table.mail-admin-account tbody td:nth-child(1) {
+    position: sticky;
+    left: 0;
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-admin-account thead th[data-column="1"],
+table.mail-admin-account tbody td:nth-child(2) {
+    position: sticky;
+    left: var(--left-2);
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-admin-account thead th[data-column="2"],
+table.mail-admin-account tbody td:nth-child(3) {
+    position: sticky;
+    left: var(--left-3);
+    z-index: 10;
+    background-color: white;
+}
+
+table.mail-admin-account thead th:nth-child(4),
+table.mail-admin-account tbody td:nth-child(4) {
+    position: sticky;
+    left: var(--left-4);
+    z-index: 20;
+    background-color: white;
+}
+
+table.mail-admin-account tbody td:nth-child(5) {
+    position: sticky;
+    left: var(--left-5);
+    z-index: 20;
+    background-color: white;
+}
+
+/* サブヘッダーのスタイル */
+table.mail-admin-account thead th[data-column="3"] {
+    position: sticky;
+    left: var(--left-4);
+    z-index: 30;
+}
+
+table.mail-admin-account thead th[data-column="4"] {
+    position: sticky;
+    left: var(--left-5);
+    z-index: 30;
+}
+
+/* ヘッダーのスタイル */
+table.mail-admin-account thead>tr>th.head1 {
+    background-color: rgb(209, 218, 239);
+    vertical-align: middle;
+    text-align: center;
+}
+
+table.mail-admin-account thead>tr>th.head2 {
+    background-color: #bbb;
+    vertical-align: middle;
+    text-align: center;
 }
