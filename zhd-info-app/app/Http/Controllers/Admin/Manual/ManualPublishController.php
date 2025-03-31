@@ -472,7 +472,7 @@ class ManualPublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $organization1->id)
+            ->where('shops.organization1_id', $organization1->id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -484,6 +484,12 @@ class ManualPublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($organization1->id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -815,7 +821,7 @@ class ManualPublishController extends Controller
                 'organization5.name as organization5_name',
                 'organization5.order_no as organization5_order_no',
             )
-            ->where('organization1_id', $manual->organization1_id)
+            ->where('shops.organization1_id', $manual->organization1_id)
             ->orderByRaw('organization2_id is null asc')
             ->orderByRaw('organization3_id is null asc')
             ->orderByRaw('organization4_id is null asc')
@@ -827,6 +833,12 @@ class ManualPublishController extends Controller
             ->get()
             ->toArray();
 
+        // JPのオープン前の組織を削除
+        if ($manual->organization1_id == 1) {
+            $organization_list = array_filter($organization_list, function ($org) {
+                return $org['organization2_name'] != 'オープン前';
+            });
+        }
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1300,7 +1312,7 @@ class ManualPublishController extends Controller
         $manual = Manual::find($manual_id)->first();
         $status = $manual->status;
         //掲載終了だと、エラーを返す
-        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています']);
+        if ($status == PublishStatus::Published) return response()->json(['message' => 'すでに掲載終了しています。']);
 
         $admin = session('admin');
         $now = Carbon::now();
@@ -1310,7 +1322,7 @@ class ManualPublishController extends Controller
             'editing_flg' => false
         ]);
 
-        return response()->json(['message' => '停止しました']);
+        return response()->json(['message' => '配信停止しました。']);
     }
 
     // 詳細画面のエクスポート
@@ -1886,7 +1898,7 @@ class ManualPublishController extends Controller
                     'organization5.name as organization5_name',
                     'organization5.order_no as organization5_order_no'
                 )
-                ->where('organization1_id', $organization1_id)
+                ->where('shops.organization1_id', $organization1_id)
                 ->orderBy("organization2_order_no", "asc")
                 ->orderBy("organization3_order_no", "asc")
                 ->orderBy("organization4_order_no", "asc")
