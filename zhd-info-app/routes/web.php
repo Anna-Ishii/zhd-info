@@ -143,6 +143,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
         Route::group(['prefix' => 'adminmail', 'as' => 'adminmail.', 'middleware' => 'check.allowpage:account-admin-mail'], function () {
             Route::get('/', [MailAdminAccountController::class, 'index'])->name('index');
+            Route::post('save-session-conditions', [MailAdminAccountController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('/adminAccountUpdate', [MailAdminAccountController::class, 'adminAccountUpdate'])->name('adminAccountUpdate');
         });
     });
