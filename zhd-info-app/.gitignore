@@ -24,3 +24,6 @@ yarn-error.log
 /public/movies
 
 /public/log/*
+
+supervisord.log
+supervisord.pid

@@ -1,4 +1,2 @@
 .DS_Store
 docker-compose.yml
-zhd-info-app/supervisord.log
-zhd-info-app/supervisord.pid
