@@ -182,15 +182,16 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization2_id)) {
-                        $organization2 = Organization2::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name,
-                            'organization1_id' => $organization1_id
-                        ]);
-                        $organization2_id = $organization2->id;
+                        if (!empty($organization_name)) {
+                            $organization2 = Organization2::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization2_id = $organization2->id;
+                        }
                     }
-
                 }
 
                 if ($shop[$i] == "DS") {
@@ -203,13 +204,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization3_id)) {
-                        $organization3 = Organization3::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name,
-                            'organization1_id' => $organization1_id
-                        ]);
-                        $organization3_id = $organization3->id;
+                        if (!empty($organization_name)) {
+                            $organization3 = Organization3::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization3_id = $organization3->id;
+                        }
                     }
 
                     // DM [BB]
@@ -264,13 +267,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization4_id)) {
-                        $organization4 = Organization4::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $organization_name,
-                            'organization1_id' => $organization1_id
-                        ]);
-                        $organization4_id = $organization4->id;
+                        if (!empty($organization_name)) {
+                            $organization4 = Organization4::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $organization_name,
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization4_id = $organization4->id;
+                        }
                     }
 
                     // AM,4th[BB]
@@ -343,13 +348,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization5_id)) {
-                        $organization5 = Organization5::create([
-                            "name" => $organization_name,
-                            "order_no" => $order_no,
-                            'display_name' => $this->formatOrg5Name($organization_name),
-                            'organization1_id' => $organization1_id
-                        ]);
-                        $organization5_id = $organization5->id;
+                        if (!empty($organization_name)) {
+                            $organization5 = Organization5::create([
+                                "name" => $organization_name,
+                                "order_no" => $order_no,
+                                'display_name' => $this->formatOrg5Name($organization_name),
+                                'organization1_id' => $organization1_id
+                            ]);
+                            $organization5_id = $organization5->id;
+                        }
                     }
 
                     // BM [BB]
