@@ -26,13 +26,19 @@ docker-compose up
 composer install --ignore-platform-reqs
 ```
 
-2. 既存のDBを削除 && マイグレート
+2. .env ファイルを作成
+
+```sh
+cp .env.local .env
+```
+
+3. 既存のDBを削除 && マイグレート
 
 ```sh
 php artisan migrate:fresh
 ```
 
-3. dbの初期データを登録する
+4. dbの初期データを登録する
 
 ```sh
 php artisan db:seed
