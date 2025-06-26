@@ -11,15 +11,25 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // このマイグレーションは無効化されています
+        // users_rolesテーブル作成時に既に必要なカラムが定義されているため
+        /*
         Schema::table('users_roles', function (Blueprint $table) {
-            // 新しいカラムを追加
-            $table->string('shop_code')->after('shop_id');
-            $table->string('shop_name')->after('shop_code');
+            // shop_codeとshop_nameカラムが存在しない場合のみ追加
+            if (!Schema::hasColumn('users_roles', 'shop_code')) {
+                $table->string('shop_code')->after('shop_id');
+            }
+            if (!Schema::hasColumn('users_roles', 'shop_name')) {
+                $table->string('shop_name')->after('shop_code');
+            }
 
-            // user_idカラムと外部キー制約を削除
-            $table->dropForeign(['user_id']);
-            $table->dropColumn('user_id');
+            // user_idカラムと外部キー制約を削除（存在する場合のみ）
+            if (Schema::hasColumn('users_roles', 'user_id')) {
+                $table->dropForeign(['user_id']);
+                $table->dropColumn('user_id');
+            }
         });
+        */
     }
 
     /**
