@@ -473,7 +473,7 @@ class PersonAnalysisSenderCommand extends Command
             $pdf->SetCreator(PDF_CREATOR);
             $pdf->SetAuthor('システム管理者');
             $pdf->SetTitle('業務連絡閲覧状況');
-            $pdf->SetMargins(0, 0, 0);
+            $pdf->SetMargins(5 ,20, 5);
             $pdf->AddPage();
 
             // 日本語フォントを設定
