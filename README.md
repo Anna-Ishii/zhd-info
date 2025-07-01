@@ -1,24 +1,16 @@
-# zhd-info
+# 業務連絡システム-ローカル開発環境の構築手順
 
-## Information
-
-Flamework: Laravel
-Launguage: PHP
-DB: MySQL
-
-## ローカル開発環境構築手順
-
-### リポジトリの内容をローカルにクローン
+## リポジトリの内容をローカルにクローン
 
 1. GitHubのアカウントが無い場合は[作成](https://docs.github.com/ja/get-started/start-your-journey/creating-an-account-on-github?source=post_page---------------------------)
-2. zhd-infoのリポジトリに自分のアカウントを追加して貰う
+2. zhd-infoのリポジトリ管理者に自分のアカウントを追加して貰う
 3. ログインして左側のTop repositoriesもしくはサイドバーのRepositoriesから
    zhd-infoを開く
 4. 画面右上の自分のアイコンをクリック→メニューから「Settings」をクリック
 5. 「<>Developer Setting」→「Personal access token」→「Tokens(classic)」をクリック
 6. 「Generate new token」→「Generate new token(classic)」をクリック
-7. Noteの欄にTokenの名前を記入
-   必要であればExpirationにトークン期限を入力
+7. Noteの欄にトークンの名前を記入
+   必要に応じてExpirationにトークン期限を入力
    Select scopesの「repo」にチェックを入れる
    「Generate token」をクリック→トークン生成完了
 8. \[<\>Code\]と書かれた緑色のボタンをクリックして
@@ -27,10 +19,15 @@ DB: MySQL
 10. 「git clone」を入力した後半角スペースを入力して
     4.でコピーしたURLを貼り付け(Ctrl+V)→Enter
 11. usernameを求められたら自分のアカウント名を入力
-12. passwordを求められたらgithubに戻り、7.で生成したトークンをコピー→bashに貼り付けしてEnter
+12. passwordを求められたらbashをそのままにgithubに戻り、
+    画面右上の自分のアイコンをクリック→メニューから「Settings」をクリック
+    　「<>Developer Setting」→「Personal access token」→「Tokens(classic)」をクリック
+    7.で生成したトークンをコピー→bashに貼り付けしてEnter
+    ※赤字の「Regenerate token」ボタンが表示されている場合はそれをクリック
+    　→緑の「Regenerate token」でトークンが再生成されるので、これをコピー
 13. クローン生成が始まるので、終了まで待機
 
-### .envファイルの編集
+## .envファイルの編集
 
 1. VSCode(Visual Studio Code)が無い場合は[公式サイト](https://code.visualstudio.com/download)から
    Windows用を選択しダウンロード・インストール
@@ -44,7 +41,7 @@ DB: MySQL
 6. .envファイルを開き、APP_URL=http://localhostを
    APP_URL=http://127.20.0.1に変更
 
-### Dockerコンテナの構築
+## Dockerコンテナの構築
 
 1. Docker Desktopが無い場合は[公式サイト](https://www.docker.com/ja-jp/get-started/)から
    Windows版-ARM64を選択しダウンロード・インストール
@@ -61,7 +58,7 @@ DB: MySQL
    (遷移時のユーザー名zensho、パスワードzensho777)
    ※この時点でログインしてもエラーになるので一旦そのまま
 
-### データベースのデータ準備
+## データベースのデータ準備
 
 1. DBeaverが無い場合は[公式サイト](https://dbeaver.io/download/)から
    Windows用を選択しダウンロード・インストール
@@ -90,9 +87,20 @@ DB: MySQL
     それぞれアクセスし、ログインができること、
     メッセージやマニュアルなどが表示されることを確認
 
-#### mysqlコマンドが使用できない場合
+### mysqlコマンドが使用できない場合
 
-1. [MySQL公式サイト](https://mysql.com)にアクセス
+bashで以下のコマンドを実行
+
+1. パッケージリストの更新
+   sudo apt update
+2. MySQLサーバーのインストール
+   sudo apt install mysql-server -y
+3. インストール状況の確認
+   dpkg -l | grep mysql-server
+
+<!-- Windows -->
+
+<!-- 1. [MySQL公式サイト](https://mysql.com)にアクセス
 2. \[ダウンロード\]をクリック
 3. 「MySQL Community Server」をクリック。
 4. 「Select Operating System」が「Microsoft Windows」になっていることを確認したら、
@@ -104,12 +112,16 @@ DB: MySQL
 9. (ユーザー名)のユーザー環境変数からPathをクリック→「編集」をクリック
 10. 「新規」をクリック→C:\Program Files\MySQL\MySQL Server 9.3\binを追加
 11. 「OK」をクリック→再起動
-12. Docker Desktopを起動して「zhd-info」のコンテナを起動しておく。
+12. Docker Desktopを起動して「zhd-info」のコンテナを起動しておく。 -->
 
-### ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
+## ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
 
-1. zhd-info\zhd-info-appのディレクトリでbashを開き$ sudo chmod 777 -R storage/を入力→Enter
-2. 再度アクセスを試みてください
+<!-- 1. zhd-info\zhd-info-appのディレクトリでbashを開きsudo chmod 777 -R storage/を入力→Enter -->
+
+1. Docker Desktopでzhd-infoの左の>をクリック
+2. zhd-info-appをクリック
+3. Execタブに切り替えてsudo chmod 777 -R storage/を入力→Enter
+4. 再度アクセスを試みてください
 
 ## Instrallation
 
