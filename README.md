@@ -5,27 +5,28 @@
 1. GitHubのアカウントが無い場合は[作成](https://docs.github.com/ja/get-started/start-your-journey/creating-an-account-on-github?source=post_page---------------------------)
 2. zhd-infoのリポジトリ管理者に自分のアカウントを追加して貰う
 3. ログインして左側のTop repositoriesもしくはサイドバーのRepositoriesから
-   zhd-infoを開く
+    zhd-infoを開く
 4. 画面右上の自分のアイコンをクリック→メニューから「Settings」をクリック
 5. 「<>Developer Setting」→「Personal access token」→「Tokens(classic)」をクリック
 6. 「Generate new token」→「Generate new token(classic)」をクリック
 7. Noteの欄にトークンの名前を記入
-   必要に応じてExpirationにトークン期限を入力
-   Select scopesの「repo」にチェックを入れる
-   「Generate token」をクリック→トークン生成完了
+    必要であればExpirationにトークン期限を入力
+    Select scopesの「repo」にチェックを入れる
+    「Generate token」をクリック→トークン生成完了
 8. \[<\>Code\]と書かれた緑色のボタンをクリックして
    Localタブ→HTTPSの下に出ているURLをコピー
 9. WSL2でbashを開く(Windows+Rキー→「bash」入力→Enter)
-10. 「git clone」を入力した後半角スペースを入力して
-    4.でコピーしたURLを貼り付け(Ctrl+V)→Enter
-11. usernameを求められたら自分のアカウント名を入力
-12. passwordを求められたらbashをそのままにgithubに戻り、
-    画面右上の自分のアイコンをクリック→メニューから「Settings」をクリック
-    　「<>Developer Setting」→「Personal access token」→「Tokens(classic)」をクリック
-    7.で生成したトークンをコピー→bashに貼り付けしてEnter
-    ※赤字の「Regenerate token」ボタンが表示されている場合はそれをクリック
-    　→緑の「Regenerate token」でトークンが再生成されるので、これをコピー
-13. クローン生成が始まるので、終了まで待機
+10. 「cd ~/」入力→Enter
+11. 「git clone」を入力した後半角スペースを入力して
+   4.でコピーしたURLを貼り付け(Ctrl+V)→Enter
+12.  usernameを求められたら自分のアカウント名を入力
+13.  passwordを求められたらbashをそのままにgithubに戻り、
+   画面右上の自分のアイコンをクリック→メニューから「Settings」をクリック
+　「<>Developer Setting」→「Personal access token」→「Tokens(classic)」をクリック
+   7.で生成したトークンをコピー→bashに貼り付けしてEnter
+   ※赤字の「Regenerate token」ボタンが表示されている場合はそれをクリック
+   　→緑の「Regenerate token」でトークンが再生成されるので、これをコピー
+1.   クローン生成が始まるので、終了まで待機
 
 ## .envファイルの編集
 
@@ -90,16 +91,14 @@
 ### mysqlコマンドが使用できない場合
 
 bashで以下のコマンドを実行
-
 1. パッケージリストの更新
-   sudo apt update
+sudo apt update
 2. MySQLサーバーのインストール
-   sudo apt install mysql-server -y
+sudo apt install mysql-server -y
 3. インストール状況の確認
-   dpkg -l | grep mysql-server
+dpkg -l | grep mysql-server
 
 <!-- Windows -->
-
 <!-- 1. [MySQL公式サイト](https://mysql.com)にアクセス
 2. \[ダウンロード\]をクリック
 3. 「MySQL Community Server」をクリック。
@@ -117,11 +116,11 @@ bashで以下のコマンドを実行
 ## ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
 
 <!-- 1. zhd-info\zhd-info-appのディレクトリでbashを開きsudo chmod 777 -R storage/を入力→Enter -->
-
 1. Docker Desktopでzhd-infoの左の>をクリック
 2. zhd-info-appをクリック
 3. Execタブに切り替えてsudo chmod 777 -R storage/を入力→Enter
 4. 再度アクセスを試みてください
+
 
 ## Instrallation
 
