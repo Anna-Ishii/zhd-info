@@ -1,4 +1,8 @@
 version: '3'
+volumes:
+  mysql-volume:
+    name: zhd-info-data
+  vendor-volume:
 services:
   app:
     build: ./docker/php
@@ -8,6 +12,7 @@ services:
     # command: bash -c "php-fpm && httpd -D FOREGROUND"
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     volumes:
+      - vendor-volume:/var/www/zhd-info-app/vendor
       - type: bind
         source: ./zhd-info-app
         target: /var/www/zhd-info-app
@@ -67,6 +72,3 @@ services:
       - type: bind
         source: ./docker/minio/data
         target: /export
-volumes:
-  mysql-volume:
-    name: zhd-info-data
