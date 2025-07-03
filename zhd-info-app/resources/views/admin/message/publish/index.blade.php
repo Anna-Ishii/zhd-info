@@ -250,18 +250,14 @@
                             <th class="text-center" nowrap>カテゴリ</th>
                             <th class="text-center" nowrap>タイトル</th>
                             <th class="text-center" nowrap>添付</th>
-                            <th class="text-center" nowrap>検索タグ</th>
-                            <th class="text-center" nowrap>添付ファイル</th>
                             <th class="text-center" colspan="2">掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
-                            <th class="text-center" nowrap>WowTalk通知</th>
-                            <th class="text-center" nowrap>配信店舗数</th>
+                            @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                            <th class="text-center" nowrap>操作</th>
+                            @endif
                             <th class="text-center" colspan="3" nowrap>閲覧率</th>
                             <th class="text-center" colspan="2" nowrap>登録</th>
                             <th class="text-center" colspan="2" nowrap>更新</th>
-                            @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                <th class="text-center" nowrap>操作</th>
-                            @endif
                         </tr>
                     </thead>
 
@@ -331,17 +327,6 @@
                                             </a>
                                         @endif
                                     </td>
-                                    <!-- 検索タグ -->
-                                    <td class="label-tags">
-                                        <div class="tags-text-group">
-                                            @foreach ($message->tag as $tag)
-                                                <div class="tags-text label-tags-mark">{{ $tag->name }}</div>
-                                            @endforeach
-                                        </div>
-                                        <div class="tags-input-mark" style="display:none;">複数入力する場合は「,」で区切る</div>
-                                    </td>
-                                    <!-- 添付ファイルサイズ -->
-                                    <td><div>{{ $message->content_file_size }}</div></td>
                                     <!-- 掲載期間 -->
                                     <td class="date-time">
                                         <div class="start-datetime-group">
@@ -355,15 +340,15 @@
                                     </td>
                                     <!-- 状態 -->
                                     <td>{{ $message->status->text() }}</td>
-                                    <!-- WowTalk通知 -->
-                                    <td class="label-notification-group">
-                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
-                                    </td>
-                                    <!-- 配信店舗数 -->
-                                    <td style="text-align: right">
-                                        <div class="shop-edit-group">
-                                            <span class="shop-count">{{ $message->shop_count }}</span>
-                                        </div>
+                                    <!-- 操作 -->
+                                         @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                                            <td nowrap>
+                                                <div class="button-group">
+                                                    <button class="editBtn btn btn-admin">編集</button>
+                                                    <button class="StopBtn btn btn-admin" {{ $message->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
+                                                </div>
+                                            </td>
+                                        @endif 
                                     </td>
                                     <!-- 閲覧率 -->
                                     @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
@@ -436,36 +421,24 @@
                                             </a>
                                         @endif
                                     </td>
-                                    <td class="label-tags">
-                                        <div>
-                                            @foreach ($message->tag as $tag)
-                                                <div class="label-tags-mark">
-                                                    {{ $tag->name }}
-                                                </div>
-                                            @endforeach
-                                        </div>
-
-                                    </td>
-                                    <td>
-                                        <div>{{ $message->content_file_size }}</div>
-                                    </td>
+                                     <!-- 掲載期間 -->
                                     <td class="date-time">
                                         <div>{{ $message->formatted_start_datetime }}</div>
                                     </td>
                                     <td class="date-time">
                                         <div>{{ $message->formatted_end_datetime }}</div>
                                     </td>
+                                    <!-- 状態 -->
                                     <td>{{ $message->status->text() }}</td>
-                                    <!-- WowTalk通知 -->
-                                    <td class="label-notification-group">
-                                        <div class="wowtalk-notification-text">{{ $message->broadcast_notification_status }}</div>
-                                    </td>
-                                    <td style="text-align: right">{{ $message->shop_count }}</td>
-                                    @if ($message->status == App\Enums\PublishStatus::Wait || $message->status == App\Enums\PublishStatus::Editing)
-                                        <td></td>
-                                        <td></td>
-                                        <td nowrap>詳細</td>
-                                    @else
+                                    <!-- 操作 -->
+                                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                                        <td nowrap>
+                                            <div class="button-group">
+                                                <button class="editBtn btn btn-admin">編集</button>
+                                                <button class="StopBtn btn btn-admin" {{ $message->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
+                                            </div>
+                                        </td>
+                                    @endif
                                         <!-- 閲覧率を表示 -->
                                         <td
                                             class="view-rate {{ ($message->total_users != 0 ? $message->view_rate : 0) <= 30 ? 'under-quota' : '' }}">
@@ -477,7 +450,6 @@
                                         <td class="detailBtn">
                                             <a href="/admin/message/publish/{{ $message->id }}">詳細</a>
                                         </td>
-                                    @endif
                                     <td>{{ $message->create_user->name }}</td>
                                     <td class="date-time">
                                         <div>{{ $message->formatted_created_at }}</div>
@@ -485,16 +457,6 @@
                                     <td>{{ isset($message->updated_user->name) ? $message->updated_user->name : '' }}</td>
                                     <td class="date-time">
                                         <div>{{ $message->formatted_updated_at }}</div>
-                                    </td>
-                                @endif
-
-                                <!-- 操作 -->
-                                @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                    <td nowrap>
-                                        <div class="button-group">
-                                            <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin" {{ $message->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
-                                        </div>
                                     </td>
                                 @endif
                             </tr>
