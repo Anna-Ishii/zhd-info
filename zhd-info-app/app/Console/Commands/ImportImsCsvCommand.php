@@ -26,7 +26,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
-
+use App\Utils\SESMailer;
 class ImportImsCsvCommand extends Command
 {
     /**
@@ -84,15 +84,43 @@ class ImportImsCsvCommand extends Command
                 $shops_data = (new ShopsIMSImport)
                     ->toCollection($organization_path, 's3', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("{$organization_filename}ファイル読み込み完了");
-                $this->import_shops($shops_data[0]);
+                
+                $outputdata = $this->import_shops($shops_data[0]);
+                
+                
+                
                 unset($shops_data);
                 $ims_log->import_department_at = new Carbon('now');
                 $ims_log->import_department_error = false;
+                $ims_log->save();
+                
+                
+                if(count($outputdata)){
+                	
+                	//$header = '"差分種別","業態コード","業態名","ブランド名","店舗コード","店舗名","第１階層　ラベル","第１階層　組織名","第１階層　組織ソートキー","第１階層　組織長コード","第１階層　組織長名","第１階層　組織長メールアドレス","第２階層　ラベル","第２階層　組織名","第２階層　組織ソートキー","第２階層　組織長コード","第２階層　組織長名","第２階層　組織長メールアドレス","第３階層　ラベル","第３階層　組織名","第３階層　組織ソートキー","第３階層　組織長コード","第３階層　組織長名","第３階層　組織長メールアドレス","第４階層　ラベル","第４階層　組織名","第４階層　組織ソートキー","第４階層　組織長コード","第４階層　組織長名","第４階層　組織長メールアドレス","第５階層　ラベル","第５階層　組織名","第５階層　組織ソートキー","第５階層　組織長コード","第５階層　組織長名","第５階層　組織長メールアドレス","閉店日"';
+                	
+                	
+                	$header = '"差分種別","ID" ,"店舗名","店舗コード","組織コード4","組織コード3","組織コード2","組織コード1","データ作成日時","データ更新日時","組織コード5","業態コード","表示名"';
+                	
+                	
+                	Storage::disk('local')->put('imscsv/'.$ims_log->id.'.csv', mb_convert_encoding($header."\r\n".implode("\r\n",$outputdata),"SJIS-win","UTF-8"));
+                	
+                	
+                	$mailer = new SESMailer();
+	                $fromName = '業連・動画配信ツール';
+	                $to = ['doitest1@nssx.co.jp','doitest2@nssx.co.jp','masato.kato@zensho.com'];
+	                $subject = 'IMSデータ取り込み';
+	                $messageContent = 'IMSデータ取り込み';
+	        		$mailer->sendEmail($fromName, $to, $subject, $messageContent, [storage_path('/app/imscsv/'.$ims_log->id.'.csv')]);
+                }
+                
             } catch (\Throwable $th) {
                 $ims_log->import_department_message = $th->getMessage();
                 $ims_log->import_department_error = true;
                 throw $th;
             }
+            
+            /*
             // クルーの取り込み
             try {
                 $this->info("{$crews_filename}ファイルを読み込みます");
@@ -108,6 +136,7 @@ class ImportImsCsvCommand extends Command
                 $ims_log->import_crew_error = true;
                 throw $th;
             }
+            */
 
             DB::commit();
         } catch (\Throwable $th) {
@@ -117,6 +146,9 @@ class ImportImsCsvCommand extends Command
             $this->info("$th_msg");
         }
         $ims_log->save();
+        
+        
+        
         $this->info('end');
     }
 
@@ -127,6 +159,9 @@ class ImportImsCsvCommand extends Command
         $shop_list = Shop::query()->pluck('id')->toArray();
         $today = Carbon::now();
         $register_shop_id = [];
+        
+        
+        $output = [];
 
         foreach ($shops_data as $index => $shop) {
             $organization1 = Organization1::where('name', $shop[0])->first();
@@ -140,6 +175,8 @@ class ImportImsCsvCommand extends Command
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
+                
+         //       $output[] = 'insert,'.implode(',',$shop->toArray());
                 continue;
             }
             // 営業部、DS、AR、BLの登録
@@ -182,16 +219,17 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization2_id)) {
-                        if (!empty($organization_name)) {
-                            $organization2 = Organization2::create([
-                                "name" => $organization_name,
-                                "order_no" => $order_no,
-                                'display_name' => $organization_name,
-                                'organization1_id' => $organization1_id
-                            ]);
-                            $organization2_id = $organization2->id;
-                        }
+                      if (!empty($organization_name)) {
+                        $organization2 = Organization2::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
+                        ]);
+                        $organization2_id = $organization2->id;
+                      }
                     }
+
                 }
 
                 if ($shop[$i] == "DS") {
@@ -204,15 +242,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization3_id)) {
-                        if (!empty($organization_name)) {
-                            $organization3 = Organization3::create([
-                                "name" => $organization_name,
-                                "order_no" => $order_no,
-                                'display_name' => $organization_name,
-                                'organization1_id' => $organization1_id
-                            ]);
-                            $organization3_id = $organization3->id;
-                        }
+                      if (!empty($organization_name)) {
+                        $organization3 = Organization3::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
+                        ]);
+                        $organization3_id = $organization3->id;
+                      }
                     }
 
                     // DM [BB]
@@ -267,15 +305,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization4_id)) {
-                        if (!empty($organization_name)) {
-                            $organization4 = Organization4::create([
-                                "name" => $organization_name,
-                                "order_no" => $order_no,
-                                'display_name' => $organization_name,
-                                'organization1_id' => $organization1_id
-                            ]);
-                            $organization4_id = $organization4->id;
-                        }
+                      if (!empty($organization_name)) {
+                        $organization4 = Organization4::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
+                        ]);
+                        $organization4_id = $organization4->id;
+                      }
                     }
 
                     // AM,4th[BB]
@@ -348,15 +386,15 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization5_id)) {
-                        if (!empty($organization_name)) {
-                            $organization5 = Organization5::create([
-                                "name" => $organization_name,
-                                "order_no" => $order_no,
-                                'display_name' => $this->formatOrg5Name($organization_name),
-                                'organization1_id' => $organization1_id
-                            ]);
-                            $organization5_id = $organization5->id;
-                        }
+                      if (!empty($organization_name)) {
+                        $organization5 = Organization5::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $this->formatOrg5Name($organization_name),
+                            'organization1_id' => $organization1_id
+                        ]);
+                        $organization5_id = $organization5->id;
+                      }
                     }
 
                     // BM [BB]
@@ -390,6 +428,7 @@ class ImportImsCsvCommand extends Command
             $brand_id = $brand->id;
             $shop_code = $shop[3];
             $shop_name = $shop[4];
+            
 
             //店舗コードを更新(IMS連携の初回のみ)
             Shop::update_shopcode($shop_code, $brand_id);
@@ -417,7 +456,7 @@ class ImportImsCsvCommand extends Command
             );
 
             // users_rolesテーブルのデータを更新
-            $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
+            $environment = Environment::where('command_name', $this->signature)->where('contents', 'stag')->select('id')->first();
             if (!empty($environment) && !empty($shop)) {
                 $this->create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email);
             }
@@ -425,12 +464,15 @@ class ImportImsCsvCommand extends Command
             // 新規店舗の場合
             if (is_null($shop_id)) {
                 $new_shop[] = $shop;
+                
+      //          $output[] = 'insert,'.implode(',',$shop->toArray());
             }
 
             // 店舗の情報が更新された時
             if ($shop->wasChanged()) {
                 // 店舗更新
                 $change_shop[] = $shop;
+   //             $output[] = 'update,'.implode(',',$shop->toArray());
             }
 
             $register_shop_id[] = $shop->id;
@@ -496,12 +538,15 @@ class ImportImsCsvCommand extends Command
         $this->info("---新しい店舗---");
         if (!empty($new_shop)) {
             foreach ($new_shop as $s) {
+                
+                $output[] = 'insert,'.implode(',',$s->toArray());
                 $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
         $this->info("---変更する店舗---");
         if (!empty($change_shop)) {
             foreach ($change_shop as $s) {
+                $output[] = 'update,'.implode(',',$s->toArray());
                 $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
@@ -509,14 +554,19 @@ class ImportImsCsvCommand extends Command
         $this->info("---削除する店舗---");
         if (!empty($diff_shop)) {
             foreach ($diff_shop as $s) {
+                $output[] = 'delete,'.implode(',',$s->toArray());
                 $this->info("shopID" . $s);
             }
         }
+        
+        return $output;
     }
 
     // users_rolesテーブルのデータを更新
     private function create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email)
     {
+        
+        
         // users_rolesテーブルのデータを更新
         UsersRole::updateOrCreate(
             [
@@ -525,6 +575,7 @@ class ImportImsCsvCommand extends Command
                 'shop_name' => $shop_name,
             ],
             [
+          //      'shop_code' => $shop_code,
                 'DM_id' => $DM_id,
                 'DM_name' => $DM_name,
                 'DM_email' => $DM_email,
@@ -547,6 +598,7 @@ class ImportImsCsvCommand extends Command
                 '5th_view_notification' => false,
             ]
         );
+
     }
 
     // ユーザー作成

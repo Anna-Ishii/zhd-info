@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Account\MailAdminAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ApiController;
 use App\Http\Controllers\Admin\Manage\ImsController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
@@ -56,6 +57,13 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 // 管理画面へのログイン画面
 Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
 Route::post('/admin/auth', [AuthController::class, 'login']);
+
+Route::get('/ep/auth', [AuthController::class, 'api']);
+Route::post('/ep/auth', [AuthController::class, 'api']);
+Route::get('/me/auth', [MemberAuthController::class, 'api']);
+Route::post('/me/auth', [MemberAuthController::class, 'api']);
+
+
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
@@ -143,7 +151,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
         Route::group(['prefix' => 'adminmail', 'as' => 'adminmail.', 'middleware' => 'check.allowpage:account-admin-mail'], function () {
             Route::get('/', [MailAdminAccountController::class, 'index'])->name('index');
-            Route::post('save-session-conditions', [MailAdminAccountController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('/adminAccountUpdate', [MailAdminAccountController::class, 'adminAccountUpdate'])->name('adminAccountUpdate');
         });
     });
@@ -154,9 +161,18 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
+    
+    
     Route::group(['prefix' => 'manage', 'as' => 'manage', 'middleware' => 'check.allowpage:ims'], function () {
-        Route::get('ims', [ImsController::class, 'index'])->name('index');
+        	Route::get('ims', [ImsController::class, 'index'])->name('index');
+        	Route::get('ims/{id}', [ImsController::class, 'dl'])->name('dl');
+        	Route::get('/manage/ims/{id}', [ImsController::class, 'dl'])->name('dl');
+        	Route::post('ims2', [ImsController::class, 'execute'])->name('execute');
+        	Route::get('/manage/ims2', [ImsController::class, 'execute'])->name('execute');
+        	Route::get('ims2', [ImsController::class, 'execute'])->name('execute');
+        	
     });
+    
     Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
         Route::post('/personal/save-session-conditions', [PersonalContoller::class, 'saveSessionConditions'])->name('save-session-conditions');
