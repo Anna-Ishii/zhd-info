@@ -179,7 +179,7 @@ vendorフォルダをコンテナ内のボリュームにマウントしたの�
 make update
 ```
 
-## Instrallation
+## Installation
 
 ### ホストでの作業
 
