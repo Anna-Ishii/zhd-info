@@ -40,7 +40,7 @@
 5. zhd-info-app/.env.localをコピー(Ctrl+C)→その場で貼り付け(Ctrl+V)して
    コピーしたファイルの名称を「.env」に変更
 6. .envファイルを開き、APP_URL=http://localhostを
-   APP_URL=http://127.20.0.1に変更
+   APP_URL=http://127.0.0.1に変更
 
 ## Dockerコンテナの構築
 
@@ -54,7 +54,7 @@
    zhd-infoのステータスが実行中(Running)になっているか確認
    (Nameの左が●になっているか、またはActionsが🔳になっていれば実行中)
 5. 実行中になっていなければDocker Desktopからzhd-infoの▷をクリック
-6. ブラウザのアドレスバーにhttp://127.20.0.1を入力して
+6. ブラウザのアドレスバーにhttp://127.0.0.1を入力して
    店舗ログイン画面に遷移するか確認
    (遷移時のユーザー名zensho、パスワードzensho777)
    ※この時点でログインしてもエラーになるので一旦そのまま
@@ -67,23 +67,23 @@
 3. zhd-info/docker/mysql/init/に任意名称のディレクトリを作成
 4. 作成したディレクトリにlaravel.sqlを入れる
 5. laravel.sqlを入れたディレクトリ内でbashを開く
-6. 「mysql -h 127.20.0.1(APP_URLのIPを入力) -u zhduser -p laravel < laravel.sql」を入力→Enter
+6. 「mysql -h 127.0.0.1(APP_URLのIPを入力) -u zhduser -p laravel < laravel.sql」を入力→Enter
 7. パスワードを要求されたら「zhdpass」を入力→Enter
    (入力中の内容は表示されないので注意)
 8. sqlスクリプトが完了するまで待機
 9. DBeaverを起動して左側のデータベースナビゲータで
    右クリック→\[作成\]→\[接続\]をクリック
 10. 接続タイプはMySQLを選択して次へ
-11. Server Host	「127.20.0.1」
+11. Server Host	「127.0.0.1」
     ユーザー名	「zhduser」
     パスワード	「zhdpass」
     を入力して\[テスト接続\]→接続済みと出たら問題なし
     \[終了\]をクリック
 12. データベースの各テーブルにデータが入っていることを確認
 13. ブラウザから
-    http://127.20.0.1/member/auth
+    http://127.0.0.1/member/auth
     (ログインID&パスワード:bb5057)と
-    http://127.20.0.1/admin/auth
+    http://127.0.0.1/admin/auth
     (社員番号&パスワード:admin)から
     それぞれアクセスし、ログインができること、
     メッセージやマニュアルなどが表示されることを確認
