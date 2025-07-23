@@ -121,8 +121,65 @@ dpkg -l | grep mysql-server
 3. Execタブに切り替えてsudo chmod 777 -R storage/を入力→Enter
 4. 再度アクセスを試みてください
 
+## ショートカットコマンド
 
-## Instrallation
+### Makefileについて
+Dockerコンテナ内でマイグレーションの実行などをしないといけないのでMakefileを用意しています。
+
+例：
+
+マイグレーション実行
+```
+make migrate
+```
+
+コンテナ起動
+```
+make up
+```
+コンテナ終了
+```
+make down
+```
+
+各コマンドと処理内容についてはリポジトリ直下の
+
+Makefile
+
+を確認してください。
+
+Windowsの場合下記からmakeコマンドをダウンロードできます。
+
+http://gnuwin32.sourceforge.net/packages/make.htm
+
+※更新日が恐ろしく古いですがちゃんと動作します。
+
+※インストール後、環境変数のpathに C:\Program Files (x86)\GnuWin32\bin を通してください。
+
+## vendorフォルダの取扱について
+
+※vendorをマウントすると極端に動作が遅くなるので別ボリュームとしてマウントしています。
+
+### IDE向けのvendorフォルダアップデート
+
+そのため、laravelのフォルダ内でcomposer installする必要があります。
+
+1. ```cd zhd-info-app```
+2. ```composer update```
+
+※composer(ver.2系)のインストールが必要です。
+
+### コンテナ内のvendorフォルダアップデート
+
+vendorフォルダをコンテナ内のボリュームにマウントしたのでこのままではローカル環境のコンテナ内のvendorは空になっています。
+
+必ず一度下記コマンドを実行してください。
+
+```
+make update
+```
+
+## Installation
 
 ### ホストでの作業
 
