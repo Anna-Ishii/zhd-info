@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Artisan;
 class importjob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+    public $timeout = 5400; // 1:30:00
 
     /**
      * Create a new job instance.
