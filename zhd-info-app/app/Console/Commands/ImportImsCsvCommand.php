@@ -57,8 +57,14 @@ class ImportImsCsvCommand extends Command
         $ims_log->save();
 
         $now = new Carbon('now');
-         //$now_str = $now->format("Ymd");
-        $now_str = '20250609'; //テスト用に日付を固定
+         $now_str = $now->format("Ymd");
+
+        // 開発環境でのテスト用日付オーバーライド
+        if (app()->environment('local', 'testing')) {
+            $now_str = config('ims.test_date', $now_str);
+        }
+
+
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
@@ -66,8 +72,6 @@ class ImportImsCsvCommand extends Command
         $crews_path = $directory . $crews_filename;
         $this->info($organization_path);
         $this->info($crews_path);
-        global $totaltime;
-        $totaltime = time();
 
         if (!Storage::disk('s3')->exists($organization_path)) {
             $this->error("{$organization_path}が存在しません");
@@ -171,8 +175,6 @@ class ImportImsCsvCommand extends Command
         
         $output = [];
         $start = time();
-         global $errortime;
-         $errortime = time();
 
         foreach ($shops_data as $index => $shop) {
             $organization1 = Organization1::where('name', $shop[0])->first();
@@ -968,10 +970,6 @@ class ImportImsCsvCommand extends Command
         $trimed_word = preg_replace($pattern, '', $name);
         $this->info("{$trimed_word}");
         // echo "{$trimed_word}\n";
-        global $errortime;
-        global $totaltime;
-        // echo "実行時間: " . (time() - $errortime) . "秒\n";
-        // echo "総実行時間: " . (time() - $totaltime) . "秒\n";
 
         return $trimed_word;
     }

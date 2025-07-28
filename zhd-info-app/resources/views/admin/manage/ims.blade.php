@@ -1,28 +1,3 @@
-@php
-    // データベース接続
-    $conn = new mysqli("zhd-info-db-1", "zhduser", "zhdpass", "laravel");
-    if ($conn->connect_error) {
-        die("接続失敗: " . $conn->connect_error);
-    }
-
-    // テーブルのデータが存在するか確認
-    $sql = "SELECT COUNT(*) as count FROM jobs WHERE payload LIKE '%importjob%'";
-    $result = $conn->query($sql);
-
-    // デフォルト値を設定
-    $disabled = 'disabled';
-    $ims = '';
-    $button_text = '手動実行';
-
-    if ($result && $row = $result->fetch_assoc()) {
-        $disabled = $row['count'] > 0 ? 'disabled' : '';
-        $ims = $row['count'] > 0 ? '' : '/admin/manage/ims2';
-        $button_text = $row['count'] > 0 ? '実行中' : '手動実行';
-    }
-
-    $conn->close();
-@endphp
-
 @extends('layouts.admin.parent')
 
 @section('sidebar')
@@ -36,9 +11,12 @@
 @section('content')
     <div id="page-wrapper">
     
-    
-    <button class="btn btn-admin" type="button" onClick="location.href='<?php echo $ims?>';" <?php echo $disabled; ?>><?php echo $button_text?></button>
-    
+    <button class="btn btn-admin" type="button" 
+        onClick="location.href='{{ $isJobRunning ? '' : '/admin/manage/ims2' }}';" 
+        {{ $isJobRunning ? 'disabled' : '' }}>
+    {{ $isJobRunning ? '実行中' : '手動実行' }}
+    </button>
+
     
         <div class="ims-count">
             全{{ $log->count() }}件

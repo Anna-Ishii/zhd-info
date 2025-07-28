@@ -12,14 +12,14 @@ use Illuminate\Support\Facades\Artisan;
 class importjob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $timeout = 5400; // 1:30:00
+    public $timeout
 
     /**
      * Create a new job instance.
      */
     public function __construct()
     {
-        //
+        $this->timeout = config('ims.job_timeout', 5400);
     }
 
     /**
