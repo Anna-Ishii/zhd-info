@@ -116,12 +116,12 @@ class ImportImsCsvCommand extends Command
                 	Storage::disk('local')->put('imscsv/'.$ims_log->id.'.csv', mb_convert_encoding($header."\r\n".implode("\r\n",$outputdata),"SJIS-win","UTF-8"));
                 	               
                     // メール送信
-                	// $mailer = new SESMailer();
-                    // $fromName = '業連・動画配信ツール';
-	                // $to = ['yotake@nssx.co.jp'];
-	                // $subject = 'IMSデータ取り込み';
-	                // $messageContent = 'IMSデータ取り込み';
-	        		// $mailer->sendEmail($fromName, $to, $subject, $messageContent, [storage_path('/app/imscsv/'.$ims_log->id.'.csv')]);
+                	$mailer = new SESMailer();
+                    $fromName = '業連・動画配信ツール';
+	                $to = ['yotake@nssx.co.jp','skomine@nssx.co.jp'];
+	                $subject = 'IMSデータ取り込み';
+	                $messageContent = 'IMSデータ取り込み';
+	        		$mailer->sendEmail($fromName, $to, $subject, $messageContent, [storage_path('/app/imscsv/'.$ims_log->id.'.csv')]);
                 }
             } catch (\Throwable $th) {
                 $ims_log->import_department_message = $th->getMessage();
