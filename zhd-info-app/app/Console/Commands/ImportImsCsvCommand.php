@@ -26,6 +26,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use App\Utils\SESMailer;
 
 class ImportImsCsvCommand extends Command
 {
@@ -48,6 +49,7 @@ class ImportImsCsvCommand extends Command
      */
     public function handle()
     {
+        error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
         ini_set('memory_limit', '-1');
         $this->info('start');
         $ims_log = new ImsSyncLog();
@@ -55,7 +57,14 @@ class ImportImsCsvCommand extends Command
         $ims_log->save();
 
         $now = new Carbon('now');
-        $now_str = $now->format("Ymd");
+         $now_str = $now->format("Ymd");
+
+        // 開発環境でのテスト用日付オーバーライド
+        if (app()->environment('local', 'testing')) {
+            $now_str = config('ims.test_date', $now_str);
+        }
+
+
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
         $directory = "IMS2/FR_BUSINESS/";
@@ -78,27 +87,60 @@ class ImportImsCsvCommand extends Command
 
         DB::beginTransaction();
         try {
+            $loadtime = time();
+
             // 組織情報の取り込み
             try {
                 $this->info("{$organization_filename}ファイルを読み込みます");
+                echo "{$organization_filename}ファイルを読み込みます\n";
                 $shops_data = (new ShopsIMSImport)
                     ->toCollection($organization_path, 's3', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("{$organization_filename}ファイル読み込み完了");
-                $this->import_shops($shops_data[0]);
+                echo "{$organization_filename}ファイル読み込み完了\n";
+                $this->info("読み込み時間: " . (time() - $loadtime) . "秒");
+                echo "読み込み時間: " . (time() - $loadtime) . "秒\n";
+                
+                $outputdata = $this->import_shops($shops_data[0]);
+                
                 unset($shops_data);
                 $ims_log->import_department_at = new Carbon('now');
                 $ims_log->import_department_error = false;
+                $ims_log->save();
+                
+                
+                if(count($outputdata)){
+
+                	//$header = '"差分種別","業態コード","業態名","ブランド名","店舗コード","店舗名","第１階層　ラベル","第１階層　組織名","第１階層　組織ソートキー","第１階層　組織長コード","第１階層　組織長名","第１階層　組織長メールアドレス","第２階層　ラベル","第２階層　組織名","第２階層　組織ソートキー","第２階層　組織長コード","第２階層　組織長名","第２階層　組織長メールアドレス","第３階層　ラベル","第３階層　組織名","第３階層　組織ソートキー","第３階層　組織長コード","第３階層　組織長名","第３階層　組織長メールアドレス","第４階層　ラベル","第４階層　組織名","第４階層　組織ソートキー","第４階層　組織長コード","第４階層　組織長名","第４階層　組織長メールアドレス","第５階層　ラベル","第５階層　組織名","第５階層　組織ソートキー","第５階層　組織長コード","第５階層　組織長名","第５階層　組織長メールアドレス","閉店日"';
+                	$header = '"差分種別","ID" ,"店舗名","店舗コード","組織コード4","組織コード3","組織コード2","組織コード1","データ作成日時","データ更新日時","組織コード5","業態コード","表示名"';
+
+                	Storage::disk('local')->put('imscsv/'.$ims_log->id.'.csv', mb_convert_encoding($header."\r\n".implode("\r\n",$outputdata),"SJIS-win","UTF-8"));
+                	               
+                    // メール送信
+                	// $mailer = new SESMailer();
+                    // $fromName = '業連・動画配信ツール';
+	                // $to = ['yotake@nssx.co.jp'];
+	                // $subject = 'IMSデータ取り込み';
+	                // $messageContent = 'IMSデータ取り込み';
+	        		// $mailer->sendEmail($fromName, $to, $subject, $messageContent, [storage_path('/app/imscsv/'.$ims_log->id.'.csv')]);
+                }
             } catch (\Throwable $th) {
                 $ims_log->import_department_message = $th->getMessage();
                 $ims_log->import_department_error = true;
                 throw $th;
-            }
+            }    
+            $this->info("組織情報の取り込み完了");
+
+            $loadtime = time();
             // クルーの取り込み
             try {
                 $this->info("{$crews_filename}ファイルを読み込みます");
+                echo "{$crews_filename}ファイルを読み込みます\n";
                 $crews_data = [];
                 (new CrewsIMSImport($crews_data))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
                 $this->info("{$crews_filename}ファイル読み込み完了");
+                echo "{$crews_filename}ファイル読み込み完了\n";
+                $this->info("読み込み時間: " . (time() - $loadtime) . "秒");
+                echo "読み込み時間: " . (time() - $loadtime) . "秒\n";
                 $this->import_crews($crews_data);
                 unset($crews_data);
                 $ims_log->import_crew_at = new Carbon('now');
@@ -117,21 +159,28 @@ class ImportImsCsvCommand extends Command
             $this->info("$th_msg");
         }
         $ims_log->save();
+        
         $this->info('end');
     }
 
     private function import_shops($shops_data)
     {
+        $this->info("店舗更新開始");
+        echo "店舗更新開始\n";
         $new_shop = []; // 新店舗を格納する配列
         $close_shop = []; // 削除する店舗を格納する配列
         $shop_list = Shop::query()->pluck('id')->toArray();
         $today = Carbon::now();
         $register_shop_id = [];
+        
+        $output = [];
+        $start = time();
 
         foreach ($shops_data as $index => $shop) {
             $organization1 = Organization1::where('name', $shop[0])->first();
             if (!$organization1) {
                 $this->error("組織1 '{$shop[0]}' が見つかりません");
+                echo "組織1 '{$shop[0]}' が見つかりません\n";
                 continue;
             }
             $organization1_id = $organization1->id;
@@ -140,6 +189,7 @@ class ImportImsCsvCommand extends Command
             // 閉店の店舗
             if (is_null($close_date) || $today->gte($close_date)) {
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)->where('shop_code', $shop[3])->value('id');
+            //       $output[] = 'insert,'.implode(',',$shop->toArray());
                 continue;
             }
             // 営業部、DS、AR、BLの登録
@@ -168,6 +218,8 @@ class ImportImsCsvCommand extends Command
             $fifth_name = null;
             $fifth_email = null;
 
+            dump('index:' . $index . ' organization1:' . $organization1);
+            
             for ($i = 5; $i < 35; $i += 6) {
                 $organization_name = $shop[$i + 1];
                 $order_no = (int)$shop[$i + 2];
@@ -182,15 +234,24 @@ class ImportImsCsvCommand extends Command
                     ]);
 
                     if (is_null($organization2_id)) {
-                        if (!empty($organization_name)) {
-                            $organization2 = Organization2::create([
-                                "name" => $organization_name,
-                                "order_no" => $order_no,
-                                'display_name' => $organization_name,
-                                'organization1_id' => $organization1_id
-                            ]);
-                            $organization2_id = $organization2->id;
-                        }
+                      if (!empty($organization_name)) {
+                        $organization2 = Organization2::create([
+                            "name" => $organization_name,
+                            "order_no" => $order_no,
+                            'display_name' => $organization_name,
+                            'organization1_id' => $organization1_id
+                        ]);
+                        $organization2_id = $organization2->id;
+                      }
+                    }
+
+                    // JP, ON, HY
+                    $valid_organization_ids = [1, 5, 4];
+
+                    if (in_array($organization1_id, $valid_organization_ids, true)) {
+                        $DM_id    = $shop[$i + 3];
+                        $DM_name  = $shop[$i + 4];
+                        $DM_email = $shop[$i + 5];
                     }
                 }
 
@@ -215,46 +276,14 @@ class ImportImsCsvCommand extends Command
                         }
                     }
 
-                    // DM [BB]
-                    if ($organization1_id == 2) {
-                        $DM_id = $shop[$i + 3];    // 第2階層DM 組織長コード
-                        $DM_name = $shop[$i + 4];  // 第2階層DM 組織長名
-                        $DM_email = $shop[$i + 5]; // 第2階層DM 組織長メアド
-                    }
-                    // DM,BM[HY]
-                    elseif ($organization1_id == 4) {
-                        $DM_id = null;
-                        $DM_name = null;
-                        $DM_email = null;
-                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
-                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
-                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
-                    }
-                    // DM,BM[JP]
-                    elseif ($organization1_id == 1) {
-                        $DM_id = null;
-                        $DM_name = null;
-                        $DM_email = null;
-                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
-                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
-                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
-                    }
-                    // DM,BM[ON]
-                    elseif ($organization1_id == 3) {
-                        $DM_id = null;
-                        $DM_name = null;
-                        $DM_email = null;
-                        $BM_id = $shop[$i + 3];    // 第2階層BM 組織長コード
-                        $BM_name = $shop[$i + 4];  // 第2階層BM 組織長名
-                        $BM_email = $shop[$i + 5]; // 第2階層BM 組織長メアド
-                    }
-                    // DM[TAG]
-                    elseif ($organization1_id == 3) {
-                        $DM_id = $shop[$i + 3];    // 第2階層DM 組織長コード
-                        $DM_name = $shop[$i + 4];  // 第2階層DM 組織長名
-                        $DM_email = $shop[$i + 5]; // 第2階層DM 組織長メアド
-                    }
+                    // BB, TAG, SK, HS, C, AD
+                    $valid_organization_ids = [2, 3, 8, 15, 14, 6];
 
+                    if (in_array($organization1_id, $valid_organization_ids, true)) {
+                        $DM_id    = $shop[$i + 3];
+                        $DM_name  = $shop[$i + 4];
+                        $DM_email = $shop[$i + 5];
+                    }
                 }
 
                 if ($shop[$i] == "AR") {
@@ -306,7 +335,7 @@ class ImportImsCsvCommand extends Command
                         $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
                     }
                     // AM,4th[ON]
-                    elseif ($organization1_id == 3) {
+                    elseif ($organization1_id == 5) {
                         $AM_id = null;
                         $AM_name = null;
                         $AM_email = null;
@@ -335,18 +364,18 @@ class ImportImsCsvCommand extends Command
                         $forth_name = $shop[$i + 4];  // 第4階層4th 組織長名
                         $forth_email = $shop[$i + 5]; // 第4階層4th 組織長メアド
                     }
-
                 }
-
+                
                 if ($shop[$i] == "BL") {
                     $organization5_id = Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->value('id');
                     // 初回のみ
+                    // $this->info("BL初回のみ");
                     Organization5::where('name', $shop[$i + 1])->where('organization1_id', $organization1_id)->update([
                         'order_no' => $order_no,
                         'display_name' => $this->formatOrg5Name($organization_name),
                         'organization1_id' => $organization1_id
                     ]);
-
+                    // $this->info("BL初回のみ通過");
                     if (is_null($organization5_id)) {
                         if (!empty($organization_name)) {
                             $organization5 = Organization5::create([
@@ -359,25 +388,14 @@ class ImportImsCsvCommand extends Command
                         }
                     }
 
-                    // BM [BB]
-                    if ($organization1_id == 2) {
-                        $BM_id = $shop[$i + 3];    // 第3階層BM 組織長コード
-                        $BM_name = $shop[$i + 4];  // 第3階層BM 組織長名
-                        $BM_email = $shop[$i + 5]; // 第3階層BM 組織長メアド
-                    }
-                    // DM[SK]
-                    elseif ($organization1_id == 8) {
-                        $DM_id = $shop[$i + 3];    // 第3階層DM 組織長コード
-                        $DM_name = $shop[$i + 4];  // 第3階層DM 組織長名
-                        $DM_email = $shop[$i + 5]; // 第3階層DM 組織長メアド
-                    }
-                    // BM[TAG]
-                    elseif ($organization1_id == 3) {
-                        $BM_id = $shop[$i + 3];    // 第3階層BM 組織長コード
-                        $BM_name = $shop[$i + 4];  // 第3階層BM 組織長名
-                        $BM_email = $shop[$i + 5]; // 第3階層BM 組織長メアド
-                    }
+                    // BB, JP, ON, HY, TAG, SK, HS, C, AD
+                    $valid_organization_ids = [2, 1, 5, 4, 3, 8, 15, 14, 6];
 
+                    if (in_array($organization1_id, $valid_organization_ids, true)) {
+                        $BM_id    = $shop[$i + 3];
+                        $BM_name  = $shop[$i + 4];
+                        $BM_email = $shop[$i + 5];
+                    }
                 }
             }
 
@@ -417,7 +435,7 @@ class ImportImsCsvCommand extends Command
             );
 
             // users_rolesテーブルのデータを更新
-            $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
+            $environment = Environment::where('command_name', $this->signature)->where('contents', 'stag')->select('id')->first();
             if (!empty($environment) && !empty($shop)) {
                 $this->create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email);
             }
@@ -425,17 +443,20 @@ class ImportImsCsvCommand extends Command
             // 新規店舗の場合
             if (is_null($shop_id)) {
                 $new_shop[] = $shop;
+        //          $output[] = 'insert,'.implode(',',$shop->toArray());
             }
 
             // 店舗の情報が更新された時
             if ($shop->wasChanged()) {
                 // 店舗更新
                 $change_shop[] = $shop;
+        //             $output[] = 'update,'.implode(',',$shop->toArray());
             }
 
             $register_shop_id[] = $shop->id;
         }
-
+        $this->info("組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒");
+        echo "組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒" . "\n";
 
         // 初回のみパッチ
         DB::insert('insert into message_organization (
@@ -470,53 +491,85 @@ class ImportImsCsvCommand extends Command
         }
 
         // 削除する店舗一覧のIDは物理削除しないように修正
-        // $diff_shop_id = array_diff($shop_list, $register_shop_id);
-        // $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
+        $diff_shop_id = array_diff($shop_list, $register_shop_id);
+        echo "diff_shop_id: " . implode(',', $diff_shop_id) . "\n";
+        $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
 
-        // $delete_shop = array_merge($diff_shop, $close_shop);
-        // $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
-        // foreach ($diff_shop_user as $key => $user) {
-        //     $user->message()->detach();
-        //     // message_shopのshop_idを削除
-        //     MessageShop::where('shop_id', $user->shop_id)->delete();
+        $delete_shop = array_merge($diff_shop, $close_shop);
+        $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
+        foreach ($diff_shop_user as $key => $user) {
+            $user->message()->detach();
+            // message_shopのshop_idを削除
+            MessageShop::where('shop_id', $user->shop_id)->delete();
 
-        //     $user->manual()->detach();
-        //     // manual_shopのshop_idを削除
-        //     ManualShop::where('shop_id', $user->shop_id)->delete();
-        // }
-        // User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
-        // Shop::whereIn('id', $delete_shop)->delete();
+            $user->manual()->detach();
+            // manual_shopのshop_idを削除
+            ManualShop::where('shop_id', $user->shop_id)->delete();
+        }
+        User::query()->whereIn('shop_id', $delete_shop)->forceDelete();
+        Shop::whereIn('id', $delete_shop)->delete();
 
-        // // wowtalk_shopテーブルのデータを削除
-        // if (!empty($environment) && !empty($delete_shop)) {
-        //     WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
-        // }
+        // wowtalk_shopテーブルのデータを削除
+        if (!empty($environment) && !empty($delete_shop)) {
+            WowtalkShop::whereIn('shop_id', $delete_shop)->delete();
+        }
 
         // ログ出力
         $this->info("---新しい店舗---");
+        echo "---新しい店舗---\n";
         if (!empty($new_shop)) {
             foreach ($new_shop as $s) {
+                $output[] = $this->formatShopCsvRow($s, 'insert');
                 $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
         $this->info("---変更する店舗---");
+        echo "---変更する店舗---\n";
         if (!empty($change_shop)) {
             foreach ($change_shop as $s) {
+                $output[] = $this->formatShopCsvRow($s, 'update');
                 $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
 
+        // // ログ出力
+        // $this->info("---新しい店舗---");
+        // if (!empty($new_shop)) {
+        //     foreach ($new_shop as $s) {
+        //         $output[] = 'insert,'.implode(',',$s->toArray());
+        //         $this->info("ここまでOK");
+        //         $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+        //     }
+        // }
+        // $this->info("---変更する店舗---");
+        // if (!empty($change_shop)) {
+        //     foreach ($change_shop as $s) {
+        //         $output[] = 'update,'.implode(',',$s->toArray());
+        //         $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+        //     }
+        // }
+
         $this->info("---削除する店舗---");
+        echo "---削除する店舗---\n";
         if (!empty($diff_shop)) {
             foreach ($diff_shop as $s) {
+                // $output[] = 'delete,'.implode(',',$s->toArray());
+                $output[] = 'delete,' . $s;
                 $this->info("shopID" . $s);
             }
         }
+
+        $this->info("---店舗ログ出力終了---");
+        echo "---店舗ログ出力終了---\n";
+        
+        return $output;
     }
 
     // users_rolesテーブルのデータを更新
     private function create_users_roles($shop, $shop_code, $shop_name, $DM_id, $DM_name, $DM_email, $BM_id, $BM_name, $BM_email, $AM_id, $AM_name, $AM_email, $forth_id, $forth_name, $forth_email, $fifth_id, $fifth_name, $fifth_email)
     {
+        
+        
         // users_rolesテーブルのデータを更新
         UsersRole::updateOrCreate(
             [
@@ -525,6 +578,7 @@ class ImportImsCsvCommand extends Command
                 'shop_name' => $shop_name,
             ],
             [
+          //      'shop_code' => $shop_code,
                 'DM_id' => $DM_id,
                 'DM_name' => $DM_name,
                 'DM_email' => $DM_email,
@@ -547,14 +601,20 @@ class ImportImsCsvCommand extends Command
                 '5th_view_notification' => false,
             ]
         );
+
     }
 
     // ユーザー作成
     private function create_user($shop)
     {
+        $this->info("ユーザー作成開始");
+        echo "ユーザー作成開始\n";
+        $start = time();
         // 店長ロール
         $ROLL_ID = 4;
         $employee_code = $this->shopid2employeecode($shop);
+        $this->info("employee_code: {$employee_code}");
+        $start = time();
         $user = User::create([
             'name' => $shop->name,
             'belong_label' => $shop->name,
@@ -564,9 +624,24 @@ class ImportImsCsvCommand extends Command
             'email' => '',
             'roll_id' => $ROLL_ID,
         ]);
+        $this->info("name:{$user->name}");
+        $this->info("belong_label:{$user->belong_label}");
+        $this->info("shop_id:{$user->shop_id}");
+        $this->info("employee_code:{$user->employee_code}");
+        $this->info("password:{$user->password}");
+        $this->info("email:{$user->email}");
+        $this->info("roll_id:{$user->roll_id}");
+
+        // $this->info("userオブジェクト定義完了:  処理時間: " . (time() - $start) . "秒");
+        $start = time();
+        $this->info("メッセージ配信開始");
+        echo "メッセージ配信開始\n";
         $user->distributeMessages();
+        $this->info("メッセージ配信完了: 処理時間: " . (time() - $start) . "秒");
+        echo "メッセージ配信完了: 処理時間: " . (time() - $start) . "秒\n";
 
         // 該当のマニュアルを登録
+        // $this->info("マニュアル登録開始");
         $manual_data = [];
         $shop = Shop::find($user->shop_id);
 
@@ -583,8 +658,10 @@ class ImportImsCsvCommand extends Command
         foreach ($manuals as $manual) {
             $manual_data[$manual['id']] = ['shop_id' => $shop->id];
         }
+        // $this->info("マニュアル登録完了");
 
         // manual_shopテーブルにデータをインサート
+        // $this->info("manual_shopデータインサート開始");
         foreach ($manual_data as $manual_id => $data) {
             ManualShop::insert([
                 'manual_id' => $manual_id,
@@ -595,12 +672,16 @@ class ImportImsCsvCommand extends Command
                 'brand_id' => $shop->brand_id,
             ]);
         }
-
+        // $this->info("manual_shopデータインサート完了");
         $user->manual()->sync($manual_data);
+        $this->info("ユーザー作成完了");
+        echo "ユーザー作成完了\n";
     }
 
     private function shopid2employeecode(Shop $shop)
     {
+        $this->info("shopid2employeecode実行");
+        echo "shopid2employeecode実行\n";
         $shop_code = $shop->shop_code;
         $brand_name = $shop->brand->name;
 
@@ -618,6 +699,8 @@ class ImportImsCsvCommand extends Command
     // wowtalk_shopテーブルのデータを更新
     private function create_wowtalk_shop($shop)
     {
+        $this->info("create_wowtalk_shop実行");
+        // echo "create_wowtalk_shop実行\n";
         $data = $this->wowtalkid2shopcode($shop);
         $chunkSize = 300;
         // データをチャンクして挿入
@@ -629,6 +712,8 @@ class ImportImsCsvCommand extends Command
     // wowtalkIDを作成
     private function wowtalkid2shopcode(Shop $shop)
     {
+        $this->info("wowtalkid2shopcode実行");
+        echo "wowtalkid2shopcode実行\n";
         $data = [];
 
         // JP
@@ -726,6 +811,8 @@ class ImportImsCsvCommand extends Command
 
     public function import_crews($crews_data)
     {
+        $this->info("import_crews実行");
+        echo "import_crews実行\n";
         $ROLL_ID = 4;
 
         $undefind_shop = [];
@@ -738,25 +825,44 @@ class ImportImsCsvCommand extends Command
         // 配列をコレクションに変換
         $crews_data = collect($crews_data);
 
-        $crews_data->chunk(20000)->each(function ($chunk) use ($ROLL_ID, &$undefind_shop, &$undefind_user, &$register_crews, &$change_crew, &$new_crew) {
+        // $crews_data->chunk(20000)->each(function ($chunk) use ($ROLL_ID, &$undefind_shop, &$undefind_user, &$register_crews, &$change_crew, &$new_crew) {
+        // organization1を取得
+        $organization1Map = Organization1::all()->keyBy('name');
+
+        // shopを取得
+        $shopMap = Shop::all()->keyBy(function ($shop) {
+            return $shop->organization1_id . '_' . $shop->shop_code;
+        });
+
+        // userを取得
+        $userMap = User::where('roll_id', $ROLL_ID)->get()->keyBy('shop_id');
+
+        $this->info("userを取得");
+        echo "userを取得\n";
+        $crews_data->chunk(20000)->each(function ($chunk) use ($ROLL_ID, &$undefind_shop, &$undefind_user, &$register_crews, &$change_crew, &$new_crew, $organization1Map, $shopMap, $userMap) {
             $bulkUpsertData = [];
             $existingPartCodes = Crew::whereIn('part_code', $chunk->pluck(13)->toArray())->pluck('part_code')->toArray();
 
             foreach ($chunk as $crew) {
-                $org1 = Organization1::where('name', $crew[0])->first();
+                // $org1 = Organization1::where('name', $crew[0])->first();
+                $org1 = $organization1Map[$crew[0]] ?? null;
                 $org1_id = $org1->id;
 
                 // クルーの情報を更新
-                $shop = Shop::query()
-                    ->where('organization1_id', $org1_id)
-                    ->where('shop_code', $crew[16])
-                    ->first();
-                if (empty($shop)) {
+                // $shop = Shop::query()
+                //     ->where('organization1_id', $org1_id)
+                //     ->where('shop_code', $crew[16])
+                //     ->first();
+                // if (empty($shop)) {
+                $shopKey = $org1_id . '_' . $crew[16];
+                $shop = $shopMap[$shopKey] ?? null;
+                if (empty($shop) || $shop->organization1_id !== $org1->id) {
                     $undefind_shop[] = $crew;
                     continue;
                 }
 
-                $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
+                // $user = User::where('shop_id', $shop->id)->where('roll_id', $ROLL_ID)->first();
+                $user = $userMap[$shop->id] ?? null;
                 if (empty($user)) {
                     $undefind_user[] = $crew;
                     continue;
@@ -797,44 +903,49 @@ class ImportImsCsvCommand extends Command
         });
 
         // クルーの削除は物理削除しないように修正
-        // $crew_list = Crew::query()
-        //     ->pluck('part_code')
-        //     ->toArray();
-        // $diff_crew_id = array_diff($crew_list, $register_crews);
+        $crew_list = Crew::query()
+            ->pluck('part_code')
+            ->toArray();
+        $diff_crew_id = array_diff($crew_list, $register_crews);
 
-        // // 1000件ごとにチャンクして削除処理
-        // collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
-        //     $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
-        //     $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
-        //     Crew::whereIn('part_code', $chunk)->delete();
-        // });
+        // 1000件ごとにチャンクして削除処理
+        collect($diff_crew_id)->chunk(1000)->each(function ($chunk) use (&$deleted_crew) {
+            $crewsToDelete = Crew::whereIn('part_code', $chunk)->get();
+            $deleted_crew = array_merge($deleted_crew, $crewsToDelete->toArray()); // 削除するクルーを保存
+            Crew::whereIn('part_code', $chunk)->delete();
+        });
 
         // ログ出力
         $this->info("---新しいクルー---");
+        echo "---新しいクルー---\n";
         if (!empty($new_crew)) {
             foreach ($new_crew as $c) {
                 $this->info("crewID " . $c);
             }
         }
         $this->info("---変更するクルー---");
+        echo "---変更するクルー---\n";
         if (!empty($change_crew)) {
             foreach ($change_crew as $c) {
                 $this->info("crewID " . $c);
             }
         }
         $this->info("---削除するクルー---");
+        echo "---削除するクルー---\n";
         if (!empty($deleted_crew)) {
             foreach ($deleted_crew as $c) {
                 $this->info("crewID" . $c['id'] . " クルー名" . $c['name']);
             }
         }
         $this->info("---店舗が見つからないエラー---");
+        echo "---店舗が見つからないエラー---\n";
         if (!empty($undefind_shop)) {
             foreach ($undefind_shop as $c) {
                 $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
             }
         }
         $this->info("---店舗ユーザーが見つからないエラー---");
+        echo "---店舗ユーザーが見つからないエラー---\n";
         if (!empty($undefind_user)) {
             foreach ($undefind_user as $c) {
                 $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
@@ -844,30 +955,60 @@ class ImportImsCsvCommand extends Command
 
     private function parseDateTime($datetime)
     {
+        // $this->info("parseDateTime実行");
         return (!isset($datetime)) ? null : Carbon::parse($datetime, 'Asia/Tokyo');
     }
 
     private function formatShopName($name)
     {
-        $trim_words = ["VS", "BB", "ＪＰ", "JO", "NIB", "YCP", "T", "TJ", "ＮＩＢ", "G"];
+        // $this->info("formatShopName実行");
+        $trim_words = ["VS", "BB", "JP", "JO", "NIB", "YCP", "T", "TJ", "NIB", "G"];
         $trimed_word = $name;
         // 正規表現のパターンを生成
         $pattern = '/' . implode('|', array_map('preg_quote', $trim_words)) . '/';
 
         $trimed_word = preg_replace($pattern, '', $name);
+        $this->info("{$trimed_word}");
+        // echo "{$trimed_word}\n";
 
         return $trimed_word;
     }
 
     public function formatOrg5Name($name)
     {
+        // $this->info("formatOrg5Name実行");
         $trim_words = ["ブロック", "BL", "ON_", "ON"];
+        // $this->info("trim_words定義完了");
         $trimed_word = $name;
+        // $this->info("trimed_word定義完了");
         // 正規表現のパターンを生成
         $pattern = '/' . implode('|', array_map('preg_quote', $trim_words)) . '/';
+        // $this->info("pattern定義完了");
 
         $trimed_word = preg_replace($pattern, '', $name);
+        // $this->info("trimed_word置換完了");
+        $this->info("{$trimed_word}");
+        // echo "{$trimed_word}\n";
 
         return $trimed_word;
+    }
+
+    private function formatShopCsvRow(Shop $shop, string $action): string
+    {
+        return implode(',', [
+            $action,
+            $shop->id,
+            $shop->name,
+            $shop->shop_code,
+            $shop->organization4_id,
+            $shop->organization3_id,
+            $shop->organization2_id,
+            $shop->organization1_id,
+            $shop->created_at,
+            $shop->updated_at,
+            $shop->organization5_id,
+            $shop->brand_id,
+            $shop->display_name,
+        ]);
     }
 }
