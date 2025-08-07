@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Artisan;
 class importjob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $timeout= 5400;
+    // public $timeout= 7200;
     public $tries = 1;
 
     /**
