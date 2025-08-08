@@ -67,7 +67,7 @@ return [
 
         'daily' => [
             'driver' => 'daily',
-            'path' => storage_path('logs/laravel.log'),
+            'path' => storage_path('logs/laravel-'.php_sapi_name().'.log'),
             'level' => env('LOG_LEVEL', 'debug'),
             'days' => 30,
             'permission' => 0777,

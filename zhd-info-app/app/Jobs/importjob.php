@@ -23,7 +23,7 @@ class importjob implements ShouldQueue
      */
     public function __construct()
     {
-        //
+        $this->timeout = config('ims.job_timeout', 5400);
     }
 
     /**

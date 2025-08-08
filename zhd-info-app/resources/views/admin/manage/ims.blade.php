@@ -15,8 +15,11 @@
     </div>
     @endif
 
-    <button class="btn btn-admin" type="button" onClick="location.href='/admin/manage/ims2';">手動実行</button>
-
+    <button class="btn btn-admin" type="button"
+        onClick="location.href='{{ $isJobRunning ? '' : '/admin/manage/ims2' }}';"
+        {{ $isJobRunning ? 'disabled' : '' }}>
+    {{ $isJobRunning ? '実行中' : '手動実行' }}
+    </button>
 
         <div class="ims-count">
             全{{ $log->count() }}件

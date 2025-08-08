@@ -215,19 +215,15 @@
                             <th class="text-center" nowrap>対象業態</th>
                             <th class="text-center" nowrap>カテゴリ</th>
                             <th class="text-center" nowrap>タイトル</th>
-                            <th class="text-center" nowrap>検索タグ</th>
-                            <th class="text-center" colspan="2" nowrap>添付ファイル</th>
                             <th class="text-center" nowrap>再生時間</th>
                             <th class="text-center" colspan="2" nowrap>掲載期間</th>
                             <th class="text-center" nowrap>状態</th>
-                            <th class="text-center" nowrap>WowTalk通知</th>
-                            <th class="text-center" nowrap>配信店舗数</th>
-                            <th class="text-center" colspan="3" nowrap>閲覧率</th>
-                            <th class="text-center" colspan="2" nowrap>登録者</th>
-                            <th class="text-center" colspan="2" nowrap>更新</th>
                             @if ($admin->ability == App\Enums\AdminAbility::Edit)
                                 <th class="text-center" nowrap>操作</th>
                             @endif
+                            <th class="text-center" colspan="3" nowrap>閲覧率</th>
+                            <th class="text-center" colspan="2" nowrap>登録者</th>
+                            <th class="text-center" colspan="2" nowrap>更新</th>
 
                         </tr>
                     </thead>
@@ -259,23 +255,6 @@
                                         {{ $manual->title }}
                                     @endif
                                 </td>
-                                <td class="label-tags">
-                                    <div>
-                                        @foreach ($manual->tag as $tag)
-                                            <div class="label-tags-mark">
-                                                {{ $tag->name }}
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </td>
-                                <td>
-                                    @if (isset($manual->content_url))
-                                        <div>{{ $manual->content_type }}</div>
-                                    @endif
-                                </td>
-                                <td>
-                                    <div>{{ $manual->content_file_size }}</div>
-                                </td>
                                 <td class="label-movie-time"> - </td>
                                 <td class="date-time">
                                     <div>{{ $manual->formatted_start_datetime }}</div>
@@ -284,11 +263,14 @@
                                     <div>{{ $manual->formatted_end_datetime }}</div>
                                 </td>
                                 <td>{{ $manual->status->text() }}</td>
-                                <!-- WowTalk通知 -->
-                                <td class="label-notification-group">
-                                    <div class="wowtalk-notification-text">{{ $manual->broadcast_notification_status }}</div>
-                                </td>
-                                <td style="text-align: right">{{ $manual->shop_count }}</td>
+                                @if ($admin->ability == App\Enums\AdminAbility::Edit)
+                                    <td>
+                                        <div class="button-group">
+                                            <button class="editBtn btn btn-admin">編集</button>
+                                            <button class="StopBtn btn btn-admin" {{ $manual->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
+                                        </div>
+                                    </td>
+                                @endif
                                 @if ($manual->status == App\Enums\PublishStatus::Wait || $manual->status == App\Enums\PublishStatus::Editing)
                                     <td></td>
                                     <td></td>
@@ -317,14 +299,6 @@
                                     <div>{{ $manual->formatted_updated_at }}</div>
                                 </td>
 
-                                @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                    <td>
-                                        <div class="button-group">
-                                            <button class="editBtn btn btn-admin">編集</button>
-                                            <button class="StopBtn btn btn-admin" {{ $manual->status == App\Enums\PublishStatus::Published ? 'disabled' : '' }}>配信停止</button>
-                                        </div>
-                                    </td>
-                                @endif
                             </tr>
                         @endforeach
                     </tbody>
