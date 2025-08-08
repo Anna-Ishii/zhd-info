@@ -1,20 +1,23 @@
 @extends('layouts.admin.parent')
 
 @section('sidebar')
-    
-    
-    
+
     @include('admin.components.side', ['arrow_pages' => $arrow_pages,'message_saved_url' => $message_saved_url])
-    
+
 @endsection
 
 @section('content')
     <div id="page-wrapper">
-    
-    
+
+    @if (session('message'))
+    <div class="alert alert-success">
+        {{ session('message') }}
+    </div>
+    @endif
+
     <button class="btn btn-admin" type="button" onClick="location.href='/admin/manage/ims2';">手動実行</button>
-    
-    
+
+
         <div class="ims-count">
             全{{ $log->count() }}件
         </div>
@@ -28,7 +31,7 @@
                 <tr>
                     <th class="text-center">クルー情報</th>
                     <th class="text-center">組織情報</th>
-                    
+
                 </tr>
             </thead>
             <tbody>
@@ -42,7 +45,7 @@
                             {{ $l->import_department_error !== false ? '-' : $l->import_department_at?->isoFormat('HH:mm:ss') }}
                         </td>
                         <td class="text-center {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
-                            
+
                             @if($l->import_department_error == false && $l->import_department_at)
                             <a href="/admin/manage/ims/{{$l->id}}" target="_blank">CSV</a>
                             @endif

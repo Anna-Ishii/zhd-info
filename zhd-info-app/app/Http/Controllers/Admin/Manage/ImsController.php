@@ -10,14 +10,14 @@ use Illuminate\Support\Facades\Storage;
 class ImsController extends Controller
 {
     public function dl($id) {
-    	
-    	
+
+
     	$data = Storage::disk('local')->get('imscsv/'.$id.'.csv');
     	if(!$data){
     		echo '更新データはありません';
     		exit();
     	}
-    	
+
     	header('Content-Type: application/octet-stream');
     	$file = "ims_".date('Ymd_His').".csv";
 		header('Content-Disposition: attachment; filename='.$file);
@@ -26,31 +26,20 @@ class ImsController extends Controller
     	}else{
     		echo $data;
     	}
-    	
-    	
-    	 
-    	 
+
     	exit();
-    	
+
     }
-    
-    
+
+
     public function execute() {
-    	
-    	
     	importjob::dispatch();
-    	sleep(5);
-    	return redirect('/admin/manage/ims');
-    	
+    	return redirect('/admin/manage/ims')->with('message', 'バッチ処理を受け付けました。完了までお待ちください。');
     }
-    
+
     public function index() {
-    	
-    	
-    	
-    	
     	//Storage::disk('local')->put('sample.txt', "test");
-    	
+
         $admin = session('admin');
         $log = ImsSyncLog::orderBy('id', 'desc')->limit(30)->get();
 
