@@ -15,8 +15,7 @@ class ImsController extends Controller
 
     	$data = Storage::disk('local')->get('imscsv/'.$id.'.csv');
     	if(!$data){
-    		echo '更新データはありません';
-    		exit();
+    		abort(404, '更新データはありません');
     	}
 
     	header('Content-Type: application/octet-stream');
