@@ -6,14 +6,19 @@
 
 @section('content')
     <div id="page-wrapper">
-    
-    <button class="btn btn-admin" type="button" 
-        onClick="location.href='{{ $isJobRunning ? '' : '/admin/manage/ims2' }}';" 
+
+    @if (session('message'))
+    <div class="alert alert-success">
+        {{ session('message') }}
+    </div>
+    @endif
+
+    <button class="btn btn-admin" type="button"
+        onClick="location.href='{{ $isJobRunning ? '' : '/admin/manage/ims2' }}';"
         {{ $isJobRunning ? 'disabled' : '' }}>
     {{ $isJobRunning ? '実行中' : '手動実行' }}
     </button>
 
-    
         <div class="ims-count">
             全{{ $log->count() }}件
         </div>
@@ -27,7 +32,7 @@
                 <tr>
                     <th class="text-center">クルー情報</th>
                     <th class="text-center">組織情報</th>
-                    
+
                 </tr>
             </thead>
             <tbody>
@@ -41,7 +46,7 @@
                             {{ $l->import_department_error !== false ? '-' : $l->import_department_at?->isoFormat('HH:mm:ss') }}
                         </td>
                         <td class="text-center {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
-                            
+
                             @if($l->import_department_error == false && $l->import_department_at)
                             <a href="/admin/manage/ims/{{$l->id}}" target="_blank">CSV</a>
                             @endif
