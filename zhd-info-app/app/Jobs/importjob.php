@@ -14,17 +14,16 @@ use Illuminate\Support\Facades\Artisan;
 class importjob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    public $tries = 3;
-    public $timeout = 3600;
-    public $backoff = 30;
+    // public $timeout= 7200;
+    public $tries = 1;
 
     /**
      * Create a new job instance.
      */
-    public function __construct()
-    {
-        $this->timeout = config('ims.job_timeout', 5400);
-    }
+    // public function __construct()
+    // {
+    //     $this->timeout = config('ims.job_timeout', 7200);
+    // }
 
     /**
      * ジョブが重複して実行されないようにする
@@ -42,6 +41,8 @@ class importjob implements ShouldQueue
     public function handle(): void
     {
         try {
+            ini_set('max_execution_time', '7200');
+            set_time_limit(7200);
             Artisan::call('app:import-ims-csv-command');
             \Log::info('手動バッチ成功 importjob completed.');
         } catch (\Throwable $e) {
@@ -52,3 +53,4 @@ class importjob implements ShouldQueue
         }
     }
 }
+

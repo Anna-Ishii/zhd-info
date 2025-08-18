@@ -1,9 +1,7 @@
 @extends('layouts.admin.parent')
 
-@section('sidebar')
-
+@section('sideber')
     @include('admin.components.side', ['arrow_pages' => $arrow_pages,'message_saved_url' => $message_saved_url])
-
 @endsection
 
 @section('content')
