@@ -15,7 +15,9 @@ class importjob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     // public $timeout= 7200;
-    public $tries = 1;
+    public $tries = 3;
+    public $timeout = 3600;
+    public $backoff = 30;
 
     /**
      * Create a new job instance.
