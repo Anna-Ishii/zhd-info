@@ -95,6 +95,18 @@ class ImportImsCsvCommand extends Command
         $this->info($organization_path);
         $this->info($crews_path);
 
+//デバック　ImportImsCsvCommand状態確認
+$filename = __FILE__;
+$timestamp = filemtime($filename);
+$this->info("組織ファイル:{$organization_filename}");
+echo "組織ファイル:{$organization_filename}\n";
+$this->info("ファイル: " . basename($filename) );
+echo "ファイル: " . basename($filename) . "\n";
+$this->info("更新日時: " . date('Y-m-d H:i:s', $timestamp));
+echo "更新日時: " . date('Y-m-d H:i:s', $timestamp) . "\n";
+$this->info("実行ファイル: " . $filename . ":" .__LINE__);
+echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
+
         if (!Storage::disk('s3')->exists($organization_path)) {
             $this->error("{$organization_path}が存在しません");
             $this->info('end');
