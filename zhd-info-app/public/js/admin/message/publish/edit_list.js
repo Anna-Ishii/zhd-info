@@ -2214,10 +2214,18 @@ $(document).ready(function () {
                             value="" name="end_datetime" autocomplete="off">
                     </div>
                 </td>
-                <td></td>
+                <td style="text-align: right">
+                    <div class="shop-edit-group">
+                        <input type="button" class="btn btn-admin" id="checkAll-${newMessageId}" name="organizationAll" value="全店">
+                        <input type="hidden" id="selectOrganizationAll-${newMessageId}" name="select_organization[all]" value="">
+                        <input type="button" class="btn btn-admin" id="shopEditBtn-${newMessageId}"
+                            data-toggle="modal" data-target="#editShopModal-${newMessageId}" value="一部">
+                        <input type="hidden" id="selectStore-${newMessageId}" name="select_organization[store]" value="">
+                    </div>
                 <td nowrap>
                     <div class="button-group"></div>
                 </td>
+                <td></td>
                 <td class="view-rate"></td>
                 <td></td>
                 <td class="detailBtn"></td>

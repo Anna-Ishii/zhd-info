@@ -251,6 +251,7 @@
                             <th class="text-center" nowrap>タイトル</th>
                             <th class="text-center" nowrap>添付</th>
                             <th class="text-center" colspan="2">掲載期間</th>
+                            <th class="text-center" nowrap>配信店舗数</th>
                             <th class="text-center" nowrap>状態</th>
                             @if ($admin->ability == App\Enums\AdminAbility::Edit)
                             <th class="text-center" nowrap>操作</th>
@@ -336,6 +337,12 @@
                                     <td class="date-time">
                                         <div class="end-datetime-group">
                                             <span class="end-datetime-text">{{ $message->formatted_end_datetime }}</span>
+                                        </div>
+                                    </td>
+                                    <!-- 配信店舗数 -->
+                                    <td style="text-align: right">
+                                        <div class="shop-edit-group">
+                                            <span class="shop-count">{{ $message->shop_count }}</span>
                                         </div>
                                     </td>
                                     <!-- 状態 -->
