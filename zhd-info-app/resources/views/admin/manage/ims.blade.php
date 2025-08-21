@@ -48,7 +48,7 @@
                         <td class="text-center {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
 
                             @if($l->import_department_error == false && $l->import_department_at)
-                            <a href="/admin/manage/ims/{{$l->id}}" target="_blank">CSV</a>
+                            <a href="/admin/manage/ims/shops_{{$l->id}}" target="_blank">CSV</a>
                             @endif
                         </td>
                     </tr>
