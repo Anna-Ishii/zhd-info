@@ -2,11 +2,14 @@
     <thead>
         <tr style="line-height: 11px; text-align: center;">
             @foreach ($organizations as $organization)
-                <th colspan="2" style="background-color: #bbbbbb;">
+                <th colspan="2" rowspan="2" style="background-color: #e2e2e2;">
                     <div>{{ $organization }}</div>
                 </th>
             @endforeach
-            <th class="head1" colspan="3" style="background-color: #bbbbbb;">
+            <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                <div>店舗<br>コード</div>
+            </th>
+            <th class="head1" colspan="2" rowspan="2" style="background-color: #e2e2e2;">
                 <div>店舗</div>
             </th>
             <th class="head1" colspan="3" style="background-color: #bbbbbb;">
@@ -22,6 +25,22 @@
         </tr>
     </thead>
 
+    <!-- レポート行の高さ -->
+    <style>
+        tr {
+            line-height: 1.88;
+        }
+        td {
+            border: 0.5px solid black;
+            font-size: 7px;
+        }
+    </style>
+
+    <!-- 行数のカウント -->
+    @php
+        $rowCount = 0;
+    @endphp
+
     {{-- 業態 (計) --}}
     <tbody>
         <tr style="background-color: #ffffff;">
@@ -29,8 +48,10 @@
             <td style="border-bottom: 1px solid black; text-align: right;">
                 {{ $viewrates['org1_readed_sum'] ?? 0 }} /
             </td>
-            <td style="border-bottom: 1px solid black; text-align: center;">
-                {{ $viewrates['org1_sum'] ?? 0 }}
+            <td colspan="{{ count($organizations) * 2 + 3 }}">&nbsp;{{ $organization1->name }}計</td>
+            <!-- 期間計在籍数 -->
+            <td style="text-align: right;">
+                {{ $viewrates['org1_sum'] ?? 0 }}&nbsp;
             </td>
             <td style="border-bottom: 1px solid black; text-align: right;
                 @if (isset($viewrates['org1_readed_sum']) && isset($viewrates['org1_sum']))
@@ -73,6 +94,60 @@
                 @endforeach
             @endisset
         </tr>
+        @php $rowCount++; @endphp
+        @if ($rowCount % 50 === 0)
+            </tbody></table>
+            <div style="page-break-after: always;"></div>
+            <table class="personal table">
+                <thead>
+                        <tr style="line-height: 6px; text-align: center;">
+                            <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                <div>業態名</div>
+                            </th>
+                            @foreach ($organizations as $organization)
+                                <th colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                    <div>{{ $organization }}</div>
+                                </th>
+                            @endforeach
+                            <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                <div>店舗<br>コード</div>
+                            </th>
+                            <th class="head1" colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                <div>店舗</div>
+                            </th>
+                            <th class="head1" colspan="3" style="background-color: #e2e2e2;">
+                                <div>期間計</div>
+                            </th>
+                            @foreach ($messages as $m)
+                                <th class="head2" colspan="2" style="background-color: #dae9f8;">
+                                    @isset($m->start_datetime)
+                                        <div>{{ $m->start_datetime?->isoFormat('YYYY/MM/DD') }}<br>{{ Str::limit($m->title, 58) }}</div>
+                                    @endisset
+                                </th>
+                            @endforeach
+                        </tr>
+                        <tr style="line-height: 6px; text-align: center;">
+                            <th class="head2" style="background-color: #e1e1e1;">
+                                <div>在籍数</div>
+                            </th>
+                            <th class="head2" style="background-color: #e1e1e1;">
+                                <div>閲覧数</div>
+                            </th>
+                            <th class="head2" style="background-color: #e1e1e1;">
+                                <div>閲覧率</div>
+                            </th>
+                            @foreach ($messages as $m)
+                                <th class="head2" style="background-color: #e1e1e1;">
+                                    <div>閲覧数</div>
+                                </th>
+                                <th class="head2" style="background-color: #e1e1e1;">
+                                    <div>閲覧率</div>
+                                </th>
+                            @endforeach
+                        </tr>
+                </thead>
+                <tbody>
+        @endif
     </tbody>
 
     {{-- 組織ごと (計) --}}
@@ -116,6 +191,60 @@
                             @endisset
                         @endforeach
                     </tr>
+                    @php $rowCount++; @endphp
+                    @if ($rowCount % 50 === 0)
+                        </tbody></table>
+                        <div style="page-break-after: always;"></div>
+                        <table class="personal table">
+                            <thead>
+                                    <tr style="line-height: 6px; text-align: center;">
+                                        <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                            <div>業態名</div>
+                                        </th>
+                                        @foreach ($organizations as $organization)
+                                            <th colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                                <div>{{ $organization }}</div>
+                                            </th>
+                                        @endforeach
+                                        <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                            <div>店舗<br>コード</div>
+                                        </th>
+                                        <th class="head1" colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                            <div>店舗</div>
+                                        </th>
+                                        <th class="head1" colspan="3" style="background-color: #e2e2e2;">
+                                            <div>期間計</div>
+                                        </th>
+                                        @foreach ($messages as $m)
+                                            <th class="head2" colspan="2" style="background-color: #dae9f8;">
+                                                @isset($m->start_datetime)
+                                                    <div>{{ $m->start_datetime?->isoFormat('YYYY/MM/DD') }}<br>{{ Str::limit($m->title, 58) }}</div>
+                                                @endisset
+                                            </th>
+                                        @endforeach
+                                    </tr>
+                                    <tr style="line-height: 6px; text-align: center;">
+                                        <th class="head2" style="background-color: #e1e1e1;">
+                                            <div>在籍数</div>
+                                        </th>
+                                        <th class="head2" style="background-color: #e1e1e1;">
+                                            <div>閲覧数</div>
+                                        </th>
+                                        <th class="head2" style="background-color: #e1e1e1;">
+                                            <div>閲覧率</div>
+                                        </th>
+                                        @foreach ($messages as $m)
+                                            <th class="head2" style="background-color: #e1e1e1;">
+                                                <div>閲覧数</div>
+                                            </th>
+                                            <th class="head2" style="background-color: #e1e1e1;">
+                                                <div>閲覧率</div>
+                                            </th>
+                                        @endforeach
+                                    </tr>
+                            </thead>
+                            <tbody>
+                    @endif
                     @php $index++; @endphp
                 @endforeach
             @endisset
@@ -137,18 +266,22 @@
                 @endphp
                 <tr style="{{ $isEven($index) ? '' : 'background-color: #d3d3d3;' }}">
                     @isset($m_c->o3_name)
-                        <td class="orgDS" colspan="2" style="border-bottom: 1px solid black; text-align: left;">{{ $m_c->o3_name }}</td>
+                        <td class="orgDS" colspan="2" style="text-align: left;">&nbsp;{{ $m_c->o3_name }}</td>
                     @endisset
                     @isset($m_c->o4_name)
-                        <td class="orgAR" colspan="2" style="border-bottom: 1px solid black; text-align: left;">{{ $m_c->o4_name }}</td>
+                        <td class="orgAR" colspan="2" style="text-align: left;">&nbsp;{{ $m_c->o4_name }}</td>
                     @endisset
                     @isset($m_c->o5_name)
-                        <td class="orgBL" colspan="2" style="border-bottom: 1px solid black; text-align: left;">{{ $m_c->o5_name }}</td>
+                        <!-- <td class="orgBL" colspan="2" style="width: {{74.2 - (count($organizations) - 1) * 14.8}}px; text-align: left;">&nbsp;{{ $m_c->o5_name }}</td> -->
+                        <td class="orgBL" colspan="2" style="text-align: left;">&nbsp;{{ $m_c->o5_name }}</td>
                     @endisset
-                    <td style="border-bottom: 1px solid black; text-align: center;">{{ $m_c->shop_code }}</td>
-                    <td colspan="2" style="border-bottom: 1px solid black; text-align: left;">{{ Str::limit($m_c->shop_name, 16) }}</td>
-                    <td style="border-bottom: 1px solid black; text-align: right;">
-                        {{ $viewrates['shop_readed_sum'][$m_c->shop_code] }} /
+                    <!-- <td style="width: {{33.4-(count($organizations)-1)*3}}px; text-align: center;">{{ $m_c->shop_code }}</td> -->
+                    <td style="text-align: center;">{{ $m_c->shop_code }}</td>
+                    <!-- <td colspan="2" style="width:65px; text-align:left;">&nbsp;{{ $m_c->shop_name }}</td> -->
+                    <td colspan="2" style="text-align:left;">&nbsp;{{ $m_c->shop_name }}</td>
+                    <!-- 期間計在籍数 -->
+                    <td style="text-align: right;">
+                        {{ $viewrates['shop_sum'][$m_c->shop_code] }}&nbsp;
                     </td>
                     <td style="border-bottom: 1px solid black; text-align: center;">
                         {{ $viewrates['shop_sum'][$m_c->shop_code] }}
@@ -180,6 +313,60 @@
                         @endisset
                     @endforeach
                 </tr>
+                @php $rowCount++; @endphp
+                @if ($rowCount % 50 === 0)
+                    </tbody></table>
+                    <div style="page-break-after: always;"></div>
+                    <table class="personal table">
+                        <thead>
+                            <tr style="line-height: 6px; text-align: center;">
+                                <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                    <div>業態名</div>
+                                </th>
+                                @foreach ($organizations as $organization)
+                                    <th colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                        <div>{{ $organization }}</div>
+                                    </th>
+                                @endforeach
+                                <th class="head1" rowspan="2" style="background-color: #e2e2e2;">
+                                    <div>店舗<br>コード</div>
+                </th>
+                                <th class="head1" colspan="2" rowspan="2" style="background-color: #e2e2e2;">
+                                    <div>店舗</div>
+                                </th>
+                                <th class="head1" colspan="3" style="background-color: #e2e2e2;">
+                                    <div>期間計</div>
+                                </th>
+                                @foreach ($messages as $m)
+                                    <th class="head2" colspan="2" style="background-color: #dae9f8;">
+                                        @isset($m->start_datetime)
+                                            <div>{{ $m->start_datetime?->isoFormat('YYYY/MM/DD') }}<br>{{ Str::limit($m->title, 58) }}</div>
+                                        @endisset
+                                    </th>
+                                @endforeach
+                            </tr>
+                            <tr style="line-height: 6px; text-align: center;">
+                                <th class="head2" style="background-color: #e1e1e1;">
+                                    <div>在籍数</div>
+                                </th>
+                                <th class="head2" style="background-color: #e1e1e1;">
+                                    <div>閲覧数</div>
+                                </th>
+                                <th class="head2" style="background-color: #e1e1e1;">
+                                    <div>閲覧率</div>
+                                </th>
+                                @foreach ($messages as $m)
+                                    <th class="head2" style="background-color: #e1e1e1;">
+                                        <div>閲覧数</div>
+                                    </th>
+                                    <th class="head2" style="background-color: #e1e1e1;">
+                                        <div>閲覧率</div>
+                                    </th>
+                                @endforeach
+                            </tr>
+                        </thead>
+                        <tbody>
+                @endif
                 @php
                     $previousO5Name = $m_c->o5_name;
                 @endphp
