@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('search_conditions', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('admin_id');
+            $table->unsignedBigInteger('admin_id')->nullable();
             $table->string('page_name')->nullable();
             $table->text('url')->nullable();
             $table->timestamps();

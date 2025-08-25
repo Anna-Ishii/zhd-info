@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\Account\MailAdminAccountController;
 use App\Http\Controllers\Admin\Analyse\PersonalContoller;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AuthController;
+use App\Http\Controllers\Admin\ApiController;
 use App\Http\Controllers\Admin\Manage\ImsController;
 use App\Http\Controllers\Admin\Manual\ManualPublishController;
 use App\Http\Controllers\Admin\Message\MessagePublishController;
@@ -32,11 +33,11 @@ use Symfony\Component\Mime\MessageConverter;
 Route::get('/member/auth', [MemberAuthController::class, 'index'])->name('auth');
 Route::post('/member/auth', [MemberAuthController::class, 'login']);
 Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
-Route::post('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
+//Route::post('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
 Route::get('/search', [TopController::class, 'search'])->name('search')->middleware('auth');
-Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function (){
+Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth'], function () {
     Route::get('/', [MessageController::class, 'index'])->name('index');
     Route::get('detail/{message_id}', [MessageController::class, 'detail'])->name('detail')->where('message_id', '^\d+$');
     Route::get('/search', [MessageController::class, 'search'])->name('search');
@@ -46,7 +47,7 @@ Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'auth']
     Route::get('/crews-message', [MessageController::class, 'getCrewsMessage'])->name('crew-message');
     Route::post('/crews-logout', [MessageController::class, 'crewsLogout'])->name("crew-logout");
 });
-Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], function () {
+Route::group(['prefix' => 'manual', 'as' => 'manual.', 'middleware' => 'auth'], function () {
     Route::get('/', [ManualController::class, 'index'])->name('index');
     Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
     Route::put('/watched', [ManualController::class, 'watched'])->name('watched');
@@ -56,13 +57,20 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
 // 管理画面へのログイン画面
 Route::get('/admin/auth', [AuthController::class, 'index'])->name('admin.auth');
 Route::post('/admin/auth', [AuthController::class, 'login']);
+
+Route::get('/ep/auth', [AuthController::class, 'api']);
+Route::post('/ep/auth', [AuthController::class, 'api']);
+Route::get('/me/auth', [MemberAuthController::class, 'api']);
+Route::post('/me/auth', [MemberAuthController::class, 'api']);
+
+
 Route::post('/admin/logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 // 管理画面のルート
-Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function() {
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'], function () {
     // 管理画面-業務連絡
-    Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function(){
-        Route::group(['prefix' => 'publish', 'as' => 'publish.'], function(){
+    Route::group(['prefix' => 'message', 'as' => 'message.', 'middleware' => 'check.allowpage:message'], function () {
+        Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::post('save-session-conditions', [MessagePublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('save-search-conditions', [MessagePublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
@@ -92,7 +100,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
     });
     // 管理画面-動画マニュアル
-    Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'check.allowpage:manual'], function () {
+    Route::group(['prefix' => 'manual', 'as' => 'manual.', 'middleware' => 'check.allowpage:manual'], function () {
         Route::group(['prefix' => 'publish', 'as' => 'publish.'], function () {
             Route::get('/', [ManualPublishController::class, 'index'])->name('index');
             Route::post('save-session-conditions', [ManualPublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
@@ -117,7 +125,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
-        Route::group(['middleware' => 'check.allowpage:account-shop'], function(){
+        Route::group(['middleware' => 'check.allowpage:account-shop'], function () {
             Route::get('/', [AccountController::class, 'index'])->name('index');
             Route::post('save-session-conditions', [AccountController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::get('new', [AccountController::class, 'new'])->name('new');
@@ -143,21 +151,26 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
         Route::group(['prefix' => 'adminmail', 'as' => 'adminmail.', 'middleware' => 'check.allowpage:account-admin-mail'], function () {
             Route::get('/', [MailAdminAccountController::class, 'index'])->name('index');
-            Route::post('save-session-conditions', [MailAdminAccountController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('/adminAccountUpdate', [MailAdminAccountController::class, 'adminAccountUpdate'])->name('adminAccountUpdate');
         });
     });
 
     Route::group(['prefix' => 'setting', 'as' => 'setting.'], function () {
         Route::group(['prefix' => '/change_password', 'as' => 'change_password.'], function () {
-        Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
-        Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
+            Route::get('/', [ChangePasswordController::class, 'index'])->name('index');
+            Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
-    Route::group(['prefix' => 'manage', 'as' => 'manage', 'middleware' => 'check.allowpage:ims'], function () {
+
+
+    Route::group(['prefix' => 'manage', 'as' => 'manage.', 'middleware' => 'check.allowpage:ims'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
+        Route::get('ims/{id}', [ImsController::class, 'dl'])->name('dl');
+        Route::get('/ims/{id}', [ImsController::class, 'dl'])->name('ims.dl');
+        Route::get('ims2', [ImsController::class, 'execute'])->name('execute');
     });
-    Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
+
+    Route::group(['prefix' => 'analyse', 'as' => 'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
         Route::get('/personal', [PersonalContoller::class, 'index'])->name('index');
         Route::post('/personal/save-session-conditions', [PersonalContoller::class, 'saveSessionConditions'])->name('save-session-conditions');
         Route::post('/personal/save-search-conditions', [PersonalContoller::class, 'saveSearchConditions'])->name('save-search-conditions');
@@ -170,7 +183,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     Route::fallback(function () {
         return redirect(route('admin.message.publish.index'));
     });
-
 });
 
 
