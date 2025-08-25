@@ -272,12 +272,9 @@
                         <td class="orgAR" colspan="2" style="text-align: left;">&nbsp;{{ $m_c->o4_name }}</td>
                     @endisset
                     @isset($m_c->o5_name)
-                        <!-- <td class="orgBL" colspan="2" style="width: {{74.2 - (count($organizations) - 1) * 14.8}}px; text-align: left;">&nbsp;{{ $m_c->o5_name }}</td> -->
                         <td class="orgBL" colspan="2" style="text-align: left;">&nbsp;{{ $m_c->o5_name }}</td>
                     @endisset
-                    <!-- <td style="width: {{33.4-(count($organizations)-1)*3}}px; text-align: center;">{{ $m_c->shop_code }}</td> -->
                     <td style="text-align: center;">{{ $m_c->shop_code }}</td>
-                    <!-- <td colspan="2" style="width:65px; text-align:left;">&nbsp;{{ $m_c->shop_name }}</td> -->
                     <td colspan="2" style="text-align:left;">&nbsp;{{ $m_c->shop_name }}</td>
                     <!-- 期間計在籍数 -->
                     <td style="text-align: right;">
