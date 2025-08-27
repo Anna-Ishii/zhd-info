@@ -11,7 +11,7 @@
     <!-- style.css -->
     <script>
         // IEの判定
-        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        var isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
         if (!isIE) {
             // IEでない場合
@@ -27,6 +27,15 @@
             document.head.appendChild(link);
         }
     </script>
+
+    <!-- Google fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" />
+
+    <!-- phase3 style -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="{{ asset('/css/phase3/common.min.css') }}">
 
     @stack('css')
     <!-- jQuery UI -->
@@ -44,28 +53,21 @@
 
     @yield('content')
 
-    {{-- <div class="version-number">
-        Ver. {{config('version.version')}}
-    </div> --}}
     <div class="modalBg"></div>
     @include('common.modal-check')
     @include('common.modal-edit')
     @include('common.modal-continue')
     @include('common.modal-logout')
 
-    @include('common.footer')
+    {{--@include('common.footer')--}}
 
     <script src="{{ asset('/js/timer.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/common.js') }}?date={{ date('Ymd') }}" defer></script>
-    {{-- <script>
-        const crew = @json($user->crew);
-        console.log(crew);
-    </script> --}}
 
     <!-- Livewire -->
     <script>
         // IEの判定
-        var isIE = /*@cc_on!@*/false || !!document.documentMode;
+        var isIE = /*@cc_on!@*/ false || !!document.documentMode;
 
         if (!isIE) {
             // IEでない場合
@@ -74,6 +76,7 @@
             document.body.appendChild(script);
         }
     </script>
-
+    @stack('js')
 </body>
+
 </html>
