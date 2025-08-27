@@ -95,6 +95,18 @@ class ImportImsCsvCommand extends Command
         \Log::info($organization_path);
         \Log::info($crews_path);
 
+//デバック　ImportImsCsvCommand状態確認
+$filename = __FILE__;
+$timestamp = filemtime($filename);
+$this->info("組織ファイル:{$organization_filename}");
+echo "組織ファイル:{$organization_filename}\n";
+$this->info("ファイル: " . basename($filename) );
+echo "ファイル: " . basename($filename) . "\n";
+$this->info("更新日時: " . date('Y-m-d H:i:s', $timestamp));
+echo "更新日時: " . date('Y-m-d H:i:s', $timestamp) . "\n";
+$this->info("実行ファイル: " . $filename . ":" .__LINE__);
+echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
+
         if (!Storage::disk('s3')->exists($organization_path)) {
             \Log::error("{$organization_path}が存在しません");
             \Log::info("end");
@@ -513,7 +525,7 @@ class ImportImsCsvCommand extends Command
         $diff_shop_id = array_diff($shop_list, $register_shop_id);
         echo "diff_shop_id: " . implode(',', $diff_shop_id) . "\n";
         $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
-
+        // $diff_shop_info = Shop::whereIn('id', $diff_shop_id)->get(); // ログ出力用(処理追加予定)
         $delete_shop = array_merge($diff_shop, $close_shop);
         $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
         foreach ($diff_shop_user as $key => $user) {
@@ -550,7 +562,6 @@ class ImportImsCsvCommand extends Command
                 \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-
         \Log::info("---削除する店舗---");
         echo "---削除する店舗---\n";
         if (!empty($diff_shop)) {
@@ -559,12 +570,21 @@ class ImportImsCsvCommand extends Command
                 \Log::info("shopID" . $s);
             }
         }
+        // 削除ログ出力をこちらの処理に変更予定
+        // $this->info("---削除する店舗---");
+        // echo "---削除する店舗---\n";
+        // if (!empty($diff_shop_info)) {
+        //     foreach ($diff_shop_info as $s) {
+        //         $output[] = $this->formatShopCsvRow($s, 'delete');
+        //         $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+        //     }
+        // }
 
         \Log::info("---店舗ログ出力終了---");
         echo "---店舗ログ出力終了---\n";
 
         if (count($output)) {
-            $header = '"差分種別","ID" ,"店舗名","店舗コード","組織コード4","組織コード3","組織コード2","組織コード1","データ作成日時","データ更新日時","組織コード5","業態コード","表示名"';
+            $header = '"差分種別","ID","業態名","業態コード","ブランドコード","店舗名","店舗コード","組織コード2","組織コード3","組織コード4","組織コード5","データ作成日時","データ更新日時","表示名"';
             Storage::disk('local')->put('imscsv/shops_' . $ims_log_id . '.csv', mb_convert_encoding($header . "\r\n" . implode("\r\n", $output), "SJIS-win", "UTF-8"));
         }
     }
@@ -991,19 +1011,26 @@ class ImportImsCsvCommand extends Command
 
     private function formatShopCsvRow(Shop $shop, string $action): string
     {
+        // organization1のnameを取得
+        $organization1_name = '';
+        if ($shop->organization1_id) {
+            $org1 = Organization1::find($shop->organization1_id);
+            $organization1_name = $org1 ? $org1->name : '';
+        }
         return implode(',', [
             $action,
             $shop->id,
+            $organization1_name,
+            $shop->organization1_id,
+            $shop->brand_id,
             $shop->name,
             $shop->shop_code,
-            $shop->organization4_id,
-            $shop->organization3_id,
             $shop->organization2_id,
-            $shop->organization1_id,
+            $shop->organization3_id,
+            $shop->organization4_id,
+            $shop->organization5_id,
             $shop->created_at,
             $shop->updated_at,
-            $shop->organization5_id,
-            $shop->brand_id,
             $shop->display_name,
         ]);
     }
