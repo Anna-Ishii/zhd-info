@@ -74,7 +74,7 @@ class ImportImsCsvCommand extends Command
     {
         error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
         ini_set('memory_limit', '-1');
-        $this->info('start');
+        \Log::info('start');
         $ims_log = new ImsSyncLog();
         $ims_log->import_at = new Carbon('now');
         $ims_log->save();
@@ -92,8 +92,8 @@ class ImportImsCsvCommand extends Command
         $directory = "IMS2/FR_BUSINESS/";
         $organization_path = $directory . $organization_filename;
         $crews_path = $directory . $crews_filename;
-        $this->info($organization_path);
-        $this->info($crews_path);
+        \Log::info($organization_path);
+        \Log::info($crews_path);
 
 //デバック　ImportImsCsvCommand状態確認
 $filename = __FILE__;
@@ -108,14 +108,14 @@ $this->info("実行ファイル: " . $filename . ":" .__LINE__);
 echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
         if (!Storage::disk('s3')->exists($organization_path)) {
-            $this->error("{$organization_path}が存在しません");
-            $this->info('end');
+            \Log::error("{$organization_path}が存在しません");
+            \Log::info("end");
             exit();
         }
 
         if (!Storage::disk('s3')->exists($crews_path)) {
-            $this->error("{$crews_path}が存在しません");
-            $this->info('end');
+            \Log::error("{$crews_path}が存在しません");
+            \Log::info("end");
             exit();
         }
 
@@ -125,12 +125,12 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
             // 組織情報の取り込み
             try {
-                $this->info("{$organization_filename}ファイルを読み込みます");
+                \Log::info("{$organization_filename}ファイルを読み込みます");
                 echo "{$organization_filename}ファイルを読み込みます\n";
                 $shops_data = (new ShopsIMSImport)->toCollection($organization_path, 's3', \Maatwebsite\Excel\Excel::CSV);
-                $this->info("{$organization_filename}ファイル読み込み完了");
+                \Log::info("{$organization_filename}ファイル読み込み完了");
                 echo "{$organization_filename}ファイル読み込み完了\n";
-                $this->info("読み込み時間: " . (time() - $loadtime) . "秒");
+                \Log::info("読み込み時間: " . (time() - $loadtime) . "秒");
                 echo "読み込み時間: " . (time() - $loadtime) . "秒\n";
 
                 $this->import_shops($shops_data[0], $ims_log->id);
@@ -144,18 +144,18 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
                 $ims_log->import_department_error = true;
                 throw $th;
             }
-            $this->info("組織情報の取り込み完了");
+            \Log::info("組織情報の取り込み完了");
 
             $loadtime = time();
             // クルーの取り込み
             try {
-                $this->info("{$crews_filename}ファイルを読み込みます");
+                \Log::info("{$crews_filename}ファイルを読み込みます");
                 echo "{$crews_filename}ファイルを読み込みます\n";
                 $crews_data = [];
                 (new CrewsIMSImport($crews_data))->import($crews_path, 's3', \Maatwebsite\Excel\Excel::CSV);
-                $this->info("{$crews_filename}ファイル読み込み完了");
+                \Log::info("{$crews_filename}ファイル読み込み完了");
                 echo "{$crews_filename}ファイル読み込み完了\n";
-                $this->info("読み込み時間: " . (time() - $loadtime) . "秒");
+                \Log::info("読み込み時間: " . (time() - $loadtime) . "秒");
                 echo "読み込み時間: " . (time() - $loadtime) . "秒\n";
                 $this->import_crews($crews_data, $ims_log->id);
                 unset($crews_data);
@@ -172,7 +172,8 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
             DB::rollBack();
             $th_msg  = $th->getMessage();
-            $this->info("$th_msg");
+            \Log::error("ジョブ失敗: $th_msg", ['trace' => $th->getTraceAsString()]);
+            throw $th;
         }
         $ims_log->save();
 
@@ -194,19 +195,18 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
             : '取り込んだCSVに前回との差分がありました。ご確認お願いします。';
         $mailer->sendEmail($fromName, $to, $subject, $messageContent, $attachments);
 
-        $this->info('end');
+        \Log::info("end");
     }
 
     private function import_shops($shops_data, $ims_log_id)
     {
-        $this->info("店舗更新開始");
+        \Log::info("店舗更新開始");
         echo "店舗更新開始\n";
         $new_shop = []; // 新店舗を格納する配列
         $close_shop = []; // 削除する店舗を格納する配列
         $shop_list = Shop::query()->pluck('id')->toArray();
         $today = Carbon::now();
         $register_shop_id = [];
-
         $output = [];
         $start = time();
 
@@ -215,8 +215,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         foreach ($shops_data as $index => $shop) {
             $organization1 = Organization1::where('name', $shop[0])->first();
             if (!$organization1) {
-                $this->error("組織1 '{$shop[0]}' が見つかりません");
-                echo "組織1 '{$shop[0]}' が見つかりません\n";
+                \Log::error("組織1 '{$shop[0]}' が見つかりません");
                 continue;
             }
             $organization1_id = $organization1->id;
@@ -486,7 +485,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
             $register_shop_id[] = $shop->id;
         }
-        $this->info("組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒");
+        \Log::info("組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒");
         echo "組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒" . "\n";
 
         // 初回のみパッチ
@@ -547,28 +546,28 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         }
 
         // ログ出力
-        $this->info("---新しい店舗---");
+        \Log::info("---新しい店舗---");
         echo "---新しい店舗---\n";
         if (!empty($new_shop)) {
             foreach ($new_shop as $s) {
                 $output[] = $this->formatShopCsvRow($s, 'insert');
-                $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+                \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-        $this->info("---変更する店舗---");
+        \Log::info("---変更する店舗---");
         echo "---変更する店舗---\n";
         if (!empty($change_shop)) {
             foreach ($change_shop as $s) {
                 $output[] = $this->formatShopCsvRow($s, 'update');
-                $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+                \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-        $this->info("---削除する店舗---");
+        \Log::info("---削除する店舗---");
         echo "---削除する店舗---\n";
         if (!empty($diff_shop)) {
             foreach ($diff_shop as $s) {
                 $output[] = 'delete,' . $s;
-                $this->info("shopID" . $s);
+                \Log::info("shopID" . $s);
             }
         }
         // 削除ログ出力をこちらの処理に変更予定
@@ -581,7 +580,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         //     }
         // }
 
-        $this->info("---店舗ログ出力終了---");
+        \Log::info("---店舗ログ出力終了---");
         echo "---店舗ログ出力終了---\n";
 
         if (count($output)) {
@@ -630,13 +629,13 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
     // ユーザー作成
     private function create_user($shop)
     {
-        $this->info("ユーザー作成開始");
+        \Log::info("ユーザー作成開始");
         echo "ユーザー作成開始\n";
         $start = time();
         // 店長ロール
         $ROLL_ID = 4;
         $employee_code = $this->shopid2employeecode($shop);
-        $this->info("employee_code: {$employee_code}");
+        \Log::info("employee_code: {$employee_code}");
         $start = time();
         $user = User::create([
             'name' => $shop->name,
@@ -647,20 +646,20 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
             'email' => '',
             'roll_id' => $ROLL_ID,
         ]);
-        $this->info("name:{$user->name}");
-        $this->info("belong_label:{$user->belong_label}");
-        $this->info("shop_id:{$user->shop_id}");
-        $this->info("employee_code:{$user->employee_code}");
-        $this->info("password:{$user->password}");
-        $this->info("email:{$user->email}");
-        $this->info("roll_id:{$user->roll_id}");
+        \Log::info("name:{$user->name}");
+        \Log::info("belong_label:{$user->belong_label}");
+        \Log::info("shop_id:{$user->shop_id}");
+        \Log::info("employee_code:{$user->employee_code}");
+        \Log::info("password:{$user->password}");
+        \Log::info("email:{$user->email}");
+        \Log::info("roll_id:{$user->roll_id}");
 
         // $this->info("userオブジェクト定義完了:  処理時間: " . (time() - $start) . "秒");
         $start = time();
-        $this->info("メッセージ配信開始");
+        \Log::info("メッセージ配信開始");
         echo "メッセージ配信開始\n";
         $user->distributeMessages();
-        $this->info("メッセージ配信完了: 処理時間: " . (time() - $start) . "秒");
+        \Log::info("メッセージ配信完了: 処理時間: " . (time() - $start) . "秒");
         echo "メッセージ配信完了: 処理時間: " . (time() - $start) . "秒\n";
 
         // 該当のマニュアルを登録
@@ -697,13 +696,13 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         }
         // $this->info("manual_shopデータインサート完了");
         $user->manual()->sync($manual_data);
-        $this->info("ユーザー作成完了");
+        \Log::info("ユーザー作成完了");
         echo "ユーザー作成完了\n";
     }
 
     private function shopid2employeecode(Shop $shop)
     {
-        $this->info("shopid2employeecode実行");
+        \Log::info("shopid2employeecode実行");
         echo "shopid2employeecode実行\n";
         $shop_code = $shop->shop_code;
         $brand_name = $shop->brand->name;
@@ -715,14 +714,13 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         } else {
             $employee_code = $brand_label . $shop_number;
         }
-
         return $employee_code;
     }
 
     // wowtalk_shopテーブルのデータを更新
     private function create_wowtalk_shop($shop)
     {
-        $this->info("create_wowtalk_shop実行");
+        \Log::info("create_wowtalk_shop実行");
         // echo "create_wowtalk_shop実行\n";
         $data = $this->wowtalkid2shopcode($shop);
         $chunkSize = 300;
@@ -735,7 +733,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
     // wowtalkIDを作成
     private function wowtalkid2shopcode(Shop $shop)
     {
-        $this->info("wowtalkid2shopcode実行");
+        \Log::info("wowtalkid2shopcode実行");
         echo "wowtalkid2shopcode実行\n";
         $data = [];
 
@@ -834,7 +832,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
     public function import_crews($crews_data, $ims_log_id)
     {
-        $this->info("import_crews実行");
+        \Log::info("import_crews実行");
         echo "import_crews実行\n";
         $ROLL_ID = 4;
 
@@ -927,6 +925,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
             });
         });
 
+        // コメントアウトされていた部分
         // クルーの削除は物理削除しないように修正
         $crew_list = Crew::query()
             ->pluck('part_code')
@@ -941,42 +940,42 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         });
 
         // ログ出力
-        $this->info("---新しいクルー---");
+        \Log::info("---新しいクルー---");
         echo "---新しいクルー---\n";
         if (!empty($new_crew)) {
             foreach ($new_crew as $c) {
-                $this->info("crewID " . $c);
+                \Log::info("crewID " . $c);
                 $crew_output[] = $this->formatCrewsCsvRow($c, 'insert');
             }
         }
-        $this->info("---変更するクルー---");
+        \Log::info("---変更するクルー---");
         echo "---変更するクルー---\n";
         if (!empty($change_crew)) {
             foreach ($change_crew as $c) {
-                $this->info("crewID " . $c);
+                \Log::info("crewID " . $c);
                 $crew_output[] = $this->formatCrewsCsvRow($c, 'update');
             }
         }
-        $this->info("---削除するクルー---");
+        \Log::info("---削除するクルー---");
         echo "---削除するクルー---\n";
         if (!empty($deleted_crew)) {
             foreach ($deleted_crew as $c) {
                 $crew_output[] = $this->formatCrewsCsvRow($c['id'], 'delete');
-                $this->info("crewID" . $c['id'] . " クルー名" . $c['name']);
+                \Log::info("crewID" . $c['id'] . " クルー名" . $c['name']);
             }
         }
-        $this->info("---店舗が見つからないエラー---");
+        \Log::info("---店舗が見つからないエラー---");
         echo "---店舗が見つからないエラー---\n";
         if (!empty($undefind_shop)) {
             foreach ($undefind_shop as $c) {
-                $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
+                \Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
             }
         }
-        $this->info("---店舗ユーザーが見つからないエラー---");
+        \Log::info("---店舗ユーザーが見つからないエラー---");
         echo "---店舗ユーザーが見つからないエラー---\n";
         if (!empty($undefind_user)) {
             foreach ($undefind_user as $c) {
-                $this->info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
+                Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
             }
         }
 

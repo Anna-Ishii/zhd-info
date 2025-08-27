@@ -11,14 +11,13 @@ use Illuminate\Support\Facades\DB;
 class ImsController extends Controller
 {
     public function dl($id) {
-    	
-    	
+
+
     	$data = Storage::disk('local')->get('imscsv/'.$id.'.csv');
     	if(!$data){
-    		echo '更新データはありません';
-    		exit();
+    		abort(404, '更新データはありません');
     	}
-    	
+
     	header('Content-Type: application/octet-stream');
     	$file = "ims_".date('Ymd_His').".csv";
 		header('Content-Disposition: attachment; filename='.$file);
@@ -27,28 +26,21 @@ class ImsController extends Controller
     	}else{
     		echo $data;
     	}
-    	
-    	
-    	 
-    	 
+
     	exit();
-    	
+
     }
-    
-    
+
+
     public function execute() {
-    	
-    	
     	importjob::dispatch();
-    	sleep(5);
-    	return redirect('/admin/manage/ims');
-    	
+    	return redirect('/admin/manage/ims')->with('message', 'バッチ処理を受け付けました。完了までお待ちください。');
     }
-    
+
     // public function index() {
-    	
+
     // 	//Storage::disk('local')->put('sample.txt', "test");
-    	
+
         // $admin = session('admin');
         // $log = ImsSyncLog::orderBy('id', 'desc')->limit(30)->get();
 
@@ -104,9 +96,9 @@ class ImsController extends Controller
         $isJobRunning = DB::table('jobs')
             ->where('payload', 'like', '%importjob%')
             ->exists();
-            
+
         $log = ImsSyncLog::orderBy('import_at', 'desc')->get();
-        
+
         return view('admin.manage.ims', [
             'log' => $log,
             'message_saved_url' => $message_saved_url,

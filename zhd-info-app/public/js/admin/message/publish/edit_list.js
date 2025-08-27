@@ -2202,17 +2202,6 @@ $(document).ready(function () {
                     </div>
                 </td>
                 <td class="label-file"></td>
-                <td class="label-tags">
-                    <div class="tags-text-group">
-                        <div class="tags-input-group form-group tag-form" style="width: -webkit-fill-available;">
-                            <div class="form-control">
-                                <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="tags-input-mark">複数入力する場合は「,」で区切る</div>
-                </td>
-                <td></td>
                 <td class="date-time">
                     <div class="start-datetime-group" style="width: max-content;">
                         <input id="dateFrom-${newMessageId}" class="form-control"
@@ -2225,15 +2214,6 @@ $(document).ready(function () {
                             value="" name="end_datetime" autocomplete="off">
                     </div>
                 </td>
-                <td></td>
-                <td class="label-notification-group">
-                    <div class="wowtalk-notification-input-group" style="background-color: #ffffff00; color: black;">
-                        <label style="cursor: pointer;">
-                            <input type="checkbox" name="wowtalk_notification" class="checkCommon mr8" style="cursor: pointer;">
-                            <span>あり</span>
-                        </label>
-                    </div>
-                </td>
                 <td style="text-align: right">
                     <div class="shop-edit-group">
                         <input type="button" class="btn btn-admin" id="checkAll-${newMessageId}" name="organizationAll" value="全店">
@@ -2242,7 +2222,10 @@ $(document).ready(function () {
                             data-toggle="modal" data-target="#editShopModal-${newMessageId}" value="一部">
                         <input type="hidden" id="selectStore-${newMessageId}" name="select_organization[store]" value="">
                     </div>
+                <td nowrap>
+                    <div class="button-group"></div>
                 </td>
+                <td></td>
                 <td class="view-rate"></td>
                 <td></td>
                 <td class="detailBtn"></td>
@@ -2250,9 +2233,6 @@ $(document).ready(function () {
                 <td class="date-time"></td>
                 <td></td>
                 <td class="date-time"></td>
-                <td nowrap>
-                    <div class="button-group"></div>
-                </td>
             </tr>
         `;
 

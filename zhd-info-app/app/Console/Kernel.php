@@ -9,6 +9,7 @@ use App\Console\Commands\ExportShopCsvCommand;
 use App\Console\Commands\MessageUserUpdateCommand;
 use App\Console\Commands\ShopCreateCommand;
 use App\Console\Commands\ShopUserCreateCommnad;
+use App\Console\Commands\ImportImsCsvCommand;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -22,6 +23,7 @@ class Kernel extends ConsoleKernel
         ShopCreateCommand::class,
         ExportShopCsvCommand::class,
         ExportCrewFakerCsvCommand::class,
+        ImportImsCsvCommand::class,
     ];
     /**
      * Define the application's command schedule.
