@@ -8,6 +8,7 @@ use App\Models\MessageCategory;
 use App\Models\MessageContent;
 use App\Models\Message;
 use Carbon\Carbon;
+use Carbon\CarbonInterface as CI;
 use App\Utils\OutputContentPdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -22,124 +23,151 @@ class MessageController extends Controller
     {
         session()->put('current_url', $request->fullUrl());
         $keyword = $request->input('keyword');
-        $not_read_check = $request->input('not_read_check');
-        $check_crew = session("check_crew", null);
-        $search_period = SearchPeriod::tryFrom($request->input('search_period', SearchPeriod::All->value));
+        $start_date = $request->input('start_date');
+        $end_date = $request->input('end_date');
 
         $user = session("member");
 
-        $sub = DB::table('messages')
-            ->select([
-                DB::raw('messages.id as message_id'),
-                DB::raw('count(c.id) as crew_count'),
-                DB::raw('count(c_m_l.crew_id) as readed_crew_count'),
-                DB::raw('round((count(c_m_l.crew_id) / count(c.id)) * 100, 0) as view_rate')
-            ])
+        $today = Carbon::now();
+        $temp = $today->copy()->startOfWeek()->subWeeks(4);
+        $query_date = $this->daysBetween($temp, $today);
+
+        $messages = DB::table('messages')
             ->leftjoin('message_user as m_u', 'messages.id', '=', 'm_u.message_id')
-            ->leftjoin('crews as c', 'm_u.user_id', '=', 'c.user_id')
-            ->leftjoin('crew_message_logs as c_m_l', function ($join) {
-                $join->on('c_m_l.crew_id', '=', 'c.id')
-                    ->where('c_m_l.message_id', '=', DB::raw('messages.id'));
-            })
-            ->where('m_u.user_id', '=', $user->id)
-            ->when(isset($check_crew[0]), function ($query) use ($check_crew) {
-                $query->where('c.id', $check_crew[0]->id);
-            })
-            ->groupBy('messages.id');
+            ->where('m_u.user_id', $user->id)
+            ->where('start_datetime', '<=', $today)
+            ->where('end_datetime', '>=', $query_date)
+            ->orderBy('id', 'desc')
+            ->select(['messages.id', 'messages.title', 'messages.content_url', 'messages.start_datetime', 'messages.end_datetime'])
+            ->get()
+            ->map(function ($m) {
+                $m->start = Carbon::parse($m->start_datetime);
+                $m->end   = Carbon::parse($m->end_datetime);
+                return $m;
+            });
 
-        // 掲示中のデータをとってくる
-        $messages = $user->message()
-            ->with('category', 'tag')
-            ->select([
-                'sub.crew_count as crew_count',
-                'sub.readed_crew_count as readed_crew_count',
-                'sub.view_rate as view_rate'
-            ])
-            ->publishingMessage()
-            ->LeftJoinSub($sub, 'sub', 'messages.id', 'sub.message_id')
-            ->when(isset($keyword), function ($query) use ($keyword) {
-                $query->where(function ($query) use ($keyword) {
-                    $query->whereLike('title', $keyword)
-                        ->orWhereHas('tag', function ($query) use ($keyword) {
-                            $query->where('name', $keyword);
-                        });
-                });
-            })
-            ->when(isset($search_period), function ($query) use ($search_period) {
-                switch ($search_period) {
-                    case SearchPeriod::All:
-                        break;
-                    case SearchPeriod::Past_week:
-                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subWeek()->isoFormat('YYYY/MM/DD'));
-                        break;
-                    case SearchPeriod::Past_month:
-                        $query->where('start_datetime', '>=', now('Asia/Tokyo')->subMonth()->isoFormat('YYYY/MM/DD'));
-                        break;
-                    default:
-                        break;
+        $messages_by_day = [];
+        $messages_by_week_partial = [];
+        $messages_by_week_full = [];
+
+        $dayStart = $today->copy()->subDays(6);
+        for ($d = $today->copy(); $d->gte($dayStart); $d->subDay()) {
+            $label = $this->formatDateWithWeekdayJp($d->format('Y-m-d'));
+            foreach ($messages as $message) {
+                if ($d->between($message->start, $message->end)) {
+                    $messages_by_day[$label][] = [
+                        'title' => $message->title,
+                        'url'   => route('message.detail', ['message_id' => $message->id, 'message_content_url' => $message->content_url]),
+                    ];
                 }
-            })
-            ->when(!empty($crews), function ($query) {
-                $query->orderByRaw('
-                    case
-                        when readed_crew_count = 0 or readed_crew_count is null then 0
-                        else 1
-                    end, readed_crew_count asc
-                ');
-            })
-            ->when(isset($not_read_check) && isset($check_crew[0]), function ($query) {
-                $query->where('sub.readed_crew_count', '<', 1);
-            })
-            ->orderBy('created_at', 'desc')
-
-            ->paginate(20)
-            ->appends(request()->query());
-
-        $categories = MessageCategory::get();
-        $organization1_id =  $user->shop->organization1->id;
-        $keywords = DB::table("message_search_logs as m_s_l")
-            ->select([
-                'keyword',
-                DB::raw('COUNT(*) as count'),
-            ])
-            ->leftJoin('shops as s', 's.id', 'm_s_l.shop_id')
-            ->Join('organization1 as o1', function ($join) use ($organization1_id) {
-                $join->on('o1.id', '=', 's.organization1_id')
-                    ->where('o1.id', '=', $organization1_id);
-            })
-            ->groupBy('keyword', 'o1.id')
-            ->orderBy('count', 'desc')
-            ->limit(3)
-            ->get();
-
-        // 添付ファイル
-        foreach ($messages as $message) {
-            $this->attachFilesToMessage($message);
+            }
         }
 
-        return view('message.index', [
-            'messages' => $messages,
-            'categories' => $categories,
-            'keywords' => $keywords,
-            'user' => $user,
-            'organization1_id' => $organization1_id
-        ]);
+        $partialStart = $dayStart->copy()->startOfWeek(CI::MONDAY);
+        $partialEnd   = $dayStart->copy()->subDay();
+        $hasPartial = $partialStart->lte($partialEnd);
+        if ($hasPartial) {
+            $label = $this->formatRangeJp($partialStart, $partialEnd);
+            foreach ($messages as $message) {
+                if ($message->start->lte($partialEnd) && $message->end->gte($partialStart)) {
+                    $messages_by_week_partial[$label][] = [
+                        'title' => $message->title,
+                        'url'   => route('message.detail', ['message_id' => $message->id, 'message_content_url' => $message->content_url]),
+                    ];
+                }
+            }
+        }
+
+        $weeks = 3;
+        $firstFullWeekStart = $hasPartial
+            ? $partialStart->copy()->subWeek()
+            : $today->copy()->startOfWeek(CI::MONDAY)->subWeek();
+
+        for ($w = 0; $w < $weeks; $w++) {
+            $ws = $firstFullWeekStart->copy()->subWeeks($w);
+            $we = $ws->copy()->endOfWeek(CI::SUNDAY);
+            $label = $this->formatRangeJp($ws, $we);
+            foreach ($messages as $message) {
+                if ($message->start->lte($we) && $message->end->gte($ws)) {
+                    $messages_by_week_full[$label][] = [
+                        'title' => $message->title,
+                        'url'   => route('message.detail', ['message_id' => $message->id, 'message_content_url' => $message->content_url]),
+                    ];
+                }
+            }
+        }
+
+        $search_query = DB::table('messages')
+            ->leftJoin('message_user as m_u', 'messages.id', '=', 'm_u.message_id')
+            ->where('m_u.user_id', $user->id);
+
+        if ($keyword) {
+            $search_query->where('messages.title', 'like', "%{$keyword}%");
+        }
+        if ($start_date && $end_date) {
+            $search_query->where('end_datetime', '>=', $start_date . ' 00:00:00')
+                ->where('start_datetime', '<=', $end_date . ' 23:59:59');
+        } elseif ($start_date) {
+            $search_query->where('end_datetime', '>=', $start_date . ' 00:00:00');
+        } elseif ($end_date) {
+            $search_query->where('start_datetime', '<=', $end_date . ' 23:59:59');
+        }
+
+        $search_msgs = $search_query
+            ->orderBy('id', 'desc')
+            ->select([
+                'messages.id',
+                'messages.title',
+                'messages.content_url',
+                'messages.start_datetime',
+                'messages.end_datetime'
+            ])
+            ->get();
+
+        $search_messages = [];
+        foreach ($search_msgs as $m) {
+            $search_messages[][] = [
+                'title' => $m->title,
+                'url'   => route('message.detail', ['message_id' => $m->id, 'message_content_url' => $m->content_url]),
+            ];
+        }
+
+        return view(
+            'message.index',
+            compact(
+                'messages_by_day',
+                'messages_by_week_partial',
+                'messages_by_week_full',
+                'start_date',
+                'end_date',
+                'keyword',
+                'search_messages'
+            )
+        );
     }
 
-    // public function detail($message_id)
-    // {
-    //     $user = session('member');
-    //     $crews = session('crews');
-    //     $message = Message::findOrFail($message_id);
+    private function daysBetween(Carbon $start, Carbon $end): array
+    {
+        $days = [];
+        for ($d = $start->copy(); $d->lte($end); $d->addDay()) {
+            $days[] = $d->format('Y-m-d');
+        }
+        return array_reverse($days);
+    }
 
-    //     $user->message()->wherePivot('read_flg', false)->updateExistingPivot($message->id, [
-    //         'read_flg' => true,
-    //         'readed_datetime' => Carbon::now(),
-    //     ]);
+    private function formatDateWithWeekdayJp(string $ymd): string
+    {
+        $dow = ['日', '月', '火', '水', '木', '金', '土'];
+        $c = Carbon::createFromFormat('Y-m-d', $ymd);
+        return $c->format("Y/m/d") . '(' . $dow[$c->dayOfWeek] . ')';
+    }
 
-    //     $message->putCrewRead($crews);
-    //     return redirect()->to($message->content_url)->withInput();
-    // }
+    private function formatRangeJp($start, $end): string
+    {
+        $s = $start instanceof Carbon ? $start : Carbon::parse($start, 'Asia/Tokyo');
+        $e = $end   instanceof Carbon ? $end   : Carbon::parse($end,   'Asia/Tokyo');
+        return $s->isoFormat('YYYY/M/D(ddd)') . ' - ' . $e->isoFormat('YYYY/M/D(ddd)');
+    }
 
     public function detail($message_id)
     {
@@ -171,8 +199,8 @@ class MessageController extends Controller
         $user = session('member');
         $param = [
             'keyword' => $request['keyword'],
-            'search_period' => $request['search_period'],
-            'not_read_check' => $request['not_read_check']
+            'start_date' => $request['start_date'],
+            'end_date' => $request['end_date'],
         ];
 
         if ($request->filled('keyword')) {
