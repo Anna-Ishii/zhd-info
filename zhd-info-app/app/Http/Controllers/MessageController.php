@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Enums\SearchPeriod;
+use App\Http\Requests\MessagesSearchRequest;
 use App\Models\Crew;
 use App\Models\MessageCategory;
 use App\Models\MessageContent;
@@ -19,7 +20,7 @@ require_once(resource_path("outputpdf/libs/fpdi/autoload.php"));
 
 class MessageController extends Controller
 {
-    public function index(Request $request)
+    public function index(MessagesSearchRequest $request)
     {
         session()->put('current_url', $request->fullUrl());
         $keyword = $request->input('keyword');
@@ -104,13 +105,19 @@ class MessageController extends Controller
         if ($keyword) {
             $search_query->where('messages.title', 'like', "%{$keyword}%");
         }
+
+
         if ($start_date && $end_date) {
-            $search_query->where('end_datetime', '>=', $start_date . ' 00:00:00')
-                ->where('start_datetime', '<=', $end_date . ' 23:59:59');
+            $start_carbon = Carbon::createFromFormat('Y-m-d', $start_date)->startOfDay();
+            $end_carbon = Carbon::createFromFormat('Y-m-d', $end_date)->endOfDay();
+            $search_query->where('messages.end_datetime', '>=', $start_carbon)
+                ->where('messages.start_datetime', '<=', $end_carbon);
         } elseif ($start_date) {
-            $search_query->where('end_datetime', '>=', $start_date . ' 00:00:00');
+            $start_carbon = Carbon::createFromFormat('Y-m-d', $start_date)->startOfDay();
+            $search_query->where('end_datetime', '>=', $start_carbon);
         } elseif ($end_date) {
-            $search_query->where('start_datetime', '<=', $end_date . ' 23:59:59');
+            $end_carbon = Carbon::createFromFormat('Y-m-d', $end_date)->endOfDay();
+            $search_query->where('start_datetime', '<=', $end_carbon);
         }
 
         $search_msgs = $search_query
