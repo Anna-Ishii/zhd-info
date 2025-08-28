@@ -10,7 +10,7 @@ RUN mkdir /run/php-fpm
 
 RUN dnf update -y && \
     dnf install -y \
-    httpd wget php-fpm php-mysqli php-json php php-devel \
+    httpd wget php-fpm php-mysqli php-json php php-devel php-gd \
     php-pear php-zip git python3-pip mesa-libGL mesa-libGL-devel \
     mariadb105-server poppler-utils python3-pip qpdf && \
     pip3 install supervisor
