@@ -56,6 +56,26 @@ $(window).on("load", function () {
         window.print();
     });
 
+    /* 業務連絡詳細PDF印刷 */
+    $(document).on("click", ".btn-print-message", function () {
+        const iframe = document.getElementById("pdfFrame");
+        if (iframe && iframe.contentWindow) {
+            // 読み込みが完了してから印刷
+            iframe.onload = function () {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            };
+
+            // 既にロード済みの場合
+            if (iframe.contentDocument.readyState === "complete") {
+                iframe.contentWindow.focus();
+                iframe.contentWindow.print();
+            }
+        } else {
+            alert("PDFが読み込まれていません。");
+        }
+    });
+
     /* 移動先選択モーダル */
     $(document).on("click", ".btnMoveFolder", function () {
         var chkTargetName = $(this).data("target-name");
