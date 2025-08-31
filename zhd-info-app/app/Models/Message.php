@@ -53,7 +53,7 @@ class Message extends Model
 
     public function user(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'message_user','message_id', 'user_id')
+        return $this->belongsToMany(User::class, 'message_user', 'message_id', 'user_id')
             ->using(MessageUser::class)
             ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
@@ -245,7 +245,7 @@ class Message extends Model
 
             return $total_filesize . "B";
 
-        // 単一ファイルの場合の処理
+            // 単一ファイルの場合の処理
         } else {
 
             if (!isset($this->content_url)) return "ファイルがありません";
@@ -273,37 +273,37 @@ class Message extends Model
     public function scopeWaitMessage($query)
     {
         return $query
-                ->where('end_datetime', '>', now('Asia/Tokyo'))
-                ->where(function ($query) {
-                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+            ->where('end_datetime', '>', now('Asia/Tokyo'))
+            ->where(function ($query) {
+                $query->where('start_datetime', '>', now('Asia/Tokyo'))
                     ->orWhereNull('start_datetime');
-                })
-                ->orWhereNull('end_datetime')
-                ->where(function ($query) {
-                    $query->where('start_datetime', '>', now('Asia/Tokyo'))
+            })
+            ->orWhereNull('end_datetime')
+            ->where(function ($query) {
+                $query->where('start_datetime', '>', now('Asia/Tokyo'))
                     ->orWhereNull('start_datetime');
-                })
-                ->where('editing_flg', false);
+            })
+            ->where('editing_flg', false);
     }
 
     // 掲載中
     public function scopePublishingMessage($query)
     {
         return $query
-                ->where('start_datetime', '<=', now('Asia/Tokyo'))
-                ->where(function ($q) {
-                    $q->where('end_datetime', '>', now('Asia/Tokyo'))
-                        ->orWhereNull('end_datetime');
-                })
-                ->where('editing_flg', false);
+            ->where('start_datetime', '<=', now('Asia/Tokyo'))
+            ->where(function ($q) {
+                $q->where('end_datetime', '>', now('Asia/Tokyo'))
+                    ->orWhereNull('end_datetime');
+            })
+            ->where('editing_flg', false);
     }
 
     // 掲載終了
     public function scopePublishedMessage($query)
     {
         return $query
-                ->where('end_datetime', '<=', now('Asia/Tokyo'))
-                ->where('editing_flg', false);
+            ->where('end_datetime', '<=', now('Asia/Tokyo'))
+            ->where('editing_flg', false);
     }
 
     public function scopeViewRateBetween($query, $min = 0, $max = 100)
@@ -319,19 +319,20 @@ class Message extends Model
         $startDateTime = Carbon::now()->subDays($days);
 
         return $query
-                ->where('start_datetime', '<=', now('Asia/Tokyo'))
-                ->where(function ($q) {
-                    $q->where('end_datetime', '>', now('Asia/Tokyo'))
+            ->where('start_datetime', '<=', now('Asia/Tokyo'))
+            ->where(function ($q) {
+                $q->where('end_datetime', '>', now('Asia/Tokyo'))
                     ->orWhereNull('end_datetime');
-                })
-                ->where('editing_flg',
-                    false
-                );
+            })
+            ->where(
+                'editing_flg',
+                false
+            );
 
         return $query->where('start_datetime', '>=', $startDateTime);
     }
 
-    public function putCrewRead(array $crews = []) :Void
+    public function putCrewRead(array $crews = []): Void
     {
         $params = [];
         $crews_unique = array_unique($crews);
@@ -340,7 +341,7 @@ class Message extends Model
                 ->where('crew_id', $crew)
                 ->where('message_id', $this->attributes['id'])
                 ->exists();
-            if($exists) continue; // すでに既読してたら、登録しない
+            if ($exists) continue; // すでに既読してたら、登録しない
             $params[] = [
                 'crew_id' => $crew,
                 'message_id' => $this->attributes['id'],
@@ -361,5 +362,33 @@ class Message extends Model
         ];
 
         return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
+    }
+
+    public function getFormattedStartDateAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd)') : null;
+    }
+
+    public function getFormattedStartTimeAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
+    }
+
+    public function getFormattedEndDateAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd)') : null;
+    }
+
+    public function getFormattedEndTimeAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
     }
 }
