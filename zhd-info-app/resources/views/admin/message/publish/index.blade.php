@@ -435,6 +435,12 @@
                                     <td class="date-time">
                                         <div>{{ $message->formatted_end_datetime }}</div>
                                     </td>
+                                    <!-- 配信店舗数 -->
+                                    <td style="text-align: right">
+                                        <div class="shop-edit-group">
+                                            <span class="shop-count">{{ $message->shop_count }}</span>
+                                        </div>
+                                    </td>
                                     <!-- 状態 -->
                                     <td>{{ $message->status->text() }}</td>
                                     <!-- 操作 -->
