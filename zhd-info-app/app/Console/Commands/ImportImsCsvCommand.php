@@ -525,7 +525,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         $diff_shop_id = array_diff($shop_list, $register_shop_id);
         echo "diff_shop_id: " . implode(',', $diff_shop_id) . "\n";
         $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
-        // $diff_shop_info = Shop::whereIn('id', $diff_shop_id)->get(); // ログ出力用(処理追加予定)
+        $diff_shop_info = Shop::whereIn('id', $diff_shop_id)->get(); // ログ出力用(処理追加予定)
         $delete_shop = array_merge($diff_shop, $close_shop);
         $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
         foreach ($diff_shop_user as $key => $user) {
@@ -564,27 +564,18 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         }
         \Log::info("---削除する店舗---");
         echo "---削除する店舗---\n";
-        if (!empty($diff_shop)) {
-            foreach ($diff_shop as $s) {
-                $output[] = 'delete,' . $s;
-                \Log::info("shopID" . $s);
+        if (!empty($diff_shop_info)) {
+            foreach ($diff_shop_info as $s) {
+                $output[] = $this->formatShopCsvRow($s, 'delete');
+                $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-        // 削除ログ出力をこちらの処理に変更予定
-        // $this->info("---削除する店舗---");
-        // echo "---削除する店舗---\n";
-        // if (!empty($diff_shop_info)) {
-        //     foreach ($diff_shop_info as $s) {
-        //         $output[] = $this->formatShopCsvRow($s, 'delete');
-        //         $this->info("shopID" . $s->id . " 店舗名" . $s->name);
-        //     }
-        // }
 
         \Log::info("---店舗ログ出力終了---");
         echo "---店舗ログ出力終了---\n";
 
         if (count($output)) {
-            $header = '"差分種別","ID","業態名","業態コード","ブランドコード","店舗名","店舗コード","組織コード2","組織コード3","組織コード4","組織コード5","データ作成日時","データ更新日時","表示名"';
+            $header = '"差分種別","ID","業態名","業態コード","ブランド名","ブランドコード","店舗名","表示名","店舗コード","組織名2","組織コード2","組織名3","組織コード3","組織名4","組織コード4","組織名5","組織コード5","データ作成日時","データ更新日時",';
             Storage::disk('local')->put('imscsv/shops_' . $ims_log_id . '.csv', mb_convert_encoding($header . "\r\n" . implode("\r\n", $output), "SJIS-win", "UTF-8"));
         }
     }
@@ -1017,21 +1008,57 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
             $org1 = Organization1::find($shop->organization1_id);
             $organization1_name = $org1 ? $org1->name : '';
         }
+        // organization2のnameを取得
+        $organization2_name = '';
+        if ($shop->organization2_id) {
+            $org2 = Organization2::find($shop->organization2_id);
+            $organization2_name = $org2 ? $org2->name : '';
+        }
+        // organization3のnameを取得
+        $organization3_name = '';
+        if ($shop->organization3_id) {
+            $org3 = Organization3::find($shop->organization3_id);
+            $organization3_name = $org3 ? $org3->name : '';
+        }
+        // organization4のnameを取得
+        $organization4_name = '';
+        if ($shop->organization4_id) {
+            $org4 = Organization4::find($shop->organization4_id);
+            $organization4_name = $org4 ? $org4->name : '';
+        }
+        // organization5のnameを取得
+        $organization5_name = '';
+        if ($shop->organization5_id) {
+            $org5 = Organization5::find($shop->organization5_id);
+            $organization5_name = $org5 ? $org5->name : '';
+        }
+        // brandのnameを取得
+        $brand_name = '';
+        if ($shop->brand_id) {
+            $brands = Brand::find($shop->brand_id);
+            $brand_name = $brands ? $brands->name : '';
+        }
+
         return implode(',', [
             $action,
             $shop->id,
             $organization1_name,
             $shop->organization1_id,
+            $brand_name,
             $shop->brand_id,
             $shop->name,
+            $shop->display_name,
             $shop->shop_code,
+            $organization2_name,
             $shop->organization2_id,
+            $organization3_name,
             $shop->organization3_id,
+            $organization4_name,
             $shop->organization4_id,
+            $organization5_name,
             $shop->organization5_id,
             $shop->created_at,
             $shop->updated_at,
-            $shop->display_name,
         ]);
     }
 
