@@ -62,7 +62,7 @@
                         <div href="#" class="business-contact__recent__item business-contact__item">
                             <div class="item__info">
                                 <p class="item__ttl">{{ $latest_message->title }}</p>
-                                <a href="{{ route('message.detail', $latest_message->id) }}" class="item__link">内容を確認する<img src="asset('img/arrow_right.svg')" alt=""></a>
+                                <a href="{{ route('message.detail', $latest_message->id) }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
                             </div>
                         </div>
                     </div>
