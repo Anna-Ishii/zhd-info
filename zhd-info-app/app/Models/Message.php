@@ -315,9 +315,6 @@ class Message extends Model
 
     public function scopeStartDatetimeFromDayAgo(Builder $query, $days)
     {
-        // 特定の日数前から現在までの期間を計算
-        $startDateTime = Carbon::now()->subDays($days);
-
         return $query
             ->where('start_datetime', '<=', now('Asia/Tokyo'))
             ->where(function ($q) {
@@ -328,8 +325,6 @@ class Message extends Model
                 'editing_flg',
                 false
             );
-
-        return $query->where('start_datetime', '>=', $startDateTime);
     }
 
     public function putCrewRead(array $crews = []): Void

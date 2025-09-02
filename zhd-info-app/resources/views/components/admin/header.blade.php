@@ -57,38 +57,4 @@
             <div class="overlay" id="hamburgerOverlay"></div>
         </div>
     </div>
-    <div class="l-header__bottom">
-        <div class="l-header__bottom__wrap">
-            <div class="l-header__back"><a class="prev"
-                    href="/admin/message/publish?{{ session('message_publish_url') }}"><img
-                        src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
-            <p class="l-header__bottom__ttl">業務連絡</p>
-        </div>
-        <div class="l-header__bottom__link">
-            <button data-toggle="modal" data-target="#messageImportModal"><img
-                    src="{{ asset('/img/inport_icon.svg') }}" alt="">インポート</button>
-            <button
-                onclick="location.href=#"><img
-                    src="{{ asset('/img/export_icon.svg') }}" alt="">エクスポート</button>
-            <a href="#">
-                <img src="{{ asset('/img/register_icon.svg') }}" alt="">新規登録
-            </a>
-        </div>
-    </div>
-    <div class="l-header__link">
-        <div class="l-header__link__wrap">
-            <div class="l-header__link__text"><a class="page_link active"
-                    href="{{ route('admin.message.publish.index') }}">業務連絡一覧</a></div>
-            <div class="l-header__link__text"><a class="page_link" href="{{ route('admin.analyse.index') }}">閲覧状況</a>
-            </div>
-            <div class="l-header__link__text"><a class="page_link"
-                    href="{{ route('admin.account.index') }}">店舗アカウント</a></div>
-            <div class="l-header__link__text"><a class="page_link"
-                    href="{{ route('admin.account.mail.index') }}">DM/BM/AMメール配信設定</a></div>
-            <div class="l-header__link__text"><a class="page_link"
-                    href="{{ route('admin.account.adminmail.index') }}">本部従業員への配信設定</a></div>
-            <div class="l-header__link__text"><a class="page_link" href="{{ route('admin.manage.index') }}">IMS連携</a>
-            </div>
-        </div>
-    </div>
 </header>

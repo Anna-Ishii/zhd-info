@@ -28,6 +28,8 @@
     {{-- ($admin, $message は子ビューから渡されます) --}}
     <x-admin.header :admin="$admin" :message="$message" />
 
+    @yield('page_header')
+
     @yield('content')
 
     {{-- 共通のJSファイル --}}
