@@ -556,6 +556,14 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
         // JPのオープン前の組織を削除
         if ($organization1->id == 1) {
@@ -700,6 +708,14 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1125,6 +1141,14 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
         // JPのオープン前の組織を削除
         if ($message->organization1_id == 1) {
@@ -1338,6 +1362,14 @@ class MessagePublishController extends Controller
             ->orderBy("organization5_order_no", "asc")
             ->get()
             ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -2914,6 +2946,14 @@ class MessagePublishController extends Controller
                 ->orderBy("organization5_order_no", "asc")
                 ->get()
                 ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
             // 店舗情報を取得する
             $brand_ids = $brand_list->pluck('id')->toArray();
@@ -3023,6 +3063,14 @@ class MessagePublishController extends Controller
                 ->orderBy("organization5_order_no", "asc")
                 ->get()
                 ->toArray();
+        // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
+        $organization_list = collect($organization_list)
+        ->unique(function ($item) {
+            // 組織IDと名称でユニーク化
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
 
             // 店舗情報を取得する
             $brand_ids = $brand_list->pluck('id')->toArray();
