@@ -6,8 +6,25 @@
 
 {{-- 'styles' スタックにページ固有のCSSを追加する --}}
 @push('styles')
-    <link href="{{ asset('/admin/css/show-phase3.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/show.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 @endpush
+
+@section('page_header')
+    <div class="l-header__bottom">
+        <div class="l-header__bottom__wrap">
+            <div class="l-header__back"><a class="prev"
+                    href="/admin/message/publish?{{ session('message_publish_url') }}"><img
+                        src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
+            <p class="l-header__bottom__ttl">業務連絡</p>
+        </div>
+        <div class="l-header__bottom__link">
+            <button
+                onclick="location.href='{{ route('admin.message.publish.export', $message->id) }}?{{ http_build_query(request()->query()) }}'"><img
+                    src="{{ asset('/img/export_icon.svg') }}" alt="">エクスポート</button>
+        </div>
+    </div>
+    <x-admin.message-nav />
+@endsection
 
 {{-- 'content' セクションにメインコンテンツを記述する --}}
 @section('content')
