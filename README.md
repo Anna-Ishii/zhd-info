@@ -80,13 +80,6 @@
     を入力して\[テスト接続\]→接続済みと出たら問題なし
     \[終了\]をクリック
 12. データベースの各テーブルにデータが入っていることを確認
-13. ブラウザから
-    http://127.0.0.1/member/auth
-    (ログインID&パスワード:bb5057)と
-    http://127.0.0.1/admin/auth
-    (社員番号&パスワード:admin)から
-    それぞれアクセスし、ログインができること、
-    メッセージやマニュアルなどが表示されることを確認
 
 ### mysqlコマンドが使用できない場合
 
@@ -113,13 +106,43 @@ dpkg -l | grep mysql-server
 11. 「OK」をクリック→再起動
 12. Docker Desktopを起動して「zhd-info」のコンテナを起動しておく。 -->
 
-## ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
+## 依存ファイル(vendor)の生成とAPP_KEYの生成
+1. zhd-infoを開いた状態のVSCodeで
+   画面上部の\[ターミナル\]から\[新しいターミナル\]をクリックするか
+   Ctrl+Shift+@でターミナルを開く
+2. vendor生成
+   ```
+   docker compose exec app bash -lc "cd /var/www/zhd-info-app &&
+    composer install --no-interaction --prefer-dist --ignore-platform-reqs"
+   ```
+   APP_KEYの生成(未設定の場合発行。設定済なら無視されます)
+   ```
+   docker compose exec app bash -lc "cd /var/www/zhd-info-app &&
+   `php artisan key:generate || true`"
+   ```
+   のコマンドを実行
+3. キャッシュクリア
+   ```
+   docker compose exec app php artisan config:clear
+   docker compose exec app php artisan route:clear
+   docker compose exec app php artisan cache:clear
+   ```
+4. ブラウザから
+    http://127.0.0.1/member/auth
+    (ログインID&パスワード:bb5057)と
+    http://127.0.0.1/admin/auth
+    (社員番号&パスワード:admin)から
+    それぞれアクセスし、ログインができること、
+    メッセージやマニュアルなどが表示されることを確認
+
+### ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
 
 <!-- 1. zhd-info\zhd-info-appのディレクトリでbashを開きsudo chmod 777 -R storage/を入力→Enter -->
 1. Docker Desktopでzhd-infoの左の>をクリック
 2. zhd-info-appをクリック
-3. Execタブに切り替えてsudo chmod 777 -R storage/を入力→Enter
+3. Execタブに切り替えてchmod 777 -R storage/を入力→Enter
 4. 再度アクセスを試みてください
+
 
 ## ショートカットコマンド
 
