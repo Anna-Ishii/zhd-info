@@ -356,6 +356,8 @@ function processInChunks(array, chunkSize, callback, doneCallback) {
 
 // 全店ボタン処理
 $(document).on('click', 'input[id="checkAll"][name="organizationAll"]', function() {
+    var overlay = $('#overlay');
+    overlay.css('display', 'block'); // オーバーレイを表示
     removeSelectedClass();
     // 全ての organization_shops[] チェックボックスをチェックする
     $('#storeModal input[name="organization_shops[]"]').each(function() {
@@ -386,6 +388,10 @@ $(document).on('click', 'input[id="checkAll"][name="organizationAll"]', function
     $(this).addClass("check-selected");
     // csvインポートボタン変更
     $('#importCsv').attr('data-target', '#messageStoreImportModal');
+    // オーバーレイを3秒後に非表示にする
+    setTimeout(function() {
+        overlay.css('display', 'none');
+    }, 3000);
 });
 
 
