@@ -39,8 +39,6 @@
    開いていなければ左側最上のエクスプローラアイコンを選択
 5. zhd-info-app/.env.localをコピー(Ctrl+C)→その場で貼り付け(Ctrl+V)して
    コピーしたファイルの名称を「.env」に変更
-6. .envファイルを開き、APP_URL=http://localhostを
-   APP_URL=http://127.0.0.1に変更
 
 ## Dockerコンテナの構築
 
@@ -54,10 +52,6 @@
    zhd-infoのステータスが実行中(Running)になっているか確認
    (Nameの左が●になっているか、またはActionsが🔳になっていれば実行中)
 5. 実行中になっていなければDocker Desktopからzhd-infoの▷をクリック
-6. ブラウザのアドレスバーにhttp://127.0.0.1を入力して
-   店舗ログイン画面に遷移するか確認
-   (遷移時のユーザー名zensho、パスワードzensho777)
-   ※この時点でログインしてもエラーになるので一旦そのまま
 
 ## データベースのデータ準備
 
@@ -128,12 +122,22 @@ dpkg -l | grep mysql-server
    docker compose exec app php artisan cache:clear
    ```
 4. ブラウザから
-    http://127.0.0.1/member/auth
+    http://localhost/member/auth
     (ログインID&パスワード:bb5057)と
-    http://127.0.0.1/admin/auth
+    http://localhost/admin/auth
     (社員番号&パスワード:admin)から
     それぞれアクセスし、ログインができること、
     メッセージやマニュアルなどが表示されることを確認
+    (両方共にベーシック認証のユーザー名zensho、パスワードzensho777)
+
+---
+
+### http://localhost～でアクセスした際にlocalhost はデータを送信しませんでした。と出た場合
+1. .envファイルを開き、APP_URL=http://localhostを
+   APP_URL=http://127.0.0.1 に変更
+2.  http://127.0.0.1/member/auth と
+    http://127.0.0.1/admin/auth から
+    再度アクセスを試行してみて下さい。
 
 ### ログインの際などにlaravel.logのアクセス権限が無いエラーが出た場合
 
@@ -143,6 +147,7 @@ dpkg -l | grep mysql-server
 3. Execタブに切り替えてchmod 777 -R storage/を入力→Enter
 4. 再度アクセスを試みてください
 
+---
 
 ## ショートカットコマンド
 
