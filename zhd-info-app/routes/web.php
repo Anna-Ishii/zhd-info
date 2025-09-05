@@ -154,7 +154,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         Route::post('/', [ChangePasswordController::class, 'edit'])->name('edit');
         });
     });
-    Route::group(['prefix' => 'manage', 'as' => 'manage', 'middleware' => 'check.allowpage:ims'], function () {
+    Route::group(['prefix' => 'manage', 'as' => 'manage.', 'middleware' => 'check.allowpage:ims'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
     });
     Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
