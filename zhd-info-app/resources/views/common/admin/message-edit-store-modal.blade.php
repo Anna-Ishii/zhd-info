@@ -272,6 +272,37 @@
                                             </ul>
                                         </div>
                                     </li>
+                                    @else
+                                    <li class="list-group-item">
+                                        <div>
+                                            <div>
+                                                <label style="font-weight: 500 !important; cursor: pointer;">
+                                                        その他
+                                                </label>
+                                                <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
+                                                    data-target="#storeCollapse{{ $index }}"
+                                                    style="float: right; cursor: pointer;"></div>
+                                            </div>
+                                            <ul id="storeCollapse{{ $index }}" class="list-group mt-2 collapse">
+                                                @foreach ($organization['other_shop_list'] as $index => $shop)
+                                                    @if (isset($shop['display_name']))
+                                                        <li class="list-group-item">
+                                                            <div>
+                                                                <label style="font-weight: 500 !important; cursor: pointer;">
+                                                                    <input type="checkbox" name="organization_shops[]"
+                                                                        data-store-id="{{ $shop['id'] }}"
+                                                                        value="{{ $shop['id'] }}"
+                                                                        class="checkCommon mr8 shop-checkbox"
+                                                                        >
+                                                                        {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
+                                                                </label>
+                                                            </div>
+                                                        </li>
+                                                    @endif
+                                                @endforeach
+                                            </ul>
+                                        </div>
+                                    </li>
                                 @endif
                             @endforeach
                         </ul>

@@ -557,13 +557,7 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
         // JPのオープン前の組織を削除
         if ($organization1->id == 1) {
@@ -607,6 +601,9 @@ class MessagePublishController extends Controller
             });
             $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
                 return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['other_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
             });
             return $org;
         }, $organization_list);
@@ -709,13 +706,7 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -752,6 +743,9 @@ class MessagePublishController extends Controller
             });
             $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
                 return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['other_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
             });
             return $org;
         }, $organization_list);
@@ -1142,13 +1136,7 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
         // JPのオープン前の組織を削除
         if ($message->organization1_id == 1) {
@@ -1192,6 +1180,9 @@ class MessagePublishController extends Controller
             });
             $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
                 return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['other_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
             });
             return $org;
         }, $organization_list);
@@ -1363,13 +1354,7 @@ class MessagePublishController extends Controller
             ->get()
             ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
         // 店舗情報を取得する
         $brand_ids = $brand_list->pluck('id')->toArray();
@@ -1406,6 +1391,9 @@ class MessagePublishController extends Controller
             });
             $org['organization2_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
                 return $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
+            });
+            $org['other_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
+                return is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']);
             });
             return $org;
         }, $organization_list);
@@ -2947,13 +2935,7 @@ class MessagePublishController extends Controller
                 ->get()
                 ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
             // 店舗情報を取得する
             $brand_ids = $brand_list->pluck('id')->toArray();
@@ -2983,6 +2965,7 @@ class MessagePublishController extends Controller
                 $org['organization4_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']));
                 $org['organization3_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 $org['organization2_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                $org['other_shop_list'] = array_filter($all_shops, fn($shop) => is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 return $org;
             }, $organization_list);
 
@@ -3064,13 +3047,7 @@ class MessagePublishController extends Controller
                 ->get()
                 ->toArray();
         // ADとHSで配信店舗の二重登録が発生するため、組織5のIDと名称でユニーク化
-        $organization_list = collect($organization_list)
-        ->unique(function ($item) {
-            // 組織IDと名称でユニーク化
-            return $item['organization5_id'] . '-' . $item['organization5_name'];
-        })
-        ->values()
-        ->all();
+        $organization_list = $this->deduplicateOrganizationList($organization_list);
 
             // 店舗情報を取得する
             $brand_ids = $brand_list->pluck('id')->toArray();
@@ -3100,6 +3077,7 @@ class MessagePublishController extends Controller
                 $org['organization4_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization4_id'] == $org['organization4_id'] && is_null($shop['organization5_id']));
                 $org['organization3_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization3_id'] == $org['organization3_id'] && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 $org['organization2_shop_list'] = array_filter($all_shops, fn($shop) => $shop['organization2_id'] == $org['organization2_id'] && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
+                $org['other_shop_list'] = array_filter($all_shops, fn($shop) => is_null($shop['organization2_id']) && is_null($shop['organization3_id']) && is_null($shop['organization4_id']) && is_null($shop['organization5_id']));
                 return $org;
             }, $organization_list);
 
@@ -3549,4 +3527,14 @@ class MessagePublishController extends Controller
         // 正規表現で日付文字列から曜日を削除
         return preg_replace('/\(.+\)/', '', $dateString);
     }
+
+    // 組織5のIDと名称でユニーク化する関数
+    private function deduplicateOrganizationList($organization_list) {
+    return collect($organization_list)
+        ->unique(function ($item) {
+            return $item['organization5_id'] . '-' . $item['organization5_name'];
+        })
+        ->values()
+        ->all();
+}
 }
