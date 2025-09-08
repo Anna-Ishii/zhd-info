@@ -196,8 +196,21 @@ class MessageController extends Controller
             }
         }
 
+        // 新着業務連絡を取得する
+        $user = session('member');
+
+        $start_date_time = Carbon::now()->subDays(7)->startOfDay();
+
+        $latest_messages = $user->message()
+            ->whereBetween('start_datetime', [$start_date_time, now('Asia/Tokyo')])
+            ->where(fn($q) => $q->where('end_datetime', '>', now('Asia/Tokyo'))->orWhereNull('end_datetime'))
+            ->where('editing_flg', false)
+            ->latest('start_datetime')
+            ->get();
+
         return view('message.detail', [
             'message' => $message,
+            'latest_messages' => $latest_messages,
         ]);
     }
 
@@ -257,26 +270,10 @@ class MessageController extends Controller
             ]);
             DB::commit();
 
-            // SKの場合、PDFを別ページで表示
-            if ($message->organization1_id === 8) {
-                // detailメソッドにリダイレクト
-                $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
-                return redirect()->to($url)->withInput();
-            } else {
-                if (!empty($message_content)) {
-                    if (count($message_content) > 1) {
-                        $first_content = $message_content[0];
-                        if ($message->content_name !== $first_content['content_name']) {
-                            $message->content_url = $first_content['content_url'];
-                        }
-                    } else {
-                        $single_content = $message_content[0];
-                        $message->content_url = $single_content['content_url'];
-                    }
-                }
-                // 既読が無事できたらpdfへ
-                return redirect()->to($message->content_url)->withInput();
-            }
+            // detailメソッドにリダイレクト
+            $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
+            return redirect()->to($url)->withInput();
+
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();

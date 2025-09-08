@@ -20,61 +20,61 @@
             document.head.appendChild(link);
         }
     </script>
+
+    <link href="{{ asset('/css/phase3/business-contact.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 @endpush
 
+@section('backUrl', route('message.index', ['search_period' => 'all']))
 @section('title', '業務連絡')
     @section('previous_page')
         <a href="{{{ session('current_url', route('message.index')) }}}">業務連絡</a>
     @endsection
 
     @section('content')
-        <header class="header header--detail">
-            <section class="header__inner flex">
-                <div class="header__titleBox flex">
-                    <section class="header__title">
-                        <h1 class="txtBold txtBlue">{{ $message->title }}</h1>
-                        <time datetime="{{ $message->formatted_start_datetime }}" class="mr8 txtBold">{{ $message->formatted_start_datetime }}</time>
-                    </section>
-                </div>
-                <ul class="header__menu flex">
-                    <li>
-                        <button type="button" class="btnPrint">
-                            <img src="{{ asset('img/icon_print.svg') }}" alt="印刷する">
-                        </button>
-                    </li>
-                </ul>
-            </section>
-        </header>
 
-    {{-- <main class="main message">
-        <div class="main__supplement mb26">
-            <p>{{ $message->detail }}</p>
-            <p class="test"></p>
-        </div>
-        <div class="main__inner">
-            <div class="main__fileView">
-                <!-- ?file=の後を表示したいPDFのパスに変更してください -->
-                <iframe src="/js/pdfjs/web/viewer.html?file={{ asset($message->content_url) }}"></iframe>
-            </div>
-        </div>
-    </main> --}}
-
-    <main class="main manual">
+    <main>
+    <div class="business-contact business-contact__detail">
         <input id="manual_id" value="{{$message->id}}" hidden>
-        <div class="main__inner">
+        <div class="business-contact__detail__head">
+            <h2 class="business-contact__detail__head__ttl">{{ $message->title }}</h2>
+            <button class="business-contact__detail__head__btn btn-print-message">
+                <img src="{{ asset('img/icon_print.svg') }}" alt="印刷する">
+                印刷
+            </button>
+        </div>
+        <div class="business-contact__detail__content">
             <div class="main__supplement main__box--single thumb_parents flex">
-                {{-- PDF --}}
-                <div class="main__supplement__detail">
-
-                    @if(isset($message->main_file))
-                        <div class="pdf-container all" data-url="{{ asset($message->main_file['file_url']) }}"></div>
-                    @else
-                        <div class="pdf-container all" data-url="{{ asset($message->content_url) }}"></div>
-                    @endif
-
+                <div class="pdf-container" style="width:100%; height:80vh;">
+                    <iframe id="pdfFrame" src="{{ asset($message->content_url . "#toolbar=0&navpanes=0") }}"
+                        width="100%"
+                        height="100%"
+                        style="border:none;">
+                    </iframe>
                 </div>
             </div>
         </div>
+        <div class="business-contact__recent">
+        <h2 class="business-contact__recent__ttl">新着業務連絡</h2>
+            <div class="swiper business-contact__recent__swiper">
+                <div class="swiper-wrapper business-contact__recent__list">
+                    @foreach($latest_messages as $latest_message)
+                    <div class="swiper-slide">
+                        <div href="#" class="business-contact__recent__item business-contact__item">
+                            <div class="item__info">
+                                <p class="item__ttl">{{ $latest_message->title }}</p>
+                                <a href="{{ route('message.detail', $latest_message->id) }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+        <!-- Add navigation arrows -->
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+</div>
     </main>
 
     @include('common.footer')
@@ -100,4 +100,7 @@
         }
     </script>
     <script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="{{ asset('/js/businessContactSwiper.js')}}?date={{ date('Ymd') }}"></script>
 @endsection
