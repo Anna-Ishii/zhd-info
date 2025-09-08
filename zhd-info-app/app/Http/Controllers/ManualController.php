@@ -52,7 +52,7 @@ class ManualController extends Controller
                 return $manual;
             });
 
-        return view('manual.index-new', [
+        return view('manual.index', [
             'allManuals' => $allManuals,
             'categoryManuals' => $categoryManuals,
             'categories' => $categories,
