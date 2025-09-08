@@ -913,6 +913,11 @@ $(document).ready(function () {
                     orgId = organization['organization2_id'];
                     orgName = organization['organization2_name'];
                     shopList = organization['organization2_shop_list'] || {};
+                } else{
+                    org = 'other';
+                    orgId = organization['other_id'];
+                    orgName = organization['other_name'];
+                    shopList = organization['other_shop_list'] || {};
                 }
 
                 if (orgId && orgName) {
@@ -932,7 +937,6 @@ $(document).ready(function () {
                             </div>
                         </li>
                     `).join('');
-
                     organizationItems += `
                         <li class="list-group-item">
                             <div>
@@ -956,9 +960,41 @@ $(document).ready(function () {
                             </div>
                         </li>
                     `;
+                } else {
+                    let shopsHtml = Object.values(shopList).map(shop => `
+                        <li class="list-group-item">
+                            <div>
+                                <label style="font-weight: 500 !important; cursor: pointer;">
+                                    <input type="checkbox" name="organization_shops[]"
+                                        data-store-id="{{ $shop['id'] }}"
+                                        value="{{ $shop['id'] }}"
+                                        class="checkCommon mr8 org-checkbox"
+                                        >
+                                        ${shop.shop_code} ${shop.display_name}
+                                </label>
+                            </div>
+                        </li>
+                    `).join('');
+                    organizationItems += `
+                        <li class="list-group-item">
+                            <div>
+                                <div>
+                                    <label style="font-weight: 500 !important; cursor: pointer;">
+                                        その他
+                                    </label>
+                                    <div id="id-collapse" data-toggle="collapse" aria-expanded="false"
+                                        data-target="#storeCollapse${index}-${messageId}"
+                                        style="float: right; cursor: pointer;"></div>
+                                </div>
+                                <ul id="storeCollapse${index}-${messageId}" class="list-group mt-2 collapse">
+                                    ${shopsHtml}
+                                </ul>
+                            </div>
+                        </li>
+                    `;
                 }
             });
-
+                            
             let shopItems = Array.isArray(allShopList) ? allShopList.map(shop => `
                 <li class="list-group-item">
                     <div>
