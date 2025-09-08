@@ -7,7 +7,7 @@
     </div>
     <div class="l-header__bottom">
         <div class="l-header__bottom__wrap">
-            <div class="l-header__back"><a class="prev" href="#"><img src="/assets/img/back-icon.svg" alt="">戻る</a></div>
+            <div class="l-header__back"><a class="prev" href="@yield('backUrl')"><img src="{{ asset('img/back-icon.svg') }}" alt="">戻る</a></div>
             <p class="l-header__bottom__ttl">@yield('title')</p>
         </div>
     </div>
