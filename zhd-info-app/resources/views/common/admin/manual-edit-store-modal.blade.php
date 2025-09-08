@@ -291,6 +291,11 @@
                                                                         data-store-id="{{ $shop['id'] }}"
                                                                         value="{{ $shop['id'] }}"
                                                                         class="checkCommon mr8 shop-checkbox"
+                                                                        @if (request()->old())
+                                                                            {{ in_array((string) $shop['id'], $organization_shops, true) ? 'checked' : '' }}
+                                                                        @else
+                                                                            {{ in_array($shop['id'], $target_org['shops'], true) ? 'checked' : '' }}
+                                                                        @endif
                                                                         >
                                                                         {{ $shop['shop_code'] }} {{ $shop['display_name'] }}
                                                                 </label>
