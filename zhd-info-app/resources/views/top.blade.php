@@ -65,7 +65,7 @@
                 @if ($organization1_id === 8)
                     <div class="top__link" style="border: 0px solid #fff;"></div>
                 @else
-                    <a href="/manual?category_menu_active=true" class="top__link">
+                    <a href="{{ route('manual.index', ['type' => 'all']) }}" class="top__link">
                         @if ($recent_manuals->count() > 0)
                             <p class="top__link__notice">新着{{ $recent_manuals->count() }}件</p>
                         @endif
