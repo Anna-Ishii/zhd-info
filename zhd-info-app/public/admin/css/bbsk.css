@@ -1,0 +1,673 @@
+@charset "UTF-8";
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Breakpoint　値はサイトに合わせて変更しましょう
+------------------------------------------------------*/
+/*------------------------------------------------------
+    このファイルは基本触らない
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 18px auto;
+}
+.pagination span {
+    font-size: 16px;
+    background: #fff;
+    min-width: 54px;
+    min-height: 44px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #0050c0;
+    border-right: 1px solid #0050c0;
+    border-bottom: 1px solid #0050c0;
+    cursor: pointer;
+}
+.pagination span.disabled svg {
+    opacity: 0.32;
+}
+.pagination span.current-page {
+    background: #0050c0;
+    color: #fff;
+}
+.pagination span:first-of-type {
+    border-left: 1px solid #0050c0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+.pagination span:last-of-type {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+table,
+td,
+th {
+    border-collapse: collapse;
+}
+table thead {
+    background: #f4f5f6;
+}
+table thead th {
+    height: 32px;
+    vertical-align: middle;
+    font-weight: bold;
+    border-bottom: 1px solid #dadadb;
+    padding: 4px;
+    min-height: 25px;
+    font-size: 1.4rem;
+    letter-spacing: 0;
+    text-align: left;
+}
+table thead th:last-of-type {
+    text-align: center;
+}
+table thead .column1 {
+    width: 48px;
+}
+table thead .column2 {
+    width: 100px;
+}
+table thead .column3 {
+    width: 64px;
+}
+table thead .column4 {
+    width: 200px;
+}
+table thead .column5 {
+    min-width: 270px;
+}
+table thead .column6 {
+    width: 76px;
+}
+table thead .column7 {
+    width: 210px;
+    border-left: 1px solid rgba(217, 217, 217, 0.3);
+}
+table thead .column8 {
+    width: 80px;
+    border-left: 1px solid rgba(217, 217, 217, 0.3);
+}
+table thead .column9 {
+    width: 190px;
+    border-left: 1px solid rgba(217, 217, 217, 0.3);
+}
+table thead .column10 {
+    width: 48px;
+    border-left: 1px solid rgba(217, 217, 217, 0.3);
+}
+table tbody tr {
+    background: #fff;
+}
+table tbody tr td {
+    width: 30px;
+    min-height: 25px;
+    font-size: 1.2rem;
+    letter-spacing: 0;
+    height: auto;
+    min-height: 54px;
+    vertical-align: middle;
+    padding: 10px 8px;
+}
+table tbody tr td.column7,
+table tbody tr td.column8,
+table tbody tr td.column9,
+table tbody tr td.column10 {
+    border-left: 1px solid rgba(217, 217, 217, 0.3);
+}
+table tbody tr td.column1,
+table tbody tr td.column2,
+table tbody tr td.column8 {
+    text-align: center;
+}
+table tbody tr td.column5 a {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+    line-height: 1.5em;
+    max-height: 3em;
+}
+table tbody tr td.edit button,
+table tbody tr td.delete button,
+table tbody tr td.type button {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+table tbody tr td.edit img,
+table tbody tr td.delete img,
+table tbody tr td.type img {
+    display: block;
+    margin: 0 auto;
+}
+table tbody tr:last-of-type td {
+    border-bottom: none;
+}
+
+.l-header__bottom {
+    margin: 0;
+}
+.l-header__link {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 7px 60px;
+    box-shadow: 0 4px 6px -4px rgba(0, 81, 163, 0.2);
+}
+.l-header__link__wrap {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+.l-header__link__text .page_link {
+    font-size: 1.6rem;
+    color: #0051a3;
+}
+.l-header__link__text .page_link:hover {
+    opacity: 0.7;
+}
+.l-header__link__text .page_link.active {
+    font-weight: 700;
+}
+
+.c-btn {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 40px auto;
+    gap: 40px;
+    text-align: center;
+}
+.c-btn__white {
+    width: 200px;
+    font-size: 1.8rem;
+    line-height: 22px;
+    font-weight: bold;
+    background: transparent;
+    color: #0050c0;
+    border: 1px solid #0050c0;
+    border-radius: 100px;
+    padding: 16px 0px;
+}
+.c-btn__blue {
+    width: 200px;
+    font-size: 1.8rem;
+    line-height: 22px;
+    font-weight: bold;
+    color: white;
+    background: #0050c0;
+    border: none;
+    border-radius: 100px;
+    padding: 16px 0px;
+}
+.c-btn .disabled-btn {
+    opacity: 0.32;
+    pointer-events: none;
+}
+
+.custom-date-picker {
+    position: relative;
+    display: inline-block;
+}
+.custom-date-picker .calendar-icon {
+    position: absolute;
+    right: 10px;
+    top: 52%;
+    background: url("/img/calendar_gray.svg") no-repeat center/cover;
+    width: 20px;
+    height: 20px;
+    pointer-events: none;
+}
+.custom-date-picker .date-input {
+    color: #8e9199 !important;
+}
+.custom-date-picker .date-input.filled {
+    background-color: white;
+    color: #1b2131 !important;
+    border: 1px solid #8e9199 !important;
+    border-radius: 4px;
+}
+.custom-date-picker .hidden {
+    display: none;
+}
+
+/* 日付入力欄のスタイル */
+.custom-calendar-input .custom-calendar {
+    position: absolute;
+    z-index: 1;
+    top: calc(100% + 1px);
+    left: 0px;
+    background-color: #fff;
+    border-radius: 4px;
+    padding: 16px;
+    box-shadow: 0 3px 10px rgba(27, 33, 49, 0.5);
+}
+.custom-calendar-input .custom-calendar.end-date {
+    right: 0px;
+    left: auto;
+}
+.custom-calendar-input.hidden {
+    display: none;
+}
+.custom-calendar-input .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 0 10px;
+    font-size: 16px;
+}
+.custom-calendar-input .calendar-header span {
+    font-weight: bold;
+}
+.custom-calendar-input .calendar-header button {
+    width: 32px;
+    height: 32px;
+    border: none;
+    cursor: pointer;
+}
+.custom-calendar-input .calendar-header .prev-month {
+    background: url("/img/prev-month.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-header .next-month {
+    background: url("/img/next-month.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-header .close-calendar {
+    background: url("/img/close_icon.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+}
+.custom-calendar-input .calendar-day,
+.custom-calendar-input .calendar-weekday {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    margin: 0;
+    cursor: pointer;
+}
+.custom-calendar-input .calendar-day.out-of-month {
+    color: #f2f2f3;
+    pointer-events: none;
+}
+.custom-calendar-input .calendar-day.today {
+    color: #fff;
+    background: #0050c0;
+    border-radius: 50%;
+    font-weight: bold;
+}
+.custom-calendar-input .calendar-today-button {
+    display: block;
+    margin: 16px 6px 10px auto;
+    background: transparent;
+    border: none;
+    color: #0050c0;
+    font-size: 16px;
+}
+
+/* 時間入力欄のスタイル */
+.time-picker {
+    width: 160px;
+    border: 1px solid #8e9199;
+    border-radius: 4px;
+}
+.time-picker input {
+    border-radius: 4px;
+    font-weight: 400;
+    padding: 9px 10px 9px 16px !important;
+}
+
+.custom-select__wrap {
+    position: relative;
+    width: 100%;
+    font-size: 14px;
+}
+.custom-select__wrap .custom-select {
+    position: relative;
+    cursor: pointer;
+    background: #fff;
+    padding: 10px 25px 10px 16px;
+    border-radius: 4px;
+}
+.custom-select__wrap .custom-select .custom-options {
+    position: absolute;
+    top: calc(100% + 2px);
+    left: 0;
+    right: 0;
+    background: #fff;
+    display: none;
+    max-height: 380px;
+    overflow-y: scroll;
+    z-index: 10;
+    flex-direction: column;
+    border-radius: 4px;
+    box-shadow: 0 3px 10px rgba(27, 33, 49, 0.5);
+}
+.custom-select__wrap .custom-select .custom-options .custom-option {
+    padding: 10px 0 10px 16px;
+    font-size: 1.6rem;
+    cursor: pointer;
+}
+.custom-select__wrap .custom-select .custom-options .custom-option:hover {
+    background-color: #f0f0f0;
+}
+.custom-select__wrap .custom-select.open .custom-options {
+    display: flex;
+}
+.custom-select__wrap .custom-select.open .custom-select__trigger::after {
+    background: url("/img/select_toggle_open.svg") no-repeat center/cover;
+}
+.custom-select__wrap .custom-select__trigger {
+    display: block;
+    width: 100%;
+    font-size: 1.6rem;
+}
+.custom-select__wrap .custom-select__trigger::after {
+    width: 24px;
+    aspect-ratio: 1;
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: url("/img/select_toggle.svg") no-repeat center/cover;
+}
+
+.custom-date-picker {
+    width: 100%;
+}
+.custom-date-picker input {
+    font-size: 1.6rem;
+    width: 100%;
+}
+.custom-date-picker .time-picker .time-input {
+    background: transparent;
+}
+.custom-date-picker .calendar-icon {
+    top: 22%;
+}
+
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+.modal-overlay .modal {
+    min-width: 924px;
+    background: white;
+    padding: 40px 64px;
+    border-radius: 10px;
+    text-align: center;
+}
+.modal-overlay .modal p {
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2.4rem;
+    font-weight: bold;
+}
+
+.bbsk {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 32px;
+    padding: 0 0 40px 0;
+}
+.bbsk__search {
+    width: 100%;
+    padding: 16px 40px;
+}
+.bbsk__search select {
+    text-overflow: ellipsis; /* 省略記号を表示 */
+}
+.bbsk__search .report-search__item {
+    width: 100%;
+    font-size: 1.6rem;
+    border-radius: 4px;
+    overflow: hidden;
+}
+.bbsk__search .report-search__item label {
+    margin: 0 0 4px 0;
+    font-weight: bold;
+}
+.bbsk__search .report-search__item input {
+    display: block;
+    width: 100%;
+    font-size: 1.6rem;
+    padding: 10px 36px 10px 16px;
+    border: none;
+    background: #fff;
+}
+.bbsk__search .report-search__item .input-icon {
+    position: relative;
+}
+.bbsk__search .report-search__item .input-icon .icon {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: #999;
+    font-size: 16px;
+}
+.bbsk__search .filter-bar {
+    display: grid;
+    grid-template-columns: 112px 112px 112px 112px 344px minmax(318px, 1fr) 128px;
+    gap: 8px;
+}
+.bbsk__search .filter-bar .field {
+    display: grid;
+    gap: 6px;
+    min-width: 0;
+}
+.bbsk__search .filter-bar .field .label {
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+.bbsk__search .filter-bar .field .control,
+.bbsk__search .filter-bar .field .control input,
+.bbsk__search .filter-bar .field .control select {
+    width: 100%;
+    box-sizing: border-box;
+}
+.bbsk__search .filter-bar .field .control input,
+.bbsk__search .filter-bar .field .control select {
+    height: 44px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 4px;
+    background: #fff;
+}
+.bbsk__search .filter-bar .field--range .control {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 8px;
+    align-items: center;
+}
+.bbsk__search .filter-bar .field--range .tilde {
+    color: #8e9199;
+}
+.bbsk__search .filter-bar .field .searchbox {
+    position: relative;
+}
+.bbsk__search .filter-bar .field .searchbox input {
+    padding-right: 38px;
+}
+.bbsk__search .filter-bar .field .searchbox button {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    bottom: 4px;
+    width: 32px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    cursor: pointer;
+}
+.bbsk__search .filter-bar .save {
+    justify-self: end;
+    align-self: end;
+    height: 44px;
+    padding: 0 8px;
+    border: 1px solid #0051a3;
+    color: #0051a3;
+    background: #fff;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-size: 1.6rem;
+    font-weight: 700;
+}
+.bbsk__search .annotation {
+    color: #1b2131;
+    font-size: 1.2rem;
+    margin-top: 7px;
+}
+.bbsk__main {
+    width: 100%;
+    padding: 0 40px;
+}
+.bbsk__main a {
+    color: #0051a3;
+}
+.bbsk__main .total__dsp {
+    font-size: 1.6rem;
+    margin-bottom: 16px;
+}
+.bbsk__main .date-range {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: max-content;
+    align-items: center;
+    justify-content: center;
+}
+.bbsk__main .date-range .dt {
+    display: grid;
+    grid-template-rows: auto auto;
+    align-items: center;
+    justify-items: center;
+}
+.bbsk__main .date-range .dt .dt-date,
+.bbsk__main .date-range .dt .dt-time {
+    white-space: nowrap;
+}
+.bbsk__main .date-range .dt .dt-sep {
+    color: #8e9199;
+    user-select: none;
+}
+.progress-inline {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+}
+.pill {
+    width: 48px;
+    background: #ffd5d5;
+    padding: 4px;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pill.red {
+    background: #e84949;
+    color: #fff;
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+.pill-val {
+    font-weight: 700;
+}
+.ratio {
+    flex-grow: 1;
+}
+.ratio-now {
+    display: inline-block;
+    min-width: 50px;
+    text-align: right;
+}
+
+/* 右のリンク */
+.more {
+    color: var(--link);
+    text-decoration: none;
+}
+.more:hover {
+    text-decoration: underline;
+}
+
+table thead .head-type th:last-child {
+    border-right: 1px solid #dadadb;
+}
+table tbody tr.ended {
+    background-color: #e8e8e8;
+}
