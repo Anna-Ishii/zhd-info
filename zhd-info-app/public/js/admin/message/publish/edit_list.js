@@ -969,6 +969,7 @@ $(document).ready(function () {
                                         data-store-id="{{ $shop['id'] }}"
                                         value="{{ $shop['id'] }}"
                                         class="checkCommon mr8 org-checkbox"
+                                        ${Array.isArray(targetOrg.shops) && targetOrg.shops.includes(shop.id) ? 'checked' : ''}
                                         >
                                         ${shop.shop_code} ${shop.display_name}
                                 </label>
