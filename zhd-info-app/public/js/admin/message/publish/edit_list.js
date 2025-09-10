@@ -966,8 +966,8 @@ $(document).ready(function () {
                             <div>
                                 <label style="font-weight: 500 !important; cursor: pointer;">
                                     <input type="checkbox" name="organization_shops[]"
-                                        data-store-id="{{ $shop['id'] }}"
-                                        value="{{ $shop['id'] }}"
+                                        data-store-id="${shop.id}"
+                                        value="${shop.id}"
                                         class="checkCommon mr8 org-checkbox"
                                         ${Array.isArray(targetOrg.shops) && targetOrg.shops.includes(shop.id) ? 'checked' : ''}
                                         >
