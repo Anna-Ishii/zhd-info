@@ -9,13 +9,10 @@
                 @elseif($manual->is_revised)
                     <span class="item__tags__tag item__tags__tag--revise">改定</span>
                 @endif
-                @php
-                    $extensions = $manual->content->pluck('content_type')->unique();
-                @endphp
-                @if($extensions->contains('pdf'))
+                @if($manual->has_om)
                     <span class="item__tags__tag item__tags__tag--om">OM</span>
                 @endif
-                @if($extensions->intersect(['mp4','mov','avi','mkv'])->isNotEmpty())
+                @if($manual->has_video)
                     <span class="item__tags__tag item__tags__tag--movie">動画</span>
                 @endif
             </div>
