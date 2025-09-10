@@ -120,31 +120,25 @@ class ManualController extends Controller
 
         // 公開中でユーザが閲覧できるマニュアル
         $baseManuals = $user->manual()
-            ->with('content')
+            ->with('content', 'category_level2')
             ->publishingManual()
             ->orderBy('created_at', 'desc')
             ->get();
 
-        // キーワード検索（タイトルのみ）※まず全マニュアルから絞る
-        $manuals = $baseManuals;
+        // NEW/改訂 + OM/動画フラグ付与
+        $manuals = $this->enrichManuals($baseManuals, $now);
+
+        // キーワード検索（タイトルのみ）
         if ($keyword) {
             $manuals = $manuals->filter(fn($m) => str_contains($m->title, $keyword));
         }
 
         // タイプでフィルター（om / video の場合のみ）
         if ($type === 'om') {
-            $manuals = $manuals->filter(fn($m) => $m->content->contains(
-                fn($c) => str_ends_with(strtolower($c->content_name), '.pdf')
-            ));
+            $manuals = $manuals->filter(fn($m) => $m->has_om)->values();
         } elseif ($type === 'video') {
-            $videoExts = ['.mp4', '.mov', '.avi', '.mkv'];
-            $manuals = $manuals->filter(fn($m) => $m->content->contains(
-                fn($c) => collect($videoExts)->contains(fn($ext) => str_ends_with(strtolower($c->content_name), $ext))
-            ));
+            $manuals = $manuals->filter(fn($m) => $m->has_video)->values();
         }
-
-        // NEW/改訂 + OM/動画
-        $manuals = $this->enrichManuals($manuals, $now);
 
         // Blade に返却
         return view('manual._list', ['allManuals' => $manuals])->render();
