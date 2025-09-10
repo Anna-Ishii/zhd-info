@@ -3,21 +3,15 @@
     <img class="item__img" src="{{ $manual->thumbnails_url }}" alt="">
     <div class="item__info">
         <div class="item__tags">
-            @if($manual->is_new)
-                <span class="item__tags__tag item__tags__tag--new">NEW</span>
+        @if($manual->is_new)
+            <span class="item__tags__tag item__tags__tag--new">NEW</span>
             @elseif($manual->is_revised)
                 <span class="item__tags__tag item__tags__tag--revise">改定</span>
             @endif
-            @php
-                $extensions = $manual->content->pluck('content_name')->map(fn($n) => strtolower($n))->unique();
-            @endphp
-            @if($extensions->contains(fn($n) => str_ends_with($n, '.pdf')))
+            @if($manual->has_om)
                 <span class="item__tags__tag item__tags__tag--om">OM</span>
             @endif
-            @if($extensions->contains(fn($n) => str_ends_with($n, '.mp4')) ||
-                $extensions->contains(fn($n) => str_ends_with($n, '.mov')) ||
-                $extensions->contains(fn($n) => str_ends_with($n, '.avi')) ||
-                $extensions->contains(fn($n) => str_ends_with($n, '.mkv')))
+            @if($manual->has_video)
                 <span class="item__tags__tag item__tags__tag--movie">動画</span>
             @endif
         </div>

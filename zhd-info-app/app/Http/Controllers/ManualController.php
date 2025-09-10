@@ -22,18 +22,16 @@ class ManualController extends Controller
             ->with('content', 'category_level2')
             ->publishingManual();
 
-        // テーブル全体の最新 start_datetime を取得（NEW判定用）
-        $latestStartDatetime = (clone $baseQuery)->max('start_datetime');
+        // NEW判定用の基準日（トップ画面の新着仕様に合わせる場合は過去1週間）
+        $newSince = Carbon::now()->subDays(7)->startOfDay();
 
-        // 全件取得（NEW/改訂フラグ付き）
-        $allManuals = (clone $baseQuery)
+        // 全件取得
+        $allManualsCollection = (clone $baseQuery)
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($manual) use ($latestStartDatetime) {
-                $manual->is_new = $manual->start_datetime == $latestStartDatetime;
-                $manual->is_revised = $manual->updated_at > $manual->created_at;
-                return $manual;
-            });
+            ->get();
+
+        // NEW/改訂 + OM/動画
+        $allManuals = $this->enrichManuals($allManualsCollection, $newSince);
 
         // カテゴリ関連
         $categories = ManualCategoryLevel1::with('level2s')->get();
@@ -41,16 +39,13 @@ class ManualController extends Controller
         $firstLevel2Id = $firstLevel1?->level2s->first()?->id;
 
         // カテゴリー初期表示用マニュアル（絞り込みあり）
-        $categoryManuals = (clone $baseQuery)
+        $categoryManualsCollection = (clone $baseQuery)
             ->when($firstLevel2Id, fn($q) => $q->where('category_level2_id', $firstLevel2Id))
             ->orderBy('created_at', 'desc')
-            ->get()
-            ->map(function ($manual) use ($latestStartDatetime) {
-                // NEW/改訂フラグはテーブル全体の最新と比較
-                $manual->is_new = $manual->start_datetime == $latestStartDatetime;
-                $manual->is_revised = $manual->updated_at > $manual->created_at;
-                return $manual;
-            });
+            ->get();
+
+        // NEW/改訂 + OM/動画
+        $categoryManuals = $this->enrichManuals($categoryManualsCollection, $newSince);
 
         return view('manual.index', [
             'allManuals' => $allManuals,
@@ -120,6 +115,7 @@ class ManualController extends Controller
         $user = session('member');
         $type = $request->input('type', 'all');
         $keyword = $request->input('keyword');
+        $newSince = Carbon::now()->subDays(7)->startOfDay();
 
         // 公開中でユーザが閲覧できるマニュアル
         $baseManuals = $user->manual()
@@ -127,11 +123,6 @@ class ManualController extends Controller
             ->publishingManual()
             ->orderBy('created_at', 'desc')
             ->get();
-
-        // テーブル全体の最新 start_datetime を取得（NEW判定用）
-        $latestStartDatetime = $user->manual()
-            ->publishingManual()
-            ->max('start_datetime');
 
         // キーワード検索（タイトルのみ）※まず全マニュアルから絞る
         $manuals = $baseManuals;
@@ -151,12 +142,8 @@ class ManualController extends Controller
             ));
         }
 
-        // NEW / 改訂フラグを追加（テーブル全体の最新と比較）
-        $manuals = $manuals->map(function ($manual) use ($latestStartDatetime) {
-            $manual->is_new = $manual->start_datetime == $latestStartDatetime;
-            $manual->is_revised = $manual->updated_at > $manual->created_at;
-            return $manual;
-        });
+        // NEW/改訂 + OM/動画
+        $manuals = $this->enrichManuals($manuals, $newSince);
 
         // Blade に返却
         return view('manual._list', ['allManuals' => $manuals])->render();
@@ -167,29 +154,19 @@ class ManualController extends Controller
     {
         $user = session('member');
         $level2Id = $request->input('level2_id');
+        $newSince = Carbon::now()->subDays(7)->startOfDay();
 
-        // ベースクエリ（全体取得用）
-        $baseQueryAll = $user->manual()
-            ->publishingManual();
-
-        // テーブル全体の最新 start_datetime を取得
-        $latestStartDatetime = $baseQueryAll->max('start_datetime');
-
-        // 中カテゴリー絞り込み
-        $baseQuery = $user->manual()
+        // 子カテゴリー絞り込み
+        $manuals = $user->manual()
             ->with('content')
             ->publishingManual()
             ->when($level2Id, fn($q) => $q->where('category_level2_id', $level2Id))
-            ->orderBy('created_at', 'desc');
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        // マニュアル取得＆NEW/改訂フラグ設定
-        $manuals = $baseQuery->get()->map(function ($manual) use ($latestStartDatetime) {
-            $manual->is_new = $manual->start_datetime == $latestStartDatetime; // テーブル全体の最新と比較
-            $manual->is_revised = $manual->updated_at > $manual->created_at;
-            return $manual;
-        });
+        // NEW/改訂 + OM/動画
+        $manuals = $this->enrichManuals($manuals, $newSince);
 
-        // Blade に返す
         return view('manual._recent', ['categoryManuals' => $manuals])->render();
     }
 
@@ -200,5 +177,75 @@ class ManualController extends Controller
         $level1 = ManualCategoryLevel1::with('level2s')->find($level1Id);
 
         return response()->json($level1?->level2s ?? []);
+    }
+
+    /**
+     * NEW/改訂フラグ付与
+     * @param \Illuminate\Support\Collection $manuals
+     * @param Carbon|null $newSince NEW判定用の基準日（任意）
+     * @return \Illuminate\Support\Collection
+     */
+    private function addFlags($manuals, $newSince = null)
+    {
+        // マニュアル全体の start_datetime の最新日付を取得（NEW判定用）
+        $latestStartDatetime = $manuals->max('start_datetime');
+
+        return $manuals->map(function ($manual) use ($latestStartDatetime, $newSince) {
+            // このマニュアルの start_datetime が最新かどうか
+            $isLatest = $manual->start_datetime == $latestStartDatetime;
+
+            // NEW判定用の基準日を超えているか（$newSince が設定されている場合）
+            $isRecent = $newSince ? $manual->start_datetime >= $newSince : true;
+
+            // NEWフラグ付与：最新かつ基準日以降であれば true
+            $manual->is_new = $isLatest && $isRecent;
+
+            // 改訂フラグ付与：updated_at があり、作成日より更新日が後なら true
+            $manual->is_revised = $manual->updated_at && $manual->updated_at > $manual->created_at;
+
+            return $manual;
+        });
+    }
+
+    /**
+     * OM/動画タグ付与
+     * content 配列がある場合は配列、ない場合は manual 自身の content_name で判定
+     * @param \Illuminate\Support\Collection $manuals
+     * @return \Illuminate\Support\Collection
+     */
+    private function addTags($manuals)
+    {
+        $videoExts = ['.mp4', '.mov', '.avi', '.mkv'];
+
+        return $manuals->map(function ($manual) use ($videoExts) {
+
+            // 判定用の拡張子リストを取得
+            if ($manual->content->isNotEmpty()) {
+                $extensions = $manual->content
+                    ->pluck('content_name')
+                    ->map(fn($n) => strtolower(trim($n)));
+            } else {
+                $extensions = collect([strtolower(trim($manual->content_name))]);
+            }
+
+            // OM判定(PDF)
+            $manual->has_om = $extensions->contains(fn($n) => str_ends_with($n, '.pdf'));
+
+            // 動画判定
+            $manual->has_video = $extensions->contains(
+                fn($n) =>
+                collect($videoExts)->contains(fn($ext) => str_ends_with($n, $ext))
+            );
+
+            return $manual;
+        });
+    }
+
+    /**
+     * 共通: NEW/改訂 + OM/動画 判定セット
+     */
+    private function enrichManuals($manuals, $newSince = null)
+    {
+        return $this->addTags($this->addFlags($manuals, $newSince));
     }
 }
