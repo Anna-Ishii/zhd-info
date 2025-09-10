@@ -22,8 +22,8 @@ class ManualController extends Controller
             ->with('content', 'category_level2')
             ->publishingManual();
 
-        // NEW判定用の基準日（トップ画面の新着仕様に合わせる場合は過去1週間）
-        $newSince = Carbon::now()->subDays(7)->startOfDay();
+        // NEW判定用に現在日時を指定（任意。省略すると Carbon::now() が使われる）
+        $now = Carbon::now();
 
         // 全件取得
         $allManualsCollection = (clone $baseQuery)
@@ -31,7 +31,7 @@ class ManualController extends Controller
             ->get();
 
         // NEW/改訂 + OM/動画
-        $allManuals = $this->enrichManuals($allManualsCollection, $newSince);
+        $allManuals = $this->enrichManuals($allManualsCollection, $now);
 
         // カテゴリ関連
         $categories = ManualCategoryLevel1::with('level2s')->get();
@@ -45,7 +45,7 @@ class ManualController extends Controller
             ->get();
 
         // NEW/改訂 + OM/動画
-        $categoryManuals = $this->enrichManuals($categoryManualsCollection, $newSince);
+        $categoryManuals = $this->enrichManuals($categoryManualsCollection, $now);
 
         return view('manual.index', [
             'allManuals' => $allManuals,
@@ -115,7 +115,8 @@ class ManualController extends Controller
         $user = session('member');
         $type = $request->input('type', 'all');
         $keyword = $request->input('keyword');
-        $newSince = Carbon::now()->subDays(7)->startOfDay();
+        // NEW判定用に現在日時を指定（任意。省略すると Carbon::now() が使われる）
+        $now = Carbon::now();
 
         // 公開中でユーザが閲覧できるマニュアル
         $baseManuals = $user->manual()
@@ -143,7 +144,7 @@ class ManualController extends Controller
         }
 
         // NEW/改訂 + OM/動画
-        $manuals = $this->enrichManuals($manuals, $newSince);
+        $manuals = $this->enrichManuals($manuals, $now);
 
         // Blade に返却
         return view('manual._list', ['allManuals' => $manuals])->render();
@@ -154,7 +155,8 @@ class ManualController extends Controller
     {
         $user = session('member');
         $level2Id = $request->input('level2_id');
-        $newSince = Carbon::now()->subDays(7)->startOfDay();
+        // NEW判定用に現在日時を指定（任意。省略すると Carbon::now() が使われる）
+        $now = Carbon::now();
 
         // 子カテゴリー絞り込み
         $manuals = $user->manual()
@@ -165,7 +167,7 @@ class ManualController extends Controller
             ->get();
 
         // NEW/改訂 + OM/動画
-        $manuals = $this->enrichManuals($manuals, $newSince);
+        $manuals = $this->enrichManuals($manuals, $now);
 
         return view('manual._recent', ['categoryManuals' => $manuals])->render();
     }
@@ -180,27 +182,20 @@ class ManualController extends Controller
     }
 
     /**
-     * NEW/改訂フラグ付与
+     * NEW/改訂フラグ付与（レビューアー仕様: 過去7日以内をNEW）
      * @param \Illuminate\Support\Collection $manuals
-     * @param Carbon|null $newSince NEW判定用の基準日（任意）
+     * @param Carbon|null $now 判定用の現在時刻（任意指定可）
      * @return \Illuminate\Support\Collection
      */
-    private function addFlags($manuals, $newSince = null)
+    private function addFlags($manuals, $now = null)
     {
-        // マニュアル全体の start_datetime の最新日付を取得（NEW判定用）
-        $latestStartDatetime = $manuals->max('start_datetime');
+        $now = $now ?: Carbon::now();
 
-        return $manuals->map(function ($manual) use ($latestStartDatetime, $newSince) {
-            // このマニュアルの start_datetime が最新かどうか
-            $isLatest = $manual->start_datetime == $latestStartDatetime;
+        return $manuals->map(function ($manual) use ($now) {
+            // NEWフラグ: start_datetime が過去7日以内なら true
+            $manual->is_new = $manual->start_datetime->diffInDays($now) <= 7;
 
-            // NEW判定用の基準日を超えているか（$newSince が設定されている場合）
-            $isRecent = $newSince ? $manual->start_datetime >= $newSince : true;
-
-            // NEWフラグ付与：最新かつ基準日以降であれば true
-            $manual->is_new = $isLatest && $isRecent;
-
-            // 改訂フラグ付与：updated_at があり、作成日より更新日が後なら true
+            // 改訂フラグ: updated_at があり、作成日より後なら true
             $manual->is_revised = $manual->updated_at && $manual->updated_at > $manual->created_at;
 
             return $manual;
@@ -244,8 +239,8 @@ class ManualController extends Controller
     /**
      * 共通: NEW/改訂 + OM/動画 判定セット
      */
-    private function enrichManuals($manuals, $newSince = null)
+    private function enrichManuals($manuals, $now = null)
     {
-        return $this->addTags($this->addFlags($manuals, $newSince));
+        return $this->addTags($this->addFlags($manuals, $now));
     }
 }
