@@ -51,6 +51,12 @@ Route::group(['prefix' => 'manual', 'as' =>'manual.', 'middleware' => 'auth'], f
     Route::get('detail/{manual_id}', [ManualController::class, 'detail'])->name('detail')->where('manual_id', '^\d+$');
     Route::put('/watched', [ManualController::class, 'watched'])->name('watched');
     Route::get('/search', [ManualController::class, 'search'])->name('search');
+    // Ajax: タブ切替・検索用（タイプ）
+    Route::get('filter-by-type', [ManualController::class, 'filterByType'])->name('manual.filterByType');
+    // Ajax: カテゴリー切替用
+    Route::get('filter-by-category', [ManualController::class, 'filterByCategory'])->name('manual.filterByCategory');
+    // 大カテゴリー → 子カテゴリー取得
+    Route::get('/level2-by-level1', [ManualController::class, 'getLevel2ByLevel1'])->name('manual.level2ByLevel1');
 });
 
 // 管理画面へのログイン画面
