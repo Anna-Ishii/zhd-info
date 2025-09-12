@@ -13,7 +13,7 @@
    必要であればExpirationにトークン期限を入力
    Select scopesの「repo」にチェックを入れる
    「Generate token」をクリック→トークン生成完了
-8. \[<\>Code\]と書かれた緑色のボタンをクリックして
+8. 設定画面からzhd-infoの画面に戻り\[<\>Code\]と書かれた緑色のボタンをクリックして
    Localタブ→HTTPSの下に出ているURLをコピー
 9. WSL2でbashを開く(Windows+Rキー→「bash」入力→Enter)
 10. 「cd ~/」入力→Enter
