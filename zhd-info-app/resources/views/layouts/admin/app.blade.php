@@ -54,7 +54,6 @@
             <span class="spinner"></span>
         </div>
     </div>
-    </div>
 </body>
 
 </html>
