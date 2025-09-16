@@ -23,7 +23,7 @@
                     src="{{ asset('/img/export_icon.svg') }}" alt="">エクスポート</button>
         </div>
     </div>
-    <x-admin.message-nav />
+    <x-admin.header-links />
 @endsection
 
 {{-- 'content' セクションにメインコンテンツを記述する --}}
