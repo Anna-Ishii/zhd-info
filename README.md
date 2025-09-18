@@ -43,7 +43,8 @@
 ## Dockerコンテナの構築
 
 1. Docker Desktopが無い場合は[公式サイト](https://www.docker.com/ja-jp/get-started/)から
-   Windows版-ARM64を選択し案内に従ってダウンロード・インストール
+   使用している端末に合ったものを選択し案内に従ってダウンロード・インストール
+   (何を選ぶべきか迷った際はコマンドプロンプトでecho %PROCESSOR_ARCHITECTURE%  で出力結果確認)
 2. VSCodeが起動していなければ起動、zhd-infoのフォルダを開いておく
 3. zhd-infoを開いた状態のVSCodeで
    画面上部の\[ターミナル\]から\[新しいターミナル\]をクリックするか
