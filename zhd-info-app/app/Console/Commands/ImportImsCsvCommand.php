@@ -210,7 +210,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         $output = [];
         $start = time();
 
-        $environment = Environment::where('command_name', $this->signature)->where('contents', 'stag')->select('id')->first();
+        $environment = Environment::where('command_name', $this->signature)->where('contents', 'prod')->select('id')->first();
 
         foreach ($shops_data as $index => $shop) {
             $organization1 = Organization1::where('name', $shop[0])->first();
