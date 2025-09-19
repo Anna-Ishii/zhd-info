@@ -83,9 +83,9 @@ class ImportImsCsvCommand extends Command
         $now_str = $now->format("Ymd");
 
         // 開発環境でのテスト用日付オーバーライド
-        if (app()->environment('local', 'testing')) {
-            $now_str = config('ims.test_date', $now_str);
-        }
+        // if (app()->environment('local', 'testing')) {
+        //     $now_str = config('ims.test_date', $now_str);
+        // }
 
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
