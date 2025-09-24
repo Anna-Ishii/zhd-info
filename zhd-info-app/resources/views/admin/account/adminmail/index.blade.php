@@ -13,7 +13,7 @@
     <div class="l-header__bottom">
         <div class="l-header__bottom__wrap">
             <div class="l-header__back"><a class="prev"
-                    href="{{ url()->previous('/admin/publish/message') }}"><img
+                    href="{{ request()->header('referer') ? url()->previous() : route('admin.message.publish.index') }}"><img
                         src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
             <p class="l-header__bottom__ttl">本部従業員への配信設定</p>
         </div>
