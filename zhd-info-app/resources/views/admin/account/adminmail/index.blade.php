@@ -75,66 +75,10 @@
         </div>
         @include('common.admin.pagenation', ['objects' => $users])
 
-        <!-- インポートモーダル -->
-        <div class="modal-overlay" id="inportModal">
-            <div class="modal inport-modal">
-                <div class="close-btn" id="inportCloselBtn"><img src="{{ asset('assets/img/cancel_icon.svg') }}" alt="閉じる"></div>
-                <div class="top-erea">
-                    <p class="ttl">業務連絡csvインポート</p>
-                    <p class="txt">csvデータを業務連絡に上書きします</p>
-                </div>
-                <div class="middle-erea">
-                    <p><span class="required"></span><span class="required_txt">：必須項目</span></p>
-                    <p class="ttl">CSV添付<span class="required"></span></p>
-                    <div class="file-upload__container">
-                        <div class="file-upload__container__item">
-                            <div class="file-upload__container__item__wrap">
-                                <div class="file-input-item">
-                                    <div class="uploader">
-                                        <label for="fileUp">
-                                            <img class="uploadbefore" src="{{ asset('assets/img/upload-cloud.svg') }}" alt="" />
-                                            <div class="upload-txt uploadbefore">
-                                                <p>ここにファイルをドロップ</p>
-                                                <p>または</p>
-                                                <p class="upload-txt-btn">ファイルを選択</p>
-                                            </div>
-                                            <div class="uploaded">
-                                                <img class="uploaded-img" src="" alt="" />
-                                                <p class="uploaded-txt">uploaded-img.jpg</p>
-                                            </div>
-                                        </label>
-                                        <input type="file" name="file" id="fileUp" />
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="c-btn">
-                    <button class="c-btn__blue disabled-btn" id="inportOpenBtn" data-file="bb_sk_inport_csv">開く</button>
-                </div>
-            </div>
-        </div>
-        <!-- エクスポートモーダル -->
-            <div class="modal-overlay" id="exportModal">
-            <div class="modal">
-                <div class="close-btn" id="ExportCloselBtn"><img src="{{ asset('assets/img/cancel_icon.svg') }}" alt="閉じる"></div>
-                <p>
-                    csvデータをエクスポートします<br>
-                    出力対象を選択してください
-                </p>
-                <div class="c-btn">
-                    <button class="c-btn__white" id="ExportAllPageBtn">全ページ</button>
-                    <button class="c-btn__blue" id="ExportDispPageBtn">表示中ページ</button>
-                </div>
-            </div>
-        </div>
     </main>
 @endsection
 
 {{-- 'scripts' セクションにページ固有のJSを追加する --}}
 @push('scripts')
     <script src="{{ asset('/js/admin/account/mailadminaccount/index.js') }}?date={{ date('Ymd') }}" defer></script>
-    <script src="{{ asset('/js/inportModal.js') }}"></script>
-    <script src="{{ asset('/js/exportModal.js') }}"></script>
 @endpush
