@@ -17,11 +17,6 @@
                         src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
             <p class="l-header__bottom__ttl">本部従業員への配信設定</p>
         </div>
-        <div class="l-header__bottom__link">
-            <button
-                onclick="location.href='#'"><img
-                    src="{{ asset('/img/register_icon.svg') }}" alt="">新規登録</button>
-        </div>
     </div>
     <x-admin.header-links />
 @endsection
