@@ -43,7 +43,7 @@
                         <ul id="submenu-manual" class="submenu" hidden>
                             <li><a class="hamburger__sublink"
                                     href="{{ route('admin.manual.publish.index') }}">マニュアル一覧</a></li>
-                            <li><a class="hamburger__sublink" href="#">業務設定</a></li>
+                            <li><a class="hamburger__sublink" href="#">業態設定</a></li>
                         </ul>
                     </li>
                     <li><a class="hamburger__link" href="#">指示作成</a></li>
