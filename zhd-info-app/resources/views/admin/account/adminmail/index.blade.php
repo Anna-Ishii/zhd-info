@@ -12,9 +12,8 @@
 @section('page_header')
     <div class="l-header__bottom">
         <div class="l-header__bottom__wrap">
-            {{-- 「戻る」のデフォルト値はZrepo側のトップ画面を想定、パス決定後変更すること --}}
             <div class="l-header__back"><a class="prev"
-                    href="{{ url()->previous('/#') }}"><img
+                    href="{{ url()->previous('/admin/publish/message') }}"><img
                         src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
             <p class="l-header__bottom__ttl">本部従業員への配信設定</p>
         </div>
