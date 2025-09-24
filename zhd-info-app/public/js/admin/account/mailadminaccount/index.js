@@ -106,16 +106,21 @@ $(document).ready(function() {
         // 編集ボタン
         if (accountEditBtn) {
             $(accountEditBtn).hide();
-            const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="margin-right: 5px;">登録</p>`;
-            $(accountEditBtnGroup).append(saveButtonHtml);
-            const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin">取消</p>`;
-            $(accountEditBtnGroup).append(deleteButtonHtml);
+
+            // ボタンラップ全体を作る
+            const buttonWrapHtml = `
+                <div class="button-wrap">
+                    <button class="cancel-btn accountEditDeleteBtn">取消</button>
+                    <button class="register-btn accountEditSaveBtn">登録</button>
+                </div>
+            `;
+
+            // accountEditBtnGroup に追加
+            accountEditBtnGroup.append(buttonWrapHtml);            
         }
 
         // すべて選択/解除ボタン
-        const statusBreak = $('.statusBreak');
         const statusAllSelectBtn = $('.statusAllSelectBtn');
-        statusBreak.show();
         statusAllSelectBtn.show();
 
         $('table#list.mail-admin-account tbody tr').each(function() {
@@ -134,7 +139,7 @@ $(document).ready(function() {
                 $(status).hide();
                 const statusSelectGroupHtml = `
                     <div class="status-select-group">
-                        <select class="form-control" name="status" style="padding: 0px; ${!(statusFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-id="${id}" ${!(statusFlg) ? 'disabled' : ''}>
+                        <select name="status" ${!(statusFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-id="${id}" ${!(statusFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -173,7 +178,7 @@ $(document).ready(function() {
 
 
         // すべて選択/解除ボタン処理
-        $('.statusAllSelectBtn').on('click', function() {
+        $('.statusAllSelectBtn').off('click').on('click', function() {
             const buttonClass = $(this).attr('class').split(' ').find(cls => cls.includes('AllSelectBtn'));
             let targetName;
             let targetId;
@@ -184,14 +189,14 @@ $(document).ready(function() {
             switch(buttonClass) {
                 case 'statusAllSelectBtn':
                     targetName = 'status';
-                    targetId = 'label-employee_number';
+                    targetId = 'column1'; // 従業員番号のクラス名
                     break;
             }
 
             $('table#list.mail-admin-account tbody tr').each(function() {
                 const row = $(this);
 
-                // numberのみ存在するか確認
+                // 従業員番号が存在するか確認
                 const hasNumber = !!row.find(`.${targetId}`).text();
 
                 if (hasNumber) {
@@ -199,6 +204,10 @@ $(document).ready(function() {
                     row.find(`select[name="${targetName}"]`).val(newValue);
                 }
             });
+
+            // ボタンの状態を更新
+            $(this).toggleClass('active');
+            $(this).attr('aria-pressed', $(this).hasClass('active'));
         });
 
 
@@ -221,6 +230,9 @@ $(document).ready(function() {
             // すべて選択/解除ボタン
             const statusAllSelectBtn = $('.statusAllSelectBtn');
             statusAllSelectBtn.hide();
+            // ボタンの状態をリセット
+            statusAllSelectBtn.removeClass('active');
+            statusAllSelectBtn.attr('aria-pressed', 'false');
 
             $('table#list.mail-admin-account tbody tr').each(function() {
                 const row = $(this);
