@@ -523,9 +523,9 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
 
         // 削除する店舗一覧のIDは物理削除しないように修正
         $diff_shop_id = array_diff($shop_list, $register_shop_id);
-        echo "diff_shop_id: " . implode(',', $diff_shop_id) . "\n";
+        // echo "diff_shop_id: " . implode(',', $diff_shop_id) . "\n";
         $diff_shop = Shop::whereIn('id', $diff_shop_id)->pluck('id')->toArray();
-        $diff_shop_info = Shop::whereIn('id', $diff_shop_id)->get(); // ログ出力用(処理追加予定)
+        $diff_shop_info = Shop::whereIn('id', $diff_shop_id)->get(); // ログ出力用
         $delete_shop = array_merge($diff_shop, $close_shop);
         $diff_shop_user = User::query()->withTrashed()->whereIn('shop_id', $delete_shop)->get();
         foreach ($diff_shop_user as $key => $user) {
@@ -546,28 +546,28 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         }
 
         // ログ出力
-        \Log::info("---新しい店舗---");
-        echo "---新しい店舗---\n";
+        // \Log::info("---新しい店舗---");
+        // echo "---新しい店舗---\n";
         if (!empty($new_shop)) {
             foreach ($new_shop as $s) {
                 $output[] = $this->formatShopCsvRow($s, 'insert');
-                \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
+                // \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-        \Log::info("---変更する店舗---");
-        echo "---変更する店舗---\n";
+        // \Log::info("---変更する店舗---");
+        // echo "---変更する店舗---\n";
         if (!empty($change_shop)) {
             foreach ($change_shop as $s) {
                 $output[] = $this->formatShopCsvRow($s, 'update');
-                \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
+                // \Log::info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
-        \Log::info("---削除する店舗---");
-        echo "---削除する店舗---\n";
+        // \Log::info("---削除する店舗---");
+        // echo "---削除する店舗---\n";
         if (!empty($diff_shop_info)) {
             foreach ($diff_shop_info as $s) {
                 $output[] = $this->formatShopCsvRow($s, 'delete');
-                $this->info("shopID" . $s->id . " 店舗名" . $s->name);
+                // $this->info("shopID" . $s->id . " 店舗名" . $s->name);
             }
         }
 
@@ -626,7 +626,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         // 店長ロール
         $ROLL_ID = 4;
         $employee_code = $this->shopid2employeecode($shop);
-        \Log::info("employee_code: {$employee_code}");
+        // \Log::info("employee_code: {$employee_code}");
         $start = time();
         $user = User::create([
             'name' => $shop->name,
@@ -637,13 +637,13 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
             'email' => '',
             'roll_id' => $ROLL_ID,
         ]);
-        \Log::info("name:{$user->name}");
-        \Log::info("belong_label:{$user->belong_label}");
-        \Log::info("shop_id:{$user->shop_id}");
-        \Log::info("employee_code:{$user->employee_code}");
-        \Log::info("password:{$user->password}");
-        \Log::info("email:{$user->email}");
-        \Log::info("roll_id:{$user->roll_id}");
+        // \Log::info("name:{$user->name}");
+        // \Log::info("belong_label:{$user->belong_label}");
+        // \Log::info("shop_id:{$user->shop_id}");
+        // \Log::info("employee_code:{$user->employee_code}");
+        // \Log::info("password:{$user->password}");
+        // \Log::info("email:{$user->email}");
+        // \Log::info("roll_id:{$user->roll_id}");
 
         // $this->info("userオブジェクト定義完了:  処理時間: " . (time() - $start) . "秒");
         $start = time();
@@ -712,7 +712,7 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
     private function create_wowtalk_shop($shop)
     {
         \Log::info("create_wowtalk_shop実行");
-        // echo "create_wowtalk_shop実行\n";
+        echo "create_wowtalk_shop実行\n";
         $data = $this->wowtalkid2shopcode($shop);
         $chunkSize = 300;
         // データをチャンクして挿入
@@ -931,44 +931,44 @@ echo "実行ファイル: " . $filename . ":" . __LINE__ . "\n";
         });
 
         // ログ出力
-        \Log::info("---新しいクルー---");
-        echo "---新しいクルー---\n";
+        // \Log::info("---新しいクルー---");
+        // echo "---新しいクルー---\n";
         if (!empty($new_crew)) {
             foreach ($new_crew as $c) {
-                \Log::info("crewID " . $c);
+                // \Log::info("crewID " . $c);
                 $crew_output[] = $this->formatCrewsCsvRow($c, 'insert');
             }
         }
-        \Log::info("---変更するクルー---");
-        echo "---変更するクルー---\n";
+        // \Log::info("---変更するクルー---");
+        // echo "---変更するクルー---\n";
         if (!empty($change_crew)) {
             foreach ($change_crew as $c) {
-                \Log::info("crewID " . $c);
+                // \Log::info("crewID " . $c);
                 $crew_output[] = $this->formatCrewsCsvRow($c, 'update');
             }
         }
-        \Log::info("---削除するクルー---");
-        echo "---削除するクルー---\n";
+        // \Log::info("---削除するクルー---");
+        // echo "---削除するクルー---\n";
         if (!empty($deleted_crew)) {
             foreach ($deleted_crew as $c) {
                 $crew_output[] = $this->formatCrewsCsvRow($c['id'], 'delete');
-                \Log::info("crewID" . $c['id'] . " クルー名" . $c['name']);
+                // \Log::info("crewID" . $c['id'] . " クルー名" . $c['name']);
             }
         }
-        \Log::info("---店舗が見つからないエラー---");
-        echo "---店舗が見つからないエラー---\n";
-        if (!empty($undefind_shop)) {
-            foreach ($undefind_shop as $c) {
-                \Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
-            }
-        }
-        \Log::info("---店舗ユーザーが見つからないエラー---");
-        echo "---店舗ユーザーが見つからないエラー---\n";
-        if (!empty($undefind_user)) {
-            foreach ($undefind_user as $c) {
-                Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
-            }
-        }
+        // \Log::info("---店舗が見つからないエラー---");
+        // echo "---店舗が見つからないエラー---\n";
+        // if (!empty($undefind_shop)) {
+        //     foreach ($undefind_shop as $c) {
+        //         \Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
+        //     }
+        // }
+        // \Log::info("---店舗ユーザーが見つからないエラー---");
+        // echo "---店舗ユーザーが見つからないエラー---\n";
+        // if (!empty($undefind_user)) {
+        //     foreach ($undefind_user as $c) {
+        //         Log::info("店舗コード" . $c[16] . " 店舗名" . $c[17]);
+        //     }
+        // }
 
         if (count($crew_output)) {
             $header = '"action","id"';
