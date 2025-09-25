@@ -73,7 +73,7 @@
                 </li>
                 <li>
                 <ul class="nav nav-second-level"><li>
-                    <a href="https://z-report-stag.zensho-i.net/admin/history" >Z-repoterへ戻る</a>
+                    <a href="https://z-report.zensho-i.net/admin/history" >Z-repoterへ戻る</a>
                 </li></ul>
                 </li>
             </ul>
