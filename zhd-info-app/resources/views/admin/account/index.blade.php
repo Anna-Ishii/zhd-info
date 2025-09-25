@@ -17,13 +17,11 @@
 {{-- 'styles' スタックにページ固有のCSSを追加する --}}
 @push('styles')
     <link href="{{ asset('/css/phase3/store-account.css') }}?date={{ date('Ymd') }}" rel="stylesheet"/>
-    <link href="{{ asset('/css/sb-admin-2.css') }}?date={{ date('Ymd') }}" rel="stylesheet"/>
 @endpush
 
 @push('scripts')
     <script src="{{ asset('/js/admin/account/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/account/store-account.js') }}?date={{ date('Ymd') }}" defer></script>
-    <script src="{{ asset('/js/admin/account/exportModal.js') }}?date={{ date('Ymd') }}" defer></script>
 @endpush
 
 <meta name="title" content="" />
@@ -40,7 +38,6 @@
                 </div>
                 <div class="l-header__bottom__link">
                     <a href="{{ route('admin.account.export') }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin"><img src="{{ asset('img/export_icon.svg') }}" alt="">エクスポート</a>
-                    <!-- <button class="export-modal-btn"><img src="{{ asset('img/export_icon.svg') }}" alt="">エクスポート</button> -->
                 </div>
             </div>
             <div class="l-header__link">
@@ -134,26 +131,12 @@
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- 仮付け検索・編集ボタン -->
+                                <!-- 仮付け検索ボタン -->
                                 <!-- <div class="input-group">
                                     <button class="btn btn-admin">検索</button>
                                 </div> -->
                                 <!-- <div class="input-group">
-                                    <p class="btn btn-admin" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 20px; margin-left: 10px; padding: 6px 12px; cursor: pointer;">検索</p>
-                                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                        <div class="account-edit-btn-group">
-                                            <p class="accountEditBtn btn btn-admin" onclick="this.style.pointerEvents = 'none';" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 10px; margin-left: 10px; padding: 6px 12px; cursor: pointer;">編集</p>
-                                        </div>
-                                    @endif
-                                </div> -->
-                                <!-- 編集ボタン -->
-                                <!-- <div>
-                                    @if ($admin->ability == App\Enums\AdminAbility::Edit)
-                                        <div class="account-edit-btn-group">
-                                            <p class="accountEditBtn btn btn-admin" onclick="this.style.pointerEvents = 'none';" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 35px; margin-left: 10px; padding: 6px 12px; cursor: pointer;">編集</p>
-                                        </div>
-                                    @endif
+                                    <p class="btn btn-admin" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 10px; margin-left: 10px; padding: 6px 12px; cursor: pointer;">検索</p>
                                 </div> -->
                                 <!-- <p class="annotation" style="white-space: nowrap;">※「エクスポート」は検索時に設定した業態で行われます。</p> -->
                             </form>
@@ -171,8 +154,6 @@
                         </div>
                     @endif
                 </div>
-                  <!-- border-radius: 100px;
-  padding: 16px 0px; -->
                 <div class="table-wrap">
                     <div class="tableInner" style="height: 70vh;">
                         <table id="list" class="account table-list table table-bordered table-hover table-condensed text-center">
@@ -297,23 +278,7 @@
                     </div>
                 </div>
             </div>
-
             @include('common.admin.pagenation', ['objects' => $users])
-
-            <!-- エクスポートモーダル -->
-            <!-- <div class="modal-overlay" id="exportModal">
-                <div class="modal">
-                    <div class="close-btn" id="ExportCloselBtn"><img src="{{asset('img/cancel_icon.svg') }}" alt="閉じる"></div>
-                    <p>
-                        csvデータをエクスポートします<br>
-                        出力対象を選択してください
-                    </p>
-                    <div class="c-btn">
-                        <a class="c-btn__white" id="ExportAllPageBtn" href="{{ route('admin.account.export') }}?{{ http_build_query(request()->query()) }}" class="btn btn-admin">全ページ</a>
-                        <button class="c-btn__blue" id="ExportDispPageBtn">表示中ページ</button>
-                    </div>
-                </div>
-            </div> -->
         </main>
 
 @endsection
