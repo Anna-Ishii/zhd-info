@@ -139,6 +139,40 @@ class MessageController extends Controller
             ];
         }
 
+        $search_messages_by_day = [];
+        if ($start_date && $end_date) {
+            $searchDayStart = Carbon::createFromFormat('Y-m-d', $start_date);
+            $searchDayEnd   = Carbon::createFromFormat('Y-m-d', $end_date);
+        } elseif ($start_date) {
+            $searchDayStart = Carbon::createFromFormat('Y-m-d', $start_date);
+            $searchDayEnd   = Carbon::createFromFormat('Y-m-d', $start_date);
+        } elseif ($end_date) {
+            $searchDayStart = Carbon::createFromFormat('Y-m-d', $end_date);
+            $searchDayEnd   = Carbon::createFromFormat('Y-m-d', $end_date);
+        } else {
+            $searchDayStart = null;
+            $searchDayEnd   = null;
+        }
+
+        if ($searchDayStart && $searchDayEnd) {
+            for ($d = $searchDayEnd->copy(); $d->gte($searchDayStart); $d->subDay()) {
+                $label = $this->formatDateWithWeekdayJp($d->format('Y-m-d'));
+                foreach ($search_msgs as $m) {
+                    $msgStart = Carbon::parse($m->start_datetime);
+                    $msgEnd   = Carbon::parse($m->end_datetime);
+                    if ($d->between($msgStart, $msgEnd)) {
+                        $search_messages_by_day[$label][] = [
+                            'title' => $m->title,
+                            'url'   => route('message.detail', [
+                                'message_id' => $m->id,
+                                'message_content_url' => $m->content_url,
+                            ]),
+                        ];
+                    }
+                }
+            }
+        }
+
         return view(
             'message.index',
             compact(
@@ -148,7 +182,9 @@ class MessageController extends Controller
                 'start_date',
                 'end_date',
                 'keyword',
-                'search_messages'
+                'search_messages',
+                'search_messages_by_day',
+                'today',
             )
         );
     }
