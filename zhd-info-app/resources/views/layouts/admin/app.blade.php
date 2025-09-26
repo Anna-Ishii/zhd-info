@@ -26,7 +26,7 @@
 
 <body>
     {{-- ($admin, $message は子ビューから渡されます) --}}
-    <x-admin.header :admin="$admin" :message="$message" />
+    <x-admin.header :admin="$admin" :message="$message ?? null" />
 
     @yield('page_header')
 
