@@ -9,8 +9,6 @@
 <link href="{{ asset('/admin/css/show.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 {{-- ページごとのCSSがここに入る --}}
 <link href="{{ asset('/admin/css/ims-integration-settings.css') }}?date={{ time() }}" rel="stylesheet">
-<!-- Bootstrap Core CSS -->
-<link href="{{ asset('/admin/css/bootstrap.min.css') }}" rel="stylesheet">
 @endpush
 
 @section('page_header')
@@ -22,7 +20,7 @@
         <p class="l-header__bottom__ttl">IMS連携</p>
     </div>
 </div>
-<x-admin.message-nav />
+<x-admin.header-links />
 @endsection
 
 @section('content')
