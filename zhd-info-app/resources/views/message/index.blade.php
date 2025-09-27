@@ -19,14 +19,14 @@
 
                     <div class="achieve__search__date__wrap">
                         <div class="custom-date-picker custom-calendar-input achieve__search__date calendarOnly-input">
-                            <input class="date-input calendar-input" id="start-date" name="start_date" type="date" value="{{ request()->input('start_date', '') }}" />
+                            <input class="date-input calendar-input" id="start-date" name="start_date" type="date" value="{{ request()->input('start_date', '') }}" max="{{ $today->toDateString() }}" />
                             <span class="calendar-icon"></span>
                             <div class="custom-calendar hidden">
                             </div>
                         </div>
                         <span class="achieve__search__date__separator">〜</span>
                         <div class="custom-date-picker custom-calendar-input achieve__search__date calendarOnly-input">
-                            <input class="date-input calendar-input" id="end-date" name="end_date" type="date" value="{{ request()->input('end_date', '') }}" />
+                            <input class="date-input calendar-input" id="end-date" name="end_date" type="date" value="{{ request()->input('end_date', '') }}" max="{{ $today->toDateString() }}" />
                             <span class="calendar-icon"></span>
                             <div class="custom-calendar hidden">
                             </div>
@@ -40,73 +40,74 @@
                 </form>
             </div>
 
-            <div class="achieve__filtered">
-                <div class="achieve__filtered__list">
-                    @if (request()->filled('keyword') || request()->filled('start_date') || request()->filled('end_date'))
-                        @if (empty($search_messages))
-                            <p>検索結果なし</p>
-                        @else
+            @if (request()->anyFilled(['keyword', 'start_date', 'end_date']))
+                <div class="achieve__filtered">
+                    <div class="achieve__filtered__list">
+                        @if (empty($search_messages_by_day))
                             <div class="achieve__content__wrap">
-                                <p class="achieve__content__list__name">検索結果<img class="achieve__content__list__name__toggle is-open" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
-                                <div class="achieve__content__list is-open">
-                                    @foreach ($search_messages as $items)
+                                <p class="achieve__content__list__name">検索結果なし</p>
+                            </div>
+                        @else
+                            @foreach ($search_messages_by_day as $date => $items)
+                                <div class="achieve__content__wrap">
+                                    <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle is-open" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
+                                    <div class="achieve__content__list is-open">
                                         @foreach ($items as $item)
                                             <div class="achieve__content__item">
-                                                <p class="item__ttl">{{ $item['title'] }}</p>
+                                                <p class="item__ttl" data-truncate="30">{{ $item['title'] }}</p>
                                                 <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
                                             </div>
                                         @endforeach
-                                    @endforeach
+                                    </div>
                                 </div>
-                            </div>
+                            @endforeach
                         @endif
-                    @endif
+                    </div>
                 </div>
-            </div>
-
-            <div class="achieve__content">
-                <h2 class="achieve__content__ttl">過去1ヵ月に配信された業務連絡</h2>
-                @foreach ($messages_by_day as $date => $items)
-                    <div class="achieve__content__wrap">
-                        <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle is-open" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
-                        <div class="achieve__content__list is-open">
-                            @foreach ($items as $item)
-                                <div class="achieve__content__item">
-                                    <p class="item__ttl">{{ $item['title'] }}</p>
-                                    <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
-                                </div>
-                            @endforeach
+            @else
+                <div class="achieve__content">
+                    <h2 class="achieve__content__ttl">過去1ヵ月に配信された業務連絡</h2>
+                    @foreach ($messages_by_day as $date => $items)
+                        <div class="achieve__content__wrap">
+                            <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle is-open" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
+                            <div class="achieve__content__list is-open">
+                                @foreach ($items as $item)
+                                    <div class="achieve__content__item">
+                                        <p class="item__ttl" data-truncate="30">{{ $item['title'] }}</p>
+                                        <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-                @foreach ($messages_by_week_partial as $date => $items)
-                    <div class="achieve__content__wrap">
-                        <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
-                        <div class="achieve__content__list">
-                            @foreach ($items as $item)
-                                <div class="achieve__content__item">
-                                    <p class="item__ttl">{{ $item['title'] }}</p>
-                                    <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
-                                </div>
-                            @endforeach
+                    @endforeach
+                    @foreach ($messages_by_week_partial as $date => $items)
+                        <div class="achieve__content__wrap">
+                            <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
+                            <div class="achieve__content__list">
+                                @foreach ($items as $item)
+                                    <div class="achieve__content__item">
+                                        <p class="item__ttl" data-truncate="30">{{ $item['title'] }}</p>
+                                        <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-                @foreach ($messages_by_week_full as $date => $items)
-                    <div class="achieve__content__wrap">
-                        <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
-                        <div class="achieve__content__list">
-                            @foreach ($items as $item)
-                                <div class="achieve__content__item">
-                                    <p class="item__ttl">{{ $item['title'] }}</p>
-                                    <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
-                                </div>
-                            @endforeach
+                    @endforeach
+                    @foreach ($messages_by_week_full as $date => $items)
+                        <div class="achieve__content__wrap">
+                            <p class="achieve__content__list__name">{{ $date }}<img class="achieve__content__list__name__toggle" src="{{ asset('img/list_toggle.svg') }}" alt=""></p>
+                            <div class="achieve__content__list">
+                                @foreach ($items as $item)
+                                    <div class="achieve__content__item">
+                                        <p class="item__ttl" data-truncate="30">{{ $item['title'] }}</p>
+                                        <a href="{{ $item['url'] }}" class="item__link">内容を確認する<img src="{{ asset('img/arrow_right.svg') }}" alt=""></a>
+                                    </div>
+                                @endforeach
+                            </div>
                         </div>
-                    </div>
-                @endforeach
-            </div>
-
+                    @endforeach
+                </div>
+            @endif
         </div>
     </main>
 @endsection

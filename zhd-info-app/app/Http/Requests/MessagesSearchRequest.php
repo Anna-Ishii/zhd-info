@@ -22,9 +22,9 @@ class MessagesSearchRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'keyword' => 'nullable|string|max:255',
-            'start_date' => 'nullable|date|before_or_equal:today',
-            'end_date' => 'nullable|date|after_or_equal:start_date|before_or_equal:today'
+            'keyword' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['nullable', 'date', 'before_or_equal:today'],
+            'end_date' => ['nullable',  'date', 'after_or_equal:start_date', 'before_or_equal:today'],
         ];
     }
 
