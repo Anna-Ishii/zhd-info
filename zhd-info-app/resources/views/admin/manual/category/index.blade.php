@@ -1,79 +1,48 @@
-<!DOCTYPE html>
-<html lang="ja">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+{{-- layouts.admin.app をレイアウトとして継承する --}}
+@extends('layouts.admin.app')
 
-        <!-- Google fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Noto+Sans:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap"
-            rel="stylesheet"
-        />
+{{-- 'title' セクションにページ固有のタイトルを設定する --}}
+@section('title', 'マニュアル カテゴリ設定')
 
-        <!-- css -->
-        <link rel="stylesheet" href="./assets/css/common.min.css" />
-        <!-- 全ページ共通のCSS -->
-        <link rel="stylesheet" href="./assets/css/manual-management.min.css" />
-        <!-- ページごとのCSS -->
-        <script src="https://unpkg.com/draggabilly@2/dist/draggabilly.pkgd.min.js"></script>
-        <script src="https://unpkg.com/packery@2/dist/packery.pkgd.min.js"></script>
-        <!-- Primary Meta Tags -->
-        <meta name="title" content="" />
-        <meta name="description" content="" />
+{{-- 'styles' スタックにページ固有のCSSを追加する --}}
+@push('styles')
+    <link href="{{ asset('/admin/css/manual-management.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+    <link href="{{ asset('/admin/css/bbsk.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+@endpush
 
-        <title>指示作成</title>
-    </head>
+{{-- 'scripts' スタックにページ固有のJSを追加する --}}
+@push('scripts')
+    <script src="https://unpkg.com/draggabilly@2/dist/draggabilly.pkgd.min.js"></script>
+    <script src="https://unpkg.com/packery@2/dist/packery.pkgd.min.js"></script>
+    <script src="{{ asset('/js/admin/manual/category/ttlWrap.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/category/manualManagement.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/category/modal.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/manual/category/selectItem.js') }}?date={{ date('Ymd') }}" defer></script>
+@endpush
 
-    <body>
-        <header class="l-header">
-            <div class="l-header__top">
-                <h1><a href="/top.html"><img src="./assets/img/logo.svg" alt="Z-Reporter"></a></h1>
-                <div class="l-header__top__info">
-                    <p>ログイン中：加藤 真人/Kato Masato</p>
-                    <div class="hamburger">
-                        <span></span>
-                        <span></span>
-                        <span></span>
-                    </div>
-                    <nav class="hamburger-menu" id="hamburgerMenu">
-                        <button class="hamburger-menu__close" id="closeHamburgerMenu">
-                            <span></span>
-                            <span></span>
-                        </button>
-                        <ul>
-                            <li><a class="hamburger__link" href="/report-list.html">報告一覧</a></li>
-                            <li><a class="hamburger__link" href="/instruction-create.html">指示作成</a></li>
-                            <li><a class="hamburger__link" href="/user-management.html">ユーザー管理</a></li>
-                            <li><a class="hamburger__link" href="/user-management-password.html">パスワード変更</a></li>
-                            <li><button class="hamburger__logout">ログアウト</button></li>
-                        </ul>
-                    </nav>
-                    <div class="overlay" id="hamburgerOverlay"></div>
-                </div>
-            </div>
-            <div class="l-header__bottom">
-                <div class="l-header__bottom__wrap">
-                    <div class="l-header__back"><a class="prev" href="#"><img src="/assets/img/back-icon.svg" alt="">戻る</a></div>
-                    <p class="l-header__bottom__ttl">業態ごと設定</p>
-                </div>
-            </div>
-        </header>
+@section('page_header')
+    <div class="l-header__bottom">
+        <div class="l-header__bottom__wrap">
+            {{-- @TODO どこに遷移？ --}}
+            <div class="l-header__back"><a class="prev" href="#"><img
+                        src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
+            <p class="l-header__bottom__ttl">業態設定</p>
+        </div>
+    </div>
+    <x-admin.manual-header-links />
+@endsection
 
+{{-- 'content' セクションにメインコンテンツを記述する --}}
+@section('content')
+    <main>
+        <form method="POST" action="{{ route('admin.manual.category.update') }}">
+            @csrf
+            @method('PUT')
 
-        <main>
             <div class="form">
                 <div class="tabs__container">
+                    {{-- TODO: この部分は業態リストで動的に生成する必要がある --}}
                     <p class="tabs__item active">HSコード</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
-                    <p class="tabs__item">業態名</p>
                     <p class="tabs__item">業態名</p>
                 </div>
 
@@ -84,178 +53,80 @@
                     </div>
                 </div>
 
+                {{-- 新規カテゴリ追加用のブロック --}}
                 <div class="add-category">
                     <div class="category">
                         <div class="category__header">
-                            <input class="category__title" placeholder="新しいカテゴリ名を追加"></input>
+                            <input class="category__title" name="new_categories[0][name]" placeholder="新しいカテゴリ名を追加">
                         </div>
                         <div class="category__content">
                             <div class="subcategory__list">
                                 <div class="subcategory__item">
-                                    <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                    <input class="subcategory__name" placeholder="小カテゴリ名を入力してください"></input>
+                                    <span class="drag-icon"><img class="editonly move-select-item"
+                                            src="{{ asset('img/select-drag.svg') }}" alt="" style="touch-action: none;"></span>
+                                    <input class="subcategory__name" name="new_categories[0][subcategories][0][name]" placeholder="小カテゴリ名を入力してください">
                                     <span class="subcategory__actions">
-                                        <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                        <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                        <button type="button" class="delete-btn"><img src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                        <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                        <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
                                     </span>
                                 </div>
                             </div>
-                            
                             <span class="category__actions">
-                                <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                <button type="button" class="delete-btn"><img src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
                             </span>
                         </div>
-                        <button class="add-subcategory">＋小カテゴリを追加</button>
+                        <button type="button" class="add-subcategory">＋小カテゴリを追加</button>
                     </div>
                 </div>
 
+                {{-- 既存カテゴリ表示用のコンテナ --}}
                 <div class="form__container">
-                    <div class="form__item">
-                        <div class="category">
-                            <img class="category__drag" src="./assets/img/drag.svg" alt="">
-                            <div class="category__header">
-                                <input class="category__title" value="商品関連"></input>
-                            </div>
-                            <div class="category__content">
-                                <div class="subcategory__list">
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="握り"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="軍艦"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="デザート"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="巻き"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="切符"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="汁・麺類"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="ホット食品"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
+                    @foreach ($categories as $index => $categoryLevel1)
+                        <div class="form__item" data-category-id="{{ $categoryLevel1->id }}">
+                            <div class="category">
+                                <img class="category__drag" src="{{ asset('img/drag.svg') }}" alt="ドラッグ">
+                                <div class="category__header">
+                                    <input class="category__title" name="categories[{{ $categoryLevel1->id }}][name]" value="{{ $categoryLevel1->name }}">
+                                    {{-- JSで並び替え順をセットするためのhidden input --}}
+                                    <input type="hidden" class="sort-order-input" name="categories[{{ $categoryLevel1->id }}][sort_order]" value="{{ $index }}">
                                 </div>
-                                
-                                <span class="category__actions">
-                                    <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                    <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                    <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                </span>
-                            </div>
-                            <button class="add-subcategory">＋小カテゴリを追加</button>
-                        </div>
-                    </div>
-
-                    <div class="form__item">
-                        <div class="category">
-                            <img class="category__drag" src="./assets/img/drag.svg" alt="">
-                            <div class="category__header">
-                                <input class="category__title" value="フェア"></input>
-                            </div>
-                            <div class="category__content">
-                                <div class="subcategory__list">
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="小カテゴリ名が入ります"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
+                                <div class="category__content">
+                                    <div class="subcategory__list">
+                                        @foreach ($categoryLevel1->level2s as $subIndex => $categoryLevel2)
+                                            <div class="subcategory__item" data-subcategory-id="{{ $categoryLevel2->id }}">
+                                                <span class="drag-icon">
+                                                    <img class="editonly move-select-item" src="{{ asset('img/select-drag.svg') }}" alt="ドラッグ">
+                                                </span>
+                                                <input class="subcategory__name" name="categories[{{ $categoryLevel1->id }}][subcategories][{{ $categoryLevel2->id }}][name]" value="{{ $categoryLevel2->name }}">
+                                                <input type="hidden" class="sort-order-input" name="categories[{{ $categoryLevel1->id }}][subcategories][{{ $categoryLevel2->id }}][sort_order]" value="{{ $subIndex }}">
+                                                <span class="subcategory__actions">
+                                                    <button type="button" class="delete-btn"><img src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                                    <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                                    <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                                </span>
+                                            </div>
+                                        @endforeach
                                     </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="小カテゴリ名が入ります"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
-                                    <div class="subcategory__item">
-                                        <span class="drag-icon"><img class="editonly move-select-item" src="./assets/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                                        <input class="subcategory__name" value="小カテゴリ名が入ります"></input>
-                                        <span class="subcategory__actions">
-                                            <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                            <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                            <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                        </span>
-                                    </div>
+                                    <span class="category__actions">
+                                        <button type="button" class="delete-btn"><img src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                        <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                        <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+                                    </span>
                                 </div>
-                                
-                                <span class="category__actions">
-                                    <button class="delete-btn"><img src="./assets/img/delete_icon.svg" alt="削除"></button>
-                                    <button class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                    <button class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                                </span>
+                                <button type="button" class="add-subcategory">＋小カテゴリを追加</button>
                             </div>
-                            <button class="add-subcategory">＋小カテゴリを追加</button>
                         </div>
-                    </div>
+                    @endforeach
                 </div>
-    
+
                 <div class="c-btn">
                     <button class="c-btn__blue" type="submit">更新する</button>
                 </div>
             </div>
+        </form>
+    </main>
+@endsection
 
-        </main>
-
-        <script src="./assets/js/hamburger.js"></script>
-        <script src="./assets/js/ttlWrap.js"></script>
-        <script src="./assets/js/manualManagement.js"></script>
-        <script src="./assets/js/modal.js"></script>
-        <script src="./assets/js/selectItem.js"></script>
-        
-    </body>
-</html>

@@ -124,6 +124,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
         });
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::get('/', [ManualCategoryController::class, 'index'])->name('index');
+            Route::put('/', [ManualCategoryController::class, 'update'])->name('update');
         });
     });
     Route::group(['prefix' => 'account', 'as' => 'account.'], function () {
