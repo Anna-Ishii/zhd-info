@@ -258,7 +258,7 @@
                             <td class="label-DM_email" nowrap>{{ $u->DM_email }}</td>
                             <td class="label-DM_status" style="border-right: 1px solid #DADADB; text-align: center" nowrap>
                                 <span class="DM_status-select"
-                                    value="{{ $u->DM_view_notification == '〇' ? 'selected' : '未設定' }}">{{ $u->DM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
+                                    value="{{ $u->DM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->DM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
                             </td>
                             <!-- BM -->
                             <td class="label-BM_id" style="text-align: center" nowrap>{{ $u->BM_id }}</td>
