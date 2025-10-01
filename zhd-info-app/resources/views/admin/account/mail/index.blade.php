@@ -173,7 +173,6 @@
                                 <th class="column9"></th>
                             </tr>
                             <tr class="head">
-                            <tr>
                                 <th class="column1" rowspan="2" nowrap data-column="0">DS</th>
                                 <th class="column2" rowspan="2" nowrap data-column="1">BL</th>
                                 <th class="column3" rowspan="2" nowrap data-column="2">AR</th>
@@ -181,7 +180,6 @@
                                 <th class="column6" colspan="4" style="text-align: center;" nowrap>DM</th>
                                 <th class="column6" colspan="4" style="text-align: center;" nowrap>BM</th>
                                 <th class="column6" colspan="4" style="text-align: center;" nowrap>AM</th>
-                            </tr>
                             </tr>
                             <tr class="head_bottom">
                                 <th class="column4">コード</th>
@@ -268,7 +266,7 @@
                             <td class="label-BM_email" nowrap>{{ $u->BM_email }}</td>
                             <td class="label-BM_status" style="border-right: 1px solid #DADADB; text-align: center" nowrap>
                                 <span class="BM_status-select" data-BM_id="{{ $u->BM_id }}"
-                                    value="{{ $u->BM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->DM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
+                                    value="{{ $u->BM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->BM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
                             </td>
                             <!-- AM -->
                             <td class="label-AM_id" style="text-align: center" nowrap>{{ $u->AM_id }}</td>
@@ -276,7 +274,7 @@
                             <td class="label-AM_email" nowrap>{{ $u->AM_email }}</td>
                             <td class="label-AM_status" style="border-right: 1px solid #DADADB; text-align: center" nowrap>
                                 <span class="AM_status-select" data-AM_id="{{ $u->AM_id }}"
-                                    value="{{ $u->AM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->DM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
+                                    value="{{ $u->AM_view_notification == '〇' ? 'selected' : '' }}">{{ $u->AM_view_notification == '〇' ? 'selected' : '未設定' }}</span>
                             </td>
                         </tr>
                         @endforeach
