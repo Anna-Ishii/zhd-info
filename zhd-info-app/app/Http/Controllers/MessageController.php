@@ -222,13 +222,25 @@ class MessageController extends Controller
         // メッセージに添付ファイルを追加
         $this->attachFilesToMessage($message);
 
-        // URLの message_content_url と一致するファイルがある場合、そのファイルをメインファイルとして設定
-        if ($message_content_url && isset($message->content_files)) {
+        // main_file を初期化
+        $message->main_file = null;
+
+        // URLの message_content_url と一致するファイルがある場合、そのファイルを main_file として設定
+        if ($message_content_url && !empty($message->content_files)) {
             foreach ($message->content_files as $file) {
-                if ($file['file_url'] === $message_content_url) {
+                $filePath = public_path($file['file_url']);
+                if ($file['file_url'] === $message_content_url && file_exists($filePath)) {
                     $message->main_file = $file;
                     break;
                 }
+            }
+        }
+
+        // content_url のファイルが存在するか確認（main_file がまだセットされていなければ）
+        if (!$message->main_file && !empty($message->content_url)) {
+            $contentPath = public_path($message->content_url);
+            if (file_exists($contentPath)) {
+                $message->main_file = ['file_url' => $message->content_url];
             }
         }
 
@@ -309,7 +321,6 @@ class MessageController extends Controller
             // detailメソッドにリダイレクト
             $url = action([MessageController::class, 'detail'], ['message_id' => $message_id]);
             return redirect()->to($url)->withInput();
-
         } catch (\Throwable $th) {
             DB::rollBack();
             return back()->withInput();
