@@ -26,8 +26,8 @@ class PublishStoreRequest extends FormRequest
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable|date_format:Y/m/d H:i',
             'end_datetime' => 'nullable|date_format:Y/m/d H:i',
-            'target_roll' => 'required',
-            'brand' => 'required',
+            'target_roll' => 'nullable|array',
+            'brand' => 'required|array',
             'organization_shops' => 'required',
         ];
     }
@@ -55,6 +55,8 @@ class PublishStoreRequest extends FormRequest
             'file_path' => array_filter($this->input('file_path', [])),
             'start_datetime' => $this->input('start_datetime') === 'null' ? null : $this->input('start_datetime'),
             'end_datetime' => $this->input('end_datetime') === 'null' ? null : $this->input('end_datetime'),
+            'target_roll' => $this->input('target_roll', []),
+            'brand' => $this->input('brand', []),
         ]);
     }
 }
