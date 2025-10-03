@@ -70,287 +70,276 @@
 
 @section('content')
 
+<main class="business-notice-create business-notice-create-instruction mb-0">
     <div id="page-wrapper">
         @include('common.admin.page-head', ['title' => '業務連絡新規登録'])
 
-        <form id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
+        <form class="form" id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
             @csrf
-            <div class="form-group form-group-sm">
-                <label class="col-lg-2 control-label">カテゴリ<span class="text-danger required">*<span></label>
-                <div class="col-lg-6">
-                    <label class="mr16">
-                        <select name="category_id" class="form-control">
-                            <option value="" hidden>カテゴリを選択</option>
-                            @foreach ($category_list as $category)
-                                {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
-                                @if ($organization1->id === 8 || $category->id !== 7 && $category->id !== 8)
-                                    <option value="{{ $category->id }}"
-                                        {{ old('category_id') == $category->id ? 'selected' : '' }}>
-                                        {{ $category->name }}
-                                    </option>
-                                @endif
-                            @endforeach
+            <div class="content-item">
+                <p><span class="required"></span><span class="required_txt">：必須項目</span></p>
+                <div class="content__wrap">
+                    <p class="content required">カテゴリ</p>
+                    <div class="control">
+                        <select name="category_id">
+                            <option value="" selected class="placeholder-option">選択してください</option>
+                                @foreach ($category_list as $category)
+                                    {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
+                                    @if ($organization1->id === 8 || $category->id !== 7 && $category->id !== 8)
+                                        <option value="{{ $category->id }}"
+                                            {{ old('category_id') == $category->id ? 'selected' : '' }}>
+                                            {{ $category->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
                         </select>
-                    </label>
+                    </p>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">ラベル</label>
-                <div class="col-lg-4">
-                    <label>
-                        <input type="checkbox" name="emergency_flg" class="mr8"
-                            {{ old('emergency_flg') == 'on' ? 'checked' : '' }}>
-                        重要
-                    </label>
+                <div class="content__wrap content-checkbox">
+                    <p class="content">ラベル</p>
+                    <div class="input-group">
+                        <label class="custom-checkbox custom-checkbox-square">
+                            <input type="checkbox" name="emergency_flg" class="mr8"
+                                {{ old('emergency_flg') == 'on' ? 'checked' : '' }}>
+                                <span class="checkmark"></span>
+                                重要
+                        </label>
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">タイトル<span class="text-danger required">*<span></label>
-                <div class="col-lg-4">
-                    <input class="form-control" name="title" value="{{ old('title') }}">
+
+                <div class="content__wrap">
+                    <p class="content required">タイトル</p>
+                    <div class="input-group custom-textbox">
+                        <input type="text" name="title" value="{{ old('title') }}">
                 </div>
                 {{-- <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div> --}}
-            </div>
-            <div class="form-group tag-form">
-                <label class="col-lg-2 control-label">検索タグ</label>
-                <div class="col-lg-4">
-                    <div class="form-control">
-                        @if (old('tag_name'))
-                            @foreach (old('tag_name') as $index => $tag_name)
-                                <span class="focus:outline-none tag-form-label" nowrap>
-                                    {{ $tag_name }}<span class="tag-form-delete">×</span>
-                                    <input type="hidden" name="tag_name[]" value='{{ $tag_name }}'>
-                                </span>
-                            @endforeach
-                        @endif
-                        <span contenteditable="true" class="focus:outline-none tag-form-input"></span>
-                    </div>
-                    <div>複数入力する場合は「,」で区切る</div>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label"></label>
-                <div class="col-lg-12 fileInputs">
-                    @if (old('file_name'))
-                        @foreach (old('file_name') as $index => $file_name)
-                            <div class="file-input-container">
-                                <div class="row">
-                                    @if ($index === 0)
-                                        <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
-                                    @else
-                                        <label class="col-lg-2 control-label">添付{{$index}}</label>
-                                    @endif
-                                    <div class="col-lg-4">
-                                        <label class="inputFile form-control">
-                                            <span class="fileName" style="text-align: center;">{!! $file_name ? $file_name : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}</span>
-                                            <input type="file" name="file[]" accept=".pdf" multiple="multiple" data-cache="active">
-                                            <input type="hidden" name="file_name[]" value="{{ $file_name }}">
-                                            <input type="hidden" name="file_path[]" value="{{ old('file_path')[$index] }}">
-                                            <input type="hidden" name="join_flg[]" value="{{ old('join_flg')[$index] }}">
-                                            <button type="button" class="btn btn-sm delete-btn" style="background-color: #eee; color: #000; position: absolute; top: 0; right: 0;">削除</button>
-                                        </label>
-                                        <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                            <div class="progress-bar" style="width: 0%"></div>
-                                        </div>
-                                    </div>
-                                    @if (old('join_flg')[$index] === 'join')
-                                        <label class="col-lg-2" style="padding-top: 10px;">結合</label>
-                                    @else
-                                        <label class="col-lg-2" style="padding-top: 10px; display: none;">結合</label>
-                                    @endif
-                                </div>
-                            </div>
-                        @endforeach
-                    @else
-                        <div class="file-input-container">
-                            <div class="row">
-                                <label class="col-lg-2 control-label">業連<span class="text-danger required">*</span></label>
-                                <div class="col-lg-4">
-                                    <label class="inputFile form-control">
-                                        <span class="fileName" style="text-align: center;">{!! old('file_name[]') ? old('file_name[]') : 'ファイルを選択またはドロップ<br>※複数ファイルのドロップ可能' !!}</span>
-                                        <input type="file" name="file[]" accept=".pdf" multiple="multiple">
-                                        <input type="hidden" name="file_name[]" value="{{ old('file_name[]') }}">
-                                        <input type="hidden" name="file_path[]" value="{{ old('file_path[]') }}">
-                                        <input type="hidden" name="join_flg[]" value="{{ old('join_flg[]') }}">
+            
+                <div class="content__wrap content-file">
+                    <p class="content required">業連ファイル</p>
+                    <p class="annotation">複数ファイルのドロップが可能です。</p>
+                    <div class="file-upload__container">
+                        <div class="file-upload__container__item">
+                            <div class="file-upload__container__item__wrap">
+                                <div class="file-input-item">
+                                    <div class="uploader">
+                                        <label for="fileUp">
+                                            <img class="uploadbefore" src="{{ asset('img/upload-cloud.svg') }}" alt="" />
+                                            <div class="upload-txt uploadbefore">
+                                                <p>ここにファイルをドロップ</p>
+                                                <p>または</p>
+                                                <p class="upload-txt-btn">ファイルを選択</p>
+                                            </div>
+                                            <div class="uploaded">
+                                                <img class="uploaded-img" src="" alt="" />
+                                                <p class="uploaded-txt">uploaded-img.jpg</p>
+                                            </div>
                                     </label>
-                                    <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
-                                        <div class="progress-bar" style="width: 0%"></div>
+                                        <input type="file" name="file[]" id="fileUp" accept=".pdf,.png,.jpg,.jpeg" multiple="multiple">
                                     </div>
                                 </div>
-                                <label class="col-lg-2" style="padding-top: 10px; display: none;">結合</label>
                             </div>
                         </div>
+                    </div>
+                    <p class="annotation">ファイル数の制限: 00  単一ファイル サイズの制限: 100MB  許可するファイルの種類: 画像(PNG,JPG,JPEG)/PDF</p>
+                    
+                    <!-- アップロード済みファイル表示 -->
+                    @if (old('file_name') && is_array(old('file_name')))
+                        @foreach (old('file_name') as $index => $file_name)
+                            <div class="file-uploaded">
+                                <p class="file__name"><a href="#">{{ $file_name }}</a></p>
+                                <p class="file__size">{{ old('file_size')[$index] ?? '84.4KB' }}</p>
+                                <p class="file__upload_message">アップロード完了</p>
+                                <p class="file__delete_btn">
+                                    <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
+                                    <input type="hidden" name="file_name[]" value="{{ $file_name }}">
+                                    <input type="hidden" name="file_path[]" value="{{ old('file_path')[$index] ?? '' }}">
+                                    <input type="hidden" name="join_flg[]" value="{{ old('join_flg')[$index] ?? '' }}">
+                                </p>
+                            </div>
+                        @endforeach
                     @endif
-                    <div class="col-lg-6 join-file-btn">
-                        <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
-                                <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
-                                <input type="button" class="btn btn-admin joinFile" id="joinFileId" data-toggle="modal" data-target="#joinFileModal" value="ファイルの結合">
-                        </label>
+                            
+                    <!-- アップロード中のファイル表示（JavaScriptで動的に追加される） -->
+                    <div class="file-uploading" style="display: none;">
+                        <div class="file-uploading__wrap">
+                            <div class="file__wrap">
+                                <p class="file__name"><a href="#">アップロード中ファイル.pdf</a></p>
+                                <p class="file__size">320KB/098KB</p>
+                                <p class="file__upload_message">アップロード中…</p>
+                                </div>
+                            <div class="file-uploading__imgwrap">
+                                <div class="upload-progress-bar">
+                                    <div class="upload-progress-fill" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="file__cancel_btn"><img src="{{ asset('img/cancel_icon.svg') }}" alt="中止"></p>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">掲載開始日時</label>
-                <div class="col-lg-4 flex ai-center">
-                    <input id="dateFrom" class="form-control mr16" name="start_datetime" value="{{ old('start_datetime') }}" autocomplete="off">
-                    <label>
-                        <input type="checkbox" class="dateDisabled" data-target="dateFrom">
-                        未定
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">掲載終了日時</label>
-                <div class="col-lg-4 flex ai-center">
-                    <input id="dateTo" class="form-control mr16" name="end_datetime" value="{{ old('end_datetime') }}" autocomplete="off">
-                    <label>
-                        <input type="checkbox" class="dateDisabled" data-target="dateTo">
-                        未定
-                    </label>
-                </div>
-            </div>
-            <div class="form-group" hidden>
-                <label class="col-lg-2 control-label">対象者</label>
-                <div class="col-lg-10 checkArea">
-                    <label class="mr16">
-                        <input type="checkbox" id="checkAll" class="mr8" checked>
-                        全て
-                    </label>
-                    @foreach ($target_roll_list as $target_roll)
-                        <label class="mr16">
-                            <input type="checkbox" name="target_roll[]" value="{{ $target_roll->id }}"
-                                class="checkCommon mr8" checked>
-                            {{ $target_roll->name }}
+                
+                <div class="content__wrap content-set content-checkbox">
+                    <p class="content">掲載期間</p>
+                    <p>開始日時</p>
+                    <div class="input-group custom-date">
+                        <div class="custom-date-picker custom-calendar-input report-search__item start-date calendarOnly-input">
+                            <input class="date-input calendar-input" id="dateFrom" name="start_datetime" type="text" value="{{ old('start_datetime') }}" placeholder="yyyy/MM/dd (曜日) hh:mm" autocomplete="off">
+                            <span class="calendar-icon"></span>
+                            <div class="custom-calendar hidden">
+                                <!-- カレンダー描画される部分 -->
+                                <div class="time-picker">
+                                    <input type="time" class="time-input" value="00:00">
+                                </div>
+                            </div>
+                        </div>
+                        <label class="custom-checkbox custom-checkbox-square">
+                            <input type="checkbox" class="dateDisabled" data-target="dateFrom">
+                            <span class="checkmark"></span>
+                            未定
                         </label>
-                    @endforeach
+                    </div>
+                    <p>終了日時</p>
+                    <div class="input-group custom-date">
+                        <div class="custom-date-picker custom-calendar-input report-search__item end-date calendarOnly-input">
+                            <input class="date-input calendar-input" id="dateTo" name="end_datetime" type="text" value="{{ old('end_datetime') }}" placeholder="yyyy/MM/dd (曜日) hh:mm" autocomplete="off">
+                            <span class="calendar-icon"></span>
+                            <div class="custom-calendar hidden">
+                                <!-- カレンダー描画される部分 -->
+                                <div class="time-picker">
+                                    <input type="time" class="time-input" value="00:00">
+                                </div>
+                            </div>
+                        </div>
+                        <label class="custom-checkbox custom-checkbox-square">
+                            <input type="checkbox" class="dateDisabled" data-target="dateTo">
+                            <span class="checkmark"></span>
+                            未定
+                        </label>                          
+                    </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">対象業態<span class="text-danger required">*<span></label>
-                <div class="col-lg-10 checkArea">
-                    <div class="mb8">
-                        <label class="mr16">
-                            <input type="checkbox" id="checkAll" name="brandAll" class="mr8"
-                                @if (request()->old())
-                                    {{ old('brandAll') ? 'checked' : '' }}
-                                @else
-                                    {{ 'checked' }}
-                                @endif
-                                >
+                <div class="content__wrap content-checkbox">
+                        <p class="content required">対象業態</p>
+                        <div class="input-group">
+                            <label class="custom-checkbox custom-checkbox-square max-size">
+                                <input type="checkbox" id="checkAll" name="brandAll"
+                                    @if (request()->old())
+                                        {{ old('brandAll') ? 'checked' : '' }}
+                                    @endif
+                                    >
+                                <span class="checkmark"></span>
                                 全業態
                         </label>
-                    </div>
                     @foreach ($brand_list as $brand)
-                        <label class="mr16">
-                            <input type="checkbox" name="brand[]" value="{{ $brand->id }}" class="checkCommon mr8"
-                                @if (old('brand'))
-                                    {{ in_array((string) $brand->id, old('brand', []), true) ? 'checked' : '' }}
-                                @elseif (!request()->old())
-                                    {{ 'checked' }}
-                                @else
-                                @endif
-                                >
+                                <label class="custom-checkbox custom-checkbox-square">
+                                    <input type="checkbox" name="brand[]" value="{{ $brand->id }}"
+                                    @if (old('brand'))
+                                        {{ in_array((string) $brand->id, old('brand', []), true) ? 'checked' : '' }}
+                                    @endif
+                                    >
+                                    <span class="checkmark"></span>
                                 {{ $brand->name }}
                         </label>
                     @endforeach
                 </div>
             </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">対象店舗<span class="text-danger required">*<span></label>
-                <div class="col-lg-10 checkArea">
-                    <div class="check-store-list mb8 text-left">
-                        @if (old('organization.org5.0'))
-                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="{{old('organization.org5.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
-                        @endif
-                        @if (old('organization.org4.0'))
-                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="{{old('organization.org4.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="">
-                        @endif
-                        @if (old('organization.org3.0'))
-                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="{{old('organization.org3.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="">
-                        @endif
-                        @if (old('organization.org2.0'))
-                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="{{old('organization.org2.0')}}">
-                        @else
-                            <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="">
-                        @endif
-                        @if (old('organization_shops'))
-                            <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="{{old('organization_shops')}}">
-                        @else
-                            <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="">
-                        @endif
-                        <label class="mr16">
-                            @if (old('select_organization.all') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="checkAll" name="organizationAll" value="全店">
-                                <input type="hidden" id="selectOrganizationAll" name="select_organization[all]" value="selected">
-                            @else
-                                <input type="button" class="btn btn-admin" id="checkAll" name="organizationAll" value="全店">
-                                <input type="hidden" id="selectOrganizationAll" name="select_organization[all]" value="">
-                            @endif
-                        </label>
-                        <label class="mr16">
-                            @if (old('select_organization.store') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="checkStore" data-toggle="modal" data-target="#messageStoreModal" value="店舗選択">
-                                <input type="hidden" id="selectStore" name="select_organization[store]" value="selected">
-                            @else
-                                <input type="button" class="btn btn-admin" id="checkStore" data-toggle="modal" data-target="#messageStoreModal" value="店舗選択">
-                                <input type="hidden" id="selectStore" name="select_organization[store]" value="">
-                            @endif
-                        </label>
-                        <label class="mr16">
-                            @if (old('select_organization.csv') === 'selected')
-                                <input type="button" class="btn btn-admin check-selected" id="importCsv" data-toggle="modal" data-target="#messageStoreModal" value="インポート">
-                                <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
-                            @else
-                                <input type="button" class="btn btn-admin" id="importCsv" data-toggle="modal" data-target="#messageStoreImportModal" value="インポート">
-                                <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
-                            @endif
-                        </label>
-                        <label class="mr16">
-                            <input type="button" class="btn btn-admin" id="exportCsv" value="エクスポート">
-                            <input type="hidden" name="organization1_id" value="{{$organization1->id}}">
+
+                <div class="content__wrap content-button">
+                    <p class="content required">対象店舗</p>
+                    <div class="input-group check-store-list">
+                        <div class="button__wrap__item {{ old('select_organization.all') === 'selected' ? 'active' : '' }}">
+                            <p id="checkAll" data-action="all">全店</p>
+                        </div>
+                        <div class="button__wrap__item {{ old('select_organization.store') === 'selected' ? 'active' : '' }}">
+                            <p id="checkStore" data-action="store" data-toggle="modal" data-target="#messageStoreModal">店舗選択</p>
+                        </div>
+                        <div class="button__wrap__item {{ old('select_organization.csv') === 'selected' ? 'active' : '' }}">
+                            <img src="{{ asset('img/inport_icon.svg') }}" alt="インポート">
+                            <p id="importCsv" data-action="import" class="inport-modal-btn">インポート</p>
+                        </div>
+                        <div class="button__wrap__item">
+                            <img src="{{ asset('img/export_icon.svg') }}" alt="エクスポート">
+                            <p id="exportCsv" data-action="export">エクスポート</p>
+                        </div>
+                        <input type="hidden" name="organization1_id" value="{{$organization1->id}}">
+                    </div>
+                    @if (old('organization.org5.0'))
+                        <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="{{old('organization.org5.0')}}">
+                    @else
+                        <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
+                    @endif
+                    @if (old('organization.org4.0'))
+                        <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="{{old('organization.org4.0')}}">
+                    @else
+                        <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="">
+                    @endif
+                    @if (old('organization.org3.0'))
+                        <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="{{old('organization.org3.0')}}">
+                    @else
+                        <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="">
+                    @endif
+                    @if (old('organization.org2.0'))
+                        <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="{{old('organization.org2.0')}}">
+                    @else
+                        <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="">
+                    @endif
+                    @if (old('organization_shops'))
+                        <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="{{old('organization_shops')}}">
+                    @else
+                        <input type="hidden" id="checkOrganizationShops" name="organization_shops" value="">
+                    @endif
+                    @if (old('select_organization.all') === 'selected')
+                        <input type="hidden" id="selectOrganizationAll" name="select_organization[all]" value="selected">
+                    @else
+                        <input type="hidden" id="selectOrganizationAll" name="select_organization[all]" value="">
+                    @endif
+                    @if (old('select_organization.store') === 'selected')
+                        <input type="hidden" id="selectStore" name="select_organization[store]" value="selected">
+                    @else
+                        <input type="hidden" id="selectStore" name="select_organization[store]" value="">
+                    @endif
+                    @if (old('select_organization.csv') === 'selected')
+                        <input type="hidden" id="selectCsv" name="select_organization[csv]" value="selected">
+                    @else
+                        <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
+                    @endif
+                </div>
+
+                <div class="content__wrap content-checkbox">
+                    <p class="content">WowTalk通知</p>
+                    <div class="input-group">
+                        <label class="custom-checkbox custom-checkbox-square">
+                            <input type="checkbox" name="wowtalk_notification"
+                                {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}>
+                            <span class="checkmark"></span>
+                            あり
                         </label>
                     </div>
                 </div>
-            </div>
-            <div class="form-group">
-                <label class="col-lg-2 control-label">WowTalk通知</label>
-                <div class="col-lg-4">
-                    <label>
-                        <input type="checkbox" name="wowtalk_notification" class="mr8"
-                            {{ old('wowtalk_notification') == 'on' ? 'checked' : '' }}>
-                        あり
-                    </label>
-                </div>
-            </div>
-            <div class="form-group text-left">
-                <div class="col-lg-2 control-label">
-                    <span class="text-danger required">*</span>：必須項目
-                </div>
-            </div>
-            <div class="form-group text-center">
-                <div class="col-lg-2 col-lg-offset-2">
-                    <input class="btn btn-admin" type="submit" name="register" value="登　録"
-                        onclick="window.onbeforeunload=null" />
-                </div>
-                <div class="col-lg-2">
-                    <input class="btn btn-admin" type="submit" name="save" value="保　存"
-                        onclick="window.onbeforeunload=null" />
-                </div>
-                <div class="col-lg-2">
-                    <a href="/admin/message/publish?{{ session('message_publish_url') }}" class="btn btn-admin">一覧に戻る</a>
-                </div>
-            </div>
 
+            </div>
         </form>
     </div>
+</main>
+
+<div class="footer">
+    <p><a href="/admin/message/publish?{{ session('message_publish_url') }}">一覧に戻る</a></p>
+    <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
+    <button class="c-btn__blue" type="submit" name="register" form="form" onclick="window.onbeforeunload=null">登録</button>
+</div>
     @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
     @include('common.admin.message-new-join-file-modal', [])
-    <script src="{{ asset('/js/admin/message/publish/new.js') }}?date={{ date('Ymd') }}" defer></script>
-    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/new.js') }}?date={{ date('Ymd') }}"></script>
+    <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}"></script>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create-instruction.css') }}?v={{ time() }}">
+    <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create.css') }}?v={{ time() }}">
+    <!-- モーダルカスタムCSSを読み込み -->
+    <link rel="stylesheet" href="{{ asset('css/phase3/message-import-modal.css') }}?v={{ time() }}">
+
+
+    <!-- JavaScript -->
+    <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
+    <script src="{{ asset('/admin/js/calendarWeekdays.js') }}?date={{ date('Ymd') }}"></script>
+    <!-- モーダルJavaScriptを読み込み -->
+    <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
 @endsection
