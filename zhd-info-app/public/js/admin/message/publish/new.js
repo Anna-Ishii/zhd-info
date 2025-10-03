@@ -32,8 +32,67 @@ function appendFormTagInput() {
 
 
 
+
+// アップロード中の表示を追加する関数
+function showUploadingDisplay(fileName, fileSize) {
+    // アップロード前の表示を非表示
+    $('.uploadbefore').hide();
+    
+    // 既存の.file-uploading要素を表示
+    $('.file-uploading').show();
+    $('.file-uploading .file__name a').text(fileName);
+    $('.file-uploading .file__size').text(formatFileSize(fileSize));
+}
+
+// ファイルサイズをフォーマットする関数
+function formatFileSize(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+}
+
+// ファイル表示を更新する関数
+function updateFileDisplay(fileName, filePath) {
+    // アップロード中の表示を非表示
+    $('.file-uploading').hide();
+    
+    // ファイル選択部分を再表示
+    $('.uploadbefore').show();
+    
+    // 新しいfile-uploaded要素を追加
+    addFileUploadedElement(fileName, filePath);
+}
+
+// file-uploaded要素を追加する関数
+function addFileUploadedElement(fileName, filePath) {
+    const fileUploadedHtml = `
+        <div class="file-uploaded">
+            <p class="file__name"><a href="#">${fileName}</a></p>
+            <p class="file__size">84.4KB</p>
+            <p class="file__upload_message">アップロード完了</p>
+            <p class="file__delete_btn">
+                <img src="/img/delete_icon.svg" alt="ファイル削除">
+                <input type="hidden" name="file_name[]" value="${fileName}">
+                <input type="hidden" name="file_path[]" value="${filePath}">
+                <input type="hidden" name="join_flg[]" value="single">
+            </p>
+        </div>
+    `;
+    
+    // file-uploaded要素を適切な場所に追加
+    if ($('.file-uploaded').length > 0) {
+        // 既存のfile-uploaded要素の後に追加
+        $('.file-uploaded').last().after(fileUploadedHtml);
+    } else {
+        // 最初のfile-uploaded要素として追加
+        $('.content-file').append(fileUploadedHtml);
+    }
+}
+
 // PDFファイル処理
-$(document).on("change", '.fileInputs input[type="file"]', function () {
+$(document).on("change", 'input[type="file"][name="file[]"]', function () {
     let _this = $(this);
     let csrfToken = $('meta[name="csrf-token"]').attr("content");
     let fileList = _this[0].files;
@@ -42,10 +101,16 @@ $(document).on("change", '.fileInputs input[type="file"]', function () {
     let progress = labelForm.parent().find(".progress");
     let progressBar = progress.children(".progress-bar");
 
+
     labelForm.parent().find(".text-danger").remove();
 
     // ファイルが上書きかどうか（上書き=true）
     let dataCache = _this.is("[data-cache]");
+
+    // ファイルが選択されていない場合は処理を終了
+    if (fileList.length === 0) {
+        return;
+    }
 
     // 既存のファイル数を取得 (ファイル入力欄の-1)
     let filesCount = $(".fileInputs .file-input-container").length - 1;
@@ -66,6 +131,9 @@ $(document).on("change", '.fileInputs input[type="file"]', function () {
     progressBar.hide();
     progressBar.css("width", "0%");
     progress.show();
+    
+    // アップロード中の表示を追加
+    showUploadingDisplay(fileList[0].name, fileList[0].size);
 
     let fileName = _this.siblings('input[name="file_name[]"]');
     let filePath = _this.siblings('input[name="file_path[]"]');
@@ -88,6 +156,9 @@ $(document).on("change", '.fileInputs input[type="file"]', function () {
                     progressBar.show();
                     progressBar.css("width", progVal + "%");
                     // console.log(progVal);
+                    // プログレスバーの幅を更新
+                    $('.upload-progress-fill').css("width", progVal + "%");
+                    
                     if (progVal === 100) {
                         setTimeout(() => {
                             progress.hide();
@@ -126,6 +197,9 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
             fileName.val(content_name);
             filePath.val(content_url);
             joinFile.val("single");
+            
+            // HTMLの表示を更新
+            updateFileDisplay(content_name, content_url);
         } else {
             addNewFileInput(content_name, content_url, join_flg = "single");
         }
@@ -134,6 +208,12 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
     // PDFファイルの上書きではない
     if (!dataCache) {
         let fileInputs = document.querySelector(".fileInputs");
+        
+        // fileInputsが存在しない場合は処理をスキップ
+        if (!fileInputs) {
+            return;
+        }
+        
         let fileInput = fileInputs.querySelector('input[name="file[]"]');
 
         // 単一ファイル欄に加工
@@ -224,7 +304,12 @@ function addNewFileInput(content_name, content_url, join_flg) {
 
 // 結合ボタンを追加
 function addJoinFileBtn() {
-    $(".fileInputs").append(`
+    let fileInputs = $(".fileInputs");
+    if (fileInputs.length === 0) {
+        return;
+    }
+    
+    fileInputs.append(`
         <div class="col-lg-6 join-file-btn">
             <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
                 <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
@@ -263,10 +348,16 @@ function addFileInputAdd() {
     let file_path = "";
     let join_flg = "";
 
+    // fileInputs要素の存在チェック
+    let fileInputs = $(".fileInputs");
+    if (fileInputs.length === 0) {
+        return;
+    }
+
     // 既存の添付ラベルの数を取得
     let currentLabelCount = $(".file-input-container .control-label:contains('添付')").length + 1;
 
-    $(".fileInputs").append(`
+    fileInputs.append(`
         <div class="file-input-container">
             <div class="row">
             <label class="col-lg-2 control-label">添付${currentLabelCount}</label>
@@ -298,6 +389,22 @@ function renumberSendLabels() {
         }
     });
 }
+
+// file-uploadedの削除ボタンのクリックイベント
+$(document).on("click", ".file__delete_btn", function () {
+    // 親のfile-uploaded要素を削除
+    $(this).closest('.file-uploaded').remove();
+    
+    // ファイル入力フィールドの値をクリア
+    $('input[type="file"][name="file[]"]').val('');
+    
+    // data-cache属性を削除して再アップロード可能にする
+    $('input[type="file"][name="file[]"]').removeAttr('data-cache');
+    
+    // アップロード表示をリセット
+    $('.file-uploading').hide();
+    $('.upload-progress-fill').css('width', '0%');
+});
 
 // 削除ボタンのクリックイベント
 $(document).on("click", ".delete-btn", function () {
@@ -332,6 +439,16 @@ $(document).on("click", ".delete-btn", function () {
         addFileInputAdd();
         addJoinFileBtn();
     }
+
+    // ファイル入力フィールドの値をクリア
+    $('input[type="file"][name="file[]"]').val('');
+    
+    // data-cache属性を削除して再アップロード可能にする
+    $('input[type="file"][name="file[]"]').removeAttr('data-cache');
+    
+    // アップロード表示をリセット
+    $('.file-uploading').hide();
+    $('.upload-progress-fill').css('width', '0%');
 
     // 「結合中」メッセージを更新する関数の呼び出し
     updateModalFooterMessage();
