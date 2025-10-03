@@ -7,12 +7,12 @@ $(document).ready(function () {
     if ($("#selectStore").val() === "selected") {
         // 店舗選択中の処理
         const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
-        $("#checkStore").val(`店舗選択(${selectedCountStore}店舗)`);
+        $("#checkStore").text(`店舗選択(${selectedCountStore}店舗)`);
     }
     if ($("#selectCsv").val() === "selected") {
         // インポート選択中の処理
         const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
-        $("#importCsv").val(`インポート(${selectedCountStore}店舗)`);
+        $("#importCsv").text(`インポート(${selectedCountStore}店舗)`);
     }
 });
 
@@ -356,8 +356,22 @@ function processInChunks(array, chunkSize, callback, doneCallback) {
 
 
 
+// 店舗選択ボタン処理
+$(document).on('click', '#checkStore[data-action="store"]', function() {
+    removeSelectedClass();
+    // 店舗選択モーダルを開く
+    $('#messageStoreModal').modal('show');
+});
+
+// インポートボタン処理
+$(document).on('click', '#importCsv[data-action="import"]', function() {
+    removeSelectedClass();
+    // インポートモーダルを開く
+    $('#messageStoreImportModal').modal('show');
+});
+
 // 全店ボタン処理
-$(document).on('click', 'input[id="checkAll"][name="organizationAll"]', function() {
+$(document).on('click', '#checkAll[data-action="all"]', function() {
     removeSelectedClass();
     // 全ての organization_shops[] チェックボックスをチェックする
     $('#storeModal input[name="organization_shops[]"]').each(function() {
@@ -380,8 +394,8 @@ $(document).on('click', 'input[id="checkAll"][name="organizationAll"]', function
     // フォームクリア（全店ボタン）
     $('#selectOrganizationAll').val("selected");
     // 店舗選択、インポートボタンをもとに戻す
-    $('#checkStore').val('店舗選択');
-    $('#importCsv').val('インポート');
+    $('#checkStore').text('店舗選択');
+    $('#importCsv').text('インポート');
     // 選択中の店舗数を更新する
     updateSelectedStores();
     // ボタンの見た目を変更する
@@ -499,7 +513,7 @@ $(document).on('click', '#selectStoreBtn', function() {
     $('#importCsv').attr('data-target', '#messageStoreImportModal');
     // 店舗選択中の処理
     const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
-    $('.check-store-list input[id="checkStore"]').val(`店舗選択(${selectedCountStore}店舗)`);
+    $('#checkStore').text(`店舗選択(${selectedCountStore}店舗)`);
 });
 
 // モーダルが閉じられる際にchangeValuesを実行
@@ -540,12 +554,12 @@ $(document).on('click', '#selectCsvBtn', function() {
     // モーダルを閉じる
     $("#messageStoreModal").modal("hide");
     // 店舗選択ボタンをもとに戻す
-    $("#checkStore").val('店舗選択');
+    $("#checkStore").text('店舗選択');
     // check-selected クラスを追加
     $("#importCsv").addClass("check-selected");
     // 店舗選択中の処理
     const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
-    $('.check-store-list input[id="importCsv"]').val(`インポート(${selectedCountStore}店舗)`);
+    $('#importCsv').text(`インポート(${selectedCountStore}店舗)`);
 });
 
 $(document).on('click', '#csvImportBtn', function() {
@@ -787,7 +801,8 @@ function getNumericDateTime() {
 $(document).on('click', '#exportCsv', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();
-    formData.append("organization1_id", $('.check-store-list input[name="organization1_id"]').val());
+    var organization1Id = $('.check-store-list input[name="organization1_id"]').val();
+    formData.append("organization1_id", organization1Id);
 
     $.ajax({
         url: '/admin/message/publish/csv/store/export',

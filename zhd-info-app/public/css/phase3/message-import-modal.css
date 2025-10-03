@@ -1,0 +1,497 @@
+@charset "UTF-8";
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Breakpoint　値はサイトに合わせて変更しましょう
+------------------------------------------------------*/
+/*------------------------------------------------------
+    このファイルは基本触らない
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+.modal-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  justify-content: center;
+  align-items: center;
+}
+.modal-overlay.disp {
+  display: flex !important;
+  z-index: 9999 !important;
+  background: rgba(0, 0, 0, 0.5) !important;
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+.modal-overlay .modal {
+  min-width: 924px;
+  max-width: 90vw;
+  max-height: 90vh;
+  background: white;
+  padding: 40px 64px;
+  border-radius: 10px;
+  text-align: center;
+  position: relative;
+  overflow-y: auto;
+  margin: auto;
+}
+.modal-overlay .modal .close-btn {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  top: 16px;
+  right: 16px;
+}
+.modal-overlay .modal .close-btn img {
+  width: 24.11px;
+  height: 24.11px;
+}
+.modal-overlay .modal p {
+  min-height: 200px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.4rem;
+  font-weight: bold;
+}
+.modal-overlay .modal.inport-modal {
+  padding: 0;
+  text-align: left;
+}
+.modal-overlay .modal.inport-modal p {
+  min-height: auto;
+  display: block;
+  font-weight: normal;
+}
+.modal-overlay .modal.inport-modal .top-erea {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  padding: 15px 32px;
+  border-bottom: 1px solid #8E9199;
+  min-height: 84px;
+}
+.modal-overlay .modal.inport-modal .top-erea .ttl,
+.modal-overlay .modal.inport-modal .middle-erea .ttl {
+  font-size: 2.0rem;
+  letter-spacing: 0;
+  line-height: 150%;
+  font-weight: 700;
+}
+.modal-overlay .modal.inport-modal .top-erea .txt {
+  font-size: 1.6rem;
+  letter-spacing: 0;
+  line-height: 150%;
+}
+.modal-overlay .modal.inport-modal .middle-erea {
+  min-height: 540px;
+  padding: 16px 32px;
+  text-align: left;
+}
+.modal-overlay .modal.inport-modal.comp .middle-erea {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay .modal.inport-modal .middle-erea p {
+  margin-bottom: 16px;
+}
+.modal-overlay .modal.inport-modal.comp .middle-erea p {
+  margin: 0;
+  font-size: 2.0rem;
+  letter-spacing: 0;
+  line-height: 150%;
+}
+.modal-overlay .modal.inport-modal .middle-erea p.subttl {
+  margin-bottom: 4px;
+}
+.modal-overlay .modal.inport-modal .middle-erea .required::after {
+  content: "＊";
+  position: relative;
+  font-size: 1rem;
+  top: -1em;
+  color: #E84949;
+}
+.modal-overlay .modal.inport-modal .middle-erea .required_txt {
+  font-size: 1.4rem;
+  letter-spacing: 0;
+  line-height: 150%;
+}
+.modal-overlay .modal.inport-modal .middle-erea .ttl .required::after {
+  left: 0.5em;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container {
+  display: flex;
+  flex-direction: column;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item {
+  display: flex;
+  align-items: stretch;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader {
+  width: 100%;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label {
+  display: flex;
+  height: 424px;
+  padding: 24px 100px;
+  border-radius: 4px;
+  border: 1px dashed #0051A3;
+  background-color: #F5F9FF;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay .modal.inport-modal .middle-erea .add-file__wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.modal-overlay .modal.inport-modal .middle-erea .add-file__wrap .add-file .file-upload__container__item__wrap .file-input-item .uploader label {
+  height: auto;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label img.uploadbefore {
+  width: 80px;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt {
+  text-align: center;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt p {
+  font-size: 1.6rem;
+  margin: 0;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt p:nth-of-type(2) {
+  margin: 8px auto;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt-btn {
+  padding: 10px 30px;
+  border-radius: 4px;
+  border: 1px solid #0050C0;
+  color: #0050C0;
+  background-color: #fff;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader input {
+  display: none;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader .uploaded {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  display: none;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader .uploaded-img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader .uploaded-txt p {
+  font-size: 1.6rem;
+  color: #8E9199;
+}
+.modal-overlay .modal.inport-modal .c-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 16px 32px;
+  margin: 0;
+  gap: 0;
+  text-align: center;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  height: 60px;
+  padding: 8px 16px;
+  border: 1px solid #8E9199;
+  border-radius: 4px;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded p {
+  margin: 0;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded .file__name {
+  flex: 1 1 670px;
+  min-width: 0;
+  font-size: 1.6rem;
+  color: #1B2131;
+  letter-spacing: 0;
+  line-height: 120%;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded .file__size {
+  width: 100px;
+  text-align: right;
+  font-size: 1.4rem;
+  color: #8E9199;
+  flex: 0 0 auto;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded .file__upload_message {
+  width: 112px;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+  color: #0051A3;
+}
+.modal-overlay .modal.inport-modal .middle-erea .file-uploaded .file__delete_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+
+.bbsk {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  gap: 32px;
+  padding: 0 0 40px 0;
+}
+.bbsk__search {
+  width: 100%;
+  padding: 16px 40px;
+}
+.bbsk__search select{
+  text-overflow: ellipsis;    /* 省略記号を表示 */
+}
+.bbsk__search .report-search__item {
+  width: 100%;
+  font-size: 1.6rem;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.bbsk__search .report-search__item label {
+  margin: 0 0 4px 0;
+  font-weight: bold;
+}
+.bbsk__search .report-search__item input {
+  display: block;
+  width: 100%;
+  font-size: 1.6rem;
+  padding: 10px 36px 10px 16px;
+  border: none;
+  background: #fff;
+}
+.bbsk__search .report-search__item .input-icon {
+  position: relative;
+}
+.bbsk__search .report-search__item .input-icon .icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #999;
+  font-size: 16px;
+}
+.bbsk__search .filter-bar {
+  display: grid;
+  grid-template-columns: 112px 112px 112px 112px 344px minmax(318px, 1fr) 128px;
+  gap: 8px;
+}
+.bbsk__search .filter-bar .field{
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+}
+.bbsk__search .filter-bar .field .label{
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.bbsk__search .filter-bar .field .control,
+.bbsk__search .filter-bar .field .control input,
+.bbsk__search .filter-bar .field .control select{
+  width: 100%;
+  box-sizing: border-box;
+}
+.bbsk__search .filter-bar .field .control input,
+.bbsk__search .filter-bar .field .control select{
+  height: 44px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 4px;
+  background: #fff;
+}
+.bbsk__search .filter-bar .field--range .control{
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+}
+.bbsk__search .filter-bar .field--range .tilde{ color: #8E9199; }
+.bbsk__search .filter-bar .field .searchbox{
+  position: relative;
+}
+.bbsk__search .filter-bar .field .searchbox input{
+  padding-right: 38px;
+}
+.bbsk__search .filter-bar .field .searchbox button{
+  position: absolute;
+  right: 4px; top: 4px; bottom: 4px;
+  width: 32px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.bbsk__search .filter-bar .save{
+  justify-self: end;
+  align-self: end;
+  height: 44px;
+  padding: 0 8px;
+  border: 1px solid #0051A3;
+  color: #0051A3;
+  background: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+.bbsk__search .annotation {
+  color: #1B2131;
+  font-size: 1.2rem;
+  margin-top: 7px;
+}
+.bbsk__main {
+  width: 100%;
+  padding: 0 40px;
+}
+.bbsk__main a {
+  color: #0051A3;
+}
+.bbsk__main .total__dsp {
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+}
+.bbsk__main .date-range {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: max-content;
+  align-items: center;
+  justify-content: center;
+}
+.bbsk__main .date-range .dt {
+  display: grid;
+  grid-template-rows: auto auto;
+  align-items: center;
+  justify-items: center;
+}
+.bbsk__main .date-range .dt .dt-date,
+.bbsk__main .date-range .dt .dt-time {
+  white-space: nowrap;
+}
+.bbsk__main .date-range .dt .dt-sep {
+  color: #8E9199;
+  user-select: none;
+}
+.progress-inline{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+.pill{
+  width: 48px;
+  background: #FFD5D5;
+  padding: 4px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pill.red{
+  background: #E84949;
+  color: #fff;
+  border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.pill-val{
+  font-weight: 700;
+}
+.ratio{
+  flex-grow: 1;
+}
+.ratio-now {
+  display: inline-block;
+  min-width: 50px;
+  text-align: right;
+}
+
+/* 右のリンク */
+.more{
+  color: var(--link);
+  text-decoration: none;
+}
+.more:hover{
+  text-decoration: underline;
+}
+
+table thead .head-type th:last-child {
+  border-right: 1px solid #DADADB;
+}
+table tbody tr.ended {
+  background-color: #E8E8E8;
+}

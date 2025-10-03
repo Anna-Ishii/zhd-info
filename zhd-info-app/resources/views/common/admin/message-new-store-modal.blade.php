@@ -1,40 +1,43 @@
-<!-- モーダル：CSV取込 -->
-<div class="modal fade" id="messageStoreImportModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <button type="button" class="close" data-dismiss="modal"><span>×</span></button>
-                <h4 class="modal-title">店舗選択csvインポート</h4>
-            </div>
-            <div class="modal-body">
-                <div>
-                    csvデータを店舗選択モーダルに表示します
-                </div>
-                <form class="form-horizontal">
-                    <input type="hidden" name="organization1" value="{{$organization1->id}}">
-                    <div class="form-group">
-                        <label class="col-sm-2 control-label">csv添付<span class="text-danger required">*<span></label>
-                        <div class="col-sm-9">
-                            <label class="inputFile form-control">
-                                <span class="fileName">ファイルを選択またはドロップ</span>
-                                <input type="file" name="csv" accept=".csv">
-                            </label>
-                            <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="0"
-                                aria-valuemin="0" aria-valuemax="100">
-                                <div class="progress-bar" style="width: 0%"></div>
+<!-- インポートモーダル -->
+
+<div class="modal-overlay" id="inportModal">
+    <div class="modal inport-modal">
+        <div class="close-btn" id="inportCloselBtn">
+            <img src="{{ asset('img/cancel_icon.svg') }}" alt="閉じる">
+        </div>
+        <div class="top-erea">
+            <p class="ttl">業務連絡csvインポート</p>
+            <p class="txt">csvデータを業務連絡に上書きします</p>
+        </div>
+        <div class="middle-erea">
+            <p><span class="required"></span><span class="required_txt">：必須項目</span></p>
+            <p class="ttl">CSV添付<span class="required"></span></p>
+            <div class="file-upload__container">
+                <div class="file-upload__container__item">
+                    <div class="file-upload__container__item__wrap">
+                        <div class="file-input-item">
+                            <div class="uploader">
+                                <label for="fileUp">
+                                    <img class="uploadbefore" src="{{ asset('img/upload-cloud.svg') }}" alt="" />
+                                    <div class="upload-txt uploadbefore">
+                                        <p>ここにファイルをドロップ</p>
+                                        <p>または</p>
+                                        <p class="upload-txt-btn">ファイルを選択</p>
+                                    </div>
+                                    <div class="uploaded">
+                                        <img class="uploaded-img" src="" alt="" />
+                                        <p class="uploaded-txt">uploaded-img.jpg</p>
+                                    </div>
+                                </label>
+                                <input type="file" name="csv" id="fileUp" accept=".csv" />
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <div class="col-sm-3 control-label">
-                            <span class="text-danger required">*</span>：必須項目
-                        </div>
-                        <div class="col-sm-2 col-sm-offset-6 control-label">
-                            <input type="button" id="importButton" class="btn btn-admin" data-toggle="modal" data-target="#messageStoreModal" value="インポート" disabled>
-                        </div>
-                    </div>
-                </form>
+                </div>
             </div>
+        </div>
+        <div class="c-btn">
+            <button class="c-btn__blue disabled-btn" id="inportOpenBtn" data-file="bb_sk_inport_csv">開く</button>
         </div>
     </div>
 </div>
@@ -321,3 +324,6 @@
         </div>
     </div>
 </div>
+
+
+
