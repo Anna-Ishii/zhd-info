@@ -1,0 +1,659 @@
+@charset "UTF-8";
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Breakpoint　値はサイトに合わせて変更しましょう
+------------------------------------------------------*/
+/*------------------------------------------------------
+    このファイルは基本触らない
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+.l-header__bottom {
+  margin: 0;
+}
+.l-header__link {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 7px 60px;
+  box-shadow: 0 4px 6px -4px rgba(0, 81, 163, 0.2);
+}
+.l-header__link__wrap {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.l-header__link__text .page_link {
+  font-size: 1.6rem;
+  color: #0051A3;
+}
+.l-header__link__text .page_link:hover {
+  opacity: 0.7;
+}
+.l-header__link__text .page_link.active {
+  font-weight: 700;
+}
+
+.c-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto;
+  gap: 40px;
+  text-align: center;
+}
+.c-btn__white {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  background: #fff;
+  color: #0050C0;
+  border: 1px solid #0050C0;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
+.c-btn__blue {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  color: white;
+  background: #0050C0;
+  border: none;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
+.disabled-btn {
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+.custom-radio-wrap .custom-radio {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  padding-left: 28px;
+  margin-right: 20px;
+  font-size: 16px;
+}
+.custom-radio-wrap .custom-radio input[type=radio] {
+  opacity: 0;
+  position: absolute;
+}
+.custom-radio-wrap .custom-radio .radio-mark {
+  position: absolute;
+  left: 0;
+  top: 12px;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 1px solid #8E9199;
+  border-radius: 50%;
+}
+.custom-radio-wrap .custom-radio input[type=radio]:checked + .radio-mark {
+  background-color: #fff;
+  border-color: #0050C0;
+}
+.custom-radio-wrap .custom-radio input[type=radio]:checked + .radio-mark::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0050C0;
+}
+
+.custom-checkbox-square {
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1.5;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  margin-right: 1em;
+}
+.custom-checkbox-square input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.custom-checkbox-square .checkmark {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 1px solid #8E9199;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.custom-checkbox-square input:checked + .checkmark {
+  background-color: #0050C0;
+  border-color: #0050C0;
+}
+.custom-checkbox-square .checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 0px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.custom-checkbox-square input:checked + .checkmark::after {
+  display: block;
+}
+.custom-checkbox-square .checkmark {
+  left: 0px;
+}
+
+.custom-date-picker {
+  position: relative;
+  display: inline-block;
+}
+.custom-date-picker .calendar-icon {
+  position: absolute;
+  right: 10px;
+  top: 22%;
+  background: url("../img/calendar_gray.svg") no-repeat center/cover;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.custom-date-picker .calendar-icon.active {
+  position: absolute;
+  right: 10px;
+  top: 22%;
+  background: url("../img/calendar.svg") no-repeat center/cover;
+  width: 20px;
+  height: 20px;
+}
+.custom-date-picker .date-input {
+  background-color: #F4F4F5;
+  transition: background-color 0.3s;
+  color: #8E9199 !important;
+}
+.custom-date-picker .date-input.filled {
+  background-color: white;
+  color: #1B2131 !important;
+  border: 1px solid #8E9199 !important;
+  border-radius: 4px;
+}
+.custom-date-picker .hidden {
+  display: none;
+}
+/* 日付入力欄のスタイル */
+.custom-calendar-input .custom-calendar {
+  position: absolute;
+  z-index: 1;
+  top: calc(100% + 1px);
+  left: 0px;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 16px;
+  box-shadow: 0 3px 10px rgba(27, 33, 49, 0.5);
+}
+.custom-calendar-input.hidden {
+  display: none;
+}
+.custom-calendar-input .calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 10px;
+  font-size: 16px;
+}
+.custom-calendar-input .calendar-header span {
+  font-weight: bold;
+}
+.custom-calendar-input .calendar-header button {
+  width: 32px;
+  height: 32px;
+  border: none;
+  cursor: pointer;
+}
+.custom-calendar-input .calendar-header .prev-month {
+  background: url("../img/prev-month.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-header .next-month {
+  background: url("../img/next-month.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-header .close-calendar {
+  background: url("../img/close_icon.svg") no-repeat center/cover;
+}
+.custom-calendar-input .calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+.custom-calendar-input .calendar-day,
+.custom-calendar-input .calendar-weekday {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  margin: 0;
+  cursor: pointer;
+}
+.custom-calendar-input .calendar-day.out-of-month {
+  color: #F2F2F3;
+  pointer-events: none;
+}
+.custom-calendar-input .calendar-day.selected {
+  color: #fff;
+  background: #0050C0;
+  border-radius: 50%;
+  font-weight: bold;
+}
+.custom-calendar-input .calendar-today-button {
+  display: block;
+  margin: 16px 6px 10px auto;
+  background: transparent;
+  border: none;
+  color: #0050C0;
+  font-size: 16px;
+}
+
+/* 時間入力欄のスタイル */
+.time-input{
+  min-width: 157px !important;
+  border: none !important;
+  background-color: #FFF !important;
+}
+.time-picker input {
+  border-radius: 4px;
+  font-weight: 400;
+  padding: 9px 10px 9px 16px !important;
+}
+
+body {
+  font-family: "Noto Sans";
+  background: #F3F7FF;
+  font-size: 1.6rem;
+  color: #1B2131;
+}
+
+main.business-notice-create-instruction {
+  padding: 40px 100px 80px;
+}
+main.business-notice-create-instruction .required::after {
+  content: "＊";
+  position: relative;
+  font-size: 1rem;
+  top: -1em;
+  left: 0.5em;
+  color: #E84949;
+}
+main.business-notice-create-instruction .required_txt {
+  font-size: 1.4rem;
+}
+main.business-notice-create-instruction .content-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 40px 64px;
+}
+main.business-notice-create-instruction .content-item .content__wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 32px;
+}
+main.business-notice-create-instruction .content-item .content__wrap .content {
+  font-size: 20px;
+  font-weight: bold;
+  line-height: 1;
+}
+main.business-notice-create-instruction .content-item .content__wrap .txt {
+  font-size: 16px;
+  color: #8E9199;
+  padding: 16px 0;
+}
+main.business-notice-create-instruction .control select {
+  min-width: 491px;
+  height: 44px;
+  padding: 10px 12px 10px 16px;
+  border: 1px solid #8E9199;
+  border-radius: 4px;
+  background: #fff;
+  font-size: 1.6rem;
+}
+main.business-notice-create-instruction .form .annotation {
+  line-height: 150%;
+  color: #8E9199;
+}
+main.business-notice-create-instruction .form input {
+  font-size: 1.6rem;
+  color: #1B2131;
+  padding: 8px 16px;
+  border: 1px solid #1B2131;
+  border-radius: 4px;
+}
+main.business-notice-create-instruction .form .content-radio .input-group {
+  display: flex;
+  gap: 16px;
+}
+main.business-notice-create-instruction .form .content-radio .input-group label {
+  font-weight: normal;
+}
+main.business-notice-create-instruction .form .content-checkbox .input-group {
+  display: flex;
+  gap: 4px;
+}
+main.business-notice-create-instruction .form .content-checkbox .input-group label {
+  font-weight: normal;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+main.business-notice-create-instruction .form .input-group {
+  flex-wrap: wrap;
+}
+main.business-notice-create-instruction .form .input-group .custom-checkbox {
+  width: 60px;
+}
+main.business-notice-create-instruction .form .input-group .custom-checkbox.max-size {
+  width: 100%;
+}
+main.business-notice-create-instruction .form .input-group .custom-checkbox input {
+  margin: 0;
+}
+main.business-notice-create-instruction .form .input-group.custom-textbox input {
+  border: 1px solid #1B2131;
+  background-color: #FFFFFF;
+  padding: 10px 16px;
+  font-size: 1.6rem;
+  width: 100%;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container {
+  display: flex;
+  flex-direction: column;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item {
+  display: flex;
+  align-items: stretch;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader {
+  width: 100%;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label {
+  display: flex;
+  height: 292px;
+  padding: 40px 50px;
+  border-radius: 10px;
+  border: 1px dashed #0050C0;
+  background-color: #F5F9FF;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  justify-content: center;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt {
+  text-align: center;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt p:nth-of-type(2) {
+  margin: 8px auto;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt-btn {
+  padding: 10px 30px;
+  border-radius: 4px;
+  border: 1px solid #0050C0;
+  color: #0050C0;
+  background-color: #fff;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader input {
+  display: none;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader .uploaded {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  display: none;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader .uploaded-img {
+  width: 100%;
+  height: 100%;
+  -o-object-fit: cover;
+     object-fit: cover;
+}
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader .uploaded-txt {
+  font-size: 1.6rem;
+  color: #8E9199;
+}
+
+main.business-notice-create-instruction .form .content-file .file-uploaded,
+main.business-notice-create-instruction .form .content-file .file-uploading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 60px;
+  padding: 8px 16px;
+  border: 1px solid #8E9199;
+  border-radius: 4px;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded__wrap,
+main.business-notice-create-instruction .form .content-file .file-uploading__wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+main.business-notice-create-instruction .form .content-file .file-uploading__wrap {
+  flex-direction: column;
+  gap: 4px;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__name,
+main.business-notice-create-instruction .form .content-file .file-uploading .file__name {
+  flex: 1 1 670px;
+  min-width: 0;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__name a,
+main.business-notice-create-instruction .form .content-file .file-uploading .file__name a {
+  font-size: 1.6rem;
+  color: #0051A3;
+  text-decoration: underline;
+  text-decoration-color: #0051A3;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__size,
+main.business-notice-create-instruction .form .content-file .file-uploading .file__size {
+  width: 100px;
+  text-align: right;
+  font-size: 1.4rem;
+  color: #8E9199;
+  flex: 0 0 auto;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__upload_message,
+main.business-notice-create-instruction .form .content-file .file-uploading .file__upload_message {
+  width: 112px;
+  font-size: 1.4rem;
+  line-height: 1.2;
+  letter-spacing: 0;
+  flex: 0 0 auto;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__upload_message {
+  color: #0051A3;
+}
+main.business-notice-create-instruction .form .content-file .file-uploading .file__upload_message {
+  color: #8E9199;
+}
+main.business-notice-create-instruction .form .content-file .file-uploaded .file__delete_btn,
+main.business-notice-create-instruction .form .content-file .file-uploading .file__cancel_btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+}
+main.business-notice-create-instruction .form .content-file .file-uploading .file-uploading__wrap .file__wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+main.business-notice-create-instruction .form .content-file .file-uploading .file-uploading__wrap .file__wrap .file__name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+/* ファイルアップロード進捗バー */
+main.business-notice-create-instruction .form .content-file .file-uploading .upload-progress-bar {
+  width: 100px;
+  height: 8px;
+  background-color: #E5E5E5;
+  border-radius: 4px;
+  overflow: hidden;
+}
+main.business-notice-create-instruction .form .content-file .file-uploading .upload-progress-fill {
+  height: 100%;
+  background-color: #8E9199;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+main.business-notice-create-instruction .form .content-file .file-join__wrap {
+  display: flex;
+  align-items: center;
+  justify-content: end;
+}
+main.business-notice-create-instruction .form .content-file .file-join__wrap .file-join-btn {
+  padding: 10px 16px;
+  background-color: #0051A3;
+  color: #FFF;
+  border-radius: 4px;
+}
+
+main.business-notice-create-instruction .form .input-group.custom-date input {
+  min-width: 491px;
+  padding: 10px 16px;
+  background-color: #FFF;
+  border: 1px solid #1B2131;
+  font-size: 1.6rem;
+  color: #1B2131 !important;
+}
+main.business-notice-create-instruction .form .input-group.custom-date input.disabled {
+  background-color: #F2F2F3;
+  border: none;
+  color: #1B2131 !important;
+}
+main.business-notice-create-instruction .form .content-button .input-group {
+  display: flex;
+  gap: 16px;
+}
+main.business-notice-create-instruction .form .content-button .input-group .button__wrap__item {
+  height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 10px 16px;
+  border: 1px solid #0051A3;
+  border-radius: 4px;
+  background: #fff;
+  gap: 8px;
+  cursor: pointer;
+}
+main.business-notice-create-instruction .form .content-button .input-group .button__wrap__item.active {
+  background: rgba(0, 81, 163, 0.7);
+}
+main.business-notice-create-instruction .form .content-button .input-group .button__wrap__item p {
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #0051A3;
+}
+main.business-notice-create-instruction .form .content-button .input-group .button__wrap__item.active p {
+  color: #FFF;
+}
+main.business-notice-create-instruction .form .content-button .input-group .button__wrap__item img {
+  width: 22px;
+  height: 22px;
+}
+main.business-notice-create-instruction .form .instruction-message a {
+  color: #0051A3;
+  text-decoration: underline;
+  text-decoration-color: #0051A3;
+}
+main.business-notice-create-instruction .form .content-set .input-group {
+  gap: 8px;
+}
+
+main.business-notice-create-instruction .footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 40px 0;
+}
+main.business-notice-create-instruction .footer p {
+  min-width: 200px;
+  text-align: center;
+}
+main.business-notice-create-instruction .footer a {
+  color: #0051A3;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+main *, 
+footer * {
+  margin-bottom: 0 !important;
+}
