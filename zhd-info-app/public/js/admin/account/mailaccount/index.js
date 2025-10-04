@@ -253,10 +253,10 @@ $(document).ready(function() {
         // 編集ボタン
         if (accountEditBtn) {
             $(accountEditBtn).hide();
-            const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="margin-right: 5px;">登録</p>`;
-            $(accountEditBtnGroup).append(saveButtonHtml);
-            const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin">取消</p>`;
+            const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin" style="text-align:center; width: 128px; line-height: 1.5; font-weight: bold; font-size: 1.6rem !important; border-radius: 5px; background: white; color: #0051A3; display: inline-block; margin-top: -55px; margin-bottom: 15px; margin-right: 20px; padding: 10px 16px; border: 1px solid #0051A3; cursor: pointer;">取消</p>`;
             $(accountEditBtnGroup).append(deleteButtonHtml);
+            const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="text-align:center; width: 128px; line-height: 1.5; font-weight: bold; font-size: 1.6rem !important; border-radius: 5px; background: #0051A3; color: white; display: inline-block; margin-top: -55px; margin-bottom: 15px; margin-right: 20px; padding: 10px 16px; cursor: pointer;">登録</p>`;
+            $(accountEditBtnGroup).append(saveButtonHtml);
         }
 
         // DMの業連閲覧状況メール配信のすべて選択/解除ボタン
@@ -320,8 +320,8 @@ $(document).ready(function() {
             if (dmStatus) {
                 $(dmStatus).hide();
                 const dmStatusSelectGroupHtml = `
-                    <div class="dm-status-select-group">
-                        <select class="form-control" name="DM_status" style="padding: 0px; ${!(dmNumberFlg && dmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-dm_id="${dmId}" ${!(dmNumberFlg && dmMailFlg) ? 'disabled' : ''}>
+                    <div class="dm-status-select-group" style="text-align: center;">
+                        <select class="form-control" name="DM_status" style="    border: 1px solid #8E9199; border-radius: 4px; padding: 8px 12px 8px 16px; ${!(dmNumberFlg && dmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-dm_id="${dmId}" ${!(dmNumberFlg && dmMailFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${dmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>
@@ -334,8 +334,8 @@ $(document).ready(function() {
             if (bmStatus) {
                 $(bmStatus).hide();
                 const bmStatusSelectGroupHtml = `
-                <div class="bm-status-select-group">
-                    <select class="form-control" name="BM_status" style="padding: 0px; ${!(bmNumberFlg && bmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-bm_id="${bmId}" ${!(bmNumberFlg && bmMailFlg) ? 'disabled' : ''}>
+                <div class="bm-status-select-group" style="text-align: center;">
+                    <select class="form-control" name="BM_status" style="    border: 1px solid #8E9199; border-radius: 4px; padding: 8px 12px 8px 16px; ${!(bmNumberFlg && bmMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-bm_id="${bmId}" ${!(bmNumberFlg && bmMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${bmStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
@@ -348,8 +348,8 @@ $(document).ready(function() {
             if (amStatus) {
                 $(amStatus).hide();
                 const amStatusSelectGroupHtml = `
-                <div class="am-status-select-group">
-                    <select class="form-control" name="AM_status" style="padding: 0px; ${!(amNumberFlg && amMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-am_id="${amId}" ${!(amNumberFlg && amMailFlg) ? 'disabled' : ''}>
+                <div class="am-status-select-group" style="text-align: center;">
+                    <select class="form-control" name="AM_status" style="    border: 1px solid #8E9199; border-radius: 4px; padding: 8px 12px 8px 16px; ${!(amNumberFlg && amMailFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-am_id="${amId}" ${!(amNumberFlg && amMailFlg) ? 'disabled' : ''}>
                         <option value="0">未設定</option>
                         <option value="1" ${amStatus.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                     </select>
