@@ -1,9 +1,9 @@
 @extends('layouts.parent')
 
 @push('css')
-    <!-- detail.css -->
-    <script>
-        // IEの判定
+<!-- detail.css -->
+<script>
+    // IEの判定
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
         if (!isIE) {
@@ -19,20 +19,20 @@
             link.href = "{{ asset('/css/iecsslibrary/detail.css') }}?date={{ date('Ymd') }}";
             document.head.appendChild(link);
         }
-    </script>
+</script>
 
-    <link href="{{ asset('/css/phase3/business-contact.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+<link href="{{ asset('/css/phase3/business-contact.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 @endpush
 
-@section('backUrl', route('message.index', ['search_period' => 'all']))
+@section('backUrl', session('current_url', route('message.index')))
 @section('title', '業務連絡')
-    @section('previous_page')
-        <a href="{{{ session('current_url', route('message.index')) }}}">業務連絡</a>
-    @endsection
+@section('previous_page')
+<a href="{{{ session('current_url', route('message.index')) }}}">業務連絡</a>
+@endsection
 
-    @section('content')
+@section('content')
 
-    <main>
+<main>
     <div class="business-contact business-contact__detail">
         <input id="manual_id" value="{{$message->id}}" hidden>
         <div class="business-contact__detail__head">
@@ -44,17 +44,19 @@
         </div>
         <div class="business-contact__detail__content">
             <div class="main__supplement main__box--single thumb_parents flex">
-                <div class="pdf-container" style="width:100%; height:80vh;">
-                    <iframe id="pdfFrame" src="{{ asset($message->content_url . "#toolbar=0&navpanes=0") }}"
-                        width="100%"
-                        height="100%"
-                        style="border:none;">
+                <div class="pdf-container">
+                    @if(isset($message->main_file))
+                    <iframe id="pdfFrame" class="pdf-frame"
+                        src="{{ asset($message->main_file['file_url']) }}#toolbar=0&navpanes=0" title="PDF プレビュー">
                     </iframe>
+                    @else
+                    <p class="pdf-not-exist">PDFが存在しません</p>
+                    @endif
                 </div>
             </div>
         </div>
         <div class="business-contact__recent">
-        <h2 class="business-contact__recent__ttl">新着業務連絡</h2>
+            <h2 class="business-contact__recent__ttl">新着業務連絡</h2>
             <div class="swiper business-contact__recent__swiper">
                 <div class="swiper-wrapper business-contact__recent__list">
                     @foreach($latest_messages as $latest_message)
@@ -74,14 +76,14 @@
         <div class="swiper-button-next"></div>
         <div class="swiper-button-prev"></div>
     </div>
-</div>
-    </main>
+    </div>
+</main>
 
-    @include('common.footer')
+@include('common.footer')
 
-    <!-- pdfjs -->
-    <script>
-        // IEの判定
+<!-- pdfjs -->
+<script>
+    // IEの判定
         var isIE = /*@cc_on!@*/false || !!document.documentMode;
 
         if (!isIE) {
@@ -98,9 +100,9 @@
             };
             document.body.appendChild(script);
         }
-    </script>
-    <script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
-    <!-- Swiper JS -->
-    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-    <script src="{{ asset('/js/businessContactSwiper.js')}}?date={{ date('Ymd') }}"></script>
+</script>
+<script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
+<!-- Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="{{ asset('/js/businessContactSwiper.js')}}?date={{ date('Ymd') }}"></script>
 @endsection
