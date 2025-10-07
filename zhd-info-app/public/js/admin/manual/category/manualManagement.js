@@ -1,334 +1,201 @@
-// Packeryインスタンスをグローバルまたはスコープ外で参照できるようにしておく
-let categoryPackery = null;
+/**
+ * 並び順を更新するための共通関数
+ * @param {HTMLElement} container - 対象のコンテナ
+ */
+function updateSortOrder(container) {
+    if (!container) return;
+    const items = Array.from(container.children).filter(el => el.matches('.subcategory__item, .form__item') && el.style.display !== 'none');
+    items.forEach((item, index) => {
+        const sortInput = item.querySelector('.sort-order-input');
+        if (sortInput) {
+            sortInput.value = index + 1; // 1始まりで設定
+        }
+    });
+}
+
+/**
+ * Packeryを初期化するための共通関数
+ * @param {HTMLElement} container - Packeryを適用するコンテナ
+ * @param {string} itemSelector - 対象となるアイテムのセレクタ
+ * @param {string} handleSelector - ドラッグ操作のハンドルとなる要素のセレクタ
+ */
+function initializePackery(container, itemSelector, handleSelector) {
+    if (!container || !window.Packery) return;
+    if (container._pckry) container._pckry.destroy();
+
+    const pckry = new Packery(container, {
+        itemSelector: itemSelector,
+        gutter: 0,
+        getSortData: {
+            order: (itemElem) => {
+                const sortInput = itemElem.querySelector('.sort-order-input');
+                return sortInput ? parseInt(sortInput.value, 10) : 0;
+            }
+        },
+        sortBy: 'order'
+    });
+
+    container._pckry = pckry;
+
+    let isInitialLayout = true;
+    pckry.on('layoutComplete', function() {
+        if (isInitialLayout) {
+            pckry.options.sortBy = undefined;
+            isInitialLayout = false;
+        }
+    });
+
+    container.querySelectorAll(itemSelector).forEach(item => {
+        if (!item._draggabilly) {
+            const draggie = new Draggabilly(item, { handle: handleSelector });
+            item._draggabilly = draggie;
+        }
+        pckry.bindDraggabillyEvents(item._draggabilly);
+    });
+    
+    pckry.on('dragItemPositioned', () => updateSortOrder(container));
+}
+
+/**
+ * 新しい小カテゴリのHTML要素を生成する関数
+ * @param {string} parentNamePrefix - 親カテゴリのname属性のプレフィックス
+ * @returns {HTMLElement} - 生成された小カテゴリのHTML要素
+ */
+function createSubcategoryElement(parentNamePrefix) {
+    const subUniqueId = `new_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    const newItem = document.createElement('div');
+    newItem.className = 'subcategory__item';
+    newItem.dataset.subcategoryId = subUniqueId;
+    
+    const nameAttribute = `${parentNamePrefix}[sub_categories][${subUniqueId}][name]`;
+    const sortOrderAttribute = `${parentNamePrefix}[sub_categories][${subUniqueId}][sort_order]`;
+
+    newItem.innerHTML = `
+        <span class="drag-icon"><img class="editonly move-select-item" src="/img/select-drag.svg" alt="ドラッグ"></span>
+        <input class="subcategory__name" name="${nameAttribute}" placeholder="小カテゴリ名を入力してください">
+        <input type="hidden" class="sort-order-input" name="${sortOrderAttribute}" value="0">
+        <span class="subcategory__actions">
+            <button type="button" class="delete-btn"><img src="/img/delete_icon.svg" alt="削除"></button>
+            <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+            <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
+        </span>
+    `;
+    return newItem;
+}
+
 
 document.addEventListener('DOMContentLoaded', function () {
+    const mainForm = document.querySelector('main form');
+    if (!mainForm) return;
 
-    document.querySelectorAll('.subcategory__list').forEach(function (container) {
-        // 各サブカテゴリアイテムをドラッグ可能に
-        var draggies = [];
-        var items = container.querySelectorAll('.subcategory__item');
-        items.forEach(function (item) {
-            var draggie = new Draggabilly(item, {
-            handle: '.drag-icon'
-            });
-            draggies.push(draggie);
-        });
+    const formContainer = mainForm.querySelector('.form__container');
 
-        // Packeryで並び替え
-        var pckry = new Packery(container, {
-            itemSelector: '.subcategory__item',
-            gutter: 0,
-        });
-        container._pckry = pckry;
+    // --- メインのイベント処理 (イベントデリゲーション) ---
+    mainForm.addEventListener('click', function(e) {
+        const target = e.target;
+        const addSubBtn = target.closest('.add-subcategory');
+        const actionBtn = target.closest('.delete-btn, .up-btn, .down-btn');
+        const formItemForEdit = target.closest('.form__item');
 
-        // DraggabillyとPackeryを連携
-        draggies.forEach(function (draggie) {
-            pckry.bindDraggabillyEvents(draggie);
-        });
+        // 「＋小カテゴリを追加」ボタン
+        if (addSubBtn) {
+            e.preventDefault();
+            const categoryElement = addSubBtn.closest('.category');
+            const list = categoryElement.querySelector('.subcategory__list');
+            const parentTitleInput = categoryElement.querySelector('.category__title');
+            
+            if (!list || !parentTitleInput || !parentTitleInput.name) return;
 
-        // 小カテゴリ削除
-        container.addEventListener('click', function (e) {
-            if (e.target.closest('.subcategory__actions .delete-btn')) {
-            const item = e.target.closest('.subcategory__item');
-            if (item) {
-                item.remove();
-                pckry.reloadItems();
-                pckry.layout();
-            }
-            }
-        });
-
-        // 小カテゴリの上下移動
-        container.addEventListener('click', function (e) {
-            // 上へ
-            if (e.target.closest('.up-btn')) {
-                const item = e.target.closest('.subcategory__item');
-                if (item && item.previousElementSibling) {
-                    container.insertBefore(item, item.previousElementSibling);
-                    if (container._pckry) {
-                        container._pckry.reloadItems();
-                        container._pckry.layout();
-                    }
-                }
-            }
-            // 下へ
-            if (e.target.closest('.down-btn')) {
-                const item = e.target.closest('.subcategory__item');
-                if (item && item.nextElementSibling) {
-                    // 次の次の要素の前に挿入（＝次の要素の後ろに移動）
-                    container.insertBefore(item.nextElementSibling, item);
-                    if (container._pckry) {
-                        container._pckry.reloadItems();
-                        container._pckry.layout();
-                    }
-                }
-            }
-        });
-
-    });
-
-    const formContainer = document.querySelector('.form__container');
-
-
-    // 小カテゴリ追加
-    document.querySelectorAll('.add-subcategory').forEach(addBtn => {
-        addBtn.addEventListener('click', function () {
-            const category = addBtn.closest('.category');
-            const list = category.querySelector('.subcategory__list');
-    
-            // ★★★ 修正点1: 親カテゴリのname属性を取得して、新しい子カテゴリのname属性を生成する ★★★
-            const parentTitleInput = category.querySelector('.category__title');
-            if (!parentTitleInput || !parentTitleInput.name) {
-                console.error('Parent category title input or its name is not found.');
-                return; // 親のname属性がなければ処理を中断
-            }
             const parentNamePrefix = parentTitleInput.name.substring(0, parentTitleInput.name.lastIndexOf('[name]'));
-            const subUniqueId = `new_${Date.now()}`;
-
-            // 新しい小カテゴリ要素を作成
-            const newItem = document.createElement('div');
-            newItem.className = 'subcategory__item';
-            // ★★★ 修正点2: 画像パスをルート相対パスに修正し、name属性とhidden inputを追加 ★★★
-            newItem.innerHTML = `
-                <span class="drag-icon"><img class="editonly move-select-item" src="/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                <input class="subcategory__name" name="${parentNamePrefix}[subcategories][${subUniqueId}][name]" placeholder="小カテゴリ名を入力してください">
-                <input type="hidden" class="sort-order-input" name="${parentNamePrefix}[subcategories][${subUniqueId}][sort_order]" value="${list.children.length}">
-                <span class="subcategory__actions">
-                    <button type="button" class="delete-btn"><img src="/img/delete_icon.svg" alt="削除"></button>
-                    <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                    <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                </span>
-            `;
-            // 小カテゴリリストの末尾に追加
+            const newItem = createSubcategoryElement(parentNamePrefix); 
             list.appendChild(newItem);
 
-            // Draggabilly + Packery の再初期化（list を container とみなす）
-            const draggie = new Draggabilly(newItem, {
-                handle: '.drag-icon'
-            });
-
             if (list._pckry) {
-                list._pckry.bindDraggabillyEvents(draggie);
-                list._pckry.appended(newItem);
-                list._pckry.layout();
-            }
-        });
-    });
-
-
-    // カテゴリ削除/カテゴリの上下移動
-    document.querySelectorAll('.category').forEach(function (category) {
-        const actions = category.querySelector('.category__actions');
-        if (actions) {
-        actions.addEventListener('click', function (e) {
-            if (e.target.closest('.delete-btn')) {
-                const formItem = category.closest('.form__item');
-                if (formItem) {
-                    formItem.remove();
-                    if (categoryPackery) {
-                        categoryPackery.reloadItems();
-                        categoryPackery.layout();
-                    }
-                }
-            }
-            if (e.target.closest('.category__actions .up-btn')) {
-                const formItem = e.target.closest('.form__item');
-                if (formItem && formItem.previousElementSibling) {
-                    formContainer.insertBefore(formItem, formItem.previousElementSibling);
-                    if (categoryPackery) {
-                        categoryPackery.reloadItems();
-                        categoryPackery.layout();
-                    }
-                }
-            }
-            // 下へ
-            if (e.target.closest('.category__actions .down-btn')) {
-                const formItem = e.target.closest('.form__item');
-                if (formItem && formItem.nextElementSibling) {
-                    formContainer.insertBefore(formItem.nextElementSibling, formItem);
-                    if (categoryPackery) {
-                        categoryPackery.reloadItems();
-                        categoryPackery.layout();
-                    }
-                }
-            }
-        });
-        }
-    });
-
-
-    // カテゴリー（form__item）ドラッグ＆ドロップ
-    if (formContainer) {
-        // Packery初期化
-        categoryPackery = new Packery(formContainer, {
-            itemSelector: '.form__item',
-            gutter: 0,
-        });
-
-        // 各form__itemにDraggabillyをセット
-        formContainer.querySelectorAll('.form__item').forEach(item => {
-            const draggie = new Draggabilly(item, {
-                handle: '.category__drag'
-            });
-            categoryPackery.bindDraggabillyEvents(draggie);
-        });
-    }
-
-
-    // form__itemクリックで.edit-mode付与
-    document.querySelectorAll('.form__item').forEach(item => {
-        item.addEventListener('click', function (e) {
-        document.querySelectorAll('.form__item').forEach(i => i.classList.remove('edit-mode'));  // 他のform__itemから.edit-modeを外す
-        item.classList.add('edit-mode');
-        if (categoryPackery) categoryPackery.layout();
-        e.stopPropagation();  // 子要素のクリックでも発火するので、バブリングを止める
-        });
-    });
-
-    // bodyクリックで全ての.edit-modeを外す
-    document.body.addEventListener('click', function () {
-        document.querySelectorAll('.form__item').forEach(i => i.classList.remove('edit-mode'));
-        if (categoryPackery) categoryPackery.layout();
-    });
-
-    // --- add-categoryからform__containerへカテゴリ追加 ---
-    const addCategory = document.querySelector('.add-category');
-    const addCategoryInput = addCategory.querySelector('.category__title');
-    const addCategorySubList = addCategory.querySelector('.subcategory__list');
-    const addCategoryAddSubBtn = addCategory.querySelector('.add-subcategory');
-
-    // ★★★ 修正点3: イベントトリガーを 'blur' (フォーカスが外れた時) に変更 ★★★
-    addCategoryInput.addEventListener('blur', function (e) {
-        const catName = addCategoryInput.value.trim();
-        if (!catName) return;
-
-        // ★★★ 修正点4: 新規親カテゴリにname属性とsort_orderを追加 ★★★
-        const parentUniqueId = `new_${Date.now()}`;
-        const formItem = document.createElement('div');
-        formItem.className = 'form__item';
-        formItem.innerHTML = `
-            <div class="category">
-                <img class="category__drag" src="/img/drag.svg" alt="">
-                <div class="category__header">
-                    <input class="category__title" name="new_categories[${parentUniqueId}][name]" value="${catName}">
-                    <input type="hidden" class="sort-order-input" name="new_categories[${parentUniqueId}][sort_order]" value="0">
-                </div>
-                <div class="category__content">
-                    <div class="subcategory__list"></div>
-                    <span class="category__actions">
-                        <button type="button" class="delete-btn"><img src="/img/delete_icon.svg" alt="削除"></button>
-                        <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                        <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                    </span>
-                </div>
-                <button type="button" class="add-subcategory">＋小カテゴリを追加</button>
-            </div>
-        `;
-        // 小カテゴリ（add-categoryで入力済みのもの）をコピー
-        const subList = formItem.querySelector('.subcategory__list');
-        addCategorySubList.querySelectorAll('.subcategory__item').forEach((item, index) => {
-            const input = item.querySelector('.subcategory__name');
-            if (input && input.value.trim()) {
-                const clone = item.cloneNode(true);
-                const subUniqueId = `new_${Date.now()}_${index}`;
-                // ★★★ 修正点5: コピーした小カテゴリのname属性を正しく設定 ★★★
-                clone.querySelector('.subcategory__name').name = `new_categories[${parentUniqueId}][subcategories][${subUniqueId}][name]`;
-                clone.innerHTML += `<input type="hidden" class="sort-order-input" name="new_categories[${parentUniqueId}][subcategories][${subUniqueId}][sort_order]" value="${index}">`;
-                subList.appendChild(clone);
-            }
-        });
-        // form__containerに追加
-        formContainer.appendChild(formItem);
-
-        // Draggabilly + Packery再初期化
-        if (categoryPackery) {
-            const draggie = new Draggabilly(formItem, {
-                handle: '.category__drag'
-            });
-            categoryPackery.bindDraggabillyEvents(draggie);
-            categoryPackery.appended(formItem);
-            setTimeout(() => {
-                categoryPackery.reloadItems();
-                categoryPackery.layout();
-            }, 50);
-        }
-        
-        const newSubList = formItem.querySelector('.subcategory__list');
-        if (newSubList) {
-            var draggies = [];
-            newSubList.querySelectorAll('.subcategory__item').forEach(function (item) {
-                var draggie = new Draggabilly(item, { handle: '.drag-icon' });
-                draggies.push(draggie);
-            });
-            var pckry = new Packery(newSubList, { itemSelector: '.subcategory__item', gutter: 0, });
-            newSubList._pckry = pckry;
-            draggies.forEach(function (draggie) { pckry.bindDraggabillyEvents(draggie); });
-        }
-        
-        const addSubBtn = formItem.querySelector('.add-subcategory');
-        if (addSubBtn) {
-            // (イベントリスナーは元のコードからコピーし、パスとname属性を修正)
-            addSubBtn.addEventListener('click', function () {
-                const category = addSubBtn.closest('.category');
-                const list = category.querySelector('.subcategory__list');
-                const parentTitleInput = category.querySelector('.category__title');
-                if (!parentTitleInput || !parentTitleInput.name) return;
-                const parentNamePrefix = parentTitleInput.name.substring(0, parentTitleInput.name.lastIndexOf('[name]'));
-                const subUniqueId = `new_${Date.now()}`;
-
-                const newItem = document.createElement('div');
-                newItem.className = 'subcategory__item';
-                newItem.innerHTML = `
-                    <span class="drag-icon"><img class="editonly move-select-item" src="/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-                    <input class="subcategory__name" name="${parentNamePrefix}[subcategories][${subUniqueId}][name]" placeholder="小カテゴリ名を入力してください">
-                    <input type="hidden" class="sort-order-input" name="${parentNamePrefix}[subcategories][${subUniqueId}][sort_order]" value="${list.children.length}">
-                    <span class="subcategory__actions">
-                        <button type="button" class="delete-btn"><img src="/img/delete_icon.svg" alt="削除"></button>
-                        <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                        <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                    </span>
-                `;
-                list.appendChild(newItem);
                 const draggie = new Draggabilly(newItem, { handle: '.drag-icon' });
-                if (list._pckry) {
-                    list._pckry.bindDraggabillyEvents(draggie);
-                    list._pckry.appended(newItem);
+                newItem._draggabilly = draggie;
+                list._pckry.appended(newItem);
+                list._pckry.bindDraggabillyEvents(draggie);
+                setTimeout(() => {
                     list._pckry.layout();
+                    updateSortOrder(list);
+                }, 50);
+            }
+            return;
+        }
+
+        // 削除、上下ボタン
+        if (actionBtn) {
+            e.preventDefault();
+            const item = actionBtn.closest('.subcategory__item, .form__item');
+            if (!item) return;
+
+            const parentContainer = item.parentElement;
+            
+            if (actionBtn.classList.contains('delete-btn')) {
+                const parentId = item.closest('.form__item')?.dataset.categoryId;
+                const subId = item.dataset.subcategoryId;
+                const isNewItem = (subId && String(subId).startsWith('new_')) || (parentId && String(parentId).startsWith('new_'));
+
+                if (isNewItem) {
+                    item.remove();
+                } else {
+                    const deleteInput = document.createElement('input');
+                    deleteInput.type = 'hidden';
+                    deleteInput.value = '1';
+                    if (subId) {
+                        deleteInput.name = `categories[${parentId}][subcategories][${subId}][delete]`;
+                    } else {
+                        deleteInput.name = `categories[${parentId}][delete]`;
+                    }
+                    item.appendChild(deleteInput);
+                    item.style.display = 'none';
                 }
-            });
+            }
+            else if (actionBtn.classList.contains('up-btn') && item.previousElementSibling) {
+                parentContainer.insertBefore(item, item.previousElementSibling);
+            }
+            else if (actionBtn.classList.contains('down-btn') && item.nextElementSibling) {
+                parentContainer.insertBefore(item.nextElementSibling, item);
+            }
+
+            if (parentContainer._pckry) {
+                parentContainer._pckry.reloadItems();
+                parentContainer._pckry.layout();
+            }
+            updateSortOrder(parentContainer);
+            return; // 他の処理と競合しないように
         }
         
-        formItem.addEventListener('click', function (e) {
-            document.querySelectorAll('.form__item').forEach(i => i.classList.remove('edit-mode'));
-            formItem.classList.add('edit-mode');
-            if (categoryPackery) categoryPackery.layout();
-            e.stopPropagation();
-        });
-        
-        // inputリセット
-        addCategoryInput.value = '';
-        addCategorySubList.innerHTML = '';
-        const emptySub = document.createElement('div');
-        emptySub.className = 'subcategory__item';
-        emptySub.innerHTML = `
-            <span class="drag-icon"><img class="editonly move-select-item" src="/img/select-drag.svg" alt="" style="touch-action: none;"></span>
-            <input class="subcategory__name" placeholder="小カテゴリ名を入力してください">
-            <span class="subcategory__actions">
-                <button type="button" class="delete-btn"><img src="/img/delete_icon.svg" alt="削除"></button>
-                <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn"><path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-                <button type="button" class="down-btn"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" class="downbtn"><path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"></path></svg></button>
-            </span>
-        `;
-        addCategorySubList.appendChild(emptySub);
+        // 編集モードの切り替え処理
+        if (formItemForEdit) {
+            // ボタンや入力欄、ドラッグハンドルなど、操作要素のクリックではモードを切り替えない
+            if (target.closest('button, input, a, .drag-icon')) {
+                return;
+            }
+            // 他の項目の編集モードをすべて解除
+            document.querySelectorAll('.form__item.edit-mode').forEach(i => {
+                if (i !== formItemForEdit) {
+                    i.classList.remove('edit-mode');
+                }
+            });
+            // クリックされた項目の編集モードを切り替える (トグル)
+            formItemForEdit.classList.toggle('edit-mode');
+
+            if (formContainer._pckry) formContainer._pckry.layout();
+
+        } else if (!target.closest('.category')) {
+            // カテゴリ関連以外の場所がクリックされたら、すべての編集モードを解除
+            document.querySelectorAll('.form__item.edit-mode').forEach(i => i.classList.remove('edit-mode'));
+            if (formContainer && formContainer._pckry) formContainer._pckry.layout();
+        }
     });
 
-    // タブ切り替え
-    document.querySelectorAll('.tabs__item').forEach(tab => {
-        tab.addEventListener('click', function () {
-            document.querySelectorAll('.tabs__item').forEach(i => i.classList.remove('active'));
-            tab.classList.add('active');
-        });
+    // --- 初期化処理の呼び出し ---
+    if (formContainer) {
+        initializePackery(formContainer, '.form__item', '.category__drag');
+    }
+    document.querySelectorAll('.subcategory__list').forEach(list => {
+        initializePackery(list, '.subcategory__item', '.drag-icon');
     });
-
 });
 
