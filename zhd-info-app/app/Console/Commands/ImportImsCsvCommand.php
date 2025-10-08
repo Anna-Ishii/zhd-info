@@ -25,6 +25,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use App\Utils\SESMailer;
+use Illuminate\Support\Facades\Log;
 
 class ImportImsCsvCommand extends Command
 {
@@ -63,6 +64,16 @@ class ImportImsCsvCommand extends Command
         'HS'   => 15,
         'L'    => 16,
         'ZET'  => 17,
+    ];
+
+    const SYSTEM_CONSTANTS = [
+        'ENVIRONMENT_STAG' => 'stag',
+    ];
+
+    const SHOP_CSV_COLUMNS = [
+        'ORG1_NAME'   => 0,
+        'SHOP_CODE'   => 3,
+        'CLOSE_DATE'  => 35,
     ];
 
     /**
@@ -166,7 +177,7 @@ class ImportImsCsvCommand extends Command
         // メール送信
         $mailer = new SESMailer();
         $fromName = '業連・動画配信ツール';
-        $to = ['yotake@nssx.co.jp', 'skomine@nssx.co.jp'];
+        $to = array_map('trim', explode(',', config('ims.notification_emails')));
         $subject = 'IMSデータ取り込み';
         $attachments = [];
         $types = ['shops'];
@@ -196,21 +207,21 @@ class ImportImsCsvCommand extends Command
         $output = [];
         $start = time();
 
-        $environment = Environment::where('command_name', $this->signature)->where('contents', 'stag')->select('id')->first();
+        $environment = Environment::where('command_name', $this->signature)->where('contents', self::SYSTEM_CONSTANTS['ENVIRONMENT_STAG'])->select('id')->first();
 
         foreach ($shops_data as $index => $shop) {
-            $organization1 = Organization1::where('name', $shop[0])->first();
+            $organization1 = Organization1::where('name', $shop[self::SHOP_CSV_COLUMNS['ORG1_NAME']])->first();
             if (!$organization1) {
-                \Log::error("組織1 '{$shop[0]}' が見つかりません");
+                \Log::error("組織1 '{$shop[self::SHOP_CSV_COLUMNS['ORG1_NAME']]}' が見つかりません");
                 continue;
             }
             $organization1_id = $organization1->id;
 
-            $close_date = $this->parseDateTime($shop[35]);
+            $close_date = $this->parseDateTime($shop[self::SHOP_CSV_COLUMNS['CLOSE_DATE']]);
             // 閉店の店舗
             if (empty($close_date) || $today->gte($close_date)) {
                 $close_shop[] = Shop::where('organization1_id', $organization1_id)
-                    ->where('shop_code', $shop[3])
+                    ->where('shop_code', $shop[self::SHOP_CSV_COLUMNS['SHOP_CODE']])
                     ->value('id');
                 continue;
             }
@@ -474,26 +485,74 @@ class ImportImsCsvCommand extends Command
         \Log::info("組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒");
         echo "組織データ取り込み完了: 処理時間: " . (time() - $start) . "秒" . "\n";
 
-        // 初回のみパッチ
-        DB::insert(
-            'insert into message_organization (
-                with m_o5 as (
-                select distinct m_u.message_id as message_id, s.organization1_id as organization1_id, s.organization5_id as organization5_id from message_user as m_u
-                left join users as u on m_u.user_id = u.id
-                left join shops as s on u.shop_id = s.id
-                inner join organization5 as o5 on s.organization5_id = o5.id
-                )
-                select message_id, organization1_id, NULL as organization2_id, NULL as organization3_id, NULL as organization4_id, organization5_id, ? as created_at, ? as updated_at from m_o5
-                );',
-            [new Carbon('now'), new Carbon('now')]
-        );
+        $now = now();
 
-        DB::delete(
-            'DELETE FROM message_organization WHERE organization5_id IN (
-                select id from organization5 where id not in (
-                select distinct organization5_id from shops where organization5_id is not null)
-            )'
-        );
+        try {
+            DB::transaction(function () use ($now) {
+                // --- サブクエリ作成 ---
+                $subQuery = DB::table('message_user as m_u')
+                    ->select([
+                        'm_u.message_id',
+                        's.organization1_id',
+                        DB::raw('NULL as organization2_id'),
+                        DB::raw('NULL as organization3_id'),
+                        DB::raw('NULL as organization4_id'),
+                        's.organization5_id',
+                        DB::raw("'{$now}' as created_at"),
+                        DB::raw("'{$now}' as updated_at"),
+                    ])
+                    ->leftJoin('users as u', 'm_u.user_id', '=', 'u.id')
+                    ->leftJoin('shops as s', 'u.shop_id', '=', 's.id')
+                    ->join('organization5 as o5', 's.organization5_id', '=', 'o5.id')
+                    ->distinct();
+
+                // --- データ登録 ---
+                DB::table('message_organization')->insertUsing(
+                    [
+                        'message_id',
+                        'organization1_id',
+                        'organization2_id',
+                        'organization3_id',
+                        'organization4_id',
+                        'organization5_id',
+                        'created_at',
+                        'updated_at'
+                    ],
+                    $subQuery
+                );
+
+                Log::info('message_organization の初期データ登録が完了しました。');
+            });
+        } catch (\Throwable $e) {
+            // トランザクション内で発生した例外をキャッチ
+            Log::error('message_organization 登録処理でエラー発生: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            throw $e;
+        }
+
+        try {
+            DB::transaction(function () {
+                // 不要な message_organization のレコード削除
+                $deleted = DB::delete(
+                    'DELETE FROM message_organization WHERE organization5_id IN (
+                    SELECT id FROM organization5
+                    WHERE id NOT IN (
+                        SELECT DISTINCT organization5_id FROM shops WHERE organization5_id IS NOT NULL
+                    )
+                )'
+                );
+
+                Log::info("message_organization の不要データ削除完了。削除件数: {$deleted}");
+            });
+        } catch (\Throwable $e) {
+            Log::error('message_organization の削除処理でエラー発生: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+            throw $e;
+        }
 
         // 新店舗のユーザー作成
         foreach ($new_shop as $n_s) {
