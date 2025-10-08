@@ -15,10 +15,12 @@
         </span>
     @else
         <a href="{{ $objects->previousPageUrl() }}" class="prev">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M13.75 16.5L8.25 11L13.75 5.5" stroke="#1B2131" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
+            <span>
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M13.75 16.5L8.25 11L13.75 5.5" stroke="#1B2131" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </span>
         </a>
     @endif
 
@@ -55,10 +57,12 @@
     {{-- Next Page Link --}}
     @if ($objects->hasMorePages())
         <a href="{{ $objects->nextPageUrl() }}" class="next">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M8.25 16.5L13.75 11L8.25 5.5" stroke="#1B2131" stroke-linecap="round"
-                    stroke-linejoin="round" />
-            </svg>
+            <span>
+                <svg width="22" height="22" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8.25 16.5L13.75 11L8.25 5.5" stroke="#1B2131" stroke-linecap="round"
+                        stroke-linejoin="round" />
+                </svg>
+            </span>
         </a>
     @else
         <span class="next disabled">
