@@ -989,6 +989,15 @@ class MessagePublishController extends Controller
             SendWowtalkNotificationJob::dispatch($message_id, 'message', 'message_store');
         }
 
+        // 指示作成用の保存の場合はJSONレスポンスを返す
+        if (isset($request->save_for_instruction)) {
+            return response()->json([
+                'success' => true,
+                'message_id' => $message->id,
+                'message' => '保存が完了しました'
+            ]);
+        }
+
         // 検索条件をセッションから取得してリダイレクト
         $message_publish_url = session('message_publish_url');
         if ($message_publish_url) {
