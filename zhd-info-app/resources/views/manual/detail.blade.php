@@ -112,11 +112,22 @@
                         </div>
 
                     @elseif( in_array($manual->content_type, ['pdf'], true ))
-                        {{-- PDF --}}
-                        <div class="main__supplement__detail">
+                        {{-- PDF（メイン） --}}
+                        <p class="text-content">{{ $manual->description }}</p>
+                        <div class="pdf-swiper-container" id="pdf-container-main">
+                            <div class="swiper pdf-swiper" id="pdf-swiper-main">
+                                <div class="swiper-wrapper" id="pdfViewer-main"></div>
+                                {{-- ナビゲーション --}}
+                                <div class="swiper-button-prev pdf-prev-manual"></div>
+                                <div class="swiper-button-next pdf-next-manual"></div>
+                            </div>
+                        </div>
+
+                        {{-- 元コード --}}
+                        {{-- <div class="main__supplement__detail">
                             <p class="text-content">{{ $manual->description }}</p>
                             <div class="pdf-container" data-url="{{ asset($manual->content_url) }}"></div>
-                        </div>
+                        </div> --}}
 
                     @else
                         {{-- 画像 --}}
@@ -208,11 +219,21 @@
                             </div>
 
                         @elseif( in_array($content->content_type, ['pdf'], true ))
-                            {{-- PDF --}}
-                            <p class="text-content">{{ $content->description }}</p>
+                            {{-- PDF（手順） --}}
+                            <div class="pdf-swiper-container" id="pdf-container-{{ $loop->index }}">
+                                <div class="swiper pdf-swiper" id="pdf-swiper-{{ $loop->index }}">
+                                    <div class="swiper-wrapper" id="pdfViewer-{{ $loop->index }}"></div>
+                                    {{-- ナビゲーション --}}
+                                    <div class="swiper-button-prev pdf-prev-manual"></div>
+                                    <div class="swiper-button-next pdf-next-manual"></div>
+                                </div>
+                            </div>
+
+                            {{-- 元コード --}}
+                            {{-- <p class="text-content">{{ $content->description }}</p>
                             <div class="flex">
                                 <div class="pdf-container" data-url="{{ asset($content->content_url) }}"></div>
-                            </div>
+                            </div> --}}
 
                         @else
                             {{-- 画像 --}}
@@ -235,8 +256,106 @@
         </main>
 
         @include('common.footer')
-
         <!-- pdfjs -->
         <script src="{{ asset('/js/oldjslibrary/pdfjs-2.10.377-dist/build/pdf.js') }}"></script>
         <script src="{{ asset('/js/detail.js') }}?date={{ date('Ymd') }}" defer></script>
-    @endsection
+
+        <!-- Swiper JS -->
+        <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+        <script src="{{ asset('/js/businessContactSwiper.js')}}?date={{ date('Ymd') }}"></script>
+
+        <!-- PDF.js 表示制御 -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", async function() {
+                // === PDF.js設定 ===
+                pdfjsLib.GlobalWorkerOptions.workerSrc =
+                    "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js";
+
+                // ==== (1) メインPDF ====
+                @if($manual->content_type === 'pdf')
+                    await renderPdf(
+                        "{{ asset($manual->content_url) }}",
+                        "main"
+                    );
+                @endif
+
+                // ==== (2) 手順PDF群 ====
+                @foreach($contents as $index => $content)
+                    @if($content->content_type === 'pdf')
+                        await renderPdf(
+                            "{{ asset($content->content_url) }}",
+                            "{{ $index }}"
+                        );
+                    @endif
+                @endforeach
+
+                // ==== 共通レンダリング関数 ====
+                async function renderPdf(url, key) {
+                    const containerId = `pdfViewer-${key}`;
+                    const swiperId = `pdf-swiper-${key}`;
+                    const paginationId = `page-count-${key}`;
+
+                    const container = document.getElementById(containerId);
+                    if (!container) return;
+
+                    try {
+                        const pdf = await pdfjsLib.getDocument(url).promise;
+                        const numPages = pdf.numPages;
+
+                        for (let i = 1; i <= numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const scale = 1.2;
+                            const viewport = page.getViewport({ scale });
+                            const canvas = document.createElement("canvas");
+                            const context = canvas.getContext("2d");
+                            canvas.width = viewport.width;
+                            canvas.height = viewport.height;
+                            await page.render({ canvasContext: context, viewport }).promise;
+
+                            const slide = document.createElement("div");
+                            slide.className = "swiper-slide flex flex-col items-center";
+
+                            const pageNumEl = document.createElement("div");
+                            pageNumEl.className = "pdf-page-number";
+                            pageNumEl.textContent = `${i}/${numPages}`;
+
+                            slide.appendChild(canvas);
+                            slide.appendChild(pageNumEl);
+                            container.appendChild(slide);
+                        }
+
+                        // SwiperをPDFごとに初期化
+                        const swiper = new Swiper(`#${swiperId}`, {
+                            slidesPerView: 2,
+                            // slidesPerView: key === "main" ? 1 : 2,
+                            slidesPerGroup: 1,
+                            spaceBetween: 20,
+                            loop: false,
+                            navigation: {
+                                nextEl: `#${swiperId} .pdf-next-manual`,
+                                prevEl: `#${swiperId} .pdf-prev-manual`
+                            },
+                            on: {
+                                init() { updatePagination(this); },
+                                slideChange() { updatePagination(this); }
+                            }
+                        });
+
+                        // ページ番号更新
+                        function updatePagination(swiper) {
+                            const totalSpreads = Math.ceil(numPages / 2);
+                            const currentSpread = Math.floor(swiper.activeIndex / 1) + 1;
+                            const paginationEl = document.getElementById(paginationId);
+                            if (paginationEl) {
+                                paginationEl.textContent = `${currentSpread}/${totalSpreads}`;
+                            }
+                        }
+
+                    } catch (error) {
+                        console.error("PDF読み込みエラー:", error);
+                    }
+                }
+            });
+        </script>
+@endsection
