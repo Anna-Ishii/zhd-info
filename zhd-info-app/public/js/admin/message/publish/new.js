@@ -638,3 +638,34 @@ function updateJoinFileLabel() {
         $(".inputFile #joinFileId").val("結合の修正");
     }
 }
+
+// 指示作成ラジオボタンの変更イベント
+$(document).ready(function() {
+    // 初期状態の設定
+    updateButtonDisplay();
+    
+    // ラジオボタンの変更イベント
+    $(document).on('change', 'input[name="instruction"]', function() {
+        updateButtonDisplay();
+    });
+    
+    // 指示作成へ進むボタンのクリックイベント：未実装
+    $(document).on('click', '#instructionBtn', function() {
+        handleInstructionButtonClick();
+    });
+});
+
+// ボタンの表示/非表示を更新する関数
+function updateButtonDisplay() {
+    const instructionYes = $('input[name="instruction"][value="あり"]');
+    const registerBtn = $('#registerBtn');
+    const instructionBtn = $('#instructionBtn');
+    
+    if (instructionYes.is(':checked')) {
+        registerBtn.hide();
+        instructionBtn.show();
+    } else {
+        registerBtn.show();
+        instructionBtn.hide();
+    }
+}
