@@ -649,7 +649,7 @@ $(document).ready(function() {
         updateButtonDisplay();
     });
     
-    // 指示作成へ進むボタンのクリックイベント：未実装
+    // 指示作成へ進むボタンのクリックイベント
     $(document).on('click', '#instructionBtn', function() {
         handleInstructionButtonClick();
     });
@@ -668,4 +668,69 @@ function updateButtonDisplay() {
         registerBtn.show();
         instructionBtn.hide();
     }
+}
+
+// グローバル変数で処理中フラグを管理
+let isProcessingInstruction = false;
+
+// 指示作成ボタンのクリック処理
+function handleInstructionButtonClick() {
+    // 既に処理中の場合は何もしない
+    if (isProcessingInstruction) {
+        return;
+    }
+
+    // 処理中フラグを設定
+    isProcessingInstruction = true;
+
+    const instructionBtn = $('#instructionBtn');
+    
+    // ボタンを無効化して連打を防止
+    instructionBtn.prop('disabled', true).text('処理中...');
+
+    const formData = new FormData($('#form')[0]);
+    const csrfToken = $('meta[name="csrf-token"]').attr('content');
+    
+    // 既存の保存処理と同じパラメータを追加
+    formData.append('save', '1'); 　　　　　　　　　// 保存処理として実行
+    formData.append('save_for_instruction', '1'); // 指示作成用のフラグ
+    
+    $.ajax({
+        url: $('#form').attr('action'), // フォームのaction属性を使用
+        type: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+        },
+    })
+    .done(function(response) {
+        // 保存成功時の処理
+        if (response && response.success && response.message_id) {
+            const messageId = response.message_id;
+            
+            // ページ遷移
+            window.location.href = `#?message_id=${messageId}`;// Zrepoの指示作成フォームへのリンク設定予定
+        } else {
+            alert('登録内容の保存に失敗しました。');
+            resetInstructionButton();
+        }
+    })
+    .fail(function(jqXHR, textStatus, errorThrown) {
+        // エラー処理        
+        if (textStatus === 'timeout') {
+            alert('処理がタイムアウトしました。しばらく待ってから再度お試しください。');
+        } else {
+            alert('保存中にエラーが発生しました。');
+        }
+        
+        resetInstructionButton();
+    });
+}
+
+// 指示作成ボタンをリセット
+function resetInstructionButton() {
+    isProcessingInstruction = false;
+    $('#instructionBtn').prop('disabled', false).text('指示作成へ進む');
 }
