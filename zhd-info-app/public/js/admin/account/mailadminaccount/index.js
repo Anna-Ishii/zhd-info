@@ -130,7 +130,7 @@ $(document).ready(function() {
             const id = row.data('id');
             const status = row.find('.status-select');
             let statusFlg = true;
-            if (!row.find('.label-status').text()) {
+            if (!row.find('.label-status').text().trim()) {
                 statusFlg = false;
             }
 
@@ -139,7 +139,7 @@ $(document).ready(function() {
                 $(status).hide();
                 const statusSelectGroupHtml = `
                     <div class="status-select-group">
-                        <select name="status" ${!(statusFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-id="${id}" ${!(statusFlg) ? 'disabled' : ''}>
+                        <select name="status" style="${!(statusFlg) ? 'cursor: not-allowed;' : 'cursor: pointer;'}" data-id="${id}" ${!(statusFlg) ? 'disabled' : ''}>
                             <option value="0">未設定</option>
                             <option value="1" ${status.attr('value') === 'selected' ? 'selected' : ''}>〇</option>
                         </select>

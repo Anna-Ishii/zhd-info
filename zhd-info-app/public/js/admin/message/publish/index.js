@@ -350,8 +350,6 @@ $(document).ready(function () {
                 }
             })
             .catch((error) => {
-                console.log(error.message);
-                
                 alert(error.message);
                 overlay.style.display = "none";
             });
