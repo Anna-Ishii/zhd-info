@@ -2,3 +2,4 @@
 docker-compose.yml
 zhd-info-app/supervisord.log
 zhd-info-app/supervisord.pid
+zhd-info-app/vendor
