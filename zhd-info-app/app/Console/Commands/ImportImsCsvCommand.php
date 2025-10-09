@@ -66,14 +66,44 @@ class ImportImsCsvCommand extends Command
         'ZET'  => 17,
     ];
 
-    const SYSTEM_CONSTANTS = [
-        'ENVIRONMENT_STAG' => 'stag',
+    /**
+     * 組織CSVカラムインデックス
+     */
+    const SHOP_CSV_COLUMNS = [
+        'ORG1_NAME' => 0,      // 組織1名
+        'BRAND_NAME' => 2,     // ブランド名
+        'SHOP_CODE' => 3,      // 店舗コード
+        'SHOP_NAME' => 4,      // 店舗名
+        'ORG_START' => 5,      // 組織データ開始位置
+        'ORG_END' => 35,       // 組織データ終了位置
+        'ORG_STEP' => 6,       // 組織データステップ
+        'CLOSE_DATE' => 35,    // 閉店日
     ];
 
-    const SHOP_CSV_COLUMNS = [
-        'ORG1_NAME'   => 0,
-        'SHOP_CODE'   => 3,
-        'CLOSE_DATE'  => 35,
+    /**
+     * クルーCSVカラムインデックス
+     */
+    const CREW_CSV_COLUMNS = [
+        'ORG1_NAME' => 0,      // 組織1名
+        'MY_NUMBER' => 12,     // マイナンバー
+        'PART_CODE' => 13,     // パートコード
+        'NAME' => 14,          // 氏名
+        'NAME_KANA' => 15,     // 氏名カナ
+        'SHOP_CODE' => 16,     // 店舗コード
+        'SHOP_NAME' => 17,     // 店舗名
+        'BIRTH_DATE' => 18,    // 生年月日
+        'REGISTER_DATE' => 19, // 登録日
+    ];
+
+    /**
+     * システム定数
+     */
+    const SYSTEM_CONSTANTS = [
+        'MANAGER_ROLE_ID' => 4,        // 店長ロールID
+        'WOWTALK_CHUNK_SIZE' => 300,   // WowTalkチャンクサイズ
+        'ENVIRONMENT_STAG' => 'stag',  // ステージング環境識別子
+        'SELECTED_FLAG_ALL' => 'all',  // 全選択フラグ
+        'IMS_DIRECTORY' => 'IMS2/FR_BUSINESS/', // IMSディレクトリパス
     ];
 
     /**
@@ -98,7 +128,7 @@ class ImportImsCsvCommand extends Command
 
         $organization_filename = "organization_{$now_str}.csv";
         $crews_filename = "crew_{$now_str}.csv";
-        $directory = "IMS2/FR_BUSINESS/";
+        $directory = self::SYSTEM_CONSTANTS['IMS_DIRECTORY'];
         $organization_path = $directory . $organization_filename;
         $crews_path = $directory . $crews_filename;
         \Log::info($organization_path);
@@ -251,7 +281,7 @@ class ImportImsCsvCommand extends Command
             $fifth_name = null;
             $fifth_email = null;
 
-            dump('index:' . $index . ' organization1:' . $organization1);
+            \Log::info('index:' . $index . ' organization1:' . $organization1);
 
             for ($i = 5; $i < 35; $i += 6) {
                 $organization_name = $shop[$i + 1];
@@ -901,6 +931,11 @@ class ImportImsCsvCommand extends Command
 
             foreach ($chunk as $crew) {
                 $org1 = $organization1Map[$crew[0]] ?? null;
+                if (!$org1) {
+                    \Log::error("組織1が見つかりません: " . ($crew[0] ?? 'NULL'));
+                    $undefind_shop[] = $crew;
+                    continue;
+                }
                 $org1_id = $org1->id;
 
                 // クルーの情報を更新
@@ -911,7 +946,7 @@ class ImportImsCsvCommand extends Command
                 // if (empty($shop)) {
                 $shopKey = $org1_id . '_' . $crew[16];
                 $shop = $shopMap[$shopKey] ?? null;
-                if (empty($shop) || $shop->organization1_id !== $org1->id) {
+                if (empty($shop) || $shop->organization1_id !== $org1_id) {
                     $undefind_shop[] = $crew;
                     continue;
                 }
