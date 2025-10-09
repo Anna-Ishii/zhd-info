@@ -1,0 +1,425 @@
+@charset "UTF-8";
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Breakpoint　値はサイトに合わせて変更しましょう
+------------------------------------------------------*/
+/*------------------------------------------------------
+    このファイルは基本触らない
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    color format (カラー設定)
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+/*------------------------------------------------------
+    Top page用scss
+------------------------------------------------------*/
+.c-btn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 40px auto;
+  gap: 40px;
+  text-align: center;
+}
+.c-btn__white {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  background: transparent;
+  color: #0050C0;
+  border: 1px solid #0050C0;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
+.c-btn__blue {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  color: white;
+  background: #0050C0;
+  border: none;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
+.c-btn .disabled-btn {
+  opacity: 0.32;
+  pointer-events: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+body {
+  font-family: "Noto Sans";
+  background: #F3F7FF;
+  font-size: 1.6rem;
+  color: #1B2131;
+}
+
+.form {
+  padding: 0 100px 80px;
+}
+.form .tabs__container {
+  width: 100%;
+  margin: 32px 0;
+  display: flex;
+  align-items: flex-end;
+  overflow: auto;
+}
+.form .tabs__container .tabs__item {
+  min-width: 124px;
+  font-size: 2rem;
+  padding: 7px 12px;
+  flex-grow: 1;
+  color: #8E9199;
+  border-bottom: 1px solid #8E9199;
+  text-align: center;
+}
+.form .tabs__container .tabs__item.active {
+  color: #0050C0;
+  border-bottom: 3px solid #0050C0;
+}
+.form .ttl-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 40px 64px;
+}
+.form .ttl-item .ttl__wrap .ttl {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1;
+  padding: 0 0 8px;
+  border-bottom: 1px solid #0050C0;
+}
+.form .ttl-item .ttl__wrap .txt {
+  font-size: 16px;
+  color: #8E9199;
+  padding: 16px 0;
+}
+.form .form__container {
+  display: flex;
+  flex-direction: column;
+  margin: 32px 0 0;
+}
+.form .form__container .form__item {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 58px 80px 32px;
+  border: none;
+  margin: 0 0 32px;
+}
+.form .form__container .form__item .category {
+  position: relative;
+  pointer-events: none;
+}
+.form .form__container .form__item .category .category__drag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+}
+.form .form__container .form__item .category .category__header {
+  padding: 0 0 0 52px;
+}
+.form .form__container .form__item .category .category__header .category__title {
+  width: 360px;
+  font-size: 20px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  pointer-events: none;
+  background: none;
+  padding: 0;
+}
+.form .form__container .form__item .category .category__content {
+  display: flex;
+}
+.form .form__container .form__item .category .category__content .subcategory__list {
+  width: -moz-fit-content;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  margin: 24px 0 0 0;
+  flex-grow: 1;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .drag-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .drag-icon img {
+  padding: 10px;
+  width: 100%;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .subcategory__name {
+  width: 360px;
+  font-size: 16px;
+  flex-grow: 1;
+  background: #F4F4F5;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .subcategory__actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px 8px;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .subcategory__actions button {
+  width: 24px;
+  height: 24px;
+  padding: 1px;
+  border: none;
+  background: none;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item .subcategory__actions button svg {
+  stroke: #1B2131;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item:first-of-type .subcategory__actions .up-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .form__container .form__item .category .category__content .subcategory__list .subcategory__item:last-of-type .subcategory__actions .down-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .form__container .form__item .category .category__content .category__actions {
+  opacity: 0;
+  width: 40%;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+}
+.form .form__container .form__item .category .category__content .category__actions button {
+  width: 24px;
+  height: 24px;
+  padding: 1px;
+  border: none;
+  background: none;
+}
+.form .form__container .form__item .category .category__content .category__actions button svg {
+  stroke: #1B2131;
+}
+.form .form__container .form__item .category .add-subcategory {
+  width: -moz-fit-content;
+  width: fit-content;
+  font-size: 16px;
+  color: #0050C0;
+  padding: 10px 16px 10px 0;
+  margin: 0 0 0 52px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.form .form__container .form__item.edit-mode {
+  border-top: 4px solid #0050C0;
+}
+.form .form__container .form__item.edit-mode .category {
+  pointer-events: auto;
+}
+.form .form__container .form__item.edit-mode .category .category__header .category__title {
+  pointer-events: auto;
+  padding: 10px 16px;
+  border-bottom: 2px solid #1B2131;
+  background: #F4F5F6;
+}
+.form .form__container .form__item.edit-mode .category .category__content .category__actions {
+  opacity: 1;
+}
+.form .form__container .form__item.edit-mode .category .category__drag {
+  display: none;
+}
+.form .form__container .form__item:first-of-type .category .category__actions .up-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .form__container .form__item:last-of-type .category .category__actions .down-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .add-category {
+  width: 100%;
+  background: #fff;
+  border-radius: 10px;
+  padding: 58px 80px 32px;
+  border: none;
+  margin: 32px 0 32px;
+}
+.form .add-category .category {
+  position: relative;
+}
+.form .add-category .category .category__drag {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 44px;
+  height: 44px;
+  margin: 0 auto;
+  transform: translate(-50%, -100%);
+  pointer-events: auto;
+}
+.form .add-category .category .category__header {
+  padding: 0 0 0 52px;
+}
+.form .add-category .category .category__header .category__title {
+  width: 360px;
+  font-size: 20px;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  box-sizing: border-box;
+  background: none;
+  padding: 0;
+  font-weight: bold;
+}
+.form .add-category .category .category__content {
+  display: flex;
+}
+.form .add-category .category .category__content .subcategory__list {
+  width: -moz-fit-content;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  margin: 24px 0 0 0;
+  flex-grow: 1;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 4px 0;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .drag-icon {
+  width: 44px;
+  height: 44px;
+  flex-shrink: 0;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .drag-icon img {
+  padding: 10px;
+  width: 100%;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .subcategory__name {
+  width: 360px;
+  font-size: 16px;
+  flex-grow: 1;
+  background: #F4F4F5;
+  padding: 10px 16px;
+  border: none;
+  border-radius: 4px;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .subcategory__actions {
+  flex-shrink: 0;
+  display: flex;
+  gap: 8px;
+  padding: 10px 8px;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .subcategory__actions button {
+  width: 24px;
+  height: 24px;
+  padding: 1px;
+  border: none;
+  background: none;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item .subcategory__actions button svg {
+  stroke: #1B2131;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item:first-of-type .subcategory__actions .up-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .add-category .category .category__content .subcategory__list .subcategory__item:last-of-type .subcategory__actions .down-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .add-category .category .category__content .category__actions {
+  opacity: 0;
+  width: 40%;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 8px;
+}
+.form .add-category .category .category__content .category__actions button {
+  width: 24px;
+  height: 24px;
+  padding: 1px;
+  border: none;
+  background: none;
+}
+.form .add-category .category .category__content .category__actions button svg {
+  stroke: #1B2131;
+}
+.form .add-category .category .add-subcategory {
+  width: -moz-fit-content;
+  width: fit-content;
+  font-size: 16px;
+  color: #0050C0;
+  padding: 10px 16px 10px 0;
+  margin: 0 0 0 52px;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
+.form .add-category:first-of-type .category .category__actions .up-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
+.form .add-category:last-of-type .category .category__actions .down-btn {
+  pointer-events: none;
+  opacity: 0.3;
+}
