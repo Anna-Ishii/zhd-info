@@ -60,110 +60,22 @@
         <div class="bbsk__search ">
             <form method="get">
                 <div class="filter-bar">
-                    <div class="field">
-                        <div class="label">業態</div>
-                        <div class="control">
-                            <select name="brand">
-                                @foreach ($organization1_list as $org1)
-                                    <option value="{{ base64_encode($org1->id) }}"
-                                        {{ request()->input('brand') == base64_encode($org1->id) ? 'selected' : '' }}>
-                                        {{ $org1->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
+                    {{-- 業態 --}}
+                    <x-admin.select-box name="brand" label="業態" :options="$organization1_list" :base64-value="true" />
+                    {{-- ラベル --}}
+                    <x-admin.select-box name="label" label="ラベル" :options="[['value' => '1', 'name' => '重要']]" value-key="value" name-key="name" />
 
-                    <div class="field">
-                        <div class="label">ラベル</div>
-                        <div class="control">
-                            <select name="label">
-                                <option value="">指定なし</option>
-                                <option value="1" {{ request()->input('label') == 1 ? 'selected' : '' }}>重要</option>
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="label">カテゴリ</div>
-                        <div class="control">
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle custom-dropdown" type="button"
-                                    id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">
-                                    <span id="selectedCategories" class="custom-dropdown-text">指定なし</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                        fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
-                                        <path fill-rule="evenodd"
-                                            d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"
-                                            stroke="currentColor" stroke-width="1.5" />
-                                    </svg>
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownMenuButton"
-                                    onclick="event.stopPropagation();">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="selectAllCategories"
-                                            onclick="toggleAllCategories()">
-                                        <label class="form-check-label" for="selectAllCategories" class="custom-label"
-                                            onclick="event.stopPropagation();">全て選択/選択解除</label>
-                                    </div>
-                                    @foreach ($category_list as $category)
-                                        {{-- 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示 --}}
-                                        @if ($organization1->id === 8 || ($category->id !== 7 && $category->id !== 8))
-                                            <div class="form-check">
-                                                <input class="form-check-input" type="checkbox" name="category[]"
-                                                    value="{{ $category->id }}"
-                                                    {{ in_array($category->id, request()->input('category', [])) ? 'checked' : '' }}
-                                                    id="category{{ $category->id }}" onchange="updateSelectedCategories()">
-                                                <label class="form-check-label" for="category{{ $category->id }}"
-                                                    class="custom-label" onclick="event.stopPropagation();">
-                                                    {{ $category->name }}
-                                                </label>
-                                            </div>
-                                        @endif
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field">
-                        <div class="label">状態</div>
-                        <div class="control">
-                            <div class="dropdown">
-                                <button class="btn btn-default dropdown-toggle custom-dropdown" type="button"
-                                    id="dropdownStatusButton" data-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">
-                                    <span id="selectedStatus" class="custom-dropdown-text">指定なし</span>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
-                                        fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
-                                        <path fill-rule="evenodd"
-                                            d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708 .708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708"
-                                            stroke="currentColor" stroke-width="1.5" />
-                                    </svg>
-                                </button>
-                                <div class="dropdown-menu" aria-labelledby="dropdownStatusButton"
-                                    onclick="event.stopPropagation();">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" id="selectAllStatuses"
-                                            onclick="toggleAllStatuses()">
-                                        <label class="form-check-label" for="selectAllStatuses" class="custom-label"
-                                            onclick="event.stopPropagation();">全て選択/選択解除</label>
-                                    </div>
-                                    @foreach ($publish_status as $status)
-                                        <div class="form-check">
-                                            <input class="form-check-input" type="checkbox" name="status[]"
-                                                value="{{ $status->value }}"
-                                                {{ in_array($status->value, request()->input('status', [])) ? 'checked' : '' }}
-                                                id="status{{ $status->value }}" onchange="updateSelectedStatuses()">
-                                            <label class="form-check-label" for="status{{ $status->value }}"
-                                                class="custom-label" onclick="event.stopPropagation();">
-                                                {{ $status->text() }}
-                                            </label>
-                                        </div>
-                                    @endforeach
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    @php
+                        // 業態SKの時は「消防設備点検実施のお知らせ」「その他店舗へのお知らせ」を表示
+                        $filtered_category_list = $category_list->filter(function ($category) use ($organization1) {
+                            return $organization1->id === 8 || ($category->id !== 7 && $category->id !== 8);
+                        });
+                    @endphp
+                    {{-- カテゴリ --}}
+                    <x-admin.select-checkbox label="カテゴリ" name="category" :options="$filtered_category_list" />
+                    {{-- 状態 --}}
+                    <x-admin.select-checkbox label="状態" name="status" :options="$publish_status" value-key="value"
+                        name-key="text" />
                     <div class="field field--range">
                         <div class="label">掲載期間</div>
                         <div class="control">
