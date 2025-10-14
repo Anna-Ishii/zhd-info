@@ -60,7 +60,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     });
                 } else {
                     // 個別のチェックボックスが変更された場合、「全て選択」の状態を更新
-                    const allOptions = customSelect.querySelectorAll(`input[type='checkbox'][name='${groupName}'][value!='${ALL_TOGGLE_VALUE}']`);
+                    const allOptions = customSelect.querySelectorAll(
+                        `input[type='checkbox'][name='${groupName}']:not([value='${ALL_TOGGLE_VALUE}'])`
+                    );
                     const selectAllCheckbox = customSelect.querySelector(`input[type='checkbox'][value='${ALL_TOGGLE_VALUE}']`);
                     if (selectAllCheckbox) {
                         const allChecked = Array.from(allOptions).every(box => box.checked);
