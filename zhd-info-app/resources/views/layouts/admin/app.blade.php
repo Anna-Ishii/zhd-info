@@ -41,9 +41,11 @@
     <script src="{{ asset('js/admin/navigation/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/index.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/admin/js/bootstrap.min.js') }}"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/js/jquery.tablesorter.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.0/js/jquery.tablesorter.min.js">
+    </script>
     <script type="text/javascript"
-        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/extras/jquery.metadata.min.js"></script>
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery.tablesorter/2.31.1/js/extras/jquery.metadata.min.js">
+    </script>
     <script src="{{ asset('/js/edit.js') }}?date={{ date('Ymd') }}" defer></script>
     @livewireScripts
 
