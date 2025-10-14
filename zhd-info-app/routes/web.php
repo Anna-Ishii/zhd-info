@@ -162,8 +162,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
     });
     Route::group(['prefix' => 'manage', 'as' => 'manage.', 'middleware' => 'check.allowpage:ims'], function () {
         Route::get('ims', [ImsController::class, 'index'])->name('index');
-        Route::get('ims/{id}', [ImsController::class, 'dl'])->name('dl');
-        Route::get('/ims/{id}', [ImsController::class, 'dl'])->name('ims.dl');
+        Route::get('ims/{id}', [ImsController::class, 'dl'])->name('ims.dl');
         Route::get('ims2', [ImsController::class, 'execute'])->name('execute');
     });
     Route::group(['prefix' => 'analyse', 'as' =>'analyse.', 'middleware' => 'check.allowpage:message-analyse'], function () {
