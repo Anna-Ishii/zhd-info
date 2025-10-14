@@ -1,103 +1,87 @@
-@extends('layouts.admin.parent')
+{{-- layouts.admin.app をレイアウトとして継承する --}}
+@extends('layouts.admin.app')
 
-@section('sideber')
-    <div class="navbar-default sidebar" role="navigation">
-        <div class="sidebar-nav navbar-collapse">
-            <ul class="nav">
-                @if (in_array('message', $arrow_pages, true) || in_array('manual', $arrow_pages, true))
-                    <li>
-                        <a href="#" class="nav-label">1.配信</a>
-                        <ul class="nav nav-second-level">
-                            @if (in_array('message', $arrow_pages, true))
-                                <li class="message-publish">
-                                    <a href="{{ isset($message_saved_url) && $message_saved_url->page_name == 'message-publish' ? $message_saved_url->url : '/admin/message/publish/' }}">1-1 業務連絡</a>
-                                </li>
-                            @endif
-                            @if (in_array('manual', $arrow_pages, true))
-                                <li class="manual-publish">
-                                    <a href="{{ isset($manual_saved_url) && $manual_saved_url->page_name == 'manual-publish' ? $manual_saved_url->url : '/admin/manual/publish/' }}">1-2 動画マニュアル</a>
-                                </li>
-                            @endif
-                        </ul>
-                    </li>
-                @endif
-                @if (in_array('message-analyse', $arrow_pages, true))
-                    <li>
-                        <a href="#" class="nav-label">2.データ抽出</span></a>
-                        <ul class="nav nav-second-level">
-                            <li class="analyse-personal">
-                                <a href="{{ isset($analyse_personal_saved_url) && $analyse_personal_saved_url->page_name == 'analyse-personal' ? $analyse_personal_saved_url->url : '/admin/analyse/personal/' }}">2-1.業務連絡の閲覧状況</a>
-                            </li>
-                        </ul>
-                    </li>
-                @endif
-                @if (in_array('account-shop', $arrow_pages, true) || in_array('account-admin', $arrow_pages, true) || in_array('account-mail', $arrow_pages, true) || in_array('account-admin-mail', $arrow_pages, true))
-                    <li>
-                        <a href="#" class="nav-label">3.管理</span></a>
-                        <ul class="nav nav-second-level">
-                            @if (in_array('account-shop', $arrow_pages, true))
-                                <li><a href="/admin/account/">3-1.店舗アカウント</a></li>
-                            @endif
-                            @if (in_array('account-admin', $arrow_pages, true))
-                                <li><a href="/admin/account/admin">3-2.本部アカウント</a></li>
-                            @endif
-                            @if (in_array('account-mail', $arrow_pages, true))
-                                <li><a href="/admin/account/mail">3-3.DM/BM/AMメール配信設定</a></li>
-                            @endif
-                            @if (in_array('account-admin-mail', $arrow_pages, true))
-                                <li><a href="/admin/account/adminmail">3-4.本部従業員への配信設定</a></li>
-                            @endif
-                        </ul>
-                    </li>
-                @endif
-                @if (in_array('ims', $arrow_pages, true))
-                    <li>
-                        <a href="#" class="nav-label">4.その他</span></a>
-                        <ul class="nav nav-second-level">
-                            <li class="active" class="{{ $is_error_ims ? 'warning' : '' }}"><a
-                                    href="/admin/manage/ims">4-1.IMS連携</a></li>
-                        </ul>
-                    </li>
-                @endif
-                <li>
-                    <a href="#" class="nav-label">Ver. {{ config('version.admin_version') }}</span></a>
-                </li>
-            </ul>
-        </div>
-        <!-- /.sidebar-collapse -->
+{{-- 'title' セクションにページ固有のタイトルを設定する --}}
+@section('title', 'IMS連携')
+
+{{-- 'styles' スタックにページ固有のCSSを追加する --}}
+@push('styles')
+<link href="{{ asset('/admin/css/show.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
+{{-- ページごとのCSSがここに入る --}}
+<link href="{{ asset('/admin/css/ims-integration-settings.css') }}?date={{ time() }}" rel="stylesheet">
+@endpush
+
+@section('page_header')
+<div class="l-header__bottom">
+    <div class="l-header__bottom__wrap">
+        <div class="l-header__back"><a class="prev"
+                href="/admin/message/publish?{{ session('message_publish_url') }}"><img
+                    src="{{ asset('/img/back-icon.svg') }}" alt="">戻る</a></div>
+        <p class="l-header__bottom__ttl">IMS連携</p>
     </div>
-    <!-- /.navbar-static-side -->
+</div>
+<x-admin.header-links />
 @endsection
 
 @section('content')
-    <div id="page-wrapper">
-        <div class="ims-count">
-            全{{ $log->count() }}件
+<main class="ims-integration-settings">
+    @if (session('message'))
+    <div class="alert alert-success">{{ session('message') }}</div>
+    @endif
+
+    <div class="ims-integration-settings__main">
+        <div class="main-head-wrap">
+            <p class="total__dsp">全{{ $log->total() }}件</p>
+            <button class="manual-sync-btn" type="button"
+                onClick="location.href='{{ $isJobRunning ? '' : '/admin/manage/ims2' }}';" {{ $isJobRunning ? 'disabled'
+                : '' }}>
+                {{ $isJobRunning ? '実行中' : '手動実行' }}
+            </button>
         </div>
-        <table class="table ims">
-            <thead>
-                <tr>
-                    <th rowspan="2" class="text-center">日付</th>
-                    <th colspan="2" class="text-center">更新時間</th>
-                </tr>
-                <tr>
-                    <th class="text-center">クルー情報</th>
-                    <th class="text-center">組織情報</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($log as $l)
+        <div class="table-wrap">
+            <table class="table ims">
+                <thead>
+                    <!-- colspanの列幅指定用 -->
+                    <tr class="def">
+                        <th class="column1"></th>
+                        <th class="column2"></th>
+                        <th class="column3"></th>
+                        <th class="column4"></th>
+                    </tr>
+                    <tr class="head">
+                        <th class="column1" rowspan="2">日付</th>
+                        <th class="column2" colspan="2">更新時期</th>
+                        <th class="column4" rowspan="2">実行結果</th>
+                    </tr>
+                    <tr class="head_bottom">
+                        <th class="column2">クルー情報</th>
+                        <th class="column3">組織情報</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($log as $l)
                     <tr>
-                        <td>{{ $l->import_at->isoFormat('YYYY/MM/DD') }}</td>
-                        <td class="text-center {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
+                        <td class="column1">{{ $l->import_at->isoFormat('YYYY/MM/DD') }}</td>
+                        <td class="column2 {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
                             {{ $l->import_crew_error !== false ? '-' : $l->import_crew_at?->isoFormat('HH:mm:ss') }}
                         </td>
-                        <td class="text-center {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
-                            {{ $l->import_department_error !== false ? '-' : $l->import_department_at?->isoFormat('HH:mm:ss') }}
+                        <td class="column3 {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
+                            {{ $l->import_department_error !== false ? '-' :
+                            $l->import_department_at?->isoFormat('HH:mm:ss') }}
+                        </td>
+                        <td class="column4 {{ $l->import_crew_error || $l->import_department_error ? 'error' : '' }}">
+
+                            @if($l->import_department_error == false && $l->import_department_at)
+                            <a href="/admin/manage/ims/shops_{{$l->id}}" target="_blank">CSV</a>
+                            @endif
                         </td>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
     </div>
+    {{-- ページネーション --}}
+    @include('common.admin.pagenation', ['objects' => $log])
+</main>
 @endsection

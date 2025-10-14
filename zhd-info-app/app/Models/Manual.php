@@ -47,7 +47,7 @@ class Manual extends Model
     {
         return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
             ->using(ManualUser::class)
-            ->withPivot('read_flg','shop_id', 'readed_datetime');
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
 
     public function readed_user(): BelongsToMany
@@ -55,7 +55,7 @@ class Manual extends Model
         return $this->belongsToMany(User::class, 'manual_user', 'manual_id', 'user_id')
             ->using(ManualUser::class)
             ->wherePivot('read_flg', true)
-            ->withPivot('read_flg','shop_id', 'readed_datetime');
+            ->withPivot('read_flg', 'shop_id', 'readed_datetime');
     }
 
     public function shop(): BelongsToMany
@@ -107,7 +107,7 @@ class Manual extends Model
     {
         // リレーションからnameプロパティを取得して配列に変換
         $brandNames = $this->brand()->orderBy('id', 'asc')->pluck('name')->toArray();
-        if($brandList === $brandNames) return "全業態";
+        if ($brandList === $brandNames) return "全業態";
         // カンマ区切りの文字列として返す
         return implode(',', $brandNames);
     }
@@ -215,7 +215,7 @@ class Manual extends Model
 
     public function getContentFileSizeAttribute()
     {
-        if(!isset($this->content_url)) return "ファイルがありません";
+        if (!isset($this->content_url)) return "ファイルがありません";
         $path = public_path($this->content_url);
 
         if (!file_exists($path)) return "ファイルがありません";
@@ -226,12 +226,12 @@ class Manual extends Model
         $M = 1000 * $K;
 
         if ($M <= $filesize) {
-            return round($filesize / $M, 2)."MB";
+            return round($filesize / $M, 2) . "MB";
         } else if ($K <= $filesize) {
-            return round($filesize / $K, 2)."KB";
+            return round($filesize / $K, 2) . "KB";
         }
 
-        return $filesize."B";
+        return $filesize . "B";
     }
 
     // 待機
@@ -241,12 +241,12 @@ class Manual extends Model
             ->where('end_datetime', '>', now('Asia/Tokyo'))
             ->where(function ($query) {
                 $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('start_datetime');
+                    ->orWhereNull('start_datetime');
             })
             ->orWhereNull('end_datetime')
             ->where(function ($query) {
                 $query->where('start_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('start_datetime');
+                    ->orWhereNull('start_datetime');
             })
             ->where('editing_flg', false);
     }
@@ -258,7 +258,7 @@ class Manual extends Model
             ->where('start_datetime', '<=', now('Asia/Tokyo'))
             ->where(function ($q) {
                 $q->where('end_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('end_datetime');
+                    ->orWhereNull('end_datetime');
             })
             ->where('editing_flg', false);
     }
@@ -296,7 +296,7 @@ class Manual extends Model
             ->where('start_datetime', '<=', now('Asia/Tokyo'))
             ->where(function ($q) {
                 $q->where('end_datetime', '>', now('Asia/Tokyo'))
-                ->orWhereNull('end_datetime');
+                    ->orWhereNull('end_datetime');
             })
             ->where('editing_flg', false);
     }
@@ -308,7 +308,8 @@ class Manual extends Model
             ->where('manual_user.user_id', $userId);
     }
 
-    public static function getCurrentNumber($organization1_id): Int{
+    public static function getCurrentNumber($organization1_id): Int
+    {
         return self::where('organization1_id', $organization1_id)->max('number') ?? 0;
     }
 
@@ -321,5 +322,33 @@ class Manual extends Model
         ];
 
         return $statusMapping[$this->attributes['is_broadcast_notification']] ?? '不明';
+    }
+
+    public function getFormattedStartDateAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd)') : null;
+    }
+
+    public function getFormattedStartTimeAttribute()
+    {
+        $before_datetime = $this->attributes['start_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
+    }
+
+    public function getFormattedEndDateAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('YYYY/MM/DD(ddd)') : null;
+    }
+
+    public function getFormattedEndTimeAttribute()
+    {
+        $before_datetime = $this->attributes['end_datetime'];
+        Carbon::setLocale('ja');
+        return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
     }
 }
