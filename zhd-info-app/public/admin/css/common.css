@@ -678,3 +678,174 @@ body {
         margin: 30px auto;
     }
 }
+
+
+/* --- 1. 単一選択のカスタムセレクトボックス (.custom-select) --- */
+.custom-select__wrap {
+  position: relative;
+  width: 100%;
+  font-size: 14px;
+}
+.custom-select__wrap .custom-select {
+  position: relative;
+  cursor: pointer;
+  background: #fff;
+  padding: 10px 25px 10px 16px;
+  border-radius: 4px;
+}
+.custom-select__wrap .custom-select .custom-options {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  display: none;
+  max-height: 380px;
+  overflow-y: scroll;
+  z-index: 10;
+  flex-direction: column;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(27, 33, 49, 0.5);
+}
+.custom-select__wrap .custom-select .custom-options .custom-option {
+  padding: 10px 0 10px 16px;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.custom-select__wrap .custom-select .custom-options .custom-option:hover {
+  background-color: #f0f0f0;
+}
+.custom-select__wrap .custom-select.open .custom-options {
+  display: flex;
+}
+.custom-select__wrap .custom-select.open .custom-select__trigger::after {
+  background: url("/img/select_toggle_open.svg") no-repeat center/cover;
+}
+.custom-select__wrap .custom-select__trigger {
+  display: block;
+  width: 100%;
+  font-size: 1.6rem;
+}
+.custom-select__wrap .custom-select__trigger::after {
+  width: 24px;
+  aspect-ratio: 1;
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: url("/img/select_toggle.svg") no-repeat center/cover;
+}
+
+/* --- 2. チェックボックス付きのカスタムセレクトボックス (.custom-select-checkbox) --- */
+.custom-select-checkbox__wrap {
+  position: relative;
+  width: 100%;
+  font-size: 14px;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox {
+  position: relative;
+  cursor: pointer;
+  background: #fff;
+  padding: 10px 25px 10px 16px;
+  border-radius: 4px;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox .custom-options {
+  position: absolute;
+  top: calc(100% + 2px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  display: none;
+  width: 264px;
+  max-height: 380px;
+  overflow-y: scroll;
+  z-index: 10;
+  flex-direction: column;
+  border-radius: 4px;
+  box-shadow: 0 3px 10px rgba(27, 33, 49, 0.5);
+}
+.custom-select-checkbox__wrap .custom-select-checkbox .custom-options .custom-option {
+  padding: 10px 0 10px 40px;
+  font-size: 1.6rem;
+  cursor: pointer;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox .custom-options .custom-option:hover {
+  background-color: #f0f0f0;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox.open .custom-options {
+  display: flex;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox.open .custom-select-checkbox__trigger::after {
+  background: url("/img/select_toggle_open.svg") no-repeat center/cover;
+}
+.custom-select-checkbox__wrap .custom-select-checkbox__trigger {
+  display: block;
+  width: 100%;
+  font-size: 1.6rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-inline-size: 4em; /* 文字数が増えた時に省略記号(...)を表示 */
+}
+.custom-select-checkbox__wrap .custom-select-checkbox__trigger::after {
+  width: 24px;
+  aspect-ratio: 1;
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: url("/img/select_toggle.svg") no-repeat center/cover;
+}
+
+/* --- 3. カスタムチェックボックス自体のスタイル (.custom-checkbox-square) --- */
+.custom-checkbox-square {
+  position: relative;
+  padding-left: 28px;
+  cursor: pointer;
+  display: inline-block;
+  line-height: 1.5;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  margin-right: 1em;
+}
+.custom-checkbox-square input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+.custom-checkbox-square .checkmark {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 20px;
+  width: 20px;
+  background-color: #fff;
+  border: 1px solid #8E9199;
+  border-radius: 2px;
+  box-sizing: border-box;
+}
+.custom-checkbox-square input:checked + .checkmark {
+  background-color: #0050C0;
+  border-color: #0050C0;
+}
+.custom-checkbox-square .checkmark::after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 5px;
+  top: 0px;
+  width: 6px;
+  height: 12px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+.custom-checkbox-square input:checked + .checkmark::after {
+  display: block;
+}
