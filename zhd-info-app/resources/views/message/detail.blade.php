@@ -42,19 +42,19 @@
                 印刷
             </button>
         </div>
-        <div class="business-contact__detail__content">
-            <div class="main__supplement main__box--single thumb_parents flex">
-                <div class="pdf-container">
-                    @if(isset($message->main_file))
-                    <iframe id="pdfFrame" class="pdf-frame"
-                        src="{{ asset($message->main_file['file_url']) }}#toolbar=0&navpanes=0" title="PDF プレビュー">
-                    </iframe>
-                    @else
-                    <p class="pdf-not-exist">PDFが存在しません</p>
-                    @endif
-                </div>
+
+        {{-- PDF表示部分 --}}
+        <div class="pdf-swiper-container">
+            <div class="swiper pdf-swiper">
+                <div class="swiper-wrapper" id="pdfViewer"></div>
+                {{-- ナビゲーション --}}
+                <div class="swiper-button-prev pdf-prev"></div>
+                <div class="swiper-button-next pdf-next"></div>
             </div>
+
+            <div class="pagination" id="page-count"></div>
         </div>
+
         <div class="business-contact__recent">
             <h2 class="business-contact__recent__ttl">新着業務連絡</h2>
             <div class="swiper business-contact__recent__swiper">
@@ -105,4 +105,88 @@
 <!-- Swiper JS -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <script src="{{ asset('/js/businessContactSwiper.js')}}?date={{ date('Ymd') }}"></script>
+
+<!-- PDF.js 表示制御 -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", async function() {
+        const url = "{{ asset($message->content_url) }}";
+        const container = document.getElementById("pdfViewer");
+        const paginationEl = document.getElementById("page-count");
+
+        // worker設定
+        // pdfjsLib.GlobalWorkerOptions.workerSrc =
+        //     "{{ asset('/js/pdfjs/build/pdf.worker.js') }}";
+        pdfjsLib.GlobalWorkerOptions.workerSrc =
+            "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.worker.min.js";
+
+        try {
+            // PDFロード
+            const pdf = await pdfjsLib.getDocument(url).promise;
+            const numPages = pdf.numPages;
+
+            // PDFロード後
+            for (let i = 1; i <= numPages; i++) {
+                const page = await pdf.getPage(i);
+                const scale = 1.2;
+                const viewport = page.getViewport({ scale });
+                const canvas = document.createElement("canvas");
+                const context = canvas.getContext("2d");
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+                await page.render({ canvasContext: context, viewport }).promise;
+
+                // 1ページを1スライドとして追加
+                const pageNumEl = document.createElement("div");
+                pageNumEl.className = "pdf-page-number";
+                pageNumEl.textContent = `${i}/${numPages}`;
+
+                // スライドにcanvasとページ番号を追加
+                const slide = document.createElement("div");
+                slide.className = "swiper-slide flex flex-col items-center";
+                slide.appendChild(canvas);
+                slide.appendChild(pageNumEl);
+
+                container.appendChild(slide);
+            }
+
+            // Swiper 初期化
+            new Swiper(".pdf-swiper", {
+                slidesPerView: 2,     // 2ページ並び
+                slidesPerGroup: 1,    // 1ページずつスライド
+                spaceBetween: 20,     // ページ間の余白
+                loop: false,
+                centeredSlides: false,
+                navigation: {
+                    nextEl: ".pdf-next",
+                    prevEl: ".pdf-prev"
+                },
+                keyboard: true,
+                on: {
+                        init: function() {
+                        updatePagination(this);
+                    },
+                        slideChange: function() {
+                        updatePagination(this);
+                    }
+                }
+            });
+
+        // ページ番号更新処理（見開き単位）
+        function updatePagination(swiper) {
+            // 総見開き数（2ページずつカウント）
+            const totalSpreads = Math.ceil(numPages / 2);
+
+            // 現在の見開き番号を計算
+            // activeIndexは左ページのインデックス（0始まり）
+            const currentSpread = Math.floor(swiper.activeIndex / 1) + 1;
+
+            paginationEl.textContent = `${currentSpread}/${totalSpreads}`;
+        }
+
+        } catch (error) {
+            console.error("PDF読み込みエラー:", error);
+        }
+    });
+</script>
 @endsection
