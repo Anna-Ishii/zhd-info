@@ -121,6 +121,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('/csv/store/upload', [ManualPublishController::class, 'csvStoreUpload'])->name('csvStoreUpload');
             Route::get('/csv/store/progress', [ManualPublishController::class, 'storeProgress'])->name('storeProgress');
             Route::post('/csv/store/import', [ManualPublishController::class, 'csvStoreImport'])->name('csvStoreImport');
+            Route::post('/csv/shop/import', [ManualPublishController::class, 'csvShopImport'])->name('csvShopImport');
         });
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::get('/', [ManualCategoryController::class, 'index'])->name('index');
