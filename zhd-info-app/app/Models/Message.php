@@ -35,6 +35,9 @@ class Message extends Model
         'updated_admin_id',
         'start_datetime',
         'end_datetime',
+        'instruction_flg',
+        'instruction_id',
+        'instruction_title',
 
     ];
 

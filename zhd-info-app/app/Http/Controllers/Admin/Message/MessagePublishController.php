@@ -810,6 +810,11 @@ class MessagePublishController extends Controller
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
         $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
         $is_broadcast_notification = $msg_params['is_broadcast_notification'];
+        
+        // 指示関連のカラムを追加
+        $msg_params['instruction_flg'] = isset($request->instruction_flg) && $request->instruction_flg == 'on' ? 1 : 0;
+        $msg_params['instruction_id'] = $request->instruction_id ?? null;
+        $msg_params['instruction_title'] = $request->instruction_title ?? null;
 
         try {
             DB::beginTransaction();
@@ -1504,6 +1509,11 @@ class MessagePublishController extends Controller
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
         $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
         $is_broadcast_notification = $msg_params['is_broadcast_notification'];
+        
+        // 指示関連のカラムを追加
+        $msg_params['instruction_flg'] = isset($request->instruction_flg) && $request->instruction_flg == 'on' ? 1 : 0;
+        $msg_params['instruction_id'] = $request->instruction_id ?? null;
+        $msg_params['instruction_title'] = $request->instruction_title ?? null;
 
         // 手順を登録する
         $content_data = [];

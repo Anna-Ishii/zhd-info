@@ -29,6 +29,9 @@ class PublishStoreRequest extends FormRequest
             'target_roll' => 'nullable|array',
             'brand' => 'required|array',
             'organization_shops' => 'required',
+            'instruction_flg' => 'nullable|boolean',
+            'instruction_id' => 'nullable|string|max:255',
+            'instruction_title' => 'nullable|string|max:255',
         ];
     }
 

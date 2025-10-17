@@ -28,6 +28,9 @@ class PublishUpdateRequest extends FormRequest
             'target_roll' => 'required',
             'brand' => 'required',
             'organization_shops' => 'required',
+            'instruction_flg' => 'nullable|boolean',
+            'instruction_id' => 'nullable|string|max:255',
+            'instruction_title' => 'nullable|string|max:255',
         ];
     }
 
