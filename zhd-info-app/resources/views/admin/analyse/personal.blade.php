@@ -72,7 +72,7 @@
 
     <div id="page-wrapper">
         <!-- 絞り込み部分 -->
-        <form method="get" class="mb24">
+        <form method="get" class="mb24" id="searchForm">
             <div class="form-group form-inline mb16 ">
                 <div class="input-group col-lg-1 spMb16">
                     <label class="input-group-addon">業態</label>
@@ -91,7 +91,7 @@
                         @if (in_array($organization, $organizations, true))
                             <div class="dropdown">
                                 <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">全て</span>
+                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-personal">全て</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
                                         <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
                                     </svg>
@@ -115,7 +115,7 @@
                         @else
                             <div class="dropdown">
                                 <button class="btn btn-default dropdown-toggle custom-dropdown" type="button" id="dropdownOrg{{ $organization }}" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" disabled>
-                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-text">　</span>
+                                    <span id="selectedOrgs{{ $organization }}" class="custom-dropdown-personal">　</span>
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-chevron-down" viewBox="0 0 17 17">
                                         <path fill-rule="evenodd" d="M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708" stroke="currentColor" stroke-width="1.5"/>
                                     </svg>
@@ -158,9 +158,6 @@
                 <div class="input-group col-lg-1 spMb16">
                     <input name="message_freeword" value="{{ request()->input('message_freeword') }}" class="form-control"
                         placeholder="キーワードを入力してください" />
-                </div>
-                <div class="input-group">
-                    <button class="btn btn-admin">検索</button>
                 </div>
                 <div class="input-group col-lg-1" style="float: right;">
                     <input type="button" class="btn btn-admin saveSearchBtn" value="検索条件を保存">
