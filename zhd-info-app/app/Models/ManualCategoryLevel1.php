@@ -87,7 +87,7 @@ class ManualCategoryLevel1 extends Model
                 foreach ($validated_data['new_categories'] as $level1Data) {
                     if (empty($level1Data['name'])) continue;
 
-                     $last_sort_order++;
+                    $last_sort_order++;
 
                     $newCategoryLevel1 = self::findAndRestoreOrCreate(
                         $level1Data['name'],
@@ -129,5 +129,18 @@ class ManualCategoryLevel1 extends Model
             'name' => $name,
             'sort_order' => $sort_order,
         ]);
+    }
+
+    /**
+     * 全ての大カテゴリを、それに紐づく小カテゴリと共に、
+     * それぞれのsort_order昇順で取得
+     *
+     * @return Collection<ManualCategoryLevel1>
+     */
+    public static function getAllSortedWithSubcategories(): Collection
+    {
+        return self::with('level2s')
+            ->orderBy('sort_order', 'asc')
+            ->get();
     }
 }

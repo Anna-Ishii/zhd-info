@@ -34,7 +34,7 @@ class ManualController extends Controller
         $allManuals = $this->enrichManuals($allManualsCollection, $now);
 
         // カテゴリ関連
-        $categories = ManualCategoryLevel1::with('level2s')->get();
+        $categories = ManualCategoryLevel1::getAllSortedWithSubcategories();
         $firstLevel1 = $categories->first();
         $firstLevel2Id = $firstLevel1?->level2s->first()?->id;
 
