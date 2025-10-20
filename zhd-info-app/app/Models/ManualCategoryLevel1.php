@@ -130,17 +130,4 @@ class ManualCategoryLevel1 extends Model
             'sort_order' => $sort_order,
         ]);
     }
-
-    /**
-     * 全ての大カテゴリを、それに紐づく小カテゴリと共に、
-     * それぞれのsort_order昇順で取得
-     *
-     * @return Collection<ManualCategoryLevel1>
-     */
-    public static function getAllSortedWithSubcategories(): Collection
-    {
-        return self::with('level2s')
-            ->orderBy('sort_order', 'asc')
-            ->get();
-    }
 }
