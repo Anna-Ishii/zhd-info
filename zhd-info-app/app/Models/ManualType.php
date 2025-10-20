@@ -13,4 +13,9 @@ class ManualType extends Model
     [
         'name',
     ];
+
+    public function manuals()
+    {
+        return $this->belongsToMany(Manual::class, 'manual_manual_type');
+    }
 }
