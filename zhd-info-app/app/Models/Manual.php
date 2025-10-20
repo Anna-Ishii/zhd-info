@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\PublishStatus;
 use App\Models\Traits\WhereLike;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -350,5 +351,30 @@ class Manual extends Model
         $before_datetime = $this->attributes['end_datetime'];
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
+    }
+
+    /**
+     * 指定されたユーザーに紐づき、公開中のマニュアルを下記優先順位でソートして取得
+     * - manual_category_level1s.sort_order 昇順
+     * - manual_category_level2s.sort_order 昇順
+     * - manuals.created_at 降順
+     * (カテゴリ未設定のものは最後に表示)
+     *
+     * @param User $user
+     * @return Collection<Manual>
+     */
+    public static function getPublishedAndSortedForUser(User $user): Collection
+    {
+        return $user->manual()
+            ->with('content', 'category_level2')->publishingManual()
+            ->leftJoin('manual_category_level2s', 'manuals.category_level2_id', '=', 'manual_category_level2s.id')
+            ->leftJoin('manual_category_level1s', 'manuals.category_level1_id', '=', 'manual_category_level1s.id')
+            ->select('manuals.*')
+            ->orderByRaw('manual_category_level1s.sort_order IS NULL ASC')
+            ->orderBy('manual_category_level1s.sort_order', 'asc')
+            ->orderByRaw('manual_category_level2s.sort_order IS NULL ASC')
+            ->orderBy('manual_category_level2s.sort_order', 'asc')
+            ->orderBy('manuals.created_at', 'desc')
+            ->get();
     }
 }
