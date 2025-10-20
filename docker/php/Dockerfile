@@ -40,6 +40,8 @@ RUN dnf -y update && \
     sqlite-devel \
     libzip-devel
 
+RUN dnf clean all
+
 # PHP 8.1のソースを取得してビルド
 WORKDIR /usr/src
 RUN wget https://www.php.net/distributions/php-8.1.29.tar.gz && \
@@ -64,6 +66,9 @@ RUN wget https://www.php.net/distributions/php-8.1.29.tar.gz && \
     make -j$(nproc) && \
     make install
 
+RUN rm -rf /usr/src/php-8.1.29* && \
+    rm -rf /tmp/* 
+
 # Xdebugのソースを取得
 WORKDIR /xdebug
 RUN git clone https://github.com/xdebug/xdebug.git . && \
@@ -72,11 +77,7 @@ RUN git clone https://github.com/xdebug/xdebug.git . && \
     make && \
     make install
 
-RUN git clone https://github.com/xdebug/xdebug.git
-RUN cd /xdebug && \
-    ./rebuild.sh && \
-    ./configure && \
-    make
+RUN rm -rf /usr/src/xdebug
 
 RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" &&\
     php composer-setup.php &&\
