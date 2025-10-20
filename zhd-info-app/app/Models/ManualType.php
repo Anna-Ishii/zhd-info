@@ -9,8 +9,6 @@ class ManualType extends Model
 {
     use HasFactory;
 
-    protected $tables = 'manual_types';
-
     protected $fillable =
     [
         'name',
