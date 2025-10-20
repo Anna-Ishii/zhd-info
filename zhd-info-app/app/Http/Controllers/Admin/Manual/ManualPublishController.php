@@ -441,7 +441,7 @@ class ManualPublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $admin = session('admin');
 
@@ -652,7 +652,7 @@ class ManualPublishController extends Controller
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $validated = $request->validated();
 
@@ -738,7 +738,7 @@ class ManualPublishController extends Controller
             }
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
             if (isset($selected_shop_codes)) {
                 $bulk_manual_shops = [];
@@ -853,7 +853,7 @@ class ManualPublishController extends Controller
 
     public function edit($manual_id)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $admin = session('admin');
 
@@ -978,7 +978,7 @@ class ManualPublishController extends Controller
         $target_org['select'] = null;
 
         $selectedFlg = null;
-        $chunkSize = 200; // チャンクサイズを設定
+        $chunkSize = config('manual.chunk_size'); // チャンクサイズを設定
         $offset = 0;
 
         // ManualShopテーブルからメッセージに関連する店舗情報を取得
@@ -1069,7 +1069,7 @@ class ManualPublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $manual_id)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $validated = $request->validated();
 
@@ -1194,7 +1194,7 @@ class ManualPublishController extends Controller
             ManualShop::where('manual_id', $manual_id)->delete();
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
             // manual_shopにshop_idとmanual_idをバルクインサート
             if (isset($request->organization_shops)) {
@@ -1244,7 +1244,7 @@ class ManualPublishController extends Controller
             $currentUsers = $manual->user()->pluck('user_id')->toArray();
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
             // 削除処理
             $usersToDetach = array_diff($currentUsers, array_keys($targetUsers));
@@ -1418,7 +1418,7 @@ class ManualPublishController extends Controller
     // 動画マニュアルCSV エクスポート（新規登録/編集）
     public function csvStoreExport(Request $request)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         // 新規登録か編集かを判定
         $isEdit = $request->has('manual_id');
@@ -1664,7 +1664,7 @@ class ManualPublishController extends Controller
 
                 ManualShop::where('manual_id', $manual->id)->delete();
                 // manual_shopにインサート
-                $chunkSize = 200;
+                $chunkSize = config('manual.chunk_size');
 
                 // manual_shopにshop_idとmanual_idをバルクインサート
                 if (isset($ml["shops"])) {
@@ -2174,7 +2174,7 @@ class ManualPublishController extends Controller
     private function getTargetUsersByShopId($organizations): array
     {
         $target_user_data = [];
-        $chunkSize = 200;
+        $chunkSize = config('manual.chunk_size');
 
         if (isset($organizations->organization_shops)) {
             $organization_shops = explode(',', $organizations->organization_shops);
