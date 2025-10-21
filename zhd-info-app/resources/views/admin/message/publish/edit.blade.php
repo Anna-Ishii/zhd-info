@@ -29,12 +29,10 @@
 @section('content')
     <main class="business-notice-create business-notice-create-instruction mb-0">
         <div id="page-wrapper">
-            @include('common.admin.page-head', ['title' => '業務連絡編集'])
 
             <form class="form" id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
                 @csrf
                 <div class="content-item">
-                    <p><span class="required"></span><span class="required_txt">：必須項目</span></p>
                     <div class="content__wrap">
                         <p class="content required">カテゴリ</p>
                         <div class="control">
@@ -53,7 +51,7 @@
                                         @endif
                                     @endforeach
                             </select>
-                        </p>
+                        </div>
                     </div>
                     <div class="content__wrap content-checkbox">
                         <p class="content">ラベル</p>
