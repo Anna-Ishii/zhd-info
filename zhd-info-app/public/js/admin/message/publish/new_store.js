@@ -97,6 +97,10 @@ function updateSelectAllCheckboxes() {
     selectAllStoreCodeCheckbox.checked = allCheckedStoreCode;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// 店舗選択モーダルのチェックボックスのイベント ////////////////////////////////////////////////////////////////////////
+
 // チェックボックスの変更イベントリスナーを追加
 $(document).on('change', '#storeModal input[name="organization_shops[]"], #storeModal input[name="shops_code[]"]', function() {
     syncCheckboxes($(this).attr('data-store-id'), this.checked);
@@ -283,6 +287,10 @@ $(document).on("change", "#selectAllStoreCode", function () {
         }
     }
 
+// 店舗選択モーダルのチェックボックスのイベント ////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
     // 処理の後、状態を更新
     function finishProcess() {
         if ($('#selectOrganization').is(':checked')) {
@@ -382,6 +390,9 @@ function processInChunks(array, chunkSize, callback, doneCallback) {
     processNextChunk();
 }
 
+
+///////////////////////////////////////////////////////////////////////////////////////////
+// 親画面のイベント ////////////////////////////////////////////////////////////////////////
 
 // 全店ボタン処理
 $(document).on('click', '#checkAll[data-action="all"]', function() {
@@ -506,30 +517,6 @@ $(document).on('click', '#checkStore[data-action="store"]', function() {
     updateSelectedStores();
 });
 
-// 通常モード店舗選択モーダルの選択処理
-// 通常モード店舗選択モーダルで選択した店舗データを保存し、UIを通常モードに切り替える
-$(document).on('click', '#selectStoreBtn', function() {
-    removeSelectedClass();
-    // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
-    changeValues();
-    // フォームクリア（店舗選択ボタン）
-    $("#selectStore").val("selected");
-    // インポートボタンをもとに戻す
-    $("#importCsv").text('インポート');
-    // モーダルを閉じる
-    $("#messageStoreModal").modal("hide");
-    // check-selected クラスを追加
-    $("#checkStore").addClass("check-selected");
-    // 店舗選択中の処理
-    const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
-    $('#checkStore').text(`店舗選択(${selectedCountStore}店舗)`);
-});
-
-// モーダルが閉じられる際にchangeValuesを実行
-$('#storeModal').on('hidden.bs.modal', function () {
-    changeValues();
-});
-
 // インポートボタン処理
 $(document).on('click', '#importCsv[data-action="import"]', function() {
     // CSVモードかどうかを判定
@@ -559,6 +546,88 @@ $(document).on('click', '#importCsv[data-action="import"]', function() {
         // CSVインポートモーダルを開く
         $('#messageStoreImportModal').addClass('disp');
     }
+});
+
+// エクスポートボタン処理
+$(document).on('click', '#exportCsv', function() {
+    var csrfToken = $('meta[name="csrf-token"]').attr('content');
+    let formData = new FormData();
+    var organization1Id = $('.check-store-list input[name="organization1_id"]').val();
+    formData.append("organization1_id", organization1Id);
+
+    $.ajax({
+        url: '/admin/message/publish/csv/store/export',
+        type: 'post',
+        data: formData,
+        processData: false,
+        contentType: false,
+        headers: {
+            'X-CSRF-TOKEN': csrfToken,
+        },
+        xhrFields: {
+            responseType: 'blob' // レスポンスのタイプをBlobに設定
+        },
+    }).done(function(response, textStatus, jqXHR){
+        var blob = new Blob([response], { type: 'text/csv' });
+        var url = window.URL.createObjectURL(blob);
+        var a = document.createElement('a');
+
+        // サーバーからファイル名を取得する
+        var disposition = jqXHR.getResponseHeader('Content-Disposition');
+        var fileName = disposition ? disposition.split('filename=')[1].split(';')[0].replace(/"/g, '') : 'export.csv';
+
+        a.href = url;
+        a.download = "店舗選択_" + fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url); // オブジェクトURLを解放
+        document.body.removeChild(a); // 一時的に生成したリンクを削除
+
+    }).fail(function(jqXHR, textStatus, errorThrown){
+        var errorMessage = 'An error occurred. Please try again later.';
+
+        if (jqXHR.status === 422) {
+            errorMessage = 'Validation error. Please check your input and try again.';
+        } else if (jqXHR.status === 504) {
+            errorMessage = 'Server timeout. Please try again later.';
+        } else if (jqXHR.status === 500) {
+            errorMessage = 'Internal server error. Please try again later.';
+        }
+
+        console.log('Error: ' + jqXHR.status + ' - ' + textStatus);
+        alert(errorMessage);
+    });
+});
+
+// 親画面のイベント ////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////////////
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+// 店舗選択モーダルのイベント ////////////////////////////////////////////////////////////////////////
+
+// 通常モード店舗選択モーダルの選択処理
+// 通常モード店舗選択モーダルで選択した店舗データを保存し、UIを通常モードに切り替える
+$(document).on('click', '#selectStoreBtn', function() {
+    removeSelectedClass();
+    // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
+    changeValues();
+    // フォームクリア（店舗選択ボタン）
+    $("#selectStore").val("selected");
+    // インポートボタンをもとに戻す
+    $("#importCsv").text('インポート');
+    // モーダルを閉じる
+    $("#messageStoreModal").modal("hide");
+    // check-selected クラスを追加
+    $("#checkStore").addClass("check-selected");
+    // 店舗選択中の処理
+    const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
+    $('#checkStore').text(`店舗選択(${selectedCountStore}店舗)`);
+});
+
+// モーダルが閉じられる際にchangeValuesを実行
+$('#storeModal').on('hidden.bs.modal', function () {
+    changeValues();
 });
 
 // CSVモード店舗選択モーダルの選択処理
@@ -602,6 +671,12 @@ $(document).on('click', '#csvReImportBtn[data-action="reImport"]', function() {
     $('#messageStoreImportModal').addClass('disp');
 });
 
+// 店舗選択モーダルのイベント ////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+// CSVインポートモーダルのイベント ////////////////////////////////////////////////////////////////////////
 
 // CSVインポートモーダルの閉じるボタン処理
 $(document).on('click', '#inportCloselBtn', function() {
@@ -854,6 +929,10 @@ $(document).on('click', '#csvImportBtn', function(e) {
 	});
 })
 
+// CSVインポートモーダルのイベント ////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 function isEmptyImportFile(modal) {
 	return !$(modal).find('input[type="file"]')[0].value
 }
@@ -874,53 +953,3 @@ function getNumericDateTime() {
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
 
-// エクスポートボタン処理
-$(document).on('click', '#exportCsv', function() {
-    var csrfToken = $('meta[name="csrf-token"]').attr('content');
-    let formData = new FormData();
-    var organization1Id = $('.check-store-list input[name="organization1_id"]').val();
-    formData.append("organization1_id", organization1Id);
-
-    $.ajax({
-        url: '/admin/message/publish/csv/store/export',
-        type: 'post',
-        data: formData,
-        processData: false,
-        contentType: false,
-        headers: {
-            'X-CSRF-TOKEN': csrfToken,
-        },
-        xhrFields: {
-            responseType: 'blob' // レスポンスのタイプをBlobに設定
-        },
-    }).done(function(response, textStatus, jqXHR){
-        var blob = new Blob([response], { type: 'text/csv' });
-        var url = window.URL.createObjectURL(blob);
-        var a = document.createElement('a');
-
-        // サーバーからファイル名を取得する
-        var disposition = jqXHR.getResponseHeader('Content-Disposition');
-        var fileName = disposition ? disposition.split('filename=')[1].split(';')[0].replace(/"/g, '') : 'export.csv';
-
-        a.href = url;
-        a.download = "店舗選択_" + fileName;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url); // オブジェクトURLを解放
-        document.body.removeChild(a); // 一時的に生成したリンクを削除
-
-    }).fail(function(jqXHR, textStatus, errorThrown){
-        var errorMessage = 'An error occurred. Please try again later.';
-
-        if (jqXHR.status === 422) {
-            errorMessage = 'Validation error. Please check your input and try again.';
-        } else if (jqXHR.status === 504) {
-            errorMessage = 'Server timeout. Please try again later.';
-        } else if (jqXHR.status === 500) {
-            errorMessage = 'Internal server error. Please try again later.';
-        }
-
-        console.log('Error: ' + jqXHR.status + ' - ' + textStatus);
-        alert(errorMessage);
-    });
-});
