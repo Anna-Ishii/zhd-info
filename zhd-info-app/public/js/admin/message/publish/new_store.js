@@ -16,6 +16,34 @@ $(document).ready(function () {
     }
 });
 
+// CSVインポートモーダルの初期化関数
+function initializeCsvImportModal() {
+    // 1. ファイル入力をクリア
+    $('#csvFileUp').val('');
+
+    // 2. 表示を初期状態に戻す（強制的に）
+    $('#messageStoreImportModal .upload-before').show();
+    $('#messageStoreImportModal .store-file-uploaded').hide();
+
+    // 3. インポートボタンを無効化
+    $('#csvImportBtn').prop('disabled', true);
+    $('#csvImportBtn').addClass('disabled-btn');
+
+    // 4. ファイル名とサイズをリセット
+    $('#messageStoreImportModal .file__name').text('ファイルを選択してください');
+    $('#messageStoreImportModal .file__size').text('0KB');
+
+    // 5. エラーメッセージをクリア
+    $('#messageStoreImportModal .alert-danger').remove();
+
+    // 6. 進捗バーをリセット
+    $('#messageStoreImportModal .progress').hide();
+    $('#messageStoreImportModal .progress-bar').css('width', '0%');
+
+    // 7. newMessageJsonをクリア
+    newMessageJson = null;
+}
+
 // 店舗選択中の処理
 function updateSelectedStores() {
     const selectedCount = $('#storeModal input[name="organization_shops[]"]:checked').length;
@@ -195,7 +223,7 @@ $(document).on("change", "#selectAllOrganization", function () {
         }
     }
 
-    // 処理の後、状態を更新
+    // 全選択/解除処理の後処理：状態を更新
     function finishProcess() {
         if ($('#selectOrganization').is(':checked')) {
             $('#storeModal #byOrganization li').show();
@@ -355,21 +383,6 @@ function processInChunks(array, chunkSize, callback, doneCallback) {
 }
 
 
-
-// 店舗選択ボタン処理
-$(document).on('click', '#checkStore[data-action="store"]', function() {
-    removeSelectedClass();
-    // 店舗選択モーダルを開く
-    $('#messageStoreModal').modal('show');
-});
-
-// インポートボタン処理
-$(document).on('click', '#importCsv[data-action="import"]', function() {
-    removeSelectedClass();
-    // インポートモーダルを開く
-    $('#messageStoreImportModal').modal('show');
-});
-
 // 全店ボタン処理
 $(document).on('click', '#checkAll[data-action="all"]', function() {
     removeSelectedClass();
@@ -400,21 +413,17 @@ $(document).on('click', '#checkAll[data-action="all"]', function() {
     updateSelectedStores();
     // ボタンの見た目を変更する
     $(this).addClass("check-selected");
-    // csvインポートボタン変更
-    $('#importCsv').attr('data-target', '#messageStoreImportModal');
 });
 
-
-
-// 店舗選択モーダル 選択処理
-$(document).on('click', 'input[id="checkStore"]', function() {
+// 店舗選択ボタン処理
+$(document).on('click', '#checkStore[data-action="store"]', function() {
     // モーダルタイトル変更
     var storeModalTitle = $("#messageStoreModal h4.modal-title");
     if (storeModalTitle.length) {
-        // storeModalTitle.html('店舗を選択してください。<br /><small class="text-muted">※変更履歴は保存され、引き継がれます</small>');
         storeModalTitle.html('店舗を選択してください。');
     }
 
+    // 通常モードに切り替え
     // 元のボタンのセレクターを取得して、新しいボタンのセレクターに変更
     var selectCsvButton = $("#selectCsvBtn");
     if (selectCsvButton.length) {
@@ -422,9 +431,9 @@ $(document).on('click', 'input[id="checkStore"]', function() {
     }
     // キャンセルボタン表示
     $('#cancelBtn').show();
-    // csv再インポートボタン削除
-    if ($('#csvImportBtn').length) {
-        $('#messageStoreModal .modal-footer #csvImportBtn').remove();
+    // CSVモードの再インポートボタン削除
+    if ($('#csvReImportBtn').length) {
+        $('#messageStoreModal .modal-footer #csvReImportBtn').remove();
     }
 
     // キャンセルボタン処理
@@ -497,6 +506,8 @@ $(document).on('click', 'input[id="checkStore"]', function() {
     updateSelectedStores();
 });
 
+// 通常モード店舗選択モーダルの選択処理
+// 通常モード店舗選択モーダルで選択した店舗データを保存し、UIを通常モードに切り替える
 $(document).on('click', '#selectStoreBtn', function() {
     removeSelectedClass();
     // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
@@ -504,13 +515,11 @@ $(document).on('click', '#selectStoreBtn', function() {
     // フォームクリア（店舗選択ボタン）
     $("#selectStore").val("selected");
     // インポートボタンをもとに戻す
-    $("#importCsv").val('インポート');
+    $("#importCsv").text('インポート');
     // モーダルを閉じる
     $("#messageStoreModal").modal("hide");
     // check-selected クラスを追加
     $("#checkStore").addClass("check-selected");
-    // csvインポートボタン変更
-    $('#importCsv').attr('data-target', '#messageStoreImportModal');
     // 店舗選択中の処理
     const selectedCountStore = $('#storeModal input[name="organization_shops[]"]:checked').length;
     $('#checkStore').text(`店舗選択(${selectedCountStore}店舗)`);
@@ -521,30 +530,39 @@ $('#storeModal').on('hidden.bs.modal', function () {
     changeValues();
 });
 
+// インポートボタン処理
+$(document).on('click', '#importCsv[data-action="import"]', function() {
+    // CSVモードかどうかを判定
+    const isCsvMode = $("#importCsv").hasClass("check-selected") &&
+                        $("#selectCsv").val() === "selected";
 
+    if (isCsvMode) {
+        // CSVモード時：CSVモードの店舗選択画面を表示（カスタムモーダル）
+        $('#messageStoreModal').modal('show');
 
-// CSVインポートモーダル 選択処理
-$(document).on('click', 'input[id="importCsv"]', function() {
-    // 元のボタンのセレクターを取得
-    var selectStoreButton = document.getElementById("selectStoreBtn");
-    // 新しいボタンのセレクターに変更
-    if (selectStoreButton) {
-        selectStoreButton.id = "selectCsvBtn";
-    }
-    // キャンセルボタン非表示
-    $('#cancelBtn').hide();
-    // csv再インポートボタン追加
-    if (!$('#csvImportBtn').length) {
-        $('#messageStoreModal .modal-footer').append(`<input type="button" class="btn btn-admin pull-left" id="csvImportBtn" data-toggle="modal" data-target="#messageStoreImportModal" value="再インポート">`);
+    } else {
+        // 通常モード時：CSVインポートモーダルを開く（カスタムモーダル）
+        // ボタンIDの変更（CSVモード用）
+        var selectStoreButton = document.getElementById("selectStoreBtn");
+        if (selectStoreButton) {
+            selectStoreButton.id = "selectCsvBtn";
+        }
+
+        // UI要素の設定
+        $('#cancelBtn').hide();
+
+        // 再インポートボタンの追加
+        if (!$('#csvReImportBtn').length) {
+            $('#messageStoreModal .modal-footer').append(`<button class="c-btn__blue disabled-btn" id="csvReImportBtn" data-file="bb_sk_inport_csv">再インポート</button>`);
+        }
+
+        // CSVインポートモーダルを開く
+        $('#messageStoreImportModal').addClass('disp');
     }
 });
 
-// インポートボタンのクリックイベント
-$(document).on('click', '#importButton', function() {
-    // モーダルを閉じる
-    $("#messageStoreImportModal").modal("hide");
-});
-
+// CSVモード店舗選択モーダルの選択処理
+// CSVモード店舗選択モーダルで選択した店舗データを保存し、UIをCSVモードに切り替える
 $(document).on('click', '#selectCsvBtn', function() {
     removeSelectedClass();
     // チェックされているチェックボックスの値を隠し入力フィールドに値を割り当てる
@@ -562,43 +580,98 @@ $(document).on('click', '#selectCsvBtn', function() {
     $('#importCsv').text(`インポート(${selectedCountStore}店舗)`);
 });
 
-$(document).on('click', '#csvImportBtn', function() {
+// CSVモード店舗選択モーダルの再インポートボタン処理
+$(document).on('click', '#csvReImportBtn[data-action="reImport"]', function() {
     // モーダルを閉じる
     $("#messageStoreModal").modal("hide");
 
-    // ファイルを削除
-    $('#messageStoreImportModal input[type="file"]').val('');
+    // ファイル入力をクリア
+    $('#csvFileUp').val('');
+
+    // モーダル内の要素を直接ターゲット
+    $('#messageStoreImportModal .upload-before').show();
+    $('#messageStoreImportModal .store-file-uploaded').hide();
+
+    // インポートボタンを無効化
+    $('#csvImportBtn').prop('disabled', true);
+    $('#csvImportBtn').addClass('disabled-btn');
+
+    newMessageJson = null;
+
+    // インポートモーダルを開く
+    $('#messageStoreImportModal').addClass('disp');
 });
 
 
+// CSVインポートモーダルの閉じるボタン処理
+$(document).on('click', '#inportCloselBtn', function() {
+    // インポートモーダルを閉じる
+    $("#messageStoreImportModal").removeClass("disp");
+
+    // ファイル入力をクリア
+    $('#csvFileUp').val('');
+});
+
+// CSVインポートモーダルのファイル削除ボタン処理
+$(document).on('click', '.file__delete_btn_store', function() {
+    // エラーメッセージをクリア
+    $('#messageStoreImportModal .middle-erea .alert-danger').remove();
+
+    // ファイル入力をクリア
+    $('#csvFileUp').val('');
+
+    // モーダル内の要素を直接ターゲット
+    $('#messageStoreImportModal .upload-before').show();
+    $('#messageStoreImportModal .store-file-uploaded').hide();
+
+    // インポートボタンを無効化
+    $('#csvImportBtn').prop('disabled', true);
+    $('#csvImportBtn').addClass('disabled-btn');
+
+    newMessageJson = null;
+});
 
 /* ファイル検知 */
 function changeFileName(e){
-	let fileNameTarget = e.siblings('.fileName');
 	if(e.val() == ''){
-		fileNameTarget.empty().text('ファイルを選択またはドロップ');
+		$('#messageStoreImportModal .upload-before').show();
+		$('#messageStoreImportModal .store-file-uploaded').hide();
 	}else{
 		let chkFileName = e.prop('files')[0].name;
-		fileNameTarget.empty().text(chkFileName);
+		let fileSize = e.prop('files')[0].size;
+		let fileSizeKB = (fileSize / 1024).toFixed(1) + 'KB';
+
+		// ファイル名を設定（モーダル内で直接検索）
+		$('#messageStoreImportModal .file__name').text(chkFileName);
+		// ファイルサイズを設定（モーダル内で直接検索）
+		$('#messageStoreImportModal .file__size').text(fileSizeKB);
+
+		// 表示切り替え（モーダル内で直接検索）
+		$('#messageStoreImportModal .upload-before').hide();
+		$('#messageStoreImportModal .store-file-uploaded').show();
 	}
 }
 
-// 業務連絡店舗CSV アップロード
-$(document).on('change' , '#messageStoreImportModal input[type=file]' , function(){
-	let changeTarget = $(this);
-	changeFileName(changeTarget);
-});
+// CSVインポートモーダルのファイル変更イベント処理
+let newMessageJson; // 店舗CSV保持用
+$(document).on('change', '#csvFileUp', function() {
+    // ファイル名変更処理
+    let changeTarget = $(this);
+    changeFileName(changeTarget);
 
-let newMessageJson;
-$(document).on('change', '#messageStoreImportModal input[type="file"]', function() {
+    // インポートボタンを有効化
+    $('#csvImportBtn').prop('disabled', false);
+    $('#csvImportBtn').removeClass('disabled-btn');
+
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
+
 	let log_file_name = getNumericDateTime();
     let formData = new FormData();
     formData.append("file", $(this)[0].files[0]);
 	formData.append("organization1", $('#messageStoreImportModal input[name="organization1"]').val())
 	formData.append("log_file_name", log_file_name)
 
-	let button = $('#messageStoreImportModal input[type="button"]');
+	let button = $('#csvImportBtn'); // IDを直接指定
 
     var labelForm = $(this).parent();
     var progress = labelForm.parent().find('.progress');
@@ -610,7 +683,7 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 
 	let progress_request = true;
 
-	$('#messageStoreImportModal .modal-body .alert-danger').remove();
+	$('#messageStoreImportModal .middle-erea .alert-danger').remove();
 
     $.ajax({
         url: '/admin/message/publish/csv/store/upload',
@@ -622,19 +695,21 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
             'X-CSRF-TOKEN': csrfToken,
         },
     }).done(function(response){
-        // console.log(response);
 		progress_request = false;
 		button.prop("disabled", false);
+		button.removeClass('disabled-btn');
         labelForm.parent().find('.text-danger').remove();
 		newMessageJson = response.json;
 
     }).fail(function(jqXHR, textStatus, errorThrown){
-		$('#messageStoreImportModal .modal-body').prepend(`
+        button.prop("disabled", true);
+        button.addClass('disabled-btn');
+		$('#messageStoreImportModal .middle-erea').prepend(`
 			<div class="alert alert-danger">
 				<ul></ul>
 			</div>
 		`);
-		const errorUl =  $('#messageStoreImportModal .modal-body .alert ul');
+		const errorUl =  $('#messageStoreImportModal .middle-erea .alert ul');
 		progress_request = false;
 		if (jqXHR.status === 422) {
 			jqXHR.responseJSON.message?.forEach((errorMessage)=>{
@@ -684,8 +759,8 @@ $(document).on('change', '#messageStoreImportModal input[type="file"]', function
 	}, 500);
 });
 
-// 業務連絡店舗CSV インポート
-$('#messageStoreImportModal input[type="button"]').click(function(e){
+// インポートボタン処理（モーダル内）
+$(document).on('click', '#csvImportBtn', function(e) {
 	e.preventDefault();
 
 	if(!newMessageJson) {
@@ -698,6 +773,9 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 		`);
 		return;
 	}
+    // モーダルを閉じる（カスタムモーダル用）
+    $("#messageStoreImportModal").removeClass("disp");
+
 	var csrfToken = $('meta[name="csrf-token"]').attr('content');
 
     var overlay = $('#overlay');
@@ -718,9 +796,7 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
 		},
 
 	}).done(function(response){
-		// console.log(response);
 		overlay.css('display', 'none');
-
         $('#messageStoreModal').html(response);
 
         var allOrg_flg = true;
@@ -742,12 +818,15 @@ $('#messageStoreImportModal input[type="button"]').click(function(e){
         });
         $('#selectAllStoreCode').prop('checked', allStore_flg);
 
+        // 店舗選択モーダルを表示
+        $('#messageStoreModal').modal('show');
+
         // 初期表示の更新
         updateSelectedStores();
         updateAllParentCheckboxes();
 
-        // csvインポートボタン変更
-        $('#importCsv').attr('data-target', '#messageStoreModal');
+        // CSVインポートモーダル初期化
+        initializeCsvImportModal();
 
 	}).fail(function(jqXHR, textStatus, errorThrown){
 		overlay.css('display', 'none');
@@ -795,9 +874,7 @@ function getNumericDateTime() {
     return `${year}${month}${day}${hours}${minutes}${seconds}`;
 }
 
-
-
-// 業務連絡店舗CSV エクスポート
+// エクスポートボタン処理
 $(document).on('click', '#exportCsv', function() {
     var csrfToken = $('meta[name="csrf-token"]').attr('content');
     let formData = new FormData();

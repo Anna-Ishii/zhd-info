@@ -50,7 +50,7 @@
                                         @endif
                                     @endforeach
                             </select>
-                        </p>
+                        </div>
                     </div>
                     <div class="content__wrap content-checkbox">
                         <p class="content">ラベル</p>
