@@ -351,4 +351,9 @@ class Manual extends Model
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
     }
+
+    public function manualTypes()
+    {
+        return $this->belongsToMany(ManualType::class, 'manual_manual_type');
+    }
 }
