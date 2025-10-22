@@ -2,7 +2,6 @@ $(document).ready(function () {
     // 初期表示の更新
     updateSelectedStores();
     updateAllParentCheckboxes();
-    updateSelectAllCheckboxes();
 
     if ($("#selectStore").val() === "selected") {
         // 店舗選択中の処理
@@ -82,21 +81,6 @@ function updateAllParentCheckboxes() {
     parentCheckboxes.forEach(parentCheckbox => updateParentCheckbox(parentCheckbox.getAttribute('data-organization-id')));
 }
 
-// 全選択/選択解除のチェックボックスの状態を更新
-function updateSelectAllCheckboxes() {
-    // 組織タブのチェックボックスの状態を更新
-    const organizationCheckboxes = document.querySelectorAll('#storeModal #byOrganization input.shop-checkbox');
-    const selectAllOrganizationCheckbox = document.querySelector('#selectAllOrganization');
-    const allCheckedOrganization = Array.from(organizationCheckboxes).every(checkbox => checkbox.checked);
-    selectAllOrganizationCheckbox.checked = allCheckedOrganization;
-
-    // 店舗コード順タブのチェックボックスの状態を更新
-    const storeCodeCheckboxes = document.querySelectorAll('#storeModal #byStoreCode input.shop-checkbox');
-    const selectAllStoreCodeCheckbox = document.querySelector('#selectAllStoreCode');
-    const allCheckedStoreCode = Array.from(storeCodeCheckboxes).every(checkbox => checkbox.checked);
-    selectAllStoreCodeCheckbox.checked = allCheckedStoreCode;
-}
-
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // 店舗選択モーダルのチェックボックスのイベント ////////////////////////////////////////////////////////////////////////
@@ -108,7 +92,6 @@ $(document).on('change', '#storeModal input[name="organization_shops[]"], #store
     if ($(this).hasClass('shop-checkbox')) {
         updateParentCheckbox($(this).attr('data-organization-id'));
     }
-    updateSelectAllCheckboxes();
 });
 
 // 親チェックボックスの変更イベントリスナーを追加
@@ -131,7 +114,6 @@ $(document).on('change', '#storeModal input.org-checkbox', function() {
         }
 
         updateSelectedStores();
-        updateSelectAllCheckboxes();
 });
 
 // 組織単位タブの選択中のみ表示
@@ -249,7 +231,6 @@ $(document).on("change", "#selectAllOrganization", function () {
         }
 
         updateSelectedStores();
-        updateSelectAllCheckboxes();
 
         // オーバーレイを非表示にする
         overlay.css('display', 'none');
@@ -303,7 +284,6 @@ $(document).on("change", "#selectAllStoreCode", function () {
         }
 
         updateSelectedStores();
-        updateSelectAllCheckboxes();
 
         // オーバーレイを非表示にする
         overlay.css('display', 'none');

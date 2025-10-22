@@ -574,7 +574,8 @@ class MessagePublishController extends Controller
                 'shops.organization5_id',
                 'shops.organization4_id',
                 'shops.organization3_id',
-                'shops.organization2_id'
+                'shops.organization2_id',
+                'shops.brand_id'
             )
             ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
             ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
@@ -603,22 +604,6 @@ class MessagePublishController extends Controller
             return $org;
         }, $organization_list);
 
-        // shop_code でソート済みの $all_shops をそのまま利用
-        $all_shop_list = array_map(function ($shop) {
-            return [
-                'shop_id' => $shop['id'],
-                'shop_code' => $shop['shop_code'],
-                'display_name' => $shop['display_name'],
-            ];
-        }, $all_shops);
-
-
-        // 店舗コードでshopsをソート
-        usort($all_shop_list, function ($a, $b) {
-            return strcmp($a['shop_code'], $b['shop_code']);
-        });
-
-
         // 検索条件を取得
         $message_saved_url = SearchCondition::where('admin_id', $admin->id)
             ->where('page_name', 'message-publish')
@@ -646,7 +631,6 @@ class MessagePublishController extends Controller
             'target_roll_list' => $target_roll_list,
             'brand_list' => $brand_list,
             'organization_list' => $organization_list,
-            'all_shop_list' => $all_shop_list,
             'message_saved_url' => $message_saved_url,
             'manual_saved_url' => $manual_saved_url,
             'analyse_personal_saved_url' => $analyse_personal_saved_url,

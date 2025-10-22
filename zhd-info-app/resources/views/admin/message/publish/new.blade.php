@@ -205,8 +205,8 @@
                             <div class="button__wrap__item {{ old('select_organization.all') === 'selected' ? 'active' : '' }}">
                                 <p id="checkAll" data-action="all">全店</p>
                             </div>
-                            <div class="button__wrap__item {{ old('select_organization.store') === 'selected' ? 'active' : '' }}">
-                                <p id="checkStore" data-action="store" data-toggle="modal" data-target="#messageStoreModal">店舗選択</p>
+                            <div class="button__wrap__item store-modal-btn {{ old('select_organization.store') === 'selected' ? 'active' : '' }}">
+                                <p id="checkStore" data-action="store">店舗選択</p>
                             </div>
                             <div class="button__wrap__item {{ old('select_organization.csv') === 'selected' ? 'active' : '' }}">
                                 <img src="{{ asset('img/inport_icon.svg') }}" alt="インポート">
@@ -300,7 +300,7 @@
         <button class="c-btn__blue" type="button" id="instructionBtn" style="display: none;">指示作成へ進む</button>
     </div>
 
-    @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
+    @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'organization1' => $organization1, 'selected_brands' => old('brand', [])])
     @include('common.admin.message-new-join-file-modal', [])
 @endsection
 
@@ -310,6 +310,6 @@
     <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
     <!-- JavaScript -->
     <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
-    <!-- モーダルJavaScriptを読み込み -->
-    <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
+    <!-- 店舗選択モーダルJavaScriptを読み込み -->
+    <script src="{{ asset('js/phase3/businessStoreSelect.js') }}?date={{ date('Ymd') }}"></script>
 @endpush
