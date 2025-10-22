@@ -83,6 +83,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('messageUpdateData', [MessagePublishController::class, 'messageUpdateData'])->name('messageUpdateData');
             Route::post('messageAllSaveData', [MessagePublishController::class, 'messageAllSaveData'])->name('messageAllSaveData');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
+            Route::post('delete/{message_id}', [MessagePublishController::class, 'destroy'])->name('destroy')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');

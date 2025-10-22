@@ -4,6 +4,9 @@ $(document).ready(function(){
         // ファイルは送信しない
         $('input[type="file"]').prop('disabled', true);
 
+        // 掲載期間の入力フィールドの disabled を解除（値が送信されるようにする）
+        $('input[name="start_datetime"], input[name="end_datetime"]').prop('disabled', false);
+
         if(!emptyTagInputForm()) {
             appendFormTagInput()
         }
@@ -511,3 +514,68 @@ function updateJoinFileLabel() {
         $(".inputFile #joinFileId").val("結合の修正");
     }
 }
+
+// 削除確認モーダル制御
+window.confirmDelete = function() {
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
+$(document).ready(function() {
+
+    // 削除実行ボタンのクリックイベント
+    $('#deleteExecuteBtn').on('click', function() {
+
+        // 現在のURLからmessage_idを取得
+        const currentPath = window.location.pathname;
+        const messageId = currentPath.split('/').pop();
+
+        // 削除処理を実行
+        $.ajax({
+            url: '/admin/message/publish/delete/' + messageId,
+            type: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // モーダルを閉じる
+                const modal = document.getElementById('deleteConfirmModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                }
+                // 成功時のリダイレクト（少し遅延を入れる）
+                setTimeout(function() {
+                    window.location.href = '/admin/message/publish';
+                }, 100);
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete failed:', error);
+                console.error('Response:', xhr.responseText);
+                alert('削除に失敗しました。');
+            }
+        });
+    });
+
+    // 戻るボタンでモーダルを閉じる
+    $('#deleteBackBtn').on('click', function() {
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // モーダル背景をクリックしたら閉じる
+    $('#deleteConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+});

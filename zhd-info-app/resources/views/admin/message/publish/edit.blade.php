@@ -512,6 +512,7 @@
 
     <div class="footer" style="margin-left: 0;">
         <p><a href="/admin/message/publish?{{ session('message_publish_url') }}">一覧に戻る</a></p>
+        <button class="c-btn__grey" type="button" id="deleteBtn" onclick="confirmDelete()">削除</button>
         @if ($message->editing_flg)
             <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
         @endif
@@ -522,14 +523,16 @@
 
     @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
     @include('common.admin.message-new-join-file-modal', [])
+    @include('common.admin.delete-confirm-modal')
 @endsection
 
 {{-- ページ固有のJSファイルがここに入る --}}
 @push('scripts')
-    <script src="{{ asset('/js/admin/message/publish/edit.js') }}?date={{ date('Ymd') }}" defer></script>
+    <script src="{{ asset('/js/admin/message/publish/edit.js') }}?date={{ date('Ymd') }}"></script>
     <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}?date={{ date('Ymd') }}" defer></script>
     <!-- JavaScript -->
     <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
     <!-- モーダルJavaScriptを読み込み -->
     <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
+
 @endpush

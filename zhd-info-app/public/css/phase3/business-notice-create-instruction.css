@@ -103,6 +103,17 @@
   border-radius: 100px;
   padding: 16px 0px;
 }
+.c-btn__grey {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  background: #fff;
+  color: #8E9199;
+  border: 1px solid #8E9199;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
 .disabled-btn {
   opacity: 0.32;
   pointer-events: none;
@@ -657,3 +668,7 @@ main *,
 footer * {
   margin-bottom: 0 !important;
 }
+
+/* モーダル */
+
+
