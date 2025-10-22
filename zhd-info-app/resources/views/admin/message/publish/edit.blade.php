@@ -247,11 +247,13 @@
         </div>
     </main>
 
-    <div class="footer">
+    <div class="footer" style="margin-left: 0;">
         <p><a href="/admin/message/publish?{{ session('message_publish_url') }}">一覧に戻る</a></p>
         @if ($message->editing_flg)
             <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
         @endif
+        <button class="c-btn__white" type="submit" name="register" form="form" id="" onclick="window.onbeforeunload=null">削除</button>
+        <button class="c-btn__white" type="submit" name="register" form="form" id="" onclick="window.onbeforeunload=null">複製</button>
         <button class="c-btn__blue" type="submit" name="register" form="form" id="registerBtn" onclick="window.onbeforeunload=null">登録</button>
     </div>
 
