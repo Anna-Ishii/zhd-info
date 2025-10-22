@@ -807,3 +807,12 @@ $(document).ready(function () {
             });
     });
 });
+
+const form = document.getElementById("searchForm");
+
+// フォーム内のどの入力欄でEnterしても発火
+searchForm.addEventListener("keypress", (event) => {
+  if (event.key === "Enter") {
+      form.submit();
+  }
+});

@@ -261,9 +261,11 @@ $(document).ready(function() {
         // 編集ボタン
         if (accountEditBtn) {
             $(accountEditBtn).hide();
-            const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="margin-right: 5px;">登録</p>`;
+            // const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 35px; margin-left: 10px; margin-right: 5px; padding: 6px 12px; cursor: pointer;">登録</p>`;
+            const saveButtonHtml = `<p class="accountEditSaveBtn btn btn-admin" style="text-align:center; width: 60px; line-height: 30px; font-weight: bold; font-size: 1.8rem; border-radius: 5px; background: #0050C0; color: white; font-size: 12px; display: inline-block; margin-top: -40px; margin-bottom: 0px; margin-right: 20px; padding: 6px 12px; cursor: pointer;">登録</p>`;
             $(accountEditBtnGroup).append(saveButtonHtml);
-            const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin">取消</p>`;
+            // const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin" style="background-color: #eee; color: #333; font-size: 12px; display: inline-block; margin-top: 35px; margin-left: 10px; margin-right: 5px; padding: 6px 12px; cursor: pointer;">取消</p>`;
+            const deleteButtonHtml = `<p class="accountEditDeleteBtn btn btn-admin" style="text-align:center; width: 60px; line-height: 30px; font-weight: bold; font-size: 1.8rem; border-radius: 5px; background: #0050C0; color: white; font-size: 12px; display: inline-block; margin-top: -40px; margin-bottom: 0px; margin-right: 20px; padding: 6px 12px; cursor: pointer;">取消</p>`;
             $(accountEditBtnGroup).append(deleteButtonHtml);
         }
 
