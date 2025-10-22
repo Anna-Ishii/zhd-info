@@ -30,7 +30,7 @@
     <main class="business-notice-create business-notice-create-instruction mb-0">
         <div id="page-wrapper">
 
-            <form class="form" id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
+            <form class="form" id="form" method="post" action="{{ route('admin.message.publish.edit.update', $message->id) }}" enctype="multipart/form-data" class="form-horizontal">
                 @csrf
                 <div class="content-item">
                     <div class="content__wrap">
@@ -94,10 +94,8 @@
                                     <input type="hidden" name="emergency_flg" value="{{ $message->emergency_flg ? 'on' : '' }}">
                                 @endif
                             </label>
-                            <input type="hidden" name="emergency_flg" value="{{ $message->emergency_flg ? 'on' : '' }}">
                         </div>
                     </div>
-
                     <div class="content__wrap">
                         <p class="content required">タイトル</p>
                         <div class="input-group custom-textbox">
@@ -334,6 +332,10 @@
                                         <span class="checkmark"></span>
                                         {{ $brand->name }}
                                     </label>
+                                    {{-- 実際の値を送信するための hidden input --}}
+                                    @if (in_array($brand->id, $target_brand, true))
+                                        <input type="hidden" name="brand[]" value="{{ $brand->id }}">
+                                    @endif
                                 @endforeach
                             @endif
                         </div>
@@ -431,7 +433,7 @@
                                 <input type="hidden" name="message_id" value="{{$message->id}}"> --}}
                             </div>
                             <!-- 実際のデータ送信用 hidden inputs -->
-                            {{-- <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
+                            <input type="hidden" id="checkOrganization5" name="organization[org5][]" value="">
                             <input type="hidden" id="checkOrganization4" name="organization[org4][]" value="">
                             <input type="hidden" id="checkOrganization3" name="organization[org3][]" value="">
                             <input type="hidden" id="checkOrganization2" name="organization[org2][]" value="">
@@ -446,7 +448,7 @@
                             @else
                                 <input type="hidden" id="selectStore" name="select_organization[store]" value="">
                             @endif
-                            <input type="hidden" id="selectCsv" name="select_organization[csv]" value=""> --}}
+                            <input type="hidden" id="selectCsv" name="select_organization[csv]" value="">
                         @endif
                     </div>
 
