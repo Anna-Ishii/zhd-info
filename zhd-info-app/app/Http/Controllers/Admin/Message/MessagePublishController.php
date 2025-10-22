@@ -3520,4 +3520,44 @@ class MessagePublishController extends Controller
         // 正規表現で日付文字列から曜日を削除
         return preg_replace('/\(.+\)/', '', $dateString);
     }
+
+    /**
+     * 業務連絡を論理削除する
+     *
+     * @param int $message_id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy($message_id)
+    {
+        try {
+            $admin = session('admin');
+            $message = Message::find($message_id);
+
+            if (empty($message)) {
+                return redirect()
+                    ->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))])
+                    ->with('error', '指定された業務連絡が見つかりません');
+            }
+
+            // 論理削除を実行
+            $message->delete();
+
+            // 検索条件をセッションから取得してリダイレクト
+            $message_publish_url = session('message_publish_url');
+            if ($message_publish_url) {
+                return redirect()
+                    ->route('admin.message.publish.index', [$message_publish_url])
+                    ->with('success', '業務連絡を削除しました');
+            }
+
+            return redirect()
+                ->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))])
+                ->with('success', '業務連絡を削除しました');
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', '削除処理中にエラーが発生しました');
+        }
+    }
 }
