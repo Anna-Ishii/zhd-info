@@ -28,6 +28,21 @@
 
 @section('content')
     <main class="business-notice-create business-notice-create-instruction mb-0">
+        {{-- 登録状態（editing_flg が 0）の場合のみ --}}
+        @if ($message->editing_flg == 0)
+            <div class="delivery-status-wrap">
+                @if (true)
+                {{-- @if ($message->end_datetime < Carbon::now()) --}}
+                <p>～配信停止中～</p>
+                @endif
+                @if (true)
+                {{-- @if ($message->end_datetime < Carbon::now()) --}}
+                    <button class="c-btn__gray delivery-btn" type="button" id="stopBtn" onclick="confirmStop()">配信停止</button>
+                @else
+                    <button class="c-btn__blue delivery-btn" type="button" id="stopBtn" onclick="confirmStop()">配信再開</button>
+                @endif
+            </div>
+        @endif
         <div id="page-wrapper">
 
             <form class="form" id="form" method="post" action="{{ route('admin.message.publish.edit.update', $message->id) }}" enctype="multipart/form-data" class="form-horizontal">

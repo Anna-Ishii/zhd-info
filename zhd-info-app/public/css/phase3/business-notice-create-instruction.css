@@ -669,6 +669,35 @@ footer * {
   margin-bottom: 0 !important;
 }
 
-/* モーダル */
+/* 配信停止中の帯 */
+.delivery-status-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-bottom: 40px;
+}
+.delivery-status-wrap p {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+.delivery-btn {
+  position: absolute;
+  right: 20px;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 20px 48px;
+  cursor: pointer;
+  font-weight: normal;
+  font-size: 20px;
+}
+.delivery-btn.c-btn__gray {
+  background-color: #8E9199;
+}
+.delivery-btn.c-btn__blue {
+  background-color: #005bbb;
+}
 
 
