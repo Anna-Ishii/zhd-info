@@ -30,7 +30,6 @@
 
 <main class="read-status">
 
-    {{-- <!-- 絞り込み部分 --> --}}
     <div class="read-status__search">
         <form method="get" id="searchForm">
             <div class="filter-bar">
@@ -38,7 +37,6 @@
                 {{-- 業態 --}}
                 <x-admin.select-box name="brand" label="業態" :options="$organization1_list" :base64-value="true" />
 
-                <!-- DS,BL,ARでの絞り込み(存在しない場合は空欄になる) -->
                 @foreach (['DS', 'BL', 'AR'] as $organization)
                     <div class="field">
                         <div class="label">{{ $organization }}</div>
@@ -106,7 +104,6 @@
                             <input id="publishDateFrom" class="date-input calendar-input" name="publish-from-date" value="{{ request()->input('publish-from-date') }}" autocomplete="off" placeholder="yyyy/MM/dd" readonly>
                             <span class="calendar-icon"></span>
                             <div class="custom-calendar hidden">
-                                {{-- <!-- カレンダー描画される部分 --> --}}
                                 <div class="time-picker">
                                     <input type="time" class="time-input" value="00:00">
                                 </div>
@@ -117,7 +114,6 @@
                             <input id="publishDateTo" class="form-control" name="publish-to-date" value="{{ request()->input('publish-to-date') }}" autocomplete="off" placeholder="yyyy/MM/dd" readonly>
                             <span class="calendar-icon"></span>
                             <div class="custom-calendar hidden">
-                                {{-- <!-- カレンダー描画される部分 --> --}}
                                 <div class="time-picker">
                                     <input type="time" class="time-input" value="00:00">
                                 </div>
@@ -158,8 +154,6 @@
                         </div>
                     </div>
                 </div>
-
-                {{-- 検索条件保存ボタン --}}
                 <input type="button" class="save" value="検索条件を保存">
             </div>
         </form>
@@ -176,10 +170,8 @@
                         <th class="column3">AR</th>
                         <th class="column4">店舗</th>
                         <th class="column5">期間計</th>
-                        {{-- $messagesデータ --}}
-                        @foreach($messages as $key => $m){{-- ←改行を抑制 --}}
+                        @foreach($messages as $key => $m)
                             @php
-                                // column6〜column11をループで回す
                                 $columnNum = 6 + ($key % 6);
                             @endphp
                             <th class="column{{ $columnNum }}">

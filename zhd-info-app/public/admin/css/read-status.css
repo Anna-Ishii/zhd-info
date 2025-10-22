@@ -977,8 +977,8 @@ table tbody tr.ended {
 tbody tr.org-row td.column2,
 tbody tr.org-row td.column3,
 tbody tr.org-row td.column4 {
-  visibility: hidden; /* 中身を非表示 */
-  border: none; /* 枠線も消す */
+  visibility: hidden;
+  border: none;
   background: transparent;
 }
 
@@ -987,7 +987,7 @@ table tbody .column2,
 table tbody .column3,
 table tbody .column4 {
   position: sticky;
-  background: #fff; /* 背景指定しないと下が透ける */
+  background: #fff;
   z-index: 3;
 }
 table tbody .column1 { left: 0; }
