@@ -459,7 +459,7 @@
                                 なし
                             </label>
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="あり" id="instruction_yes" @disabled($message->editing_flg == 1)>
+                                <input type="radio" name="instruction" value="あり" id="instruction_yes" @disabled($message->editing_flg == 0)>
                                 <span class="radio-mark"></span>
                                 あり
                             </label>
