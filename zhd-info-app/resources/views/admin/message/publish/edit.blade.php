@@ -512,7 +512,7 @@
 
     <div class="footer" style="margin-left: 0;">
         <p><a href="/admin/message/publish?{{ session('message_publish_url') }}">一覧に戻る</a></p>
-        <button class="c-btn__grey" type="button" id="deleteBtn" onclick="confirmDelete()">削除</button>
+        <button class="c-btn__grey" type="button" id="deletePrepareBtn" onclick="confirmDelete()">削除</button>
         @if ($message->editing_flg)
             <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
         @endif
