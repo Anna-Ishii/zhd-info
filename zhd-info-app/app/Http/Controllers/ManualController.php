@@ -69,9 +69,24 @@ class ManualController extends Controller
         ]);
 
         $contents = $manual->content;
+
+        
+        // 新着マニュアルを取得する
+        $user = session('member');
+
+        $start_date_time = Carbon::now()->subDays(7)->startOfDay();
+
+        $latest_manuals = $user->manual()
+            ->whereBetween('start_datetime', [$start_date_time, now('Asia/Tokyo')])
+            ->where(fn($q) => $q->where('end_datetime', '>', now('Asia/Tokyo'))->orWhereNull('end_datetime'))
+            ->where('editing_flg', false)
+            ->latest('start_datetime')
+            ->get();
+
         return view('manual.detail', [
             'manual' => $manual,
             'contents' => $contents,
+            'latest_manuals' => $latest_manuals,
         ]);
     }
 
