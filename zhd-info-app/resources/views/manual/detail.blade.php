@@ -51,7 +51,7 @@
                         @if( in_array($manual->content_type, ['mp4', 'mov', 'MP4'], true ))
                             {{-- 動画 --}}
 
-                                <div class="main__thumb" style="position: relative;">
+                                <div class="main__thumb" style="position: relative; max-width: none;">
                                     <p class="text-content">{{ $manual->description }}</p>
                                     <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg')}}" style="filter: brightness(70%);" alt="">
                                     <img src="{{ asset('img/play_button.png') }}" alt="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
@@ -162,7 +162,7 @@
 
                             @if( in_array($content->content_type, ['mp4', 'mov', 'MP4'], true ))
                                 {{-- 動画 --}}
-                                <div class="main__thumb" style="position: relative;">
+                                <div class="main__thumb" style="position: relative; max-width: none;">
                                     <p class="text-content">{{ $manual->description }}</p>
                                     <img src="{{ ($manual->thumbnails_url) ? asset($manual->thumbnails_url) : asset('img/img_manual_dummy.jpg')}}" style="filter: brightness(70%);" alt="">
                                     <img src="{{ asset('img/play_button.png') }}" alt="" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
