@@ -504,6 +504,17 @@
                             @endif
                             </p>
                         @endif
+
+                        {{-- 登録状態（editing_flg が 0）の場合のhidden input --}}
+                        @if ($message->editing_flg == 0)
+                            <input type="hidden" name="instruction_flg" value="{{ $message->instruction_flg }}">
+                            @if ($message->instruction_id)
+                                <input type="hidden" name="instruction_id" value="{{ $message->instruction_id }}">
+                            @endif
+                            @if ($message->instruction_title)
+                                <input type="hidden" name="instruction_title" value="{{ $message->instruction_title }}">
+                            @endif
+                        @endif
                     </div>
 
                     <div class="content__wrap content-checkbox">
@@ -542,7 +553,7 @@
         <p><a href="/admin/message/publish?{{ session('message_publish_url') }}">一覧に戻る</a></p>
         <button class="c-btn__gray" type="button" id="deletePrepareBtn" onclick="confirmDelete()">削除</button>
         @if ($message->editing_flg)
-            <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
+            <button class="c-btn__white" type="button" id="saveBtn" onclick="submitSave()">保存</button>
         @endif
         <button class="c-btn__blue" type="button" id="duplicateBtn" onclick="confirmDuplicate()">複製</button>
         <button class="c-btn__blue" type="button" id="registerBtn" onclick="confirmRegister()">登録</button>
