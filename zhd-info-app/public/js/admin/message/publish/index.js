@@ -313,8 +313,8 @@ $(document).ready(function () {
         });
         params.append('publish-date[0]', document.querySelector('input[name="publish-date[0]"]').value);
         params.append('publish-date[1]', document.querySelector('input[name="publish-date[1]"]').value);
-        params.append('rate[0]', document.querySelector('input[name="rate[0]"]').value);
-        params.append('rate[1]', document.querySelector('input[name="rate[1]"]').value);
+        // params.append('rate[0]', document.querySelector('input[name="rate[0]"]').value);
+        // params.append('rate[1]', document.querySelector('input[name="rate[1]"]').value);
         params.append('q', document.querySelector('input[name="q"]').value);
 
         let fullUrl = `${baseUrl}?${params.toString()}`;
@@ -350,6 +350,8 @@ $(document).ready(function () {
                 }
             })
             .catch((error) => {
+                console.log(error.message);
+                
                 alert(error.message);
                 overlay.style.display = "none";
             });

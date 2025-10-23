@@ -1,5 +1,4 @@
-version: '3'
-services:
+ services:
   app:
     build: ./docker/php
     ports:
@@ -67,6 +66,6 @@ services:
       - type: bind
         source: ./docker/minio/data
         target: /export
-volumes:
+ volumes:
   mysql-volume:
     name: zhd-info-data
