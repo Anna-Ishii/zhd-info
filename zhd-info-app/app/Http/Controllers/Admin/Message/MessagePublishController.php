@@ -1973,6 +1973,26 @@ class MessagePublishController extends Controller
         return response()->json(['message' => '配信停止しました。']);
     }
 
+    public function restart(Request $request)
+    {
+        $data = $request->json()->all();
+        $message_id = $data['message_id'];
+        $message = Message::find($message_id)->first();
+
+        if (!$message) {
+            return response()->json(['message' => 'メッセージが見つかりません。'], 404);
+        }
+
+        $admin = session('admin');
+        Message::whereIn('id', [$message_id])->update([
+            'end_datetime' => null,
+            'updated_admin_id' => $admin->id,
+            'editing_flg' => false
+        ]);
+
+        return response()->json(['message' => '配信を再開しました。']);
+    }
+
     // 詳細画面のエクスポート
     public function export(Request $request, $message_id)
     {

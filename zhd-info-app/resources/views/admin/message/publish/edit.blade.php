@@ -31,15 +31,17 @@
         {{-- 登録状態（editing_flg が 0）の場合のみ --}}
         @if ($message->editing_flg == 0)
             <div class="delivery-status-wrap">
-                @if (true)
-                {{-- @if ($message->end_datetime < Carbon::now()) --}}
-                <p>～配信停止中～</p>
+                @php
+                    $now = \Carbon\Carbon::now();
+                    $isStopped = $message->end_datetime && \Carbon\Carbon::parse($message->end_datetime) < $now;
+                @endphp
+                @if ($isStopped)
+                    <p>～配信停止中～</p>
                 @endif
-                @if (true)
-                {{-- @if ($message->end_datetime < Carbon::now()) --}}
-                    <button class="c-btn__gray delivery-btn" type="button" id="stopBtn" onclick="confirmStop()">配信停止</button>
+                @if ($isStopped)
+                    <button class="c-btn__blue delivery-btn" type="button" id="stopBtn" onclick="confirmStop(true)">配信再開</button>
                 @else
-                    <button class="c-btn__blue delivery-btn" type="button" id="stopBtn" onclick="confirmStop()">配信再開</button>
+                    <button class="c-btn__gray delivery-btn" type="button" id="stopBtn" onclick="confirmStop(false)">配信停止</button>
                 @endif
             </div>
         @endif
@@ -541,6 +543,7 @@
     @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
     @include('common.admin.message-new-join-file-modal', [])
     @include('common.admin.delete-confirm-modal')
+    @include('common.admin.delivery-control-modal')
 @endsection
 
 {{-- ページ固有のJSファイルがここに入る --}}

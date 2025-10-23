@@ -526,6 +526,87 @@ window.confirmDelete = function() {
     }
 }
 
+// 配信停止・配信再開処理
+window.confirmStop = function(isRestart) {
+    // 適切なモーダルを表示
+    if (isRestart) {
+        const modal = document.getElementById('restartConfirmModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+    } else {
+        const modal = document.getElementById('stopConfirmModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+    }
+}
+
+// 配信停止・配信再開の実行処理
+function executeDeliveryControl(isRestart) {
+    const action = isRestart ? '配信再開' : '配信停止';
+    const executeBtn = document.getElementById(isRestart ? 'restartExecuteBtn' : 'stopExecuteBtn');
+
+    // ボタンを非活性化（連打防止）
+    if (executeBtn) {
+        executeBtn.disabled = true;
+        executeBtn.style.opacity = '0.6';
+        executeBtn.style.cursor = 'not-allowed';
+    }
+
+    // 現在のURLからmessage_idを取得
+    const currentPath = window.location.pathname;
+    const messageId = currentPath.split('/').pop();
+
+    const endpoint = isRestart ? '/admin/message/publish/restart' : '/admin/message/publish/stop';
+
+    // 処理を実行
+    $.ajax({
+        url: endpoint,
+        type: 'POST',
+        data: JSON.stringify({
+            message_id: [messageId]
+        }),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById(isRestart ? 'restartConfirmModal' : 'stopConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+
+            // 成功時はページをリロード
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error(action + ' failed:', error);
+            console.error('Response:', xhr.responseText);
+            const errorMessage = xhr.responseJSON?.message || action + 'に失敗しました。';
+            alert(errorMessage);
+
+            // エラー時はボタンを再度有効化
+            if (executeBtn) {
+                executeBtn.disabled = false;
+                executeBtn.style.opacity = '1';
+                executeBtn.style.cursor = 'pointer';
+            }
+
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById(isRestart ? 'restartConfirmModal' : 'stopConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+        }
+    });
+}
+
 $(document).ready(function() {
 
     // 削除実行ボタンのクリックイベント
@@ -573,6 +654,50 @@ $(document).ready(function() {
 
     // モーダル背景をクリックしたら閉じる
     $('#deleteConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 配信停止実行ボタンのクリックイベント
+    $('#stopExecuteBtn').on('click', function() {
+        executeDeliveryControl(false);
+    });
+
+    // 配信停止の戻るボタンでモーダルを閉じる
+    $('#stopBackBtn').on('click', function() {
+        const modal = document.getElementById('stopConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 配信停止モーダル背景をクリックしたら閉じる
+    $('#stopConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 配信再開実行ボタンのクリックイベント
+    $('#restartExecuteBtn').on('click', function() {
+        executeDeliveryControl(true);
+    });
+
+    // 配信再開の戻るボタンでモーダルを閉じる
+    $('#restartBackBtn').on('click', function() {
+        const modal = document.getElementById('restartConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 配信再開モーダル背景をクリックしたら閉じる
+    $('#restartConfirmModal').on('click', function(e) {
         if (e.target === this) {
             $(this).css('display', 'none');
             $(this).removeClass('show');
