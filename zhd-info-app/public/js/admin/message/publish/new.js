@@ -337,12 +337,12 @@ function addJoinFileBtn() {
     if (fileInputs.length === 0) {
         return;
     }
-    
+
     fileInputs.append(`
-        <div class="col-lg-6 file-join__wrap">
-            <label class="inputFile" style="float: right; display: flex; align-items: center; justify-content: space-between;">
-                <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
-                <input type="button" class="btn btn-admin joinFile" id="joinFileId" value="ファイルの結合">
+        <div class="file-join__wrap">
+            <label class="inputFile" style="display: flex; align-items: center; gap: 10px;">
+                <p style="margin: 0; display: none;">0ファイルを結合中です。</p>
+                <input type="button" class="joinFile" id="joinFileId" value="ファイルの結合">
             </label>
         </div>
     `);
