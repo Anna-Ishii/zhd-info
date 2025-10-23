@@ -351,4 +351,13 @@ class Manual extends Model
         Carbon::setLocale('ja');
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
     }
+
+    /**
+     * マニュアルが持つ形式（OM／動画など）
+     */
+    public function manual_types()
+    {
+        return $this->belongsToMany(ManualType::class);
+    }
+
 }

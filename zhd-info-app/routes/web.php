@@ -72,7 +72,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::post('save-session-conditions', [MessagePublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('save-search-conditions', [MessagePublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
-            Route::get('update-view-rates', [MessagePublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
             Route::post('messageNewData/{organization1_id}', [MessagePublishController::class, 'messageNewData'])->name('messageNewData');
