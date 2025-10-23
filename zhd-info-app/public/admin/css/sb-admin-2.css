@@ -96,6 +96,17 @@
     text-align: left;
 }
 
+#page-wrapper .custom-dropdown-personal {
+    flex-grow: 1;
+    text-align: left;
+    display: inline-block;
+    max-width: 85px;        /* ここで幅を制御（親ボタン幅に応じて調整可） */
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis; /* 超過分を「…」に省略 */
+    vertical-align: middle;
+}
+
 #page-wrapper .form-check-label {
     font-size: 12px;
     font-weight: normal;
