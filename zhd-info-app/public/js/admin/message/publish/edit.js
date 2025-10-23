@@ -1,3 +1,5 @@
+
+
 $(document).ready(function(){
     $('#form').submit(function(event) {
         event.preventDefault();
@@ -5,13 +7,37 @@ $(document).ready(function(){
         $('input[type="file"]').prop('disabled', true);
 
         // 掲載期間の入力フィールドの disabled を解除（値が送信されるようにする）
-        $('input[name="start_datetime"], input[name="end_datetime"]').prop('disabled', false);
+        $('input[name="start_datetime"]').prop('disabled', false);
+        $('input[name="end_datetime"]').prop('disabled', false);
+        
+        // 「未定」チェックボックスがチェックされている場合は、値を'null'文字列にする
+        var startDatetimeCheckbox = $('.dateDisabled[data-target="dateFrom"]');
+        var endDatetimeCheckbox = $('.dateDisabled[data-target="dateTo"]');
+        var startDatetimeInput = $('input[name="start_datetime"]');
+        var endDatetimeInput = $('input[name="end_datetime"]');
+        
+        if (startDatetimeCheckbox.is(':checked')) {
+            startDatetimeInput.val('null');
+            console.log('開始日時: 未定チェックあり → null設定');
+        } else {
+            console.log('開始日時:', startDatetimeInput.val());
+        }
+        
+        if (endDatetimeCheckbox.is(':checked')) {
+            endDatetimeInput.val('null');
+            console.log('終了日時: 未定チェックあり → null設定');
+        } else {
+            console.log('終了日時:', endDatetimeInput.val());
+        }
 
         if(!emptyTagInputForm()) {
             appendFormTagInput()
         }
 
-        $('#form').off('submit').submit();
+        console.log('=== フォーム送信実行 ===');
+
+        // フォーム送信を直接実行（イベントハンドラーを削除してから送信）
+        this.submit();
     });
 });
 
@@ -20,15 +46,19 @@ function emptyTagLabelForm() {
 }
 
 function emptyTagInputForm() {
-    return $('.tag-form-input')[0].innerText == '';
+    const tagInputElement = $('.tag-form-input')[0];
+    return !tagInputElement || tagInputElement.innerText == '';
 }
 
 function appendFormTagInput() {
-    $('<input>').attr({
-        type: 'hidden',
-        name: 'tag_name[]',
-        value: $('.tag-form-input')[0].innerText
-    }).appendTo($('#form'));
+    const tagInputElement = $('.tag-form-input')[0];
+    if (tagInputElement && tagInputElement.innerText) {
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'tag_name[]',
+            value: tagInputElement.innerText
+        }).appendTo($('#form'));
+    }
 }
 
 
@@ -834,8 +864,40 @@ $(document).ready(function() {
         // フォームを送信
         const form = document.getElementById('form');
         if (form) {
+            // 既存のregister inputがあれば削除
+            const existingRegisterInput = form.querySelector('input[name="register"]');
+            if (existingRegisterInput) {
+                existingRegisterInput.remove();
+            }
+
+            // register inputを追加
+            const registerInput = document.createElement('input');
+            registerInput.type = 'hidden';
+            registerInput.name = 'register';
+            registerInput.value = '1';
+            form.appendChild(registerInput);
+
+            // instruction の値を instruction_flg に変換
+            const instructionRadio = form.querySelector('input[name="instruction"]:checked');
+            if (instructionRadio) {
+                // 既存のinstruction_flg inputがあれば削除
+                const existingInstructionFlgInput = form.querySelector('input[name="instruction_flg"]');
+                if (existingInstructionFlgInput) {
+                    existingInstructionFlgInput.remove();
+                }
+
+                // instruction_flg inputを追加
+                const instructionFlgInput = document.createElement('input');
+                instructionFlgInput.type = 'hidden';
+                instructionFlgInput.name = 'instruction_flg';
+                instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
+                form.appendChild(instructionFlgInput);
+            }
+
             // onbeforeunloadイベントを無効化
             window.onbeforeunload = null;
+
+            // フォームを送信
             form.submit();
         }
     });
@@ -859,3 +921,50 @@ $(document).ready(function() {
         }
     });
 });
+
+// 保存ボタンの処理（グローバルスコープ）
+window.submitSave = function() {
+    const form = document.getElementById('form');
+    if (!form) {
+        console.error('フォームが見つかりません');
+        return;
+    }
+
+    // POSTメソッドを確実に設定
+    form.method = 'POST';
+
+    // 保存フラグを追加（既存のものがあれば削除してから追加）
+    const existingSaveInput = form.querySelector('input[name="save"]');
+    if (existingSaveInput) {
+        existingSaveInput.remove();
+    }
+
+    const saveInput = document.createElement('input');
+    saveInput.type = 'hidden';
+    saveInput.name = 'save';
+    saveInput.value = '1';
+    form.appendChild(saveInput);
+
+    // instruction の値を instruction_flg に変換
+    const instructionRadio = form.querySelector('input[name="instruction"]:checked');
+    if (instructionRadio) {
+        // 既存のinstruction_flg inputがあれば削除
+        const existingInstructionFlgInput = form.querySelector('input[name="instruction_flg"]');
+        if (existingInstructionFlgInput) {
+            existingInstructionFlgInput.remove();
+        }
+
+        // instruction_flg inputを追加
+        const instructionFlgInput = document.createElement('input');
+        instructionFlgInput.type = 'hidden';
+        instructionFlgInput.name = 'instruction_flg';
+        instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
+        form.appendChild(instructionFlgInput);
+    }
+
+    // window.onbeforeunloadをクリア
+    window.onbeforeunload = null;
+
+    // フォーム送信
+    form.submit();
+}
