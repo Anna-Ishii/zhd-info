@@ -29,7 +29,6 @@
 @section('content')
     <main class="business-notice-create business-notice-create-instruction mb-0">
         <div id="page-wrapper">
-            @include('common.admin.page-head', ['title' => '業務連絡新規登録'])
 
             <form class="form" id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
                 @csrf
@@ -264,12 +263,12 @@
                         <p class="content required">指示作成</p>
                         <div class="input-group custom-radio-wrap">
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="なし" id="instruction_none">
+                                <input type="radio" name="instruction_flg" value="0" id="instruction_none">
                                 <span class="radio-mark"></span>
                                 なし
                             </label>
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="あり" id="instruction_yes" checked>
+                                <input type="radio" name="instruction_flg" value="1" id="instruction_yes">
                                 <span class="radio-mark"></span>
                                 あり
                             </label>

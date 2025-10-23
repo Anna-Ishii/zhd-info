@@ -796,7 +796,7 @@ class MessagePublishController extends Controller
         $is_broadcast_notification = $msg_params['is_broadcast_notification'];
         
         // 指示関連のカラムを追加
-        $msg_params['instruction_flg'] = isset($request->instruction_flg) && $request->instruction_flg == 'on' ? 1 : 0;
+        $msg_params['instruction_flg'] = isset($request->instruction_flg) ? (int)$request->instruction_flg : 0;
         $msg_params['instruction_id'] = $request->instruction_id ?? null;
         $msg_params['instruction_title'] = $request->instruction_title ?? null;
 
@@ -1493,9 +1493,9 @@ class MessagePublishController extends Controller
         $msg_params['editing_flg'] = isset($request->save) ? true : false;
         $msg_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
         $is_broadcast_notification = $msg_params['is_broadcast_notification'];
-        
+
         // 指示関連のカラムを追加
-        $msg_params['instruction_flg'] = isset($request->instruction_flg) && $request->instruction_flg == 'on' ? 1 : 0;
+        $msg_params['instruction_flg'] = isset($request->instruction_flg) ? (int)$request->instruction_flg : 0;
         $msg_params['instruction_id'] = $request->instruction_id ?? null;
         $msg_params['instruction_title'] = $request->instruction_title ?? null;
 
@@ -2928,7 +2928,8 @@ class MessagePublishController extends Controller
                     'shops.organization5_id',
                     'shops.organization4_id',
                     'shops.organization3_id',
-                    'shops.organization2_id'
+                    'shops.organization2_id',
+                    'shops.brand_id'
                 )
                 ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
                 ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
@@ -2949,22 +2950,11 @@ class MessagePublishController extends Controller
                 return $org;
             }, $organization_list);
 
-            // shop_code でソート済みの $all_shops をそのまま利用
-            $all_shop_list = array_map(fn($shop) => [
-                'shop_id' => $shop['id'],
-                'shop_code' => $shop['shop_code'],
-                'display_name' => $shop['display_name'],
-            ], $all_shops);
-
-            // 店舗コードでshopsをソート
-            usort($all_shop_list, fn($a, $b) => strcmp($a['shop_code'], $b['shop_code']));
-
             return response()
                 ->view('common.admin.message-csv-store-modal', [
                     'storesJson' => $storesJson,
                     'brand_list' => $brand_list,
                     'organization_list' => $organization_list,
-                    'all_shop_list' => $all_shop_list,
                     'csvStoreIds' => $csvStoreIds,
                 ], 200)
                 ->header('Content-Type', 'text/plain');
