@@ -51,7 +51,6 @@ class ManualPublishController extends Controller
 {
 
     const PAGINATE_COUNT = 50;
-    const MEMORY_LIMIT = '1024M';
 
     public function index(Request $request)
     {
@@ -136,7 +135,7 @@ class ManualPublishController extends Controller
             ])
             ->where('manuals.organization1_id', $organization1_id)
             ->when($manual_type_id, function ($query) use ($manual_type_id) {
-                $query->whereHas('manual_types', function ($q) use ($manual_type_id) {
+                $query->whereHas('manualTypes', function ($q) use ($manual_type_id) {
                     $q->where('manual_types.id', $manual_type_id);
                 });
             })

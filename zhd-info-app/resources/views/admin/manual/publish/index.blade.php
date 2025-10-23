@@ -8,7 +8,7 @@
 @push('styles')
 <link href="{{ asset('/admin/css/show.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 {{-- ページごとのCSSがここに入る --}}
-<link href="{{ asset('/admin/css/manual-list.css') }}?t={{ time() }}" rel="stylesheet">
+<link href="{{ asset('/admin/css/manual-list.css') }}?date={{ date('Ymd') }}" rel="stylesheet">
 @endpush
 
 @section('page_header')
@@ -181,14 +181,13 @@
                 <div class="field">
                     <button type="button" class="save saveSearchBtn">検索条件を保存</button>
                 </div>
-            </div>
                 <p class="annotation">※「インポート」「エクスポート「新規登録」は検索時に設定した業態で行われます。</p>
                 <button type="submit" style="display: none;"></button>
             </form>
         </div>
 
         <div class="manual-list__main">
-        <form method="post" action="#">
+            <form method="post" action="#">
             <p class="total__dsp">全{{ $manual_list->total() }}件</p>
                 <table id="list">
                     <thead>
@@ -267,13 +266,10 @@
                         @endforeach
                     </tbody>
                 </table>
-            <div class="pagenation-bottom">
-                @include('common.admin.pagenation', ['objects' => $manual_list])
-            </div>
-        </form>
+            </form>
         </div>
-
-    </div>
+        @include('common.admin.pagenation', ['objects' => $manual_list])
+    </main>
     @include('common.admin.manual-import-modal', ['organization1' => $organization1])
     @include('common.admin.manual-export-modal', ['organization1' => $organization1])
     @include('common.admin.confirm-modal')
