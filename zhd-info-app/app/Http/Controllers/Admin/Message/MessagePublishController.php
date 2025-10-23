@@ -1141,7 +1141,8 @@ class MessagePublishController extends Controller
                 'shops.organization5_id',
                 'shops.organization4_id',
                 'shops.organization3_id',
-                'shops.organization2_id'
+                'shops.organization2_id',
+                'shops.brand_id'
             )
             ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
             ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
@@ -1971,6 +1972,130 @@ class MessagePublishController extends Controller
         ]);
 
         return response()->json(['message' => '配信停止しました。']);
+    }
+
+    public function restart(Request $request)
+    {
+        $data = $request->json()->all();
+        $message_id = $data['message_id'];
+        $message = Message::find($message_id)->first();
+
+        if (!$message) {
+            return response()->json(['message' => 'メッセージが見つかりません。'], 404);
+        }
+
+        $admin = session('admin');
+        Message::whereIn('id', [$message_id])->update([
+            'end_datetime' => null,
+            'updated_admin_id' => $admin->id,
+            'editing_flg' => false
+        ]);
+
+        return response()->json(['message' => '配信を再開しました。']);
+    }
+
+    public function duplicate(Request $request, $message_id)
+    {
+        $data = $request->json()->all();
+        $delete_original = $data['delete_original'] ?? false;
+
+        $admin = session('admin');
+
+        try {
+            DB::beginTransaction();
+
+            // 元のメッセージを取得
+            $original_message = Message::find($message_id);
+            if (!$original_message) {
+                DB::rollBack();
+                return response()->json(['message' => 'メッセージが見つかりません。'], 404);
+            }
+
+            // 新しいメッセージを作成（複製）
+            $new_message = $original_message->replicate();
+            $new_message->create_admin_id = $admin->id; // 正しいカラム名に修正
+            $new_message->updated_admin_id = $admin->id;
+            $new_message->editing_flg = true; // 保存状態にする
+            $new_message->created_at = now();
+            $new_message->updated_at = now();
+            $new_message->deleted_at = null; // 論理削除フラグをクリア
+            $new_message->save();
+
+            // 関連データを複製
+            // 1. メッセージコンテンツ
+            $message_contents = MessageContent::where('message_id', $message_id)->get();
+            foreach ($message_contents as $content) {
+                $new_content = $content->replicate();
+                $new_content->message_id = $new_message->id;
+                $new_content->created_at = now();
+                $new_content->updated_at = now();
+                // deleted_at カラムが存在しない場合は設定しない
+                if (isset($new_content->deleted_at)) {
+                    $new_content->deleted_at = null;
+                }
+                $new_content->save();
+            }
+
+            // 2. メッセージ組織
+            $message_organizations = MessageOrganization::where('message_id', $message_id)->get();
+            foreach ($message_organizations as $org) {
+                $new_org = $org->replicate();
+                $new_org->message_id = $new_message->id;
+                $new_org->created_at = now();
+                $new_org->updated_at = now();
+                $new_org->save();
+            }
+
+            // 3. メッセージショップ
+            $message_shops = MessageShop::where('message_id', $message_id)->get();
+            foreach ($message_shops as $shop) {
+                $new_shop = $shop->replicate();
+                $new_shop->message_id = $new_message->id;
+                $new_shop->created_at = now();
+                $new_shop->updated_at = now();
+                $new_shop->save();
+            }
+
+            // 4. ブランド関連
+            $brands = $original_message->brand()->pluck('brands.id')->toArray();
+            if (!empty($brands)) {
+                $new_message->brand()->sync($brands);
+            }
+
+            // 5. ロール関連
+            $rolls = $original_message->roll()->pluck('rolls.id')->toArray();
+            if (!empty($rolls)) {
+                $new_message->roll()->sync($rolls);
+            }
+
+            // 6. タグ関連
+            $tags = $original_message->tag()->pluck('message_tag_master.id')->toArray();
+            if (!empty($tags)) {
+                $new_message->tag()->sync($tags);
+            }
+
+            // 元データを削除する場合
+            if ($delete_original) {
+                $original_message->deleted_at = now();
+                $original_message->save();
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'message' => '複製が完了しました。',
+                'new_message_id' => $new_message->id
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Message duplication failed: ' . $e->getMessage());
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            return response()->json([
+                'message' => '複製に失敗しました。',
+                'error' => $e->getMessage()
+            ], 500);
+        }
     }
 
     // 詳細画面のエクスポート
@@ -3493,5 +3618,45 @@ class MessagePublishController extends Controller
     {
         // 正規表現で日付文字列から曜日を削除
         return preg_replace('/\(.+\)/', '', $dateString);
+    }
+
+    /**
+     * 業務連絡を論理削除する
+     *
+     * @param int $message_id
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function destroy($message_id)
+    {
+        try {
+            $admin = session('admin');
+            $message = Message::find($message_id);
+
+            if (empty($message)) {
+                return redirect()
+                    ->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))])
+                    ->with('error', '指定された業務連絡が見つかりません');
+            }
+
+            // 論理削除を実行
+            $message->delete();
+
+            // 検索条件をセッションから取得してリダイレクト
+            $message_publish_url = session('message_publish_url');
+            if ($message_publish_url) {
+                return redirect()
+                    ->route('admin.message.publish.index', [$message_publish_url])
+                    ->with('success', '業務連絡を削除しました');
+            }
+
+            return redirect()
+                ->route('admin.message.publish.index', ['brand' => base64_encode(session('brand_id'))])
+                ->with('success', '業務連絡を削除しました');
+        } catch (\Throwable $th) {
+            Log::error($th->getMessage());
+            return redirect()
+                ->back()
+                ->with('error', '削除処理中にエラーが発生しました');
+        }
     }
 }

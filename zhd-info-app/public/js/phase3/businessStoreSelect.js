@@ -13,7 +13,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // モーダル開閉（イベント委譲を使用）
     document.addEventListener('click', (e) => {
-        if (e.target.matches('.store-modal-btn')) {
+        // クリックされた要素またはその親要素にstore-modal-btnクラスがあるかチェック
+        const storeModalBtn = e.target.closest('.store-modal-btn');
+        if (storeModalBtn) {
             modal.style.display = 'flex';
 
             // カスタムイベントを発火(new_store.jsから呼び出される)

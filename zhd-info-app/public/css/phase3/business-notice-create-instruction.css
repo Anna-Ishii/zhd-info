@@ -103,6 +103,17 @@
   border-radius: 100px;
   padding: 16px 0px;
 }
+.c-btn__gray {
+  width: 200px;
+  font-size: 1.8rem;
+  line-height: 22px;
+  font-weight: bold;
+  background: #fff;
+  color: #8E9199;
+  border: 1px solid #8E9199;
+  border-radius: 100px;
+  padding: 16px 0px;
+}
 .disabled-btn {
   opacity: 0.32;
   pointer-events: none;
@@ -1152,6 +1163,50 @@ main.business-notice-create-instruction .footer a {
   color: #0051A3;
   font-size: 1.8rem;
   font-weight: bold;
+}
+
+main *, 
+footer * {
+  margin-bottom: 0 !important;
+}
+
+/* 配信停止中の帯 */
+.delivery-status-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding-bottom: 40px;
+}
+.delivery-status-wrap p {
+  text-align: center;
+  font-weight: bold;
+  font-size: 20px;
+}
+.delivery-status-wrap .delivery-btn {
+  position: absolute;
+  right: 0;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 16px 48px;
+  cursor: pointer;
+  font-weight: normal;
+  font-size: 20px;
+}
+.delivery-btn.c-btn__gray {
+  color: #fff;
+  background-color: #8E9199;
+}
+.delivery-btn.c-btn__blue {
+  background-color: #005bbb;
+}
+
+/* 指示作成のリンクテキスト */
+.instruction-link-text a {
+  color: #0051A3;
+  text-decoration: underline;
+  text-decoration-color: #0051A3;
 }
 
 /* フッターがmainの外にある場合のスタイル */

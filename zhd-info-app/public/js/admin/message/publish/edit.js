@@ -1,14 +1,43 @@
+
+
 $(document).ready(function(){
     $('#form').submit(function(event) {
         event.preventDefault();
         // ファイルは送信しない
         $('input[type="file"]').prop('disabled', true);
 
+        // 掲載期間の入力フィールドの disabled を解除（値が送信されるようにする）
+        $('input[name="start_datetime"]').prop('disabled', false);
+        $('input[name="end_datetime"]').prop('disabled', false);
+        
+        // 「未定」チェックボックスがチェックされている場合は、値を'null'文字列にする
+        var startDatetimeCheckbox = $('.dateDisabled[data-target="dateFrom"]');
+        var endDatetimeCheckbox = $('.dateDisabled[data-target="dateTo"]');
+        var startDatetimeInput = $('input[name="start_datetime"]');
+        var endDatetimeInput = $('input[name="end_datetime"]');
+        
+        if (startDatetimeCheckbox.is(':checked')) {
+            startDatetimeInput.val('null');
+            console.log('開始日時: 未定チェックあり → null設定');
+        } else {
+            console.log('開始日時:', startDatetimeInput.val());
+        }
+        
+        if (endDatetimeCheckbox.is(':checked')) {
+            endDatetimeInput.val('null');
+            console.log('終了日時: 未定チェックあり → null設定');
+        } else {
+            console.log('終了日時:', endDatetimeInput.val());
+        }
+
         if(!emptyTagInputForm()) {
             appendFormTagInput()
         }
 
-        $('#form').off('submit').submit();
+        console.log('=== フォーム送信実行 ===');
+
+        // フォーム送信を直接実行（イベントハンドラーを削除してから送信）
+        this.submit();
     });
 });
 
@@ -17,15 +46,19 @@ function emptyTagLabelForm() {
 }
 
 function emptyTagInputForm() {
-    return $('.tag-form-input')[0].innerText == '';
+    const tagInputElement = $('.tag-form-input')[0];
+    return !tagInputElement || tagInputElement.innerText == '';
 }
 
 function appendFormTagInput() {
-    $('<input>').attr({
-        type: 'hidden',
-        name: 'tag_name[]',
-        value: $('.tag-form-input')[0].innerText
-    }).appendTo($('#form'));
+    const tagInputElement = $('.tag-form-input')[0];
+    if (tagInputElement && tagInputElement.innerText) {
+        $('<input>').attr({
+            type: 'hidden',
+            name: 'tag_name[]',
+            value: tagInputElement.innerText
+        }).appendTo($('#form'));
+    }
 }
 
 
@@ -510,4 +543,428 @@ function updateJoinFileLabel() {
     if (hasJoinFlag) {
         $(".inputFile #joinFileId").val("結合の修正");
     }
+}
+
+// 削除確認モーダル制御
+window.confirmDelete = function() {
+    const modal = document.getElementById('deleteConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
+// 複製確認モーダル制御
+window.confirmDuplicate = function() {
+    const modal = document.getElementById('duplicateConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
+// 登録確認モーダル制御
+window.confirmRegister = function() {
+    const modal = document.getElementById('registerConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
+// 複製処理
+function executeDuplicate(deleteOriginal) {
+    const executeBtn = deleteOriginal ? document.getElementById('duplicateWithDeleteBtn') : document.getElementById('duplicateWithoutDeleteBtn');
+
+    // ボタンを非活性化（連打防止）
+    if (executeBtn) {
+        executeBtn.disabled = true;
+        executeBtn.style.opacity = '0.6';
+        executeBtn.style.cursor = 'not-allowed';
+    }
+
+    // 現在のURLからmessage_idを取得
+    const currentPath = window.location.pathname;
+    const messageId = currentPath.split('/').pop();
+
+    // 処理を実行
+    $.ajax({
+        url: '/admin/message/publish/duplicate/' + messageId,
+        type: 'POST',
+        data: JSON.stringify({
+            delete_original: deleteOriginal
+        }),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById('duplicateConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+
+            // 複製されたメッセージの編集ページに遷移
+            window.location.href = '/admin/message/publish/edit/' + response.new_message_id;
+        },
+        error: function(xhr, status, error) {
+            console.error('Duplicate failed:', error);
+            console.error('Response:', xhr.responseText);
+            console.error('Status:', xhr.status);
+
+            let errorMessage = '複製に失敗しました。';
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.error) {
+                    errorMessage += '\n詳細: ' + xhr.responseJSON.error;
+                } else if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+            }
+            alert(errorMessage);
+
+            // エラー時はボタンを再度有効化
+            if (executeBtn) {
+                executeBtn.disabled = false;
+                executeBtn.style.opacity = '1';
+                executeBtn.style.cursor = 'pointer';
+            }
+
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById('duplicateConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+        }
+    });
+}
+
+// 配信停止・配信再開処理
+window.confirmStop = function(isRestart) {
+    // 適切なモーダルを表示
+    if (isRestart) {
+        const modal = document.getElementById('restartConfirmModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+    } else {
+        const modal = document.getElementById('stopConfirmModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            modal.classList.add('show');
+        }
+    }
+}
+
+// 配信停止・配信再開の実行処理
+function executeDeliveryControl(isRestart) {
+    const action = isRestart ? '配信再開' : '配信停止';
+    const executeBtn = document.getElementById(isRestart ? 'restartExecuteBtn' : 'stopExecuteBtn');
+
+    // ボタンを非活性化（連打防止）
+    if (executeBtn) {
+        executeBtn.disabled = true;
+        executeBtn.style.opacity = '0.6';
+        executeBtn.style.cursor = 'not-allowed';
+    }
+
+    // 現在のURLからmessage_idを取得
+    const currentPath = window.location.pathname;
+    const messageId = currentPath.split('/').pop();
+
+    const endpoint = isRestart ? '/admin/message/publish/restart' : '/admin/message/publish/stop';
+
+    // 処理を実行
+    $.ajax({
+        url: endpoint,
+        type: 'POST',
+        data: JSON.stringify({
+            message_id: [messageId]
+        }),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById(isRestart ? 'restartConfirmModal' : 'stopConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+
+            // 成功時はページをリロード
+            window.location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error(action + ' failed:', error);
+            console.error('Response:', xhr.responseText);
+            const errorMessage = xhr.responseJSON?.message || action + 'に失敗しました。';
+            alert(errorMessage);
+
+            // エラー時はボタンを再度有効化
+            if (executeBtn) {
+                executeBtn.disabled = false;
+                executeBtn.style.opacity = '1';
+                executeBtn.style.cursor = 'pointer';
+            }
+
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById(isRestart ? 'restartConfirmModal' : 'stopConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+        }
+    });
+}
+
+$(document).ready(function() {
+
+    // 削除実行ボタンのクリックイベント
+    $('#deleteExecuteBtn').on('click', function() {
+
+        // 現在のURLからmessage_idを取得
+        const currentPath = window.location.pathname;
+        const messageId = currentPath.split('/').pop();
+
+        // 削除処理を実行
+        $.ajax({
+            url: '/admin/message/publish/delete/' + messageId,
+            type: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                // モーダルを閉じる
+                const modal = document.getElementById('deleteConfirmModal');
+                if (modal) {
+                    modal.style.display = 'none';
+                    modal.classList.remove('show');
+                }
+                // 成功時のリダイレクト（少し遅延を入れる）
+                setTimeout(function() {
+                    window.location.href = '/admin/message/publish';
+                }, 100);
+            },
+            error: function(xhr, status, error) {
+                console.error('Delete failed:', error);
+                console.error('Response:', xhr.responseText);
+                alert('削除に失敗しました。');
+            }
+        });
+    });
+
+    // 戻るボタンでモーダルを閉じる
+    $('#deleteBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = document.getElementById('deleteConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // モーダル背景をクリックしたら閉じる
+    $('#deleteConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 配信停止実行ボタンのクリックイベント
+    $('#stopExecuteBtn').on('click', function() {
+        executeDeliveryControl(false);
+    });
+
+    // 配信停止の戻るボタンでモーダルを閉じる
+    $('#stopBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = document.getElementById('stopConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 配信停止モーダル背景をクリックしたら閉じる
+    $('#stopConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 配信再開実行ボタンのクリックイベント
+    $('#restartExecuteBtn').on('click', function() {
+        executeDeliveryControl(true);
+    });
+
+    // 配信再開の戻るボタンでモーダルを閉じる
+    $('#restartBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = document.getElementById('restartConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 配信再開モーダル背景をクリックしたら閉じる
+    $('#restartConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 削除して複製ボタンのクリックイベント
+    $('#duplicateWithDeleteBtn').on('click', function() {
+        executeDuplicate(true);
+    });
+
+    // 削除しないで複製ボタンのクリックイベント
+    $('#duplicateWithoutDeleteBtn').on('click', function() {
+        executeDuplicate(false);
+    });
+
+    // 複製モーダル背景をクリックしたら閉じる
+    $('#duplicateConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 登録実行ボタンのクリックイベント
+    $('#registerExecuteBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 確認モーダルを閉じる
+        const confirmModal = document.getElementById('registerConfirmModal');
+        if (confirmModal) {
+            confirmModal.style.display = 'none';
+            confirmModal.classList.remove('show');
+        }
+
+        // フォームを送信
+        const form = document.getElementById('form');
+        if (form) {
+            // 既存のregister inputがあれば削除
+            const existingRegisterInput = form.querySelector('input[name="register"]');
+            if (existingRegisterInput) {
+                existingRegisterInput.remove();
+            }
+
+            // register inputを追加
+            const registerInput = document.createElement('input');
+            registerInput.type = 'hidden';
+            registerInput.name = 'register';
+            registerInput.value = '1';
+            form.appendChild(registerInput);
+
+            // instruction の値を instruction_flg に変換
+            const instructionRadio = form.querySelector('input[name="instruction"]:checked');
+            if (instructionRadio) {
+                // 既存のinstruction_flg inputがあれば削除
+                const existingInstructionFlgInput = form.querySelector('input[name="instruction_flg"]');
+                if (existingInstructionFlgInput) {
+                    existingInstructionFlgInput.remove();
+                }
+
+                // instruction_flg inputを追加
+                const instructionFlgInput = document.createElement('input');
+                instructionFlgInput.type = 'hidden';
+                instructionFlgInput.name = 'instruction_flg';
+                instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
+                form.appendChild(instructionFlgInput);
+            }
+
+            // onbeforeunloadイベントを無効化
+            window.onbeforeunload = null;
+
+            // フォームを送信
+            form.submit();
+        }
+    });
+
+    // 登録の戻るボタンでモーダルを閉じる
+    $('#registerBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = document.getElementById('registerConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 登録モーダル背景をクリックしたら閉じる
+    $('#registerConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+});
+
+// 保存ボタンの処理（グローバルスコープ）
+window.submitSave = function() {
+    const form = document.getElementById('form');
+    if (!form) {
+        console.error('フォームが見つかりません');
+        return;
+    }
+
+    // POSTメソッドを確実に設定
+    form.method = 'POST';
+
+    // 保存フラグを追加（既存のものがあれば削除してから追加）
+    const existingSaveInput = form.querySelector('input[name="save"]');
+    if (existingSaveInput) {
+        existingSaveInput.remove();
+    }
+
+    const saveInput = document.createElement('input');
+    saveInput.type = 'hidden';
+    saveInput.name = 'save';
+    saveInput.value = '1';
+    form.appendChild(saveInput);
+
+    // instruction の値を instruction_flg に変換
+    const instructionRadio = form.querySelector('input[name="instruction"]:checked');
+    if (instructionRadio) {
+        // 既存のinstruction_flg inputがあれば削除
+        const existingInstructionFlgInput = form.querySelector('input[name="instruction_flg"]');
+        if (existingInstructionFlgInput) {
+            existingInstructionFlgInput.remove();
+        }
+
+        // instruction_flg inputを追加
+        const instructionFlgInput = document.createElement('input');
+        instructionFlgInput.type = 'hidden';
+        instructionFlgInput.name = 'instruction_flg';
+        instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
+        form.appendChild(instructionFlgInput);
+    }
+
+    // window.onbeforeunloadをクリア
+    window.onbeforeunload = null;
+
+    // フォーム送信
+    form.submit();
 }

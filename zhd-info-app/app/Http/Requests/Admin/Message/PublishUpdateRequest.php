@@ -25,8 +25,8 @@ class PublishUpdateRequest extends FormRequest
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
-            'target_roll' => 'required',
-            'brand' => 'required',
+            'target_roll' => 'nullable|array',
+            'brand' => 'required|array',
             'organization_shops' => 'required',
             'instruction_flg' => 'required|in:0,1',
             'instruction_id' => 'nullable|string|max:255',
@@ -55,6 +55,8 @@ class PublishUpdateRequest extends FormRequest
             'file_path' => array_filter($this->input('file_path', [])),
             'start_datetime' => $this->input('start_datetime') === 'null' ? null : $this->input('start_datetime'),
             'end_datetime' => $this->input('end_datetime') === 'null' ? null : $this->input('end_datetime'),
+            'target_roll' => $this->input('target_roll', []),
+            'brand' => $this->input('brand', []),
         ]);
     }
 }
