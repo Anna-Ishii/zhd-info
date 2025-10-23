@@ -9,15 +9,13 @@ class ManualType extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
+    protected $fillable =
+    [
         'name',
     ];
 
-    /**
-     * この形式を持つマニュアル
-     */
     public function manuals()
     {
-        return $this->belongsToMany(Manual::class);
+        return $this->belongsToMany(Manual::class, 'manual_manual_type');
     }
 }

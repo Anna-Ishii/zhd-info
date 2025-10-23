@@ -2611,3 +2611,121 @@ button.toggle-view-btn:disabled {
     padding: 5px;
     border-radius: 3px;
 }
+
+/*
+ * スライドデザイン
+ */
+.pdf-swiper .swiper-slide {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.pdf-swiper canvas {
+    max-height: 100vh;
+    width: auto;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.pdf-swiper {
+    padding: 50px 0;
+}
+
+/* 業連画面ナビゲーションデザイン */
+.pdf-prev,
+.pdf-next {
+    width: 60px;
+    height: 60px;
+    position: absolute;
+    top: 40%;
+    z-index: 10;
+    background-color: #ffffff;
+    border-radius: 50%;
+    color: #1e1e1e;
+    opacity: 5 !important;
+}
+
+.pdf-prev {
+    left: 0px;
+}
+
+.pdf-next {
+    right: 0px;
+}
+
+.pdf-prev::after,
+.pdf-next::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url(../img/next-icon.svg) center center no-repeat;
+}
+
+.pdf-next::after {
+    transform: rotate(180deg);
+}
+
+/* マニュアル画面ナビゲーションデザイン */
+.pdf-prev-manual,
+.pdf-next-manual {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2000; /* ← 他要素よりも前面に表示 */
+    background: rgba(255, 255, 255, 0.7);
+    border-radius: 50%;
+    width: 48px;
+    height: 48px;
+    border: none;
+    cursor: pointer;
+}
+
+.pdf-prev-manual {
+    left: -20px;
+}
+
+.pdf-next-manual {
+    right: -20px;
+}
+
+.pdf-prev-manual::after,
+.pdf-next-manual::after {
+    content: "";
+    display: block;
+    width: 100%;
+    height: 100%;
+    background: url(../img/next-icon.svg) center center no-repeat;
+}
+
+.pdf-next-manual::after {
+    transform: rotate(180deg);
+}
+
+/* スライド内のレイアウトを縦方向に統一 */
+.swiper-slide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* PDFページ番号の見た目調整 */
+.pdf-page-number {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #333;
+    text-align: center;
+}
+
+/* マニュアル画面Swiperデザイン */
+.pdf-swiper-container {
+    width: 100%;
+    max-width: 1000px; /* 任意、ページサイズに合わせて調整 */
+    margin: 0 auto;
+}
+
+.pdf-swiper canvas {
+    display: block;
+    height: auto;
+    width: 100%;
+}

@@ -352,12 +352,8 @@ class Manual extends Model
         return $before_datetime ? Carbon::parse($before_datetime)->isoFormat('HH:mm') : null;
     }
 
-    /**
-     * マニュアルが持つ形式（OM／動画など）
-     */
-    public function manual_types()
+    public function manualTypes()
     {
-        return $this->belongsToMany(ManualType::class);
+        return $this->belongsToMany(ManualType::class, 'manual_manual_type');
     }
-
 }
