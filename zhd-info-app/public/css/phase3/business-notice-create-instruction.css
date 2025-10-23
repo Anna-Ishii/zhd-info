@@ -103,7 +103,7 @@
   border-radius: 100px;
   padding: 16px 0px;
 }
-.c-btn__grey {
+.c-btn__gray {
   width: 200px;
   font-size: 1.8rem;
   line-height: 22px;
@@ -1165,18 +1165,19 @@ footer * {
   font-weight: bold;
   font-size: 20px;
 }
-.delivery-btn {
+.delivery-status-wrap .delivery-btn {
   position: absolute;
-  right: 20px;
+  right: 0;
   color: #fff;
   border: none;
   border-radius: 4px;
-  padding: 20px 48px;
+  padding: 16px 48px;
   cursor: pointer;
   font-weight: normal;
   font-size: 20px;
 }
 .delivery-btn.c-btn__gray {
+  color: #fff;
   background-color: #8E9199;
 }
 .delivery-btn.c-btn__blue {
