@@ -526,6 +526,86 @@ window.confirmDelete = function() {
     }
 }
 
+// 複製確認モーダル制御
+window.confirmDuplicate = function() {
+    const modal = document.getElementById('duplicateConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
+// 複製処理
+function executeDuplicate(deleteOriginal) {
+    const executeBtn = deleteOriginal ? document.getElementById('duplicateWithDeleteBtn') : document.getElementById('duplicateWithoutDeleteBtn');
+
+    // ボタンを非活性化（連打防止）
+    if (executeBtn) {
+        executeBtn.disabled = true;
+        executeBtn.style.opacity = '0.6';
+        executeBtn.style.cursor = 'not-allowed';
+    }
+
+    // 現在のURLからmessage_idを取得
+    const currentPath = window.location.pathname;
+    const messageId = currentPath.split('/').pop();
+
+    // 処理を実行
+    $.ajax({
+        url: '/admin/message/publish/duplicate/' + messageId,
+        type: 'POST',
+        data: JSON.stringify({
+            delete_original: deleteOriginal
+        }),
+        contentType: 'application/json',
+        headers: {
+            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+        },
+        success: function(response) {
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById('duplicateConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+
+            // 複製されたメッセージの編集ページに遷移
+            window.location.href = '/admin/message/publish/edit/' + response.new_message_id;
+        },
+        error: function(xhr, status, error) {
+            console.error('Duplicate failed:', error);
+            console.error('Response:', xhr.responseText);
+            console.error('Status:', xhr.status);
+
+            let errorMessage = '複製に失敗しました。';
+            if (xhr.responseJSON) {
+                if (xhr.responseJSON.error) {
+                    errorMessage += '\n詳細: ' + xhr.responseJSON.error;
+                } else if (xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+            }
+            alert(errorMessage);
+
+            // エラー時はボタンを再度有効化
+            if (executeBtn) {
+                executeBtn.disabled = false;
+                executeBtn.style.opacity = '1';
+                executeBtn.style.cursor = 'pointer';
+            }
+
+            // 確認モーダルを閉じる
+            const confirmModal = document.getElementById('duplicateConfirmModal');
+            if (confirmModal) {
+                confirmModal.style.display = 'none';
+                confirmModal.classList.remove('show');
+            }
+        }
+    });
+}
+
 // 配信停止・配信再開処理
 window.confirmStop = function(isRestart) {
     // 適切なモーダルを表示
@@ -698,6 +778,24 @@ $(document).ready(function() {
 
     // 配信再開モーダル背景をクリックしたら閉じる
     $('#restartConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 削除して複製ボタンのクリックイベント
+    $('#duplicateWithDeleteBtn').on('click', function() {
+        executeDuplicate(true);
+    });
+
+    // 削除しないで複製ボタンのクリックイベント
+    $('#duplicateWithoutDeleteBtn').on('click', function() {
+        executeDuplicate(false);
+    });
+
+    // 複製モーダル背景をクリックしたら閉じる
+    $('#duplicateConfirmModal').on('click', function(e) {
         if (e.target === this) {
             $(this).css('display', 'none');
             $(this).removeClass('show');

@@ -86,6 +86,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('delete/{message_id}', [MessagePublishController::class, 'destroy'])->name('destroy')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
             Route::post('restart', [MessagePublishController::class, 'restart'])->name('restart');
+            Route::post('duplicate/{message_id}', [MessagePublishController::class, 'duplicate'])->name('duplicate')->where('message_id', '^\d+$');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
             Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');

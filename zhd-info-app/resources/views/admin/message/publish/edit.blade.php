@@ -535,8 +535,7 @@
         @if ($message->editing_flg)
             <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
         @endif
-        <button class="c-btn__white" type="submit" name="register" form="form" id="" onclick="window.onbeforeunload=null">削除</button>
-        <button class="c-btn__white" type="submit" name="register" form="form" id="" onclick="window.onbeforeunload=null">複製</button>
+        <button class="c-btn__blue" type="button" id="duplicateBtn" onclick="confirmDuplicate()">複製</button>
         <button class="c-btn__blue" type="submit" name="register" form="form" id="registerBtn" onclick="window.onbeforeunload=null">登録</button>
     </div>
 
@@ -544,6 +543,7 @@
     @include('common.admin.message-new-join-file-modal', [])
     @include('common.admin.delete-confirm-modal')
     @include('common.admin.delivery-control-modal')
+    @include('common.admin.duplicate-confirm-modal')
 @endsection
 
 {{-- ページ固有のJSファイルがここに入る --}}
