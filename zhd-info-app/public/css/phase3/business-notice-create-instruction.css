@@ -1202,6 +1202,13 @@ footer * {
   background-color: #005bbb;
 }
 
+/* 指示作成のリンクテキスト */
+.instruction-link-text a {
+  color: #0051A3;
+  text-decoration: underline;
+  text-decoration-color: #0051A3;
+}
+
 /* フッターがmainの外にある場合のスタイル */
 .business-notice-create + .footer {
   display: flex;

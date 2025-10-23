@@ -471,30 +471,39 @@
 
                     <div class="content__wrap content-radio">
                         <p class="content required">指示作成</p>
+                        @php
+                            // URLパラメータから指示情報を取得
+                            $instruction_id = request()->get('id');
+                            $instruction_title = request()->get('instruction_title');
+
+                            // パラメータがある場合は疑似的に instruction_flg = 1 として扱う
+                            $is_instruction_active = $message->instruction_flg == 1 || ($instruction_id && $instruction_title);
+                            $display_instruction_id = $instruction_id ?: $message->instruction_id;
+                            $display_instruction_title = $instruction_title ?: $message->instruction_title;
+                        @endphp
+
                         <div class="input-group custom-radio-wrap">
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="なし" id="instruction_none" checked @disabled($message->editing_flg == 1)>
+                                <input type="radio" name="instruction" value="なし" id="instruction_none" {{ !$is_instruction_active ? 'checked' : '' }} @disabled($message->editing_flg == 0)>
                                 <span class="radio-mark"></span>
                                 なし
                             </label>
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="あり" id="instruction_yes" @disabled($message->editing_flg == 0)>
+                                <input type="radio" name="instruction" value="あり" id="instruction_yes" {{ $is_instruction_active ? 'checked' : '' }} @disabled($message->editing_flg == 0)>
                                 <span class="radio-mark"></span>
                                 あり
                             </label>
-
-                            {{-- 指示作成の有無で表示を分岐 --}}
-                            @if ($message->instruction_flg == 1)
-                                <p>作成した指示：
-                                @if ($message->instruction_id != null)
-                                    <span>{{ $message->instruction_title }}</span>
-                                @else
-                                    <span>紐づく指示が見つかりません。</span>
-                                @endif
-                                </p>
-                            @endif
-                            <input type="hidden" name="instruction_flg" value="0">
                         </div>
+                        {{-- 指示作成の有無で表示を分岐 --}}
+                        @if ($is_instruction_active)
+                            <p class="instruction-link-text">作成した指示：
+                            @if ($display_instruction_id && $display_instruction_title)
+                                <a href="/admin/instruction/{{ $display_instruction_id }}" target="_blank">{{ $display_instruction_title }}</a>
+                            @else
+                                <span>紐づく指示が見つかりません。</span>
+                            @endif
+                            </p>
+                        @endif
                     </div>
 
                     <div class="content__wrap content-checkbox">
