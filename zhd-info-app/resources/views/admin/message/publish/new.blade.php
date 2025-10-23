@@ -7,9 +7,6 @@
 @push('styles')
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create-instruction.css') }}?v={{ time() }}">
-    <!--<link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create.css') }}?v={{ time() }}">-->
-    <!-- モーダルカスタムCSSを読み込み -->
-    <link rel="stylesheet" href="{{ asset('css/phase3/message-import-modal.css') }}?v={{ time() }}">
 @endpush
 
 @section('page_header')
@@ -315,8 +312,6 @@
 @push('scripts')
     <script src="{{ asset('/js/admin/message/publish/new.js') }}?date={{ date('Ymd') }}" defer></script>
     <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
-    <!-- JavaScript -->
-    <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
     <!-- 店舗選択モーダルJavaScriptを読み込み -->
     <script src="{{ asset('js/phase3/businessStoreSelect.js') }}?date={{ date('Ymd') }}"></script>
 @endpush
