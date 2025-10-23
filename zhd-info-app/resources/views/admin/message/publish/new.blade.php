@@ -29,7 +29,6 @@
 @section('content')
     <main class="business-notice-create business-notice-create-instruction mb-0">
         <div id="page-wrapper">
-            @include('common.admin.page-head', ['title' => '業務連絡新規登録'])
 
             <form class="form" id="form" method="post" enctype="multipart/form-data" class="form-horizontal">
                 @csrf
@@ -50,7 +49,7 @@
                                         @endif
                                     @endforeach
                             </select>
-                        </p>
+                        </div>
                     </div>
                     <div class="content__wrap content-checkbox">
                         <p class="content">ラベル</p>
@@ -205,8 +204,8 @@
                             <div class="button__wrap__item {{ old('select_organization.all') === 'selected' ? 'active' : '' }}">
                                 <p id="checkAll" data-action="all">全店</p>
                             </div>
-                            <div class="button__wrap__item {{ old('select_organization.store') === 'selected' ? 'active' : '' }}">
-                                <p id="checkStore" data-action="store" data-toggle="modal" data-target="#messageStoreModal">店舗選択</p>
+                            <div class="button__wrap__item store-modal-btn {{ old('select_organization.store') === 'selected' ? 'active' : '' }}">
+                                <p id="checkStore" data-action="store">店舗選択</p>
                             </div>
                             <div class="button__wrap__item {{ old('select_organization.csv') === 'selected' ? 'active' : '' }}">
                                 <img src="{{ asset('img/inport_icon.svg') }}" alt="インポート">
@@ -264,12 +263,12 @@
                         <p class="content required">指示作成</p>
                         <div class="input-group custom-radio-wrap">
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="なし" id="instruction_none">
+                                <input type="radio" name="instruction_flg" value="0" id="instruction_none">
                                 <span class="radio-mark"></span>
                                 なし
                             </label>
                             <label class="custom-radio">
-                                <input type="radio" name="instruction" value="あり" id="instruction_yes" checked>
+                                <input type="radio" name="instruction_flg" value="1" id="instruction_yes">
                                 <span class="radio-mark"></span>
                                 あり
                             </label>
@@ -300,7 +299,7 @@
         <button class="c-btn__blue" type="button" id="instructionBtn" style="display: none;">指示作成へ進む</button>
     </div>
 
-    @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'organization1' => $organization1])
+    @include('common.admin.message-new-store-modal', ['organization_list' => $organization_list, 'organization1' => $organization1, 'selected_brands' => old('brand', [])])
     @include('common.admin.message-new-join-file-modal', [])
 @endsection
 
@@ -310,6 +309,6 @@
     <script src="{{ asset('/js/admin/message/publish/new_store.js') }}?date={{ date('Ymd') }}" defer></script>
     <!-- JavaScript -->
     <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
-    <!-- モーダルJavaScriptを読み込み -->
-    <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
+    <!-- 店舗選択モーダルJavaScriptを読み込み -->
+    <script src="{{ asset('js/phase3/businessStoreSelect.js') }}?date={{ date('Ymd') }}"></script>
 @endpush
