@@ -1,31 +1,14 @@
-<header class="header">
-    <div class="header__inner">
-        @if (request()->is('message'))
-            @if (session('check_crew'))
-                <div>
-                    <form action="/message/crews-logout" id="logoutForm" method="post">
-                        @csrf
-                        <div>
-                            <button style="padding: 0 10px 0 10px" type="button" class="btnType3 crewLogout" id="crewLogout">ログアウト</button>
-                            <div style="padding-top: 10px ">{{$check_crew[0]->part_code ?? ""}} {{$check_crew[0]->name ?? ""}}さんの未読/既読を表示中です。</div>
-                        </div>
-                    </form>
-                </div>
-            @else
-                <button type="button" class="btnType3 btnModal" data-modal-target="check">自分の閲覧状況の確認</button>
-            @endif
-        @else
-            <div></div>
-        @endif
-        <div class="member-menu-dropdown">
-            <p class="member-menu-dropdown-toggle"></p>
-            <ul class="member-menu-dropdown-menu">
-                <li class="member-menu-logout-btn">
-                    <a href="#" class="btnModal" data-modal-target="logout">
-                        <img src="{{ asset('img/icon-sign-out.svg') }}" alt="" class="logout-icon">　ログアウト
-                    </a>
-                </li>
-            </ul>
+<header class="l-header l-header__tb">
+    <div class="l-header__top">
+        <h1><a href="./top-tb.html"><img src="{{ asset('img/logo.svg') }}" alt="Z-Reporter"></a></h1>
+        <div class="l-header__top__info">
+            <p>{{ $user->name }}</p>
+        </div>
+    </div>
+    <div class="l-header__bottom">
+        <div class="l-header__bottom__wrap">
+            <div class="l-header__back"><a class="prev" href="@yield('backUrl')"><img src="{{ asset('img/back-icon.svg') }}" alt="">戻る</a></div>
+            <p class="l-header__bottom__ttl">@yield('title')</p>
         </div>
     </div>
 </header>

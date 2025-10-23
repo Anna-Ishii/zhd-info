@@ -34,6 +34,11 @@ use App\Utils\ImageConverter;
 use App\Utils\Util;
 use App\Utils\SendWowTalkApi;
 use App\Jobs\SendWowtalkNotificationJob;
+use App\Models\ManualType;
+use App\Models\Organization2;
+use App\Models\Organization3;
+use App\Models\Organization4;
+use App\Models\Organization5;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -60,7 +65,7 @@ class ManualPublishController extends Controller
         // request
         $new_category_ids = $request->input('new_category');
         $statusArray = $request->input('status') ?? [];
-        $statuses = array_map(function($status) {
+        $statuses = array_map(function ($status) {
             return PublishStatus::tryFrom((int)$status);
         }, $statusArray);
         $q = $request->input('q');
@@ -88,7 +93,7 @@ class ManualPublishController extends Controller
 
         // 閲覧率のデータを集計
         $viewRatesSub = DB::table('manual_view_rates')
-        ->select([
+            ->select([
                 'manual_id',
                 'organization1_id',
                 DB::raw('MAX(view_rate) as view_rate'),
@@ -436,7 +441,7 @@ class ManualPublishController extends Controller
 
     public function new(Organization1 $organization1)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $admin = session('admin');
 
@@ -513,6 +518,15 @@ class ManualPublishController extends Controller
             ->get()
             ->toArray();
 
+        $orgMaps = [
+            2 => Organization2::all()->keyBy('id')->toArray(),
+            3 => Organization3::all()->keyBy('id')->toArray(),
+            4 => Organization4::all()->keyBy('id')->toArray(),
+            5 => Organization5::all()->keyBy('id')->toArray(),
+        ];
+
+        $organization_map = $this->groupOrgsFlexibleWithName($all_shops, $orgMaps);
+
         // 組織別にデータを整理する
         $organization_list = array_map(function ($org) use ($all_shops) {
             $org['organization5_shop_list'] = array_filter($all_shops, function ($shop) use ($org) {
@@ -563,12 +577,15 @@ class ManualPublishController extends Controller
             ->select('page_name', 'url')
             ->first();
 
+        $manual_types = ManualType::all();
+
 
         // デフォルトの設定に戻す
         ini_restore('memory_limit');
 
         return view('admin.manual.publish.new', [
             'organization1' => $organization1,
+            'manual_types' => $manual_types,
             'new_category_list' => $new_category_list,
             'brand_list' => $brand_list,
             'organization_list' => $organization_list,
@@ -576,31 +593,117 @@ class ManualPublishController extends Controller
             'message_saved_url' => $message_saved_url,
             'manual_saved_url' => $manual_saved_url,
             'analyse_personal_saved_url' => $analyse_personal_saved_url,
+            'organization_map' => $organization_map,
         ]);
+    }
+
+    function groupOrgsFlexibleWithName($shops, $orgMaps)
+    {
+        $tree = [];
+        foreach ($shops as $shop) {
+            $ids = [
+                2 => $shop['organization2_id'],
+                3 => $shop['organization3_id'],
+                4 => $shop['organization4_id'],
+                5 => $shop['organization5_id'],
+            ];
+            $chain = [];
+            foreach ($ids as $level => $id) {
+                if (!is_null($id)) {
+                    $chain[] = [$level, $id];
+                }
+            }
+            $pointer = &$tree;
+            foreach ($chain as $index => [$level, $id]) {
+                $key = "organization{$level}_id";
+                $nameKey = "organization{$level}_name";
+                $name = $orgMaps[$level][$id]['name'] ?? $orgMaps[$level][$id]['display_name'] ?? '';
+                if (!isset($pointer[$id])) {
+                    $pointer[$id] = [
+                        $key => $id,
+                        $nameKey => $name,
+                        'name' => $orgMaps[$level][$id]['name'] ?? $orgMaps[$level][$id]['display_name'] ?? '',
+                        'children' => [],
+                        'shops' => [],
+                    ];
+                }
+                if ($index === count($chain) - 1) {
+                    $pointer[$id]['shops'][] = $shop;
+                } else {
+                    $pointer = &$pointer[$id]['children'];
+                }
+            }
+            unset($pointer);
+        }
+
+        // childrenを連番配列に
+        $toIndexed = function (&$nodes) use (&$toIndexed) {
+            $nodes = array_values($nodes);
+            foreach ($nodes as &$node) {
+                if (!empty($node['children'])) {
+                    $toIndexed($node['children']);
+                }
+            }
+        };
+        $toIndexed($tree);
+
+        return $tree;
     }
 
     public function store(PublishStoreRequest $request, Organization1 $organization1)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $validated = $request->validated();
 
         $admin = session('admin');
-        $manual_params['title'] = $request->title;
-        $manual_params['description'] = $request->description;
-        $manual_params['category_level1_id'] = $this->level1CategoryParam($request->new_category_id);
-        $manual_params['category_level2_id'] = $this->level2CategoryParam($request->new_category_id);
-        $manual_params['start_datetime'] = $this->parseDateTime($request->start_datetime);
-        $manual_params['end_datetime'] = $this->parseDateTime($request->end_datetime);
-        $manual_params['content_name'] = $request->file_name;
-        $manual_params['content_url'] = $request->file_path ? $this->registerFile($request->file_path) : null;
-        $manual_params['thumbnails_url'] = $request->file_path ? ImageConverter::convert2image($manual_params['content_url']) : null;
-        $manual_params['create_admin_id'] = $admin->id;
-        $manual_params['organization1_id'] = $organization1->id;
-        $manual_params['number'] = Manual::getCurrentNumber($organization1->id) + 1;
-        $manual_params['editing_flg'] = isset($request->save);
-        $manual_params['is_broadcast_notification'] = isset($request->wowtalk_notification) && $request->wowtalk_notification == 'on' ? 1 : 0;
+        $content_url = $this->registerFile($validated['file_path']);
+        $manual_params = [
+            'category_level1_id' => $this->level1CategoryParam($validated['new_category_id']),
+            'category_level2_id' => $this->level2CategoryParam($validated['new_category_id']),
+            'title' => $validated['title'],
+            'content_name' => $validated['file_name'],
+            'content_url' => !empty($validated['file_path']) ? $content_url : null,
+            'thumbnails_url' => !empty($validated['file_path']) ? ImageConverter::convert2image($content_url) : null,
+            'create_admin_id' => $admin->id,
+            'organization1_id' => $organization1->id,
+            'number' => Manual::getCurrentNumber($organization1->id) + 1,
+            'editing_flg' => isset($request->save),
+            'start_datetime' => $this->parseDateTime($validated['start_datetime'] ?? null),
+            'end_datetime' => $this->parseDateTime($validated['end_datetime'] ?? null),
+            'description' => $validated['description'],
+            'is_broadcast_notification' => !empty($validated['wowtalk_notification']) ? 1 : 0,
+        ];
+
         $is_broadcast_notification = $manual_params['is_broadcast_notification'];
+
+        $org1_shops = Shop::where('organization1_id', $organization1->id)->get();
+        $shops_map = $org1_shops->keyBy('shop_code')->toArray();
+
+        $raw = $validated['selected_shops'];
+        $selected_shop_codes = is_string($raw) ? json_decode($raw, true) : $raw;
+        $selected_shop_codes = $selected_shop_codes ?? [];
+
+        $selectedFlg = count($selected_shop_codes) === count($shops_map) ? 'all' : 'store';
+
+        $temp = [];
+        $unique_patterns = [];
+
+        foreach ($shops_map as $shop) {
+            $pattern = [
+                'organization2_id' => $shop['organization2_id'],
+                'organization3_id' => $shop['organization3_id'],
+                'organization4_id' => $shop['organization4_id'],
+                'organization5_id' => $shop['organization5_id'],
+            ];
+
+            $key = json_encode($pattern);
+
+            if (!isset($unique_patterns[$key])) {
+                $temp[] = $pattern;
+                $unique_patterns[$key] = true;
+            }
+        }
 
         try {
             DB::beginTransaction();
@@ -608,105 +711,69 @@ class ManualPublishController extends Controller
             $manual->updated_at = null;
             $manual->save();
 
-            foreach (['org5', 'org4', 'org3', 'org2'] as $level) {
-                if (isset($request->organization[$level][0])) {
-                    // 事前にIDの配列を取得
-                    $ids = explode(',', $request->organization[$level][0]);
+            $bulk_data = [];
+            foreach ($temp as $pattern) {
+                $orgData = [
+                    'manual_id' => $manual->id,
+                    'organization1_id' => $organization1->id,
+                    'organization2_id' => $pattern['organization2_id'] ?? null,
+                    'organization3_id' => $pattern['organization3_id'] ?? null,
+                    'organization4_id' => $pattern['organization4_id'] ?? null,
+                    'organization5_id' => $pattern['organization5_id'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+                $bulk_data[] = $orgData;
+            }
+            DB::table('manual_organization')->insert($bulk_data);
 
-                    $bulkData = [];
-                    foreach ($ids as $id) {
-                        $orgData = [
-                            'manual_id' => $manual->id,
-                            'organization1_id' => $organization1->id,
-                            'created_at' => now(),
-                            'updated_at' => now()
-                        ];
-
-                        // レベルごとにフィールドを設定
-                        switch ($level) {
-                            case 'org5':
-                                $orgData['organization5_id'] = $id;
-                                break;
-                            case 'org4':
-                                $orgData['organization4_id'] = $id;
-                                break;
-                            case 'org3':
-                                $orgData['organization3_id'] = $id;
-                                break;
-                            case 'org2':
-                                $orgData['organization2_id'] = $id;
-                                break;
-                        }
-
-                        // まとめてデータを追加
-                        $bulkData[] = $orgData;
-                    }
-
-                    // バルクインサート
-                    DB::table('manual_organization')->insert($bulkData);
-                }
+            // マニュアル形式の保存
+            foreach ($validated['manual_type'] as $type_id) {
+                DB::table('manual_manual_type')->insert([
+                    'manual_id' => $manual->id,
+                    'manual_type_id' => $type_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             }
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
-            // manual_shopにshop_idとmanual_idをバルクインサート
-            if (isset($request->organization_shops)) {
-                $organization_shops = explode(',', $request->organization_shops);
-
-                // ショップデータの事前取得とグループ化
-                $shopsData = Shop::whereIn('id', $organization_shops)
-                    ->whereIn('brand_id', $request->brand)
-                    ->get(['id', 'brand_id'])
-                    ->groupBy('id');
-
-                $insertData = [];
-                // 事前に選択フラグを決定
-                $selectedFlg = (isset($request->select_organization['all']) && $request->select_organization['all'] === 'selected') ? 'all' : 'store';
-
-                foreach ($organization_shops as $_shop_id) {
-                    if (isset($shopsData[$_shop_id])) {
-                        foreach ($shopsData[$_shop_id] as $shop) {
-                            $insertData[] = [
-                                'manual_id' => $manual->id,
-                                'shop_id' => $shop->id,
-                                'brand_id' => $shop->brand_id,
-                                'selected_flg' => $selectedFlg,
-                                'created_at' => now(),
-                                'updated_at' => now()
-                            ];
-
-                            // チャンクサイズに達したらバルクインサート
-                            if (count($insertData) >= $chunkSize) {
-                                ManualShop::insert($insertData);
-                                $insertData = [];
-                            }
-                        }
+            if (isset($selected_shop_codes)) {
+                $bulk_manual_shops = [];
+                foreach ($selected_shop_codes as $shop_code) {
+                    if (isset($shops_map[$shop_code])) {
+                        $shop = $shops_map[$shop_code];
+                        $bulk_manual_shops[] = [
+                            'manual_id' => $manual->id,
+                            'shop_id' => $shop['id'],
+                            'brand_id' => $shop['brand_id'],
+                            'selected_flg' => $selectedFlg,
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ];
+                    }
+                    // チャンクサイズに達したらバルクインサート
+                    if (count($bulk_manual_shops) >= $chunkSize) {
+                        ManualShop::insert($bulk_manual_shops);
+                        $bulk_manual_shops = [];
                     }
                 }
-
                 // 最後に残ったデータをインサート
-                if (!empty($insertData)) {
-                    ManualShop::insert($insertData);
+                if (!empty($bulk_manual_shops)) {
+                    ManualShop::insert($bulk_manual_shops);
                 }
             }
 
             $manual->brand()->attach($request->brand);
 
             if (!isset($request->save)) {
-                $manual->user()->attach($this->getTargetUsersByShopId($request));
+                //$manual->user()->attach($this->getTargetUsersByShopId($request));
+                $manual->user()->attach($this->getTargetUsersByShopCode($shops_map, $selected_shop_codes, $validated['brand']));
             }
 
             $manual->content()->createMany($this->manualContentsParam($request));
-
-            if (isset($request->tag_name)) {
-                $tag_ids = [];
-                foreach ($request->tag_name as $tag_name) {
-                    $tag = ManualTagMaster::firstOrCreate(['name' => $tag_name]);
-                    $tag_ids[] = $tag->id;
-                }
-                $manual->tag()->attach($tag_ids);
-            }
 
             DB::commit();
 
@@ -716,7 +783,7 @@ class ManualPublishController extends Controller
             $manual_id = $manual->id;
 
             // メッセージの既読・総ユーザー数を一度に集計
-            $manualRates = DB::table('manual_user')
+            $manual_rates = DB::table('manual_user')
                 ->select([
                     'manual_user.manual_id',
                     DB::raw('sum(manual_user.read_flg) as read_users'),
@@ -737,9 +804,9 @@ class ManualPublishController extends Controller
                 ->get();
 
             // バルクアップデート用のデータ準備
-            $updateData = [];
-            foreach ($manualRates as $m) {
-                $updateData[] = [
+            $update_data = [];
+            foreach ($manual_rates as $m) {
+                $update_data[] = [
                     'manual_id' => $m->manual_id,
                     'organization1_id' => $organization1_id,
                     'view_rate' => $m->view_rate,     // 閲覧率の計算
@@ -752,11 +819,10 @@ class ManualPublishController extends Controller
 
             // バルクアップデートを実行
             DB::table('manual_view_rates')->upsert(
-                $updateData,
+                $update_data,
                 ['manual_id', 'organization1_id'],
                 ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
             );
-
         } catch (\Throwable $th) {
             DB::rollBack();
             $this->rollbackRegisterFile($request->file_path);
@@ -787,7 +853,7 @@ class ManualPublishController extends Controller
 
     public function edit($manual_id)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $admin = session('admin');
 
@@ -912,7 +978,7 @@ class ManualPublishController extends Controller
         $target_org['select'] = null;
 
         $selectedFlg = null;
-        $chunkSize = 200; // チャンクサイズを設定
+        $chunkSize = config('manual.chunk_size'); // チャンクサイズを設定
         $offset = 0;
 
         // ManualShopテーブルからメッセージに関連する店舗情報を取得
@@ -1003,7 +1069,7 @@ class ManualPublishController extends Controller
 
     public function update(PublishUpdateRequest $request, $manual_id)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         $validated = $request->validated();
 
@@ -1128,7 +1194,7 @@ class ManualPublishController extends Controller
             ManualShop::where('manual_id', $manual_id)->delete();
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
             // manual_shopにshop_idとmanual_idをバルクインサート
             if (isset($request->organization_shops)) {
@@ -1178,7 +1244,7 @@ class ManualPublishController extends Controller
             $currentUsers = $manual->user()->pluck('user_id')->toArray();
 
             // チャンクサイズを設定
-            $chunkSize = 200;
+            $chunkSize = config('manual.chunk_size');
 
             // 削除処理
             $usersToDetach = array_diff($currentUsers, array_keys($targetUsers));
@@ -1221,46 +1287,45 @@ class ManualPublishController extends Controller
 
             // メッセージの既読・総ユーザー数を一度に集計
             $manualRates = DB::table('manual_user')
-            ->select([
-                'manual_user.manual_id',
-                DB::raw('sum(manual_user.read_flg) as read_users'),
-                DB::raw('count(distinct manual_user.user_id) as total_users'),
-                DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
-            ])
-            ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
-            ->where('manuals.organization1_id', $organization1_id)
-            ->when($manual_id, function ($query) use ($manual_id) {
-                $query->where('manual_user.manual_id', $manual_id);
-            })
-            ->groupBy('manual_user.manual_id')
-            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
-                $min = isset($rate[0]) ? $rate[0] : 0;
-                $max = isset($rate[1]) ? $rate[1] : 100;
-                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
-            })
-            ->get();
+                ->select([
+                    'manual_user.manual_id',
+                    DB::raw('sum(manual_user.read_flg) as read_users'),
+                    DB::raw('count(distinct manual_user.user_id) as total_users'),
+                    DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
+                ])
+                ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
+                ->where('manuals.organization1_id', $organization1_id)
+                ->when($manual_id, function ($query) use ($manual_id) {
+                    $query->where('manual_user.manual_id', $manual_id);
+                })
+                ->groupBy('manual_user.manual_id')
+                ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
+                    $min = isset($rate[0]) ? $rate[0] : 0;
+                    $max = isset($rate[1]) ? $rate[1] : 100;
+                    $query->havingRaw('view_rate between ? and ?', [$min, $max]);
+                })
+                ->get();
 
-        // バルクアップデート用のデータ準備
-        $updateData = [];
-        foreach ($manualRates as $m) {
-            $updateData[] = [
-                'manual_id' => $m->manual_id,
-                'organization1_id' => $organization1_id,
-                'view_rate' => $m->view_rate,     // 閲覧率の計算
-                'read_users' => $m->read_users,   // 既読ユーザー数
-                'total_users' => $m->total_users, // 全体ユーザー数
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
+            // バルクアップデート用のデータ準備
+            $updateData = [];
+            foreach ($manualRates as $m) {
+                $updateData[] = [
+                    'manual_id' => $m->manual_id,
+                    'organization1_id' => $organization1_id,
+                    'view_rate' => $m->view_rate,     // 閲覧率の計算
+                    'read_users' => $m->read_users,   // 既読ユーザー数
+                    'total_users' => $m->total_users, // 全体ユーザー数
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
+            }
 
-        // バルクアップデートを実行
-        DB::table('manual_view_rates')->upsert(
-            $updateData,
-            ['manual_id', 'organization1_id'],
-            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
-        );
-
+            // バルクアップデートを実行
+            DB::table('manual_view_rates')->upsert(
+                $updateData,
+                ['manual_id', 'organization1_id'],
+                ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
+            );
         } catch (\Throwable $th) {
             DB::rollBack();
             if ($manual_changed_flg) $this->rollbackRegisterFile($request->file_path);
@@ -1353,7 +1418,7 @@ class ManualPublishController extends Controller
     // 動画マニュアルCSV エクスポート（新規登録/編集）
     public function csvStoreExport(Request $request)
     {
-        ini_set('memory_limit', '1024M'); // メモリ制限を一時的に増加
+        ini_set('memory_limit', config('manual.memory_limit')); // メモリ制限を一時的に増加
 
         // 新規登録か編集かを判定
         $isEdit = $request->has('manual_id');
@@ -1392,10 +1457,15 @@ class ManualPublishController extends Controller
     {
         $validated = $request->validated();
 
-        $file = $request->file;
-        // $file->move(sys_get_temp_dir(),uniqid() . '.' . $file->getClientOriginalExtension());
+        $file = $validated['file'];
         $file_path = Storage::putFile('/tmp', $file);
         $file_name = $file->getClientOriginalName();
+
+        Log::debug("動画マニュアルファイルアップロード", [
+            'file' => $file,
+            'file_path' => $file_path,
+            'file_name' => $file_name,
+        ]);
 
         return  response()->json([
             'content_name' => $file_name,
@@ -1594,7 +1664,7 @@ class ManualPublishController extends Controller
 
                 ManualShop::where('manual_id', $manual->id)->delete();
                 // manual_shopにインサート
-                $chunkSize = 200;
+                $chunkSize = config('manual.chunk_size');
 
                 // manual_shopにshop_idとmanual_idをバルクインサート
                 if (isset($ml["shops"])) {
@@ -1855,6 +1925,77 @@ class ManualPublishController extends Controller
         return $log;
     }
 
+    public function csvShopImport(Request $request)
+    {
+        $file = $request->file('import_csv');
+        $organization1_id = $request->input('organization1_id');
+        //$brand_ids = Brand::where('organization1_id', $organization1_id)->pluck('id')->toArray();
+        $csv = new \SplFileObject($file->getRealPath());
+        $csv->setFlags(\SplFileObject::READ_CSV | \SplFileObject::READ_AHEAD | \SplFileObject::DROP_NEW_LINE | \SplFileObject::SKIP_EMPTY);
+        $csv->setCsvControl(',', '"');
+
+        $shops = [];
+        $header = [];
+        foreach ($csv as $i => $row) {
+            if (!is_array($row) || (count($row) === 1 && $row[0] === null)) continue;
+            $row = array_map(fn($v) => $v === null ? null : trim(mb_convert_encoding((string)$v, 'UTF-8', 'UTF-8, SJIS-win, CP932')), $row);
+
+            if ($i === 0) {
+                if (!empty($row[0])) $row[0] = preg_replace('/^\xEF\xBB\xBF/u', '', $row[0]);
+                $header = $row;
+                $expected = ['店舗コード', '店舗名'];
+                if (array_diff($expected, $header)) {
+                    return response()->json([
+                        'ok' => false,
+                        'message' => 'CSVヘッダが想定と違います',
+                        'expected' => $expected,
+                        'actual' => $header,
+                    ], 422);
+                }
+                continue;
+            }
+            $shops[] = [
+                'shop_code' => $row[array_search('店舗コード', $header)] ?? null,
+                'shop_name' => $row[array_search('店舗名', $header)] ?? null,
+            ];
+        }
+
+        $all_shops = Shop::query()
+            ->select(
+                'shops.id as id',
+                'shops.shop_code',
+                'shops.display_name',
+                'shops.organization5_id',
+                'shops.organization4_id',
+                'shops.organization3_id',
+                'shops.organization2_id'
+            )
+            ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
+            ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')
+            ->leftJoin('organization3 as org3', 'shops.organization3_id', '=', 'org3.id')
+            ->leftJoin('organization2 as org2', 'shops.organization2_id', '=', 'org2.id')
+            ->where('shops.organization1_id', $organization1_id)
+            //->whereIn('shops.brand_id', $brand_ids)
+            ->orderBy('shops.shop_code', 'asc')
+            ->get()
+            ->toArray();
+
+        $orgMaps = [
+            2 => Organization2::all()->keyBy('id')->toArray(),
+            3 => Organization3::all()->keyBy('id')->toArray(),
+            4 => Organization4::all()->keyBy('id')->toArray(),
+            5 => Organization5::all()->keyBy('id')->toArray(),
+        ];
+
+        $organization_map = $this->groupOrgsFlexibleWithName($all_shops, $orgMaps);
+
+        return response()->json([
+            'ok' => true,
+            'count' => count($shops),
+            'shops' => $shops,
+        ]);
+    }
+
     // 動画マニュアルCSV インポート（新規登録/編集）
     public function csvStoreImport(Request $request)
     {
@@ -1991,10 +2132,49 @@ class ManualPublishController extends Controller
         return $target_user_data;
     }
 
+    private function getTargetUsersByShopCode(array $shop_maps, array $selected_shop_codes, array $brand_ids): array
+    {
+        if (empty($shop_maps) || empty($selected_shop_codes) || empty($brand_ids)) {
+            return [];
+        }
+
+        $codeToId = [];
+        foreach ($shop_maps as $s) {
+            if (isset($s['shop_code'], $s['id'])) {
+                $codeToId[$s['shop_code']] = $s['id'];
+            }
+        }
+
+        $selected_shop_ids = [];
+        foreach ($selected_shop_codes as $code) {
+            if (isset($codeToId[$code])) {
+                $selected_shop_ids[] = $codeToId[$code];
+            }
+        }
+
+        if (empty($selected_shop_ids)) return [];
+
+        $selected_shop_ids = array_values(array_unique($selected_shop_ids));
+
+        $rows = User::query()
+            ->join('shops', 'users.shop_id', '=', 'shops.id')
+            ->whereIn('shops.id', $selected_shop_ids)
+            ->whereIn('shops.brand_id', $brand_ids)
+            ->select(['users.id as user_id', 'users.shop_id'])
+            ->orderBy('users.shop_id')
+            ->get();
+
+        $target_user_data = [];
+        foreach ($rows as $r) {
+            $target_user_data[$r->user_id] = ['shop_id' => $r->shop_id];
+        }
+        return $target_user_data;
+    }
+
     private function getTargetUsersByShopId($organizations): array
     {
         $target_user_data = [];
-        $chunkSize = 200; // チャンクサイズを設定
+        $chunkSize = config('manual.chunk_size');
 
         if (isset($organizations->organization_shops)) {
             $organization_shops = explode(',', $organizations->organization_shops);
@@ -2033,10 +2213,10 @@ class ManualPublishController extends Controller
     // 「手順」を登録するために加工する
     private function manualContentsParam($request): array
     {
-        if (!(isset($request['manual_flow']))) return [];
+        if (!isset($request['step'])) return [];
 
         $content_data = [];
-        foreach ($request['manual_flow'] as $i => $r) {
+        foreach ($request['step'] as $i => $r) {
             $content_data[$i]['title'] = $r['title'];
             $content_data[$i]['description'] = $r['detail'];
             $content_data[$i]['order_no'] = $i + 1;
@@ -2075,6 +2255,7 @@ class ManualPublishController extends Controller
         rename($current_path, $next_path);
         return $content_url;
     }
+
     private function rollbackRegisterFile($request_file_path): Void
     {
         if (!(isset($request_file_path))) return;
