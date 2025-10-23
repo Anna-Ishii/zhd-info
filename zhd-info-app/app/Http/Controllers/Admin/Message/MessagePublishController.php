@@ -1141,7 +1141,8 @@ class MessagePublishController extends Controller
                 'shops.organization5_id',
                 'shops.organization4_id',
                 'shops.organization3_id',
-                'shops.organization2_id'
+                'shops.organization2_id',
+                'shops.brand_id'
             )
             ->leftJoin('organization5 as org5', 'shops.organization5_id', '=', 'org5.id')
             ->leftJoin('organization4 as org4', 'shops.organization4_id', '=', 'org4.id')

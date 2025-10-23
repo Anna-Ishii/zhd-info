@@ -366,8 +366,8 @@
                                 <div class="button__wrap__item {{ (old('select_organization.all') === 'selected' || (!request()->old() && $target_org['select'] === 'all')) ? 'active' : '' }}">
                                     <p id="checkAll" data-action="all">全店</p>
                                 </div>
-                                <div class="button__wrap__item {{ (old('select_organization.store') === 'selected' || (!request()->old() && ($target_org['select'] === 'store' || $target_org['select'] === 'oldStore'))) ? 'active' : '' }}">
-                                    <p id="checkStore" data-action="store" data-toggle="modal" data-target="#messageStoreModal">店舗選択</p>
+                                <div class="button__wrap__item store-modal-btn {{ (old('select_organization.store') === 'selected' || (!request()->old() && ($target_org['select'] === 'store' || $target_org['select'] === 'oldStore'))) ? 'active' : '' }}">
+                                    <p id="checkStore" data-action="store">店舗選択</p>
                                 </div>
                                 <div class="button__wrap__item {{ old('select_organization.csv') === 'selected' ? 'active' : '' }}">
                                     <img src="{{ asset('img/inport_icon.svg') }}" alt="インポート">
@@ -564,5 +564,7 @@
     <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
     <!-- モーダルJavaScriptを読み込み -->
     <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
+    <!-- 店舗選択モーダルJavaScriptを読み込み -->
+    <script src="{{ asset('js/phase3/businessStoreSelect.js') }}?date={{ date('Ymd') }}"></script>
 
 @endpush
