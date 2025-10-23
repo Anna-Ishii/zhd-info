@@ -537,6 +537,17 @@ window.confirmDuplicate = function() {
     }
 }
 
+// 登録確認モーダル制御
+window.confirmRegister = function() {
+    const modal = document.getElementById('registerConfirmModal');
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    } else {
+        console.error('Modal not found');
+    }
+}
+
 // 複製処理
 function executeDuplicate(deleteOriginal) {
     const executeBtn = deleteOriginal ? document.getElementById('duplicateWithDeleteBtn') : document.getElementById('duplicateWithoutDeleteBtn');
@@ -802,6 +813,46 @@ $(document).ready(function() {
 
     // 複製モーダル背景をクリックしたら閉じる
     $('#duplicateConfirmModal').on('click', function(e) {
+        if (e.target === this) {
+            $(this).css('display', 'none');
+            $(this).removeClass('show');
+        }
+    });
+
+    // 登録実行ボタンのクリックイベント
+    $('#registerExecuteBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+
+        // 確認モーダルを閉じる
+        const confirmModal = document.getElementById('registerConfirmModal');
+        if (confirmModal) {
+            confirmModal.style.display = 'none';
+            confirmModal.classList.remove('show');
+        }
+
+        // フォームを送信
+        const form = document.getElementById('form');
+        if (form) {
+            // onbeforeunloadイベントを無効化
+            window.onbeforeunload = null;
+            form.submit();
+        }
+    });
+
+    // 登録の戻るボタンでモーダルを閉じる
+    $('#registerBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const modal = document.getElementById('registerConfirmModal');
+        if (modal) {
+            modal.style.display = 'none';
+            modal.classList.remove('show');
+        }
+    });
+
+    // 登録モーダル背景をクリックしたら閉じる
+    $('#registerConfirmModal').on('click', function(e) {
         if (e.target === this) {
             $(this).css('display', 'none');
             $(this).removeClass('show');

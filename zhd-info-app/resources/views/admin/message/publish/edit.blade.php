@@ -545,7 +545,7 @@
             <button class="c-btn__white" type="submit" name="save" form="form" onclick="window.onbeforeunload=null">保存</button>
         @endif
         <button class="c-btn__blue" type="button" id="duplicateBtn" onclick="confirmDuplicate()">複製</button>
-        <button class="c-btn__blue" type="submit" name="register" form="form" id="registerBtn" onclick="window.onbeforeunload=null">登録</button>
+        <button class="c-btn__blue" type="button" id="registerBtn" onclick="confirmRegister()">登録</button>
     </div>
 
     @include('common.admin.message-edit-store-modal', ['organization_list' => $organization_list, 'all_shop_list' => $all_shop_list, 'target_org' => $target_org, 'organization1_id' => $message->organization1_id])
@@ -553,6 +553,7 @@
     @include('common.admin.delete-confirm-modal')
     @include('common.admin.delivery-control-modal')
     @include('common.admin.duplicate-confirm-modal')
+    @include('common.admin.register-confirm-modal')
 @endsection
 
 {{-- ページ固有のJSファイルがここに入る --}}
