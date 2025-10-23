@@ -706,7 +706,7 @@ $(document).ready(function() {
     updateButtonDisplay();
     
     // ラジオボタンの変更イベント
-    $(document).on('change', 'input[name="instruction"]', function() {
+    $(document).on('change', 'input[name="instruction_flg"]', function() {
         updateButtonDisplay();
     });
     
@@ -718,7 +718,7 @@ $(document).ready(function() {
 
 // ボタンの表示/非表示を更新する関数
 function updateButtonDisplay() {
-    const instructionYes = $('input[name="instruction"][value="あり"]');
+    const instructionYes = $('input[name="instruction_flg"][value="1"]');
     const registerBtn = $('#registerBtn');
     const instructionBtn = $('#instructionBtn');
     
