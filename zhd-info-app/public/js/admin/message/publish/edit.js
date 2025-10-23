@@ -892,6 +892,39 @@ $(document).ready(function() {
                 instructionFlgInput.name = 'instruction_flg';
                 instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
                 form.appendChild(instructionFlgInput);
+
+                // URLパラメータから instruction_id と instruction_title を取得
+                const urlParams = new URLSearchParams(window.location.search);
+                const instructionId = urlParams.get('instruction_id');
+                const instructionTitle = urlParams.get('instruction_title');
+
+                // instruction_id が存在する場合は追加（空でも追加）
+                if (instructionId !== null) {
+                    const existingInstructionIdInput = form.querySelector('input[name="instruction_id"]');
+                    if (existingInstructionIdInput) {
+                        existingInstructionIdInput.value = instructionId;
+                    } else {
+                        const instructionIdInput = document.createElement('input');
+                        instructionIdInput.type = 'hidden';
+                        instructionIdInput.name = 'instruction_id';
+                        instructionIdInput.value = instructionId;
+                        form.appendChild(instructionIdInput);
+                    }
+                }
+
+                // instruction_title が存在する場合は追加（空でも追加）
+                if (instructionTitle !== null) {
+                    const existingInstructionTitleInput = form.querySelector('input[name="instruction_title"]');
+                    if (existingInstructionTitleInput) {
+                        existingInstructionTitleInput.value = instructionTitle;
+                    } else {
+                        const instructionTitleInput = document.createElement('input');
+                        instructionTitleInput.type = 'hidden';
+                        instructionTitleInput.name = 'instruction_title';
+                        instructionTitleInput.value = instructionTitle;
+                        form.appendChild(instructionTitleInput);
+                    }
+                }
             }
 
             // onbeforeunloadイベントを無効化
@@ -960,6 +993,39 @@ window.submitSave = function() {
         instructionFlgInput.name = 'instruction_flg';
         instructionFlgInput.value = instructionRadio.value === 'あり' ? '1' : '0';
         form.appendChild(instructionFlgInput);
+
+        // URLパラメータから instruction_id と instruction_title を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const instructionId = urlParams.get('instruction_id');
+        const instructionTitle = urlParams.get('instruction_title');
+
+        // instruction_id が存在する場合は追加（空でも追加）
+        if (instructionId !== null) {
+            const existingInstructionIdInput = form.querySelector('input[name="instruction_id"]');
+            if (existingInstructionIdInput) {
+                existingInstructionIdInput.value = instructionId;
+            } else {
+                const instructionIdInput = document.createElement('input');
+                instructionIdInput.type = 'hidden';
+                instructionIdInput.name = 'instruction_id';
+                instructionIdInput.value = instructionId;
+                form.appendChild(instructionIdInput);
+            }
+        }
+
+        // instruction_title が存在する場合は追加（空でも追加）
+        if (instructionTitle !== null) {
+            const existingInstructionTitleInput = form.querySelector('input[name="instruction_title"]');
+            if (existingInstructionTitleInput) {
+                existingInstructionTitleInput.value = instructionTitle;
+            } else {
+                const instructionTitleInput = document.createElement('input');
+                instructionTitleInput.type = 'hidden';
+                instructionTitleInput.name = 'instruction_title';
+                instructionTitleInput.value = instructionTitle;
+                form.appendChild(instructionTitleInput);
+            }
+        }
     }
 
     // window.onbeforeunloadをクリア

@@ -474,7 +474,7 @@
                         <p class="content required">指示作成</p>
                         @php
                             // URLパラメータから指示情報を取得
-                            $instruction_id = request()->get('id');
+                            $instruction_id = request()->get('instruction_id');
                             $instruction_title = request()->get('instruction_title');
 
                             // パラメータがある場合は疑似的に instruction_flg = 1 として扱う
@@ -505,16 +505,12 @@
                             @endif
                             </p>
                         @endif
-                        
+
                         {{-- 登録状態（editing_flg が 0）の場合のhidden input --}}
                         @if ($message->editing_flg == 0)
-                            <input type="hidden" name="instruction_flg" value="{{ $message->instruction_flg }}">
-                            @if ($message->instruction_id)
-                                <input type="hidden" name="instruction_id" value="{{ $message->instruction_id }}">
-                            @endif
-                            @if ($message->instruction_title)
-                                <input type="hidden" name="instruction_title" value="{{ $message->instruction_title }}">
-                            @endif
+                            <input type="hidden" name="instruction_flg" value="{{ $message->instruction_flg ?? $is_instruction_active ? 1 : 0 }}">
+                            <input type="hidden" name="instruction_id" value="{{ $message->instruction_id ?? $display_instruction_id ?? '' }}">
+                            <input type="hidden" name="instruction_title" value="{{ $message->instruction_title ?? $display_instruction_title ?? '' }}">
                         @endif
                     </div>
 

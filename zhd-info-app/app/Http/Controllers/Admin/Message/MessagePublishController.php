@@ -1496,9 +1496,17 @@ class MessagePublishController extends Controller
         $is_broadcast_notification = $msg_params['is_broadcast_notification'];
 
         // 指示関連のカラムを追加
-        $msg_params['instruction_flg'] = isset($request->instruction_flg) ? (int)$request->instruction_flg : 0;
-        $msg_params['instruction_id'] = $request->instruction_id ?? null;
-        $msg_params['instruction_title'] = $request->instruction_title ?? null;
+        // 既存の値がない場合のみ、リクエストの値を設定
+        if (empty($message->instruction_flg) && empty($message->instruction_id) && empty($message->instruction_title)) {
+            $msg_params['instruction_flg'] = isset($request->instruction_flg) ? (int)$request->instruction_flg : 0;
+            $msg_params['instruction_id'] = $request->instruction_id ?? null;
+            $msg_params['instruction_title'] = $request->instruction_title ?? null;
+        } else {
+            // 既存の値がある場合は、既存の値を維持
+            $msg_params['instruction_flg'] = $message->instruction_flg ?? 0;
+            $msg_params['instruction_id'] = $message->instruction_id;
+            $msg_params['instruction_title'] = $message->instruction_title;
+        }
 
         // 手順を登録する
         $content_data = [];
