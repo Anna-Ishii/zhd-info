@@ -58,7 +58,7 @@
             <div class="accordion">
                 <h4><span class="selected-count">0</span>店舗選択中</h4>
                 <div class="store-selected-list">
-                    <p class="accordion-sub-subheader"><span class="accordion-check"></span>選択中の店舗を表示</p>
+                    <p class="accordion-sub-subheader select-display-accordion"><span class="accordion-check"></span>選択中の店舗を表示</p>
                     <ul class="accordion-sub-subbody" id="selectedStores"></ul>
                 </div>
 
@@ -91,7 +91,7 @@
                                 <input type="checkbox" name="organization[org5][]"
                                     data-organization-id="{{ $organization['organization5_id'] }}"
                                     value="{{ $organization['organization5_id'] }}"
-                                    class="checkStore mr8 org-checkbox"
+                                    class="checkStore org-checkbox"
                                     id="org5_{{ $organization['organization5_id'] }}"
                                     @if (old('organization.org5'))
                                         {{ in_array((string) $organization['organization5_id'], old('organization.org5', []), true) ? 'checked' : '' }}
@@ -101,7 +101,7 @@
                                     style="display: none;"
                                 >
                                 <p class="accordion-sub-subheader">
-                                    <span class="accordion-check" onclick="document.getElementById('org5_{{ $organization['organization5_id'] }}').click();"></span>
+                                    <span class="accordion-check"></span>
                                     {{ $organization['organization5_name'] }}
                                 </p>
                                 {{-- 組織5配下の店舗リスト（折りたたみ可能） --}}
@@ -115,7 +115,7 @@
                                                     data-store-id="{{ $shop['id'] }}"
                                                     data-brand-id="{{ $shop['brand_id'] }}"
                                                     value="{{ $shop['id'] }}"
-                                                    class="checkCommon mr8 shop-checkbox"
+                                                    class="checkCommon shop-checkbox"
                                                     @if (old('organization_shops'))
                                                         {{ in_array((string) $shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                     @elseif(!request()->old())
@@ -138,7 +138,7 @@
                                 <input type="checkbox" name="organization[org4][]"
                                     data-organization-id="{{ $organization['organization4_id'] }}"
                                     value="{{ $organization['organization4_id'] }}"
-                                    class="checkStore mr8 org-checkbox"
+                                    class="checkStore org-checkbox"
                                     id="org4_{{ $organization['organization4_id'] }}"
                                     @if (old('organization.org4'))
                                         {{ in_array((string) $organization['organization4_id'], old('organization.org4', []), true) ? 'checked' : '' }}
@@ -148,7 +148,7 @@
                                     style="display: none;"
                                 >
                                 <p class="accordion-sub-subheader">
-                                    <span class="accordion-check" onclick="document.getElementById('org4_{{ $organization['organization4_id'] }}').click();"></span>
+                                    <span class="accordion-check"></span>
                                     {{ $organization['organization4_name'] }}
                                 </p>
                                 {{-- 組織4配下の店舗リスト（折りたたみ可能） --}}
@@ -162,7 +162,7 @@
                                                     data-store-id="{{ $shop['id'] }}"
                                                     data-brand-id="{{ $shop['brand_id'] }}"
                                                     value="{{ $shop['id'] }}"
-                                                    class="checkCommon mr8 shop-checkbox"
+                                                    class="checkCommon shop-checkbox"
                                                     @if (old('organization_shops'))
                                                         {{ in_array((string) $shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                     @elseif(!request()->old())
@@ -185,7 +185,7 @@
                                 <input type="checkbox" name="organization[org3][]"
                                     data-organization-id="{{ $organization['organization3_id'] }}"
                                     value="{{ $organization['organization3_id'] }}"
-                                    class="checkStore mr8 org-checkbox"
+                                    class="checkStore org-checkbox"
                                     id="org3_{{ $organization['organization3_id'] }}"
                                     @if (old('organization.org3'))
                                         {{ in_array((string) $organization['organization3_id'], old('organization.org3', []), true) ? 'checked' : '' }}
@@ -195,8 +195,8 @@
                                     style="display: none;"
                                 >
                                 <p class="accordion-sub-subheader">
-                                    <span class="accordion-check" onclick="document.getElementById('org3_{{ $organization['organization3_id'] }}').click();"></span>
-                                    {{ $organization['organization3_name'] }}
+                                    <span class="accordion-check"></span>
+                                    {{ $organization['organization3_name'] }}直轄
                                 </p>
                                 {{-- 組織3配下の店舗リスト（折りたたみ可能） --}}
                                 <div class="accordion-sub-subbody">
@@ -208,7 +208,7 @@
                                                     data-organization-id="{{ $organization['organization3_id'] }}"
                                                     data-store-id="{{ $shop['id'] }}"
                                                     value="{{ $shop['id'] }}"
-                                                    class="checkCommon mr8 shop-checkbox"
+                                                    class="checkCommon shop-checkbox"
                                                     @if (old('organization_shops'))
                                                         {{ in_array((string) $shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                     @elseif(!request()->old())
@@ -231,7 +231,7 @@
                                 <input type="checkbox" name="organization[org2][]"
                                     data-organization-id="{{ $organization['organization2_id'] }}"
                                     value="{{ $organization['organization2_id'] }}"
-                                    class="checkStore mr8 org-checkbox"
+                                    class="checkStore org-checkbox"
                                     id="org2_{{ $organization['organization2_id'] }}"
                                     @if (old('organization.org2'))
                                         {{ in_array((string) $organization['organization2_id'], old('organization.org2', []), true) ? 'checked' : '' }}
@@ -241,8 +241,8 @@
                                     style="display: none;"
                                 >
                                 <p class="accordion-sub-subheader">
-                                    <span class="accordion-check" onclick="document.getElementById('org2_{{ $organization['organization2_id'] }}').click();"></span>
-                                    {{ $organization['organization2_name'] }}
+                                    <span class="accordion-check"></span>
+                                    {{ $organization['organization2_name'] }}直轄
                                 </p>
                                 {{-- 組織2配下の店舗リスト（折りたたみ可能） --}}
                                 <div class="accordion-sub-subbody">
@@ -255,7 +255,7 @@
                                                     data-store-id="{{ $shop['id'] }}"
                                                     data-brand-id="{{ $shop['brand_id'] }}"
                                                     value="{{ $shop['id'] }}"
-                                                    class="checkCommon mr8 shop-checkbox"
+                                                    class="checkCommon shop-checkbox"
                                                     @if (old('organization_shops'))
                                                         {{ in_array((string) $shop['id'], $organization_shops, true) ? 'checked' : '' }}
                                                     @elseif(!request()->old())
@@ -275,8 +275,8 @@
             </div>
         </div>
         <div class="c-btn">
-            <button class="c-btn__white" id="cancelSelectBtn">キャンセル</button>
-            <button class="c-btn__blue" id="storeModalConfirmBtn">選択する</button>
+            <button class="c-btn__white" id="cancelBtn">キャンセル</button>
+            <button class="c-btn__blue" id="selectStoreBtn">選択する</button>
         </div>
     </div>
 </div>

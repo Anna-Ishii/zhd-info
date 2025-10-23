@@ -346,14 +346,11 @@ button {
   display: flex !important;
   z-index: 9999 !important;
 }
-
-/* デバッグ用: モーダル本体を確実に表示 */
 .modal-overlay.disp .modal {
   display: block !important;
   visibility: visible !important;
   opacity: 1 !important;
 }
-
 .modal-overlay .modal {
   min-width: 1086px;
   max-width: 90vw;
@@ -473,7 +470,7 @@ button {
 .modal-overlay .modal.inport-modal .middle-erea .file-upload__container__item__wrap .file-input-item .uploader label {
   display: flex;
   height: 424px;
-  padding: 24px 60px;
+  padding: 24px 100px;
   border-radius: 4px;
   border: 1px dashed #0051A3;
   background-color: #F5F9FF;
@@ -682,7 +679,7 @@ button {
 .store-modal .modal-content .store-modal__main .accordion-body,
 .store-modal .modal-content .store-modal__main .accordion-subbody {
   display: none;
-  margin: 0 0 0 40px;
+  /* margin: 0 0 0 40px; */
 }
 .store-modal .modal-content .store-modal__main .accordion-sub-subbody {
   display: none;
@@ -703,9 +700,12 @@ button {
   border-radius: 4px;
   margin: 16px 0;
 }
+.store-modal .modal-content .store-modal__main .accordion-sub-subheader:not(.store-selected-list .accordion-sub-subheader){
+  background: #F2F2F3;
+}
 .store-modal .modal-content .store-modal__main .accordion-header::after,
 .store-modal .modal-content .store-modal__main .accordion-subheader::after,
-.store-modal .modal-content .store-modal__main .accordion-sub-subheader::after {
+.store-modal .modal-content .store-modal__main .accordion-sub-subheader:not(.store-selected-list .accordion-sub-subheader)::after {
   content: "";
   width: 14px;
   height: 1.5px;
@@ -718,7 +718,7 @@ button {
 }
 .store-modal .modal-content .store-modal__main .accordion-header::before,
 .store-modal .modal-content .store-modal__main .accordion-subheader::before,
-.store-modal .modal-content .store-modal__main .accordion-sub-subheader::before {
+.store-modal .modal-content .store-modal__main .accordion-sub-subheader:not(.store-selected-list .accordion-sub-subheader)::before {
   content: "";
   width: 1.5px;
   height: 14px;
@@ -738,6 +738,7 @@ button {
   border-radius: 2px;
   display: inline-block;
   margin: 0px 8px 0 0;
+  background: #fff;
 }
 .store-modal .modal-content .store-modal__main .select-all-stores {
   background: transparent;
@@ -750,7 +751,7 @@ button {
 }
 .store-modal .modal-content .store-modal__main .accordion-header.open,
 .store-modal .modal-content .store-modal__main .accordion-subheader.open,
-.store-modal .modal-content .store-modal__main .accordion-sub-subheader.open {
+.store-modal .modal-content .store-modal__main .accordion-sub-subheader.open:not(.store-selected-list .accordion-sub-subheader) {
   font-weight: bold;
   background: #F3F7FF;
 }
@@ -760,15 +761,13 @@ button {
   display: none;
 }
 .store-modal .modal-content .store-modal__main .accordion-header.open .accordion-check,
-.store-modal .modal-content .store-modal__main .accordion-subheader.open .accordion-check,
-.store-modal .modal-content .store-modal__main .accordion-sub-subheader.open .accordion-check {
+.store-modal .modal-content .store-modal__main .accordion-subheader.open .accordion-check {
   border: 1px solid #0050C0;
   background: #0050C0;
   position: relative;
 }
 .store-modal .modal-content .store-modal__main .accordion-header.open .accordion-check::after,
-.store-modal .modal-content .store-modal__main .accordion-subheader.open .accordion-check::after,
-.store-modal .modal-content .store-modal__main .accordion-sub-subheader.open .accordion-check::after {
+.store-modal .modal-content .store-modal__main .accordion-subheader.open .accordion-check::after {
   content: "";
   position: absolute;
   left: 6px;

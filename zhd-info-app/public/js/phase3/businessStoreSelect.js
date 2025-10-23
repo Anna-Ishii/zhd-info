@@ -1,40 +1,85 @@
 document.addEventListener('DOMContentLoaded', function () {
-    const storeSelectRadio = document.querySelectorAll('.store-modal-btn');
-    const modal = document.getElementById('storeModal');
-    const cancelBtn = document.getElementById('cancelSelectBtn');
-    const modalConfirmBtn = document.getElementById('storeModalConfirmBtn');
-    const selectedContainer = document.getElementById('selectedStores');
-    const countDisplays = document.querySelectorAll('.selected-count');
-    const selectAllBtn = document.querySelector('.select-all-stores');
-    const storeNameInput = document.getElementById('store-name');
-    const searchResults = document.getElementById('searchResults');
-    const brandSelectAllContainer = document.getElementById('brandSelectAllContainer');
+    // 動的に取得する要素は関数内で毎回取得する
+    const modal = document.getElementById('storeModal'); //店舗選択モーダル
+    const csvStoreModal = document.getElementById('csvStoreModal'); //CSVモード店舗選択モーダル
+    const cancelBtn = document.getElementById('cancelBtn'); //キャンセルボタン
+    const modalConfirmBtn = document.getElementById('selectStoreBtn'); //選択するボタン
+    const selectedContainer = document.getElementById('selectedStores'); //選択中の店舗を表示
+    const countDisplays = document.querySelectorAll('.selected-count'); //選択中の店舗数
+    const selectAllBtn = document.querySelector('.select-all-stores'); //全店ボタン（業態ごと）
+    const storeNameInput = document.getElementById('store-name'); //店舗名入力フィールド
+    const searchResults = document.getElementById('searchResults'); //検索結果
+    const brandSelectAllContainer = document.getElementById('brandSelectAllContainer'); //業態ボタン
 
-    // モーダル開閉
-    storeSelectRadio.forEach(btn => {
-        btn.addEventListener('click', () => modal.style.display = 'flex');
+    // モーダル開閉（イベント委譲を使用）
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('.store-modal-btn')) {
+            modal.style.display = 'flex';
+
+            // カスタムイベントを発火(new_store.jsから呼び出される)
+            document.dispatchEvent(new CustomEvent('store-modal:opened', {
+                detail: { modalId: 'storeModal', triggeredBy: 'store-modal-btn' }
+            }));
+
+            // 各組織チェックボックスのCSS状態を更新
+            const orgCheckboxes = document.querySelectorAll('#storeModal input.org-checkbox');
+            Array.from(orgCheckboxes).forEach(orgCb => {
+                if (orgCb.checked) {
+                    updateCheckboxCSS(orgCb, orgCb.checked, '.accordion-item');
+                }
+            });
+
+            // 選択された店舗を更新
+            updateSelectedStores();
+            updateStoreCount();
+        }
     });
-    cancelBtn?.addEventListener('click', () => modal.style.display = 'none');
-    modalConfirmBtn?.addEventListener('click', () => modal.style.display = 'none');
+    // モーダル閉じるボタン（イベント委譲を使用）
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('#cancelBtn') || e.target.matches('#selectStoreBtn')) {
+            modal.style.display = 'none';
+        }
+    });
 
     // アコーディオン展開
     const toggleOpen = (selector) => {
-        document.querySelectorAll(selector).forEach(el => {
-            el.addEventListener('click', () => {
-                console.log("トグルクリック");
-                el.classList.toggle('open');
-                el.nextElementSibling?.classList.toggle('open');
-            });
+        document.addEventListener('click', (e) => {
+            if (e.target.matches(selector)) {
+                e.target.classList.toggle('open');
+                e.target.nextElementSibling?.classList.toggle('open');
+            }
         });
     };
     toggleOpen('.accordion-header');
     toggleOpen('.accordion-subheader');
     toggleOpen('.accordion-sub-subheader');
 
-    const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]');
+    // 選択中の店舗を表示アコーディオン
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('.select-display-accordion')) {
+            // updateOrgCheckboxCSSを再利用（ダミーのチェックボックス要素を作成）
+            const dummyCheckbox = {
+                id: 'select-display-dummy',
+                closest: () => e.target.closest('.store-selected-list')
+            };
 
+            // アコーディオンの開閉状態に基づいてCSSを更新
+            const isOpen = e.target.classList.contains('open');
+            const accrodionParentClass = '.store-selected-list';
+            updateCheckboxCSS(dummyCheckbox, isOpen, accrodionParentClass);
+        }
+    });
+    // 動的に取得する要素は関数内で毎回取得する
+
+    // 選択された店舗を更新
     function updateSelectedStores() {
+        // 動的に要素を取得（CSVモード対応）
+        const selectedContainer = document.getElementById('selectedStores');
+        if (!selectedContainer) {
+            return;
+        }
         selectedContainer.innerHTML = '';
+        const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]');
         checkboxes.forEach((checkbox, index) => {
             if (checkbox.checked) {
                 const label = checkbox.closest('.custom-checkbox-square');
@@ -72,7 +117,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function updateStoreCount() {
+        // 動的に作成されたチェックボックスを除外（data-original-index属性を持つものを除外）
+        const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]:not([data-original-index])');
         const count = Array.from(checkboxes).filter(cb => cb.checked).length;
+        // 動的に要素を取得（CSVモード対応）
+        const countDisplays = document.querySelectorAll('.selected-count');
         countDisplays.forEach(display => {
             display.textContent = count;
             // 親要素（○店舗選択中部分）を取得
@@ -87,21 +136,121 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 店舗チェックボックスの変更イベントリスナー
-    checkboxes.forEach(cb => {
-        cb.addEventListener('change', () => {
-            updateSelectedStores();
-            updateStoreCount();
-        });
-    });
-
-    selectAllBtn?.addEventListener('click', () => {
-        checkboxes.forEach(cb => cb.checked = true);
-        console.log('全店舗選択');
+    // businessStoreSelect.js でイベントをリッスン（new_store.jsから呼び出される）
+    document.addEventListener('update-selected-stores', function() {
         updateSelectedStores();
+    });
+    document.addEventListener('update-store-count', function() {
         updateStoreCount();
     });
 
+    // 店舗チェックボックスの変更イベント
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('.store-modal__main .custom-checkbox-square input[type="checkbox"]')) {
+            // カスタムイベントを発火(new_store.jsから呼び出される)
+            document.dispatchEvent(new CustomEvent('store-checkbox:changed', {
+                detail: { storeCheckbox: e.target }
+            }));
+
+            // 選択された店舗を更新
+            updateSelectedStores();
+            updateStoreCount();
+        }
+    });
+
+    // 組織チェックボックスの変更イベント（イベント委譲を使用）
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('#storeModal input.org-checkbox')) {
+
+            const isChecked = e.target.checked;
+            const accrodionParentClass = '.accordion-item';
+            // カスタムイベントを発火(new_store.jsから呼び出される)
+            document.dispatchEvent(new CustomEvent('org-checkbox:changed', {
+                detail: { orgCheckbox: e.target, isChecked: isChecked }
+            }));
+            // CSS状態を更新
+            updateCheckboxCSS(e.target, isChecked, accrodionParentClass);
+            // 選択された店舗を更新
+            updateSelectedStores();
+            updateStoreCount();
+        }
+    });
+
+    // 組織アコーディオンチェックボックスのクリックイベント
+    document.addEventListener('click', function(e) {
+        if (e.target.matches('.accordion-check')) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // 対応する組織チェックボックスを取得
+            const orgCheckbox = e.target.closest('.accordion-item').querySelector('.org-checkbox');
+            if (orgCheckbox) {
+                // チェックボックスの状態を切り替え
+                orgCheckbox.checked = !orgCheckbox.checked;
+
+                // changeイベントを手動で発火
+                const changeEvent = new Event('change', { bubbles: true });
+                orgCheckbox.dispatchEvent(changeEvent);
+            }
+        }
+    });
+
+    // accordion-sub-subheaderのCSS状態を更新する関数
+    function updateCheckboxCSS(checkbox, isChecked, accrodionParentClass) {
+        const accrodionParent = checkbox.closest(accrodionParentClass);
+        const accordionHeader = accrodionParent.querySelector('.accordion-sub-subheader');
+        const accordionCheck = accordionHeader.querySelector('.accordion-check');
+
+        if (isChecked) {
+            // チェックマークのスタイルを更新
+            // カスタムスタイルを適用
+            accordionCheck.style.border = '1px solid #0050C0';
+            accordionCheck.style.background = '#0050C0';
+            accordionCheck.style.position = 'relative';
+
+            // 疑似要素::afterにスタイルを適用
+            const style = document.createElement('style');
+            style.id = `accordion-check-after-${checkbox.id}`;
+            style.textContent = `
+                ${accrodionParentClass} .accordion-sub-subheader .accordion-check::after {
+                    content: "";
+                    position: absolute;
+                    left: 6px;
+                    top: 0px;
+                    width: 6px;
+                    height: 12px;
+                    border: solid white;
+                    border-width: 0 2px 2px 0;
+                    transform: rotate(45deg);
+                }
+            `;
+            document.head.appendChild(style);
+
+        } else {
+            // デフォルトスタイルに戻す
+            accordionCheck.style.border = '';
+            accordionCheck.style.background = '';
+            accordionCheck.style.position = '';
+
+            // 疑似要素::afterのスタイルを削除
+            const existingStyle = document.getElementById(`accordion-check-after-${checkbox.id}`);
+            if (existingStyle) {
+                existingStyle.remove();
+            }
+        }
+    }
+
+    // 全店舗選択ボタン（業態ごと）
+    document.addEventListener('click', (e) => {
+        if (e.target.matches('.select-all-stores')) {
+            const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = true);
+            updateSelectedStores();
+            updateStoreCount();
+        }
+    });
+
+    // 初期化
     updateSelectedStores();
     updateStoreCount();
 
@@ -109,13 +258,17 @@ document.addEventListener('DOMContentLoaded', function () {
     observeBrandSelection();
     updateBrandAllCheckbox(); // 初期状態を設定
 
-    storeNameInput?.addEventListener('input', function () {
-        const searchQuery = storeNameInput.value.trim().toLowerCase();
-        filterStores(searchQuery);
+    // 店舗名検索
+    document.addEventListener('input', (e) => {
+        if (e.target.matches('#store-name')) {
+            const searchQuery = e.target.value.trim().toLowerCase();
+            filterStores(searchQuery);
+        }
     });
 
     function filterStores(query) {
         const allStores = document.querySelectorAll('#storeList label');
+        const searchResults = document.getElementById('searchResults');
         searchResults.innerHTML = '';
 
         // 検索結果のヘッダーを更新
@@ -177,6 +330,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function getSelectedStoreNames() {
+        const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]');
         return Array.from(checkboxes)
             .filter(cb => cb.checked)
             .map(cb => {
@@ -222,22 +376,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // イベントリスナー
-    ['distribution-start-date', 'report-deadline', 'publication-end-date'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('input', validateForm);
-            element.addEventListener('change', validateForm);
+    // フォームバリデーション
+    document.addEventListener('input', (e) => {
+        if (e.target.matches('#distribution-start-date, #report-deadline, #publication-end-date')) {
+            validateForm();
         }
     });
-    document.querySelectorAll('input[name="business-type[]"]').forEach(cb => {
-        cb.addEventListener('change', validateForm);
-    });
-    document.querySelectorAll('input[name="target-store"]').forEach(rb => {
-        rb.addEventListener('change', validateForm);
-    });
-    document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]').forEach(cb => {
-        cb.addEventListener('change', validateForm);
+    document.addEventListener('change', (e) => {
+        if (e.target.matches('#distribution-start-date, #report-deadline, #publication-end-date, input[name="business-type[]"], input[name="target-store"], .store-modal__main .custom-checkbox-square input[type="checkbox"]')) {
+            validateForm();
+        }
     });
 
     // updateSelectedStoresやupdateStoreCountからも呼ぶ
@@ -258,16 +406,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 業態選択を監視して動的にチェックボックスを生成
     function observeBrandSelection() {
-        const brandCheckboxes = document.querySelectorAll('input[name="brand[]"]');
-        const brandAllCheckbox = document.querySelector('input[name="brandAll"]');
-
         // 初期状態でチェックボックスを生成
         updateBrandSelectAllButtons();
 
-        // 全業態チェックボックスの変更を監視
-        if (brandAllCheckbox) {
-            brandAllCheckbox.addEventListener('change', function() {
-                if (this.checked) {
+        // 業態チェックボックスの変更（イベント委譲を使用）
+        document.addEventListener('change', (e) => {
+            if (e.target.matches('input[name="brandAll"]')) {
+                const brandCheckboxes = document.querySelectorAll('input[name="brand[]"]');
+                if (e.target.checked) {
                     // 全業態にチェックを入れる
                     brandCheckboxes.forEach(cb => cb.checked = true);
                 } else {
@@ -275,16 +421,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     brandCheckboxes.forEach(cb => cb.checked = false);
                 }
                 updateBrandSelectAllButtons();
-            });
-        }
-
-        // 個別業態チェックボックスの変更を監視
-        brandCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', function() {
+            } else if (e.target.matches('input[name="brand[]"]')) {
                 // 対象業態が変更されたら、モーダル内の業態チェックボックスを更新
                 updateBrandAllCheckbox();
                 updateBrandSelectAllButtons();
-            });
+            }
         });
     }
 
@@ -293,6 +434,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const selectedBrands = getSelectedBrands();
         const brandList = getBrandList();
         const brandAllCheckbox = document.querySelector('input[name="brandAll"]');
+        const brandSelectAllContainer = document.getElementById('brandSelectAllContainer');
 
         // コンテナをクリア
         brandSelectAllContainer.innerHTML = '';
@@ -363,7 +505,6 @@ document.addEventListener('DOMContentLoaded', function () {
             e.preventDefault();
             e.stopPropagation();
             e.stopImmediatePropagation();
-            console.log('業態すべてボタンクリック:', brand.name);
 
             // 店舗選択処理
             toggleAllStoresByBrand(brand.id);
@@ -374,9 +515,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // 特定業態の店舗を選択/選択解除
     function toggleAllStoresByBrand(brandId) {
-        console.log('業態IDで店舗切り替え:', brandId);
-
         // 該当業態の店舗を取得
+        const checkboxes = document.querySelectorAll('.store-modal__main .custom-checkbox-square input[type="checkbox"]');
         const brandStores = Array.from(checkboxes).filter(cb => {
             const storeBrandId = cb.dataset.brandId;
             return storeBrandId && storeBrandId == brandId;
@@ -384,9 +524,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // すべて選択されているかチェック
         const allSelected = brandStores.every(cb => cb.checked);
-
-        console.log('該当業態の店舗数:', brandStores.length);
-        console.log('すべて選択済み:', allSelected);
 
         // すべて選択されている場合は選択解除、そうでなければ選択
         const newState = !allSelected;
