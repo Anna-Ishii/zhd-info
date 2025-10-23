@@ -103,7 +103,7 @@
                             @foreach (old('file_name') as $index => $file_name)
                                 <div class="file-uploaded">
                                     <p class="file__name"><a href="#">{{ $file_name }}</a></p>
-                                    <p class="file__size">{{ old('file_size')[$index] ?? '84.4KB' }}</p>
+                                    <p class="file__size">{{ old('file_size')[$index] ?? '0KB' }}</p>
                                     <p class="file__upload_message">アップロード完了</p>
                                     <p class="file__delete_btn">
                                         <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
@@ -119,7 +119,7 @@
                             <div class="file-uploading__wrap">
                                 <div class="file__wrap">
                                     <p class="file__name"><a href="#">アップロード中ファイル.pdf</a></p>
-                                    <p class="file__size">320KB/098KB</p>
+                                    <p class="file__size">0KB</p>
                                     <p class="file__upload_message">アップロード中…</p>
                                     </div>
                                 <div class="file-uploading__imgwrap">

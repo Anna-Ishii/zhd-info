@@ -54,7 +54,7 @@ function formatFileSize(bytes) {
 }
 
 // ファイル表示を更新する関数
-function updateFileDisplay(fileName, filePath) {
+function updateFileDisplay(fileName, filePath, fileSize = 0) {
     // アップロード中の表示を非表示
     $('.file-uploading').hide();
     
@@ -62,15 +62,15 @@ function updateFileDisplay(fileName, filePath) {
     $('.uploadbefore').show();
     
     // 新しいfile-uploaded要素を追加
-    addFileUploadedElement(fileName, filePath);
+    addFileUploadedElement(fileName, filePath, fileSize);
 }
 
 // file-uploaded要素を追加する関数
-function addFileUploadedElement(fileName, filePath) {
+function addFileUploadedElement(fileName, filePath, fileSize = 0) {
     const fileUploadedHtml = `
         <div class="file-uploaded">
             <p class="file__name"><a href="#">${fileName}</a></p>
-            <p class="file__size">84.4KB</p>
+            <p class="file__size">${formatFileSize(fileSize)}</p>
             <p class="file__upload_message">アップロード完了</p>
             <p class="file__delete_btn">
                 <img src="/img/delete_icon.svg" alt="ファイル削除">
@@ -83,13 +83,16 @@ function addFileUploadedElement(fileName, filePath) {
     
     // file-uploaded要素を適切な場所に追加
     if ($('.file-uploaded').length > 0) {
-        console.log('file-uploaded要素が存在する');
         // 既存のfile-uploaded要素の後に追加
         $('.file-uploaded').last().after(fileUploadedHtml);
     } else {
-        console.log('file-uploaded要素が存在しない');
-        // file-uploadingの後ろに追加
-        $('.file-uploading').after(fileUploadedHtml);
+        // file-join__wrapの前に追加
+        if ($('.file-join__wrap').length > 0) {
+            $('.file-join__wrap').before(fileUploadedHtml);
+        } else {
+            // フォールバック: content-fileの最後に追加
+            $('.content-file').append(fileUploadedHtml);
+        }
     }
 }
 
@@ -136,6 +139,9 @@ $(document).on("change", 'input[type="file"][name="file[]"]', function () {
     
     // アップロード中の表示を追加
     showUploadingDisplay(fileList[0].name, fileList[0].size);
+
+    // ファイルサイズをdata属性に保存
+    _this.data('file-size', fileList[0].size);
 
     let fileName = _this.siblings('input[name="file_name[]"]');
     let filePath = _this.siblings('input[name="file_path[]"]');
@@ -201,7 +207,28 @@ function handleResponse(response, fileName, filePath, joinFile, dataCache) {
             joinFile.val("single");
             
             // HTMLの表示を更新
-            updateFileDisplay(content_name, content_url);
+            // サーバーからのファイルサイズまたは保存されたファイルサイズを使用
+            let fileSize = 0;
+            if (response.file_sizes && response.file_sizes[i]) {
+                fileSize = response.file_sizes[i];
+            } else {
+                // 保存されたファイルサイズを取得
+                const fileInput = $('input[type="file"][data-cache="active"]');
+                if (fileInput.length > 0) {
+                    fileSize = fileInput.data('file-size') || 0;
+                } else {
+                    // 別の方法でファイルサイズを取得
+                    const allFileInputs = $('input[type="file"]');
+                    for (let j = 0; j < allFileInputs.length; j++) {
+                        const savedSize = $(allFileInputs[j]).data('file-size');
+                        if (savedSize) {
+                            fileSize = savedSize;
+                            break;
+                        }
+                    }
+                }
+            }
+            updateFileDisplay(content_name, content_url, fileSize);
         } else {
             addNewFileInput(content_name, content_url, join_flg = "single");
         }
