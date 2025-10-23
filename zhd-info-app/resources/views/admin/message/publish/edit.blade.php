@@ -314,38 +314,7 @@
                             </label>
                         </div>
                     </div>
-                    
-                    <div class="content__wrap content-checkbox">
-                        <p class="content required">対象者</p>
-                        <div class="input-group">
-                            {{-- 保存状態（editing_flg が 1）の場合 --}}
-                            @if ($message->editing_flg == 1)
-                                @foreach ($target_roll_list as $roll)
-                                    <label class="custom-checkbox custom-checkbox-square">
-                                        <input type="checkbox" name="target_roll[]" value="{{ $roll->id }}"
-                                            {{ in_array($roll->id, $message_target_roll, true) ? 'checked' : '' }}>
-                                        <span class="checkmark"></span>
-                                        {{ $roll->name }}
-                                    </label>
-                                @endforeach
-                            {{-- 登録状態（editing_flg が 0）の場合 --}}
-                            @else
-                                @foreach ($target_roll_list as $roll)
-                                    <label class="custom-checkbox custom-checkbox-square">
-                                        <input type="checkbox" name="target_roll_display[]" value="{{ $roll->id }}" disabled
-                                            {{ in_array($roll->id, $message_target_roll, true) ? 'checked' : '' }}>
-                                        <span class="checkmark"></span>
-                                        {{ $roll->name }}
-                                    </label>
-                                @endforeach
-                                {{-- hidden input for target_roll --}}
-                                @foreach ($message_target_roll as $roll_id)
-                                    <input type="hidden" name="target_roll[]" value="{{ $roll_id }}">
-                                @endforeach
-                            @endif
-                        </div>
-                    </div>
-                    
+
                     <div class="content__wrap content-checkbox">
                         <p class="content required">対象業態</p>
                         <div class="input-group">
