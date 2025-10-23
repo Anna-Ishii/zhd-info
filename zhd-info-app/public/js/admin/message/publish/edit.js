@@ -724,7 +724,9 @@ $(document).ready(function() {
     });
 
     // 戻るボタンでモーダルを閉じる
-    $('#deleteBackBtn').on('click', function() {
+    $('#deleteBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const modal = document.getElementById('deleteConfirmModal');
         if (modal) {
             modal.style.display = 'none';
@@ -746,7 +748,9 @@ $(document).ready(function() {
     });
 
     // 配信停止の戻るボタンでモーダルを閉じる
-    $('#stopBackBtn').on('click', function() {
+    $('#stopBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const modal = document.getElementById('stopConfirmModal');
         if (modal) {
             modal.style.display = 'none';
@@ -768,7 +772,9 @@ $(document).ready(function() {
     });
 
     // 配信再開の戻るボタンでモーダルを閉じる
-    $('#restartBackBtn').on('click', function() {
+    $('#restartBackBtn').on('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
         const modal = document.getElementById('restartConfirmModal');
         if (modal) {
             modal.style.display = 'none';
