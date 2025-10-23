@@ -962,6 +962,10 @@ main.business-notice-create-instruction .form .content-file .file-upload__contai
   color: #0050C0;
   background-color: #fff;
 }
+
+main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt-btn:hover {
+  cursor: pointer;
+}
 main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader input {
   display: none;
 }
@@ -1074,9 +1078,23 @@ main.business-notice-create-instruction .form .content-file .file-join__wrap {
 }
 main.business-notice-create-instruction .form .content-file .file-join__wrap .file-join-btn {
   padding: 10px 16px;
-  background-color: #0051A3;
+  background-color: #0050C0;
   color: #FFF;
+  border: 1px solid #0050C0;
   border-radius: 4px;
+}
+
+main.business-notice-create-instruction .form .content-file .file-join__wrap .file-join-btn:hover {
+  cursor: pointer;
+}
+
+/* inputFileラッパーがホバー効果を阻害しないように制御 */
+main.business-notice-create-instruction .form .content-file .file-join__wrap .inputFile {
+  cursor: default;
+}
+
+main.business-notice-create-instruction .form .content-file .file-join__wrap .inputFile:hover {
+  cursor: default;
 }
 
 main.business-notice-create-instruction .form .input-group.custom-date input {
@@ -1208,4 +1226,232 @@ footer * {
   color: #0051A3;
   font-size: 1.8rem;
   font-weight: bold;
+}
+
+
+/*------------------------------------------------------
+    ファイル結合モーダルスタイル
+------------------------------------------------------*/
+.join-file-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.join-file-modal-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+}
+
+.join-file-modal-container {
+    position: relative;
+    width: 100%;
+    max-width: 600px;
+    max-height: 80vh;
+    z-index: 10001;
+}
+
+.join-file-modal-content {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+    animation: modernModalSlideIn 0.3s ease-out;
+}
+
+@keyframes modernModalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.join-file-modal-header {
+    padding: 24px 24px 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    background: #ffffff;
+}
+
+.join-file-modal-title h3 {
+    margin: 0 0 4px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1a1a;
+    line-height: 1.3;
+}
+
+.join-file-modal-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.4;
+}
+
+.join-file-modal-close {
+    background: none;
+    border: none;
+    padding: 8px;
+    cursor: pointer;
+    color: #999999;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+}
+
+.join-file-modal-close:hover {
+    background: #f5f5f5;
+    color: #333333;
+}
+
+.join-file-modal-body {
+    padding: 24px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.join-file-modal-body .checkbox {
+    margin-bottom: 12px;
+    padding: 12px 16px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.join-file-modal-body .checkbox:hover {
+    border-color: #d0d0d0;
+    background: #fafafa;
+}
+
+.join-file-modal-body .checkbox label {
+    display: flex;
+    align-items: center;
+    margin: 0;
+    cursor: pointer;
+    font-size: 14px;
+    color: #333333;
+    line-height: 1.4;
+}
+
+.join-file-modal-body .checkbox input[type="checkbox"] {
+    margin-right: 12px;
+    width: 18px;
+    height: 18px;
+    accent-color: #0050C0;
+}
+
+.join-file-modal-body .file-type-message {
+    background: #e8f4fd;
+    border: 1px solid #b3d9ff;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    font-size: 14px;
+    color: #0050C0;
+    line-height: 1.4;
+}
+
+.join-file-modal-body .no-pdf-message {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 12px 16px;
+    font-size: 14px;
+    color: #856404;
+    line-height: 1.4;
+    text-align: center;
+}
+
+.join-file-modal-footer {
+    padding: 16px 24px 24px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #ffffff;
+    border-top: 1px solid #f0f0f0;
+    min-height: 60px;
+}
+
+.join-file-modal-footer .footer-message {
+    flex: 1;
+    margin: 0;
+    font-size: 14px;
+    color: #666666;
+    line-height: 1.4;
+    padding-right: 16px;
+    word-wrap: break-word;
+}
+
+.join-file-modal-footer .footer-buttons {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.join-file-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 80px;
+}
+
+.join-file-btn-secondary {
+    background: #f5f5f5;
+    color: #666666;
+    border: 1px solid #e0e0e0;
+}
+
+.join-file-btn-secondary:hover {
+    background: #e8e8e8;
+    color: #333333;
+}
+
+.join-file-btn-primary {
+    background: #0050C0;
+    color: #ffffff;
+}
+
+
+.join-file-btn-primary:disabled {
+    background: #cccccc;
+    color: #999999;
+    cursor: not-allowed;
+}
+
+/* モーダルが非表示の時の処理 */
+.join-file-modal:not([style*="display: block"]) {
+    display: none !important;
+}
+
+.join-file-modal:not([style*="display: block"]) .join-file-modal-overlay {
+    display: none !important;
 }

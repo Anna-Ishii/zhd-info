@@ -7,7 +7,7 @@
 @push('styles')
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create-instruction.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create.css') }}?v={{ time() }}">
+    <!--<link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create.css') }}?v={{ time() }}">-->
     <!-- モーダルカスタムCSSを読み込み -->
     <link rel="stylesheet" href="{{ asset('css/phase3/message-import-modal.css') }}?v={{ time() }}">
 @endpush
@@ -69,7 +69,7 @@
                             <input type="text" name="title" value="{{ old('title') }}">
                     </div>
                     {{-- <div class="counter">入力数 {{mb_strlen(old('title', ''))}}/20文字</div> --}}
-                
+
                     <div class="content__wrap content-file">
                         <p class="content required">業連ファイル</p>
                         <p class="annotation">複数ファイルのドロップが可能です。</p>
@@ -97,13 +97,13 @@
                             </div>
                         </div>
                         <p class="annotation">ファイル数の制限: 00  単一ファイル サイズの制限: 100MB  許可するファイルの種類: 画像(PNG,JPG,JPEG)/PDF</p>
-                        
+
                         <!-- アップロード済みファイル表示 -->
                         @if (old('file_name') && is_array(old('file_name')))
                             @foreach (old('file_name') as $index => $file_name)
                                 <div class="file-uploaded">
                                     <p class="file__name"><a href="#">{{ $file_name }}</a></p>
-                                    <p class="file__size">{{ old('file_size')[$index] ?? '84.4KB' }}</p>
+                                    <p class="file__size">{{ old('file_size')[$index] ?? '0KB' }}</p>
                                     <p class="file__upload_message">アップロード完了</p>
                                     <p class="file__delete_btn">
                                         <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
@@ -114,13 +114,12 @@
                                 </div>
                             @endforeach
                         @endif
-                                
                         <!-- アップロード中のファイル表示（JavaScriptで動的に追加される） -->
                         <div class="file-uploading" style="display: none;">
                             <div class="file-uploading__wrap">
                                 <div class="file__wrap">
                                     <p class="file__name"><a href="#">アップロード中ファイル.pdf</a></p>
-                                    <p class="file__size">320KB/098KB</p>
+                                    <p class="file__size">0KB</p>
                                     <p class="file__upload_message">アップロード中…</p>
                                     </div>
                                 <div class="file-uploading__imgwrap">
@@ -131,8 +130,17 @@
                             </div>
                             <p class="file__cancel_btn"><img src="{{ asset('img/cancel_icon.svg') }}" alt="中止"></p>
                         </div>
+
+                        <!-- ファイル結合ボタン -->
+                        <div class="file-join__wrap">
+                            <label class="inputFile">
+                                    <p style="margin: 0; padding-right: 10px; display: none;">0ファイルを結合中です。</p>
+                                    {{-- {{ id="joinFileId" data-target="#joinFileModal"}} --}}
+                                    <input type="button" class="joinFile file-join-btn" id="joinFileId" value="ファイルの結合">
+                            </label>
+                        </div>
                     </div>
-                    
+
                     <div class="content__wrap content-set content-checkbox">
                         <p class="content">掲載期間</p>
                         <p>開始日時</p>
@@ -169,7 +177,7 @@
                                 <input type="checkbox" class="dateDisabled" data-target="dateTo">
                                 <span class="checkmark"></span>
                                 未定
-                            </label>                          
+                            </label>
                         </div>
                     </div>
                     <div class="content__wrap content-checkbox">
