@@ -51,8 +51,6 @@
                 <div class="swiper-button-prev pdf-prev"></div>
                 <div class="swiper-button-next pdf-next"></div>
             </div>
-
-            <div class="pagination" id="page-count"></div>
         </div>
 
         <div class="business-contact__recent">
@@ -149,10 +147,10 @@
             }
 
             // Swiper 初期化
-            new Swiper(".pdf-swiper", {
-                slidesPerView: 2,     // 2ページ並び
-                slidesPerGroup: 1,    // 1ページずつスライド
-                spaceBetween: 20,     // ページ間の余白
+            let pdfSwiper = new Swiper(".pdf-swiper", {
+                slidesPerView: getSlidesPerView(), // 向きに応じて設定
+                slidesPerGroup: 1,
+                spaceBetween: 20,
                 loop: false,
                 centeredSlides: false,
                 navigation: {
@@ -161,27 +159,43 @@
                 },
                 keyboard: true,
                 on: {
-                        init: function() {
+                    init() {
                         updatePagination(this);
                     },
-                        slideChange: function() {
+                    slideChange() {
                         updatePagination(this);
                     }
                 }
             });
 
-        // ページ番号更新処理（見開き単位）
-        function updatePagination(swiper) {
-            // 総見開き数（2ページずつカウント）
-            const totalSpreads = Math.ceil(numPages / 2);
+            // 向きまたは画面サイズで切り替え
+            function getSlidesPerView() {
+                if (window.matchMedia("(orientation: landscape)").matches) {
+                    return 2; // 横向き → 2ページ
+                } else {
+                    return 1; // 縦向き → 1ページ
+                }
+            }
 
-            // 現在の見開き番号を計算
-            // activeIndexは左ページのインデックス（0始まり）
-            const currentSpread = Math.floor(swiper.activeIndex / 1) + 1;
+            // 向き変更時に再設定
+            window.addEventListener("resize", () => {
+                setTimeout(() => {
+                    pdfSwiper.params.slidesPerView = getSlidesPerView();
+                    pdfSwiper.update();
+                }, 300);
+            });
 
-            paginationEl.textContent = `${currentSpread}/${totalSpreads}`;
-        }
+            // ページ番号更新処理（見開き単位）
+            function updatePagination(swiper) {
+                // 総見開き数（ページずつカウント）
+                const totalSpreads = Math.ceil(numPages / 1);
 
+                // 現在の見開き番号を計算
+                // activeIndexは左ページのインデックス（0始まり）
+                const currentSpread = Math.floor(swiper.activeIndex / 1) + 1;
+
+                paginationEl.textContent = `${currentSpread}/${totalSpreads}`;
+            }
         } catch (error) {
             console.error("PDF読み込みエラー:", error);
         }
