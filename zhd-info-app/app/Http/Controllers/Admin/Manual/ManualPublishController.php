@@ -49,6 +49,9 @@ use Maatwebsite\Excel\Validators\ValidationException;
 
 class ManualPublishController extends Controller
 {
+
+    const PAGINATE_COUNT = 50;
+
     public function index(Request $request)
     {
         $admin = session('admin');
@@ -62,6 +65,11 @@ class ManualPublishController extends Controller
 
         $organization1_list = $admin->getOrganization1();
 
+        // 形式をDBから取得
+        $manual_types = DB::table('manual_types')
+            ->select('id', 'name')
+            ->get();
+
         // request
         $new_category_ids = $request->input('new_category');
         $statusArray = $request->input('status') ?? [];
@@ -69,6 +77,7 @@ class ManualPublishController extends Controller
             return PublishStatus::tryFrom((int)$status);
         }, $statusArray);
         $q = $request->input('q');
+        $manual_type_id = $request->input('manual_type');
         $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $organization1_list[0]->id;
         $publish_date = $request->input('publish-date');
 
@@ -105,7 +114,7 @@ class ManualPublishController extends Controller
 
         $manual_list = Manual::query()
             ->with('create_user', 'updated_user', 'brand', 'tag', 'category_level1', 'category_level2')
-            ->leftjoin('manual_user', 'manuals.id', '=', 'manual_id')
+            ->leftJoin('manual_user', 'manuals.id', '=', 'manual_id')
             ->leftJoinSub($viewRatesSub, 'view_rates', function ($join) {
                 $join->on('manuals.id', '=', 'view_rates.manual_id');
                 $join->on('manuals.organization1_id', '=', 'view_rates.organization1_id');
@@ -113,6 +122,8 @@ class ManualPublishController extends Controller
             ->leftJoinSub($sub, 'sub', function ($join) {
                 $join->on('sub.m_id', '=', 'manuals.id');
             })
+            ->leftJoin('manual_manual_type', 'manuals.id', '=', 'manual_manual_type.manual_id')
+            ->leftJoin('manual_types', 'manual_manual_type.manual_type_id', '=', 'manual_types.id')
             ->select([
                 'manuals.*',
                 'view_rates.view_rate',
@@ -120,11 +131,15 @@ class ManualPublishController extends Controller
                 'view_rates.total_users',
                 'view_rates.last_updated',
                 'sub.b_name as brand_name',
+                DB::raw('GROUP_CONCAT(DISTINCT manual_types.name ORDER BY manual_types.name) as manual_types')
             ])
             ->where('manuals.organization1_id', $organization1_id)
-            ->groupBy(DB::raw('manuals.id'))
-            // 検索機能 キーワード
-            ->when(isset($q), function ($query) use ($q) {
+            ->when($manual_type_id, function ($query) use ($manual_type_id) {
+                $query->whereHas('manualTypes', function ($q) use ($manual_type_id) {
+                    $q->where('manual_types.id', $manual_type_id);
+                });
+            })
+            ->when($q, function ($query) use ($q) {
                 $query->where(function ($query) use ($q) {
                     $query->whereLike('title', $q)
                         ->orWhereHas('tag', function ($query) use ($q) {
@@ -132,7 +147,6 @@ class ManualPublishController extends Controller
                         });
                 });
             })
-            // 検索機能 状態
             ->when(isset($statuses) && count($statuses) > 0, function ($query) use ($statuses) {
                 $query->where(function ($query) use ($statuses) {
                     foreach ($statuses as $status) {
@@ -153,9 +167,7 @@ class ManualPublishController extends Controller
                                 });
                                 break;
                             case PublishStatus::Editing:
-                                $query->orWhere('editing_flg', '=', true);
-                                break;
-                            default:
+                                $query->orWhere('editing_flg', true);
                                 break;
                         }
                     }
@@ -165,21 +177,21 @@ class ManualPublishController extends Controller
             ->when(isset($new_category_ids), function ($query) use ($new_category_ids) {
                 $query->whereIn('category_level2_id', $new_category_ids);
             })
-            ->when((isset($publish_date[0])), function ($query) use ($publish_date) {
-                $query
-                    ->where('start_datetime', '>=', $publish_date[0]);
+            ->when(isset($publish_date[0]), function ($query) use ($publish_date) {
+                $query->where('start_datetime', '>=', $publish_date[0]);
             })
-            ->when((isset($publish_date[1])), function ($query) use ($publish_date) {
-                $query
-                    ->where(function ($query) use ($publish_date) {
-                        $query->where('end_datetime', '<=', $publish_date[1])
-                            ->orWhereNull('end_datetime');
-                    });
+            ->when(isset($publish_date[1]), function ($query) use ($publish_date) {
+                $query->where(function ($query) use ($publish_date) {
+                    $query->where('end_datetime', '<=', $publish_date[1])
+                        ->orWhereNull('end_datetime');
+                });
             })
             ->join('admin', 'create_admin_id', '=', 'admin.id')
+            ->groupBy('manuals.id')
             ->orderBy('manuals.id', 'desc')
-            ->paginate(50)
+            ->paginate(self::PAGINATE_COUNT)
             ->appends(request()->query());
+
 
         // 店舗数をカウント
         if ($manual_list) {
@@ -237,6 +249,7 @@ class ManualPublishController extends Controller
             'manual_list' => $manual_list,
             'organization1' => $organization1,
             'organization1_list' => $organization1_list,
+            'manual_types' => $manual_types,
             'message_saved_url' => $message_saved_url,
             'manual_saved_url' => $manual_saved_url,
             'analyse_personal_saved_url' => $analyse_personal_saved_url,
@@ -275,60 +288,6 @@ class ManualPublishController extends Controller
             Log::error('Error saving search conditions: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => '検索条件の保存中にエラーが発生しました。'], 500);
         }
-    }
-
-    // 閲覧率の更新処理
-    public function updateViewRates(Request $request)
-    {
-        $admin = session('admin');
-        $organization1_id = $request->input('brand') ? base64_decode($request->input('brand')) : $admin->firstOrganization1()->id;
-        $rate = $request->input('rate');
-        $manual_id = $request->input('manual_id'); // manual_idを取得
-
-        // メッセージの既読・総ユーザー数を一度に集計
-        $manualRates = DB::table('manual_user')
-            ->select([
-                'manual_user.manual_id',
-                DB::raw('sum(manual_user.read_flg) as read_users'),
-                DB::raw('count(distinct manual_user.user_id) as total_users'),
-                DB::raw('round((sum(manual_user.read_flg) / count(distinct manual_user.user_id)) * 100, 1) as view_rate')
-            ])
-            ->join('manuals', 'manual_user.manual_id', '=', 'manuals.id')
-            ->where('manuals.organization1_id', $organization1_id)
-            ->when($manual_id, function ($query) use ($manual_id) {
-                $query->where('manual_user.manual_id', $manual_id);
-            })
-            ->groupBy('manual_user.manual_id')
-            ->when((isset($rate[0]) || isset($rate[1])), function ($query) use ($rate) {
-                $min = isset($rate[0]) ? $rate[0] : 0;
-                $max = isset($rate[1]) ? $rate[1] : 100;
-                $query->havingRaw('view_rate between ? and ?', [$min, $max]);
-            })
-            ->get();
-
-        // バルクアップデート用のデータ準備
-        $updateData = [];
-        foreach ($manualRates as $manual) {
-            $updateData[] = [
-                'manual_id' => $manual->manual_id,
-                'organization1_id' => $organization1_id,
-                'view_rate' => $manual->view_rate,     // 閲覧率の計算
-                'read_users' => $manual->read_users,   // 既読ユーザー数
-                'total_users' => $manual->total_users, // 全体ユーザー数
-                'created_at' => now(),
-                'updated_at' => now(),
-            ];
-        }
-
-        // バルクアップデートを実行
-        DB::table('manual_view_rates')->upsert(
-            $updateData,
-            ['manual_id', 'organization1_id'],
-            ['view_rate', 'read_users', 'total_users', 'created_at', 'updated_at']
-        );
-
-        // 処理完了後にページをリダイレクトして結果を表示
-        return redirect()->back()->with('success', '閲覧率が更新されました。');
     }
 
     public function show(Request $request, $manual_id)
@@ -405,7 +364,7 @@ class ManualPublishController extends Controller
             ->orderBy('organization4.order_no')
             ->orderBy('organization5.order_no')
             ->orderBy('shops.shop_code')
-            ->paginate(50)
+            ->paginate(self::PAGINATE_COUNT)
             ->appends(request()->query());
 
         // 検索条件を取得
