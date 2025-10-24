@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -25,6 +26,11 @@ class Organization1 extends Model
     public function shop(): HasMany
     {
         return $this->hasMany(Shop::class, 'id', 'organization1_id');
+    }
+
+    public function manualCategoryLevel1s(): HasMany
+    {
+        return $this->hasMany(ManualCategoryLevel1::class);
     }
 
     public function getOrganization5()
@@ -94,5 +100,15 @@ class Organization1 extends Model
             ->where('organization1_id', $this->id)
             ->whereNotNull('organization3_id')
             ->exists();
+    }
+
+    /**
+     *  ID順でソートされた全てのOrganization1を取得
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<Organization1>
+     */
+    public static function getAllOrderedById(): Collection
+    {
+        return self::orderBy('id')->get();
     }
 }
