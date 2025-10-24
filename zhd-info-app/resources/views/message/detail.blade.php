@@ -79,8 +79,6 @@
     </div>
 </main>
 
-@include('common.footer')
-
 <!-- pdfjs -->
 <script>
     // IEの判定
