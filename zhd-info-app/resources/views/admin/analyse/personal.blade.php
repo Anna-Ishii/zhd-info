@@ -35,8 +35,20 @@
             <div class="filter-bar">
 
                 {{-- 業態 --}}
-                <x-admin.select-box name="brand" label="業態" :options="$organization1_list" :base64-value="true" />
-
+                <!-- <x-admin.select-box name="brand" label="業態" :options="$organization1_list" :base64-value="true" /> -->
+                <div class="field">
+                    <div class="label">業態</div>
+                    <div class="control">
+                        <select name="organization1" class="form-control">
+                            @foreach ($organization1_list as $org1)
+                                <option value="{{ base64_encode($org1->id) }}"
+                                    {{ request()->input('organization1') == base64_encode($org1->id) ? 'selected' : '' }}>
+                                    {{ $org1->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
                 @foreach (['DS', 'BL', 'AR'] as $organization)
                     <div class="field">
                         <div class="label">{{ $organization }}</div>
