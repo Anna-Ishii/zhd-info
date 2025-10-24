@@ -7,9 +7,6 @@
 @push('styles')
     <!-- CSS -->
     <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create-instruction.css') }}?v={{ time() }}">
-    <link rel="stylesheet" href="{{ asset('css/phase3/business-notice-create.css') }}?v={{ time() }}">
-    <!-- モーダルカスタムCSSを読み込み -->
-    <link rel="stylesheet" href="{{ asset('css/phase3/message-import-modal.css') }}?v={{ time() }}">
 @endpush
 
 @section('page_header')
@@ -166,7 +163,7 @@
                                     @if (isset($file_name))
                                         <div class="file-uploaded">
                                             <p class="file__name"><a href="#">{{ $file_name }}</a></p>
-                                            <p class="file__size">{{ old('file_size')[$index] ?? '84.4KB' }}</p>
+                                            <p class="file__size">{{ old('file_size')[$index] ?? '0KB' }}</p>
                                             <p class="file__upload_message">アップロード完了</p>
                                             <p class="file__delete_btn">
                                                 <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
@@ -184,7 +181,7 @@
                                     @foreach ($message_contents as $index => $message_content)
                                         <div class="file-uploaded">
                                             <p class="file__name"><a href="#">{{ $message_content->content_name ?? 'ファイル' }}</a></p>
-                                            <p class="file__size">84.4KB</p>
+                                            <p class="file__size">{{ old('file_size')[$index] ?? '0KB' }}</p>
                                             <p class="file__upload_message">アップロード完了</p>
                                             <p class="file__delete_btn">
                                                 <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
@@ -200,7 +197,7 @@
                                     @if ($message->content_name)
                                         <div class="file-uploaded">
                                             <p class="file__name"><a href="#">{{ $message->content_name }}</a></p>
-                                            <p class="file__size">84.4KB</p>
+                                            <p class="file__size">{{ old('file_size')[$index] ?? '0KB' }}</p>
                                             <p class="file__upload_message">アップロード完了</p>
                                             <p class="file__delete_btn">
                                                 <img src="{{ asset('img/delete_icon.svg') }}" alt="ファイル削除">
@@ -219,7 +216,7 @@
                                 <div class="file-uploading__wrap">
                                     <div class="file__wrap">
                                         <p class="file__name"><a href="#">アップロード中ファイル.pdf</a></p>
-                                        <p class="file__size">320KB/098KB</p>
+                                        <p class="file__size">0KB</p>
                                         <p class="file__upload_message">アップロード中…</p>
                                         </div>
                                     <div class="file-uploading__imgwrap">
@@ -260,7 +257,17 @@
                                 @endif
                             @endif
                         @endif
+
+                        <!-- ファイル結合ボタン -->
+                        <div class="file-join__wrap">
+                            <label class="inputFile" style="display: flex; align-items: center; gap: 10px;">
+                                    <p style="margin: 0; display: none;">0ファイルを結合中です。</p>
+                                    <input type="button" class="joinFile file-join-btn" id="joinFileId" value="ファイルの結合">
+                            </label>
+                        </div>
                     </div>
+
+
 
                     {{-- 掲載期間はフラグに関係なく修正可能のため分岐しない --}}
                     <div class="content__wrap content-set content-checkbox">
@@ -568,10 +575,6 @@
 @push('scripts')
     <script src="{{ asset('/js/admin/message/publish/edit.js') }}?date={{ date('Ymd') }}"></script>
     <script src="{{ asset('/js/admin/message/publish/edit_store.js') }}?date={{ date('Ymd') }}" defer></script>
-    <!-- JavaScript -->
-    <script src="{{ asset('js/phase3/business-notice-create.js') }}"></script>
-    <!-- モーダルJavaScriptを読み込み -->
-    <script src="{{ asset('js/phase3/importModal.js') }}?v={{ time() }}"></script>
     <!-- 店舗選択モーダルJavaScriptを読み込み -->
     <script src="{{ asset('js/phase3/businessStoreSelect.js') }}?date={{ date('Ymd') }}"></script>
 

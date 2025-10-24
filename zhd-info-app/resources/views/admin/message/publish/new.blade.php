@@ -132,7 +132,6 @@
                         <div class="file-join__wrap">
                             <label class="inputFile" style="display: flex; align-items: center; gap: 10px;">
                                     <p style="margin: 0; display: none;">0ファイルを結合中です。</p>
-                                    {{-- {{ id="joinFileId" data-target="#joinFileModal"}} --}}
                                     <input type="button" class="joinFile file-join-btn" id="joinFileId" value="ファイルの結合">
                             </label>
                         </div>

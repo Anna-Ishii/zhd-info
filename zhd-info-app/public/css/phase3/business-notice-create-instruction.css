@@ -962,9 +962,8 @@ main.business-notice-create-instruction .form .content-file .file-upload__contai
   color: #0050C0;
   background-color: #fff;
 }
-
 main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader label .upload-txt-btn:hover {
-  cursor: pointer;
+  cursor: pointer !important;
 }
 main.business-notice-create-instruction .form .content-file .file-upload__container__item__wrap .file-input-item .uploader input {
   display: none;
