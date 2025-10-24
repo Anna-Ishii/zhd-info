@@ -25,7 +25,7 @@
         <div class="l-header__bottom__wrap">
             {{-- @TODO どこに遷移？ --}}
             <div class="l-header__back"><a class="prev" href="#"><img
-                        src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
+                         src="{{ asset('/img/back-icon.svg') }}"alt="">戻る</a></div>
             <p class="l-header__bottom__ttl">業態設定</p>
         </div>
     </div>
@@ -44,7 +44,7 @@
                 <div class="tabs__container">
                     @foreach ($all_organizations as $org)
                         <a href="{{ route('admin.manual.category.index', ['organization1' => $org->id]) }}"
-                            class="tabs__item {{ $current_organization_id == $org->id ? 'active' : '' }}">
+                           class="tabs__item {{ $current_organization_id == $org->id ? 'active' : '' }}">
                             {{ $org->name }}
                         </a>
                     @endforeach
@@ -65,45 +65,46 @@
                         </div>
                         <div class="category__content">
                             <div class="subcategory__list">
-                                <div class="subcategory__item">
+                                <div class="subcategory__item" data-subcategory-id="new_default_0">
                                     <span class="drag-icon"><img class="editonly move-select-item"
-                                            src="{{ asset('img/select-drag.svg') }}" alt=""
-                                            style="touch-action: none;"></span>
-                                    <input class="subcategory__name" name="new_categories[0][sub_categories][0][name]"
-                                        placeholder="小カテゴリ名を入力してください">
+                                             src="{{ asset('img/select-drag.svg') }}" alt=""
+                                             style="touch-action: none;"></span>
+                                    <input class="subcategory__name"
+                                           name="new_categories[0][sub_categories][new_default_0][name]"
+                                           placeholder="小カテゴリ名を入力してください">
                                     <input type="hidden" class="sort-order-input"
-                                        name="new_categories[0][sub_categories][0][sort_order]" value="1">
+                                           name="new_categories[0][sub_categories][new_default_0][sort_order]" value="1">
                                     <span class="subcategory__actions">
                                         <button type="button" class="delete-btn"><img
-                                                src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                                 src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
                                         <button type="button" class="up-btn"><svg width="22" height="22"
-                                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                class="upbtn">
+                                                 viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                 class="upbtn">
                                                 <path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8"
-                                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                                      stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg></button>
                                         <button type="button" class="down-btn"><svg width="22" height="22"
-                                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                class="downbtn">
+                                                 viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                 class="downbtn">
                                                 <path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8"
-                                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                                      stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg></button>
                                     </span>
                                 </div>
                             </div>
                             <span class="category__actions">
                                 <button type="button" class="delete-btn"><img src="{{ asset('img/delete_icon.svg') }}"
-                                        alt="削除"></button>
+                                         alt="削除"></button>
                                 <button type="button" class="up-btn"><svg width="22" height="22" viewBox="0 0 24 24"
-                                        fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn">
+                                         fill="none" xmlns="http://www.w3.org/2000/svg" class="upbtn">
                                         <path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8"
-                                            stroke-linecap="round" stroke-linejoin="round"></path>
+                                              stroke-linecap="round" stroke-linejoin="round"></path>
                                     </svg></button>
                                 <button type="button" class="down-btn"><svg width="22" height="22"
-                                        viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                        class="downbtn">
+                                         viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                         class="downbtn">
                                         <path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8"
-                                            stroke-linecap="round" stroke-linejoin="round"></path>
+                                              stroke-linecap="round" stroke-linejoin="round"></path>
                                     </svg></button>
                             </span>
                         </div>
@@ -119,43 +120,43 @@
                                 <img class="category__drag" src="{{ asset('img/drag.svg') }}" alt="ドラッグ">
                                 <div class="category__header">
                                     <input class="category__title" name="categories[{{ $categoryLevel1->id }}][name]"
-                                        value="{{ $categoryLevel1->name }}">
+                                           value="{{ $categoryLevel1->name }}">
                                     <input type="hidden" class="sort-order-input"
-                                        name="categories[{{ $categoryLevel1->id }}][sort_order]"
-                                        value="{{ $categoryLevel1->sort_order }}">
+                                           name="categories[{{ $categoryLevel1->id }}][sort_order]"
+                                           value="{{ $categoryLevel1->sort_order }}">
                                 </div>
                                 <div class="category__content">
                                     <div class="subcategory__list">
                                         @foreach ($categoryLevel1->level2s as $categoryLevel2)
                                             <div class="subcategory__item"
-                                                data-subcategory-id="{{ $categoryLevel2->id }}">
+                                                 data-subcategory-id="{{ $categoryLevel2->id }}">
                                                 <span class="drag-icon">
                                                     <img class="editonly move-select-item"
-                                                        src="{{ asset('img/select-drag.svg') }}" alt="ドラッグ">
+                                                         src="{{ asset('img/select-drag.svg') }}" alt="ドラッグ">
                                                 </span>
                                                 <input class="subcategory__name"
-                                                    name="categories[{{ $categoryLevel1->id }}][sub_categories][{{ $categoryLevel2->id }}][name]"
-                                                    value="{{ $categoryLevel2->name }}">
+                                                       name="categories[{{ $categoryLevel1->id }}][sub_categories][{{ $categoryLevel2->id }}][name]"
+                                                       value="{{ $categoryLevel2->name }}">
                                                 <input type="hidden" class="sort-order-input"
-                                                    name="categories[{{ $categoryLevel1->id }}][sub_categories][{{ $categoryLevel2->id }}][sort_order]"
-                                                    value="{{ $categoryLevel2->sort_order }}">
+                                                       name="categories[{{ $categoryLevel1->id }}][sub_categories][{{ $categoryLevel2->id }}][sort_order]"
+                                                       value="{{ $categoryLevel2->sort_order }}">
                                                 <span class="subcategory__actions">
                                                     <button type="button" class="delete-btn"><img
-                                                            src="{{ asset('img/delete_icon.svg') }}"
-                                                            alt="削除"></button>
+                                                             src="{{ asset('img/delete_icon.svg') }}"
+                                                             alt="削除"></button>
                                                     <button type="button" class="up-btn"><svg width="22"
-                                                            height="22" viewBox="0 0 24 24" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg" class="upbtn">
+                                                             height="22" viewBox="0 0 24 24" fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg" class="upbtn">
                                                             <path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22"
-                                                                stroke-width="1.8" stroke-linecap="round"
-                                                                stroke-linejoin="round"></path>
+                                                                  stroke-width="1.8" stroke-linecap="round"
+                                                                  stroke-linejoin="round"></path>
                                                         </svg></button>
                                                     <button type="button" class="down-btn"><svg width="22"
-                                                            height="22" viewBox="0 0 24 24" fill="none"
-                                                            xmlns="http://www.w3.org/2000/svg" class="downbtn">
+                                                             height="22" viewBox="0 0 24 24" fill="none"
+                                                             xmlns="http://www.w3.org/2000/svg" class="downbtn">
                                                             <path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2"
-                                                                stroke-width="1.8" stroke-linecap="round"
-                                                                stroke-linejoin="round"></path>
+                                                                  stroke-width="1.8" stroke-linecap="round"
+                                                                  stroke-linejoin="round"></path>
                                                         </svg></button>
                                                 </span>
                                             </div>
@@ -163,18 +164,18 @@
                                     </div>
                                     <span class="category__actions">
                                         <button type="button" class="delete-btn"><img
-                                                src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
+                                                 src="{{ asset('img/delete_icon.svg') }}" alt="削除"></button>
                                         <button type="button" class="up-btn"><svg width="22" height="22"
-                                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                class="upbtn">
+                                                 viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                 class="upbtn">
                                                 <path d="M3.5 10.3333L12 2M12 2L20.5 10.3333M12 2V22" stroke-width="1.8"
-                                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                                      stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg></button>
                                         <button type="button" class="down-btn"><svg width="22" height="22"
-                                                viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-                                                class="downbtn">
+                                                 viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
+                                                 class="downbtn">
                                                 <path d="M3.5 13.6667L12 22M12 22L20.5 13.6667M12 22V2" stroke-width="1.8"
-                                                    stroke-linecap="round" stroke-linejoin="round"></path>
+                                                      stroke-linecap="round" stroke-linejoin="round"></path>
                                             </svg></button>
                                     </span>
                                 </div>
