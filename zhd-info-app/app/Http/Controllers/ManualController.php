@@ -17,18 +17,11 @@ class ManualController extends Controller
 
         $user = session('member');
 
-        // ベースクエリ
-        $baseQuery = $user->manual()
-            ->with('content', 'category_level2')
-            ->publishingManual();
-
         // NEW判定用に現在日時を指定（任意。省略すると Carbon::now() が使われる）
         $now = Carbon::now();
 
         // 全件取得
-        $allManualsCollection = (clone $baseQuery)
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $allManualsCollection = Manual::getPublishedAndSortedForUser($user);
 
         // NEW/改訂 + OM/動画
         $allManuals = $this->enrichManuals($allManualsCollection, $now);
@@ -39,10 +32,9 @@ class ManualController extends Controller
         $firstLevel2Id = $firstLevel1?->level2s->first()?->id;
 
         // カテゴリー初期表示用マニュアル（絞り込みあり）
-        $categoryManualsCollection = (clone $baseQuery)
-            ->when($firstLevel2Id, fn($q) => $q->where('category_level2_id', $firstLevel2Id))
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $categoryManualsCollection = $allManualsCollection->when($firstLevel2Id, function ($collection) use ($firstLevel2Id) {
+            return $collection->where('category_level2_id', $firstLevel2Id);
+        });
 
         // NEW/改訂 + OM/動画
         $categoryManuals = $this->enrichManuals($categoryManualsCollection, $now);

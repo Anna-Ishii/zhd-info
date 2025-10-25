@@ -87,7 +87,7 @@ class ManualCategoryLevel1 extends Model
                 foreach ($validated_data['new_categories'] as $level1Data) {
                     if (empty($level1Data['name'])) continue;
 
-                     $last_sort_order++;
+                    $last_sort_order++;
 
                     $newCategoryLevel1 = self::findAndRestoreOrCreate(
                         $level1Data['name'],
