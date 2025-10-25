@@ -21,12 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 selectedNames.push(labelText);
             }
         });
-    
-        if (selectedNames.length === 0) {
-          trigger.textContent = "全て";
-        } else {
-          trigger.textContent = selectedNames.join(", ");
-        }
+
+        trigger.textContent = selectedNames.length === 0 ? "全て" : selectedNames.join(", ");
     };
 
     document.querySelectorAll(".custom-select-checkbox").forEach(customSelect => {
@@ -38,6 +34,29 @@ document.addEventListener("DOMContentLoaded", () => {
         // 開閉
         trigger.addEventListener("click", (e) => {
             e.stopPropagation();
+
+            // 他の開いているメニューを閉じる
+            document.querySelectorAll(".custom-select-checkbox.open").forEach(other => {
+                if (other !== customSelect) {
+                    finalizeSelection(other);
+                    other.classList.remove("open");
+                }
+            });
+
+            // 通常セレクトボックスも閉じる
+            document.querySelectorAll(".custom-select.open").forEach(select => {
+                if (!select.contains(e.target)) {
+                    select.classList.remove("open");
+                }
+            });
+
+            // カレンダーなどを開いたときも他を閉じる
+            document.querySelectorAll(".custom-calendar:not(.hidden)").forEach(calendar => {
+                if (!calendar.contains(e.target)) {
+                    calendar.classList.add("hidden");
+                }
+            });
+
             customSelect.classList.toggle("open");
         });
 

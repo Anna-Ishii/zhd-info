@@ -360,8 +360,8 @@ class Manual extends Model
      * - manuals.created_at 降順
      * (カテゴリ未設定のものは最後に表示)
      *
-     * @param User $user
-     * @return Collection<Manual>
+     * @param \App\Models\User $user
+     * @return \Illuminate\Database\Eloquent\Collection<<int, Manual>
      */
     public static function getPublishedAndSortedForUser(User $user): Collection
     {
@@ -376,5 +376,10 @@ class Manual extends Model
             ->orderBy('manual_category_level2s.sort_order', 'asc')
             ->orderBy('manuals.created_at', 'desc')
             ->get();
+    }
+
+    public function manualTypes()
+    {
+        return $this->belongsToMany(ManualType::class, 'manual_manual_type');
     }
 }
