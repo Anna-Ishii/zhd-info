@@ -78,7 +78,7 @@ table thead th {
   z-index: 3;
   height: 32px;
   vertical-align: middle;
-  font-weight: bold !important;
+  font-weight: bold;
   border-bottom: 1px solid #DADADB;
   padding: 4px 7px;
   min-height: 25px;
@@ -180,19 +180,12 @@ table tbody tr td {
 }
 table tbody tr:first-child td {
   border-bottom: 2px double #000;
-  position: sticky;
-  top: 117px;
-  /* top: 63px; */
-  z-index: 2;
 }
 table tbody tr td.column1 {
   position: sticky;
   left: 0;
   z-index: 3;
   border-right: 1px solid #8E9199;
-}
-table tbody tr:first-child td.column1 {
-  z-index: 4;
 }
 table tbody tr td.column6, table tbody tr td.column7, table tbody tr td.column8,table tbody tr td.column9,table tbody tr td.column10,table tbody tr td.column11 {
   border-left: 1px solid #D9D9D9;
