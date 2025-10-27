@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class Message extends Model
 {
-    use WhereLike;
+    use WhereLike, SoftDeletes;
 
     protected $table = 'messages';
 
@@ -35,6 +36,9 @@ class Message extends Model
         'updated_admin_id',
         'start_datetime',
         'end_datetime',
+        'instruction_flg',
+        'instruction_id',
+        'instruction_title',
 
     ];
 

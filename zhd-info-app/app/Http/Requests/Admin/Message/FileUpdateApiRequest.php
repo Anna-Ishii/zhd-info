@@ -22,7 +22,7 @@ class FileUpdateApiRequest extends ApiRequest
 
         // ファイル数だけルールを生成
         for ($i = 0; $i < $fileCount; $i++) {
-            $rules['file' . $i] = 'required|mimes:pdf|max:150000';
+            $rules['file' . $i] = 'required|mimes:pdf,png,jpg,jpeg|max:150000';
         }
 
         return $rules;
@@ -42,7 +42,7 @@ class FileUpdateApiRequest extends ApiRequest
         // ファイルごとにメッセージを生成
         foreach ($files as $key => $file) {
             $messages[$key . '.required'] = 'ファイルを添付してください';
-            $messages[$key . '.mimes'] = 'pdf形式のファイルを添付してください';
+            $messages[$key . '.mimes'] = 'PDF、PNG、JPG、JPEG形式のファイルを添付してください';
             $messages[$key . '.max'] = 'ファイルの容量が大きすぎます。150MB以下にしてください';
         }
 
