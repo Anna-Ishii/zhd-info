@@ -73,7 +73,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('/', [MessagePublishController::class, 'index'])->name('index');
             Route::post('save-session-conditions', [MessagePublishController::class, 'saveSessionConditions'])->name('save-session-conditions');
             Route::post('save-search-conditions', [MessagePublishController::class, 'saveSearchConditions'])->name('save-search-conditions');
-            Route::get('update-view-rates', [MessagePublishController::class, 'updateViewRates'])->name('update-view-rates');
             Route::get('/{message_id}', [MessagePublishController::class, 'show'])->name('show')->where('message_id', '^\d+$');
             Route::get('{organization1}/new', [MessagePublishController::class, 'new'])->name('new');
             Route::post('messageNewData/{organization1_id}', [MessagePublishController::class, 'messageNewData'])->name('messageNewData');
@@ -84,7 +83,10 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('messageUpdateData', [MessagePublishController::class, 'messageUpdateData'])->name('messageUpdateData');
             Route::post('messageAllSaveData', [MessagePublishController::class, 'messageAllSaveData'])->name('messageAllSaveData');
             Route::post('edit/{message_id}', [MessagePublishController::class, 'update'])->name('edit.update')->where('message_id', '^\d+$');
+            Route::post('delete/{message_id}', [MessagePublishController::class, 'destroy'])->name('destroy')->where('message_id', '^\d+$');
             Route::post('stop', [MessagePublishController::class, 'stop'])->name('stop');
+            Route::post('restart', [MessagePublishController::class, 'restart'])->name('restart');
+            Route::post('duplicate/{message_id}', [MessagePublishController::class, 'duplicate'])->name('duplicate')->where('message_id', '^\d+$');
             Route::get('export/{message_id}', [MessagePublishController::class, 'export'])->name('export')->where('message_id', '^\d+$');
             Route::post('/upload', [MessagePublishController::class, 'fileUpload'])->name('fileUpload');
             Route::get('export-list', [MessagePublishController::class, 'exportList'])->name('export-list');
@@ -110,6 +112,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::post('{organization1}/new', [ManualPublishController::class, 'store'])->name('new.store');
             Route::get('edit/{manual_id}', [ManualPublishController::class, 'edit'])->name('edit')->where('manual_id', '^\d+$');
             Route::post('edit/{manual_id}', [ManualPublishController::class, 'update'])->name('edit.update')->where('manual_id', '^\d+$');
+            Route::post('edit/{manual_id}/duplicate', [ManualPublishController::class, 'duplicate'])->name('edit.duplicate')->where('manual_id', '^\d+$');
             Route::post('/stop', [ManualPublishController::class, 'stop'])->name('stop');
             Route::get('export/{manual_id}', [ManualPublishController::class, 'export'])->name('export')->where('manual_id', '^\d+$');
             Route::post('/upload', [ManualPublishController::class, 'fileUpload'])->name('fileUpload');
@@ -122,6 +125,7 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
             Route::get('/csv/store/progress', [ManualPublishController::class, 'storeProgress'])->name('storeProgress');
             Route::post('/csv/store/import', [ManualPublishController::class, 'csvStoreImport'])->name('csvStoreImport');
             Route::post('/csv/shop/import', [ManualPublishController::class, 'csvShopImport'])->name('csvShopImport');
+            Route::post('/stream-stop/{manual_id}', [ManualPublishController::class, 'streamStop'])->name('streamStop');
         });
         Route::group(['prefix' => 'category', 'as' => 'category.'], function () {
             Route::get('/', [ManualCategoryController::class, 'index'])->name('index');

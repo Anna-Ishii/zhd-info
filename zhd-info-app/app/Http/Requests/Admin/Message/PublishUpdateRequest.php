@@ -25,9 +25,12 @@ class PublishUpdateRequest extends FormRequest
             'emergency_flg' => 'nullable',
             'start_datetime' => 'nullable',
             'end_datetime' => 'nullable',
-            'target_roll' => 'required',
-            'brand' => 'required',
+            'target_roll' => 'nullable|array',
+            'brand' => 'required|array',
             'organization_shops' => 'required',
+            'instruction_flg' => 'required|in:0,1',
+            'instruction_id' => 'nullable|string|max:255',
+            'instruction_title' => 'nullable|string|max:255',
         ];
     }
 
@@ -41,6 +44,7 @@ class PublishUpdateRequest extends FormRequest
             'target_roll' => '対象者を選択してください',
             'brand.required' => '対象業態を選択してください',
             'organization_shops.required' => '対象店舗を選択してください',
+            'instruction_flg.required' => '指示作成を選択してください',
         ];
         return $messages;
     }
@@ -51,6 +55,8 @@ class PublishUpdateRequest extends FormRequest
             'file_path' => array_filter($this->input('file_path', [])),
             'start_datetime' => $this->input('start_datetime') === 'null' ? null : $this->input('start_datetime'),
             'end_datetime' => $this->input('end_datetime') === 'null' ? null : $this->input('end_datetime'),
+            'target_roll' => $this->input('target_roll', []),
+            'brand' => $this->input('brand', []),
         ]);
     }
 }
