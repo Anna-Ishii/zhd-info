@@ -32,7 +32,7 @@ use Symfony\Component\Mime\MessageConverter;
 // アプリ側画面へのログイン画面
 Route::get('/member/auth', [MemberAuthController::class, 'index'])->name('auth');
 Route::post('/member/auth', [MemberAuthController::class, 'login']);
-Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
+Route::get('/member/logout', [MemberAuthController::class, 'logout'])->name('member.logout.get');
 Route::post('/member/logout', [MemberAuthController::class, 'logout'])->name('logout');
 
 Route::get('/', [TopController::class, 'index'])->name('top')->middleware('auth');
