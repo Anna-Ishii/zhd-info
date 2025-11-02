@@ -24,3 +24,11 @@ yarn-error.log
 /public/movies
 
 /public/log/*
+/bootstrap/cache/
+/storage/framework/views/
+
+/bootstrap/cache/
+/storage/framework/views/
+
+bootstrap/cache/
+storage/framework/views/
