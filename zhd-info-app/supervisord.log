@@ -1,0 +1,153 @@
+2025-11-02 05:00:56,730 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-11-02 05:00:56,780 INFO supervisord started with pid 1
+2025-11-02 05:00:58,108 INFO spawned: 'httpd' with pid 25
+2025-11-02 05:00:59,160 INFO spawned: 'laravel-queue_00' with pid 26
+2025-11-02 05:00:59,186 INFO spawned: 'php-fpm' with pid 27
+2025-11-02 05:01:00,194 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:00,195 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:00,196 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:02,060 INFO exited: php-fpm (exit status 0; expected)
+2025-11-02 05:01:03,191 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:04,197 INFO spawned: 'laravel-queue_00' with pid 228
+2025-11-02 05:01:05,988 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:05,989 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:07,085 INFO spawned: 'laravel-queue_00' with pid 231
+2025-11-02 05:01:08,151 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:09,909 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:10,913 INFO spawned: 'laravel-queue_00' with pid 234
+2025-11-02 05:01:11,949 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:14,211 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:15,216 INFO spawned: 'laravel-queue_00' with pid 242
+2025-11-02 05:01:16,217 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:17,450 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:18,452 INFO spawned: 'laravel-queue_00' with pid 248
+2025-11-02 05:01:19,903 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:19,903 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:20,907 INFO spawned: 'laravel-queue_00' with pid 251
+2025-11-02 05:01:22,453 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:22,453 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:23,469 INFO spawned: 'laravel-queue_00' with pid 262
+2025-11-02 05:01:24,688 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:24,688 WARN exited: laravel-queue_00 (exit status 255; not expected)
+2025-11-02 05:01:25,694 INFO spawned: 'laravel-queue_00' with pid 263
+2025-11-02 05:01:26,809 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:26,809 WARN exited: laravel-queue_00 (exit status 255; not expected)
+2025-11-02 05:01:27,896 INFO spawned: 'laravel-queue_00' with pid 265
+2025-11-02 05:01:29,125 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:29,126 WARN exited: laravel-queue_00 (exit status 255; not expected)
+2025-11-02 05:01:30,136 INFO spawned: 'laravel-queue_00' with pid 266
+2025-11-02 05:01:31,260 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:31,260 WARN exited: laravel-queue_00 (exit status 255; not expected)
+2025-11-02 05:01:32,264 INFO spawned: 'laravel-queue_00' with pid 270
+2025-11-02 05:01:33,744 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:33,744 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:34,750 INFO spawned: 'laravel-queue_00' with pid 273
+2025-11-02 05:01:36,034 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:36,035 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:37,048 INFO spawned: 'laravel-queue_00' with pid 276
+2025-11-02 05:01:38,292 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:38,292 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:39,296 INFO spawned: 'laravel-queue_00' with pid 279
+2025-11-02 05:01:40,632 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:40,632 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:41,641 INFO spawned: 'laravel-queue_00' with pid 282
+2025-11-02 05:01:42,763 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:42,763 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:43,768 INFO spawned: 'laravel-queue_00' with pid 285
+2025-11-02 05:01:44,926 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:44,927 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:46,118 INFO spawned: 'laravel-queue_00' with pid 288
+2025-11-02 05:01:47,656 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:47,819 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:48,823 INFO spawned: 'laravel-queue_00' with pid 291
+2025-11-02 05:01:50,743 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:50,744 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:51,790 INFO spawned: 'laravel-queue_00' with pid 294
+2025-11-02 05:01:52,297 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:53,383 INFO spawned: 'laravel-queue_00' with pid 297
+2025-11-02 05:01:54,973 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:55,007 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:56,062 INFO spawned: 'laravel-queue_00' with pid 300
+2025-11-02 05:01:58,373 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:01:59,673 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:01:59,674 INFO spawned: 'laravel-queue_00' with pid 303
+2025-11-02 05:02:00,913 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:02,565 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:03,589 INFO spawned: 'laravel-queue_00' with pid 306
+2025-11-02 05:02:04,947 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:04,947 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:05,984 INFO spawned: 'laravel-queue_00' with pid 309
+2025-11-02 05:02:07,591 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:07,592 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:08,596 INFO spawned: 'laravel-queue_00' with pid 312
+2025-11-02 05:02:09,841 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:09,842 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:10,849 INFO spawned: 'laravel-queue_00' with pid 315
+2025-11-02 05:02:12,205 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:12,205 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:13,180 INFO spawned: 'laravel-queue_00' with pid 318
+2025-11-02 05:02:14,376 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:14,376 WARN exited: laravel-queue_00 (exit status 1; not expected)
+2025-11-02 05:02:15,413 INFO spawned: 'laravel-queue_00' with pid 326
+2025-11-02 05:02:16,456 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:02:18,464 INFO reaped unknown pid 321 (exit status 0)
+2025-11-02 05:07:13,196 INFO reaped unknown pid 353 (terminated by SIGHUP)
+2025-11-02 05:07:13,211 INFO reaped unknown pid 358 (terminated by SIGHUP)
+2025-11-02 05:08:05,290 WARN received SIGTERM indicating exit request
+2025-11-02 05:08:05,297 INFO waiting for httpd, laravel-queue_00 to die
+2025-11-02 05:08:06,317 WARN stopped: laravel-queue_00 (terminated by SIGTERM)
+2025-11-02 05:08:07,799 INFO stopped: httpd (exit status 0)
+2025-11-02 05:08:19,692 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-11-02 05:08:19,763 INFO supervisord started with pid 1
+2025-11-02 05:08:20,787 INFO spawned: 'httpd' with pid 30
+2025-11-02 05:08:20,811 INFO spawned: 'laravel-queue_00' with pid 31
+2025-11-02 05:08:20,848 INFO spawned: 'php-fpm' with pid 32
+2025-11-02 05:08:22,518 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:08:22,518 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:08:22,518 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:08:23,908 INFO exited: php-fpm (exit status 0; expected)
+2025-11-02 05:08:29,928 INFO reaped unknown pid 234 (exit status 0)
+2025-11-02 05:16:00,679 INFO reaped unknown pid 259 (terminated by SIGHUP)
+2025-11-02 05:16:00,693 INFO reaped unknown pid 264 (terminated by SIGHUP)
+2025-11-02 05:19:27,931 INFO reaped unknown pid 333 (terminated by SIGHUP)
+2025-11-02 05:19:27,932 INFO reaped unknown pid 338 (exit status 129)
+2025-11-02 05:28:20,559 INFO reaped unknown pid 431 (exit status 0)
+2025-11-02 05:28:28,572 INFO reaped unknown pid 450 (terminated by SIGHUP)
+2025-11-02 05:28:28,572 INFO reaped unknown pid 452 (terminated by SIGHUP)
+2025-11-02 05:33:12,912 INFO reaped unknown pid 572 (terminated by SIGHUP)
+2025-11-02 05:33:20,922 WARN received SIGTERM indicating exit request
+2025-11-02 05:33:20,927 INFO waiting for httpd, laravel-queue_00 to die
+2025-11-02 05:33:21,961 WARN stopped: laravel-queue_00 (terminated by SIGTERM)
+2025-11-02 05:33:23,180 INFO stopped: httpd (exit status 0)
+2025-11-02 05:33:35,418 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-11-02 05:33:35,428 INFO supervisord started with pid 1
+2025-11-02 05:33:36,460 INFO spawned: 'httpd' with pid 7
+2025-11-02 05:33:36,484 INFO spawned: 'laravel-queue_00' with pid 8
+2025-11-02 05:33:36,521 INFO spawned: 'php-fpm' with pid 9
+2025-11-02 05:33:37,821 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:33:37,821 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:33:37,822 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 05:33:39,146 INFO exited: php-fpm (exit status 0; expected)
+2025-11-02 05:36:54,415 INFO reaped unknown pid 217 (terminated by SIGHUP)
+2025-11-02 05:36:54,438 INFO reaped unknown pid 227 (exit status 129)
+2025-11-02 05:41:49,813 INFO reaped unknown pid 335 (exit status 0)
+2025-11-02 05:55:42,052 INFO reaped unknown pid 487 (exit status 0)
+2025-11-02 05:56:03,947 INFO reaped unknown pid 554 (exit status 0)
+2025-11-02 06:14:55,290 INFO reaped unknown pid 708 (exit status 129)
+2025-11-02 06:19:50,662 INFO reaped unknown pid 780 (exit status 129)
+2025-11-02 06:20:24,701 WARN received SIGTERM indicating exit request
+2025-11-02 06:20:24,709 INFO waiting for httpd, laravel-queue_00 to die
+2025-11-02 06:20:25,750 WARN stopped: laravel-queue_00 (terminated by SIGTERM)
+2025-11-02 06:20:26,151 INFO stopped: httpd (exit status 0)
+2025-11-02 06:20:28,523 CRIT Supervisor is running as root.  Privileges were not dropped because no user is specified in the config file.  If you intend to run as root, you can set user=root in the config file to avoid this message.
+2025-11-02 06:20:28,527 INFO supervisord started with pid 1
+2025-11-02 06:20:29,538 INFO spawned: 'httpd' with pid 6
+2025-11-02 06:20:29,546 INFO spawned: 'laravel-queue_00' with pid 7
+2025-11-02 06:20:29,561 INFO spawned: 'php-fpm' with pid 8
+2025-11-02 06:20:30,685 INFO success: httpd entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 06:20:30,685 INFO success: laravel-queue_00 entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 06:20:30,685 INFO success: php-fpm entered RUNNING state, process has stayed up for > than 1 seconds (startsecs)
+2025-11-02 06:20:30,948 INFO exited: php-fpm (exit status 0; expected)
+2025-11-02 06:44:06,745 INFO reaped unknown pid 394 (exit status 129)
+2025-11-02 06:52:41,379 INFO reaped unknown pid 475 (exit status 129)
+2025-11-02 06:57:27,714 INFO reaped unknown pid 545 (exit status 0)

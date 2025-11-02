@@ -196,3 +196,6 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'adminauth'
 Route::fallback(function () {
     return redirect(route('top'));
 });
+
+// tmp health
+Route::get('/healthz', fn() => 'ok');

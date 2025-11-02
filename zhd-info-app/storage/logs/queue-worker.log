@@ -1,0 +1,184 @@
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+Warning: require(/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Fatal error: Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php' (include_path='.:') in /var/www/zhd-info-app/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /var/www/zhd-info-app/vendor/composer/autoload_real.php(45): {closure}('8a9dc1de0ca7e01...', '/var/www/zhd-in...')
+#1 /var/www/zhd-info-app/vendor/autoload.php(22): ComposerAutoloaderInit1682a75cc65d26e6ede4a2d4045b8a3e::getLoader()
+#2 /var/www/zhd-info-app/artisan(18): require('/var/www/zhd-in...')
+#3 {main}
+  thrown in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Warning: require(/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Fatal error: Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php' (include_path='.:') in /var/www/zhd-info-app/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /var/www/zhd-info-app/vendor/composer/autoload_real.php(45): {closure}('8a9dc1de0ca7e01...', '/var/www/zhd-in...')
+#1 /var/www/zhd-info-app/vendor/autoload.php(22): ComposerAutoloaderInit1682a75cc65d26e6ede4a2d4045b8a3e::getLoader()
+#2 /var/www/zhd-info-app/artisan(18): require('/var/www/zhd-in...')
+#3 {main}
+  thrown in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Warning: require(/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Fatal error: Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php' (include_path='.:') in /var/www/zhd-info-app/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /var/www/zhd-info-app/vendor/composer/autoload_real.php(45): {closure}('8a9dc1de0ca7e01...', '/var/www/zhd-in...')
+#1 /var/www/zhd-info-app/vendor/autoload.php(22): ComposerAutoloaderInit1682a75cc65d26e6ede4a2d4045b8a3e::getLoader()
+#2 /var/www/zhd-info-app/artisan(18): require('/var/www/zhd-in...')
+#3 {main}
+  thrown in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Warning: require(/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php): Failed to open stream: No such file or directory in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+Fatal error: Uncaught Error: Failed opening required '/var/www/zhd-info-app/vendor/composer/../aws/aws-sdk-php/src/functions.php' (include_path='.:') in /var/www/zhd-info-app/vendor/composer/autoload_real.php:41
+Stack trace:
+#0 /var/www/zhd-info-app/vendor/composer/autoload_real.php(45): {closure}('8a9dc1de0ca7e01...', '/var/www/zhd-in...')
+#1 /var/www/zhd-info-app/vendor/autoload.php(22): ComposerAutoloaderInit1682a75cc65d26e6ede4a2d4045b8a3e::getLoader()
+#2 /var/www/zhd-info-app/artisan(18): require('/var/www/zhd-in...')
+#3 {main}
+  thrown in /var/www/zhd-info-app/vendor/composer/autoload_real.php on line 41
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+
+
+In ProviderRepository.php line 206:
+                                                       
+  Class "Barryvdh\Debugbar\ServiceProvider" not found  
+                                                       
+

@@ -4,6 +4,7 @@
     ports:
       - 80:80
       - 5173:5173
+      - "8000:8000"
     # command: bash -c "php-fpm && httpd -D FOREGROUND"
     command: ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
     volumes:
